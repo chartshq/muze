@@ -1,0 +1,63 @@
+@import "./firebolt/side-effects/selection-box/styles.scss";
+$prefix: muze-;
+
+.#{$prefix}legend-box {
+    font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
+  
+    line-height: 10px !important;
+    height: 100px;
+    float: none !important;
+    display: inline-block;
+    border: solid rgba(0, 0, 0, 0);
+    
+}
+
+.#{$prefix}legend-title {
+    border-bottom: solid rgba(0,0,0,0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 30px;
+    fill:#4F4F4F;
+    font-weight:800;
+}
+.#{$prefix}legend-overflow {
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    text-align: center
+}
+
+.#{$prefix}legend-shape-svg {
+    cursor: pointer;
+}
+.#{$prefix}legend-shape {
+    cursor: pointer;
+    fill-opacity: 0.8;
+}
+
+.#{$prefix}legend-fadeout {
+    fill-opacity: 0.3;
+}
+
+.#{$prefix}legend-brighten {
+    fill-opacity: 1;
+    // fill: #ff0000;
+}
+.#{$prefix}legend-item-info {
+    float: left;
+    display: flex;
+    align-items: center;
+      font-size: 12px;
+  
+}
+.#{$prefix}legend-item-info.center{
+    justify-content: center;
+}
+.#{$prefix}legend-item-info.start{
+    justify-content: flex-start;
+}
+.#{$prefix}legend-item-info.end{
+    justify-content: flex-end;
+}

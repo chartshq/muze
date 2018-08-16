@@ -1,0 +1,65 @@
+# This references the default nodejs container from
+# the Docker Hub: https://registry.hub.docker.com/_/node/
+# If you want Nodesource's container you would reference nodesource/node
+# Read more about containers on our dev center
+# http://devcenter.wercker.com/docs/containers/index.html
+box: node
+# This is the build pipeline. Pipelines are the core of wercker
+# Read more about pipelines on our dev center
+# http://devcenter.wercker.com/docs/pipelines/index.html
+
+# You can also use services such as databases. Read more on our dev center:
+# http://devcenter.wercker.com/docs/services/index.html
+# services:
+    # - postgres
+    # http://devcenter.wercker.com/docs/services/postgresql.html
+
+    # - mongo
+    # http://devcenter.wercker.com/docs/services/mongodb.html
+build:
+  # The steps that will be executed on build
+  # Steps make up the actions in your pipeline
+  # Read more about steps on our dev center:
+  # http://devcenter.wercker.com/docs/steps/index.html
+  steps:
+
+    - add-ssh-key:
+        keyname: BITBUCKET
+
+    - add-to-known_hosts:
+        hostname: bitbucket.org
+        fingerprint: 97:8c:1b:f2:6f:14:6b:5c:3b:ec:aa:46:46:74:7c:40
+        type: rsa
+
+    - script:
+      name: install chrome headless
+      code: |
+        apt-get update -y
+        apt-get install -y ca-certificates apt-transport-https ttf-wqy-zenhei ttf-unfonts-core
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+        echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+        apt-get update -y
+        apt-get install -y google-chrome-unstable
+
+    - script:
+      name: set browser
+      code: |
+        export CHROME_BIN=/usr/bin/google-chrome-unstable
+    # A step that executes `npm install` command
+    - npm-install
+    # A step that executes `npm test` command
+    - npm-test
+
+    # A custom script step, name value is used in the UI
+    # and the code value contains the command that get executed
+    - script:
+        name: echo nodejs information
+        code: |
+          echo "node version $(node -v) running"
+          echo "npm version $(npm -v) running"
+
+  after-steps:
+    - slack-notifier:
+        url: https://hooks.slack.com/services/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
+        channel: #fusionboard-wercker
+        username: werckerbot

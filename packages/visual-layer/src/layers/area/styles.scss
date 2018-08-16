@@ -1,0 +1,7 @@
+@import '../../prefix.scss';
+
+.#{$prefix}layer-area {
+    stroke-linejoin: round;
+    fill:#086bb6;;
+    fill-opacity: 0.7;
+}

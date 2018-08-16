@@ -103,5 +103,7 @@ typings/
 # Serverless directories
 .serverless
 
+packages/*/.nsi.json
+
 
 # End of https://www.gitignore.io/api/node,macos

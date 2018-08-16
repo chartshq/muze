@@ -1,0 +1,10 @@
+{
+  "presets": [
+    ["env", { "modules": false }], "flow"
+  ],
+  "env": {
+    "test": {
+      "plugins": [ "istanbul" ]
+    }
+  }
+}

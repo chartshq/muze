@@ -1,0 +1,23 @@
+@import '../../prefix.scss';
+
+.#{$prefix}layer-text text{
+    font-size: 12px;
+    fill: #000;
+}
+
+.#{$prefix}layer-text rect{
+    fill: #7f7f7f;
+    fill-opacity: 0.3;
+}
+
+.#{$prefix}layer-text-highlight {
+    fill-opacity: 1;
+}
+
+.#{$prefix}layer-text-fadeout {
+    fill-opacity: 0.3 !important;
+}
+
+.#{$prefix}layer-text-selected {
+    fill: #000 !important;
+}

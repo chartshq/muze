@@ -1,0 +1,61 @@
+# PLATFORM
+# ========
+# All exclusions that are specific to the NPM, GIT, IDE and Operating Systems.
+
+# - Do not allow installed node modules to be committed. Doing `npm install -d` will bring them in root or other places.
+node_modules
+
+# - Do not commit any log file from anywhere
+*.log
+
+# - Prevent addition of OS specific file explorer files
+Thumbs.db
+.DS_Store
+.vscode/*
+
+# PROJECT
+# =======
+# Configuration pertaining to project specific repository structure.
+
+# - Prevent Sublime text IDE files from being commited to repository
+*.sublime-*
+
+# - Prevent NetBeans IDE files from being commited to repository
+nbproject/
+
+# - Allow sublime text project file to be commited in the development directory.
+!/develop/*.sublime-project
+
+# - We use file names with `attr-*` for chart attribute tutorial files. These files remain in the `xt-attrs` submodule,
+#   but are copied to a temp folder for building docs along with the tutorials from `develop/docs`. They should not be
+#   tracked in the main project
+develop/docs/attr-*
+
+# - Prevent extra `jshint` configuration from being committed from anywhere. Only `package.json` will be used as
+#   accepted source of config.
+.jshintrc
+
+# - Prevent CI output files from being Added
+/dist/
+
+# - Prevent Modular build template files from being Added
+develop/template/modular
+
+# - Prevent diff backups from SourceTree from showing as commit.
+*.BACKUP.*
+*.BASE.*
+*.LOCAL.*
+*.REMOTE.*
+*.orig
+
+# Ignore .swp files in case vim is getting used
+*.swp
+
+# Ignore .tmp folder created for mocha-webpack test cases
+/.tmp/
+
+# Ignore docs folder created by jsdoc
+/docs
+
+# Ignore coverage folder created by karma
+coverage
