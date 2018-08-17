@@ -1,0 +1,22 @@
+{
+    "name": "@chartshq/muze-firebolt",
+    "version": "1.0.0",
+    "description": "Manages physical and behavioural action model",
+    "main": "src/index.js",
+    "license": "MIT",
+    "author": "FusionCharts Technologies support@fusioncharts.com",
+    "repository": {
+        "type": "git",
+        "url": "https://bitbucket.org/fusioncharts/muze-firebolt.git"
+    },
+    "keywords": [
+        "firebolt",
+        "interaction",
+        "data-visualization",
+        "visualization"
+    ],
+    "dependencies": {
+        "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+        "@chartshq/muze-tooltip": "^1.0.0"
+    }
+}

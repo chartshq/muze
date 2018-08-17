@@ -1,0 +1,20 @@
+{
+  "name": "@chartshq/visual-group",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fusionboard/visual-group.git"
+  },
+  "dependencies": {
+    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
+    "@chartshq/muze-axis": "^1.0.0",
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-unit": "^1.0.0",
+    "@chartshq/visual-layer": "^1.0.0"
+  }
+}

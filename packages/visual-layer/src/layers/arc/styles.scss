@@ -1,0 +1,17 @@
+@import '../../prefix.scss';
+
+.#{$prefix}layer-arc-highlight {
+    fill: #7f7f7f !important;
+}
+
+.#{$prefix}layer-arc-fadeout {
+    fill-opacity: 0.3 !important;
+}
+
+.#{$prefix}layer-arc-selected {
+    fill: #e6e6e6 !important;
+}
+
+.#{$prefix}layer-arc{
+    fill: #086bb6;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@chartshq/transform",
+  "description": "JavaScript Data Visualisation Library",
+  "homepage": "http://www.fusioncharts.com/",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "src/index.js",
+  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "keywords": [
+    "transform"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/transform.git"
+  },
+  "dependencies": {
+    "d3-axis": "^1.0.8",
+    "d3-collection": "^1.0.4",
+    "d3-scale": "^1.0.6",
+    "d3-shape": "^1.2.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@chartshq/visual-unit",
+  "version": "1.0.0",
+  "description": "Component which manages layers and interactions",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": "",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/visual-unit"
+  },
+  "dependencies": {
+    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
+    "@chartshq/muze-axis": "^1.0.0",
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-layer": "^1.0.0",
+    "@chartshq/muze-firebolt": "^1.0.0"
+  }
+}

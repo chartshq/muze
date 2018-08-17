@@ -1,0 +1,33 @@
+{
+  "name": "muze",
+  "description": "JavaScript Data Visualization Library",
+  "homepage": "http://www.fusioncharts.com/",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "keywords": [
+    "renderer",
+    "muze",
+    "svg",
+    "vector",
+    "graphics",
+    "data-visualization",
+    "visualization"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/muze"
+  },
+  "dependencies": {
+    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
+    "fusioncharts-smartlabel": "^1.0.2",
+    "@chartshq/layout": "^1.0.0",
+    "@chartshq/muze-firebolt": "^1.0.0",
+    "@chartshq/muze-legend": "^1.0.0",
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-cell": "^1.0.0",
+    "@chartshq/visual-group": "^1.0.0",
+    "@chartshq/visual-layer": "^1.0.0",
+    "@chartshq/visual-unit": "^1.0.0"
+  }
+}

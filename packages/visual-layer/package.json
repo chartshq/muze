@@ -1,0 +1,23 @@
+{
+  "name": "@chartshq/visual-layer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": "",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/visual-layer.git"
+  },
+  "dependencies": {
+    "d3-ease": "^1.0.3",
+    "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
+    "d3-shape": "^1.2.0",
+    "d3-transition": "^1.1.1",
+    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
+    "@chartshq/muze-axis": "^1.0.0",
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/transform": "^1.0.0"
+  }
+}

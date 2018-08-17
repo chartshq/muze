@@ -1,0 +1,9 @@
+@import './prefix.scss';
+
+.#{$prefix}visual-unit {
+    background: '#fff'
+}
+
+.#{$prefix}axis-zero-line {
+    stroke-width: 1px;
+}

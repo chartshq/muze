@@ -1,0 +1,17 @@
+{
+    "name": "@chartshq/muze-tooltip",
+    "version": "1.0.0",
+    "description": "Tooltip Renderer",
+    "main": "src/index.js",
+    "license": "MIT",
+    "author": "FusionCharts Technologies support@fusioncharts.com",
+    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "https://bitbucket.org/fusioncharts/muze-tooltip.git"
+    },
+    "dependencies": {
+        "d3-shape": "^1.2.0",
+        "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    }
+}

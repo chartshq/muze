@@ -1,0 +1,19 @@
+{
+    "name": "@chartshq/muze-legend",
+    "version": "1.0.0",
+    "description": "D3 Legend module",
+    "main": "src/index.js",
+    "license": "MIT",
+    "author": "FusionCharts",
+    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "https://bitbucket.org/fusioncharts/muze-legend"
+    },
+    "dependencies": {
+        "d3-shape": "^1.2.0",
+        "@chartshq/muze-axis": "^1.0.0",
+        "@chartshq/muze-firebolt": "^1.0.0",
+        "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    }
+}

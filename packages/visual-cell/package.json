@@ -1,0 +1,16 @@
+{
+  "name": "@chartshq/visual-cell",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "license": "MIT",
+  "author": "FusionCharts",
+  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fusioncharts/visual-cell.git"
+  },
+  "dependencies": {
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@chartshq/layout",
+  "version": "1.0.0",
+  "description": "Layout module for Muze renderer",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/layout"
+  },
+  "keywords": [
+    "Layout",
+    "Muze",
+    "Chart Positioning"
+  ],
+  "dependencies": {
+    "d3-collection": "^1.0.4",
+    "d3-selection": "^1.1.0",
+    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+  },
+  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/fusioncharts/layout#readme"
+}
