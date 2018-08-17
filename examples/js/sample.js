@@ -58,8 +58,8 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
             },
             ];
 
@@ -99,14 +99,14 @@
             canvas.width(window.innerWidth - 30)
             .height(window.innerHeight);
         };
-        let rows = ['Origin', 'Acceleration'],
-            columns = ['Year'];
+        let rows = ['Cylinders', 'Acceleration'],
+            columns = ['Origin'];
 
         canvas = canvas
 			.rows(rows)
 			.columns(columns)
             .data(rootData)
-			.width(600)
+			.width(400)
             .height(1000)
             .layers([{
                 mark: 'bar',
@@ -144,7 +144,7 @@
                 .color({
                     field: 'Origin',
                     // scheme: ['R//ed']
-                    scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)']
+                    // scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)']
                     // interpolate: true
                 })
                 // .size('Origin')
