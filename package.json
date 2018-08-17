@@ -50,7 +50,8 @@
     "start": "webpack-dev-server --host 0.0.0.0 --open --mode development --config webpack.config.dev.js",
     "lint": "eslint ./packages",
     "lint-errors": "eslint --quiet ./packages",
-    "docs": "jsdoc -c ./jsdoc.conf.json"
+    "docs": "jsdoc -c ./jsdoc.conf.json",
+    "postinstall": "lerna bootstrap"
   },
   "dependencies": {}
 }
