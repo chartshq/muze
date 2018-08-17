@@ -99,8 +99,8 @@
             canvas.width(window.innerWidth - 30)
             .height(window.innerHeight);
         };
-        let rows = ['Cylinders', 'Acceleration'],
-            columns = ['Origin'];
+        let rows = ['Acceleration'],
+            columns = ['Horsepower'];
 
         canvas = canvas
 			.rows(rows)
@@ -109,7 +109,7 @@
 			.width(400)
             .height(1000)
             .layers([{
-                mark: 'bar',
+                mark: 'point',
                 // transform: {
                 //     type: 'group'
                 // },
@@ -141,8 +141,8 @@
             // })
             // .size('Year')
             // .shape('Year')
-                .color({
-                    field: 'Origin',
+                .size({
+                    field: 'Displacement',
                     // scheme: ['R//ed']
                     // scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)']
                     // interpolate: true

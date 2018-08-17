@@ -57,7 +57,8 @@ const getLayerDefinition = (context, axes, type, orientation) => {
         },
         axes: {
             [orientation]: axis
-        }
+        },
+        interactive: false
     };
 };
 
