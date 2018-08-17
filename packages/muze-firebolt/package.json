@@ -16,7 +16,7 @@
         "visualization"
     ],
     "dependencies": {
-        "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+        "muze-utils": "^1.0.0",
         "@chartshq/muze-tooltip": "^1.0.0"
     }
 }

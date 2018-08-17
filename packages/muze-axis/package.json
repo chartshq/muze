@@ -15,6 +15,6 @@
     "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
     "d3-scale-chromatic": "^1.2.0",
     "d3-shape": "^1.2.0",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    "muze-utils": "^1.0.0"
   }
 }

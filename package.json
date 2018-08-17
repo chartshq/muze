@@ -46,7 +46,7 @@
     "utd": "karma start karma.conf.js --browsers=Chrome --single-run=false --debug --auto-watch",
     "ut": "karma start karma.conf.js",
     "build": "webpack --mode production --optimize-dedupe --config webpack.config.dev.js",
-    "build:dev": "webpack --mode development",
+    "build:dev": "webpack --mode development  --config webpack.config.dev.js",
     "start": "webpack-dev-server --host 0.0.0.0 --open --mode development --config webpack.config.js",
     "lint": "eslint ./packages",
     "lint-errors": "eslint --quiet ./packages",

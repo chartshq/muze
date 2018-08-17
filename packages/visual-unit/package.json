@@ -11,9 +11,9 @@
     "url": "https://bitbucket.org/fusioncharts/visual-unit"
   },
   "dependencies": {
-    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
+    "datamodel": "^1.0.0",
     "@chartshq/muze-axis": "^1.0.0",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "muze-utils": "^1.0.0",
     "@chartshq/visual-layer": "^1.0.0",
     "@chartshq/muze-firebolt": "^1.0.0"
   }

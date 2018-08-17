@@ -1,0 +1,43 @@
+{
+  "name": "datamodel",
+  "description": "A model which has been built on the concept of relational algebra",
+  "homepage": "https://bitbucket.org/fusioncharts/datamodel",
+  "version": "1.0.0",
+  "license": "ISC",
+  "main": "src/index.js",
+  "author": "FusionCharts Technologies <support@fusioncharts.com> (https://fusioncharts.com)",
+  "keywords": [
+    "datamodel",
+    "data",
+    "relational",
+    "algebra",
+    "model"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/fusioncharts/datamodel.git"
+  },
+  "contributors": [
+    {
+      "name": "Akash Ghoswami",
+      "email": "akash@fusioncharts.com"
+    },
+    {
+      "name": "Subhash Haldar",
+      "email": "subhash@fusioncharts.com"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "rousan@fusioncharts.com",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Ujjal Kumar Dutta",
+      "email": "ujjal@fusioncharts.com"
+    }
+  ],
+  "dependencies": {
+    "d3-dsv": "^1.0.8",
+    "muze-utils": "^1.0.0"
+  }
+}

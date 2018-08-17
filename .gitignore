@@ -107,4 +107,6 @@ packages/*/.nsi.json
 
 packages/*/node_modules/
 
+dist/
+
 # End of https://www.gitignore.io/api/node,macos
