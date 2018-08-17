@@ -1,5 +1,5 @@
 {
-  "name": "visual-group",
+  "name": "@chartshq/visual-group",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
-    "muze-axis": "git+ssh://git@bitbucket.org/fusioncharts/muze-axis.git#develop",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
-    "visual-unit": "git+ssh://git@bitbucket.org/fusioncharts/visual-unit.git#develop",
-    "visual-layer": "git+ssh://git@bitbucket.org/fusioncharts/visual-layer.git#develop"
+    "@chartshq/muze-axis": "^1.0.0",
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-unit": "^1.0.0",
+    "@chartshq/visual-layer": "^1.0.0"
   },
   "devDependencies": {
     "d3-selection": "^1.1.0",
@@ -55,7 +55,7 @@
     "sass-loader": "^7.0.1",
     "style-loader": "^0.20.3",
     "transform-runtime": "0.0.0",
-    "visual-cell": "git+ssh://git@bitbucket.org/fusioncharts/visual-cell.git#develop",
+    "@chartshq/visual-cell": "^1.0.0",
     "webpack": "^4.12.0",
     "webpack-cli": "^3.0.7",
     "webpack-dev-server": "^3.1.4"

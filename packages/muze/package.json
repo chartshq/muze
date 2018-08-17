@@ -1,8 +1,8 @@
 {
-  "name": "muze",
+  "name": "@chartshq/muze",
   "description": "JavaScript Data Visualization Library",
   "homepage": "http://www.fusioncharts.com/",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "license": "MIT",
   "author": "FusionCharts Technologies <support@fusioncharts.com>",
   "keywords": [
@@ -22,14 +22,14 @@
   "dependencies": {
     "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
     "fusioncharts-smartlabel": "^1.0.2",
-    "layout": "git+ssh://git@bitbucket.org/fusioncharts/layout.git#develop",
-    "muze-firebolt": "git+ssh://git@bitbucket.org/fusioncharts/muze-firebolt.git#develop",
-    "muze-legend": "git+ssh://git@bitbucket.org/fusioncharts/muze-legend.git#develop",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
-    "visual-cell": "git+ssh://git@bitbucket.org/fusioncharts/visual-cell.git#develop",
-    "visual-group": "git+ssh://git@bitbucket.org/fusioncharts/visual-group.git#develop",
-    "visual-layer": "git+ssh://git@bitbucket.org/fusioncharts/visual-layer.git#develop",
-    "visual-unit": "git+ssh://git@bitbucket.org/fusioncharts/visual-unit.git#develop"
+    "@chartshq/layout": "^1.0.0",
+    "@chartshq/muze-firebolt": "^1.0.0",
+    "@chartshq/muze-legend": "^1.0.0",
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-cell": "^1.0.0",
+    "@chartshq/visual-group": "^1.0.0",
+    "@chartshq/visual-layer": "^1.0.0",
+    "@chartshq/visual-unit": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

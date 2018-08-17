@@ -1,5 +1,5 @@
 {
-  "name": "visual-cell",
+  "name": "@chartshq/visual-cell",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/fusioncharts/visual-cell.git"
   },
   "dependencies": {
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
@@ -45,7 +45,7 @@
     "mocha": "3.4.2",
     "mocha-webpack": "0.7.0",
     "node-sass": "^4.9.0",
-    "muze-axis": "git+ssh://git@bitbucket.org/fusioncharts/muze-axis.git#develop",
+    "@chartshq/muze-axis": "^1.0.0",
     "sass-loader": "^7.0.1",
     "style-loader": "^0.21.0",
     "transform-runtime": "0.0.0",

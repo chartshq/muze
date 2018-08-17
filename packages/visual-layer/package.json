@@ -1,5 +1,5 @@
 {
-  "name": "visual-layer",
+  "name": "@chartshq/visual-layer",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
@@ -53,9 +53,9 @@
     "d3-shape": "^1.2.0",
     "d3-transition": "^1.1.1",
     "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
-    "muze-axis": "git+ssh://git@bitbucket.org/fusioncharts/muze-axis.git#develop",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
-    "transform": "git+ssh://@bitbucket.org/fusioncharts/transform.git#develop"
+    "@chartshq/muze-axis": "^1.0.0",
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/transform": "^1.0.0"
   },
   "scripts": {
     "test": "npm run lint && karma start karma.conf.js ",

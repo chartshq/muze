@@ -1,5 +1,5 @@
 {
-  "name": "muze-axis",
+  "name": "@chartshq/muze-axis",
   "version": "1.0.0",
   "description": "This contains wrapper classes over d3 axis",
   "main": "src/index.js",
@@ -63,6 +63,6 @@
     "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
     "d3-scale-chromatic": "^1.2.0",
     "d3-shape": "^1.2.0",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "visual-unit",
+  "name": "@chartshq/visual-unit",
   "version": "1.0.0",
   "description": "Component which manages layers and interactions",
   "main": "src/index.js",
@@ -51,10 +51,10 @@
   },
   "dependencies": {
     "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
-    "muze-axis": "git+ssh://git@bitbucket.org/fusioncharts/muze-axis.git#develop",
-    "muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
-    "visual-layer": "git+ssh://git@bitbucket.org/fusioncharts/visual-layer.git#develop",
-    "muze-firebolt": "git+ssh://git@bitbucket.org/fusioncharts/muze-firebolt.git#develop"
+    "@chartshq/muze-axis": "^1.0.0",
+    "@chartshq/muze-utils": "git+ssh://git@bitbucket.org/fusioncharts/muze-utils.git#develop",
+    "@chartshq/visual-layer": "^1.0.0",
+    "@chartshq/muze-firebolt": "^1.0.0"
   },
   "scripts": {
     "test": "npm run lint && npm run flow && karma start karma.conf.js ",

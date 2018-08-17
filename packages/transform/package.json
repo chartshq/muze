@@ -1,8 +1,8 @@
 {
-  "name": "transform",
+  "name": "@chartshq/transform",
   "description": "JavaScript Data Visualisation Library",
   "homepage": "http://www.fusioncharts.com/",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "src/index.js",
   "author": "FusionCharts Technologies <support@fusioncharts.com>",
