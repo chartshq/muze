@@ -1,11 +1,17 @@
 {
     "presets": [
-        ["env", { "modules": false }], "flow"
+        [
+            "env",
+            {
+                "modules": false
+            }
+        ]
     ],
     "env": {
         "test": {
-            "plugins": [ "istanbul" ]
+            "plugins": [
+                "istanbul"
+            ]
         }
     }
 }
-  
