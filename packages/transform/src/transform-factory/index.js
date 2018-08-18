@@ -14,7 +14,7 @@ const transformMap = {
     [TransformType.IDENTITY]: identity,
     [TransformType.FRACTURE]: fracture,
     [TransformType.GROUP]: group,
-    [TransformType.STACK]: stack,
+    [TransformType.STACK]: stack
 };
 
 /**
@@ -24,7 +24,7 @@ const transformMap = {
  * @param {string} type The type of the transform.
  * @return {Function} The transform function.
  */
-function transformFactory(type) {
+function transformFactory (type) {
     const transform = transformMap[type];
     if (typeof transform !== 'function') {
         throw new Error('Invalid transform type supplied.');

@@ -174,8 +174,7 @@ const unionDomain = (domains, fieldType) => {
     domains = domains.filter(dom => dom.length);
     if (fieldType === DimensionSubtype.CATEGORICAL) {
         domain = domain = [].concat(...domains);
-    }
-    else {
+    } else {
         domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
     }
 
@@ -267,8 +266,7 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
 
         if (d2 <= d1) {
             low = mid + 1;
-        }
-        else {
+        } else {
             high = mid;
         }
     }
@@ -331,8 +329,7 @@ const unique = arr => ([...new Set(arr)]);
     let uniqueVals;
     if (index !== undefined) {
         uniqueVals = unique(arr.map(d => d[index]));
-    }
-    else {
+    } else {
         uniqueVals = unique(arr);
     }
     if (uniqueVals.length > 1) {
@@ -340,8 +337,7 @@ const unique = arr => ([...new Set(arr)]);
         for (let i = 2, len = uniqueVals.length; i < len; i++) {
             diff = Math.min(diff, Math.abs(uniqueVals[i] - uniqueVals[i - 1]));
         }
-    }
-    else {
+    } else {
         diff = uniqueVals[0];
     }
 
@@ -802,11 +798,9 @@ const getArraySum = (arr, prop) => arr.reduce((total, elem) => {
  * @returns
  */
 const arraysEqual = (arr1, arr2) => {
-    if (arr1.length !== arr2.length)
-        { return false; }
+    if (arr1.length !== arr2.length) { return false; }
     for (let i = arr1.length; i--;) {
-        if (arr1[i] !== arr2[i])
-            { return false; }
+        if (arr1[i] !== arr2[i]) { return false; }
     }
 
     return true;
@@ -877,8 +871,7 @@ const mergeRecursive = (source, sink) => {
         } else if (sink[prop] instanceof Object && sink[prop].constructor === Object) {
             source[prop] = {};
             mergeRecursive(source[prop], sink[prop]);
-        }
-        else {
+        } else {
             source[prop] = sink[prop];
         }
     }
@@ -1170,8 +1163,7 @@ const filterPropagationModel = (model, propModel, measures) => {
                 saveChild: false
             });
         }
-    }
-    else {
+    } else {
         filteredModel = propModel;
     }
 
@@ -1193,8 +1185,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
                     name: field,
                     type: FieldType.DIMENSION
                 };
-            }
-            else {
+            } else {
                 fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
             }
             if (fieldObj) {
@@ -1212,8 +1203,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
             });
             data.push(temp);
         }
-    }
-    else {
+    } else {
         data = [];
         schema = [];
     }
@@ -1265,8 +1255,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
         const dataArr = identifiers.slice(1, identifiers.length);
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
-        }
-        else if (identifiers instanceof Array && identifiers[0].length) {
+        } else if (identifiers instanceof Array && identifiers[0].length) {
             const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === rowId);
             filteredDataModel = dataModel.select((fields, i) => {
                 let include = true;
@@ -1274,8 +1263,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                     let value;
                     if (propField === rowId) {
                         value = i;
-                    }
-                    else {
+                    } else {
                         value = fields[propField].valueOf();
                     }
                     const index = dataArr.findIndex(d => d[idx] === value);
@@ -1287,8 +1275,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                 mode
             });
         }
-    }
-    else {
+    } else {
         filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
     }
     return filteredDataModel;
@@ -1313,7 +1300,7 @@ const registerListeners = (context, listenerMap) => {
     }
 };
 
-const isValidValue = (value) => !isNaN(value) && value !== -Infinity && value !== Infinity;
+const isValidValue = value => !isNaN(value) && value !== -Infinity && value !== Infinity;
 /**
  *
  *
@@ -1368,8 +1355,7 @@ const extendsClass = (cls, extendsFrom, found) => {
     const prototype = cls.prototype;
     if (prototype instanceof extendsFrom) {
         found = true;
-    }
-    else {
+    } else {
         found = extendsClass(prototype, extendsFrom, found);
     }
     return found;
@@ -1406,8 +1392,7 @@ const concatModels = (dm1, dm2) => {
                 row2.forEach((value, idx) => {
                     commonTuples[key][schema2[idx].name] = value;
                 });
-            }
-            else {
+            } else {
                 const dm1Key = dim1Values.join();
                 const dm2Key = dim2Values.join();
                 if (!commonTuples[dm1Key] && !commonTuples[dm2Key]) {
@@ -1428,6 +1413,18 @@ const concatModels = (dm1, dm2) => {
     const data = [...Object.values(tuples1), ...Object.values(tuples2), ...Object.values(commonTuples)];
     return [data, commonSchema];
 };
+
+class MixinBuilder {
+    constructor (superclass) {
+        this.superclass = superclass;
+    }
+
+    with (...mixins) {
+        return mixins.reduce((c, mixin) => mixin(c), this.superclass);
+    }
+}
+
+const mix = superclass => new MixinBuilder(superclass);
 
 export {
     transformColors,
@@ -1491,5 +1488,6 @@ export {
     getObjProp,
     extendsClass,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    mix
 };

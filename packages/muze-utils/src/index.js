@@ -65,7 +65,8 @@ import {
     extendsClass,
     concatModels,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    mix
 } from './common-utils';
 
 import {
@@ -200,5 +201,6 @@ export {
     concatModels,
     getClientPoint,
     hasTouch,
-    isValidValue
+    isValidValue,
+    mix
 };

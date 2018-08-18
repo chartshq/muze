@@ -11,7 +11,7 @@
   * @param {Object} config The config object.
   * @return {Array} The unchanged data.
   */
- function identityTransform(schema, data, config) {
+ function identityTransform (schema, data, config) {
      return data;
  }
 

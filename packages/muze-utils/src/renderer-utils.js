@@ -105,14 +105,13 @@ const
         } else if (selectorType === 'id') {
             mergeSel.attr('id', selector.substring(1, selector.length));
         }
-        let exitSel = element.exit();
+        const exitSel = element.exit();
 
         if (callbacks.exit) {
             exitSel.each(function (...params) {
                 callbacks.exit(selectElement(this), ...params);
             });
-        }
-        else {
+        } else {
             exitSel.remove();
         }
         return mergeSel;
@@ -141,8 +140,7 @@ const
         let sel;
         if (htmlContainer.tagName === 'svg') {
             sel = selectElement(htmlContainer);
-        }
-        else {
+        } else {
             sel = selectElement(htmlContainer)
                                     .selectAll(`.${className}`)
                                     .data([1]);
@@ -151,7 +149,6 @@ const
                             .attr('width', width)
                             .attr('height', height);
         }
-
 
         return sel.merge(sel)
                         .attr('class', className)
@@ -171,7 +168,7 @@ const
      * @param {Object} attrs Attributes which need to be applied
      */
     setElementAttrs = (element, attrs) => {
-        for (let key in attrs) {
+        for (const key in attrs) {
             if ({}.hasOwnProperty.call(attrs, key)) {
                 element.attr(key, attrs[key]);
             }
@@ -203,7 +200,7 @@ const
      */
     addClass = (element, className, selector, filterFn) => {
         select(element).selectAll(selector).each(function (data) {
-            let elem = select(this);
+            const elem = select(this);
             filterFn ? filterFn(data) && elem.classed(className, true) :
                 elem.classed(className, true);
         });
@@ -218,7 +215,7 @@ const
      */
     removeClass = (element, className, selector, filterFn) => {
         select(element).selectAll(selector).each(function (data) {
-            let elem = select(this);
+            const elem = select(this);
             filterFn ? filterFn(data) && elem.classed(className, false) :
                 elem.classed(className, false);
         });
@@ -233,7 +230,7 @@ const
         if (!(element instanceof selection)) {
             element = selectElement(element);
         }
-        for (let key in styles) {
+        for (const key in styles) {
             if ({}.hasOwnProperty.call(styles, key)) {
                 element.style(key, styles[key]);
             }
@@ -301,7 +298,7 @@ const
      * @return {Object} x and y position relative to the container element passed.
      */
     getMousePos = (element, event) => {
-        let
+        const
             // ownerSVGBox = (element.ownerSVGElement && element.ownerSVGElement.getBoundingClientRect()) || {
             //     x: 0,
             //     y: 0
@@ -345,13 +342,11 @@ const
      * @return {Selection} Tracker group
      */
     drawTracker = (container, config) => {
-        let className = config.className,
-            group = selectElement(container).selectAll(`.${config.selector}`).data([null]),
-            groupSel = group.enter().append('g').merge(group),
-            rects = groupSel.selectAll('rect').data([null]),
-            rectMerge;
-
-        rectMerge = rects.enter().append('rect').merge(rects).node();
+        const className = config.className;
+        const group = selectElement(container).selectAll(`.${config.selector}`).data([null]);
+        const groupSel = group.enter().append('g').merge(group);
+        const rects = groupSel.selectAll('rect').data([null]);
+        const rectMerge = rects.enter().append('rect').merge(rects).node();
         setAttrs(rectMerge, {
             x: config.x || 0,
             y: config.y || 0,
@@ -375,29 +370,23 @@ const
      */
     getD3Drag = () => d3drag,
     getBrush = (value) => {
-        if (value === 'x')
-            { return brushX(); }
-        if (value === 'y')
-            { return brushY(); }
+        if (value === 'x') { return brushX(); }
+        if (value === 'y') { return brushY(); }
         return brush();
     },
     getSmartComputedStyle = (group, css) => {
-        let testText = 'W',
-            mandatoryStyle = {
-                'fill-opacity': 0
-            },
-            className = typeof css === 'string' ? css : (css instanceof Array ? css.join(' ') : undefined),
-            textEl,
-            computedStyle,
-            styleForSmartLabel;
+        let textEl;
+        const testText = 'W';
+        const mandatoryStyle = {
+            'fill-opacity': 0
+        };
+        const className = typeof css === 'string' ? css : (css instanceof Array ? css.join(' ') : undefined);
 
         if (group.node() instanceof HTMLElement) {
             textEl = group.append('div').html(testText);
-        }
-        else {
+        } else {
             textEl = group.append('text').text(testText);
         }
-
 
         if (className) {
             textEl.attr('class', className);
@@ -408,8 +397,8 @@ const
 
         textEl.style(mandatoryStyle);
 
-        computedStyle = window.getComputedStyle(textEl.node());
-        styleForSmartLabel = {
+        const computedStyle = window.getComputedStyle(textEl.node());
+        const styleForSmartLabel = {
             fontSize: computedStyle.fontSize,
             fontFamily: computedStyle.fontFamily,
             fontWeight: computedStyle.fontWeight,

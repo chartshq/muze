@@ -48,7 +48,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         cell: GeomCell,
         resolver,
         config,
-        encoder,
+        encoder
     } = context;
     const axes = resolver.axes();
     const cacheMaps = resolver.cacheMaps();
@@ -59,7 +59,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     const datamodelTransform = resolver.datamodelTransform();
     const {
         entryCellMap,
-        exitCellMap,
+        exitCellMap
     } = cacheMaps;
     const layerConfigArr = encoder.getLayerConfig({ columnFields, rowFields }, suppliedLayers || []);
     const axesCreators = { config, labelManager, axes, cacheMaps };
@@ -117,7 +117,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
             const { orientation } = axisInst.config();
 
             return new cells.AxisCell().source(axisInst).config({
-                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP,
+                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP
             });
         }
         return new cells.BlankCell();
@@ -133,10 +133,10 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
  */
 const axisPlaceholderGn = (context, selObj, cells) => {
     const {
-        matrices,
+        matrices
     } = context;
     const {
-        axesMatrix,
+        axesMatrix
     } = matrices;
 
     return (type, axisFrom) => {
@@ -260,10 +260,10 @@ const generatePlaceholders = (context, cells, labelManager) => {
         (columnsSecondary && columnsSecondary.getObjects().length ? columnsSecondary.getObjects() : []);
 
     const headerConfig = [
-        { type: LEFT, section: rows[0], axis: rowAxis, headerFrom: takeHeaderFrom.row, },
-        { type: RIGHT, section: rows[1], axis: rowAxis, headerFrom: takeHeaderFrom.row, },
-        { type: TOP, section: columns[0], axis: colAxis, headerFrom: takeHeaderFrom.column, },
-        { type: BOTTOM, section: columns[1], axis: colAxis, headerFrom: takeHeaderFrom.column, }
+        { type: LEFT, section: rows[0], axis: rowAxis, headerFrom: takeHeaderFrom.row },
+        { type: RIGHT, section: rows[1], axis: rowAxis, headerFrom: takeHeaderFrom.row },
+        { type: TOP, section: columns[0], axis: colAxis, headerFrom: takeHeaderFrom.column },
+        { type: BOTTOM, section: columns[1], axis: colAxis, headerFrom: takeHeaderFrom.column }
     ];
 
     headerConfig.forEach((config, index) => {
@@ -463,7 +463,7 @@ export const computeMatrices = (context, config) => {
         GeomCell: resolver.getCellDef(registry.GeomCell),
         AxisCell: resolver.getCellDef(registry.AxisCell),
         BlankCell: resolver.getCellDef(registry.BlankCell),
-        TextCell: resolver.getCellDef(registry.TextCell),
+        TextCell: resolver.getCellDef(registry.TextCell)
     };
     const isRowSizeEqual = isDistributionEqual(normalizedRows);
     const isColumnSizeEqual = isDistributionEqual(normalizedColumns);
@@ -476,7 +476,7 @@ export const computeMatrices = (context, config) => {
     resolver.resetSimpleAxes();
 
     const {
-            entryCellMap,
+            entryCellMap
         } = resolver.cacheMaps();
     const newCacheMap = {
         exitCellMap: entryCellMap,

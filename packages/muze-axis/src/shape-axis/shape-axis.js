@@ -16,7 +16,6 @@ import { PROPS } from './props';
 * @class SimpleAxis
 */
 export default class ShapeAxis {
-
     /**
     * Creates an instance of SimpleAxis.
     * @param {Object} params input parameters.
