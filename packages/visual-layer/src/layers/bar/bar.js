@@ -62,7 +62,7 @@ export default class BarLayer extends BaseLayer {
      * Returns the default configuration of the bar layer
      * @return {Object} Default configuration of the bar layer
      */
-    static defaultConfig() {
+    static defaultConfig () {
         return defaultConfig;
     }
 
@@ -217,7 +217,7 @@ export default class BarLayer extends BaseLayer {
                 barWidth: barWidthMetrics.width,
                 barWidthOffset: barWidthOffsets[i] || 0,
                 barHeight: barHeightMetrics.width,
-                barHeightOffset: barHeightOffsets[i] || 0,
+                barHeightOffset: barHeightOffsets[i] || 0
             }));
     }
 

@@ -58,6 +58,7 @@ export default class DiscreteLegend extends SimpleLegend {
                 value = domainForLegend[i];
                 range = [domainForLegend[i]];
             }
+
             return {
                 [scaleType]: scale[scaleFn](ele),
                 value,

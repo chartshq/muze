@@ -1,7 +1,7 @@
 import { isSimpleObject, mergeRecursive, getObjProp } from 'muze-utils';
 
 const parseLayerDefinition = (sink, definition, layerDef, layerType) => {
-    for (let key in definition) {
+    for (const key in definition) {
         if (Object.hasOwnProperty.call(definition, key)) {
             let strs;
             let propValue;
@@ -9,8 +9,7 @@ const parseLayerDefinition = (sink, definition, layerDef, layerType) => {
             if (isSimpleObject(def)) {
                 sink[key] = {};
                 parseLayerDefinition(sink[key], def, layerDef, layerType);
-            }
-            else if (typeof def === 'string' && (strs = def.split('.')) && strs[0] === layerType) {
+            } else if (typeof def === 'string' && (strs = def.split('.')) && strs[0] === layerType) {
                 propValue = getObjProp(layerDef, ...strs.slice(1, strs.length));
                 if (propValue !== undefined) {
                     sink[key] = propValue;
@@ -25,7 +24,7 @@ const parseLayerDefinition = (sink, definition, layerDef, layerType) => {
 
 const sanitizeEncoding = (encoding) => {
     // Create object for each encoding value if encoding value is a string
-    for (let key in encoding) {
+    for (const key in encoding) {
         if (typeof encoding[key] === 'string') {
             encoding[key] = {
                 field: encoding[key]
@@ -49,7 +48,6 @@ const layerFactory = (() => {
             let serializedDefs;
             const defs = compositeLayers[mark];
             const newConf = mergeRecursive({}, layerDef);
-
 
                 // If it is a composite layer then resolve all the definitions of each unit layer
             if (defs) {

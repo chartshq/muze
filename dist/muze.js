@@ -976,11 +976,16 @@ var DataModel = function (_Relation) {
         }
     }, {
         key: 'addToPropNamespace',
-        value: function addToPropNamespace(sourceId, payload, criteria, isMutableAction) {
+        value: function addToPropNamespace(sourceId) {
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
             var sourceNamespace = void 0;
-            var action = payload.action;
+            var actionName = config.actionName;
+            var payload = config.payload;
+            var isMutableAction = config.isMutableAction;
             var rootModel = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getRootDataModel"])(this);
             var propagationNameSpace = rootModel._propagationNameSpace;
+            var criteria = config.criteria;
 
             if (isMutableAction) {
                 !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});
@@ -991,9 +996,9 @@ var DataModel = function (_Relation) {
             }
 
             if (criteria === null) {
-                delete sourceNamespace[action];
+                delete sourceNamespace[actionName];
             } else {
-                sourceNamespace[action] = {
+                sourceNamespace[actionName] = {
                     criteria: criteria,
                     payload: payload
                 };
@@ -2135,11 +2140,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _field_creator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./field-creator */ "./packages/datamodel/src/field-creator.js");
 /* harmony import */ var _default_config__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./default-config */ "./packages/datamodel/src/default-config.js");
 /* harmony import */ var _converter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./converter */ "./packages/datamodel/src/converter/index.js");
-/* harmony import */ var _operator_compose__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./operator/compose */ "./packages/datamodel/src/operator/compose.js");
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 
 
 
@@ -2265,7 +2268,7 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
                 var fieldsConfig = dataModel.getFieldsConfig();
                 var data = dataObj.data;
                 fn = function fn(fields) {
-                    var include = data.some(function (row) {
+                    var include = !data.length ? false : data.some(function (row) {
                         return schema.every(function (propField) {
                             if (!(propField.name in fields)) {
                                 return true;
@@ -2283,17 +2286,29 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
             }(propModel);
         });
     }
-    var filteredModel = operation === 'and' ? _operator_compose__WEBPACK_IMPORTED_MODULE_9__["compose"].apply(undefined, _toConsumableArray(fns.map(function (fn) {
-        return Object(_operator_compose__WEBPACK_IMPORTED_MODULE_9__["select"])(fn, {
+
+    var filteredModel = void 0;
+    if (operation === 'and') {
+        var clonedModel = model.clone(false, false);
+        filteredModel = clonedModel.select(function (fields) {
+            return fns.every(function (fn) {
+                return fn(fields);
+            });
+        }, {
+            saveChild: false,
+            mode: muze_utils__WEBPACK_IMPORTED_MODULE_0__["FilteringMode"].ALL
+        });
+    } else {
+        filteredModel = model.clone(false, false).select(function (fields) {
+            return fns.some(function (fn) {
+                return fn(fields);
+            });
+        }, {
+            mode: muze_utils__WEBPACK_IMPORTED_MODULE_0__["FilteringMode"].ALL,
             saveChild: false
         });
-    })))(model.clone(false, false), {
-        saveChild: false
-    }) : model.select(function (fields) {
-        return fns.some(function (fn) {
-            return fn(fields);
-        });
-    });
+    }
+
     return filteredModel;
 };
 
@@ -2373,35 +2388,45 @@ var fieldInSchema = function fieldInSchema(schema, field) {
 var propagateIdentifiers = function propagateIdentifiers(dataModel, propModel) {
     var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
     var nonTraversingModel = arguments[3];
+    var grouped = arguments[4];
 
     // function to propagate to target the DataModel instance.
-    var forwardPropagation = function forwardPropagation(targetDM, propagationData) {
-        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel);
+    var forwardPropagation = function forwardPropagation(targetDM, propagationData, hasGrouped) {
+        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel, hasGrouped);
     };
 
     dataModel !== nonTraversingModel && dataModel.handlePropagation({
         payload: config.payload,
         data: propModel,
         sourceIdentifiers: config.sourceIdentifiers,
-        sourceId: config.propagationSourceId
+        sourceId: config.propagationSourceId,
+        groupedPropModel: !!grouped
     });
 
     // propagate to children created by SELECT operation
     Object(_operator__WEBPACK_IMPORTED_MODULE_4__["selectIterator"])(dataModel, function (targetDM, criteria) {
         if (targetDM !== nonTraversingModel) {
-            var selectedModel = propModel.select(criteria, {
+            var selectionModel = propModel[0].select(criteria, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, selectedModel);
+            var rejectionModel = propModel[1].select(criteria, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [selectionModel, rejectionModel], grouped);
         }
     });
     // propagate to children created by PROJECT operation
     Object(_operator__WEBPACK_IMPORTED_MODULE_4__["projectIterator"])(dataModel, function (targetDM, projField) {
         if (targetDM !== nonTraversingModel) {
-            var projModel = propModel.project(projField, {
+            var projModel = propModel[0].project(projField, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, projModel);
+            var rejectionProjModel = propModel[1].project(projField, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [projModel, rejectionProjModel], grouped);
         }
     });
 
@@ -2412,10 +2437,13 @@ var propagateIdentifiers = function propagateIdentifiers(dataModel, propModel) {
                 groupByString = conf.groupByString;
             // group the filtered model based on groupBy string of target
 
-            var groupedPropModel = propModel.groupBy(groupByString.split(','), reducer, {
+            var selectionGroupedModel = propModel[0].groupBy(groupByString.split(','), reducer, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, groupedPropModel);
+            var rejectionGroupedModel = propModel[1].groupBy(groupByString.split(','), reducer, {
+                saveChild: false
+            });
+            forwardPropagation(targetDM, [selectionGroupedModel, rejectionGroupedModel], true);
         }
     });
 
@@ -2425,11 +2453,17 @@ var propagateIdentifiers = function propagateIdentifiers(dataModel, propModel) {
         }
 
         if (targetDM !== nonTraversingModel) {
-            var calculatedVariableModel = propModel.calculateVariable.apply(propModel, params.concat([{
+            var _propModel$0$clone, _propModel$1$clone;
+
+            var entryModel = (_propModel$0$clone = propModel[0].clone(false, false)).calculateVariable.apply(_propModel$0$clone, params.concat([{
                 saveChild: false,
                 replaceVar: true
             }]));
-            forwardPropagation(targetDM, calculatedVariableModel);
+            var exitModel = (_propModel$1$clone = propModel[1].clone(false, false)).calculateVariable.apply(_propModel$1$clone, params.concat([{
+                saveChild: false,
+                replaceVar: true
+            }]));
+            forwardPropagation(targetDM, [entryModel, exitModel], grouped);
         }
     });
 };
@@ -2455,24 +2489,28 @@ var propagateToAllDataModels = function propagateToAllDataModels(identifiers, ro
     var propModel = void 0;
     var propagationNameSpace = config.propagationNameSpace;
     var payload = config.payload;
+    var propagationSourceId = config.propagationSourceId;
 
     if (identifiers === null) {
         criteria = null;
     } else {
         var _ref3;
 
-        criteria = (_ref3 = []).concat.apply(_ref3, [].concat(_toConsumableArray(Object.values(propagationNameSpace.mutableActions).map(function (d) {
-            return Object.values(d).map(function (obj) {
-                return obj.criteria;
+        var filteredCriteria = Object.entries(propagationNameSpace.mutableActions).filter(function (d) {
+            return d[0] !== propagationSourceId;
+        }).map(function (d) {
+            return Object.values(d[1]).map(function (action) {
+                return action.criteria;
             });
-        })), [identifiers]));
+        });
+        criteria = (_ref3 = []).concat.apply(_ref3, [].concat(_toConsumableArray(filteredCriteria), [identifiers]));
     }
 
     var rootGroupByModel = rootModels.groupByModel;
     var rootModel = rootModels.model;
     var propConfig = {
         payload: payload,
-        propagationSourceId: config.propagationSourceId,
+        propagationSourceId: propagationSourceId,
         sourceIdentifiers: identifiers
     };
 
@@ -6797,7 +6835,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 /**
  * Creates a table element of the layout
  *
@@ -6975,9 +7012,10 @@ function renderMatrices(context, matrices, layoutDimensions) {
         newCenter = [center];
         newBottom = [bottom];
     }
-    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mount, 'div', newCenter, classPrefix + '-stack-layout-container').each(function (d, i) {
+    // makeElement(mount, 'div', newCenter, `${classPrefix}-grid-layout`)
+    mount.each(function (d, i) {
         renderMatrix(newTop[i], Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"], layoutDimensions, classPrefix);
-        renderMatrix(d, Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"], layoutDimensions, classPrefix);
+        renderMatrix(newCenter[i], Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"], layoutDimensions, classPrefix);
         renderMatrix(newBottom[i], Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"], layoutDimensions, classPrefix);
     }).style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], width + 'px').style('margin-bottom', function (d, i) {
         if (i !== newBottom.length - 1) {
@@ -6996,8 +7034,11 @@ function renderMatrices(context, matrices, layoutDimensions) {
  * @param {Function} clickFn Click function to be bounded with the arrow
  * @return {Selection} the arrow element
 */
-var createArrow = function createArrow(mount, data, arrowType) {
-    return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mount, 'div', data, 'table-arrow-' + arrowType).classed('table-arrow', true);
+var createArrow = function createArrow(mount, data, _ref) {
+    var classPrefix = _ref.classPrefix,
+        display = _ref.display,
+        arrowType = _ref.arrowType;
+    return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mount, 'div', data, classPrefix + '-table-arrow-' + arrowType).classed(classPrefix + '-table-arrow', true).classed('hidden', !display);
 };
 
 /**
@@ -7010,21 +7051,38 @@ var createArrow = function createArrow(mount, data, arrowType) {
 var renderArrows = function renderArrows(context, mountPoint, viewMatricesInfo) {
     var _context$config2 = context.config(),
         columnPointer = _context$config2.columnPointer,
-        rowPointer = _context$config2.rowPointer;
+        rowPointer = _context$config2.rowPointer,
+        classPrefix = _context$config2.classPrefix;
 
     var rowPages = viewMatricesInfo.rowPages,
         columnPages = viewMatricesInfo.columnPages;
-    // const arrowClick = context.arrowClick.bind(context);
+
 
     return {
         // bottom arrow
-        bottom: createArrow(mountPoint, rowPointer + 1 !== rowPages ? [1] : [], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]),
+        bottom: createArrow(mountPoint, [1], {
+            classPrefix: classPrefix,
+            arrowType: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"],
+            display: rowPointer + 1 !== rowPages
+        }),
         // render the top arrow based on row start index
-        top: createArrow(mountPoint, rowPointer > 0 ? [1] : [], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"]),
+        top: createArrow(mountPoint, [1], {
+            classPrefix: classPrefix,
+            arrowType: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"],
+            display: rowPointer > 0
+        }),
         // right arrow
-        right: createArrow(mountPoint, columnPointer + 1 !== columnPages ? [1] : [], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"]),
+        right: createArrow(mountPoint, [1], {
+            classPrefix: classPrefix,
+            arrowType: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"],
+            display: columnPointer + 1 !== columnPages
+        }),
         // render the left arrow based on row start index
-        left: createArrow(mountPoint, columnPointer > 0 ? [1] : [], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"])
+        left: createArrow(mountPoint, [1], {
+            classPrefix: classPrefix,
+            arrowType: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"],
+            display: columnPointer > 0
+        })
     };
 };
 
@@ -19575,7 +19633,7 @@ __webpack_require__.r(__webpack_exports__);
  * @param {*} config
  */
 var rotateAxis = function rotateAxis(instance, tickText, labelManager, config) {
-    var scale = instance.scale();
+    var axis = instance.axis();
     var orientation = config.orientation,
         labels = config.labels,
         fixedBaseline = config.fixedBaseline,
@@ -19586,9 +19644,9 @@ var rotateAxis = function rotateAxis(instance, tickText, labelManager, config) {
     var tickSize = instance.getTickSize();
 
     tickText.each(function (datum, index) {
-        var yShift = void 0,
-            xShift = void 0;
-        var temp = scale.tickFormat ? scale.tickFormat()(datum) : datum;
+        var yShift = void 0;
+        var xShift = void 0;
+        var temp = axis.tickFormat ? axis.tickFormat()(datum) : datum;
 
         datum = temp.toString();
 
@@ -19614,6 +19672,8 @@ var rotateAxis = function rotateAxis(instance, tickText, labelManager, config) {
             xShift = height;
         } else if (rotation === 270) {
             xShift = -height;
+        } else {
+            xShift = 0;
         }
 
         if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"]) {
@@ -19646,8 +19706,9 @@ var changeTickOrientation = function changeTickOrientation(selectContainer, axis
 
     var tickText = selectContainer.selectAll('.tick text');
     tickText.selectAll('tspan').remove();
+
     // rotate labels if not enough space is available
-    if (rotation !== 0 && isSmartTicks === false) {
+    if (rotation !== 0 && isSmartTicks === false && (orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"] || orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"])) {
         rotateAxis(axisInstance, tickText, labelManager, config);
     } else if (rotation === 0 && isSmartTicks === false) {
         tickText.attr('transform', '');
@@ -19692,7 +19753,6 @@ var setAxisNamePos = function setAxisNamePos(textNode, orientation, measures) {
         labelOffset = measures.labelOffset,
         availableSpace = measures.availableSpace,
         axisNameWidth = measures.axisNameWidth;
-
 
     switch (orientation) {
         case _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["LEFT"]:
@@ -19740,6 +19800,7 @@ function renderAxis(axisInstance) {
         showAxisName = config.showAxisName,
         show = config.show,
         id = config.id,
+        interpolator = config.interpolator,
         classPrefix = config.classPrefix;
 
 
@@ -19753,8 +19814,10 @@ function renderAxis(axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
-    // Set ticks for the axis
-    axisInstance.setTickValues();
+    if (interpolator === 'linear') {
+        // Set ticks for the axis
+        axisInstance.setTickValues();
+    }
 
     // Get range(length of range)
     var availableSpace = Math.abs(range[0] - range[1]);
@@ -19771,7 +19834,7 @@ function renderAxis(axisInstance) {
     } else {
         selectContainer.call(axis);
     }
-
+    selectContainer.selectAll('.tick').classed(classPrefix + '-ticks', true);
     selectContainer.selectAll('.tick line').classed(classPrefix + '-tick-lines', true);
 
     // Set classes for ticks
@@ -19956,13 +20019,15 @@ var BandAxis = function (_SimpleAxis) {
             var labelManager = this._dependencies.labelManager;
 
             var domain = this.axis().scale().domain();
+            var axis = this.axis();
 
             smartTicks = domain;
+            var tickFormatter = axis.tickFormat();
 
             if (domain && domain.length) {
                 smartTicks = domain.map(function (d) {
                     labelManager.useEllipsesOnOverflow(true);
-                    smartlabel = labelManager.getSmartText(d, maxWidth, maxHeight);
+                    smartlabel = labelManager.getSmartText(tickFormatter(d), maxWidth, maxHeight);
                     return labelManager.constructor.textToLines(smartlabel);
                 });
             }
@@ -20116,6 +20181,7 @@ var defaultConfig = {
         defClassName: 'axis-name'
     },
     axisNamePadding: 12,
+    base: 10,
     classPrefix: _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CLASSPREFIX"],
     className: _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CLASSPREFIX"] + '-axis',
     exponent: 1,
@@ -20126,8 +20192,8 @@ var defaultConfig = {
         smartTicks: false
     },
     orientation: 'left',
-    maxHeight: 30,
-    maxWidth: 30,
+    maxHeight: 50,
+    maxWidth: 40,
     numberFormat: function numberFormat(val) {
         return val;
     },
@@ -20153,11 +20219,13 @@ var defaultConfig = {
 /*!*********************************************************!*\
   !*** ./packages/muze-axis/src/cartesian-axis/helper.js ***!
   \*********************************************************/
-/*! exports provided: getTickLabelInfo, computeAxisDimensions, setOffset, adjustRange, registerChangeListeners, getHorizontalAxisSpace, getVerticalAxisSpace, calculateBandSpace, calculateContinousSpace */
+/*! exports provided: getNumberOfTicks, sanitizeDomain, getTickLabelInfo, computeAxisDimensions, setOffset, adjustRange, registerChangeListeners, getHorizontalAxisSpace, getVerticalAxisSpace, calculateBandSpace, calculateContinousSpace */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getNumberOfTicks", function() { return getNumberOfTicks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitizeDomain", function() { return sanitizeDomain; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getTickLabelInfo", function() { return getTickLabelInfo; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "computeAxisDimensions", function() { return computeAxisDimensions; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setOffset", function() { return setOffset; });
@@ -20168,7 +20236,33 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "calculateBandSpace", function() { return calculateBandSpace; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "calculateContinousSpace", function() { return calculateContinousSpace; });
 /* harmony import */ var _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/axis-orientation */ "./packages/muze-axis/src/enums/axis-orientation.js");
+/* harmony import */ var _enums_scale_type__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/scale-type */ "./packages/muze-axis/src/enums/scale-type.js");
 
+
+
+var getNumberOfTicks = function getNumberOfTicks(availableSpace, labelDim, axis, context) {
+    var ticks = axis.scale().ticks();
+    var tickLength = ticks.length;
+    var numberOfValues = tickLength;
+
+    if (tickLength * (labelDim * 1.5) > availableSpace) {
+        numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
+    }
+
+    if (numberOfValues < 1) {
+        numberOfValues = 1;
+    }
+
+    return axis.scale().ticks(numberOfValues);
+};
+
+var sanitizeDomain = function sanitizeDomain(domain, context) {
+    var interpolator = context.config().interpolator;
+    if (interpolator === _enums_scale_type__WEBPACK_IMPORTED_MODULE_1__["LOG"] && domain[0] >= 0) {
+        return [Math.max(1, domain[0]), Math.max(1, domain[1])];
+    }
+    return domain;
+};
 
 /**
  *
@@ -20177,10 +20271,10 @@ __webpack_require__.r(__webpack_exports__);
  * @memberof SimpleAxis
  */
 var getTickLabelInfo = function getTickLabelInfo(context) {
-    var largestLabel = '',
-        labelProps = void 0,
-        smartTick = {},
-        axisTickLabels = void 0;
+    var largestLabel = '';
+    var labelProps = void 0;
+    var smartTick = {};
+    var axisTickLabels = void 0;
     var scale = context.scale();
     var allLabelLengths = [];
 
@@ -20197,6 +20291,7 @@ var getTickLabelInfo = function getTickLabelInfo(context) {
 
     labelManager.setStyle(context._tickLabelStyle);
     // get the values along the domain
+
     axisTickLabels = tickValues || labelFunc();
     // Get the tick labels
     axisTickLabels = axisTickLabels.map(function (originalLabel, i) {
@@ -20380,6 +20475,7 @@ var getHorizontalAxisSpace = function getHorizontalAxisSpace(context, axisDimens
 
 
     width = range && range.length ? range[1] - range[0] : 0;
+
     height = 0;
     if (tickValues) {
         width = tickValues.reduce(function (total) {
@@ -20622,6 +20718,29 @@ var LinearAxis = function (_SimpleAxis) {
         }
 
         /**
+        * This method is used to assign a domain to the axis.
+        *
+        * @param {Array} domain the domain of the scale
+        * @memberof LinearAxis
+        */
+
+    }, {
+        key: 'updateDomainBounds',
+        value: function updateDomainBounds(domain) {
+            var currentDomain = this.domain();
+
+            if (currentDomain.length === 0) {
+                currentDomain = domain;
+            }
+            if (domain.length) {
+                currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
+            }
+            currentDomain = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["sanitizeDomain"])(currentDomain, this);
+
+            return this.domain(currentDomain);
+        }
+
+        /**
          *
          *
          * @static
@@ -20634,6 +20753,9 @@ var LinearAxis = function (_SimpleAxis) {
         value: function getScaleValue(domainVal) {
             if (domainVal === null || domainVal === undefined) {
                 return undefined;
+            }
+            if (this.config().interpolator === _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LOG"] && domainVal <= 0) {
+                return 1;
             }
 
             return this.scale()(domainVal) + 0.5;
@@ -20669,7 +20791,7 @@ var LinearAxis = function (_SimpleAxis) {
     }, {
         key: 'domain',
         value: function domain(_domain) {
-            if (_domain) {
+            if (_domain && _domain.length) {
                 var _config2 = this.config(),
                     nice = _config2.nice;
 
@@ -20680,6 +20802,7 @@ var LinearAxis = function (_SimpleAxis) {
                 nice && this.scale().nice();
                 this._domain = this.scale().domain();
                 this.store().commit(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["DOMAIN"], this._domain);
+                this.logicalSpace(null);
                 return this;
             }return this._domain;
         }
@@ -20762,7 +20885,7 @@ var LinearAxis = function (_SimpleAxis) {
     }, {
         key: 'getTickValues',
         value: function getTickValues() {
-            var numberOfValues = void 0;
+            var labelDim = 0;
 
             var _config5 = this.config(),
                 orientation = _config5.orientation,
@@ -20770,28 +20893,17 @@ var LinearAxis = function (_SimpleAxis) {
 
             var range = this.range();
             var axis = this.axis();
-            var ticks = axis.scale().ticks();
-            var tickLength = ticks.length;
+
             var availableSpace = Math.abs(range[0] - range[1]);
+
             var labelProps = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getTickLabelInfo"])(this).largestLabelDim;
 
             if (tickValues) {
-                numberOfValues = tickValues;
-            } else {
-                numberOfValues = tickLength;
-                var labelDim = labelProps.height;
-                if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"]) {
-                    labelDim = labelProps.width;
-                }
-                if (tickLength * (labelDim * 1.5) > availableSpace) {
-                    numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
-                }
+                return axis.scale().ticks(tickValues);
             }
+            labelDim = labelProps[orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"] ? 'width' : 'height'];
 
-            if (numberOfValues < 1) {
-                numberOfValues = 1;
-            }
-            return axis.scale().ticks(numberOfValues);
+            return Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getNumberOfTicks"])(availableSpace, labelDim, axis, this);
         }
 
         /**
@@ -20814,10 +20926,12 @@ var LinearAxis = function (_SimpleAxis) {
 
             var axis = this.axis();
             var labelManager = this.dependencies().labelManager;
-
             labelManager.setStyle(this._tickLabelStyle);
             axis.tickTransform(function (d, i) {
-                var _labelManager$getOriS = labelManager.getOriSize(d),
+                var temp = axis.tickFormat ? axis.tickFormat()(d) : d;
+                var datum = temp.toString();
+
+                var _labelManager$getOriS = labelManager.getOriSize(datum),
                     shiftWidth = _labelManager$getOriS.width,
                     shiftHeight = _labelManager$getOriS.height;
 
@@ -20825,7 +20939,7 @@ var LinearAxis = function (_SimpleAxis) {
                     return 'translate(0, -' + shiftHeight / 3 + 'px)';
                 }
                 if (i === 0 && (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"]) && rotation === 0) {
-                    return 'translate(' + (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"] ? shiftWidth / 2 : shiftWidth / 2) + 'px,  ' + 0 + 'px)\n                    rotate(' + rotation + 'deg)';
+                    return 'translate(' + shiftWidth / 2 + 'px,  ' + 0 + 'px) rotate(' + rotation + 'deg)';
                 }return '';
             });
             return tickText;
@@ -20865,7 +20979,8 @@ var PROPS = {
             if (value.labels && value.labels.rotation) {
                 context._rotationLock = true;
             }
-            value = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(context._config, value);
+            value = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(context._config || {}, value);
+            value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             context.axis(context.createAxis(value));
             context.store().commit('config', value);
             return value;
@@ -20945,10 +21060,10 @@ var SimpleAxis = function () {
         this._eventList = [];
 
         var defCon = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, this.constructor.defaultConfig());
-        this._config = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(defCon, config);
+        var simpleConfig = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(defCon, config);
 
         var bodyElem = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('body');
-        var classPrefix = this._config.classPrefix;
+        var classPrefix = simpleConfig.classPrefix;
         this._tickLabelStyle = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getSmartComputedStyle"])(bodyElem, classPrefix + '-ticks');
         this._axisNameStyle = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getSmartComputedStyle"])(bodyElem, classPrefix + '-axis-name');
         dependencies.labelManager.setStyle(this._tickLabelStyle);
@@ -20958,9 +21073,10 @@ var SimpleAxis = function () {
         this.store(new muze_utils__WEBPACK_IMPORTED_MODULE_0__["Store"]({
             domain: this.domain(),
             range: this.range(),
-            config: this.config(),
+            config: simpleConfig,
             mount: this.mount()
         }));
+        this.config(simpleConfig);
 
         this._scale = this.createScale(this._config);
         this._axis = this.createAxis(this._config);
@@ -21040,6 +21156,7 @@ var SimpleAxis = function () {
                 this._domain = this.scale().domain();
                 this.smartTicks(this.setTickConfig());
                 this.store().commit(_enums_constants__WEBPACK_IMPORTED_MODULE_5__["DOMAIN"], this._domain);
+                this.logicalSpace(null);
                 return this;
             }
             return this._domain;
@@ -21068,7 +21185,8 @@ var SimpleAxis = function () {
     }, {
         key: 'createScale',
         value: function createScale(config) {
-            var padding = config.padding,
+            var base = config.base,
+                padding = config.padding,
                 interpolator = config.interpolator,
                 exponent = config.exponent;
 
@@ -21077,6 +21195,7 @@ var SimpleAxis = function () {
                 padding: padding,
                 interpolator: interpolator,
                 exponent: exponent,
+                base: base,
                 range: range,
                 type: this.constructor.type()
             });
@@ -21103,9 +21222,14 @@ var SimpleAxis = function () {
             if (axisClass) {
                 var axis = axisClass(this.scale());
                 var formatter = {};
+
                 if (tickFormat) {
                     formatter = function formatter(val) {
-                        return tickFormat(numberFormat(val));
+                        for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                            params[_key - 1] = arguments[_key];
+                        }
+
+                        return tickFormat.apply(undefined, [numberFormat(val)].concat(params));
                     };
                 } else {
                     formatter = function formatter(val) {
@@ -21148,7 +21272,6 @@ var SimpleAxis = function () {
             if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["TOP"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]) {
                 var range = this.range();
                 var length = Math.abs(range[0] - range[1]);
-
                 this.config({ labels: { rotation: 0 } });
                 if (length > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > length) {
                     this.config({ labels: { rotation: -90 } });
@@ -21234,8 +21357,8 @@ var SimpleAxis = function () {
         value: function invert() {
             var _this = this;
 
-            for (var _len = arguments.length, value = Array(_len), _key = 0; _key < _len; _key++) {
-                value[_key] = arguments[_key];
+            for (var _len2 = arguments.length, value = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                value[_key2] = arguments[_key2];
             }
 
             var values = value.map(function (d) {
@@ -21737,6 +21860,7 @@ var TimeAxis = function (_SimpleAxis) {
                 this._domain = this.scale().domain();
                 this.smartTicks(this.setTickConfig());
                 this.store().commit(_enums_constants__WEBPACK_IMPORTED_MODULE_4__["DOMAIN"], this._domain);
+                this.logicalSpace(null);
                 return this;
             }return this._domain;
         }
@@ -21815,7 +21939,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _scale_creator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../scale-creator */ "./packages/muze-axis/src/scale-creator.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-axis/src/enums/constants.js");
-/* harmony import */ var _scale_strategy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../scale-strategy */ "./packages/muze-axis/src/scale-strategy.js");
+/* harmony import */ var _color_strategy__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./color-strategy */ "./packages/muze-axis/src/color-axis/color-strategy.js");
 /* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./defaults */ "./packages/muze-axis/src/color-axis/defaults.js");
 /* harmony import */ var _props__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./props */ "./packages/muze-axis/src/color-axis/props.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -21861,6 +21985,7 @@ var ColorAxis = function () {
         this._rangeType = this._config.interpolate ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CONTINOUS"] : _enums_constants__WEBPACK_IMPORTED_MODULE_2__["DISCRETE"];
 
         this._schemeType = Object(_scale_creator__WEBPACK_IMPORTED_MODULE_1__["getSchemeType"])(this._config.scheme || this._config.value || this._config.range);
+
         this._colorStrategy = this.setColorStrategy(this._domainType, this._rangeType, this._schemeType);
         this._scale = this.createScale(this._colorStrategy);
         this._id = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getUniqueId"])();
@@ -21915,7 +22040,7 @@ var ColorAxis = function () {
             var _config2 = this.config(),
                 steps = _config2.steps;
 
-            return Object(_scale_strategy__WEBPACK_IMPORTED_MODULE_3__["strategyGetter"])(domainType, rangeType, schemeType, steps);
+            return Object(_color_strategy__WEBPACK_IMPORTED_MODULE_3__["strategyGetter"])(domainType, rangeType, schemeType, steps);
         }
 
         /**
@@ -22218,6 +22343,235 @@ var x11Colors = {
 
 /***/ }),
 
+/***/ "./packages/muze-axis/src/color-axis/color-strategy.js":
+/*!*************************************************************!*\
+  !*** ./packages/muze-axis/src/color-axis/color-strategy.js ***!
+  \*************************************************************/
+/*! exports provided: strategyGetter */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategyGetter", function() { return strategyGetter; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-axis/src/enums/constants.js");
+/* harmony import */ var _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/scale-type */ "./packages/muze-axis/src/enums/scale-type.js");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+
+
+
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @returns
+ */
+var indexedDomain = function indexedDomain(domain) {
+    var uniqueVals = domain;
+    var retDomain = domain.map(function (d, i) {
+        return i / (domain.length - 1);
+    });
+    return { domain: retDomain, uniqueVals: uniqueVals, scaleDomain: [0, 1] };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @returns
+ */
+var indexedDomainMeasure = function indexedDomainMeasure(domain) {
+    var uniqueVals = domain;
+    return { domain: domain, uniqueVals: uniqueVals, scaleDomain: [0, 1] };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @returns
+ */
+var normalDomain = function normalDomain(domain) {
+    var uniqueVals = domain;
+    return { uniqueVals: uniqueVals, domain: domain, nice: true };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @param {*} steps
+ * @returns
+ */
+var steppedDomain = function steppedDomain(domain, steps) {
+    var newSteps = [];
+    if (steps instanceof Array) {
+        newSteps = steps.slice().sort();
+    } else {
+        var interpolator = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["numberInterpolator"])().apply(undefined, _toConsumableArray(domain));
+        for (var i = 0; i <= steps; i++) {
+            newSteps[i] = interpolator(i / steps);
+        }
+    }
+    var uniqueVals = domain;
+    if (newSteps[0] < domain[0]) {
+        newSteps.shift();
+    }
+    var retDomain = newSteps;
+    return { uniqueVals: uniqueVals, domain: retDomain, nice: true };
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ * @param {*} domain
+ * @param {*} uniqueVals
+ * @returns
+ */
+var pieceWiseRange = function pieceWiseRange(domainValue, scale, domain, uniqueVals) {
+    var index = uniqueVals.indexOf(domainValue);
+    var numVal = domain[index];
+    var fn = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["piecewiseInterpolator"])()(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["colorInterpolator"])(), [].concat(_toConsumableArray(scale.range())));
+    return fn(numVal);
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ * @param {*} domain
+ * @param {*} uniqueVals
+ * @returns
+ */
+var uniqueRange = function uniqueRange(domainValue, scale, domain, uniqueVals) {
+    var index = uniqueVals.indexOf(domainValue);
+    var numVal = domain[index];
+    return scale(numVal);
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ * @param {*} domain
+ * @returns
+ */
+var indexedRange = function indexedRange(domainValue, scale, domain) {
+    var numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
+
+    return scale(numVal);
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ */
+var normalRange = function normalRange(domainValue, scale) {
+    return scale(domainValue);
+};
+
+/**
+ *
+ *
+ * @param {*} steps
+ */
+var strategies = function strategies() {
+    var _ref;
+
+    return _ref = {}, _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
+        domain: function domain() {
+            return indexedDomainMeasure;
+        },
+        range: function range() {
+            return indexedRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
+        domain: function domain() {
+            return indexedDomain;
+        },
+        range: function range() {
+            return uniqueRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
+        domain: function domain() {
+            return indexedDomainMeasure;
+        },
+        range: function range() {
+            return indexedRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
+        domain: function domain() {
+            return indexedDomain;
+        },
+        range: function range() {
+            return uniqueRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
+        domain: function domain() {
+            return indexedDomain;
+        },
+        range: function range(_range) {
+            if (_range.length) {
+                return pieceWiseRange;
+            }return indexedRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"],
+        domain: function domain() {
+            return normalDomain;
+        },
+        range: function range() {
+            return normalRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
+        domain: function domain() {
+            return normalDomain;
+        },
+        range: function range() {
+            return normalRange;
+        }
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["THRESHOLD"],
+        domain: function domain() {
+            return steppedDomain;
+        },
+        range: function range() {
+            return normalRange;
+        }
+
+    }), _ref;
+};
+
+/**
+ *
+ *
+ * @param {*} domainType
+ * @param {*} rangeType
+ * @param {*} schemeType
+ * @param {*} steps
+ */
+var strategyGetter = function strategyGetter(domainType, rangeType, schemeType, steps) {
+    return strategies(steps)[domainType + '-' + rangeType + '-' + (schemeType || '')];
+};
+
+/***/ }),
+
 /***/ "./packages/muze-axis/src/color-axis/defaults.js":
 /*!*******************************************************!*\
   !*** ./packages/muze-axis/src/color-axis/defaults.js ***!
@@ -22266,12 +22620,13 @@ __webpack_require__.r(__webpack_exports__);
 /*!****************************************************!*\
   !*** ./packages/muze-axis/src/color-axis/props.js ***!
   \****************************************************/
-/*! exports provided: getHslString, PROPS */
+/*! exports provided: getHslString, convertToXllString, PROPS */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getHslString", function() { return getHslString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "convertToXllString", function() { return convertToXllString; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PROPS", function() { return PROPS; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _color_maps__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./color-maps */ "./packages/muze-axis/src/color-axis/color-maps.js");
@@ -22283,7 +22638,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 
 var getHslString = function getHslString(hslArr) {
-    return 'hsl(' + hslArr[0] * 360 + ',' + hslArr[1] * 100 + '%,' + hslArr[2] * 100 + '%, \n    ' + (hslArr[3] || 1) + ')';
+    return 'hsla(' + hslArr[0] * 360 + ',' + hslArr[1] * 100 + '%,' + hslArr[2] * 100 + '%, \n    ' + (hslArr[3] || 1) + ')';
+};
+
+var convertToXllString = function convertToXllString(baseString) {
+    return (baseString.split(' ') || []).reduce(function (x, e) {
+        return '' + x + e.charAt(0).toUpperCase() + e.slice(1);
+    }, '');
 };
 
 var PROPS = {
@@ -22309,8 +22670,8 @@ var PROPS = {
                     } else if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["detectColor"])(e) === 'rgb') {
                         var col = e.substring(e.indexOf('(') + 1, e.lastIndexOf(')')).split(/,\s*/);
                         color = muze_utils__WEBPACK_IMPORTED_MODULE_0__["rgbToHsv"].apply(undefined, _toConsumableArray(col));
-                    } else if (_color_maps__WEBPACK_IMPORTED_MODULE_1__["x11Colors"][e]) {
-                        color = muze_utils__WEBPACK_IMPORTED_MODULE_0__["rgbToHsv"].apply(undefined, _toConsumableArray(_color_maps__WEBPACK_IMPORTED_MODULE_1__["x11Colors"][e].rgb.split(',')));
+                    } else if (_color_maps__WEBPACK_IMPORTED_MODULE_1__["x11Colors"][convertToXllString(e)]) {
+                        color = muze_utils__WEBPACK_IMPORTED_MODULE_0__["rgbToHsv"].apply(undefined, _toConsumableArray(_color_maps__WEBPACK_IMPORTED_MODULE_1__["x11Colors"][convertToXllString(e)].rgb.split(',')));
                     } else if (typeof e !== 'string' && !(e instanceof Array)) {
                         color = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["rgbToHsv"])(_defaults__WEBPACK_IMPORTED_MODULE_2__["palette"][i]);
                     } else {
@@ -22705,6 +23066,8 @@ function createScale(params) {
         scaleFactory = scaleMap[params.interpolator];
         if (params.interpolator === _enums_scale_type__WEBPACK_IMPORTED_MODULE_3__["POW"]) {
             return scaleFactory().range(range).exponent(params.exponent);
+        } else if (params.interpolator === _enums_scale_type__WEBPACK_IMPORTED_MODULE_3__["LOG"]) {
+            return scaleFactory().range(range).base([params.base]);
         }
     } else {
         scaleFactory = scaleMap[params.type];
@@ -22751,235 +23114,6 @@ function getScaleType(domainType, rangeType, steps) {
     }
     return _enums_constants__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"];
 }
-
-/***/ }),
-
-/***/ "./packages/muze-axis/src/scale-strategy.js":
-/*!**************************************************!*\
-  !*** ./packages/muze-axis/src/scale-strategy.js ***!
-  \**************************************************/
-/*! exports provided: strategyGetter */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategyGetter", function() { return strategyGetter; });
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enums/constants */ "./packages/muze-axis/src/enums/constants.js");
-/* harmony import */ var _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums/scale-type */ "./packages/muze-axis/src/enums/scale-type.js");
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-
-
-
-
-/**
- *
- *
- * @param {*} domain
- * @returns
- */
-var indexedDomain = function indexedDomain(domain) {
-    var uniqueVals = domain;
-    var retDomain = domain.map(function (d, i) {
-        return i / (domain.length - 1);
-    });
-    return { domain: retDomain, uniqueVals: uniqueVals, scaleDomain: [0, 1] };
-};
-
-/**
- *
- *
- * @param {*} domain
- * @returns
- */
-var indexedDomainMeasure = function indexedDomainMeasure(domain) {
-    var uniqueVals = domain;
-    return { domain: domain, uniqueVals: uniqueVals, scaleDomain: [0, 1] };
-};
-
-/**
- *
- *
- * @param {*} domain
- * @returns
- */
-var normalDomain = function normalDomain(domain) {
-    var uniqueVals = domain;
-    return { uniqueVals: uniqueVals, domain: domain };
-};
-
-/**
- *
- *
- * @param {*} domain
- * @param {*} steps
- * @returns
- */
-var steppedDomain = function steppedDomain(domain, steps) {
-    var newSteps = [];
-    if (steps instanceof Array) {
-        newSteps = steps.slice().sort();
-    } else {
-        var interpolator = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["numberInterpolator"])().apply(undefined, _toConsumableArray(domain));
-        for (var i = 0; i <= steps; i++) {
-            newSteps[i] = interpolator(i / steps);
-        }
-    }
-    var uniqueVals = domain;
-    if (newSteps[0] < domain[0]) {
-        newSteps.shift();
-    }
-    var retDomain = newSteps;
-    return { uniqueVals: uniqueVals, domain: retDomain, nice: true };
-};
-
-/**
- *
- *
- * @param {*} domainValue
- * @param {*} scale
- * @param {*} domain
- * @param {*} uniqueVals
- * @returns
- */
-var pieceWiseRange = function pieceWiseRange(domainValue, scale, domain, uniqueVals) {
-    var index = uniqueVals.indexOf(domainValue);
-    var numVal = domain[index];
-    var fn = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["piecewiseInterpolator"])()(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["colorInterpolator"])(), [].concat(_toConsumableArray(scale.range())));
-    return fn(numVal);
-};
-
-/**
- *
- *
- * @param {*} domainValue
- * @param {*} scale
- * @param {*} domain
- * @param {*} uniqueVals
- * @returns
- */
-var uniqueRange = function uniqueRange(domainValue, scale, domain, uniqueVals) {
-    var index = uniqueVals.indexOf(domainValue);
-    var numVal = domain[index];
-    return scale(numVal);
-};
-
-/**
- *
- *
- * @param {*} domainValue
- * @param {*} scale
- * @param {*} domain
- * @returns
- */
-var indexedRange = function indexedRange(domainValue, scale, domain) {
-    var numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
-
-    return scale(numVal);
-};
-
-/**
- *
- *
- * @param {*} domainValue
- * @param {*} scale
- */
-var normalRange = function normalRange(domainValue, scale) {
-    return scale(domainValue);
-};
-
-/**
- *
- *
- * @param {*} steps
- */
-var strategies = function strategies() {
-    var _ref;
-
-    return _ref = {}, _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
-        domain: function domain() {
-            return indexedDomainMeasure;
-        },
-        range: function range() {
-            return indexedRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
-        domain: function domain() {
-            return indexedDomain;
-        },
-        range: function range() {
-            return uniqueRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
-        domain: function domain() {
-            return indexedDomainMeasure;
-        },
-        range: function range() {
-            return indexedRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["SEQUENTIAL"],
-        domain: function domain() {
-            return indexedDomain;
-        },
-        range: function range() {
-            return uniqueRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
-        domain: function domain() {
-            return indexedDomain;
-        },
-        range: function range(_range) {
-            if (_range.length) {
-                return pieceWiseRange;
-            }return indexedRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"],
-        domain: function domain() {
-            return normalDomain;
-        },
-        range: function range() {
-            return normalRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
-        domain: function domain() {
-            return normalDomain;
-        },
-        range: function range() {
-            return normalRange;
-        }
-    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"], {
-        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["THRESHOLD"],
-        domain: function domain() {
-            return steppedDomain;
-        },
-        range: function range() {
-            return normalRange;
-        }
-
-    }), _ref;
-};
-
-/**
- *
- *
- * @param {*} domainType
- * @param {*} rangeType
- * @param {*} schemeType
- * @param {*} steps
- */
-var strategyGetter = function strategyGetter(domainType, rangeType, schemeType, steps) {
-    return strategies(steps)[domainType + '-' + rangeType + '-' + (schemeType || '')];
-};
 
 /***/ }),
 
@@ -23148,7 +23282,6 @@ var ShapeAxis = function () {
          * @memberof ShapeAxis
          */
         value: function getShape(value) {
-            // debugger;
             if (!this.scale() || !this.domain() || !value) {
                 return this.config().value;
             }
@@ -23254,11 +23387,12 @@ var ShapeAxis = function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
 var DEFAULT_CONFIG = {
-    interpolate: true,
+    interpolate: false,
     value: 64,
     type: 'ordinal',
-    range: [50, 1000],
-    scaleFactor: 1
+    range: [50, 360],
+    scaleFactor: 1,
+    intervals: 5
 };
 
 /***/ }),
@@ -23317,7 +23451,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _scale_creator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../scale-creator */ "./packages/muze-axis/src/scale-creator.js");
 /* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./defaults */ "./packages/muze-axis/src/size-axis/defaults.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-axis/src/enums/constants.js");
-/* harmony import */ var _props__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./props */ "./packages/muze-axis/src/size-axis/props.js");
+/* harmony import */ var _size_strategy__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./size-strategy */ "./packages/muze-axis/src/size-axis/size-strategy.js");
+/* harmony import */ var _props__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./props */ "./packages/muze-axis/src/size-axis/props.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23327,6 +23462,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
+
 
 
 
@@ -23348,34 +23484,57 @@ var SizeAxis = function () {
     function SizeAxis(config) {
         _classCallCheck(this, SizeAxis);
 
-        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["generateGetterSetters"])(this, _props__WEBPACK_IMPORTED_MODULE_4__["PROPS"]);
+        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["generateGetterSetters"])(this, _props__WEBPACK_IMPORTED_MODULE_5__["PROPS"]);
 
         this._id = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getUniqueId"])();
         this._config = Object.assign({}, this.constructor.defaultConfig(), config);
-        this._scale = this.createScale();
+
+        this._domainType = this._config.type === 'linear' ? _enums_constants__WEBPACK_IMPORTED_MODULE_3__["CONTINOUS"] : _enums_constants__WEBPACK_IMPORTED_MODULE_3__["DISCRETE"];
+        this._rangeType = this._config.interpolate || this._config.type !== 'linear' ? _enums_constants__WEBPACK_IMPORTED_MODULE_3__["CONTINOUS"] : _enums_constants__WEBPACK_IMPORTED_MODULE_3__["DISCRETE"];
+
+        this._sizeStrategy = this.setStrategy(this._domainType, this._rangeType);
+        this._scale = this.createScale(this._sizeStrategy);
         this._range = this._config.range;
 
         this.updateDomain(config.domain);
     }
 
     /**
-     *
-     *
-     * @returns
-     * @memberof SizeAxis
-     */
+    *
+    *
+    * @param {*} domainType
+    * @param {*} rangeType
+    * @param {*} schemeType
+    * @returns
+    * @memberof ColorAxis
+    */
 
 
     _createClass(SizeAxis, [{
-        key: 'createScale',
-        value: function createScale() {
+        key: 'setStrategy',
+        value: function setStrategy(domainType, rangeType) {
             var _config = this.config(),
-                interpolate = _config.interpolate,
-                type = _config.type;
+                intervals = _config.intervals;
+
+            return Object(_size_strategy__WEBPACK_IMPORTED_MODULE_4__["strategyGetter"])(domainType, rangeType, intervals);
+        }
+
+        /**
+         *
+         *
+         * @returns
+         * @memberof SizeAxis
+         */
+
+    }, {
+        key: 'createScale',
+        value: function createScale(strategy) {
+            var _config2 = this.config(),
+                range = _config2.range;
 
             return Object(_scale_creator__WEBPACK_IMPORTED_MODULE_1__["createScale"])({
-                type: interpolate ? type : _enums_constants__WEBPACK_IMPORTED_MODULE_3__["QUANTILE"],
-                range: this.range() || []
+                type: strategy.scale,
+                range: range
             });
         }
 
@@ -23388,27 +23547,8 @@ var SizeAxis = function () {
          */
 
     }, {
-        key: 'getComputedRange',
+        key: 'getSize',
 
-
-        /**
-         *
-         *
-         * @param {*} rangeValues
-         * @returns
-         * @memberof SizeAxis
-         */
-        value: function getComputedRange(rangeValues) {
-            var _config2 = this.config(),
-                type = _config2.type,
-                interpolate = _config2.interpolate;
-
-            if ((type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["ORDINAL"] || interpolate) && this.domain()) {
-                var domainLength = this.domain().length;
-                return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["interpolateArray"])(rangeValues, domainLength);
-            }
-            return rangeValues;
-        }
 
         /**
          *
@@ -23417,33 +23557,22 @@ var SizeAxis = function () {
          * @returns
          * @memberof SizeAxis
          */
-
-    }, {
-        key: 'getSize',
         value: function getSize() {
             var domainVal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
             var sizeVal = 1;
 
             var _config3 = this.config(),
-                type = _config3.type,
-                interpolate = _config3.interpolate,
                 scaleFactor = _config3.scaleFactor,
                 value = _config3.value;
 
             var scale = this.scale();
             var domain = this.domain() || [1, 1];
-            var range = this.range();
 
             if (!scale || domain[0] === domain[1]) {
                 sizeVal = value;
-            } else if (!interpolate && type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["ORDINAL"]) {
-                var rangeVal = scale(domainVal);
-                sizeVal = rangeVal / range[range.length - 1];
-            } else if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["ORDINAL"]) {
-                sizeVal = scale(this.uniqueValues().indexOf(domainVal)) || range[1];
             } else {
-                sizeVal = scale(domainVal);
+                return this._sizeStrategy.range(domainVal, scale, this.domain(), this.uniqueValues()) * scaleFactor;
             }
             return sizeVal * scaleFactor;
         }
@@ -23458,36 +23587,16 @@ var SizeAxis = function () {
     }, {
         key: 'updateDomain',
         value: function updateDomain(domain) {
-            /* istanbul ignore next */
-            this.uniqueValues(domain);
             if (domain) {
-                this.domain(domain);
-                this.scale().domain(domain);
+                var domainFn = this._sizeStrategy.domain;
+
+                var domainInfo = domainFn(domain, this.config().intervals);
+
+                this.domain(domainInfo.domain);
+                this.uniqueValues(domainInfo.uniqueVals);
+
+                this.scale().domain(domainInfo.scaleDomain || this.domain());
             }
-            this.updateRange();
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} range
-         * @memberof SizeAxis
-         */
-
-    }, {
-        key: 'updateRange',
-        value: function updateRange(range) {
-            var updatedRange = range || this.range();
-
-            this.range(this.getComputedRange(updatedRange));
-
-            this.scale().range(this.range());
-
-            this._rangeSum = this.range().reduce(function (total, num) {
-                total += num;
-                return total;
-            }, 0);
             return this;
         }
 
@@ -23559,6 +23668,153 @@ var SizeAxis = function () {
 }();
 
 /* harmony default export */ __webpack_exports__["default"] = (SizeAxis);
+
+/***/ }),
+
+/***/ "./packages/muze-axis/src/size-axis/size-strategy.js":
+/*!***********************************************************!*\
+  !*** ./packages/muze-axis/src/size-axis/size-strategy.js ***!
+  \***********************************************************/
+/*! exports provided: strategyGetter */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategyGetter", function() { return strategyGetter; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-axis/src/enums/constants.js");
+/* harmony import */ var _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/scale-type */ "./packages/muze-axis/src/enums/scale-type.js");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+
+
+
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @returns
+ */
+var indexedDomain = function indexedDomain(domain) {
+    var uniqueVals = domain;
+    var retDomain = domain.map(function (d, i) {
+        return i / (domain.length - 1);
+    });
+    return { domain: retDomain, uniqueVals: uniqueVals, scaleDomain: [0, 1] };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @returns
+ */
+var normalDomain = function normalDomain(domain) {
+    var uniqueVals = domain;
+    return { uniqueVals: uniqueVals, domain: domain };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @param {*} intervals
+ * @returns
+ */
+var steppedDomain = function steppedDomain(domain, intervals) {
+    var newIntervals = [];
+    if (intervals instanceof Array) {
+        newIntervals = intervals.slice().sort();
+    } else {
+        var interpolator = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["numberInterpolator"])().apply(undefined, _toConsumableArray(domain));
+        for (var i = 0; i < intervals; i++) {
+            newIntervals[i] = interpolator(i / (intervals - 1));
+        }
+    }
+    if (newIntervals[0] < domain[0]) {
+        newIntervals.shift();
+    }
+    var retDomain = newIntervals;
+    return { uniqueVals: newIntervals, domain: retDomain, nice: true };
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ * @param {*} domain
+ * @param {*} uniqueVals
+ * @returns
+ */
+var discreteRange = function discreteRange(domainValue, scale, domain) {
+    var numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
+    var interpolator = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["numberInterpolator"])().apply(undefined, _toConsumableArray(scale.range()));
+    return interpolator(numVal);
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ * @param {*} domain
+ * @returns
+ */
+var pieceWiseRange = function pieceWiseRange(domainValue, scale, domain, uniqueVals) {
+    var index = uniqueVals.indexOf(domainValue);
+    var numVal = domain[index];
+    var fn = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["piecewiseInterpolator"])()(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["numberInterpolator"])(), [].concat(_toConsumableArray(scale.range())));
+    return fn(numVal);
+};
+
+/**
+ *
+ *
+ * @param {*} domainValue
+ * @param {*} scale
+ */
+var normalRange = function normalRange(domainValue, scale) {
+    return scale(domainValue);
+};
+
+/**
+ *
+ *
+ * @param {*} intervals
+ */
+var strategies = function strategies() {
+    var _ref;
+
+    return _ref = {}, _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
+        domain: indexedDomain,
+        range: pieceWiseRange
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["LINEAR"],
+        domain: normalDomain,
+        range: normalRange
+    }), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONTINOUS"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"], {
+        scale: _enums_scale_type__WEBPACK_IMPORTED_MODULE_2__["THRESHOLD"],
+        domain: steppedDomain,
+        range: discreteRange
+    }), _ref;
+};
+
+/**
+ *
+ *
+ * @param {*} domainType
+ * @param {*} rangeType
+ * @param {*} schemeType
+ * @param {*} intervals
+ */
+var strategyGetter = function strategyGetter(domainType, rangeType, intervals) {
+    return strategies(intervals)[domainType + '-' + rangeType];
+};
 
 /***/ }),
 
@@ -24071,11 +24327,12 @@ __webpack_require__.r(__webpack_exports__);
         if (xField === yField) {
             var xdom = selectedDomains.x;
             var ydom = selectedDomains.y;
-
-            if (Math.abs(xdom[1] - xdom[0]) < Math.abs(ydom[1] - ydom[0])) {
-                rangeObj[xField] = xdom;
+            var min = xdom[0] > ydom[0] ? ydom : xdom;
+            var max = min === ydom ? xdom : ydom;
+            if (min[1] < max[0]) {
+                rangeObj[xField] = [];
             } else {
-                rangeObj[yField] = ydom;
+                rangeObj[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
             }
             dimensions.x = [stPos.x, endPos.x];
             dimensions.y = [stPos.y, endPos.y];
@@ -24951,8 +25208,9 @@ var Firebolt = function () {
                             dataModel: dataModel,
                             filteredDataModel: filteredDataModel,
                             propagationData: propagationInf.data,
-                            set: selectionSet._set
+                            selectionSet: selectionSet
                         };
+
                         return {
                             entrySet: [Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSetInfo"])('oldEntry', entrySet[0], setConfig), Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSetInfo"])('newEntry', entrySet[1], setConfig)],
                             exitSet: [Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSetInfo"])('oldEntry', exitSet[0], setConfig), Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSetInfo"])('newExit', exitSet[1], setConfig)],
@@ -24973,16 +25231,30 @@ var Firebolt = function () {
         value: function getAddSetFromCriteria(criteria) {
             var propagationInf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-            var filteredDataModel = propagationInf.data ? propagationInf.data : this.context.getDataModelFromIdentifiers(criteria);
+            var context = this.context;
+            var filteredDataModel = propagationInf.data ? propagationInf.data : context.getDataModelFromIdentifiers(criteria, 'all');
+            var xFields = context.fields().x || [];
+            var yFields = context.fields().y || [];
+            var xMeasures = xFields.every(function (field) {
+                return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+            });
+            var yMeasures = yFields.every(function (field) {
+                return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+            });
             return {
                 model: filteredDataModel,
-                uids: criteria === null ? null : filteredDataModel.getData().uids
+                uids: criteria === null ? null : propagationInf.data ? Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["filterPropagationModel"])(this.getFullData(), propagationInf.data[0], xMeasures && yMeasures).getData().uids : filteredDataModel[0].getData().uids
             };
         }
     }, {
         key: 'getFullData',
         value: function getFullData() {
-            return this.context.cachedData()[0];
+            return this.context.data();
+        }
+    }, {
+        key: 'resetted',
+        value: function resetted() {
+            return this._resetted;
         }
     }]);
 
@@ -25089,10 +25361,11 @@ var setSelectionSets = function setSelectionSets(addSet, selectionSet, persisten
                 exitSet = _selectionSet$getSets.exitSet;
 
             var mergedExitSet = getMergedSet(exitSet);
-            if (exitSet[1].length !== selectionSet.getCompleteSetCount() && mergedExitSet.length === selectionSet.getCompleteSetCount()) {
+            var completeSetCount = selectionSet.getCompleteSet().length;
+            if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
                 selectionSet.reset();
             }
-        } else if (existingAddSet.length) {
+        } else {
             selectionSet.updateExit();
 
             var _selectionSet$getSets2 = selectionSet.getSets(),
@@ -25101,14 +25374,6 @@ var setSelectionSets = function setSelectionSets(addSet, selectionSet, persisten
             selectionSet.reset(getMergedSet(entrySet));
             selectionSet.add(addSet);
             selectionSet.update(existingAddSet);
-        } else {
-            selectionSet.updateExit();
-
-            var _selectionSet$getSets3 = selectionSet.getSets(),
-                _entrySet = _selectionSet$getSets3.entrySet;
-
-            selectionSet.reset(getMergedSet(_entrySet));
-            selectionSet.add(addSet);
         }
     } else {
         selectionSet.remove(selectionSet.getCompleteSet());
@@ -25132,22 +25397,17 @@ var getSourceFields = function getSourceFields(propagationInf) {
     return sourceFields;
 };
 
-var getModelFromSet = function getModelFromSet(type, config) {
-    var dataModel = config.dataModel,
-        set = config.set,
-        propagationData = config.propagationData;
+var conditionsMap = {
+    newEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"]],
+    oldEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
+    mergedEnter: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
+    newExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]],
+    oldExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
+    mergedExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
+    complete: []
+};
 
-    var model = propagationData || dataModel;
-    var conditionsMap = {
-        newEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"]],
-        oldEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
-        mergedEnter: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
-        newExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]],
-        oldExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
-        mergedExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
-        complete: []
-    };
-
+var getModelFromSet = function getModelFromSet(type, model, set) {
     return model ? model.select(function (fields, i) {
         return conditionsMap[type].some(function (condition) {
             return set[i] === condition;
@@ -25158,10 +25418,22 @@ var getModelFromSet = function getModelFromSet(type, config) {
 };
 
 var getSetInfo = function getSetInfo(type, set, config) {
+    var model = null;
+    var filteredDataModel = config.filteredDataModel;
+    var selectionSet = config.selectionSet;
+    if (!config.propagationData) {
+        if (selectionSet.resetted()) {
+            model = null;
+        } else {
+            model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
+        }
+    } else if (filteredDataModel) {
+        model = type === 'mergedEnter' ? filteredDataModel[0] : filteredDataModel[1];
+    }
     return {
         uids: set,
         length: set.length,
-        model: config.isSourceFieldPresent === false ? config.filteredDataModel : getModelFromSet(type, config)
+        model: model
     };
 };
 
@@ -25511,6 +25783,11 @@ var SelectionSet = function () {
         value: function getCompleteSetCount() {
             return this._completeSetCount;
         }
+    }, {
+        key: 'resetted',
+        value: function resetted() {
+            return this._resetted;
+        }
     }]);
 
     return SelectionSet;
@@ -25532,6 +25809,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../enums/constants */ "./packages/muze-firebolt/src/enums/constants.js");
 /* harmony import */ var _spawnable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../spawnable */ "./packages/muze-firebolt/src/side-effects/spawnable.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -25557,39 +25836,45 @@ var AnchorEffect = function (_SpawnableSideEffect) {
         var _this = _possibleConstructorReturn(this, (_ref = AnchorEffect.__proto__ || Object.getPrototypeOf(AnchorEffect)).call.apply(_ref, [this].concat(params)));
 
         var context = _this.firebolt.context;
-        _this._layers = _this.getAnchorLayerConfig(context);
-        _this._layers.forEach(function (layer) {
-            return layer.data(context.data().select(function () {
-                return false;
-            }));
-        });
+        _this._layers = _this.addAnchorLayers(context);
         return _this;
     }
 
     _createClass(AnchorEffect, [{
-        key: 'getAnchorLayerConfig',
-        value: function getAnchorLayerConfig(context) {
-            var fields = context.fields();
-            var xField = '' + fields.x[0];
-            var yField = '' + fields.y[0];
-            var color = context.retinalFields().color;
-            return context.addLayer({
-                name: this.constructor.formalName(),
-                mark: 'point',
-                encoding: {
-                    x: xField,
-                    y: yField,
-                    color: color && color.field,
-                    size: {
-                        value: 100
-                    }
-                },
-                dataSource: null,
-                transition: this.getTransitionConfig(),
-                calculateDomain: false,
-                render: false,
-                interactive: false
+        key: 'addAnchorLayers',
+        value: function addAnchorLayers(context) {
+            var _this2 = this;
+
+            var layers = [];
+            this.firebolt.context.layers().forEach(function (layer, idx) {
+                var shouldDrawAnchors = layer.shouldDrawAnchors();
+                if (shouldDrawAnchors) {
+                    var encodingFieldsInf = layer.encodingFieldsInf();
+                    var config = layer.config();
+                    layers = [].concat(_toConsumableArray(layers), _toConsumableArray(context.addLayer({
+                        name: layer.alias() + '-this.constructor.formalName()-' + idx,
+                        mark: 'point',
+                        encoding: {
+                            x: encodingFieldsInf.xField,
+                            y: encodingFieldsInf.yField,
+                            color: encodingFieldsInf.colorField,
+                            size: {
+                                value: _this2.defaultSizeValue()
+                            }
+                        },
+                        transform: config.transform,
+                        transition: _this2.getTransitionConfig(),
+                        calculateDomain: false,
+                        dataSource: function dataSource(dt) {
+                            return dt.select(function () {
+                                return false;
+                            });
+                        },
+                        interactive: false
+                    })));
+                }
             });
+            return layers;
         }
     }, {
         key: 'getTransitionConfig',
@@ -25599,19 +25884,25 @@ var AnchorEffect = function (_SpawnableSideEffect) {
             };
         }
     }, {
+        key: 'defaultSizeValue',
+        value: function defaultSizeValue() {
+            return 100;
+        }
+    }, {
         key: 'apply',
         value: function apply(selectionSet) {
             var dataModel = selectionSet.mergedEnter.model;
             var drawingInf = this.drawingContext()();
             var sideEffectGroup = drawingInf.sideEffectGroup;
             var className = this.config().className;
-            var anchorGroup = this.createElement(sideEffectGroup, 'g', [1], className);
-            var shouldDrawAnchors = this.firebolt.context.layers().some(function (layer) {
-                return layer.shouldDrawAnchors();
+            var anchorGroups = this.createElement(sideEffectGroup, 'g', this._layers.map(function (d) {
+                return d.id();
+            }), className);
+            var layers = this._layers;
+            anchorGroups.each(function (d, i) {
+                layers[i].data(dataModel).mount(this);
             });
-            shouldDrawAnchors && this._layers.forEach(function (layer) {
-                return layer.data(dataModel).mount(anchorGroup.node());
-            });
+
             return this;
         }
     }], [{
@@ -25852,6 +26143,11 @@ var FilterEffect = function (_SurrogateSideEffect) {
         value: function target() {
             return 'visual-unit';
         }
+    }, {
+        key: 'mutates',
+        value: function mutates() {
+            return true;
+        }
     }]);
 
     return FilterEffect;
@@ -25947,6 +26243,11 @@ var GenericSideEffect = function () {
         key: 'target',
         value: function target() {
             return 'all';
+        }
+    }, {
+        key: 'mutates',
+        value: function mutates() {
+            return false;
         }
     }]);
 
@@ -26258,6 +26559,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getBoxDimensionsFromPayload", function() { return getBoxDimensionsFromPayload; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "changeVisibility", function() { return changeVisibility; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 
 
 var getBoxDimensionsFromPayload = function getBoxDimensionsFromPayload(payload, sourceInf) {
@@ -26269,6 +26572,7 @@ var getBoxDimensionsFromPayload = function getBoxDimensionsFromPayload(payload, 
     var yRange = void 0;
     var direction = void 0;
     var criteria = payload.criteria;
+    var dragEnd = payload.dragEnd;
     var axes = sourceInf.axes;
     var axisFields = sourceInf.fields;
     var dimensions = payload.dimensions || {};
@@ -26281,6 +26585,8 @@ var getBoxDimensionsFromPayload = function getBoxDimensionsFromPayload(payload, 
 
     var xAxis = axes.x[0];
     var yAxis = axes.y[0];
+    var xLinear = xAxis.constructor.type() === 'linear';
+    var yLinear = yAxis.constructor.type() === 'linear';
     var xField = '' + axisFields.x[0];
     var yField = '' + axisFields.y[0];
     var xCriteria = criteria[xField];
@@ -26295,36 +26601,97 @@ var getBoxDimensionsFromPayload = function getBoxDimensionsFromPayload(payload, 
     }
     direction = xCriteria && yCriteria ? 'both' : xCriteria ? 'vertical' : 'horizontal';
     if (xRange && xRange.length) {
-        if (yAxis.constructor.type() === 'band' && xAxis.constructor.type() === 'linear') {
+        if (yAxis.constructor.type() === 'band' && xLinear) {
             x1 = x2 = undefined;
             direction = 'horizontal';
         } else {
-            x1 = xAxis.getScaleValue(xRange[0]);
-            x2 = xAxis.getScaleValue(xRange[xRange.length - 1]);
-            x2 += xAxis.constructor.type() === 'band' ? xAxis.getUnitWidth() : 0;
+            var domain = xAxis.domain();
+            var bandScale = xAxis.constructor.type() === 'band';
+            var x1Val = void 0;
+            var x2Val = void 0;
+            if (bandScale) {
+                var x1DomainIndex = domain.indexOf(xRange[0]);
+                var x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
+
+                var _sort = [x1DomainIndex, x2DomainIndex].sort(function (a, b) {
+                    return a - b;
+                });
+
+                var _sort2 = _slicedToArray(_sort, 2);
+
+                x1DomainIndex = _sort2[0];
+                x2DomainIndex = _sort2[1];
+
+                x1Val = domain[x1DomainIndex];
+                x2Val = domain[x2DomainIndex];
+            } else {
+                x1Val = xRange[0];
+                x2Val = xRange[xRange.length - 1];
+            }
+            x1 = xAxis.getScaleValue(x1Val);
+            x2 = xAxis.getScaleValue(x2Val);
+            x2 += bandScale ? xAxis.getUnitWidth() : 0;
         }
     } else {
         x1 = x2 = undefined;
     }
     if (yRange && yRange.length) {
-        if (xAxis.constructor.type() === 'band' && yAxis.constructor.type() === 'linear') {
+        if (xAxis.constructor.type() === 'band' && yLinear) {
             y1 = y2 = undefined;
             direction = 'vertical';
         } else {
-            y1 = yAxis.getScaleValue(yRange[0]);
-            y2 = yAxis.getScaleValue(yRange[yRange.length - 1]);
+            var _domain = yAxis.domain();
+            var _bandScale = yAxis.constructor.type() === 'band';
+            var y1Val = void 0;
+            var y2Val = void 0;
+            if (_bandScale) {
+                var y1DomainIndex = _domain.indexOf(yRange[0]);
+                var y2DomainIndex = _domain.indexOf(yRange[yRange.length - 1]);
+
+                var _sort3 = [y1DomainIndex, y2DomainIndex].sort(function (a, b) {
+                    return b - a;
+                });
+
+                var _sort4 = _slicedToArray(_sort3, 2);
+
+                y1DomainIndex = _sort4[0];
+                y2DomainIndex = _sort4[1];
+
+                y1Val = _domain[y1DomainIndex];
+                y2Val = _domain[y2DomainIndex];
+            } else {
+                y1Val = yRange[0];
+                y2Val = yRange[yRange.length - 1];
+            }
+            y1 = yAxis.getScaleValue(y1Val);
+            y2 = yAxis.getScaleValue(y2Val);
             y2 += yAxis.constructor.type() === 'band' ? yAxis.getUnitWidth() : 0;
         }
     } else {
         y1 = y2 = undefined;
     }
 
+    if (yLinear && xLinear || !payload.dragEnd) {
+        if (xDim) {
+            var _xDim = _slicedToArray(xDim, 2);
+
+            x1 = _xDim[0];
+            x2 = _xDim[1];
+        }
+        if (yDim) {
+            var _yDim = _slicedToArray(yDim, 2);
+
+            y1 = _yDim[0];
+            y2 = _yDim[1];
+        }
+    }
+
     return {
         dimension: {
-            x1: xDim ? xDim[0] : x1,
-            x2: xDim ? xDim[1] : x2,
-            y1: yDim ? yDim[0] : y1,
-            y2: yDim ? yDim[1] : y2
+            x1: x1,
+            x2: x2,
+            y1: y1,
+            y2: y2
         },
         direction: direction
     };
@@ -26470,11 +26837,10 @@ var SelectionBox = function (_SpawnableSideEffect) {
             var selectionBox = selection.enter().append('rect').each(function () {
                 Object(_actions_physical_selection_box_drag__WEBPACK_IMPORTED_MODULE_4__["selectionBoxDrag"])(firebolt)(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), ['brush'], sideEffect);
             }).merge(selection).each(function (attrs) {
-                var element = void 0;
+                var element = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this);
+                transition && (element = element.transition().duration(transition.duration));
                 for (var key in attrs) {
                     if ({}.hasOwnProperty.call(attrs, key)) {
-                        element = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this);
-                        transition && (element = element.transition(transition.duration));
                         !isNaN(attrs[key]) && element.attr(key, attrs[key]);
                     }
                 }
@@ -29965,7 +30331,7 @@ var BRUSH = 'brush',
 /*!*****************************************************!*\
   !*** ./packages/muze-legend/src/enums/constants.js ***!
   \*****************************************************/
-/*! exports provided: CLASSPREFIX, IDFIELD, CONFIG, DATAMODEL, AXES, LAYERDEFS, WIDTH, HEIGHT, MOUNTPOINT, GRIDLINEPARENTGROUPCLASS, TRANSFORM, CONSOLIDATED, FRAGMENTED, DEFAULTCOLOR, DEFAULTSIZE, DEFAULTSHAPE, STEP, GRADIENT, ORDINAL, SCALE_FUNCTIONS, TOP, LEFT, RIGHT, BOTTOM, HORIZONTAL, VERTICAL, CENTER, VALUE, PATH, SHAPE, RECT, START, UPPER, LOWER, END, SIZE, DISCRETE */
+/*! exports provided: CLASSPREFIX, IDFIELD, CONFIG, DATAMODEL, AXES, LAYERDEFS, WIDTH, HEIGHT, MOUNTPOINT, GRIDLINEPARENTGROUPCLASS, TRANSFORM, CONSOLIDATED, FRAGMENTED, DEFAULTCOLOR, DEFAULTSIZE, DEFAULTSHAPE, STEP, GRADIENT, ORDINAL, SCALE_FUNCTIONS, TOP, LEFT, RIGHT, BOTTOM, HORIZONTAL, VERTICAL, CENTER, VALUE, PATH, SHAPE, RECT, START, UPPER, LOWER, END, SIZE, DISCRETE, MEASURE */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -30007,6 +30373,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "END", function() { return END; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SIZE", function() { return SIZE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DISCRETE", function() { return DISCRETE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MEASURE", function() { return MEASURE; });
 var CLASSPREFIX = 'muze',
     IDFIELD = '__id__',
     CONFIG = 'config',
@@ -30047,7 +30414,8 @@ var CLASSPREFIX = 'muze',
     LOWER = 'lower',
     END = 'end',
     SIZE = 'size',
-    DISCRETE = 'discrete';
+    DISCRETE = 'discrete',
+    MEASURE = 'measure';
 
 /***/ }),
 
@@ -30169,6 +30537,8 @@ var propagate = function propagate(firebolt, action, selectionSet) {
     var payload = config.payload;
     var data = firebolt.context.data();
     var metaData = firebolt.context.metaData();
+    var fieldType = metaData.getData().schema[0].type;
+
     var propPayload = {};
     var sourceId = firebolt.context._id;
     propPayload.action = _action_behaviour_map__WEBPACK_IMPORTED_MODULE_1__["propagationBehaviourMap"][action] || action;
@@ -30184,7 +30554,7 @@ var propagate = function propagate(firebolt, action, selectionSet) {
         }).map(function (d) {
             return d.value;
         });
-        if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["STEP"]) {
+        if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["STEP"] || type === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["DISCRETE"] && fieldType === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["MEASURE"]) {
             var field = Object.keys(payload.criteria || {})[0];
             values = data.filter(function (d) {
                 return entrySet.uids.indexOf(d.id) !== -1;
@@ -30219,7 +30589,12 @@ var propagate = function propagate(firebolt, action, selectionSet) {
         }
     }
 
-    metaData.addToPropNamespace('legend-' + sourceId, propPayload, propPayload.criteria === null ? null : propagationData, isMutableAction);
+    metaData.addToPropNamespace('legend-' + sourceId, {
+        payload: propPayload,
+        criteria: propPayload.criteria === null ? null : propagationData,
+        isMutableAction: isMutableAction,
+        actionName: propPayload.action
+    });
     metaData.propagate(propagationData, propPayload, {
         isMutableAction: isMutableAction,
         sourceId: sourceId
@@ -30321,11 +30696,20 @@ var LegendFireBolt = function (_Firebolt) {
                 uniqueIds = [];
             } else {
                 values = criteria[1];
-                uniqueIds = this.context.data().filter(function (d) {
-                    return values.indexOf(d.value) !== -1;
-                }).map(function (d) {
-                    return d.id;
-                });
+                if (values) {
+                    uniqueIds = this.context.data().filter(function (d) {
+                        return values.indexOf(d.value) !== -1;
+                    }).map(function (d) {
+                        return d.id;
+                    });
+                } else {
+                    values = Object.values(criteria);
+                    uniqueIds = this.context.data().filter(function (d) {
+                        return values.indexOf(d.range) !== -1;
+                    }).map(function (d) {
+                        return d.id;
+                    });
+                }
             }
             return {
                 uids: uniqueIds,
@@ -31071,11 +31455,22 @@ var DiscreteLegend = function (_SimpleLegend) {
                 scaleFn = _getScaleInfo.scaleFn;
 
             var domainForLegend = [].concat(_toConsumableArray(new Set(domain)));
+            var type = this.metaData().getData().schema[0].type;
 
             domainForLegend = domainForLegend.map(function (ele, i) {
                 var _ref;
 
-                return _ref = {}, _defineProperty(_ref, scaleType, scale[scaleFn](ele)), _defineProperty(_ref, 'value', domainForLegend[i]), _defineProperty(_ref, 'id', i), _ref;
+                var value = 0;
+                var range = 0;
+                if (type === 'measure') {
+                    value = (+domainForLegend[i]).toFixed(0);
+                    var nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
+                    range = [value, nextVal.toFixed(0)];
+                } else {
+                    value = domainForLegend[i];
+                    range = [domainForLegend[i]];
+                }
+                return _ref = {}, _defineProperty(_ref, scaleType, scale[scaleFn](ele)), _defineProperty(_ref, 'value', value), _defineProperty(_ref, 'id', i), _defineProperty(_ref, 'range', range), _ref;
             }).filter(function (d) {
                 return d.value !== null;
             });
@@ -31212,9 +31607,8 @@ var getGradientDomain = function getGradientDomain(data) {
 var makeLinearGradient = function makeLinearGradient(container, data, domain) {
     var defs = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'defs', [1]);
     var linearGradient = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(defs, 'linearGradient', [1]).attr('id', 'linear-gradient').attr('x1', '0%').attr('y2', '0%');
-
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(linearGradient, 'stop', data, 'stop-gradient').attr('offset', function (d) {
-        return d.value * 100 / domain[1] + '%';
+        return (d.value - domain[0]) * 100 / (domain[1] - domain[0]) + '%';
     }).attr('stop-color', function (d) {
         return d.color;
     });
@@ -31485,7 +31879,7 @@ var GradientLegend = function (_SimpleLegend) {
                 var _ref;
 
                 var value = domainForLegend[i];
-                return _ref = {}, _defineProperty(_ref, scaleType, scaleType === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["SIZE"] ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele)), _defineProperty(_ref, 'value', +value.toFixed(2)), _defineProperty(_ref, 'id', i), _ref;
+                return _ref = {}, _defineProperty(_ref, scaleType, scaleType === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["SIZE"] ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](Math.floor(ele))), _defineProperty(_ref, 'value', +value.toFixed(2)), _defineProperty(_ref, 'id', i), _ref;
             }).filter(function (d) {
                 return d.value !== null;
             });
@@ -31502,11 +31896,11 @@ var GradientLegend = function (_SimpleLegend) {
 
     }, {
         key: 'getLabelSpaces',
-        value: function getLabelSpaces(effPadding, align) {
+        value: function getLabelSpaces(effPadding) {
             this.config({
                 item: {
                     text: {
-                        position: align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["HORIZONTAL"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"] : _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"]
+                        position: this.config().position
                     }
                 }
             });
@@ -31556,6 +31950,21 @@ var GradientLegend = function (_SimpleLegend) {
                 return d.id;
             }));
             return legendContainer;
+        }
+        /**
+            *
+            *
+            * @param {*} data
+            * @returns
+            * @memberof SimpleLegend
+            */
+
+    }, {
+        key: 'getCriteriaFromData',
+        value: function getCriteriaFromData(data) {
+            var fieldName = this.fieldName();
+
+            return [[fieldName], [data.value]];
         }
     }], [{
         key: 'create',
@@ -31702,8 +32111,8 @@ var titleCreator = function titleCreator(container, text, measurement, classPref
  * @return
  */
 var getMaxMeasures = function getMaxMeasures(data, prop, labelManager) {
-    var maxHeight = -Infinity,
-        maxWidth = -Infinity;
+    var maxHeight = -Infinity;
+    var maxWidth = -Infinity;
 
     data.forEach(function (item) {
         var value = prop ? item[prop] : item;
@@ -31817,11 +32226,11 @@ var computeItemSpaces = function computeItemSpaces(config, measures, data) {
             if (textPosition === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] || textPosition === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["RIGHT"]) {
                 labelSpaces[i].height = totalHeight;
                 shapeSpaces[i].height = totalHeight;
-
                 itemSpaces[i].width = labelSpaces[i].width + maxShapeWidth;
             } else {
                 labelSpaces[i].width = maxShapeWidth;
                 itemSpaces[i].width = maxShapeWidth;
+                labelSpaces[i].width = maxShapeWidth;
             }
             totalWidth = Math.max(totalWidth + itemSpaces[i].width, titleWidth);
         } else {
@@ -31832,7 +32241,7 @@ var computeItemSpaces = function computeItemSpaces(config, measures, data) {
             } else {
                 shapeSpaces[i].width = maxShapeWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxShapeWidth;
-                labelSpaces[i].width = itemSpaces[i].width - maxShapeWidth;
+                labelSpaces[i].width = maxItemSpaces.width - maxShapeWidth;
                 totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
             }
         }
@@ -31895,7 +32304,7 @@ var PROPS = {
         sanitization: function sanitization(context, value) {
             var measurement = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(context._measurement, value);
             ['padding', 'border', 'margin'].forEach(function (space) {
-                measurement[space] = Math.min(measurement[space], measurement.maxWidth * 0.1, measurement.maxHeight * 0.1);
+                measurement[space] = Math.min(measurement[space] > 0 ? measurement[space] : 0, measurement.maxWidth * 0.1, measurement.maxHeight * 0.1);
             });
             return measurement;
         }
@@ -31958,7 +32367,7 @@ var applyItemStyle = function applyItemStyle(item, measureType, stepColorCheck, 
     var diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"]) {
-        return labelSpaces[item[6]][measureType] - diff + 'px';
+        return labelSpaces[item[6]][measureType] + 'px';
     }
     return (measureType === 'width' && !stepColorCheck ? maxShapeWidth : shapeSpaces[item[6]][measureType] - diff) + 'px';
 };
@@ -32016,7 +32425,8 @@ var getItemContainers = function getItemContainers(container, data, legendInstan
     var datasets = {};
 
     var _legendInstance$measu = legendInstance.measurement(),
-        itemSpaces = _legendInstance$measu.itemSpaces;
+        itemSpaces = _legendInstance$measu.itemSpaces,
+        maxItemSpaces = _legendInstance$measu.maxItemSpaces;
 
     var _legendInstance$confi = legendInstance.config(),
         classPrefix = _legendInstance$confi.classPrefix,
@@ -32037,7 +32447,7 @@ var getItemContainers = function getItemContainers(container, data, legendInstan
         return itemSpaces[i].height + 'px';
     });
     align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && rows.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], function (d, i) {
-        return itemSpaces[i].width + 'px';
+        return maxItemSpaces.width + 'px';
     });
     var columns = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(rows, 'div', datasets.column, classPrefix + '-legend-columns');
     align !== _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && columns.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], function (d, i) {
@@ -32276,6 +32686,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./defaults */ "./packages/muze-legend/src/legend/defaults.js");
 /* harmony import */ var _legend_helper__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./legend-helper */ "./packages/muze-legend/src/legend/legend-helper.js");
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -32547,20 +32959,22 @@ var SimpleLegend = function () {
             }));
             return legendContainer;
         }
-
         /**
-         *
-         *
-         * @param {*} data
-         * @returns
-         * @memberof SimpleLegend
-         */
+           *
+           *
+           * @param {*} data
+           * @returns
+           * @memberof StepLegend
+           */
 
     }, {
         key: 'getCriteriaFromData',
         value: function getCriteriaFromData(data) {
             var fieldName = this.fieldName();
-
+            var type = this.metaData().getData().schema[0].type;
+            if (type === 'measure') {
+                return _defineProperty({}, fieldName, data.range);
+            }
             return [[fieldName], [data.value]];
         }
     }], [{
@@ -36292,7 +36706,7 @@ var defaultTooltipFormatters = function defaultTooltipFormatters(type, formatter
         var nearestInterval = getNearestInterval(interval);
         return muze_utils__WEBPACK_IMPORTED_MODULE_0__["DateTimeFormatter"].formatAs(value, timeFormats[nearestInterval]);
     }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE, function (value) {
-        return formatter(value.toFixed(2));
+        return formatter(value ? value.toFixed(2) : value);
     }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION, function (value) {
         return value;
     }), _formatters);
@@ -50151,14 +50565,48 @@ var piecewiseInterpolator = function piecewiseInterpolator() {
     return d3_interpolate__WEBPACK_IMPORTED_MODULE_1__["piecewise"];
 };
 
-function hue2rgb(p, q, t) {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-}
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
+var rgbToHsl = function rgbToHsl(r, g, b) {
+    var a = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
+
+    r /= 255, g /= 255, b /= 255;
+
+    var max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    var h = void 0,
+        s = void 0,
+        l = (max + min) / 2;
+
+    if (max == min) {
+        h = s = 0; // achromatic
+    } else {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);break;
+            case g:
+                h = (b - r) / d + 2;break;
+            case b:
+                h = (r - g) / d + 4;break;
+        }
+
+        h /= 6;
+    }
+
+    return [h, s, l, a];
+};
 
 /**
  * Converts an HSL color value to RGB. Conversion formula
@@ -50178,9 +50626,18 @@ var hslToRgb = function hslToRgb(h, s, l) {
         g = void 0,
         b = void 0;
 
-    if (s === 0) {
+    if (s == 0) {
         r = g = b = l; // achromatic
     } else {
+        var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        };
+
         var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         var p = 2 * l - q;
 
@@ -50226,8 +50683,6 @@ var rgbToHsv = function rgbToHsv(r, g, b) {
                 h = (b - r) / d + 2;break;
             case b:
                 h = (r - g) / d + 4;break;
-            default:
-                break;
         }
         h /= 6;
     }
@@ -50260,22 +50715,20 @@ var hsvToRgb = function hsvToRgb(h, s, v) {
 
     switch (i % 6) {
         case 0:
-            r = v;g = t;b = p;break;
+            r = v, g = t, b = p;break;
         case 1:
-            r = q;g = v;b = p;break;
+            r = q, g = v, b = p;break;
         case 2:
-            r = p;g = v;b = t;break;
+            r = p, g = v, b = t;break;
         case 3:
-            r = p;g = q;b = v;break;
+            r = p, g = q, b = v;break;
         case 4:
-            r = t;g = p;b = v;break;
+            r = t, g = p, b = v;break;
         case 5:
-            r = v;g = p;b = q;break;
-        default:
-            break;
+            r = v, g = p, b = q;break;
     }
 
-    return [r * 255, g * 255, b * 255, a];
+    return [r * 255, g * 255, b * 255];
 };
 
 var hexToHsv = function hexToHsv(hex) {
@@ -50290,10 +50743,8 @@ var hexToHsv = function hexToHsv(hex) {
 
 var detectColor = function detectColor(col) {
     var matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-    // eslint-disable-next-line
     var matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
     var matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
-    // eslint-disable-next-line
     var matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
     var matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -50313,7 +50764,7 @@ var detectColor = function detectColor(col) {
  * @param {*} propModel
  * @returns
  */
-var filterPropagationModel = function filterPropagationModel(model, propModel) {
+var filterPropagationModel = function filterPropagationModel(model, propModel, measures) {
     var _propModel$getData = propModel.getData(),
         data = _propModel$getData.data,
         schema = _propModel$getData.schema;
@@ -50336,7 +50787,7 @@ var filterPropagationModel = function filterPropagationModel(model, propModel) {
             filteredModel = model.select(function (fields) {
                 var include = data.some(function (row) {
                     return schema.every(function (propField, idx) {
-                        if (!(propField.name in fieldMap)) {
+                        if (!measures && (!(propField.name in fieldMap) || fieldMap[propField.name].def.type === _enums__WEBPACK_IMPORTED_MODULE_6__["FieldType"].MEASURE)) {
                             return true;
                         }
                         return row[idx] === fields[propField.name].valueOf();
@@ -50409,7 +50860,7 @@ var assembleModelFromIdentifiers = function assembleModelFromIdentifiers(model, 
  * @param {*} criteria
  * @returns
  */
-var getDataModelFromRange = function getDataModelFromRange(dataModel, criteria) {
+var getDataModelFromRange = function getDataModelFromRange(dataModel, criteria, mode) {
     if (criteria === null) {
         return null;
     }
@@ -50429,7 +50880,8 @@ var getDataModelFromRange = function getDataModelFromRange(dataModel, criteria) 
     };
 
     return dataModel.select(selFn, {
-        saveChild: false
+        saveChild: false,
+        mode: mode
     });
 };
 
@@ -50440,7 +50892,7 @@ var getDataModelFromRange = function getDataModelFromRange(dataModel, criteria) 
  * @param {*} identifiers
  * @returns
  */
-var getDataModelFromIdentifiers = function getDataModelFromIdentifiers(dataModel, identifiers) {
+var getDataModelFromIdentifiers = function getDataModelFromIdentifiers(dataModel, identifiers, mode) {
     var filteredDataModel = void 0;
     if (identifiers instanceof Array) {
         var fieldsConfig = dataModel.getFieldsConfig(),
@@ -50469,11 +50921,12 @@ var getDataModelFromIdentifiers = function getDataModelFromIdentifiers(dataModel
                 });
                 return include;
             }, {
-                saveChild: false
+                saveChild: false,
+                mode: mode
             });
         }
     } else {
-        filteredDataModel = getDataModelFromRange(dataModel, identifiers);
+        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
     }
     return filteredDataModel;
 };
@@ -54220,6 +54673,10 @@ var Canvas = function (_TransactionSupport) {
         _this._composition = {};
         _this._cachedProps = {};
         _this._alias = null;
+        _this._renderedResolve = null;
+        _this._renderedPromise = new Promise(function (resolve) {
+            _this._renderedResolve = resolve;
+        });
         _this._layout = new _chartshq_layout__WEBPACK_IMPORTED_MODULE_0__["GridLayout"]();
         _this._throwback = new muze_utils__WEBPACK_IMPORTED_MODULE_2__["Store"](_defineProperty({}, muze_utils__WEBPACK_IMPORTED_MODULE_2__["CommonProps"].ACTION_INF, null));
         _this._store = new muze_utils__WEBPACK_IMPORTED_MODULE_2__["Store"]({});
@@ -54278,7 +54735,11 @@ var Canvas = function (_TransactionSupport) {
             }
             return this._composition;
         }
-
+    }, {
+        key: 'done',
+        value: function done() {
+            return this._renderedPromise;
+        }
         /**
          *
          *
@@ -54502,6 +54963,8 @@ var Canvas = function (_TransactionSupport) {
     }, {
         key: 'render',
         value: function render() {
+            var _this3 = this;
+
             var mount = this.mount();
             var lifeCycleManager = this.dependencies().lifeCycleManager;
             var resolvePolicy = this.resolve();
@@ -54520,10 +54983,16 @@ var Canvas = function (_TransactionSupport) {
             Object(_renderer__WEBPACK_IMPORTED_MODULE_7__["renderComponents"])(this, components, layoutConfig, measurement);
             // Update life cycle
             lifeCycleManager.notify({ client: this, action: 'drawn' });
-
             firebolt.initializeSideEffects();
             Object(_interaction_resolver__WEBPACK_IMPORTED_MODULE_10__["resolveInteractionPolicy"])(this, Object(_interaction_resolver__WEBPACK_IMPORTED_MODULE_10__["mergeInteractionPolicy"])(resolvePolicy || {}));
             firebolt.throwback(this._throwback);
+            var promises = [];
+            this.getValueMatrix().each(function (el) {
+                promises.push(el.valueOf().done());
+            });
+            Promise.all(promises).then(function () {
+                _this3._renderedResolve();
+            });
         }
 
         /**
@@ -54786,8 +55255,6 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -54815,26 +55282,12 @@ var GroupFireBolt = function (_Firebolt) {
             var propPayload = Object.assign(payload);
             var criteria = propPayload.criteria;
             var data = this.context.data();
-            var fieldsConfig = data.getFieldsConfig();
 
             propPayload.action = behaviour;
-            if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_2__["isSimpleObject"])(criteria)) {
-                var fields = Object.keys(criteria || {});
-                var isAllFieldContinous = fields.every(function (field) {
-                    var type = fieldsConfig[field].def.subtype || fieldsConfig[field].def.type;
-                    return type === muze_utils__WEBPACK_IMPORTED_MODULE_2__["FieldType"].MEASURE || type === muze_utils__WEBPACK_IMPORTED_MODULE_2__["FieldType"].TEMPORAL;
-                });
-
-                if (isAllFieldContinous) {
-                    data.propagateInterpolatedValues(criteria || {}, payload);
-                } else {
-                    var values = Object.values(criteria);
-                    data.propagate([fields].concat(_toConsumableArray(Object(muze_utils__WEBPACK_IMPORTED_MODULE_2__["transposeArray"])(values))), payload);
-                }
-            } else {
-                data.propagate(criteria || [], propPayload);
-            }
-
+            var model = Object(muze_utils__WEBPACK_IMPORTED_MODULE_2__["getDataModelFromIdentifiers"])(data, criteria);
+            data.propagate(model, propPayload, {
+                sourceId: this.context.alias()
+            });
             return this;
         }
     }, {
@@ -55661,9 +56114,15 @@ var legendInitializer = function legendInitializer(legendConfig, canvas, measure
             }
             legendMeasures.maxHeight = align === _constants__WEBPACK_IMPORTED_MODULE_1__["VERTICAL"] ? height - headerHeight : height * 0.2;
             legendMeasures.maxWidth = align === _constants__WEBPACK_IMPORTED_MODULE_1__["HORIZONTAL"] ? width : width * 0.2;
-            [_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], _constants__WEBPACK_IMPORTED_MODULE_1__["PADDING"], _constants__WEBPACK_IMPORTED_MODULE_1__["BORDER"], _constants__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]].forEach(function (e) {
+            [_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], _constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], _constants__WEBPACK_IMPORTED_MODULE_1__["PADDING"], _constants__WEBPACK_IMPORTED_MODULE_1__["BORDER"], _constants__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]].forEach(function (e) {
                 if (legendConfig[e]) {
-                    legendMeasures[e] = legendConfig[e];
+                    if (e === _constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"]) {
+                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, legendConfig[e]);
+                    } else if (e === _constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"]) {
+                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, legendConfig[e]);
+                    } else {
+                        legendMeasures[e] = legendConfig[e];
+                    }
                 }
             });
             legend.scale(scale).title(title && title[index] !== null ? title[index] : fieldName).fieldName(fieldName).config(legendConfig).metaData(canvas.data().project([fieldName])).measurement(legendMeasures).setLegendMeasures();
@@ -55952,8 +56411,8 @@ var setLabelRotationForAxes = function setLabelRotationForAxes(context) {
     (function () {
         for (var i = 0; i < xAxes.length; i++) {
             for (var j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].config().labels.rotation < 0) {
-                    rotation = -90;
+                if (xAxes[i][j].config().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].config().labels.rotation;
                     return;
                 }
             }
@@ -55998,10 +56457,10 @@ var getSkeletons = function getSkeletons(mount, layoutConfig, measurement) {
         components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', [1], classPrefix + '-' + type + '-container');
         components[type].style('width', canvasWidth + 'px');
     });
-    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', headers).style('width', canvasWidth + 'px').each(function (type) {
+    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', headers).style('width', canvasWidth + 'px').each(function (type, i) {
         components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).attr('class', classPrefix + '-' + type + '-container');
         if (type === 'group') {
-            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(components[type], 'div', legends, classPrefix + '-' + type + '-container').each(function (layoutType) {
+            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(components[type], 'div', legends, classPrefix + '-' + type + '-container-' + i).each(function (layoutType) {
                 components[layoutType] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + layoutType + '-container', true);
             });
         }
@@ -56145,7 +56604,7 @@ var prepareGridContainer = function prepareGridContainer(mountPoint, measurement
 
     var container = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mountPoint), 'div', [1], classPrefix + '-grid-layout').attr('id', classPrefix + '-grid-layout-' + alias).style('height', height + 'px').style('width', width + 'px');
     // Mount for matrices
-    var mount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-layout-row').attr('id', classPrefix + '-layout-row-' + alias).style('height', height + 'px').style('width', width + 'px').style('overflow-x', width > 300 ? 'none' : 'scroll').style('overflow-y', height > 300 ? 'none' : 'scroll');
+    var mount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-layout-grid-container').attr('id', classPrefix + '-layout-grid-container-' + alias).style('height', height + 'px').style('width', width + 'px').style('overflow-x', width > 300 ? 'none' : 'scroll').style('overflow-y', height > 300 ? 'none' : 'scroll');
 
     return {
         mount: mount,
@@ -60332,6 +60791,32 @@ var c = -0.5,
 
 /***/ }),
 
+/***/ "./packages/transform/src/enums/stack-config.js":
+/*!******************************************************!*\
+  !*** ./packages/transform/src/enums/stack-config.js ***!
+  \******************************************************/
+/*! exports provided: ORDER_ASCENDING, ORDER_DESCENDING, ORDER_NONE, OFFSET_DIVERGING, OFFSET_NONE, OFFSET_EXPAND, OFFSET_WIGGLE */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ORDER_ASCENDING", function() { return ORDER_ASCENDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ORDER_DESCENDING", function() { return ORDER_DESCENDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ORDER_NONE", function() { return ORDER_NONE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OFFSET_DIVERGING", function() { return OFFSET_DIVERGING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OFFSET_NONE", function() { return OFFSET_NONE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OFFSET_EXPAND", function() { return OFFSET_EXPAND; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "OFFSET_WIGGLE", function() { return OFFSET_WIGGLE; });
+var ORDER_ASCENDING = 'ascending';
+var ORDER_DESCENDING = 'descending';
+var ORDER_NONE = 'none';
+var OFFSET_DIVERGING = 'diverging';
+var OFFSET_NONE = 'diverging';
+var OFFSET_EXPAND = 'expand';
+var OFFSET_WIGGLE = 'wiggle';
+
+/***/ }),
+
 /***/ "./packages/transform/src/enums/transform-type.js":
 /*!********************************************************!*\
   !*** ./packages/transform/src/enums/transform-type.js ***!
@@ -60584,7 +61069,7 @@ var normalizeData = function normalizeData(data, schema, valueField, uniqueField
         return d[seriesKeyIndex];
     }).filter(function (item, pos, arr) {
         return arr.indexOf(item) === pos;
-    }),
+    }).sort(),
         fieldNames = schema.reduce(function (acc, obj, i) {
         acc[i] = obj.name;
         return acc;
@@ -60633,11 +61118,11 @@ var normalizeData = function normalizeData(data, schema, valueField, uniqueField
     var uniqueField = config.uniqueField,
         valueField = config.value,
         groupBy = config.groupBy,
-        sort = config.sort || 'none',
+        sort = config.sort || 'descending',
         normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy),
         stackData = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["stack"])({
         keys: normalizedData.keys,
-        offset: 'diverging',
+        offset: config.offset || 'diverging',
         order: sort,
         data: normalizedData.data
     });
@@ -60715,24 +61200,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nestCollection", function() { return nestCollection; });
 /* harmony import */ var d3_shape__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! d3-shape */ "./packages/transform/node_modules/d3-shape/index.js");
 /* harmony import */ var d3_collection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! d3-collection */ "./packages/transform/node_modules/d3-collection/index.js");
+/* harmony import */ var _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/stack-config */ "./packages/transform/src/enums/stack-config.js");
+var _stackOrders, _stackOffsets;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
 
 
-var stackOrders = {
-    none: d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderNone"],
-    ascending: d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderAscending"],
-    descending: d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderDescending"]
-},
-    stackOffsets = {
-    diverging: d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOffsetDiverging"]
-},
 
+var stackOrders = (_stackOrders = {}, _defineProperty(_stackOrders, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["ORDER_NONE"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderNone"]), _defineProperty(_stackOrders, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["ORDER_ASCENDING"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderAscending"]), _defineProperty(_stackOrders, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["ORDER_DESCENDING"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOrderDescending"]), _stackOrders);
+var stackOffsets = (_stackOffsets = {}, _defineProperty(_stackOffsets, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["OFFSET_DIVERGING"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOffsetDiverging"]), _defineProperty(_stackOffsets, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["OFFSET_NONE"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOffsetNone"]), _defineProperty(_stackOffsets, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["OFFSET_EXPAND"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOffsetExpand"]), _defineProperty(_stackOffsets, _enums_stack_config__WEBPACK_IMPORTED_MODULE_2__["OFFSET_WIGGLE"], d3_shape__WEBPACK_IMPORTED_MODULE_0__["stackOffsetWiggle"]), _stackOffsets);
 // eslint-disable-next-line require-jsdoc
-stack = function stack(params) {
+var stack = function stack(params) {
     return Object(d3_shape__WEBPACK_IMPORTED_MODULE_0__["stack"])().keys(params.keys).offset(stackOffsets[params.offset]).order(stackOrders[params.order])(params.data);
-},
-
+};
 /**
  * Groups the data into a hierarchical tree structure based on one or more fields.
  * @param { Object } params Configuration properties for nesting data
@@ -60740,7 +61222,7 @@ stack = function stack(params) {
  * @param { Array.<number> } params.keys Field indices by which the data will be grouped
  * @return { Array.<Object> } Grouped data array
  */
-nestCollection = function nestCollection(params) {
+var nestCollection = function nestCollection(params) {
     var nestFn = Object(d3_collection__WEBPACK_IMPORTED_MODULE_1__["nest"])();
     params.keys.forEach(function (key) {
         return nestFn.key(function (d) {
@@ -60978,7 +61460,7 @@ var AxisCell = function (_SimpleCell) {
                 _axis$config2 = axis.config(),
                 show = _axis$config2.show,
                 wrapperDiv = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mount), 'div', [this], _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CLASSPREFIX"] + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_1__["AXIS_CELL"]),
-                selection = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(wrapperDiv, 'svg', [1]);
+                selection = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(wrapperDiv, 'svg', [1], _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CLASSPREFIX"] + '-axis-container');
 
             this.mount(mount);
             if (availWidth === 0 || !availWidth) {
@@ -62730,6 +63212,7 @@ var getAxisConfig = function getAxisConfig(axisInfo, field, axesCreators) {
         id: axisType + '-' + index + '-' + axisIndex,
         name: field.toString(),
         field: field.toString(),
+        labels: { rotation: 0 },
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
         type: _data_type_scale_map__WEBPACK_IMPORTED_MODULE_4__["dataTypeScaleMap"][field.subtype()]
@@ -62780,6 +63263,7 @@ var generateAxisFromMap = function generateAxisFromMap(axisType, fieldInfo, axes
             currentAxes.push(xAxis);
         } else {
             var axes = map.get(axisKey);
+            axes[axisIndex]._rotationLock = false;
             axes[axisIndex] && axes[axisIndex].config(axisConfig);
         }
     });
@@ -63202,7 +63686,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-
 /**
  *
  *
@@ -63387,16 +63870,18 @@ var PolarEncoder = function (_VisualEncoder) {
 
             var fields = [];
             var layers = this.layers();
+            var fieldsConfig = datamodel.getFieldsConfig();
 
-            color && color.field && fields.push(color.field);
-            size && size.field && fields.push(size.field);
+            // color && color.field && fields.push(color.field);
+            // size && size.field && fields.push(size.field);
 
             if (layers && layers[0]) {
                 var layer = layers[0];
                 var encoding = layer.def.encoding || {};
 
-                [_enums_constants__WEBPACK_IMPORTED_MODULE_3__["RADIUS"], _enums_constants__WEBPACK_IMPORTED_MODULE_3__["ANGLE"], _enums_constants__WEBPACK_IMPORTED_MODULE_3__["SIZE"]].forEach(function (encType) {
-                    encoding[encType] && fields.push(encoding[encType].field);
+                [_enums_constants__WEBPACK_IMPORTED_MODULE_3__["RADIUS"], _enums_constants__WEBPACK_IMPORTED_MODULE_3__["ANGLE"], _enums_constants__WEBPACK_IMPORTED_MODULE_3__["SIZE"], _enums_constants__WEBPACK_IMPORTED_MODULE_3__["COLOR"]].forEach(function (encType) {
+                    var field = encoding[encType] ? encoding[encType].field : '';
+                    fieldsConfig[field] && fieldsConfig[field].def.type !== _enums_constants__WEBPACK_IMPORTED_MODULE_3__["MEASURE"] && fields.push(field);
                 });
             }
             return datamodel.groupBy([].concat(_toConsumableArray(facetFields), fields));
@@ -65975,12 +66460,13 @@ var MatrixResolver = function () {
             if (config[_enums_constants__WEBPACK_IMPORTED_MODULE_2__["DETAIL"]]) {
                 optionalProjections.push.apply(optionalProjections, _toConsumableArray(config.detail));
             }
+
             if (layerConfig.length) {
                 layerConfig.forEach(function (layer) {
                     if (layer.encoding) {
                         Object.values(layer.encoding).forEach(function (enc) {
-                            if (enc.field && optionalProjections.indexOf(enc.field) === -1) {
-                                optionalProjections.push(enc.field);
+                            if (enc && optionalProjections.indexOf(enc.field) === -1) {
+                                optionalProjections.push(enc.field ? enc.field : enc);
                             }
                         });
                     }
@@ -78251,11 +78737,18 @@ var BaseLayer = function (_SimpleLayer) {
             var colorAxis = axes.color;
             var highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
             highlightStyles.forEach(function (highlight) {
-                elements.style(highlight.type, function (d) {
-                    d.meta.colorTransform.highlight = d.meta.colorTransform.highlight || {};
-                    var fillColorInfo = colorAxis.transformColor(d.meta.stateColor, highlight.intensity);
-                    d.meta.colorTransform.highlight[highlight.type] = highlight.intensity;
-                    d.meta.stateColor = fillColorInfo.hsla;
+                var styleType = highlight.type;
+                elements.style(styleType, function (d) {
+                    var _d$meta = d.meta,
+                        colorTransform = _d$meta.colorTransform,
+                        stateColor = _d$meta.stateColor,
+                        originalColor = _d$meta.originalColor;
+
+                    colorTransform.highlight = colorTransform.highlight || {};
+                    stateColor[styleType] = stateColor[styleType] || originalColor;
+                    var fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity);
+                    colorTransform.highlight[styleType] = highlight.intensity;
+                    stateColor[styleType] = fillColorInfo.hsla;
                     return fillColorInfo.color;
                 });
             });
@@ -78279,22 +78772,30 @@ var BaseLayer = function (_SimpleLayer) {
             var colorAxis = axes.color;
             var highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
             highlightStyles.forEach(function (highlight) {
-                elements.style(highlight.type, function (d) {
-                    d.meta.colorTransform.highlight = d.meta.colorTransform.highlight || {};
-                    if (d.meta.colorTransform.highlight && d.meta.colorTransform.highlight[highlight.type]) {
-                        var fillColorInfo = colorAxis.transformColor(d.meta.stateColor, highlight.intensity.map(function (e) {
+                var styleType = highlight.type;
+                elements.style(styleType, function (d) {
+                    var _d$meta2 = d.meta,
+                        colorTransform = _d$meta2.colorTransform,
+                        stateColor = _d$meta2.stateColor,
+                        originalColor = _d$meta2.originalColor;
+
+                    colorTransform.highlight = colorTransform.highlight || {};
+                    if (colorTransform.highlight && colorTransform.highlight[styleType]) {
+                        stateColor[styleType] = stateColor[styleType] || originalColor;
+                        var fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity.map(function (e) {
                             return -e;
                         }));
-                        d.meta.stateColor = fillColorInfo.hsla;
-                        d.meta.colorTransform.highlight[highlight.type] = null;
+                        stateColor[styleType] = fillColorInfo.hsla;
+                        colorTransform.highlight[styleType] = null;
                         return fillColorInfo.color;
                     }
-                    d.meta.colorTransform.highlight = null;
+                    colorTransform.highlight = null;
 
-                    var _d$meta$stateColor = _slicedToArray(d.meta.stateColor, 3),
-                        h = _d$meta$stateColor[0],
-                        s = _d$meta$stateColor[1],
-                        l = _d$meta$stateColor[2];
+                    var _ref = stateColor[styleType] ? stateColor[styleType] : originalColor,
+                        _ref2 = _slicedToArray(_ref, 3),
+                        h = _ref2[0],
+                        s = _ref2[1],
+                        l = _ref2[2];
 
                     return 'hsl(' + h * 360 + ',' + s * 100 + '%,' + l * 100 + '%)';
                 });
@@ -78559,7 +79060,7 @@ var BaseLayer = function (_SimpleLayer) {
     }, {
         key: 'getPointsFromIdentifiers',
         value: function getPointsFromIdentifiers(identifiers, getAllAttrs) {
-            var _ref;
+            var _ref3;
 
             if (!this.data()) {
                 return [];
@@ -78569,7 +79070,7 @@ var BaseLayer = function (_SimpleLayer) {
             var points = this._points;
             var fieldsConfig = this.data().getFieldsConfig();
 
-            var filteredPoints = (_ref = []).concat.apply(_ref, _toConsumableArray(points)).filter(function (point) {
+            var filteredPoints = (_ref3 = []).concat.apply(_ref3, _toConsumableArray(points)).filter(function (point) {
                 var _data = point._data,
                     _id = point._id;
 
@@ -78976,8 +79477,8 @@ var getLayerColor = function getLayerColor(_ref, _ref2) {
         colorAxis = _ref2.colorAxis,
         colorFieldIndex = _ref2.colorFieldIndex;
 
-    var rawColor = '',
-        color = '';
+    var rawColor = '';
+    var color = '';
     if (colorEncoding && colorEncoding.value instanceof Function) {
         color = colorEncoding.value(datum, index);
         rawColor = colorEncoding.value(datum, index);
@@ -78988,9 +79489,11 @@ var getLayerColor = function getLayerColor(_ref, _ref2) {
     return { color: color, rawColor: rawColor };
 };
 
-var transfromColor = function transfromColor(colorAxis, datum, intensity) {
-    var fillColorInfo = colorAxis.transformColor(datum.meta.stateColor, intensity);
-    datum.meta.stateColor = fillColorInfo.hsla;
+var transfromColor = function transfromColor(colorAxis, datum, styleType, intensity) {
+    datum.meta.stateColor[styleType] = datum.meta.stateColor[styleType] || datum.meta.originalColor;
+    var fillColorInfo = colorAxis.transformColor(datum.meta.stateColor[styleType], intensity);
+    datum.meta.stateColor[styleType] = fillColorInfo.hsla;
+
     return fillColorInfo;
 };
 
@@ -79004,27 +79507,35 @@ var applyInteractionStyle = function applyInteractionStyle(context, selectionSet
     var interactionStyles = interaction[interactionType];
 
     interactionStyles.forEach(function (style) {
-        elements.style(style.type, function (d) {
-            d.meta.colorTransform[interactionType] = d.meta.colorTransform[interactionType] || {};
-            if (apply && !d.meta.colorTransform[interactionType][style.type]) {
+        var styleType = style.type;
+        elements.style(styleType, function (d) {
+            var _d$meta = d.meta,
+                colorTransform = _d$meta.colorTransform,
+                stateColor = _d$meta.stateColor,
+                originalColor = _d$meta.originalColor;
+
+            colorTransform[interactionType] = colorTransform[interactionType] || {};
+            if (apply && !colorTransform[interactionType][styleType]) {
                 // fade selections
-                d.meta.colorTransform[interactionType][style.type] = style.intensity;
-                return transfromColor(colorAxis, d, style.intensity).color;
+                colorTransform[interactionType][styleType] = style.intensity;
+                return transfromColor(colorAxis, d, styleType, style.intensity).color;
             }
-            if (!apply && d.meta.colorTransform[interactionType][style.type]) {
+            if (!apply && colorTransform[interactionType][styleType]) {
                 // unfade selections
-                d.meta.colorTransform[interactionType][style.type] = null;
-                return transfromColor(colorAxis, d, style.intensity.map(function (e) {
+                colorTransform[interactionType][styleType] = null;
+                return transfromColor(colorAxis, d, styleType, style.intensity.map(function (e) {
                     return -e;
                 })).color;
             }
 
-            var _d$meta$stateColor = _slicedToArray(d.meta.stateColor, 3),
-                h = _d$meta$stateColor[0],
-                s = _d$meta$stateColor[1],
-                l = _d$meta$stateColor[2];
+            var _ref3 = stateColor[styleType] ? stateColor[styleType] : originalColor,
+                _ref4 = _slicedToArray(_ref3, 4),
+                h = _ref4[0],
+                s = _ref4[1],
+                l = _ref4[2],
+                a = _ref4[3];
 
-            return 'hsl(' + h * 360 + ',' + s * 100 + '%,' + l * 100 + '%)';
+            return 'hsla(' + h * 360 + ',' + s * 100 + '%,' + l * 100 + '%, ' + (a || 1) + ')';
         });
     });
 };
@@ -79287,9 +79798,9 @@ var calculateDomainFromData = function calculateDomainFromData(data, encodingFie
 };
 
 var attachDataToVoronoi = function attachDataToVoronoi(voronoi, points) {
-    var _ref3;
+    var _ref5;
 
-    voronoi.data((_ref3 = []).concat.apply(_ref3, _toConsumableArray(points)).filter(function (d) {
+    voronoi.data((_ref5 = []).concat.apply(_ref5, _toConsumableArray(points)).filter(function (d) {
         return d._id !== undefined;
     }).map(function (d) {
         var point = d.update;
@@ -79780,7 +80291,7 @@ var ArcLayer = function (_BaseLayer) {
             var _this2 = this;
 
             var pieData = [];
-            var sizeVal = void 0;
+
             var startAngle = config.startAngle,
                 endAngle = config.endAngle,
                 encoding = config.encoding,
@@ -79796,9 +80307,9 @@ var ArcLayer = function (_BaseLayer) {
                 radiusIndex = _getFieldIndices.radiusIndex,
                 colorIndex = _getFieldIndices.colorIndex;
 
-            var dataVal = dataModel.getData(),
-                data = dataVal.data,
-                uids = dataVal.uids;
+            var dataVal = dataModel.getData();
+            var data = dataVal.data;
+            var uids = dataVal.uids;
 
             this._prevPieData = {};
             prevData.forEach(function (e, index) {
@@ -79816,7 +80327,7 @@ var ArcLayer = function (_BaseLayer) {
                 }return b[radiusIndex] - a[radiusIndex];
             });
 
-            sizeVal = data.reduce(function (acc, d) {
+            var sizeVal = data.reduce(function (acc, d) {
                 return acc + (d[sizeIndex] || 0);
             }, 1);
             // Adding the radius field values to each data point in pie data
@@ -79965,7 +80476,7 @@ var ArcLayer = function (_BaseLayer) {
                         index: i,
                         meta: {
                             originalColor: colorAxis.getRawColor(d.colorVal),
-                            stateColor: colorAxis.getRawColor(d.colorVal),
+                            stateColor: {},
                             colorTransform: {}
                         }
                     }];
@@ -80249,7 +80760,12 @@ var AreaLayer = function (_LineLayer) {
 
             var points = [];
             var transformType = this.transformType();
+            var colorAxis = axes.color;
+            var encoding = this.config().encoding;
+            var colorEncoding = encoding.color;
+            var colorField = colorEncoding.field;
             var fieldsConfig = this.data().getFieldsConfig();
+            var colorFieldIndex = colorField && fieldsConfig[colorField].index;
             var xField = encodingFieldsInf.xField,
                 yField = encodingFieldsInf.yField,
                 y0Field = encodingFieldsInf.y0Field;
@@ -80261,10 +80777,23 @@ var AreaLayer = function (_LineLayer) {
             var isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
             var isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
             var key = isXDim ? 'x' : isYDim ? 'y' : null;
-            points = data.map(function (d) {
+            points = data.map(function (d, i) {
                 var xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
                 var yPx = yAxis.getScaleValue(d.y);
                 var y0Px = y0Field || transformType === _enums_constants__WEBPACK_IMPORTED_MODULE_5__["STACK"] ? yAxis.getScaleValue(d.y0) : yAxis.getScaleValue(0);
+
+                var _getLayerColor = Object(_helpers__WEBPACK_IMPORTED_MODULE_6__["getLayerColor"])({ datum: d, index: i }, {
+                    colorEncoding: colorEncoding, colorAxis: colorAxis, colorFieldIndex: colorFieldIndex }),
+                    color = _getLayerColor.color,
+                    rawColor = _getLayerColor.rawColor;
+
+                var style = {};
+                var meta = {};
+                style.fill = color;
+                // style['fill-opacity'] = 0;
+                meta.stateColor = {};
+                meta.originalColor = rawColor;
+                meta.colorTransform = {};
                 var point = {
                     enter: {
                         x: xPx,
@@ -80277,7 +80806,9 @@ var AreaLayer = function (_LineLayer) {
                         y0: d.y0 === null ? d.y0 : y0Px
                     },
                     _id: d._id,
-                    _data: d._data
+                    _data: d._data,
+                    style: style,
+                    meta: meta
                 };
                 _this2.cachePoint(d[key], point);
                 return point;
@@ -80781,7 +81312,7 @@ var getTranslatedPoints = function getTranslatedPoints(context, data, sizeConfig
             rawColor = _getLayerColor.rawColor;
 
         style.fill = color;
-        meta.stateColor = rawColor;
+        meta.stateColor = {};
         meta.originalColor = rawColor;
         meta.colorTransform = {};
 
@@ -81663,7 +82194,7 @@ var LineLayer = function (_BaseLayer) {
 
                 style.stroke = color;
                 style['fill-opacity'] = 0;
-                meta.stateColor = rawColor;
+                meta.stateColor = {};
                 meta.originalColor = rawColor;
                 meta.colorTransform = {};
 
@@ -81958,17 +82489,11 @@ var defaultConfig = {
         }],
         fade: [{
             type: 'fill',
-            intensity: [0, -20, +20, 0]
-        }, {
-            type: 'stroke',
-            intensity: [0, -20, +20, 0]
+            intensity: [-20, -80, +20, 0]
         }],
         focus: [{
             type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }, {
-            type: 'stroke',
-            intensity: [0, 0, +20, 0]
+            intensity: [0, 0, +50, 0]
         }]
     },
     transform: {
@@ -82185,7 +82710,7 @@ var PointLayer = function (_BaseLayer) {
                         shape: shape,
                         size: Math.abs(size),
                         meta: {
-                            stateColor: rawColor,
+                            stateColor: {},
                             originalColor: rawColor,
                             colorTransform: {}
                         },
@@ -82772,7 +83297,7 @@ var TextLayer = function (_BaseLayer) {
                     color: color,
                     background: colorAxis.getColor(d._data[backgroundFieldIndex]),
                     meta: {
-                        stateColor: rawColor,
+                        stateColor: {},
                         originalColor: rawColor,
                         colorTransform: {}
                     },
@@ -83147,7 +83672,7 @@ var TickLayer = function (_PointLayer) {
                     rawColor = _getLayerColor.rawColor;
 
                 style.stroke = color;
-                meta.stateColor = rawColor;
+                meta.stateColor = {};
                 meta.originalColor = rawColor;
                 meta.colorTransform = {};
                 if (!isNaN(xPx) && !isNaN(yPx)) {
@@ -83652,12 +84177,15 @@ var propagateValues = function propagateValues(instance, action) {
 
     var propagationData = void 0;
     var payload = config.payload;
-    var isMutableAction = config.mutates;
     var selectionSet = config.selectionSet;
     var criteria = payload.criteria;
     var context = instance.context;
     var dataModel = context.cachedData()[0];
     var sourceId = context.id();
+    var sideEffects = config.sideEffects;
+    var mutableEffect = sideEffects.find(function (sideEffect) {
+        return instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true);
+    });
     var mergedModel = selectionSet.mergedEnter.model;
 
     payload.sourceUnit = sourceId;
@@ -83669,15 +84197,21 @@ var propagateValues = function propagateValues(instance, action) {
         propagationData = null;
     } else if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(criteria)) {
         var fields = Object.keys(criteria || {});
-        propagationData = mergedModel.project(fields);
+        propagationData = mergedModel ? mergedModel.project(fields) : null;
     } else {
         var criteriaFields = criteria[0];
-        propagationData = mergedModel.project(criteriaFields);
+        propagationData = mergedModel ? mergedModel.project(criteriaFields) : null;
     }
 
-    dataModel.addToPropNamespace(sourceId, payload, propagationData, isMutableAction);
+    dataModel.addToPropNamespace(sourceId, {
+        payload: payload,
+        criteria: propagationData,
+        isMutableAction: mutableEffect,
+        actionName: mutableEffect ? mutableEffect.name || mutableEffect : action
+    });
+
     dataModel.propagate(propagationData, payload, {
-        isMutableAction: isMutableAction,
+        isMutableAction: mutableEffect,
         sourceId: sourceId
     });
 };
@@ -83826,7 +84360,8 @@ var UnitFireBolt = function (_Firebolt) {
 
             var actionInf = void 0;
             var propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
-            var action = this._actions.behavioural[behaviour];
+            var behaviouralActions = this._actions.behavioural;
+            var action = behaviouralActions[behaviour];
             var context = this.context;
             var behaviourEffectMap = this._behaviourEffectMap;
             var sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
@@ -83844,7 +84379,7 @@ var UnitFireBolt = function (_Firebolt) {
                     selectionSet: selectionSet.find(function (d) {
                         return d.sourceSelectionSet;
                     }),
-                    mutable: action.constructor.mutates()
+                    sideEffects: sideEffects
                 });
             } else {
                 var applicableSideEffects = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getApplicableSideEffects"])(this, payload, sideEffects, propagationInfo);
@@ -83888,15 +84423,16 @@ var UnitFireBolt = function (_Firebolt) {
                 if (sourceIdentifiers) {
                     var fieldsConfig = sourceIdentifiers.getFieldsConfig();
                     var sourceIdentifierFields = Object.keys(fieldsConfig);
-                    var propFields = Object.keys(data.getFieldsConfig());
+                    var propFields = Object.keys(data[0].getFieldsConfig());
                     if (!Object.values(fieldsConfig).some(function (d) {
                         return d.def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
                     })) {
-                        isSourceFieldPresent = sourceIdentifierFields.every(function (d) {
+                        isSourceFieldPresent = sourceIdentifierFields.some(function (d) {
                             return propFields.indexOf(d) !== -1;
                         });
                     }
                 }
+
                 var payload = payloadFn(_this2.context, data, propValue);
                 payload && _this2.dispatchBehaviour(action, payload, {
                     propagate: false,
@@ -83977,7 +84513,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var getRangeFromData = function getRangeFromData(instance, selectionDataModel, propConfig) {
     var criteria = void 0;
-    var dataObj = selectionDataModel.getData();
+    var dataObj = selectionDataModel[0].getData();
     var propCriteria = propConfig.payload.criteria;
     var sourceIdentifiers = propConfig.sourceIdentifiers;
     var schema = dataObj.schema;
@@ -83988,7 +84524,7 @@ var getRangeFromData = function getRangeFromData(instance, selectionDataModel, p
     if (isActionSourceSame) {
         criteria = propCriteria;
     } else {
-        criteria = !selectionDataModel.isEmpty() && sourceIdentifiers !== null ? schema.reduce(function (acc, obj, index) {
+        criteria = sourceIdentifiers !== null ? schema.reduce(function (acc, obj, index) {
             var range = void 0;
             var field = obj.name;
             var fieldObj = fieldMap[field];
@@ -84029,12 +84565,12 @@ var payloadGenerator = {
     __default: function __default(instance, selectionDataModel, propConfig) {
         var propPayload = propConfig.payload;
         var sourceIdentifiers = propConfig.sourceIdentifiers;
-        var dataObj = selectionDataModel.getData();
+        var dataObj = selectionDataModel[0].getData();
         var schema = dataObj.schema;
         var payload = Object.assign({}, propPayload);
         schema = dataObj.schema;
         var data = dataObj.data;
-        payload.criteria = !sourceIdentifiers || sourceIdentifiers.isEmpty() ? null : [schema.map(function (d) {
+        payload.criteria = !sourceIdentifiers ? null : [schema.map(function (d) {
             return d.name;
         })].concat(_toConsumableArray(data));
         return payload;
@@ -84121,7 +84657,8 @@ var getLayerDefinition = function getLayerDefinition(context, axes, type, orient
             padY: type === 'band' ? 0 : undefined,
             encoding: encoding
         },
-        axes: _defineProperty({}, orientation, axis)
+        axes: _defineProperty({}, orientation, axis),
+        interactive: false
     };
 };
 
@@ -84438,9 +84975,8 @@ var createLayers = function createLayers(context, layerDefinitions) {
 var attachDataToLayers = function attachDataToLayers(layers, dm, transformedDataModels) {
     layers.forEach(function (layer) {
         var dataSource = layer.config().dataSource;
-        if (dataSource !== null) {
-            layer.data(transformedDataModels[dataSource] || dm);
-        }
+        var dataModel = dataSource instanceof Function ? dataSource(dm) : transformedDataModels[dataSource] || dm;
+        layer.data(dataModel);
     });
 };
 
@@ -84531,10 +85067,9 @@ var renderLayers = function renderLayers(context, container, layers, measurement
             layer.dataProps({
                 timeDiffs: context.store().get(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_2__["TIMEDIFFS"])
             });
-            layer.config().render !== false && layer.mount(group.node());
+            layer.mount(group.node());
         }
     });
-    context._lifeCycleManager.notify({ client: layers, action: 'drawn', formalName: 'layer' });
     return _this;
 };
 
@@ -84567,7 +85102,8 @@ var getNearestDimensionalValue = function getNearestDimensionalValue(context, po
         }))));
         key = filterData[Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getClosestIndexOf"])(filterData, key)];
     }
-    return [[field], [key]];
+
+    return key !== undefined ? [[field], [key]] : null;
 };
 
 var getLayersBy = function getLayersBy(layers, searchBy, value) {
@@ -84667,11 +85203,13 @@ var listenerMap = function listenerMap(context) {
         type: 'computed',
         props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERSCREATED"]],
         listener: function listener(fetch) {
-            return fetch(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERDEFS"], function (layerDefs) {
+            return fetch(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERDEFS"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["FIELDS"], function (layerDefs, fields) {
                 var layerDefsValue = layerDefs.value;
-                if (layerDefsValue) {
+                var fieldsVal = fields.value;
+                if (layerDefsValue && fieldsVal) {
                     var layers = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["createLayers"])(context, layerDefs.value);
                     context.layers(layers);
+                    context._layerAxisIndex = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getLayerAxisIndex"])(context.layers(), fieldsVal);
                     context._lifeCycleManager.notify({ client: layers, action: 'initialized', formalName: 'layer' });
                     return true;
                 }
@@ -84702,23 +85240,11 @@ var listenerMap = function listenerMap(context) {
         }
     }, {
         type: 'computed',
-        props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERAXISINDEX"]],
-        listener: function listener(fetch) {
-            return fetch(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["FIELDS"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERSCREATED"], function (fields, layersCreated) {
-                var fieldsVal = fields.value;
-                if (fieldsVal && layersCreated.value) {
-                    return Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getLayerAxisIndex"])(context.layers(), fieldsVal);
-                }
-                return null;
-            });
-        }
-    }, {
-        type: 'computed',
         props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["DATADOMAIN"]],
         listener: function listener(fetch) {
-            return fetch(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["DATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERSCREATED"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["AXES"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["TRANSFORM"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERAXISINDEX"], function (dataModel, layersCreated, axes, transform, layerAxisIndex) {
+            return fetch(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["DATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERSCREATED"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["AXES"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["TRANSFORM"], function (dataModel, layersCreated, axes, transform) {
                 var dataModelVal = dataModel.value;
-                var layerAxisIndexVal = layerAxisIndex.value;
+                var layerAxisIndexVal = context._layerAxisIndex;
                 var axesVal = axes.value;
                 if (dataModelVal && layersCreated.value && axesVal && layerAxisIndexVal) {
                     var layers = context.layers();
@@ -84746,7 +85272,7 @@ var listenerMap = function listenerMap(context) {
             var _ref6 = _slicedToArray(_ref5, 2),
                 dataDomain = _ref6[1];
 
-            dataDomain != null && context.updateAxisDomain(dataDomain);
+            dataDomain !== null && context.updateAxisDomain(dataDomain);
         }
     }, {
         type: 'registerImmediateListener',
@@ -84935,6 +85461,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 
 
+
 var FORMAL_NAME = 'unit';
 
 /**
@@ -84956,7 +85483,8 @@ var VisualUnit = function () {
      * @param dependencies {Object} Dependencies required by visual unit.
      */
     function VisualUnit(registry, dependencies) {
-        var _ref;
+        var _this = this,
+            _ref;
 
         _classCallCheck(this, VisualUnit);
 
@@ -84968,10 +85496,19 @@ var VisualUnit = function () {
             }),
             smartLabel: dependencies.smartLabel
         };
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise(function (resolve) {
+            _this._renderedResolve = resolve;
+        });
+        this._layerDeps.throwback.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].ON_LAYER_DRAW], function () {
+            _this._renderedResolve();
+        });
+
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
         this._gridlines = [];
         this._gridbands = [];
+        this._layerAxisIndex = {};
         this._transformedDataModels = {};
 
         _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_0__["layerFactory"].setLayerRegistry(registry.layerRegistry);
@@ -85099,7 +85636,11 @@ var VisualUnit = function () {
             this._sideEffectGroup = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["createSideEffectGroup"])(node, classPrefix + '-' + sideEffectClassName);
             return this;
         }
-
+    }, {
+        key: 'done',
+        value: function done() {
+            return this._renderedPromise;
+        }
         /**
          *
          *
@@ -85185,26 +85726,31 @@ var VisualUnit = function () {
     }, {
         key: 'addLayer',
         value: function addLayer(layerDef) {
-            var _layers;
-
-            var render = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+            var _layers,
+                _this2 = this;
 
             var layerName = layerDef.name;
             var layer = this.getLayerByName(layerName);
+            var measurement = {
+                width: this.width(),
+                height: this.height()
+            };
+
             if (layer) {
                 return [layer];
             }
             var serializedDef = _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_0__["layerFactory"].getSerializedConf(layerDef.mark, layerDef);
             var instances = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getLayerFromDef"])(this, serializedDef);
             (_layers = this.layers()).push.apply(_layers, _toConsumableArray(instances));
-            Object(_helper__WEBPACK_IMPORTED_MODULE_4__["attachAxisToLayers"])(this.axes(), instances, Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getLayerAxisIndex"])(instances, this.fields()));
-            var rootSvg = this._rootSvg;
-            if (rootSvg && render) {
-                Object(_helper__WEBPACK_IMPORTED_MODULE_4__["renderLayers"])(this, rootSvg.node(), instances, {
-                    width: this.width(),
-                    height: this.height()
+            var layerAxisIndex = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getLayerAxisIndex"])(instances, this.fields());
+            this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
+            Object(_helper__WEBPACK_IMPORTED_MODULE_4__["attachAxisToLayers"])(this.axes(), instances, layerAxisIndex);
+            this.layers().forEach(function (layer) {
+                layer.measurement(measurement);
+                layer.dataProps({
+                    timeDiffs: _this2.store().get(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_8__["TIMEDIFFS"])
                 });
-            }
+            });
             return instances;
         }
 
@@ -85243,12 +85789,12 @@ var VisualUnit = function () {
 
     }, {
         key: 'getDataModelFromIdentifiers',
-        value: function getDataModelFromIdentifiers(identifiers) {
+        value: function getDataModelFromIdentifiers(identifiers, mode) {
             if (identifiers === null) {
                 return null;
             }
             var dataModel = this.data();
-            return Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["getDataModelFromIdentifiers"])(dataModel, identifiers);
+            return Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["getDataModelFromIdentifiers"])(dataModel, identifiers, mode);
         }
 
         /**
@@ -85462,12 +86008,12 @@ var VisualUnit = function () {
     }, {
         key: 'updateAxisDomain',
         value: function updateAxisDomain(domain) {
-            var _this = this;
+            var _this3 = this;
 
             ['x', 'y'].forEach(function (type) {
-                var axes = _this.axes()[type];
+                var axes = _this3.axes()[type];
                 axes && axes.forEach(function (axis, i) {
-                    return axis.updateDomainCache(domain['' + _this.fields()[type][i]]);
+                    return axis.updateDomainCache(domain['' + _this3.fields()[type][i]]);
                 });
             });
             return this;

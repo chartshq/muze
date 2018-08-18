@@ -162,17 +162,9 @@ export default class PolarEncoder extends VisualEncoder {
      * @memberof PolarEncoder
      */
     datamodelForEncoder (datamodel, config, facetFields) {
-        const {
-            color,
-            size
-        } = config;
         const fields = [];
         const layers = this.layers();
         const fieldsConfig = datamodel.getFieldsConfig();
-
-        // color && color.field && fields.push(color.field);
-        // size && size.field && fields.push(size.field);
-
         if (layers && layers[0]) {
             const layer = layers[0];
             const encoding = layer.def.encoding || {};

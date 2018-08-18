@@ -108,7 +108,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
 const resolveDimensions = (data, config, axes) => {
     const axesInfo = {
         xAxis: axes.x,
-        yAxis: axes.y,
+        yAxis: axes.y
     };
     const {
         enterSpace: enterWidth,
@@ -244,7 +244,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             x0Field,
             y0Field,
             xFieldSubType,
-            yFieldSubType,
+            yFieldSubType
         } = context.encodingFieldsInf();
     const measurement = context._store.get(PROPS.MEASUREMENT);
     const isXDim = xFieldSubType === DimensionSubtype.CATEGORICAL || xFieldSubType === DimensionSubtype.TEMPORAL;

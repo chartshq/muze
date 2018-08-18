@@ -28,8 +28,8 @@ const checkPath = (str) => {
  * @param {*} d
  * @param {*} elem
  */
-const createShape = function(d, elem) {
-    let groupElement = selectElement(elem);
+const createShape = function (d, elem) {
+    const groupElement = selectElement(elem);
     const { shape, size, update } = d;
 
     if (shape instanceof Promise) {
@@ -86,7 +86,7 @@ const createShape = function(d, elem) {
     const symbolGroups = mount.selectAll('g').data(points, params.keyFn);
     const symbolEnter = symbolGroups.enter().append('g').attr('transform', d => `translate(${d.enter.x},${d.enter.y})`);
     mergedGroups = symbolGroups.merge(symbolEnter)
-                    .each(function(d) {
+                    .each(function (d) {
                         createShape(d, this);
                     });
     mergedGroups = disabled ? mergedGroups : mergedGroups.transition().duration(disabled ? 0 : transition.duration);

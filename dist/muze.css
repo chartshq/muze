@@ -1017,7 +1017,7 @@
     table-layout: fixed; }
   .muze-group-container td, .muze-group-container th {
     padding: 0; }
-  .muze-group-container .table-arrow {
+  .muze-group-container .muze-table-arrow {
     margin: 5px;
     width: 0px;
     height: 0px;
@@ -1025,30 +1025,30 @@
     opacity: 0.5;
     z-index: 10;
     cursor: pointer; }
-  .muze-group-container .table-arrow:hover {
+  .muze-group-container .muze-table-arrow:hover {
     opacity: 1.0; }
-  .muze-group-container .table-arrow-right {
+  .muze-group-container .muze-table-arrow-right {
     left: 100%;
     top: -webkit-calc(50% - 25px);
     top: calc(50% - 25px);
     border-top: 20px solid transparent;
     border-bottom: 20px solid transparent;
     border-left: 15px solid steelblue; }
-  .muze-group-container .table-arrow-left {
+  .muze-group-container .muze-table-arrow-left {
     right: 100%;
     top: -webkit-calc(50% - 25px);
     top: calc(50% - 25px);
     border-top: 20px solid transparent;
     border-bottom: 20px solid transparent;
     border-right: 15px solid steelblue; }
-  .muze-group-container .table-arrow-bottom {
+  .muze-group-container .muze-table-arrow-bottom {
     left: -webkit-calc(50% - 25px);
     left: calc(50% - 25px);
     top: 100%;
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;
     border-top: 15px solid steelblue; }
-  .muze-group-container .table-arrow-top {
+  .muze-group-container .muze-table-arrow-top {
     left: -webkit-calc(50% - 25px);
     left: calc(50% - 25px);
     bottom: 100%;
@@ -1105,7 +1105,7 @@
   float: left;
   position: relative; }
 
-.muze-layout-row {
+.muze-grid-layout-container {
   position: relative;
   float: left; }
 
@@ -1132,15 +1132,15 @@
   float: left;
   position: relative; }
 
-.muze-layout-row {
+.muze-layout-grid-container {
   position: relative;
   float: left; }
 
-.muze-layout-row div, .muze-layout-row table {
+.muze-layout-grid-container div, .muze-layout-grid-container table {
   float: left;
   border-collapse: collapse; }
 
-.muze-layout-row div, .muze-layout-row table {
+.muze-layout-grid-container div, .muze-layout-grid-container table {
   float: left;
   border-collapse: collapse; }
 
@@ -1159,6 +1159,9 @@
 
 .muze-group-container, .muze-layout-container, .muze-legend-container {
   float: left; }
+
+.hidden {
+  display: none; }
 
 
 /*# sourceMappingURL=muze.css.map*/
