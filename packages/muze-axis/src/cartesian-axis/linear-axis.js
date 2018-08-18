@@ -1,6 +1,6 @@
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
-import { LINEAR } from '../enums/scale-type';
+import { LINEAR, LOG } from '../enums/scale-type';
 import { DOMAIN } from '../enums/constants';
 import {
     getTickLabelInfo,
@@ -58,6 +58,9 @@ export default class LinearAxis extends SimpleAxis {
         if (domainVal === null || domainVal === undefined) {
             return undefined;
         }
+        if (this.config().interpolator === LOG && domainVal <= 0) {
+            return 1;
+        }
 
         return this.scale()(domainVal) + 0.5;
     }
@@ -95,6 +98,7 @@ export default class LinearAxis extends SimpleAxis {
             nice && this.scale().nice();
             this._domain = this.scale().domain();
             this.store().commit(DOMAIN, this._domain);
+            this.logicalSpace(null);
             return this;
         } return this._domain;
     }

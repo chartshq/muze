@@ -179,6 +179,7 @@ export default class TimeAxis extends SimpleAxis {
             this._domain = this.scale().domain();
             this.smartTicks(this.setTickConfig());
             this.store().commit(DOMAIN, this._domain);
+            this.logicalSpace(null);
             return this;
         } return this._domain;
     }
