@@ -1,4 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
+import { CommonProps } from 'muze-utils';
 import {
     setAttrs,
     getUniqueId,
@@ -66,6 +67,14 @@ export default class VisualUnit {
             }),
             smartLabel: dependencies.smartLabel
         };
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise((resolve) => {
+            this._renderedResolve = resolve;
+        });
+        this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
+            this._renderedResolve();
+        });
+
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
         this._gridlines = [];
@@ -197,6 +206,9 @@ export default class VisualUnit {
         return this;
     }
 
+    done () {
+        return this._renderedPromise;
+    }
     /**
      *
      *

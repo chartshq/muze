@@ -35,6 +35,10 @@ export default class Canvas extends TransactionSupport {
         this._composition = {};
         this._cachedProps = {};
         this._alias = null;
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise((resolve) => {
+            this._renderedResolve = resolve;
+        });
         this._layout = new GridLayout();
         this._throwback = new Store({
             [CommonProps.ACTION_INF]: null
@@ -84,6 +88,9 @@ export default class Canvas extends TransactionSupport {
         return this._composition;
     }
 
+    done () {
+        return this._renderedPromise;
+    }
     /**
      *
      *
@@ -299,10 +306,16 @@ export default class Canvas extends TransactionSupport {
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle
         lifeCycleManager.notify({ client: this, action: 'drawn' });
-
         firebolt.initializeSideEffects();
         resolveInteractionPolicy(this, mergeInteractionPolicy(resolvePolicy || {}));
         firebolt.throwback(this._throwback);
+        const promises = [];
+        this.getValueMatrix().each((el) => {
+            promises.push(el.valueOf().done());
+        });
+        Promise.all(promises).then(() => {
+            this._renderedResolve();
+        });
     }
 
     /**

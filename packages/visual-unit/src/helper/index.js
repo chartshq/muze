@@ -225,7 +225,6 @@ export const renderLayers = (context, container, layers, measurement) => {
             layer.mount(group.node());
         }
     });
-    context._lifeCycleManager.notify({ client: layers, action: 'drawn', formalName: 'layer' });
     return this;
 };
 
