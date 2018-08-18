@@ -2,13 +2,37 @@
     "name": "@chartshq/muze-legend",
     "version": "1.0.0",
     "description": "D3 Legend module",
-    "main": "src/index.js",
+    "homepage": "https://charts.com/muze",
     "license": "MIT",
-    "author": "FusionCharts",
-    "keywords": [],
+    "author": "Charts.com <support@charts.com>",
+    "contributors": [
+        {
+            "name": "Akash Ghoswami",
+            "email": "akash@fusioncharts.com"
+        },
+        {
+            "name": "Ujjal Kumar Dutta",
+            "email": "ujjal@fusioncharts.com"
+        },
+        {
+            "name": "Rousan Ali",
+            "email": "rousan@fusioncharts.com",
+            "url": "https://rousan.io"
+        }
+    ],
+    "main": "src/index.js",
+    "keywords": [
+        "muze",
+        "legend",
+        "charts",
+        "visual",
+        "fusioncharts",
+        "visualization",
+        "data"
+    ],
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/fusioncharts/muze-legend"
+        "url": "https://bitbucket.org/fusioncharts/muze"
     },
     "dependencies": {
         "d3-shape": "^1.2.0",

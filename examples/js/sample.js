@@ -92,15 +92,15 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Displacement', 'Horsepower'],
-            columns = rows.reverse();
+        let rows = ['Acceleration'],
+            columns = ['Year'];
 
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(600)
-            .height(450)
+            .width(400)
+            .height(500)
             .config({
                 gridLines: {
                     y: {
@@ -118,13 +118,14 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        exponent: 2,
-                        base: 10,
                         showInnerTicks: true,
 
                     },
                     y: {
                         showAxisName: true,
+                        // interpolator: 'log',
+                        // exponent: 2,
+                        // base: 10,
 
                     },
                 }

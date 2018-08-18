@@ -15,7 +15,7 @@ import {
     computeAxisDimensions,
     setOffset,
     registerChangeListeners,
-    calculateContinousSpace,
+    calculateContinousSpace
 } from './helper';
 import { PROPS } from './props';
 
@@ -123,6 +123,7 @@ export default class SimpleAxis {
             this._domain = this.scale().domain();
             this.smartTicks(this.setTickConfig());
             this.store().commit(DOMAIN, this._domain);
+            this.logicalSpace(null);
             return this;
         }
         return this._domain;
