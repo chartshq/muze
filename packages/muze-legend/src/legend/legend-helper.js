@@ -188,11 +188,12 @@ export const computeItemSpaces = (config, measures, data) => {
             if (textPosition === LEFT || textPosition === RIGHT) {
                 labelSpaces[i].height = totalHeight;
                 shapeSpaces[i].height = totalHeight;
-
+                // labelSpaces[i].width = maxItemSpaces.width - maxShapeWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxShapeWidth;
             } else {
                 labelSpaces[i].width = maxShapeWidth;
                 itemSpaces[i].width = maxShapeWidth;
+                labelSpaces[i].width = maxShapeWidth;
             }
             totalWidth = Math.max(totalWidth + itemSpaces[i].width, titleWidth);
         } else {
@@ -203,7 +204,7 @@ export const computeItemSpaces = (config, measures, data) => {
             } else {
                 shapeSpaces[i].width = maxShapeWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxShapeWidth;
-                labelSpaces[i].width = itemSpaces[i].width - maxShapeWidth;
+                labelSpaces[i].width = maxItemSpaces.width - maxShapeWidth;
                 totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
             }
         }

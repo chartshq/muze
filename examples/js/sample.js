@@ -85,7 +85,7 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year'], {
+        rootData = rootData.groupBy(['Year', 'Origin'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
@@ -131,15 +131,16 @@
                 }
             })
             .color({
-                field: 'Displacement'
+                field: 'Displacement',
+                interpolate: true
             })
             .legend({
                 align: 'horizontal',
 
-                position: 'bottom',
+                position: 'top',
                 item: {
                     text: {
-                        position: 'right'
+                        position: 'left'
                     }
                 },
             })

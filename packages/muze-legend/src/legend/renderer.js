@@ -32,7 +32,7 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
     const diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === VALUE) {
-        return `${labelSpaces[item[6]][measureType] - diff}px`;
+        return `${labelSpaces[item[6]][measureType]}px`;
     }
     return `${measureType === 'width' && !stepColorCheck ? maxShapeWidth : shapeSpaces[item[6]][measureType] - diff}px`;
 };
@@ -101,6 +101,7 @@ export const getItemContainers = (container, data, legendInstance) => {
     const datasets = {};
     const {
         itemSpaces,
+        maxItemSpaces
     } = legendInstance.measurement();
     const {
         classPrefix,
@@ -117,7 +118,7 @@ export const getItemContainers = (container, data, legendInstance) => {
 
     const rows = makeElement(container, 'div', datasets.row, `${classPrefix}-legend-row`);
     rows.style(HEIGHT, (d, i) => `${itemSpaces[i].height}px`);
-    align === VERTICAL && rows.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
+    align === VERTICAL && rows.style(WIDTH, (d, i) => `${maxItemSpaces.width}px`);
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
     return columns;
@@ -238,7 +239,7 @@ export const renderDiscreteItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    container.each(function(d) {
+    container.each(function (d) {
         if (d[0] === VALUE) {
             selectElement(this).text(d[1]);
         } else {
@@ -304,7 +305,7 @@ export const renderStepItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    container.each(function(d) {
+    container.each(function (d) {
         if (d[0] === VALUE) {
             selectElement(this).text(d[1]);
         } else {
