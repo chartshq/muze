@@ -1,6 +1,6 @@
 import { Firebolt } from '@chartshq/muze-firebolt';
 import DataModel from 'datamodel';
-import { FieldType, DimensionSubtype, isSimpleObject, CommonProps, transposeArray, concatModels } from 'muze-utils';
+import { FieldType, DimensionSubtype, CommonProps, getDataModelFromIdentifiers, concatModels } from 'muze-utils';
 import * as COMPONENTS from '../enums/components';
 import { changeSideEffectAvailability, getDrawingContext, getSourceInfo, getMarksFromIdentifiers } from './helper';
 
@@ -9,26 +9,12 @@ export default class GroupFireBolt extends Firebolt {
         const propPayload = Object.assign(payload);
         const criteria = propPayload.criteria;
         const data = this.context.data();
-        const fieldsConfig = data.getFieldsConfig();
 
         propPayload.action = behaviour;
-        if (isSimpleObject(criteria)) {
-            const fields = Object.keys(criteria || {});
-            const isAllFieldContinous = fields.every((field) => {
-                const type = fieldsConfig[field].def.subtype || fieldsConfig[field].def.type;
-                return type === FieldType.MEASURE || type === FieldType.TEMPORAL;
-            });
-
-            if (isAllFieldContinous) {
-                data.propagateInterpolatedValues(criteria || {}, payload);
-            } else {
-                const values = Object.values(criteria);
-                data.propagate([fields, ...transposeArray(values)], payload);
-            }
-        } else {
-            data.propagate(criteria || [], propPayload);
-        }
-
+        const model = getDataModelFromIdentifiers(data, criteria);
+        data.propagate(model, propPayload, {
+            sourceId: this.context.alias()
+        });
         return this;
     }
 
