@@ -11,11 +11,11 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  */
 export function createBinnedFieldData (field, rowDiffset, config) {
     let { buckets, numOfBins, binSize, start } = config;
-    let dataStore = [];
-    let binnedData = [];
+    const dataStore = [];
+    const binnedData = [];
     let [min, max] = field.domain();
-    let oriMax = max;
-    let end = [];
+    const oriMax = max;
+    const end = [];
     let binEnd;
     let prevEndpoint;
     let mid;
@@ -52,7 +52,7 @@ export function createBinnedFieldData (field, rowDiffset, config) {
 
     // mark each data in dataStore to respective buckets
     buckets.end.forEach((endPoint) => {
-        let tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
+        const tempStore = dataStore.filter(datum => datum.data >= prevEndpoint && datum.data < endPoint);
         tempStore.forEach((datum) => { binnedData[datum.index] = `${prevEndpoint}-${endPoint}`; });
         prevEndpoint = endPoint;
     });
@@ -63,8 +63,7 @@ export function createBinnedFieldData (field, rowDiffset, config) {
 
     // create a bin for values more than end
     dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
-                    .forEach((datum) =>
-                    { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
+                    .forEach((datum) => { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
 
     // create range and mid
     // append start to bucket marks

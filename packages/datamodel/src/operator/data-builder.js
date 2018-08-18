@@ -2,7 +2,7 @@ import { FieldType, DimensionSubtype } from 'muze-utils';
 import { rowDiffsetIterator } from './row-diffset-iterator';
 import { mergeSort } from './merge-sort';
 import { fieldInSchema } from '../helper';
-import { isCallable, isArray, } from '../utils';
+import { isCallable, isArray } from '../utils';
 /**
  * Generates the sorting functions to sort the data of a DataModel instance
  * according to the input data type.
@@ -46,7 +46,7 @@ function getSortFn (dataType, sortType, index) {
  * @param {number} fieldIndex - The target field index within schema array.
  * @return {Array} Returns an array containing the grouped data.
  */
-function groupData(data, fieldIndex) {
+function groupData (data, fieldIndex) {
     const hashMap = new Map();
     const groupedData = [];
 
@@ -72,7 +72,7 @@ function groupData(data, fieldIndex) {
  * @param {Array} targetFieldDetails - An array of the sorting field details in schema.
  * @return {Object} Returns an object containing the value of sorting fields and the target field name.
  */
-function createSortingFnArg(groupedDatum, targetFields, targetFieldDetails) {
+function createSortingFnArg (groupedDatum, targetFields, targetFieldDetails) {
     const arg = {
         label: groupedDatum[0]
     };
@@ -91,7 +91,7 @@ function createSortingFnArg(groupedDatum, targetFields, targetFieldDetails) {
  * @param {Object} dataObj - An object containing the data and schema.
  * @param {Array} sortingDetails - An array containing the sorting configs.
  */
-function sortData(dataObj, sortingDetails) {
+function sortData (dataObj, sortingDetails) {
     const { data, schema } = dataObj;
     let fieldName;
     let sortMeta;
@@ -143,7 +143,6 @@ function sortData(dataObj, sortingDetails) {
         dataObj.uids.push(value.pop());
     });
 }
-
 
 /**
  * Builds the actual data array.
@@ -200,7 +199,7 @@ export function dataBuilder (fieldStore, rowDiffset, colIdentifier, sortingDetai
     rowDiffsetIterator(rowDiffset, (i) => {
         retObj.data.push([]);
         const insertInd = retObj.data.length - 1;
-        let start = 0;
+        const start = 0;
         tmpDataArr.forEach((field, ii) => {
             retObj.data[insertInd][ii + start] = field.data[i];
         });

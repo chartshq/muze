@@ -16,5 +16,5 @@ export const DEFAULT_LAYERS = {
     [CONSTANTS.POINT_LAYER]: PointLayer,
     [CONSTANTS.TICK_LAYER]: TickLayer,
     [CONSTANTS.BAR_LAYER]: BarLayer,
-    [CONSTANTS.BASE_LAYER]: BaseLayer,
+    [CONSTANTS.BASE_LAYER]: BaseLayer
 };

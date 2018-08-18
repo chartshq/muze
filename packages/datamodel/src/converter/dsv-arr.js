@@ -19,7 +19,7 @@ import { columnMajor } from '../utils';
  */
 function DSVArr (arr, options) {
     const defaultOption = {
-        firstRowHeader: true,
+        firstRowHeader: true
     };
     options = Object.assign({}, defaultOption, options);
 

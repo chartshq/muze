@@ -5,17 +5,17 @@ import { expect } from 'chai';
 import fracture from './index';
 
 describe('FractureTransform', () => {
-    let schema,
-        data,
-        originData,
-        downloadData,
-        webvisitData;
+    let schema;
+    let data;
+    let originData;
+    let downloadData;
+    let webvisitData;
 
     before(() => {
         schema = [
             { name: 'Origin', type: 'dimension' },
             { name: 'Download', type: 'measure' },
-            { name: 'Webvisit', type: 'measure' },
+            { name: 'Webvisit', type: 'measure' }
         ];
         originData = ['Kolkata', 'Mumbai', 'Delhi', 'Bangalore'];
         downloadData = [1000, 800, 400, 900];
@@ -23,7 +23,7 @@ describe('FractureTransform', () => {
         data = [
             originData,
             downloadData,
-            webvisitData,
+            webvisitData
         ];
     });
 
@@ -44,7 +44,6 @@ describe('FractureTransform', () => {
 
         expect(tData.length).to.equal(1);
     });
-
 
     it('should break schema in n part when # of break == n where n > 1', () => {
         const [tSchema] = fracture(schema, data, {
@@ -81,7 +80,7 @@ describe('FractureTransform', () => {
 
         expect(tSchema[0]).to.deep.equal([
             { name: 'Origin', type: 'dimension' },
-            { name: 'Download', type: 'measure' },
+            { name: 'Download', type: 'measure' }
         ]);
     });
 });

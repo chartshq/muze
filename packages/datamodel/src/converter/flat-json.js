@@ -35,7 +35,7 @@ function FlatJSON (arr) {
 
     arr.forEach((item) => {
         const fields = [];
-        for (let key in item) {
+        for (const key in item) {
             if (key in header) {
                 insertionIndex = header[key];
             } else {

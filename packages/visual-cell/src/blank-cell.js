@@ -82,7 +82,7 @@ class BlankCell extends SimpleCell {
      */
     serialize () {
         return {
-            type: BLANK,
+            type: BLANK
         };
     }
 

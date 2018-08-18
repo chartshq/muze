@@ -8,7 +8,7 @@ import {
     LEFT,
     RIGHT,
     TOP,
-    BOTTOM,
+    BOTTOM
 } from '../enums/constants';
 
 /**
@@ -127,7 +127,7 @@ export const computeItemSpaces = (config, measures, data) => {
     } = measures;
     const {
         item,
-        align,
+        align
     } = config;
     const {
         shape,

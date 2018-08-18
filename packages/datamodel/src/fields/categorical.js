@@ -15,7 +15,7 @@ class Categorical extends Dimension {
      * @param {Array} data - An array containing the field data.
      * @param {Object} schema - The schema for the field.
      */
-    constructor(name, data, schema) {
+    constructor (name, data, schema) {
         super(name, data, schema);
         this.subtype = DimensionSubtype.CATEGORICAL;
     }
@@ -25,7 +25,7 @@ class Categorical extends Dimension {
      *
     * @return {string} Returns subType of the field.
     */
-    subType() {
+    subType () {
         return this.subtype;
     }
 }

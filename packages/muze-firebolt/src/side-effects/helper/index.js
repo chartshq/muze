@@ -19,8 +19,7 @@ export const spaceOutBoxes = (boxes, extent, showVertically) => {
                 secondBox.y = opposite ? firstBox.y - secondBox.height - pad :
                         bottom + pad;
             }
-        }
-        else if (opposite ? x < (secondBox.x + secondBox.width) : right > secondBox.x) {
+        } else if (opposite ? x < (secondBox.x + secondBox.width) : right > secondBox.x) {
             secondBox.x = opposite ? firstBox.x - secondBox.width - pad :
                     right + pad;
         }

@@ -15,7 +15,7 @@ const setMatrixInstances = (context, placeholder) => context.matrixInstance({
     left: new ValueMatrix(placeholder.rows[0]),
     right: new ValueMatrix(placeholder.rows[1]),
     top: new ValueMatrix(placeholder.columns[0]),
-    bottom: new ValueMatrix(placeholder.columns[1]),
+    bottom: new ValueMatrix(placeholder.columns[1])
 });
 
 /**
@@ -44,13 +44,13 @@ export const setupChangeListeners = (context) => {
                 size: size[1],
                 detail: detail[1],
                 layers: layers[1],
-                transform: transform[1],
+                transform: transform[1]
             };
             // Prepare configuration for retinal configs
             const retinalConfig = {
                 color: color[1],
                 shape: shape[1],
-                size: size[1],
+                size: size[1]
             };
             // Create the encoders for the group
             const encoders = {};

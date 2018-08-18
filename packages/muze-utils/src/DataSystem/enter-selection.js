@@ -11,7 +11,7 @@ class EnterSelection {
      * @param {Array} enterData The input data.
      * @memberof EnterSelection
      */
-    constructor(enterData, idMap, idGetter) {
+    constructor (enterData, idMap, idGetter) {
         this._enterData = enterData;
         this._idMap = idMap;
         this._idGetter = idGetter;
@@ -25,7 +25,7 @@ class EnterSelection {
      * @return {Selection} New selection with data created using callback.
      * @memberof EnterSelection
      */
-    append(callback) {
+    append (callback) {
         const objects = this._enterData.forEach((...params) => {
             const data = params[0];
             const id = this._idGetter ? this.idGetter(data) : (data.id || params[1]);

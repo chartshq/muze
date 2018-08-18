@@ -147,7 +147,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
     const {
         rowFacets,
         colFacets,
-        colProjections,
+        colProjections
     } = fieldInfo;
 
     colProjections.forEach((colProj) => {
@@ -214,7 +214,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
                         rowFacets: facetInfo[rIndex],
                         colFacets: [colFacets, val],
                         rowIndex: rIndex,
-                        columnIndex: cIndex,
+                        columnIndex: cIndex
                     },
                     fieldInfo
                 };
@@ -232,7 +232,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
                     rowFacets: facetInfo[rIndex],
                     colFacets: [[], []],
                     rowIndex: rIndex,
-                    columnIndex: 0,
+                    columnIndex: 0
                 },
                 fieldInfo
             };

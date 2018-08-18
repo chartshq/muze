@@ -66,7 +66,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         measures.selectionBoxMeasure = selectionBoxMeasure;
         measures.startPos = startPos;
         measures.endPos = endPos;
-        const criteria = getSelectionCriteria(subject, { axisScale, axisType, }, measures);
+        const criteria = getSelectionCriteria(subject, { axisScale, axisType }, measures);
 
         payload = {
             criteria: {
@@ -81,7 +81,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         measures.selectionBoxMeasure = selectionBoxMeasure;
         measures.startPos = startPos;
         measures.endPos = endPos;
-        const criteria = getSelectionCriteria(event, { axisScale, axisType, }, measures);
+        const criteria = getSelectionCriteria(event, { axisScale, axisType }, measures);
         payload = {
             criteria: {
                 [context.fieldName()]: criteria

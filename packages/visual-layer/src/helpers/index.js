@@ -88,7 +88,7 @@ export const getAxesScales = (axes) => {
         xAxis,
         yAxis,
         xScale,
-        yScale,
+        yScale
     };
 };
 
@@ -266,7 +266,7 @@ export const calculateDomainFromData = (data, encodingFieldInf, transformType) =
         xField,
         yField,
         x0Field,
-        y0Field,
+        y0Field
     } = encodingFieldInf;
     const domains = {};
     const yEnc = ENCODING.Y;

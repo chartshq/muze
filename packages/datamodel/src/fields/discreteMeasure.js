@@ -7,7 +7,7 @@ import Measure from './measure';
  * @extends Measure
  */
 class DiscreteMeasure extends Measure {
-    constructor(name, data, schema, bin) {
+    constructor (name, data, schema, bin) {
         super(name, data, schema);
         this.bin = bin;
         this.subtype = 'discrete';
@@ -26,10 +26,10 @@ class DiscreteMeasure extends Measure {
         return val.trim();
     }
 
-    bins() {
+    bins () {
         return this.bin;
     }
-    subType() {
+    subType () {
         return this.subtype;
     }
 }

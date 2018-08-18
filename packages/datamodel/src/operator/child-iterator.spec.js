@@ -7,24 +7,24 @@ import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },
-    { profit: 15, sales: 25, city: 'b' },
+    { profit: 15, sales: 25, city: 'b' }
 ];
 const schema1 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
-    { name: 'city', type: 'dimension' },
+    { name: 'city', type: 'dimension' }
 ];
 
 describe('Testing Child Iterator', () => {
-    let dm = new DataModel(data1, schema1);
-    let createdCallBack = (profit, sales) => profit / sales;
+    const dm = new DataModel(data1, schema1);
+    const createdCallBack = (profit, sales) => profit / sales;
     let hasSameChild = false;
     let hasSameFunction = false;
     const child = dm.calculateVariable({
         name: 'Efficiency'
     }, ['profit', 'sales', createdCallBack]);
 
-    let callback = (model, ...params) => {
+    const callback = (model, ...params) => {
         if (dm._children.find(childElm => childElm === model)) {
             hasSameChild = true;
         }

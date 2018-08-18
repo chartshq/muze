@@ -60,7 +60,7 @@ const orderFields = (fieldArray, type) => {
         dimensions: [...dimensionArr[0], ...dimensionArr[1]],
         measures: [...measureArr[0], ...measureArr[1]],
         temporal: [...temporalArr[0], ...temporalArr[1]],
-        categorical: [...categoricalArr[0], ...categoricalArr[1]],
+        categorical: [...categoricalArr[0], ...categoricalArr[1]]
     };
 };
 

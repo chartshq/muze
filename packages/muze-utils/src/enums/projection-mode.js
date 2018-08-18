@@ -6,7 +6,8 @@
  */
 const ProjectionMode = {
     INCLUDE: 'include',
-    EXCLUDE: 'exclude',
+    EXCLUDE: 'exclude'
 };
 
 export default ProjectionMode;
+

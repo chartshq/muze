@@ -17,9 +17,9 @@ describe('Measure Field Subtype', () => {
         defAggFn: () => {}
     };
 
-    let measure = new DiscreteMeasure('', [], schema, {});
+    const measure = new DiscreteMeasure('', [], schema, {});
     describe('Discrete Field', () => {
-        let result = measure.parse(null);
+        const result = measure.parse(null);
         it('should parse null value to empty string', () => {
             expect(result).to.equal('');
         });

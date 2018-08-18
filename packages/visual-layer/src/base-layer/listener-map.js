@@ -25,7 +25,7 @@ export const listenerMap = context => [
         listener: fetch => fetch(PROPS.TRANSFORMED_DATA, (transformedData) => {
             const transformedDataValue = transformedData.value;
             if (transformedDataValue) {
-                let fieldsConfig = context.data().getFieldsConfig();
+                const fieldsConfig = context.data().getFieldsConfig();
                 return context.getNormalizedData(transformedDataValue, fieldsConfig);
             }
             return null;

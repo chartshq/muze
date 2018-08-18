@@ -61,8 +61,8 @@ export default class TextLayer extends BaseLayer {
         const yEnc = ENCODING.Y;
 
         points = data.map((d, i) => {
-            const row = d._data,
-                textValue = textField ? row[textFieldIndex] : value;
+            const row = d._data;
+            const textValue = textField ? row[textFieldIndex] : value;
 
             const [xPx, yPx] = [xEnc, yEnc].map(type => (axes[type] ? axes[type].getScaleValue(d[type]) +
                     axes[type].getUnitWidth() / 2 : 0));

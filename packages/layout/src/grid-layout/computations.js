@@ -7,7 +7,7 @@ import { HEIGHT, WIDTH, COLUMN, ROW } from '../enums/constants';
  * @param {string} type height/width
  * @return {Object} Logical height/width of the matrix
  */
-export function getMatrixMeasurement(matrix, type) {
+export function getMatrixMeasurement (matrix, type) {
     if (matrix) {
         return matrix.getLogicalSpace()[type];
     }
@@ -21,7 +21,7 @@ export function getMatrixMeasurement(matrix, type) {
  * @param {string} type height/width
  * @param {number} value Value of measurement
  */
-export function setMatrixMeasurement(matrix, type, value) {
+export function setMatrixMeasurement (matrix, type, value) {
     if (matrix) {
         const spaces = matrix.getLogicalSpace();
         if (value && spaces[type] !== value) {
@@ -76,7 +76,7 @@ export const computeLayoutMeasurements = (layout) => {
     const centerMatrix = layout.centerMatrix();
     const {
         width,
-        height,
+        height
     } = layout.measurement();
     const {
         border
@@ -138,7 +138,7 @@ export const computeLayoutMeasurements = (layout) => {
         rowMatrixHeight,
         rowMatrixWidth,
         columnMatrixHeight,
-        columnMatrixWidth,
+        columnMatrixWidth
     };
 };
 
@@ -192,7 +192,7 @@ export const getViewMatrices = (layout, rowPointer, columnPointer) => {
     return {
         matrices,
         rowPages: rowMatrices.length,
-        columnPages: columnMatrices.length,
+        columnPages: columnMatrices.length
     };
 };
 /**
@@ -206,11 +206,11 @@ export const getViewMeasurements = (layout) => {
     const columnMatrix = layout.columnMatrix();
     const {
         width,
-        height,
+        height
     } = layout.measurement();
     const {
         columnPointer,
-        rowPointer,
+        rowPointer
     } = layout.config();
 
     const rowMatrixWidth = rowMatrix.getViewableSpaces()[rowPointer].width;

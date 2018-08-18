@@ -1,5 +1,3 @@
-
-
 /**
  * This class represents a selection applied on a data array.
  *
@@ -11,7 +9,7 @@ class Selection {
      * @param {Array<DataObject>} data Array of DataObjects.
      * @memberof Selection
      */
-    constructor() {
+    constructor () {
         this._data = [];
         // // map of id to data
         this._idMap = {};
@@ -32,7 +30,7 @@ class Selection {
      * @return {Object} current data set bound to the class
      * @memberof Selection
      */
-    getObjects() {
+    getObjects () {
         return Object.keys(this._idMap).map(e => this._idMap[e]);
     }
 
@@ -44,7 +42,7 @@ class Selection {
      * @return {Selection} Modified selection.
      * @memberof Selection
      */
-    data(newData, idGetter) {
+    data (newData, idGetter) {
         if (idGetter) {
             this._data = [];
             this._idGetter = idGetter;
@@ -109,7 +107,7 @@ class Selection {
      * @return {Selection} New selection with data created using callback.
      * @memberof EnterSelection
      */
-    append(callback) {
+    append (callback) {
         this[`_${this._mode}data`].forEach((...params) => {
             const data = params[0];
             const id = this._idGetter ? this._idGetter(...params) : (data.id || params[1]);
@@ -126,7 +124,7 @@ class Selection {
      * @return {EnterSelection} Instance of enter selection.
      * @memberof Selection
      */
-    enter() {
+    enter () {
         this._mode = 'enter';
         return this;
         // return new EnterSelection(this._enterdata, this._idMap, this._idGetter);
@@ -141,7 +139,7 @@ class Selection {
      * @return {Selection} Modified selection.
      * @memberof Selection
      */
-    attr(key, value) {
+    attr (key, value) {
         this._data.forEach(item => item.attr(key, value));
         return this;
     }
@@ -153,7 +151,7 @@ class Selection {
      * @return {Selection} Modified selection.
      * @memberof Selection
      */
-    merge(selection) {
+    merge (selection) {
         selection._data.forEach((...params) => {
             const id = this._idGetter ? this._idGetter(...params) : (params[0].id || params[1]);
             this._idMap[id] = params[0];
@@ -170,7 +168,7 @@ class Selection {
      * @return {Selection} Instance of selection.
      * @memberof Selection
      */
-    exit() {
+    exit () {
         this._mode = 'exit';
         // const exitdata = this._exitdata;
         // const exitSelection = new Selection(exitdata);
@@ -197,7 +195,7 @@ class Selection {
      *
      * @memberof Selection
      */
-    remove() {
+    remove () {
         // do cleanup on DDO's
         const data = this[`_${this._mode}data`];
 

@@ -28,14 +28,14 @@ const computeTextSpace = (context) => {
     const space = labelManager.getOriSize(context.source());
     const {
        margin,
-        show,
+        show
    } = context.config();
 
     labelManager.setStyle(context._computedStyle);
     if (show) {
         return {
             width: space.width + margin.left + margin.right + context._minTickDiff.width,
-            height: space.height + margin.top + margin.bottom + context._minTickDiff.height,
+            height: space.height + margin.top + margin.bottom + context._minTickDiff.height
         };
     } return {
         width: 0,
@@ -119,7 +119,7 @@ class TextCell extends SimpleCell {
     serialize () {
         return {
             text: this.source(),
-            type: TEXT,
+            type: TEXT
         };
     }
 
@@ -177,7 +177,7 @@ class TextCell extends SimpleCell {
             margin,
             show,
             verticalAlign,
-            textAlign,
+            textAlign
         } = this.config();
 
         this.mount(mount);

@@ -7,23 +7,23 @@ import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
-    { profit: 15, sales: 25, city: 'b', state: 'bb' },
+    { profit: 15, sales: 25, city: 'b', state: 'bb' }
 ];
 const schema1 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
     { name: 'city', type: 'dimension' },
-    { name: 'state', type: 'dimension' },
+    { name: 'state', type: 'dimension' }
 ];
 const data2 = [
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
-    { profit: 15, sales: 25, city: 'b', state: 'ba' },
+    { profit: 15, sales: 25, city: 'b', state: 'ba' }
 ];
 const schema2 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
     { name: 'city', type: 'dimension' },
-    { name: 'state', type: 'dimension' },
+    { name: 'state', type: 'dimension' }
 ];
 
 describe('Testing union', () => {
@@ -35,13 +35,13 @@ describe('Testing union', () => {
             expect(unionDataModel.getData()).to.deep.equal({
                 schema: [
                 { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'state', type: 'dimension' }
                 ],
                 data: [
                 ['a', 'aa'],
                 ['b', 'bb'],
                 ['a', 'ab'],
-                ['b', 'ba'],
+                ['b', 'ba']
                 ],
                 uids: [0, 1, 2, 3]
             });

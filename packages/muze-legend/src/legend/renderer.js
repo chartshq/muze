@@ -146,7 +146,7 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
             width,
             height,
             maxWidth,
-            maxHeight,
+            maxHeight
         } = measurement;
 
     gradHeight = height - (titleSpaces.height + 2 * margin + 2 * border);
@@ -235,7 +235,7 @@ export const renderDiscreteItem = (context, container) => {
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, false, context),
         height: d => applyItemStyle(d, HEIGHT, false, context),
-        'text-align': CENTER,
+        'text-align': CENTER
     });
 
     labelManager.setStyle(context._computedStyle);
@@ -301,7 +301,7 @@ export const renderStepItem = (context, container) => {
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, stepColor.horizontal, context),
         height: d => applyItemStyle(d, HEIGHT, stepColor.vertical, context),
-        'text-align': 'center',
+        'text-align': 'center'
     });
 
     labelManager.setStyle(context._computedStyle);

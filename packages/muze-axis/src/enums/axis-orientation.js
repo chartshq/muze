@@ -24,5 +24,5 @@ export const axisOrientationMap = {
     [AxisOrientation.LEFT]: axisLeft,
     [AxisOrientation.BOTTOM]: axisBottom,
     [AxisOrientation.RIGHT]: axisRight,
-    [AxisOrientation.TOP]: axisTop,
+    [AxisOrientation.TOP]: axisTop
 };

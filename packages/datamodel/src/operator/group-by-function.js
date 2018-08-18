@@ -95,7 +95,7 @@ function count (arr) {
  * @return {number} Returns the variance of the input array.
  */
 function variance (arr) {
-    let mean = avg(arr);
+    const mean = avg(arr);
     return avg(arr.map(num => (num - mean) ** 2));
 }
 
@@ -108,7 +108,6 @@ function variance (arr) {
 function std (arr) {
     return Math.sqrt(variance(arr));
 }
-
 
 const fnList = {
     sum,
@@ -123,5 +122,5 @@ const fnList = {
 
 export {
     sum as defReducer,
-    fnList,
+    fnList
 };

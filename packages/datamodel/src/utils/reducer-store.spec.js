@@ -27,10 +27,10 @@ describe('Testing Reducer Functionality', () => {
                 expect(REDUCER.resolve('min')).to.equal(fnList.min);
             });
         });
-        let sum2 = function() {
+        const sum2 = function () {
             return 3 + 6;
         };
-        let mysum = REDUCER.register('mySum', sum2);
+        const mysum = REDUCER.register('mySum', sum2);
         describe('#register', () => {
             it('check if reducer register a function correctly', () => {
                 REDUCER.register('mySum', sum2);

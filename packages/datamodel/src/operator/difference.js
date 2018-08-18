@@ -42,7 +42,7 @@ export function difference (dm1, dm2) {
      * @param {Object} fieldsObj - The fieldStore object format.
      * @param {boolean} addData - If true only tuple will be added to the data.
      */
-    function prepareDataHelper(dm, fieldsObj, addData) {
+    function prepareDataHelper (dm, fieldsObj, addData) {
         rowDiffsetIterator(dm._rowDiffset, (i) => {
             const tuple = {};
             let hashData = '';

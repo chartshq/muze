@@ -1,4 +1,3 @@
-
 import { DEFAULT_PLACEHOLDERS } from './defaults';
 
 /**

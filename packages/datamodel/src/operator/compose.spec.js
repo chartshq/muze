@@ -10,11 +10,11 @@ describe('Testing compose functionality', () => {
         { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
         { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
         { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
-        { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
+        { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' }
     ];
     const data2 = [
         { id: 1, netprofit: 100, netsales: 200, _first: 'Hello', _second: 'Jude' },
-        { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
+        { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' }
 
     ];
 
@@ -39,7 +39,7 @@ describe('Testing compose functionality', () => {
         {
             name: 'second',
             type: 'dimension'
-        },
+        }
     ];
     const schema2 = [
         {
@@ -62,7 +62,7 @@ describe('Testing compose functionality', () => {
         {
             name: '_second',
             type: 'dimension'
-        },
+        }
     ];
     describe('#compose', () => {
         it('should return same data when composed with only one function', () => {
@@ -124,7 +124,7 @@ describe('Testing compose functionality', () => {
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
+                { name: 'second', type: 'dimension' }
             ];
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
@@ -153,7 +153,7 @@ describe('Testing compose functionality', () => {
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'first', type: 'dimension' },
-                { name: 'second', type: 'dimension' },
+                { name: 'second', type: 'dimension' }
             ];
             const dataModel = new DataModel(data1, schema1, 'Yo');
 

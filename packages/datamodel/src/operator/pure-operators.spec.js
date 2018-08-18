@@ -12,13 +12,13 @@ describe('Testing pure operators', () => {
             { profit: 10, sales: 20, city: 'a', state: 'aa' },
             { profit: 15, sales: 25, city: 'b', state: 'bb' },
             { profit: 10, sales: 20, city: 'a', state: 'ab' },
-            { profit: 15, sales: 25, city: 'b', state: 'ba' },
+            { profit: 15, sales: 25, city: 'b', state: 'ba' }
             ];
             const schema = [
             { name: 'profit', type: 'measure' },
             { name: 'sales', type: 'measure' },
             { name: 'city', type: 'dimension' },
-            { name: 'state', type: 'dimension' },
+            { name: 'state', type: 'dimension' }
             ];
             const dataModel = new DataModel(data, schema);
 
@@ -43,13 +43,13 @@ describe('Testing pure operators', () => {
           { profit: 10, sales: 20, city: 'a', state: 'aa' },
           { profit: 15, sales: 25, city: 'b', state: 'bb' },
           { profit: 10, sales: 20, city: 'a', state: 'ab' },
-          { profit: 15, sales: 25, city: 'b', state: 'ba' },
+          { profit: 15, sales: 25, city: 'b', state: 'ba' }
             ];
             const schema = [
           { name: 'profit', type: 'measure' },
           { name: 'sales', type: 'measure' },
           { name: 'city', type: 'dimension' },
-          { name: 'state', type: 'dimension' },
+          { name: 'state', type: 'dimension' }
             ];
             const dataModel = new DataModel(data, schema);
 

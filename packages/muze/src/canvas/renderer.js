@@ -267,7 +267,7 @@ const createSideEffectContainer = (context) => {
 export const renderComponents = (context, components, layoutConfig, measurement) => {
     const {
         headers,
-        legends,
+        legends
     } = components;
     const {
         classPrefix

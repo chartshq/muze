@@ -106,7 +106,7 @@ class AxisCell extends SimpleCell {
     serialize () {
         return {
             type: AXIS,
-            axis: this.source().serialize(),
+            axis: this.source().serialize()
         };
     }
 
@@ -177,7 +177,7 @@ class AxisCell extends SimpleCell {
             top,
             bottom,
             left,
-            right,
+            right
         } = margin,
             {
             show

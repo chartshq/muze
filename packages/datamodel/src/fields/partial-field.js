@@ -13,7 +13,7 @@ class PartialField {
      * @param {Array} data - The data array.
      * @param {Object} schema - The schema of the data type.
      */
-    constructor(name, data, schema) {
+    constructor (name, data, schema) {
         this.name = name;
         this.data = data || [];
         this.schema = schema;
@@ -47,14 +47,13 @@ class PartialField {
      *
      * @abstract
      */
-    domain() {
+    domain () {
         throw new Error('Not yet implemented!');
     }
 
-    subType() {
+    subType () {
         return null;
     }
-
 
     /**
      * Parse the input value before using.
@@ -73,7 +72,7 @@ class PartialField {
      * @param {Array} data - The input data, if provided current data will not be cloned.
      * @return {PartialField} Returns the cloned field instance.
      */
-    clone(data) {
+    clone (data) {
         data = data || extend2([], this.data);
         const schema = extend2({}, this.schema);
         // Here call the constructor to create an instance of
@@ -84,21 +83,21 @@ class PartialField {
     /**
      * @return {string} Name of the field
      */
-    fieldName() {
+    fieldName () {
         return this.name;
     }
 
      /**
      * @return {string} Type of the field
      */
-    type() {
+    type () {
         return this.fieldType;
     }
 
     /**
      * @return {description} Name of the field
      */
-    description() {
+    description () {
         return this.fieldDescription;
     }
 }

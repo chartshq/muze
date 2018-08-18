@@ -38,7 +38,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
         labels: { rotation: 0 },
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
-        type: dataTypeScaleMap[field.subtype()],
+        type: dataTypeScaleMap[field.subtype()]
     };
     return mergeRecursive(axisConfig, userAxisConfig);
 };

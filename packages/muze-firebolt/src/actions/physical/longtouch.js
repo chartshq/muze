@@ -25,8 +25,7 @@ export const longtouch = firebolt => (targetEl, behaviours) => {
         setTimeout(() => {
             if (!touchEnd) {
                 dispatchBehaviour(args);
-            }
-            else {
+            } else {
                 behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
                     criteria: null
                 }));

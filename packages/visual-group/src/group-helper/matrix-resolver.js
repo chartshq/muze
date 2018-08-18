@@ -37,7 +37,7 @@ export default class MatrixResolver {
             y: {},
             color: [],
             size: [],
-            shape: [],
+            shape: []
         };
 
         this.cacheMaps(initializeCacheMaps());
@@ -491,7 +491,7 @@ export default class MatrixResolver {
         } = config;
         const {
             rowFacets,
-            colFacets,
+            colFacets
         } = this.getAllFields();
         const facetFields = [...rowFacets.map(e => e.toString()), ...colFacets.map(e => e.toString())];
         const retContext = {
@@ -523,7 +523,7 @@ export default class MatrixResolver {
         return {
             color: [...color],
             shape: [...shape],
-            size: [...size],
+            size: [...size]
         };
     }
 
@@ -594,7 +594,7 @@ export default class MatrixResolver {
         let bottomRight = [];
         const {
             rows,
-            columns,
+            columns
         } = placeholders;
         const {
             smartlabel: labelManager,

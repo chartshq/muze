@@ -26,6 +26,6 @@ export const arrangeComponents = (context) => {
     return {
         headers: titleLayouts[`${titlePosition}-${subtitlePosition}`],
         legends: legendConfig.position === LEFT || legendConfig.position === TOP ?
-        legendLayouts[0] : legendLayouts[1],
+        legendLayouts[0] : legendLayouts[1]
     };
 };

@@ -18,8 +18,7 @@ export default class FilterEffect extends SurrogateSideEffect {
         const entryModel = selectionSet.mergedEnter.model;
         if (payload.criteria === null) {
             context.clearCaching().resetData();
-        }
-        else {
+        } else {
             context.enableCaching().data(entryModel);
         }
         return this;

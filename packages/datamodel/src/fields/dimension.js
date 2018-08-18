@@ -14,7 +14,7 @@ class Dimension extends PartialField {
      * @override
      * @return {Array} Returns the unique values from dimension values.
      */
-    domain() {
+    domain () {
         return uniqueValues(this.data);
     }
 

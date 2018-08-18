@@ -185,7 +185,7 @@ class VisualGroup extends SimpleGroup {
 
         return {
             [CONFIG]: store.get(CONFIG),
-            [MOUNT]: store.get(MOUNT),
+            [MOUNT]: store.get(MOUNT)
         };
     }
 

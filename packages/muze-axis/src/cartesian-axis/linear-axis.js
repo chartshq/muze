@@ -120,7 +120,7 @@ export default class LinearAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            fixedBaseline,
+            fixedBaseline
         } = this.config();
         const { tickLabelDim } = this.getAxisDimensions();
         this.availableSpace({ width, height });
@@ -170,7 +170,7 @@ export default class LinearAxis extends SimpleAxis {
         let labelDim = 0;
         const {
             orientation,
-            tickValues,
+            tickValues
         } = this.config();
         const range = this.range();
         const axis = this.axis();

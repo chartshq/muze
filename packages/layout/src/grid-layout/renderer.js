@@ -97,8 +97,7 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
 
         if (type === CENTER && spans) {
             cells.attr(ROW_SPAN, (cell, colIndex) => spans[cell.rowIndex][colIndex]);
-        }
-        else if ((type === TOP || type === BOTTOM) && index === 1) {
+        } else if ((type === TOP || type === BOTTOM) && index === 1) {
             cells.attr(COL_SPAN, (cell, colIndex) => {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
@@ -244,7 +243,7 @@ export const renderArrows = (context, mountPoint, viewMatricesInfo) => {
             classPrefix,
             arrowType: LEFT,
             display: (columnPointer > 0)
-        }),
+        })
     };
 };
 

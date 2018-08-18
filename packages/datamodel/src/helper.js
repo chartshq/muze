@@ -42,8 +42,7 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
             criteria: criteriaFn
         };
         model._derivation.push(derivative);
-    }
-    else {
+    } else {
         derivative = [...criteriaFn];
         model._derivation.length = 0;
         model._derivation.push(...derivative);
@@ -239,7 +238,7 @@ export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTrave
         if (targetDM !== nonTraversingModel) {
             const {
                     reducer,
-                    groupByString,
+                    groupByString
                 } = conf;
                 // group the filtered model based on groupBy string of target
             const selectionGroupedModel = propModel[0].groupBy(groupByString.split(','), reducer, {
@@ -291,7 +290,8 @@ export const propagateToAllDataModels = (identifiers, rootModels, config) => {
     if (identifiers === null) {
         criteria = null;
     } else {
-        const filteredCriteria = Object.entries(propagationNameSpace.mutableActions).filter(d => d[0] !== propagationSourceId)
+        const filteredCriteria = Object.entries(propagationNameSpace.mutableActions)
+            .filter(d => d[0] !== propagationSourceId)
             .map(d => Object.values(d[1]).map(action => action.criteria));
         criteria = [].concat(...[...filteredCriteria, identifiers]);
     }

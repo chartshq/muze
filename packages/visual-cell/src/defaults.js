@@ -1,4 +1,3 @@
-
 import AxisCell from './axis-cell';
 import BlankCell from './blank-cell';
 import TextCell from './text-cell';
@@ -14,3 +13,4 @@ export const DEFAULT_PLACEHOLDERS = {
     [CONSTANTS.GEOM_CELL]: GeomCell,
     [CONSTANTS.BLANK_CELL]: BlankCell
 };
+

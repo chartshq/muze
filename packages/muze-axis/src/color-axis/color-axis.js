@@ -74,7 +74,7 @@ export default class ColorAxis {
         }
         return createScale({
             type: colorStrategy.scale,
-            range: scheme,
+            range: scheme
         });
     }
 

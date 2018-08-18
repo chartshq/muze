@@ -72,7 +72,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             const {
                 LegendCls,
                 scale,
-                fieldName,
+                fieldName
             } = dataInfo;
 
             if (prevLegends[index]) {
@@ -141,8 +141,7 @@ export const getLegendSpace = (context, availableHeight, availableWidth) => {
                 legendSpace.width += width;
                 legendSpace.height = Math.max(legendSpace.height, height);
             }
-        }
-        else if (legendSpace.height + height > availableHeight) {
+        } else if (legendSpace.height + height > availableHeight) {
             legendSpace.height = height;
             legendSpace.width += width;
         } else {

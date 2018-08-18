@@ -25,7 +25,6 @@ class Relation {
         this._derivation = [];
         this._children = [];
 
-
         if (params.length === 1 && ((source = params[0]) instanceof Relation)) {
             // parent datamodel was passed as part of source
             this._colIdentifier = source._colIdentifier;
@@ -192,7 +191,6 @@ class Relation {
      * @return {Boolean} Whether datamodel is empty or not.
      */
 
-
     isEmpty () {
         return !this._rowDiffset.length || !this._colIdentifier.length;
     }
@@ -221,8 +219,7 @@ class Relation {
                 return rowObj;
             });
             retDataModel = new this.constructor(jsonData, schema);
-        }
-        else {
+        } else {
             retDataModel = new this.constructor(this);
         }
 
@@ -263,17 +260,17 @@ class Relation {
         let dataModel;
 
         if (mode === FilteringMode.ALL) {
-            let projectionClone = cloneWithProject(this, normalizedProjField, {
+            const projectionClone = cloneWithProject(this, normalizedProjField, {
                 mode: FilteringMode.NORMAL,
                 saveChild: config.saveChild
             }, allFields);
-            let rejectionClone = cloneWithProject(this, normalizedProjField, {
+            const rejectionClone = cloneWithProject(this, normalizedProjField, {
                 mode: FilteringMode.INVERSE,
                 saveChild: config.saveChild
             }, allFields);
             dataModel = [projectionClone, rejectionClone];
         } else {
-            let projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
+            const projectionClone = cloneWithProject(this, normalizedProjField, config, allFields);
             dataModel = projectionClone;
         }
 
@@ -301,7 +298,6 @@ class Relation {
         return this;
     }
 
-
     /**
      * break the link between its parent and itself
      */
@@ -316,7 +312,7 @@ class Relation {
      */
     removeChild (child) {
         // remove from child list
-        let idx = this._children.findIndex(sibling => sibling === child);
+        const idx = this._children.findIndex(sibling => sibling === child);
         idx !== -1 ? this._children.splice(idx, 1) : true;
     }
     /**

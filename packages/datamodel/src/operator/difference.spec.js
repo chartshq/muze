@@ -9,25 +9,25 @@ const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
     { profit: 15, sales: 25, city: 'b', state: 'bb' },
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
-    { profit: 15, sales: 25, city: 'b', state: 'ba' },
+    { profit: 15, sales: 25, city: 'b', state: 'ba' }
 ];
 const schema1 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
     { name: 'city', type: 'dimension' },
-    { name: 'state', type: 'dimension' },
+    { name: 'state', type: 'dimension' }
 ];
 const data2 = [
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
     { profit: 15, sales: 25, city: 'b', state: 'ba' },
     { profit: 10, sales: 20, city: 'a', state: 'ala' },
-    { profit: 15, sales: 25, city: 'b', state: 'baa' },
+    { profit: 15, sales: 25, city: 'b', state: 'baa' }
 ];
 const schema2 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
     { name: 'city', type: 'dimension' },
-    { name: 'state', type: 'dimension' },
+    { name: 'state', type: 'dimension' }
 ];
 
 describe('Checking difference', () => {
@@ -39,11 +39,11 @@ describe('Checking difference', () => {
             expect(differenceDataModel.getData()).to.deep.equal({
                 schema: [
                 { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'state', type: 'dimension' }
                 ],
                 data: [
                 ['a', 'aa'],
-                ['b', 'bb'],
+                ['b', 'bb']
                 ],
                 uids: [0, 1]
             });

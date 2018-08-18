@@ -28,5 +28,5 @@ export default {
     [SIZE]: '',
     [DETAIL]: '',
     [LAYERS]: '',
-    [TRANSFORM]: [],
+    [TRANSFORM]: []
 };

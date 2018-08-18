@@ -7,20 +7,20 @@ import DataModel from '../index';
 
 const data1 = [
     { profit: 10, sales: 20, city: 'a' },
-    { profit: 15, sales: 25, city: 'b' },
+    { profit: 15, sales: 25, city: 'b' }
 ];
 const schema1 = [
     { name: 'profit', type: 'measure' },
     { name: 'sales', type: 'measure' },
-    { name: 'city', type: 'dimension' },
+    { name: 'city', type: 'dimension' }
 ];
 const data2 = [
     { population: 200, city: 'a' },
-    { population: 250, city: 'b' },
+    { population: 250, city: 'b' }
 ];
 const schema2 = [
     { name: 'population', type: 'measure' },
-    { name: 'city', type: 'dimension' },
+    { name: 'city', type: 'dimension' }
 ];
 
 describe('CrossProduct Functionality', () => {
@@ -35,13 +35,13 @@ describe('CrossProduct Functionality', () => {
                 { name: 'sales', type: 'measure' },
                 { name: 'ModelA.city', type: 'dimension' },
                 { name: 'population', type: 'measure' },
-                { name: 'ModelB.city', type: 'dimension' },
+                { name: 'ModelB.city', type: 'dimension' }
                 ],
                 data: [
                 [10, 20, 'a', 200, 'a'],
                 [10, 20, 'a', 250, 'b'],
                 [15, 25, 'b', 200, 'a'],
-                [15, 25, 'b', 250, 'b'],
+                [15, 25, 'b', 250, 'b']
                 ],
                 uids: [0, 1, 2, 3]
             });
@@ -57,11 +57,11 @@ describe('CrossProduct Functionality', () => {
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-                { name: 'population', type: 'measure' },
+                { name: 'population', type: 'measure' }
                 ],
                 data: [
                 [10, 20, 'a', 200],
-                [15, 25, 'b', 250],
+                [15, 25, 'b', 250]
                 ],
                 uids: [0, 1]
             });

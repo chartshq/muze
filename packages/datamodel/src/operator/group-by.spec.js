@@ -10,13 +10,13 @@ const data1 = [
     { profit: 10, sales: 20, city: 'a', state: 'aa' },
     { profit: 15, sales: 25, city: 'b', state: 'bb' },
     { profit: 10, sales: 20, city: 'a', state: 'ab' },
-    { profit: 15, sales: 25, city: 'b', state: 'ba' },
+    { profit: 15, sales: 25, city: 'b', state: 'ba' }
 ];
 const schema1 = [
     { name: 'city', type: 'dimension' },
     { name: 'state', type: 'dimension' },
     { name: 'profit', type: 'measure' },
-    { name: 'sales', type: 'measure' },
+    { name: 'sales', type: 'measure' }
 ];
 
 describe('Test groupBy', () => {
@@ -41,14 +41,14 @@ describe('Test groupBy', () => {
             const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
             expect(getReducerObj(dataModel1)).to.deep.equal({
                 profit: defReducer,
-                sales: defReducer,
+                sales: defReducer
             });
         });
         it('should return default reducer when no reducer is passed in parameter', () => {
             const dataModel1 = (new DataModel(data1, schema1, 'ModelA'));
             expect(getReducerObj(dataModel1, {})).to.deep.equal({
                 profit: defReducer,
-                sales: defReducer,
+                sales: defReducer
             });
         });
         it('should return given reducer passed in params', () => {
@@ -57,13 +57,13 @@ describe('Test groupBy', () => {
              * sample function
              * @return {number} 0
              */
-            function abc() { return 0; }
+            function abc () { return 0; }
             expect(getReducerObj(dataModel1, {
                 profit: 'sum',
-                sales: abc,
+                sales: abc
             })).to.deep.equal({
                 profit: fnList.sum,
-                sales: abc,
+                sales: abc
             });
         });
     });
@@ -75,11 +75,11 @@ describe('Test groupBy', () => {
                 schema: [
                 { name: 'city', type: 'dimension' },
                 { name: 'profit', type: 'measure' },
-                { name: 'sales', type: 'measure' },
+                { name: 'sales', type: 'measure' }
                 ],
                 data: [
                 ['a', 20, 40],
-                ['b', 30, 50],
+                ['b', 30, 50]
                 ],
                 uids: [0, 1]
             };

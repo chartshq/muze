@@ -267,8 +267,8 @@ const generatePlaceholders = (context, cells, labelManager) => {
     ];
 
     headerConfig.forEach((config, index) => {
-        let keys,
-            length;
+        let keys;
+        let length;
         const {
             type,
             section,

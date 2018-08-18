@@ -1,4 +1,3 @@
-
 import {
     symbolFns,
     selectElement,
@@ -34,7 +33,7 @@ export default class Content {
         return config;
     }
 
-    config(...c) {
+    config (...c) {
         if (c.length > 0) {
             this._config = mergeRecursive(this._config, c);
             return this;
@@ -87,7 +86,7 @@ export default class Content {
                 display: 'inline-block',
                 'margin-right': `${config.spacing}px`
             });
-            cells.each(function(d) {
+            cells.each(function (d) {
                 const el = selectElement(this);
                 el.html('');
                 if (d instanceof Object) {
@@ -104,7 +103,7 @@ export default class Content {
                         });
                         setAttrs(path, {
                             d: shape.size(d.size)(),
-                            transform: `translate(${iconContainerSize / 2}, ${iconContainerSize / 2})`,
+                            transform: `translate(${iconContainerSize / 2}, ${iconContainerSize / 2})`
                         });
                         setStyles(path, {
                             fill: d.color

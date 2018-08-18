@@ -20,7 +20,7 @@ export const CLASSPREFIX = 'muze',
     SCALE_FUNCTIONS = {
         size: 'getSize',
         shape: 'getShape',
-        color: 'getColor',
+        color: 'getColor'
     },
     TOP = 'top',
     LEFT = 'left',

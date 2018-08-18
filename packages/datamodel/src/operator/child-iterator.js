@@ -33,7 +33,7 @@ function childIterator (datamodel, callback, operation) {
                 break;
             case DM_DERIVATIVES.CAL_VAR:
                 if (child._derivation[0].op === DM_DERIVATIVES.CAL_VAR) {
-                    let params = [child._derivation[0].meta.config, [child._derivation[0].meta.fields,
+                    const params = [child._derivation[0].meta.config, [child._derivation[0].meta.fields,
                         child._derivation[0].criteria]];
                     callback(child, ...params);
                 }

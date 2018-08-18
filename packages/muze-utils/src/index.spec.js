@@ -81,7 +81,7 @@ describe('Utils', () => {
                 min: 20
             }
         };
-        let newObject = clone(obj);
+        const newObject = clone(obj);
         expect(newObject !== obj).to.equals(true);
         expect(newObject.a !== obj.a).to.equals(true);
     });
@@ -124,7 +124,7 @@ describe('Utils', () => {
     });
 
     it('Should capitalize the first letter of a word', () => {
-        let word = capitalizeFirst('simple');
+        const word = capitalizeFirst('simple');
         expect(word).to.equals('Simple');
     });
 
@@ -196,14 +196,14 @@ describe('Utils', () => {
                     value: 0,
                     meta: {
                         sanitization: intSanitizer,
-                        typeCheck: Number.isInteger,
+                        typeCheck: Number.isInteger
                     }
                 },
                 height: {
                     value: 0,
                     meta: {
                         sanitization: intSanitizer,
-                        typeCheck: Number.isInteger,
+                        typeCheck: Number.isInteger
                     }
                 },
                 config: {
@@ -233,7 +233,6 @@ describe('Utils', () => {
                 holder.height(10);
                 expect(holder.height()).to.equal(10);
             });
-
 
             it('should not set a value if wrong value is passed', () => {
                 holder.config(null);
@@ -266,11 +265,11 @@ describe('Utils', () => {
 
         describe('#isSimpleObject', () => {
             it('Should return false if array is given', () => {
-                let a = [1, 2, 3];
+                const a = [1, 2, 3];
                 expect(isSimpleObject(a)).to.equals(false);
             });
             it('Should return true for object', () => {
-                let a = {
+                const a = {
                     b: 2
                 };
                 expect(isSimpleObject(a)).to.equals(true);

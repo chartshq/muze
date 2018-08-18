@@ -1,6 +1,5 @@
-
 import {
-    LINEAR,
+    LINEAR
 } from '../enums/constants';
 /**
  * Set of default colors
@@ -11,7 +10,7 @@ export const palette = [
     '#f5ce02',
     '#67bda0',
     '#c54e4e',
-    '#ae70af',
+    '#ae70af'
 
     // '#086bb6af',
     // '#f37d45af',

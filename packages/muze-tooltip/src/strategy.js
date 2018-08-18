@@ -3,7 +3,7 @@ import {
     getClosestIndexOf,
     DateTimeFormatter,
     DimensionSubtype,
-    FieldType,
+    FieldType
 } from 'muze-utils';
 
 const timeFormats = {

@@ -9,22 +9,22 @@ describe('Group transform', () => {
             [300, 'FB', 'Kolkata'],
             [200, 'FC', 'Bangalore'],
             [300, 'FB', 'Bangalore']
-        ],
-        schema = [{
-            name: 'Downloads',
-            type: 'measure',
-        },
-        {
-            name: 'Product',
-            type: 'dimension'
-        },
-        {
-            name: 'Region',
-            type: 'dimension'
-        }],
-        config = {
-            groupBy: 'Region'
-        };
+    ];
+    const schema = [{
+        name: 'Downloads',
+        type: 'measure'
+    },
+    {
+        name: 'Product',
+        type: 'dimension'
+    },
+    {
+        name: 'Region',
+        type: 'dimension'
+    }];
+    const config = {
+        groupBy: 'Region'
+    };
 
     it('should group the data into two datasets when dimensional values for groupby are 2', () => {
         const groupedData = group(schema, data, config);
@@ -32,7 +32,7 @@ describe('Group transform', () => {
     });
 
     it('should group the data properly for multiple groupby fields', () => {
-        let data2 = [
+        const data2 = [
                 [200, 'FC', 'Kolkata', 'India'],
                 [300, 'FB', 'Kolkata', 'India'],
                 [200, 'FC', 'Bangalore', 'India'],
@@ -41,22 +41,22 @@ describe('Group transform', () => {
                 [300, 'FB', 'Texas', 'USA'],
                 [200, 'FC', 'New York', 'USA'],
                 [300, 'FB', 'New York', 'USA']
-            ],
-            schema2 = [{
-                name: 'Downloads',
-                type: 'measure',
-            },
-            {
-                name: 'Product',
-                type: 'dimension'
-            },
-            {
-                name: 'Place',
-                type: 'dimension'
-            }, {
-                name: 'Country',
-                type: 'dimension'
-            }];
+        ];
+        const schema2 = [{
+            name: 'Downloads',
+            type: 'measure'
+        },
+        {
+            name: 'Product',
+            type: 'dimension'
+        },
+        {
+            name: 'Place',
+            type: 'dimension'
+        }, {
+            name: 'Country',
+            type: 'dimension'
+        }];
 
         const groupedData = group(schema2, data2, {
             groupBy: ['Country', 'Place']

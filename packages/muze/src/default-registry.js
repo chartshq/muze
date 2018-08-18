@@ -5,7 +5,7 @@ import { SimpleGroup, VisualGroup } from '@chartshq/visual-group';
 
 export const COMPONENTS = {
     VisualGroup,
-    VisualUnit,
+    VisualUnit
 };
 export const SUBREGISTRIES = {
     cellRegistry,
@@ -15,3 +15,4 @@ export const INTERFACES = {
     SimpleGroup,
     SimpleCell
 };
+

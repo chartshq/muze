@@ -390,7 +390,7 @@ export default class SimpleAxis {
             name: this.name,
             type: this.type,
             range: this.range(),
-            config: this.config(),
+            config: this.config()
         };
     }
 

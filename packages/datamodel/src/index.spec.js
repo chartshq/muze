@@ -31,8 +31,7 @@ describe('DataModel', () => {
             ];
             const dataModel = new DataModel(data, schema);
 
-            let cloneRelation;
-            cloneRelation = dataModel.clone();
+            const cloneRelation = dataModel.clone();
             expect(cloneRelation instanceof DataModel).to.be.true;
             // Check clone datamodel have all the required attribute
             expect(cloneRelation._colIdentifier).to.equal(dataModel._colIdentifier);

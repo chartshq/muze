@@ -66,7 +66,7 @@ describe('DateTime', () => {
     describe('#getMinDiff', () => {
         it('should correctly calculate Min diff between dates array', () => {
             field = new DateTime(schema.name, data, schema);
-            let diff = field.getMinDiff();
+            const diff = field.getMinDiff();
             expect(diff).to.equal(86400000);
         });
     });

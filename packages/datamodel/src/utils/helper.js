@@ -55,7 +55,7 @@ export function uniqueValues (data) {
  * @param {Array} arr2 - The 2nd array.
  * @return {boolean} Returns whether two array have same content.
  */
-export function isArrEqual(arr1, arr2) {
+export function isArrEqual (arr1, arr2) {
     if (!isArray(arr1) || !isArray(arr2)) {
         return arr1 === arr2;
     }
@@ -80,6 +80,6 @@ export function isArrEqual(arr1, arr2) {
  * @param {Array} arr2 - The 2nd array.
  * @return {boolean} Returns whether two array have same content.
  */
-export function formatNumber(val) {
+export function formatNumber (val) {
     return val;
 }

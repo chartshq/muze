@@ -15,7 +15,7 @@ import {
     schemeCategory20,
     schemeCategory20b,
     scaleBand,
-    scaleTime,
+    scaleTime
    } from 'd3-scale';
 
 import {
@@ -160,13 +160,13 @@ const schemes = {
     [ScaleType.QUANTILE]: scaleQuantile,
     [ScaleType.TIME]: scaleTime,
     [ScaleType.COLOR]: scaleLinear,
-    [ScaleType.ORDINAL]: scaleOrdinal,
+    [ScaleType.ORDINAL]: scaleOrdinal
 };
 
 export const SCHEMES = {
     SCHEME1: schemeCategory10,
     SCHEME2: schemeCategory20,
-    SCHEME3: schemeCategory20b,
+    SCHEME3: schemeCategory20b
 };
 
 /**

@@ -3,7 +3,7 @@ import { rowDiffsetIterator } from '../operator/row-diffset-iterator'
 ;
 
 export default class Field {
-    constructor(partialFeild, rowDiff) {
+    constructor (partialFeild, rowDiff) {
         this._ref = partialFeild;
         this._rowDiff = rowDiff;
     }
@@ -16,15 +16,15 @@ export default class Field {
         return this._ref.parsed(val);
     }
 
-    domain() {
+    domain () {
         let data = [];
         let domain = null;
         data = this.getData();
         if (this._ref.fieldType === 'dimension' && this._ref.subType() !== DimensionSubtype.TEMPORAL) {
             domain = [...new Set(data)];
         } else {
-            let minD = Math.min.apply(null, data);
-            let maxD = Math.max.apply(null, data);
+            const minD = Math.min.apply(null, data);
+            const maxD = Math.max.apply(null, data);
             domain = [minD, maxD];
         }
 
@@ -35,24 +35,23 @@ export default class Field {
         return this._ref.parse(val);
     }
 
-
-    clone(datas) {
+    clone (datas) {
         return this._ref.clone(datas);
     }
 
-    fieldName() {
+    fieldName () {
         return this._ref.fieldName();
     }
 
-    type() {
+    type () {
         return this._ref.type();
     }
 
-    description() {
+    description () {
         return this._ref.description();
     }
 
-    get name() {
+    get name () {
         return this._ref.name;
     }
 
@@ -60,7 +59,7 @@ export default class Field {
     //     this._ref.name = name;
     // }
 
-    get schema() {
+    get schema () {
         return this._ref.schema;
     }
 
@@ -68,7 +67,7 @@ export default class Field {
     //     this._ref.schema = schema;
     // }
 
-    get data() {
+    get data () {
         return this._ref.data;
     }
 
@@ -76,7 +75,7 @@ export default class Field {
     //     throw new Error('Not yet implemented!');
     // }
 
-    subType() {
+    subType () {
         return this._ref.subType();
     }
 
@@ -89,7 +88,7 @@ export default class Field {
      *
      * @return {string} Returns unit of the field.
      */
-    unit() {
+    unit () {
         return this._ref.unit();
     }
 
@@ -98,7 +97,7 @@ export default class Field {
      *
      * @return {string} Returns scale of the field.
      */
-    scale() {
+    scale () {
         return this._ref.scale();
     }
 
@@ -107,19 +106,19 @@ export default class Field {
      *
      * @return {Function} Returns aggregation function of the field.
      */
-    defAggFn() {
+    defAggFn () {
         return this._ref.defAggFn();
     }
 
-    getData() {
-        let data = [];
+    getData () {
+        const data = [];
         rowDiffsetIterator(this._rowDiff, (i) => {
             data.push(this._ref.data[i]);
         });
         return data;
     }
 
-    bins() {
+    bins () {
         return this._ref.bins();
     }
 }

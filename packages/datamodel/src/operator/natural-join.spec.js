@@ -11,11 +11,11 @@ describe('Test Natural Join', () => {
         { id: 1, profit: 10, sales: 20, first: 'Hey', second: 'Jude' },
         { id: 2, profit: 20, sales: 25, first: 'Hey', second: 'Wood' },
         { id: 3, profit: 10, sales: 20, first: 'White', second: 'the sun' },
-        { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' },
+        { id: 4, profit: 15, sales: 25, first: 'White', second: 'walls' }
     ];
     const data2 = [
         { id: 1, netprofit: 10, netsales: 200, _first: 'Hello', _second: 'Jude' },
-        { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' },
+        { id: 4, netprofit: 200, netsales: 250, _first: 'Bollo', _second: 'Wood' }
 
     ];
 
@@ -40,7 +40,7 @@ describe('Test Natural Join', () => {
         {
             name: 'second',
             type: 'dimension'
-        },
+        }
     ];
     const schema2 = [
         {
@@ -63,14 +63,14 @@ describe('Test Natural Join', () => {
         {
             name: '_second',
             type: 'dimension'
-        },
+        }
     ];
     const data23 = new DataModel(data1, schema1, 'ModelA');
     const data24 = new DataModel(data2, schema2, 'ModelB');
 
     describe('#naturalJoin', () => {
         it('should return a naturally joined datamodel', () => {
-            let expectedResult = {
+            const expectedResult = {
                 schema: [
                     {
                         name: 'id',

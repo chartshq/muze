@@ -16,7 +16,7 @@ describe('Generic layout', () => {
             null,
             {
                 width: 500,
-                height: 500,
+                height: 500
             },
             {
                 row: rowOrient,
@@ -40,7 +40,7 @@ describe('Generic layout', () => {
         expect(instance.serialize()).to.deep.equal({
             measurement: {
                 height: 500,
-                width: 500,
+                width: 500
             },
             config: {
                 style: { color: 'red' },
@@ -72,11 +72,11 @@ describe('Generic layout', () => {
     it('tests measurement setter and getter', () => {
         instance.measurement({
             width: 5100,
-            height: 1500,
+            height: 1500
         });
         expect(instance.measurement()).to.deep.equal({
             width: 5100,
-            height: 1500,
+            height: 1500
         });
     });
     it('tests mountPoint setter and getter', () => {

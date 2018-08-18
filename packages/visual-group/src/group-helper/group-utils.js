@@ -60,7 +60,7 @@ export const initializeCacheMaps = () => ({
     xAxesMap: new Map(),
     yAxesMap: new Map(),
     entryCellMap: new Map(),
-    exitCellMap: new Map(),
+    exitCellMap: new Map()
 });
 
 /**

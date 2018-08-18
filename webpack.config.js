@@ -15,7 +15,7 @@ module.exports = {
         filename: outFileName,
         library: libraryName,
         libraryTarget: 'umd',
-        umdNamedDefine: true,
+        umdNamedDefine: true
     },
     devtool: 'source-map',
     module: {
@@ -61,11 +61,11 @@ module.exports = {
     },
     devServer: {
         inline: true,
-        contentBase: './examples',
+        contentBase: './examples'
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: cssFileName,
+            filename: cssFileName
         })
     ]
 };

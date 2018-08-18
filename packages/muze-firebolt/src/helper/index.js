@@ -103,7 +103,7 @@ const conditionsMap = {
     newExit: [SELECTION.SELECTION_NEW_EXIT],
     oldExit: [SELECTION.SELECTION_OLD_EXIT],
     mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
-    complete: [],
+    complete: []
 };
 
 export const getModelFromSet = (type, model, set) =>

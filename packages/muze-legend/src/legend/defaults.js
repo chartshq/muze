@@ -34,7 +34,7 @@ export const DEFAULT_CONFIG = {
             width: 20,
             color: 'rgba(0,0,0,.5)',
             type: 'circle'
-        },
+        }
     }
 };
 

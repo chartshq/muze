@@ -32,10 +32,10 @@ const fieldStore = {
                     }
                 });
                 return retObj;
-            },
+            }
         };
         return this.data[dataId];
-    },
+    }
 };
 
 export default fieldStore;

@@ -8,7 +8,7 @@ import { JOINS } from '../constants';
  *
  * @return {boolean} Always returns true.
  */
-function defaultFilterFn() { return true; }
+function defaultFilterFn () { return true; }
 
 /**
  * Implementation of cross product operation between two DataModel instances.
@@ -80,21 +80,18 @@ export function crossProduct (dm1, dm2, filterFn, replaceCommonSchema = false, j
                 });
                 if (rowAdded && JOINS.CROSS !== jointype) {
                     data[rowPosition] = tupleObj;
-                }
-                else {
+                } else {
                     data.push(tupleObj);
                     rowAdded = true;
                     rowPosition = i;
                 }
-            }
-            else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
+            } else if ((jointype === JOINS.LEFTOUTER || jointype === JOINS.RIGHTOUTER) && !rowAdded) {
                 const tupleObj = {};
-                let len = dm1FieldStore.fields.length - 1;
+                const len = dm1FieldStore.fields.length - 1;
                 tuple.forEach((cellVal, iii) => {
                     if (iii <= len) {
                         tupleObj[schema[iii].name] = cellVal;
-                    }
-                    else {
+                    } else {
                         tupleObj[schema[iii].name] = null;
                     }
                 });

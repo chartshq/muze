@@ -1,7 +1,7 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { CommonProps } from 'muze-utils';
 import {
     setAttrs,
+    CommonProps,
     getUniqueId,
     getQualifiedClassName,
     selectElement,
@@ -291,9 +291,9 @@ export default class VisualUnit {
         const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
         this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
         attachAxisToLayers(this.axes(), instances, layerAxisIndex);
-        this.layers().forEach((layer) => {
-            layer.measurement(measurement);
-            layer.dataProps({
+        this.layers().forEach((lyr) => {
+            lyr.measurement(measurement);
+            lyr.dataProps({
                 timeDiffs: this.store().get(TIMEDIFFS)
             });
         });

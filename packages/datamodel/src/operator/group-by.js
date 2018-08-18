@@ -133,8 +133,7 @@ function groupBy (dataModel, fieldArr, reducers, existingDataModel) {
     if (existingDataModel) {
         existingDataModel.__calculateFieldspace();
         newDataModel = existingDataModel;
-    }
-    else {
+    } else {
         newDataModel = new DataModel(data, schema, dbName);
     }
     return newDataModel;

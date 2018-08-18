@@ -168,7 +168,6 @@ export default class LineLayer extends BaseLayer {
         const meta = {};
 
         points = data.map((d, i) => {
-            let point;
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
             const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
@@ -180,7 +179,7 @@ export default class LineLayer extends BaseLayer {
             meta.originalColor = rawColor;
             meta.colorTransform = {};
 
-            point = {
+            const point = {
                 enter: {},
                 update: {
                     x: xPx,

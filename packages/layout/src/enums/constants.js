@@ -8,7 +8,7 @@
 export const VIEW_INDEX = {
     top: 0,
     center: 1,
-    bottom: 2,
+    bottom: 2
 };
 
 /**

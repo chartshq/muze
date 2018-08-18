@@ -4,7 +4,6 @@
 import { expect } from 'chai';
 import { fnList } from './group-by-function';
 
-
 describe('groupBy function tests', () => {
     describe('#sum', () => {
         it('should return sum for 1D array', () => {

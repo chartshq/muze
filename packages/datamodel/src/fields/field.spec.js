@@ -9,7 +9,6 @@ import Measure from './measure';
 import Dimension from './dimension';
 import DateTime from './datetime';
 
-
 describe('Field Type', () => {
     const schema = {
         name: 'Miles_per_Gallon',
@@ -21,7 +20,7 @@ describe('Field Type', () => {
     let field2;
 
     beforeEach(() => {
-        let partialfield = new PartialField(schema.name, data, schema);
+        const partialfield = new PartialField(schema.name, data, schema);
         field2 = new Field(partialfield, null);
     });
     describe('#data , #schema', () => {
@@ -88,7 +87,7 @@ describe('Field Type', () => {
         let field3;
 
         beforeEach(() => {
-            let partialField = new Measure(schema3.name, data3, schema3);
+            const partialField = new Measure(schema3.name, data3, schema3);
             field3 = new Field(partialField, '0-3');
         });
 
@@ -109,7 +108,6 @@ describe('Field Type', () => {
                 expect(field3.defAggFn()).to.equal(schema3.defAggFn);
             });
         });
-
 
         describe('#domain', () => {
             it('should return measure domain', () => {
@@ -140,7 +138,7 @@ describe('Field Type', () => {
         let field;
 
         beforeEach(() => {
-            let partialField = new Dimension(schema2.name, data2, schema2);
+            const partialField = new Dimension(schema2.name, data2, schema2);
             field = new Field(partialField, '0-5');
         });
 
@@ -161,9 +159,9 @@ describe('Field Type', () => {
                 format: '%Y-%m-%d'
             };
             const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
-            let partialField = new DateTime(schema2.name, data2, schema2);
-            let field = new Field(partialField, null);
-            let diff = field.getMinDiff();
+            const partialField = new DateTime(schema2.name, data2, schema2);
+            const field = new Field(partialField, null);
+            const diff = field.getMinDiff();
             expect(diff).to.equal(86400000);
         });
     });
@@ -176,9 +174,9 @@ describe('Field Type', () => {
         };
         const data2 = ['2017-03-01', '2017-03-02', '2017-03-03'];
         it('should return min max date on calling domain', () => {
-            let partialField = new DateTime(schema2.name, data2, schema2);
-            let field = new Field(partialField, '0-2');
-            let diff = field.domain();
+            const partialField = new DateTime(schema2.name, data2, schema2);
+            const field = new Field(partialField, '0-2');
+            const diff = field.domain();
             expect(diff).to.deep.equal([1488306600000, 1488479400000]);
         });
     });
@@ -195,7 +193,7 @@ describe('Field Type', () => {
         const data3 = [1, 3, 4, 78];
 
         let field4;
-        let partialField = new Measure(schema3.name, data3, schema3);
+        const partialField = new Measure(schema3.name, data3, schema3);
         beforeEach(() => {
             field4 = new Field(partialField, '0-3');
         });

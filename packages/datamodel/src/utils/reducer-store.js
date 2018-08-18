@@ -12,7 +12,7 @@ class ReducerStore {
 
     defaultReducer (...params) {
         if (params.length) {
-            let reducer = params[0];
+            const reducer = params[0];
             if (typeof reducer === 'function') {
                 this.store.set('defReducer', reducer);
             } else if (typeof reducer === 'string') {
@@ -47,7 +47,7 @@ class ReducerStore {
     }
 }
 
-const reducerStore = (function() {
+const reducerStore = (function () {
     let store = null;
 
     function getStore () {

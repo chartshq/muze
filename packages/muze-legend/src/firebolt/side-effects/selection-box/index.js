@@ -30,6 +30,10 @@ import './styles.scss';
      * Draws the selectionbox with the specified dimensions.
      */
     /* istanbul ignore next */ apply (selectionSet, payload) {
+        let x;
+        let y;
+        let width;
+        let height;
         const firebolt = this.firebolt;
         const context = firebolt.context;
         const config = this.config();
@@ -49,10 +53,6 @@ import './styles.scss';
         const legendGradContainer = context.getDrawingContext().svgContainer;
         const legendSelGroup = makeElement(legendGradContainer, 'g', [1], `${config.classPrefix}-selection-box-group`);
 
-        let x,
-            y,
-            width,
-            height;
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
             y = 0;
@@ -64,7 +64,7 @@ import './styles.scss';
             height = range[0] - range[1] || 0;
             width = gradientDimension;
         }
-        const enterFn = function(el) {
+        const enterFn = function (el) {
             selectionBoxDrag(firebolt)(el.node(), ['brush']);
         };
         const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,

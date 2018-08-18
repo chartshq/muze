@@ -1,4 +1,3 @@
-
 /* global describe, it, document */
 /* eslint-disable no-unused-expressions */
 import SmartlabelManager from 'fusioncharts-smartlabel';
@@ -9,10 +8,10 @@ import { CLASSPREFIX } from './enums/constants';
 
 const sm = new SmartlabelManager(200);
 const text = new TextCell({}, {
-    labelManager: sm,
+    labelManager: sm
 }).source('Hey Judey');
 const header = new TextCell({ type: 'header' }, {
-    labelManager: sm,
+    labelManager: sm
 }).source('Hey Jude');
 describe('Header Cell', () => {
     it('tests construction of the header cell', () => {
@@ -60,7 +59,7 @@ describe('Header Cell', () => {
     it('tests getting the logical space of header cell', () => {
         const {
             width,
-            height,
+            height
         } = header.getLogicalSpace();
         expect(
             typeof (width + height) === 'number'

@@ -19,7 +19,7 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
         orientation,
         labels,
         fixedBaseline,
-        type,
+        type
      } = config;
     let { rotation } = labels;
 
@@ -79,13 +79,13 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
  */
 const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     const {
-        _smartTicks,
+        _smartTicks
     } = axisInstance;
     const config = axisInstance.config();
     const labelManager = axisInstance.dependencies().labelManager;
     const {
         labels,
-        orientation,
+        orientation
     } = config;
     const {
         rotation,
@@ -125,7 +125,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
 const setFixedBaseline = (axisInstance) => {
     const {
-        fixedBaseline,
+        fixedBaseline
     } = axisInstance.config();
     if (fixedBaseline) {
         axisInstance.setFixedBaseline();
@@ -202,7 +202,7 @@ export function renderAxis (axisInstance) {
         show,
         id,
         interpolator,
-        classPrefix,
+        classPrefix
      } = config;
 
     if (!show) {

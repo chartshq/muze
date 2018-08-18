@@ -4,7 +4,6 @@
 import { expect } from 'chai';
 import { mergeSort } from './merge-sort';
 
-
 describe('Test Merge Sort', () => {
     describe('#mergeSort', () => {
         it('should return empty array when provided with empty inputs', () => {
@@ -52,7 +51,7 @@ describe('Test Merge Sort', () => {
             [10, 2],
             [10, 3],
             [10, 4],
-            [10, 5],
+            [10, 5]
             ];
             const sortedArr = [
             [1, 1],
@@ -60,7 +59,7 @@ describe('Test Merge Sort', () => {
             [10, 3],
             [10, 4],
             [10, 5],
-            [11, 6],
+            [11, 6]
             ];
             mergeSort(randArr, (a, b) => a[1] - b[1]);
             mergeSort(randArr, (a, b) => a[0] - b[0]);

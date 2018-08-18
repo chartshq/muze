@@ -15,7 +15,7 @@ class Measure extends PartialField {
      * @param {Array} data - An array containing the field data.
      * @param {Object} schema - The schema for the field.
      */
-    constructor(name, data, schema) {
+    constructor (name, data, schema) {
         super(name, data, schema);
         this.fieldUnit = schema.unit;
         this.fieldScale = schema.scale;
@@ -29,7 +29,7 @@ class Measure extends PartialField {
      * @override
      * @return {Array} Returns min and max values from measure values.
      */
-    domain() {
+    domain () {
         return generateMeasureDomain(this.data);
     }
 
@@ -51,7 +51,7 @@ class Measure extends PartialField {
      *
      * @return {string} Returns unit of the field.
      */
-    unit() {
+    unit () {
         return this.fieldUnit;
     }
 
@@ -60,7 +60,7 @@ class Measure extends PartialField {
      *
      * @return {string} Returns scale of the field.
      */
-    scale() {
+    scale () {
         return this.fieldScale;
     }
 
@@ -69,7 +69,7 @@ class Measure extends PartialField {
      *
      * @return {string} Returns number format of the field.
      */
-    numberFormat() {
+    numberFormat () {
         const formatter = this.fieldNumberformat;
         return val => formatter(val);
     }
@@ -79,7 +79,7 @@ class Measure extends PartialField {
      *
      * @return {Function} Returns aggregation function of the field.
      */
-    defAggFn() {
+    defAggFn () {
         return this.fieldDefAggFn;
     }
 }

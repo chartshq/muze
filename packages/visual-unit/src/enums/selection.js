@@ -1,6 +1,6 @@
-const SELECTION_ADD = 1,
-    SELECTION_REMOVE = -1,
-    SELECTION_NULL = 0;
+const SELECTION_ADD = 1;
+const SELECTION_REMOVE = -1;
+const SELECTION_NULL = 0;
 
 export {
     SELECTION_ADD,
