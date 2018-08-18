@@ -64,7 +64,8 @@ import {
     toArray,
     extendsClass,
     concatModels,
-    assembleModelFromIdentifiers
+    assembleModelFromIdentifiers,
+    isValidValue
 } from './common-utils';
 
 import {
@@ -198,5 +199,6 @@ export {
     CommonProps,
     concatModels,
     getClientPoint,
-    hasTouch
+    hasTouch,
+    isValidValue
 };
