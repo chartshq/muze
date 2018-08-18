@@ -196,8 +196,9 @@ export function renderMatrices (context, matrices, layoutDimensions) {
  * @param {Function} clickFn Click function to be bounded with the arrow
  * @return {Selection} the arrow element
 */
-const createArrow = (mount, data, arrowType) => makeElement(mount, 'div', data, `table-arrow-${arrowType}`)
-                .classed('table-arrow', true);
+const createArrow = (mount, data, { classPrefix, display, arrowType }) =>
+    makeElement(mount, 'div', data, `${classPrefix}-table-arrow-${arrowType}`)
+                    .classed(`${classPrefix}-table-arrow`, true).classed('hidden', !display);
 
 /**
  * Renders the arrows in the matrix
@@ -209,22 +210,41 @@ const createArrow = (mount, data, arrowType) => makeElement(mount, 'div', data, 
 export const renderArrows = (context, mountPoint, viewMatricesInfo) => {
     const {
         columnPointer,
-        rowPointer
+        rowPointer,
+        classPrefix
     } = context.config();
     const {
         rowPages,
         columnPages
     } = viewMatricesInfo;
-    // const arrowClick = context.arrowClick.bind(context);
+
     return {
         // bottom arrow
-        bottom: createArrow(mountPoint, (rowPointer + 1 !== rowPages) ? [1] : [], BOTTOM),
+        bottom: createArrow(mountPoint, [1], {
+            classPrefix,
+            arrowType: BOTTOM,
+            display: (rowPointer + 1 !== rowPages)
+        }),
         // render the top arrow based on row start index
-        top: createArrow(mountPoint, (rowPointer > 0) ? [1] : [], TOP),
+        top: createArrow(mountPoint, [1],
+            {
+                classPrefix,
+                arrowType: TOP,
+                display: rowPointer > 0
+            }),
         // right arrow
-        right: createArrow(mountPoint, (columnPointer + 1 !== columnPages) ? [1] : [], RIGHT),
+        right: createArrow(mountPoint, [1],
+            {
+                classPrefix,
+                arrowType: RIGHT,
+                display: (columnPointer + 1 !== columnPages)
+            }),
         // render the left arrow based on row start index
-        left: createArrow(mountPoint, (columnPointer > 0) ? [1] : [], LEFT),
+        left: createArrow(mountPoint, [1], {
+            classPrefix,
+            arrowType: LEFT,
+            display: (columnPointer > 0)
+        }),
     };
 };
 

@@ -30,7 +30,7 @@
         padding: 0;
     }
 
-    .table-arrow {
+    .#{$prefix}table-arrow {
         margin: 5px;
         width: 0px;
         height: 0px;
@@ -40,11 +40,11 @@
         cursor: pointer;
     }
 
-    .table-arrow:hover {
+    .#{$prefix}table-arrow:hover {
         opacity: 1.0;
     }
 
-    .table-arrow-right {
+    .#{$prefix}table-arrow-right {
         left: 100%;
         top: calc(50% - 25px);
         border-top: 20px solid transparent;
@@ -52,7 +52,7 @@
         border-left: 15px solid steelblue;
     }
 
-    .table-arrow-left {
+    .#{$prefix}table-arrow-left {
         right: 100%;
         top: calc(50% - 25px);
         border-top: 20px solid transparent;
@@ -60,7 +60,7 @@
         border-right: 15px solid steelblue;
     }
 
-    .table-arrow-bottom {
+    .#{$prefix}table-arrow-bottom {
         left: calc(50% - 25px);
         top: 100%;
         border-left: 20px solid transparent;
@@ -68,7 +68,7 @@
         border-top: 15px solid steelblue;
     }
 
-    .table-arrow-top {
+    .#{$prefix}table-arrow-top {
         left: calc(50% - 25px);
         bottom: 100%;
         border-left: 20px solid transparent;
@@ -202,3 +202,7 @@
 .#{$groupContainer}, .#{$layoutContainer}, .#{$legendContainer} {
     float: left;
 } 
+
+.hidden {
+    display: none;
+}
