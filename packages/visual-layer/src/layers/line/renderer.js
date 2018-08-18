@@ -1,24 +1,12 @@
 import {
-    line,
-    curveLinear,
-    curveStepAfter,
-    curveStepBefore,
-    curveStep,
-    curveCatmullRom
-} from 'd3-shape';
-import {
     selectElement,
-    makeElement
+    makeElement,
+    pathInterpolators,
+    Symbols
 } from 'muze-utils';
 import { updateStyle } from '../../helpers';
 
-const curveInterpolators = {
-    linear: curveLinear,
-    stepAfter: curveStepAfter,
-    catmullRom: curveCatmullRom,
-    step: curveStep,
-    stepBefore: curveStepBefore
-};
+const line = Symbols.line;
 
 /**
  * Draws a line from the points
@@ -29,7 +17,7 @@ export const drawLine = (context) => {
     let filteredPoints;
     const { container, points, interpolate, connectNullData, className, style } = context;
     const mount = selectElement(container).attr('class', className);
-    const curveInterpolatorFn = curveInterpolators[interpolate];
+    const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
                 .curve(curveInterpolatorFn)
                 .x(d => d.update.x)

@@ -10,16 +10,19 @@ import { rowDiffsetIterator } from './row-diffset-iterator';
  * @return {Array} Returns an array of created bins.
  */
 export function createBinnedFieldData (field, rowDiffset, config) {
-    let { buckets, numOfBins, binSize, start } = config;
-    const dataStore = [];
-    const binnedData = [];
-    let [min, max] = field.domain();
-    const oriMax = max;
-    const end = [];
+    let max;
     let binEnd;
     let prevEndpoint;
-
     let range;
+    let { buckets, binSize, start } = config;
+    const numOfBins = config.numOfBins;
+    const dataStore = [];
+    const binnedData = [];
+    const domain = field.domain();
+    max = domain[1];
+    const min = domain[0];
+    const oriMax = max;
+    const end = [];
 
     // create dataStore with index according to rowDiffSet
     rowDiffsetIterator(rowDiffset, (i) => {

@@ -107,7 +107,7 @@ const conditionsMap = {
 };
 
 export const getModelFromSet = (type, model, set) =>
-    model ? model.select((fields, i) => conditionsMap[type].some(condition => set[i] === condition), {
+    model ? model.select((fields, i) => (conditionsMap[type].some(condition => set[i] === condition)), {
         saveChild: false
     }) : null;
 

@@ -55,8 +55,8 @@ const orderFields = (fieldArray, type) => {
         dimensionArr[1] = [];
     }
     return {
-        fields: dimensionArr.map((list, i) => i === 1 ?
-        measureArr[i].concat(dimensionArr[i]) : dimensionArr[i].concat(measureArr[i])),
+        fields: dimensionArr.map((list, i) => (i === 1 ?
+            measureArr[i].concat(dimensionArr[i]) : dimensionArr[i].concat(measureArr[i]))),
         dimensions: [...dimensionArr[0], ...dimensionArr[1]],
         measures: [...measureArr[0], ...measureArr[1]],
         temporal: [...temporalArr[0], ...temporalArr[1]],

@@ -1,64 +1,62 @@
 import { select, selectAll, event as d3event, selection, clientPoint } from 'd3-selection';
 import { drag as d3drag } from 'd3-drag';
 import 'd3-transition';
-import { brushX, brushY, brush } from 'd3-brush';
 
-const
-    /* eslint import/prefer-default-export: 0 */
-    /**
-     * This function takes a raw DOM element or
-     * a string and returns a d3 selection of that element.
-     *
-     * @param {HTMLElement | string} element The element to wrap in d3 selection.
-     * @return {Selection} Instance of d3 selection.
-     */
-    selectElement = element => select(element);
+/**
+ * This function takes a raw DOM element or
+ * a string and returns a d3 selection of that element.
+ *
+ * @param {HTMLElement | string} element The element to wrap in d3 selection.
+ * @return {Selection} Instance of d3 selection.
+ */
+const selectElement = element => select(element);
 
-    /* eslint import/prefer-default-export: 0 */
-    /**
-     * This function takes a raw DOM element or
-     * a string and returns a d3 selection of all instances of that element.
-     *
-     * @param {HTMLElement | string} element The element to wrap in d3 selection.
-     * @return {Selection} Instance of d3 selection.
-     */
+/**
+ * This function takes a raw DOM element or
+ * a string and returns a d3 selection of all instances of that element.
+ *
+ * @param {HTMLElement | string} element The element to wrap in d3 selection.
+ * @return {Selection} Instance of d3 selection.
+ */
 const selectAllElements = element => selectAll(element);
-    /**
-     * This method is used to create an svg element.
-     *
-     * @return {SVGElement} SVG dom element.
-     */
-const createSVGElement = () =>
-        /* eslint no-undef: 0 */
-          document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    /**
-     * This method is used to create an HTML DIV.
-     *
-     * @export
-     * @return {HTMLElement} HTML dom element.
-     */
+
+/**
+ * This method is used to create an svg element.
+ *
+ * @return {SVGElement} SVG dom element.
+ */
+const createSVGElement = () => document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+/**
+ * This method is used to create an HTML DIV.
+ *
+ * @export
+ * @return {HTMLElement} HTML dom element.
+ */
 const createHTMLDiv = () => {
     const elem = document.createElement('div');
     return elem;
 };
-    /**
-     * This function is used to create an SVG group.
-     *
-     * @export
-     * @return {SVGGroupElement} instance of <g></g>
-    */
+
+/**
+ * This function is used to create an SVG group.
+ *
+ * @export
+ * @return {SVGGroupElement} instance of <g></g>
+*/
 const createSVGGroup = () => {
     const elem = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     return elem;
 };
-    /**
-     * It creates a new d3 element on the parent element
-     * @param  {Selection} parent Element to which the element is to be appended
-     * @param  {Object} elemType Type of the new element
-     * @param  {Array} data Data for the new element
-     * @param  {Object} selector classname/id/tagname for the element
-     * @return {HTMLElement} Newly Created Element
-     */
+
+/**
+ * It creates a new d3 element on the parent element
+ * @param  {Selection} parent Element to which the element is to be appended
+ * @param  {Object} elemType Type of the new element
+ * @param  {Array} data Data for the new element
+ * @param  {Object} selector classname/id/tagname for the element
+ * @return {HTMLElement} Newly Created Element
+ */
 const makeElement = (parent, elemType, data, selector, callbacks = {}, keyFn) => {
     if ((parent instanceof HTMLElement || parent instanceof SVGElement)) {
         parent = selectElement(parent);
@@ -116,26 +114,28 @@ const makeElement = (parent, elemType, data, selector, callbacks = {}, keyFn) =>
     }
     return mergeSel;
 };
-    /**
-     * This function applies styles to an element
-     *  @param  {Object} elem Element Selection
-     * @param  {Object} styleObj Style Object to be applied
-     * @return {Element} Newly Created Element
-    */
+
+/**
+ * This function applies styles to an element
+ *  @param  {Object} elem Element Selection
+ * @param  {Object} styleObj Style Object to be applied
+ * @return {Element} Newly Created Element
+*/
 const applyStyle = (elem, styleObj) => {
     Object.entries(styleObj).forEach((d) => {
         elem.style(d[0], d[1]);
     }, this);
     return elem;
 };
-    /**
-     * Creates an svg group inside an svg element
-     * @param {HTMLElement} htmlContainer any type of html element
-     * @param {string} className class name for selecting the svg element
-     * @param {number} width width of svg element
-     * @param {number} height height of svg element
-     * @return {SVGElement} SVG group element
-     */
+
+/**
+ * Creates an svg group inside an svg element
+ * @param {HTMLElement} htmlContainer any type of html element
+ * @param {string} className class name for selecting the svg element
+ * @param {number} width width of svg element
+ * @param {number} height height of svg element
+ * @return {SVGElement} SVG group element
+ */
 const getSVGGroup = (htmlContainer, className, width, height) => {
     let sel;
     if (htmlContainer.tagName === 'svg') {
@@ -154,19 +154,21 @@ const getSVGGroup = (htmlContainer, className, width, height) => {
                     .attr('class', className)
                     .node();
 };
-    /**
-     * This function appends a dom element in another element.
-     * @param {HTMLElement | SVGElement} element1 The element in which to append the second element
-     * @param {HTMLElement | SVGElement} element2 The element which will be appended.
-     */
+
+/**
+ * This function appends a dom element in another element.
+ * @param {HTMLElement | SVGElement} element1 The element in which to append the second element
+ * @param {HTMLElement | SVGElement} element2 The element which will be appended.
+ */
 const appendElement = (element1, element2) => {
     element1.appendChild(element2);
 };
-    /**
-     * Sets the attributes to the element.
-     * @param {HTMLElement | SVGElement} element Element on which attributes will be applied
-     * @param {Object} attrs Attributes which need to be applied
-     */
+
+/**
+ * Sets the attributes to the element.
+ * @param {HTMLElement | SVGElement} element Element on which attributes will be applied
+ * @param {Object} attrs Attributes which need to be applied
+ */
 const setElementAttrs = (element, attrs) => {
     for (const key in attrs) {
         if ({}.hasOwnProperty.call(attrs, key)) {
@@ -174,13 +176,14 @@ const setElementAttrs = (element, attrs) => {
         }
     }
 };
-    /**
-     * Sets attributes in the svg or html element
-     * @param {SVGElement | HTMLElement} element The element on which attrs will be applied
-     * @param {Array.<Object>} attrs Array of attributes
-     * @param {string} className className of elements to select.
-     * @return {SVGElement | HTMLElement} SVGElement or html element.
-     */
+
+/**
+ * Sets attributes in the svg or html element
+ * @param {SVGElement | HTMLElement} element The element on which attrs will be applied
+ * @param {Array.<Object>} attrs Array of attributes
+ * @param {string} className className of elements to select.
+ * @return {SVGElement | HTMLElement} SVGElement or html element.
+ */
 const setAttrs = (element, attrs, className) => {
     if (!(element instanceof selection)) {
         element = selectElement(element);
@@ -190,14 +193,15 @@ const setAttrs = (element, attrs, className) => {
     }) : setElementAttrs(element, attrs);
     return element;
 };
-    /**
-     * Adds a css class to elements which passes the filter function.If filter function is not given,
-     * then all elements will be applied the class.
-     * @param {HTMLElement | SVGElement} element element
-     * @param {string} className css class
-     * @param {string} selector css selector
-     * @param {Function} filterFn filter method.
-     */
+
+/**
+ * Adds a css class to elements which passes the filter function.If filter function is not given,
+ * then all elements will be applied the class.
+ * @param {HTMLElement | SVGElement} element element
+ * @param {string} className css class
+ * @param {string} selector css selector
+ * @param {Function} filterFn filter method.
+ */
 const addClass = (element, className, selector, filterFn) => {
     select(element).selectAll(selector).each(function (data) {
         const elem = select(this);
@@ -205,14 +209,15 @@ const addClass = (element, className, selector, filterFn) => {
                 elem.classed(className, true);
     });
 };
-    /**
-     * Removes the css class from elements which passes the filter function.If filter function is not given,
-     * then all elements will be applied the class.
-     * @param {HTMLElement | SVGElement} element element
-     * @param {string} className css class
-     * @param {string} selector css selector
-     * @param {Function} filterFn filter method.
-     */
+
+/**
+ * Removes the css class from elements which passes the filter function.If filter function is not given,
+ * then all elements will be applied the class.
+ * @param {HTMLElement | SVGElement} element element
+ * @param {string} className css class
+ * @param {string} selector css selector
+ * @param {Function} filterFn filter method.
+ */
 const removeClass = (element, className, selector, filterFn) => {
     select(element).selectAll(selector).each(function (data) {
         const elem = select(this);
@@ -220,12 +225,13 @@ const removeClass = (element, className, selector, filterFn) => {
                 elem.classed(className, false);
     });
 };
-    /**
-     * Sets styles in the svg or html element
-     * @param {SVGElement | HTMLElement} element The element on which styles will be applied
-     * @param {Array.<Object>} styles Array of style attributes
-     * @return {SVGElement | HTMLElement} SVGElement or html element.
-     */
+
+/**
+ * Sets styles in the svg or html element
+ * @param {SVGElement | HTMLElement} element The element on which styles will be applied
+ * @param {Array.<Object>} styles Array of style attributes
+ * @return {SVGElement | HTMLElement} SVGElement or html element.
+ */
 const setStyles = (element, styles) => {
     if (!(element instanceof selection)) {
         element = selectElement(element);
@@ -237,15 +243,16 @@ const setStyles = (element, styles) => {
     }
     return element;
 };
-    /**
-     * Creates svg or html elements by binding data to the selection.Removes extra elements
-     * on exit.
-     * @param {Object} params Parameter object
-     * @param {SVGElement | HTMLElement} params.container Container element where all elements will be appended
-     * @param {string} params.selector Selector by which elements will be selected from dom
-     * @param {string} params.append Append tag
-     * @param {Function} params.each Function which will be executed for each data point and element.
-     */
+
+/**
+ * Creates svg or html elements by binding data to the selection.Removes extra elements
+ * on exit.
+ * @param {Object} params Parameter object
+ * @param {SVGElement | HTMLElement} params.container Container element where all elements will be appended
+ * @param {string} params.selector Selector by which elements will be selected from dom
+ * @param {string} params.append Append tag
+ * @param {Function} params.each Function which will be executed for each data point and element.
+ */
 const createElements = (params) => {
     const container = select(params.container);
     let data;
@@ -268,13 +275,14 @@ const createElements = (params) => {
     selectionMerge.attr('class', params.className || '');
     sel.exit().remove();
 };
-    /**
-     * Clips an element with given measurement. Basically it is used to hide overflowing portions
-     * of any element.
-     * @param {SVGElement} container svg element which needs to be clipped.
-     * @param {Object} measurement Dimensions of the clipped rectangle.
-     * @param {string} id Unique id of the clip element
-     */
+
+/**
+ * Clips an element with given measurement. Basically it is used to hide overflowing portions
+ * of any element.
+ * @param {SVGElement} container svg element which needs to be clipped.
+ * @param {Object} measurement Dimensions of the clipped rectangle.
+ * @param {string} id Unique id of the clip element
+ */
 const clipElement = (container, measurement, id) => {
     const clipPathElement = makeElement(select(container), 'clipPath', [1], `#${id}`);
     const clipPathRect = makeElement(clipPathElement, 'rect', [1]);
@@ -284,26 +292,23 @@ const clipElement = (container, measurement, id) => {
                     .attr('height', measurement.height);
     clipPathElement.attr('clip-path', `url(#${id})`);
 };
-    /**
-     * Returns the element of the corresponding classname.
-     * @param {HTMLElement | SVGElement} node html or svg node element.
-     * @param {string} className css class to be applied.
-     * @return {HTMLElement | SVGElement} html or svg element.
-     */
+
+/**
+ * Returns the element of the corresponding classname.
+ * @param {HTMLElement | SVGElement} node html or svg node element.
+ * @param {string} className css class to be applied.
+ * @return {HTMLElement | SVGElement} html or svg element.
+ */
 const getElementsByClassName = (node, className) => select(node).selectAll(className).nodes();
-    /**
-     * Gets the mouse position relative to an svg type of element
-     * @param {SVGElement} element Any svg element like rect, circle, etc.
-     * @param {Event} event Event object.
-     * @return {Object} x and y position relative to the container element passed.
-     */
+
+/**
+ * Gets the mouse position relative to an svg type of element
+ * @param {SVGElement} element Any svg element like rect, circle, etc.
+ * @param {Event} event Event object.
+ * @return {Object} x and y position relative to the container element passed.
+ */
 const getMousePos = (element, event) => {
-    const
-            // ownerSVGBox = (element.ownerSVGElement && element.ownerSVGElement.getBoundingClientRect()) || {
-            //     x: 0,
-            //     y: 0
-            // },
-            boundingClientRect = element.getBoundingClientRect();
+    const boundingClientRect = element.getBoundingClientRect();
     return {
         x: event.x - boundingClientRect.x,
         y: event.y - boundingClientRect.y
@@ -317,30 +322,33 @@ const getClientPoint = (...params) => {
         y: pos[1]
     };
 };
-    /** This function appends a dom element in another element.
-     * @param {Object} tag The tag name of the element to append
-     * @param {Object} mount Mount point fo the element
-     * @return {Object} selection of the appended element
-     */
+
+/** This function appends a dom element in another element.
+ * @param {Object} tag The tag name of the element to append
+ * @param {Object} mount Mount point fo the element
+ * @return {Object} selection of the appended element
+ */
 const createElement = (tag, mount) => select(mount).append(tag).node();
-    /**
-     * This function creates captions in the container
-     * @param {Object} container The container where the caption is to be appended
-     * @param {Object} config The configuration of the caption
-     * @return {Object} node for caption
-     */
+
+/**
+ * This function creates captions in the container
+ * @param {Object} container The container where the caption is to be appended
+ * @param {Object} config The configuration of the caption
+ * @return {Object} node for caption
+ */
 const createCaption = (container, config) => {
     const caption = select(container).selectAll(config.className).data([1]);
     const captionEl = caption.enter().append('p').merge(caption).text(config.text);
     setStyles(captionEl.node(), config.styles);
     return captionEl.node();
 };
-    /**
-     * Draws an invisible rectangle element
-     * @param {SVGElement} container container element
-     * @param {Object} config x y width, height of the tracker element
-     * @return {Selection} Tracker group
-     */
+
+/**
+ * Draws an invisible rectangle element
+ * @param {SVGElement} container container element
+ * @param {Object} config x y width, height of the tracker element
+ * @return {Selection} Tracker group
+ */
 const drawTracker = (container, config) => {
     const className = config.className;
     const group = selectElement(container).selectAll(`.${config.selector}`).data([null]);
@@ -359,21 +367,19 @@ const drawTracker = (container, config) => {
     groupSel.attr('class', className);
     return groupSel;
 };
-     /**
-     * Gets the d3 event function
-     * @return {Object} d3 event
-     */
+
+/**
+ * Gets the d3 event function
+ * @return {Object} d3 event
+ */
 const getEvent = () => d3event;
-     /**
-     * Gets the d3 drag function
-     * @return {Object} d3 drag
-     */
+
+/**
+ * Gets the d3 drag function
+ * @return {Object} d3 drag
+ */
 const getD3Drag = () => d3drag;
-const getBrush = (value) => {
-    if (value === 'x') { return brushX(); }
-    if (value === 'y') { return brushY(); }
-    return brush();
-};
+
 const getSmartComputedStyle = (group, css) => {
     let textEl;
     const testText = 'W';
@@ -414,7 +420,6 @@ const hasTouch = () => 'ontouchstart' in document.documentElement;
 
 export {
     hasTouch,
-    getBrush,
     selectElement,
     selectAllElements,
     createSVGElement,

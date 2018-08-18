@@ -1,5 +1,10 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-
+import {
+    axisLeft,
+    axisRight,
+    axisTop,
+    axisBottom
+} from 'd3-axis';
 import {
     symbolCircle,
     symbolCross,
@@ -16,8 +21,18 @@ import {
     stackOrderDescending,
     stackOffsetNone,
     stackOffsetExpand,
-    stackOffsetWiggle
+    stackOffsetWiggle,
+    pie,
+    arc,
+    line,
+    curveLinear,
+    curveStepAfter,
+    curveStepBefore,
+    curveStep,
+    curveCatmullRom,
+    area
 } from 'd3-shape';
+import { scaleBand } from 'd3-scale';
 import { nest } from 'd3-collection';
 import {
     interpolate,
@@ -1416,7 +1431,38 @@ const nestCollection = (params) => {
     return nestFn.entries(params.data);
 };
 
+const pathInterpolators = {
+    curveLinear,
+    curveStepAfter,
+    curveStepBefore,
+    curveStep,
+    curveCatmullRom,
+    stepAfter: curveStepAfter,
+    catmullRom: curveCatmullRom,
+    step: curveStep,
+    stepBefore: curveStepBefore,
+    linear: curveLinear
+};
+
+const Symbols = {
+    axisLeft,
+    axisRight,
+    axisTop,
+    axisBottom,
+    line,
+    area,
+    pie,
+    arc
+};
+
+const Scales = {
+    band: scaleBand
+};
+
 export {
+    Scales,
+    Symbols,
+    pathInterpolators,
     stack,
     nestCollection,
     getSymbol,

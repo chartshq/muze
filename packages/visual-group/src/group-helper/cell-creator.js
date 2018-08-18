@@ -350,9 +350,9 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         rightHeaders
     } = selectionObj;
     const [rowPrime, rowSec, colPrime, colSec] = [rowsPrimary, rowsSecondary, columnsPrimary, columnsSecondary]
-        .map(d => d ? d.getObjects() : []);
-    const [leftFacets, rightFacets] = [leftHeaders, rightHeaders].map(e => e ? e.getObjects()
-                    .map(f => f.getObjects()) : []);
+        .map(d => (d ? d.getObjects() : []));
+    const [leftFacets, rightFacets] = [leftHeaders, rightHeaders].map(e => (e ? e.getObjects()
+                    .map(f => f.getObjects()) : []));
 
     // Compute left matrix using left headers and the axes on the rows
     let leftMatrix = leftFacets.length ? leftFacets.map((d, i) => {

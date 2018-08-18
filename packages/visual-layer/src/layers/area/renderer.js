@@ -1,16 +1,11 @@
-import { area,
-    curveLinear,
-    curveCatmullRom
-} from 'd3-shape';
 import {
     easeFns,
-    selectElement
+    selectElement,
+    pathInterpolators,
+    Symbols
 } from 'muze-utils';
 
-const curveInterpolators = {
-    linear: curveLinear,
-    catmullRom: curveCatmullRom
-};
+const area = Symbols.area;
 /**
  * Draws a line from the points
  * Generates a svg path string
@@ -22,7 +17,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
 
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
-    const curveInterpolatorFn = curveInterpolators[interpolate];
+    const curveInterpolatorFn = pathInterpolators[interpolate];
     const selection = mount.selectAll('path').data([1]);
     const [enterAreaPath, updateAreaPath] = ['enter', 'update'].map(e => area().curve(curveInterpolatorFn)
                     .x(d => d[e].x)

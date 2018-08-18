@@ -52,7 +52,6 @@
   "dependencies": {
     "d3-ease": "^1.0.3",
     "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
-    "d3-transition": "^1.1.1",
     "datamodel": "^1.0.0",
     "@chartshq/muze-axis": "^1.0.0",
     "muze-utils": "^1.0.0",

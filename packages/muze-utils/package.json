@@ -55,6 +55,8 @@
     "d3-transition": "^1.1.1",
     "d3-collection": "1.0.4",
     "d3-voronoi": "^1.1.2",
+    "d3-axis": "git+ssh://git@bitbucket.org:fusioncharts/d3-axis.git",
+    "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
     "hyperdis": "git+ssh://git@bitbucket.org/fusioncharts/hyperdis.git#develop"
   }
 }

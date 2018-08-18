@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { axisLeft, axisBottom, axisRight, axisTop } from 'd3-axis';
+import { Symbols } from 'muze-utils';
 import * as AxisOrientation from '../enums/axis-orientation';
 
 /**
@@ -21,8 +21,8 @@ export const RIGHT = 'right';
   * used to represent that axis.
   */
 export const axisOrientationMap = {
-    [AxisOrientation.LEFT]: axisLeft,
-    [AxisOrientation.BOTTOM]: axisBottom,
-    [AxisOrientation.RIGHT]: axisRight,
-    [AxisOrientation.TOP]: axisTop
+    [AxisOrientation.LEFT]: Symbols.axisLeft,
+    [AxisOrientation.BOTTOM]: Symbols.axisBottom,
+    [AxisOrientation.RIGHT]: Symbols.axisRight,
+    [AxisOrientation.TOP]: Symbols.axisTop
 };

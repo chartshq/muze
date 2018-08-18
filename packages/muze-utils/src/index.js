@@ -72,7 +72,13 @@ export {
     extendsClass,
     concatModels,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    nestCollection,
+    stack,
+    getSymbol,
+    Scales,
+    Symbols,
+    pathInterpolators
 } from './common-utils';
 
 export {
@@ -82,7 +88,6 @@ export {
     createHTMLDiv,
     createSVGGroup,
     makeElement,
-    getBrush,
     applyStyle,
     getSVGGroup,
     addClass,
@@ -101,8 +106,7 @@ export {
     getD3Drag,
     getSmartComputedStyle,
     getClientPoint,
-    hasTouch,
-    getSymbol
+    hasTouch
 } from './renderer-utils';
 
 export { dataSelect, DataObject } from './DataSystem';

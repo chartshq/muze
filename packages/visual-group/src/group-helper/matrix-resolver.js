@@ -631,8 +631,8 @@ export default class MatrixResolver {
                 return footers[type];
             }));
         } else {
-            bottomLeft = bottomCols.map(() => leftRows.length > 0 ? leftRows[0].map(() => new BlankCell()) : []);
-            bottomRight = bottomCols.map(() => rightRows.length > 0 ? rightRows[0].map(() => new BlankCell()) : []);
+            bottomLeft = bottomCols.map(() => (leftRows.length > 0 ? leftRows[0].map(() => new BlankCell()) : []));
+            bottomRight = bottomCols.map(() => (rightRows.length > 0 ? rightRows[0].map(() => new BlankCell()) : []));
         }
 
         lifeCycleManager.notify({
