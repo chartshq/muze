@@ -136,7 +136,7 @@
     position: relative;
 }
 
-.#{$prefix}layout-row {
+.#{$prefix}grid-layout-container {
     position: relative;
     float: left;
 
@@ -170,17 +170,17 @@
     position: relative;
 }
 
-.#{$prefix}layout-row {
+.#{$prefix}layout-grid-container {
     position: relative;
     float: left;
 }
 
-.#{$prefix}layout-row div, .#{$prefix}layout-row table {
+.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
     float: left;
     border-collapse: collapse;
 }
 
-.#{$prefix}layout-row div, .#{$prefix}layout-row table {
+.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
     float: left;
     border-collapse: collapse;
 }

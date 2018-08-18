@@ -1,4 +1,3 @@
-
 import { makeElement, selectElement } from 'muze-utils';
 import { cellSpanMaker } from './span-maker';
 import {
@@ -110,7 +109,7 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
             });
         }
         // Rendering content within placeholders
-        cells.each(function(cell) {
+        cells.each(function (cell) {
             cell.placeholder && cell.placeholder.render(this);
         }).exit().each((cell) => {
             cell.placeholder && cell.placeholder.remove();
@@ -175,12 +174,12 @@ export function renderMatrices (context, matrices, layoutDimensions) {
         newCenter = [center];
         newBottom = [bottom];
     }
-    makeElement(mount, 'div', newCenter, `${classPrefix}-stack-layout-container`)
-                    .each(function(d, i) {
-                        renderMatrix(newTop[i], selectElement(this), TOP, layoutDimensions, classPrefix);
-                        renderMatrix(d, selectElement(this), CENTER, layoutDimensions, classPrefix);
-                        renderMatrix(newBottom[i], selectElement(this), BOTTOM, layoutDimensions, classPrefix);
-                    })
+    // makeElement(mount, 'div', newCenter, `${classPrefix}-grid-layout`)
+    mount.each(function (d, i) {
+        renderMatrix(newTop[i], selectElement(this), TOP, layoutDimensions, classPrefix);
+        renderMatrix(newCenter[i], selectElement(this), CENTER, layoutDimensions, classPrefix);
+        renderMatrix(newBottom[i], selectElement(this), BOTTOM, layoutDimensions, classPrefix);
+    })
                     .style(WIDTH, `${width}px`)
                     .style('margin-bottom', (d, i) => {
                         if (i !== newBottom.length - 1) { return `${Math.floor(gutter)}px`; }

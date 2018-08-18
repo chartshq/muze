@@ -84,6 +84,7 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof AxisCell
      */
     setAvailableSpace (width = 0, height, padding, isOffset) {
+        debugger;
         const {
             left,
             right,
@@ -156,6 +157,7 @@ export default class LinearAxis extends SimpleAxis {
             return axis.scale().ticks(tickValues);
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
+
         return getNumberOfTicks(availableSpace, labelDim, axis, interpolator);
     }
 
@@ -188,8 +190,7 @@ export default class LinearAxis extends SimpleAxis {
                 return `translate(0, -${(shiftHeight) / 3}px)`;
             }
             if (i === 0 && (orientation === TOP || orientation === BOTTOM) && rotation === 0) {
-                return `translate(${shiftWidth / 2}px,  ${0}px)
-                    rotate(${rotation}deg)`;
+                return `translate(${shiftWidth / 2}px,  ${0}px) rotate(${rotation}deg)`;
             } return '';
         });
         return tickText;

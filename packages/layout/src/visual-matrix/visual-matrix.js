@@ -1,4 +1,3 @@
-
 import { mergeRecursive, generateGetterSetters } from 'muze-utils';
 import {
     createTree,

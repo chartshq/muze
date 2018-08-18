@@ -260,11 +260,14 @@ export default class BaseLayer extends SimpleLayer {
         const colorAxis = axes.color;
         const highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
         highlightStyles.forEach((highlight) => {
-            elements.style(highlight.type, (d) => {
-                d.meta.colorTransform.highlight = d.meta.colorTransform.highlight || {};
-                let fillColorInfo = colorAxis.transformColor(d.meta.stateColor, highlight.intensity);
-                d.meta.colorTransform.highlight[highlight.type] = highlight.intensity;
-                d.meta.stateColor = fillColorInfo.hsla;
+            const styleType = highlight.type;
+            elements.style(styleType, (d) => {
+                const { colorTransform, stateColor, originalColor } = d.meta;
+                colorTransform.highlight = colorTransform.highlight || {};
+                stateColor[styleType] = stateColor[styleType] || originalColor;
+                const fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity);
+                colorTransform.highlight[styleType] = highlight.intensity;
+                stateColor[styleType] = fillColorInfo.hsla;
                 return fillColorInfo.color;
             });
         });
@@ -283,16 +286,20 @@ export default class BaseLayer extends SimpleLayer {
         const colorAxis = axes.color;
         const highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
         highlightStyles.forEach((highlight) => {
-            elements.style(highlight.type, (d) => {
-                d.meta.colorTransform.highlight = d.meta.colorTransform.highlight || {};
-                if (d.meta.colorTransform.highlight && d.meta.colorTransform.highlight[highlight.type]) {
-                    let fillColorInfo = colorAxis.transformColor(d.meta.stateColor, highlight.intensity.map(e => -e));
-                    d.meta.stateColor = fillColorInfo.hsla;
-                    d.meta.colorTransform.highlight[highlight.type] = null;
+            const styleType = highlight.type;
+            elements.style(styleType, (d) => {
+                const { colorTransform, stateColor, originalColor } = d.meta;
+                colorTransform.highlight = colorTransform.highlight || {};
+                if (colorTransform.highlight && colorTransform.highlight[styleType]) {
+                    stateColor[styleType] = stateColor[styleType] || originalColor;
+                    const fillColorInfo = colorAxis.transformColor(stateColor[styleType],
+                        highlight.intensity.map(e => -e));
+                    stateColor[styleType] = fillColorInfo.hsla;
+                    colorTransform.highlight[styleType] = null;
                     return fillColorInfo.color;
                 }
-                d.meta.colorTransform.highlight = null;
-                const [h, s, l] = d.meta.stateColor;
+                colorTransform.highlight = null;
+                const [h, s, l] = stateColor[styleType] ? stateColor[styleType] : originalColor;
                 return `hsl(${h * 360},${s * 100}%,${l * 100}%)`;
             });
         });
@@ -461,7 +468,7 @@ export default class BaseLayer extends SimpleLayer {
 
         const [xMeasure, yMeasure] = [xFieldType, yFieldType].map(type => type === FieldType.MEASURE);
         schema.forEach((d, i) => {
-            let name = d.name;
+            const name = d.name;
             if (fieldsConfig[name].def.type === FieldType.DIMENSION) {
                 identifiers[0].push(name);
                 identifiers[1].push(data[i]);

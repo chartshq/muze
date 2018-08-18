@@ -106,7 +106,7 @@ export default class AreaLayer extends LineLayer {
             const meta = {};
             style.fill = color;
             // style['fill-opacity'] = 0;
-            meta.stateColor = rawColor;
+            meta.stateColor = {};
             meta.originalColor = rawColor;
             meta.colorTransform = {};
             const point = {

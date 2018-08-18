@@ -85,25 +85,25 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year', 'Origin'], {
+        rootData = rootData.groupBy(['Year'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Miles_per_Gallon'],
-            columns = ['Year'];
+        let rows = ['Displacement'],
+            columns = ['Weight_in_lbs'];
 
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(500)
-            .height(600)
-        .layers([{
-            mark: 'area'
-        }])
+            .width(590)
+            .height(350)
+        // .layers([{
+        //     mark: 'area'
+        // }])
             .config({
                 gridLines: {
                     y: {
@@ -121,8 +121,9 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        // interpolator: 'log',
-                        base: 10,
+                        interpolator: 'pow',
+                        exponent: 3,
+                        // base: 10,
                         showInnerTicks: true,
 
                     },
@@ -132,7 +133,7 @@
                     },
                 }
             })
-            .color('Origin')
+            // .color('Ori.gin')
             .legend({
                 align: 'horizontal',
 

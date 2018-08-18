@@ -15,9 +15,11 @@ export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colo
     return { color, rawColor };
 };
 
-const transfromColor = (colorAxis, datum, intensity) => {
-    let fillColorInfo = colorAxis.transformColor(datum.meta.stateColor, intensity);
-    datum.meta.stateColor = fillColorInfo.hsla;
+const transfromColor = (colorAxis, datum, styleType, intensity) => {
+    datum.meta.stateColor[styleType] = datum.meta.stateColor[styleType] || datum.meta.originalColor;
+    const fillColorInfo = colorAxis.transformColor(datum.meta.stateColor[styleType], intensity);
+    datum.meta.stateColor[styleType] = fillColorInfo.hsla;
+
     return fillColorInfo;
 };
 
@@ -29,24 +31,25 @@ const applyInteractionStyle = (context, selectionSet, interactionType, config) =
     const interactionStyles = interaction[interactionType];
 
     interactionStyles.forEach((style) => {
-        elements.style(style.type, ((d) => {
-            d.meta.colorTransform[interactionType] = d.meta.colorTransform[interactionType] || {};
-            if (apply && !d.meta.colorTransform[interactionType][style.type]) {
+        const styleType = style.type;
+        elements.style(styleType, ((d) => {
+            const { colorTransform, stateColor, originalColor } = d.meta;
+            colorTransform[interactionType] = colorTransform[interactionType] || {};
+            if (apply && !colorTransform[interactionType][styleType]) {
                 // fade selections
-                d.meta.colorTransform[interactionType][style.type] = style.intensity;
-                return transfromColor(colorAxis, d, style.intensity).color;
+                colorTransform[interactionType][styleType] = style.intensity;
+                return transfromColor(colorAxis, d, styleType, style.intensity).color;
             }
-            if (!apply && d.meta.colorTransform[interactionType][style.type]) {
+            if (!apply && colorTransform[interactionType][styleType]) {
                  // unfade selections
-                d.meta.colorTransform[interactionType][style.type] = null;
-                return transfromColor(colorAxis, d, style.intensity.map(e => -e)).color;
+                colorTransform[interactionType][styleType] = null;
+                return transfromColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
             }
-            const [h, s, l] = d.meta.stateColor;
-            return `hsl(${h * 360},${s * 100}%,${l * 100}%)`;
+            const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor;
+            return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a || 1})`;
         }));
     });
 };
-
 
 /**
  *
@@ -56,10 +59,9 @@ const applyInteractionStyle = (context, selectionSet, interactionType, config) =
  * @param {*} hasFaded
  */
 export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction) => {
-    let interactionConfig = { interaction, apply: hasFaded };
+    const interactionConfig = { interaction, apply: hasFaded };
     applyInteractionStyle(context, selectionSet, 'fade', interactionConfig);
 };
-
 
 /**
  *
@@ -69,7 +71,7 @@ export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction
  * @param {*} hasFaded
  */
 export const focusUnfocusSelection = (context, selectionSet, isFocussed, interaction) => {
-    let interactionConfig = { interaction, apply: isFocussed };
+    const interactionConfig = { interaction, apply: isFocussed };
     applyInteractionStyle(context, selectionSet, 'focus', interactionConfig);
 };
 
@@ -283,7 +285,7 @@ export const calculateDomainFromData = (data, encodingFieldInf, transformType) =
 
 export const attachDataToVoronoi = (voronoi, points) => {
     voronoi.data([].concat(...points).filter(d => d._id !== undefined).map((d) => {
-        let point = d.update;
+        const point = d.update;
         return {
             x: point.x,
             y: point.y,
@@ -300,7 +302,7 @@ export const attachDataToVoronoi = (voronoi, points) => {
  * @param {*} remove
  */
 export const updateStyle = (target, styles, remove) => {
-    for (let key in styles) {
+    for (const key in styles) {
         if ({}.hasOwnProperty.call(styles, key)) {
             target.style(key, remove ? null : styles[key]);
         }

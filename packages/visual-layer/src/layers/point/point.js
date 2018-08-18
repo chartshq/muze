@@ -48,7 +48,7 @@ export default class PointLayer extends BaseLayer {
      * Returns the default configuration of the point layer
      * @return {Object} Default configuration of the point layer
      */
-    static defaultConfig() {
+    static defaultConfig () {
         return defaultConfig;
     }
 
@@ -70,7 +70,7 @@ export default class PointLayer extends BaseLayer {
      * @returns
      * @memberof PointLayer
      */
-    static drawFn() {
+    static drawFn () {
         return drawSymbols;
     }
 
@@ -106,7 +106,6 @@ export default class PointLayer extends BaseLayer {
         const sizeFieldIndex = fieldsConfig[sizeField] && fieldsConfig[sizeField].index;
         const colorAxis = axes.color;
 
-
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
             const row = d._data;
@@ -140,7 +139,7 @@ export default class PointLayer extends BaseLayer {
                     shape,
                     size: Math.abs(size),
                     meta: {
-                        stateColor: rawColor,
+                        stateColor: {},
                         originalColor: rawColor,
                         colorTransform: {}
                     },

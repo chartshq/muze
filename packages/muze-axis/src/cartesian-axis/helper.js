@@ -5,18 +5,23 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, interpolator) =
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
-    if (interpolator === 'linear') {
-        if (tickLength * (labelDim * 1.5) > availableSpace) {
-            numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
-        }
+    if (tickLength * (labelDim * 1.5) > availableSpace) {
+        numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
     }
 
     if (numberOfValues < 1) {
         numberOfValues = 1;
     }
-    // if (interpolator === 'pow') {
-    //     return axis.tickSize(10, 4, -10);
-    // }
+    if (interpolator === 'log' || interpolator === 'pow') {
+        let x = 1;
+        for (let i = 0; i <= numberOfValues; i++) {
+            if (axis.scale().ticks(i).length <= numberOfValues) {
+                x = i;
+            }
+        }
+        return axis.scale().ticks(x);
+    }
+
     return axis.scale().ticks(numberOfValues);
 };
 
@@ -40,6 +45,7 @@ export const getTickLabelInfo = (context) => {
 
     labelManager.setStyle(context._tickLabelStyle);
     // get the values along the domain
+
     axisTickLabels = tickValues || labelFunc();
     // Get the tick labels
     axisTickLabels = axisTickLabels.map((originalLabel, i) => {
@@ -217,6 +223,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
     const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 
     width = range && range.length ? range[1] - range[0] : 0;
+
     height = 0;
     if (tickValues) {
         width = tickValues.reduce((total) => {

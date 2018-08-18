@@ -38,7 +38,7 @@ export default class TickLayer extends PointLayer {
      * @returns
      * @memberof TickLayer
      */
-    static drawFn() {
+    static drawFn () {
         return drawTicks;
     }
 
@@ -135,7 +135,7 @@ export default class TickLayer extends PointLayer {
                 { colorEncoding, colorAxis, colorFieldIndex });
 
             style.stroke = color;
-            meta.stateColor = rawColor;
+            meta.stateColor = {};
             meta.originalColor = rawColor;
             meta.colorTransform = {};
             if (!isNaN(xPx) && !isNaN(yPx)) {

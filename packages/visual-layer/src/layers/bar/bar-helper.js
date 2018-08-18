@@ -201,7 +201,7 @@ export const getBarMeasurement = (axis, bandScale, config) => {
     } else if (pad !== undefined) {
         let offset;
         if (isAxisBandScale) {
-            let step = scale.step();
+            const step = scale.step();
             offset = scale.padding() * step;
             width = scale.bandwidth() + offset;
         } else {
@@ -272,10 +272,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             { colorEncoding, colorAxis, colorFieldIndex });
 
         style.fill = color;
-        meta.stateColor = rawColor;
+        meta.stateColor = {};
         meta.originalColor = rawColor;
         meta.colorTransform = {};
-
 
         const update = dimensions.update;
 

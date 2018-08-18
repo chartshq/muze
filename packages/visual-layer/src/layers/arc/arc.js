@@ -253,7 +253,7 @@ export default class ArcLayer extends BaseLayer {
                 index: i,
                 meta: {
                     originalColor: colorAxis.getRawColor(d.colorVal),
-                    stateColor: colorAxis.getRawColor(d.colorVal),
+                    stateColor: {},
                     colorTransform: {}
                 }
             }], `${qualClassName[0]}-path`)

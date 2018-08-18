@@ -176,7 +176,7 @@ export default class LineLayer extends BaseLayer {
 
             style.stroke = color;
             style['fill-opacity'] = 0;
-            meta.stateColor = rawColor;
+            meta.stateColor = {};
             meta.originalColor = rawColor;
             meta.colorTransform = {};
 
@@ -300,8 +300,8 @@ export default class LineLayer extends BaseLayer {
         const dimensions = getObjProp(point, 'data', 'data', 'update');
 
         if (point) {
-            let { _data, _id } = point.data.data;
-            let identifiers = this.getIdentifiersFromData(_data, _id);
+            const { _data, _id } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(_data, _id);
             return {
                 id: identifiers,
                 dimensions: [{

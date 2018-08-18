@@ -14,7 +14,7 @@ import { LINEAR, HIDDEN, BOTTOM } from './enums/constants';
  * @param {*} config
  */
 const rotateAxis = (instance, tickText, labelManager, config) => {
-    const scale = instance.scale();
+    const axis = instance.axis();
     const {
         orientation,
         labels,
@@ -28,7 +28,7 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
     tickText.each(function (datum, index) {
         let yShift;
         let xShift;
-        const temp = scale.tickFormat ? scale.tickFormat()(datum) : datum;
+        const temp = axis.tickFormat ? axis.tickFormat()(datum) : datum;
 
         datum = temp.toString();
 
@@ -94,6 +94,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
     const tickText = selectContainer.selectAll('.tick text');
     tickText.selectAll('tspan').remove();
+
    // rotate labels if not enough space is available
     if (rotation !== 0 && isSmartTicks === false) {
         rotateAxis(axisInstance, tickText, labelManager, config);
@@ -147,7 +148,6 @@ const setAxisNamePos = (textNode, orientation, measures) => {
         availableSpace,
         axisNameWidth
     } = measures;
-
     switch (orientation) {
     case AxisOrientation.LEFT:
         textNode.attr('transform',
@@ -233,7 +233,7 @@ export function renderAxis (axisInstance) {
     } else {
         selectContainer.call(axis);
     }
-
+    selectContainer.selectAll('.tick').classed(`${classPrefix}-ticks`, true);
     selectContainer.selectAll('.tick line').classed(`${classPrefix}-tick-lines`, true);
 
     // Set classes for ticks

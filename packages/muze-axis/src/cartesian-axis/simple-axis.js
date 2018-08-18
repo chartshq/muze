@@ -216,7 +216,6 @@ export default class SimpleAxis {
         if (orientation === TOP || orientation === BOTTOM) {
             const range = this.range();
             const length = Math.abs(range[0] - range[1]);
-
             this.config({ labels: { rotation: 0 } });
             if (length > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > length) {
                 this.config({ labels: { rotation: -90 } });
