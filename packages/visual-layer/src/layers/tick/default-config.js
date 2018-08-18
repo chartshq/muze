@@ -16,7 +16,7 @@ export const defaultConfig = {
         focus: [{
             type: 'stroke',
             intensity: [0, -30, +30, 0]
-        }],
+        }]
     },
     transform: {
         type: 'identity'

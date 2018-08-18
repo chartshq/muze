@@ -1119,8 +1119,10 @@ const hexToHsv = (hex) => {
 
 const detectColor = (col) => {
     const matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-    const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
+
+    // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
+    const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
     const matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 

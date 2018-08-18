@@ -90,7 +90,7 @@ export default class AreaLayer extends LineLayer {
         const { xField, yField, y0Field } = encodingFieldsInf;
         const {
             xAxis,
-            yAxis,
+            yAxis
        } = getAxesScales(axes);
 
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;

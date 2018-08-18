@@ -3,7 +3,7 @@ import {
     setStyles,
     selectElement,
     makeElement,
-    getSmartComputedStyle,
+    getSmartComputedStyle
 } from 'muze-utils';
 
 /**

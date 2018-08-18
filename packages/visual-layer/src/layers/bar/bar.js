@@ -217,7 +217,7 @@ export default class BarLayer extends BaseLayer {
                 barWidth: barWidthMetrics.width,
                 barWidthOffset: barWidthOffsets[i] || 0,
                 barHeight: barHeightMetrics.width,
-                barHeightOffset: barHeightOffsets[i] || 0,
+                barHeightOffset: barHeightOffsets[i] || 0
             }));
     }
 

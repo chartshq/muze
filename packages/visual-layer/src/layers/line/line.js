@@ -184,7 +184,7 @@ export default class LineLayer extends BaseLayer {
                 enter: {},
                 update: {
                     x: xPx,
-                    y: d.y === null ? null : yPx,
+                    y: d.y === null ? null : yPx
                 },
                 style,
                 _data: d._data,

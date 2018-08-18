@@ -3,10 +3,10 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { interpolateArray, getUniqueId, generateGetterSetters } from 'muze-utils';
+import { getUniqueId, generateGetterSetters } from 'muze-utils';
 import { createScale, } from '../scale-creator';
 import { DEFAULT_CONFIG } from './defaults';
-import { SIZE, ORDINAL, CONTINOUS, DISCRETE } from '../enums/constants';
+import { SIZE, CONTINOUS, DISCRETE } from '../enums/constants';
 import { strategyGetter } from './size-strategy';
 import { PROPS } from './props';
 
@@ -26,7 +26,7 @@ export default class SizeAxis {
 
         this._id = getUniqueId();
         this._config = Object.assign({}, this.constructor.defaultConfig(), config);
-
+        // @todo: Will use configuration override using scale decorator
         this._domainType = this._config.type === 'linear' ? CONTINOUS : DISCRETE;
         this._rangeType = (this._config.interpolate || this._config.type !== 'linear') ? CONTINOUS : DISCRETE;
 

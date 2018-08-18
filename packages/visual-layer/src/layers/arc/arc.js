@@ -206,7 +206,7 @@ export default class ArcLayer extends BaseLayer {
     render (container) {
         const {
             height,
-            width,
+            width
         } = this.measurement();
         const {
             classPrefix,

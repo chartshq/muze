@@ -148,8 +148,6 @@ export default class GradientLegend extends SimpleLegend {
      * @memberof SimpleLegend
      */
     getCriteriaFromData (data) {
-        const fieldName = this.fieldName();
-
-        return [[fieldName], [data.value]];
+        return [[this.fieldName()], [data.value]];
     }
 }

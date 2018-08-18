@@ -10,6 +10,7 @@
       "error",
       "never"
     ],
+    
     "import/extensions": "off",
     "indent": [
       "error",
@@ -44,7 +45,7 @@
         "maxBOF": 0
       }
     ],
-    "comma-dangle": "off",
+    "comma-dangle": ["error", "never"],
     "no-underscore-dangle": 0,
     "no-mixed-operators": 0,
     "no-loop-func": "warn",

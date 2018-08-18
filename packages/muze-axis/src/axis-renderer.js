@@ -215,6 +215,7 @@ export function renderAxis (axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
+    // @to-do: Need to write a configuration override using decorator pattern
     if (interpolator === 'linear') {
     // Set ticks for the axis
         axisInstance.setTickValues();

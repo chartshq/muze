@@ -76,7 +76,8 @@ const pieceWiseRange = (domainValue, scale, domain, uniqueVals) => {
     const index = uniqueVals.indexOf(domainValue);
     const numVal = domain[index];
     const fn = piecewiseInterpolator()(numberInterpolator(), [...scale.range()]);
-    return fn(numVal); };
+    return fn(numVal);
+};
 
 /**
  *

@@ -1,7 +1,7 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 import { LOG } from '../enums/scale-type';
 
-export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
+export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
     const ticks = axis.scale().ticks();
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
@@ -10,15 +10,13 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
-    if (numberOfValues < 1) {
-        numberOfValues = 1;
-    }
-
+    numberOfValues = Math.max(1, numberOfValues);
     return axis.scale().ticks(numberOfValues);
 };
 
 export const sanitizeDomain = (domain, context) => {
     const interpolator = context.config().interpolator;
+    // @todo: Get from scale decorator
     if (interpolator === LOG && domain[0] >= 0) {
         return [Math.max(1, domain[0]), Math.max(1, domain[1])];
     }

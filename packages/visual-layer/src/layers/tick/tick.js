@@ -63,7 +63,7 @@ export default class TickLayer extends PointLayer {
         let points = [];
         const {
                 xAxis,
-                yAxis,
+                yAxis
             } = getAxesScales(axes);
         const fieldsConfig = this.data().getFieldsConfig();
         const individualClassName = this.config().individualClassName;
@@ -73,7 +73,7 @@ export default class TickLayer extends PointLayer {
                 x0Field,
                 y0Field,
                 xFieldType,
-                yFieldType,
+                yFieldType
             } = this.encodingFieldsInf();
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
