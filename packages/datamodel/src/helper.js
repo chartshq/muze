@@ -257,11 +257,15 @@ export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTrave
 
     calculatedVariableIterator(dataModel, (targetDM, ...params) => {
         if (targetDM !== nonTraversingModel) {
-            const calculatedVariableModel = propModel[0].calculateVariable(...params, {
+            const entryModel = propModel[0].clone(false, false).calculateVariable(...params, {
                 saveChild: false,
                 replaceVar: true
             });
-            forwardPropagation(targetDM, [calculatedVariableModel, calculatedVariableModel], grouped);
+            const exitModel = propModel[1].clone(false, false).calculateVariable(...params, {
+                saveChild: false,
+                replaceVar: true
+            });
+            forwardPropagation(targetDM, [entryModel, exitModel], grouped);
         }
     });
 };
