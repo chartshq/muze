@@ -2,6 +2,7 @@
   "name": "muze-monorepo",
   "private": true,
   "devDependencies": {
+    "autoprefixer": "^9.1.1",
     "babel-cli": "6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "6.1.2",
@@ -17,7 +18,7 @@
     "eslint-plugin-import": "2.7.0",
     "eslint-plugin-jsx-a11y": "5.1.1",
     "eslint-plugin-react": "7.3.0",
-    "extract-text-webpack-plugin": "^4.0.0-alpha.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "istanbul-instrumenter-loader": "^3.0.0",
     "jsdoc": "3.4.3",
     "karma": "1.7.1",
@@ -32,6 +33,7 @@
     "mocha": "3.4.2",
     "mocha-webpack": "0.7.0",
     "node-sass": "^4.9.0",
+    "postcss-loader": "^3.0.0",
     "sass-loader": "^7.0.1",
     "style-loader": "^0.21.0",
     "transform-runtime": "0.0.0",
@@ -45,13 +47,19 @@
     "test": "npm run lint && karma start karma.conf.js",
     "utd": "karma start karma.conf.js --browsers=Chrome --single-run=false --debug --auto-watch",
     "ut": "karma start karma.conf.js",
-    "build": "webpack --mode production --optimize-dedupe --config webpack.config.js",
-    "build:dev": "webpack --mode development  --config webpack.config.js",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
     "start": "webpack-dev-server --host 0.0.0.0 --open --mode development --config webpack.config.dev.js",
     "lint": "eslint ./packages",
     "lint-errors": "eslint --quiet ./packages",
     "docs": "jsdoc -c ./jsdoc.conf.json",
     "postinstall": "lerna bootstrap"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "browserslist": [
+    "last 10 major versions",
+    "not dead",
+    "Firefox ESR",
+    "ie >= 11"
+  ]
 }

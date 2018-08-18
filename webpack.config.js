@@ -2,6 +2,7 @@ const path = require('path');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+const extractCSS = new ExtractTextPlugin('muze.min.css');
 const entryFile = path.resolve(__dirname, './packages/muze/src/index.js');
 const libraryName = 'muze';
 const outFileName = `${libraryName}.js`;
@@ -26,16 +27,11 @@ module.exports = {
             },
             {
                 test: /\.(s*)css$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                        options: { singleton: true }
-                    },
-                    { loader: 'css-loader' },
-                    {
-                        loader: 'sass-loader',
-                    }
-                ]
+                use: extractCSS.extract([
+                    'css-loader',
+                    'postcss-loader',
+                    'sass-loader'
+                ])
             }
         ]
     },
@@ -55,6 +51,6 @@ module.exports = {
         contentBase: './examples',
     },
     plugins: [
-        new ExtractTextPlugin('layout.css')
+        extractCSS
     ]
 };
