@@ -85,7 +85,7 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year', 'Origin'], {
+        rootData = rootData.groupBy(['Year', 'Origin', 'Maker'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
@@ -94,8 +94,8 @@
         window.canvas = env.canvas();
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
-        let rows = ['Miles_per_Gallon', 'Horsepower'],
-            columns = ['Year'];
+        let rows = ['Miles_per_Gallon', 'Horsepower', 'Acceleration'],
+            columns = rows.reverse();
 
         canvas = canvas
             .rows(rows)
@@ -104,7 +104,7 @@
             .width(500)
             .height(600)
         .layers([{
-            mark: 'bar'
+            mark: 'point'
         }])
             .config({
                 gridLines: {
@@ -134,7 +134,10 @@
                     },
                 }
             })
-            .color('Origin')
+            .color({
+                field: 'Horsepower',
+                interpolate: true
+            })
             .legend({
                 align: 'horizontal',
 

@@ -301,7 +301,7 @@ export default class Firebolt {
     getAddSetFromCriteria (criteria, propagationInf = {}) {
         const context = this.context;
         const filteredDataModel = propagationInf.data ? propagationInf.data :
-            context.getDataModelFromIdentifiers(criteria);
+            context.getDataModelFromIdentifiers(criteria, 'all');
         const xFields = context.fields().x || [];
         const yFields = context.fields().y || [];
         const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);

@@ -1226,7 +1226,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  * @param {*} criteria
  * @returns
  */
-const getDataModelFromRange = (dataModel, criteria) => {
+const getDataModelFromRange = (dataModel, criteria, mode) => {
     if (criteria === null) {
         return null;
     }
@@ -1243,7 +1243,7 @@ const getDataModelFromRange = (dataModel, criteria) => {
 
     return dataModel.select(selFn, {
         saveChild: false,
-        mode: 'all'
+        mode
     });
 };
 
@@ -1254,7 +1254,7 @@ const getDataModelFromRange = (dataModel, criteria) => {
  * @param {*} identifiers
  * @returns
  */
-const getDataModelFromIdentifiers = (dataModel, identifiers) => {
+const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
         let fieldsConfig = dataModel.getFieldsConfig(),
@@ -1282,12 +1282,12 @@ const getDataModelFromIdentifiers = (dataModel, identifiers) => {
                 return include;
             }, {
                 saveChild: false,
-                mode: 'all'
+                mode
             });
         }
     }
     else {
-        filteredDataModel = getDataModelFromRange(dataModel, identifiers);
+        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
     }
     return filteredDataModel;
 };

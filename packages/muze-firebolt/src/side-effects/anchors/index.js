@@ -37,7 +37,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
                         y: encodingFieldsInf.yField,
                         color: encodingFieldsInf.colorField,
                         size: {
-                            value: 100
+                            value: this.defaultSizeValue()
                         }
                     },
                     transform: config.transform,
@@ -55,6 +55,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return {
             disabled: true
         };
+    }
+
+    defaultSizeValue () {
+        return 100;
     }
 
     apply (selectionSet) {
