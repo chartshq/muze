@@ -92,7 +92,7 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Acceleration'],
+        let rows = ['Origin', 'Acceleration'],
             columns = ['Year'];
 
         canvas = canvas
