@@ -6,32 +6,58 @@
   "extends": "airbnb",
   "parser": "babel-eslint",
   "rules": {
-    "func-names": ["error", "never"],
+    "func-names": [
+      "error",
+      "never"
+    ],
     "import/extensions": "off",
-    "indent": ["error", 4, { "MemberExpression": 4 }],
-    "space-before-function-paren":["error", "always"],
+    "indent": [
+      "error",
+      4,
+      {
+        "MemberExpression": 4
+      }
+    ],
+    "space-before-function-paren": [
+      "error",
+      "always"
+    ],
     "no-multi-assign": "off",
-    "max-len": ["error", 120],
-    "one-var": ["error", "never"],
+    "max-len": [
+      "error",
+      120
+    ],
+    "one-var": [
+      "error",
+      "never"
+    ],
     "no-plusplus": "off",
     "no-continue": "off",
     "no-unused-expressions": "off",
     "class-methods-use-this": "off",
     "import/prefer-default-export": "off",
-    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF" : 0 }],
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        "max": 1,
+        "maxEOF": 1,
+        "maxBOF": 0
+      }
+    ],
     "comma-dangle": "off",
     "no-underscore-dangle": 0,
-    "no-mixed-operators" : 0,
+    "no-mixed-operators": 0,
     "brace-style": "off",
     "no-loop-func": "warn",
     "no-param-reassign": "off",
-    "no-iterator" : "off",
-    "guard-for-in":"warn",
+    "no-iterator": "off",
+    "guard-for-in": "warn",
     "no-nested-ternary": "off",
+    "import/no-extraneous-dependencies": "off",
     "no-restricted-syntax": [
-       "error",
-       "LabeledStatement",
-       "WithStatement"
+      "error",
+      "LabeledStatement",
+      "WithStatement"
     ],
     "require-jsdoc": [
       "warn",
