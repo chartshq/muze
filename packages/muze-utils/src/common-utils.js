@@ -1452,7 +1452,8 @@ const Symbols = {
     line,
     area,
     pie,
-    arc
+    arc,
+    nest
 };
 
 const Scales = {

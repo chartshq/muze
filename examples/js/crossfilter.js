@@ -78,7 +78,10 @@ d3.json('../../data/cars.json', (data) => {
     }
 })
 			.layers([{
-    mark: 'bar'
+    mark: 'bar',
+    transition: {
+        effect: 'bounce'
+    }
 }])
 				.color('Origin')
 

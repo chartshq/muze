@@ -1,9 +1,8 @@
 /* global describe, it, before */
 /* eslint-disable no-unused-expressions */
-
+import { selectElement } from 'muze-utils';
 import { expect } from 'chai';
 import SmartlabelManager from 'fusioncharts-smartlabel';
-import { select } from 'd3-selection';
 import GenericLayout from './';
 
 describe('Generic layout', () => {
@@ -26,7 +25,7 @@ describe('Generic layout', () => {
                 slManager
             }
        );
-        instance.mountPoint(select('body').node());
+        instance.mountPoint(selectElement('body').node());
         instance.config({
             style: { color: 'red' },
             attributes: { type: 'text' }

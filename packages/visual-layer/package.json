@@ -50,8 +50,6 @@
     "url": "https://bitbucket.org/fusioncharts/muze.git"
   },
   "dependencies": {
-    "d3-ease": "^1.0.3",
-    "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
     "datamodel": "^1.0.0",
     "@chartshq/muze-axis": "^1.0.0",
     "muze-utils": "^1.0.0",

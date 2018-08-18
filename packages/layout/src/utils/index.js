@@ -1,9 +1,10 @@
 /**
  * This file exports utility functions that are used across the layout module
  */
-import { nest } from 'd3-collection';
+import { Symbols } from 'muze-utils';
 import { PRIMARY, SECONDARY, HEIGHT, WIDTH } from '../enums/constants';
 
+const nest = Symbols.nest;
 /**
  *
  *

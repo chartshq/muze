@@ -50,8 +50,6 @@
     "visual"
   ],
   "dependencies": {
-    "d3-collection": "^1.0.4",
-    "d3-selection": "^1.1.0",
     "muze-utils": "^1.0.0"
   }
 }
