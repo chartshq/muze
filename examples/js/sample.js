@@ -92,13 +92,8 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-<<<<<<< HEAD
         let rows = ['Acceleration'],
             columns = ['Year'];
-=======
-        let rows = ['Displacement', 'Horsepower'],
-            columns = rows.reverse();
->>>>>>> e442c99e68a3d231f956f6bcb6e30780c39b88f3
 
         canvas = canvas
             .rows(rows)
@@ -123,12 +118,6 @@
                 axes: {
                     x: {
                         showAxisName: true,
-<<<<<<< HEAD
-
-=======
-                        exponent: 2,
-                        base: 10,
->>>>>>> e442c99e68a3d231f956f6bcb6e30780c39b88f3
                         showInnerTicks: true,
 
                     },
