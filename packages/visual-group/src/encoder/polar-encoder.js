@@ -1,8 +1,7 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import { mergeRecursive } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
-import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR } from '../enums/constants';
-
+import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR, COLOR } from '../enums/constants';
 /**
  *
  *
@@ -169,16 +168,18 @@ export default class PolarEncoder extends VisualEncoder {
         } = config;
         const fields = [];
         const layers = this.layers();
+        const fieldsConfig = datamodel.getFieldsConfig();
 
-        color && color.field && fields.push(color.field);
-        size && size.field && fields.push(size.field);
+        // color && color.field && fields.push(color.field);
+        // size && size.field && fields.push(size.field);
 
         if (layers && layers[0]) {
             const layer = layers[0];
             const encoding = layer.def.encoding || {};
 
-            [RADIUS, ANGLE, SIZE].forEach((encType) => {
-                encoding[encType] && fields.push(encoding[encType].field);
+            [RADIUS, ANGLE, SIZE, COLOR].forEach((encType) => {
+                const field = encoding[encType] ? encoding[encType].field : '';
+                fieldsConfig[field] && fieldsConfig[field].def.type !== MEASURE && fields.push(field);
             });
         }
         return datamodel.groupBy([...facetFields, ...fields]);

@@ -9,6 +9,7 @@ export const PROPS = {
                 context._rotationLock = true;
             }
             value = mergeRecursive(context._config || {}, value);
+            value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             context.axis(context.createAxis(value));
             context.store().commit('config', value);
             return value;

@@ -263,17 +263,21 @@ export default class SimpleLegend {
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
-
-    /**
+  /**
      *
      *
      * @param {*} data
      * @returns
-     * @memberof SimpleLegend
+     * @memberof StepLegend
      */
     getCriteriaFromData (data) {
         const fieldName = this.fieldName();
-
+        const type = this.metaData().getData().schema[0].type;
+        if (type === 'measure') {
+            return {
+                [fieldName]: data.range
+            };
+        }
         return [[fieldName], [data.value]];
     }
 }
