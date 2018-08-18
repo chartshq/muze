@@ -87,7 +87,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             const fieldsConfig = dataModel.getFieldsConfig();
             const data = dataObj.data;
             fn = (fields) => {
-                const include = !data.length ? true : data.some(row => schema.every((propField) => {
+                const include = !data.length ? false : data.some(row => schema.every((propField) => {
                     if (!(propField.name in fields)) {
                         return true;
                     }

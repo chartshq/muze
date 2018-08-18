@@ -9,6 +9,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
     let yRange;
     let direction;
     const criteria = payload.criteria;
+    const dragEnd = payload.dragEnd;
     const axes = sourceInf.axes;
     const axisFields = sourceInf.fields;
     const dimensions = payload.dimensions || {};
@@ -39,8 +40,12 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
             x1 = x2 = undefined;
             direction = 'horizontal';
         } else {
-            x1 = xAxis.getScaleValue(xRange[0]);
-            x2 = xAxis.getScaleValue(xRange[xRange.length - 1]);
+            const domain = xAxis.domain();
+            let x1DomainIndex = domain.indexOf(xRange[0]);
+            let x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
+            [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort();
+            x1 = xAxis.getScaleValue(domain[x1DomainIndex]);
+            x2 = xAxis.getScaleValue(domain[x2DomainIndex]);
             x2 += xAxis.constructor.type() === 'band' ? xAxis.getUnitWidth() : 0;
         }
     } else {
@@ -52,20 +57,32 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
             direction = 'vertical';
         }
         else {
-            y1 = yAxis.getScaleValue(yRange[0]);
-            y2 = yAxis.getScaleValue(yRange[yRange.length - 1]);
+            const domain = yAxis.domain();
+            let y1DomainIndex = domain.indexOf(yRange[0]);
+            let y2DomainIndex = domain.indexOf(yRange[yRange.length - 1]);
+            [y1DomainIndex, y2DomainIndex] = [y1DomainIndex, y2DomainIndex].sort(((a, b) => b - a));
+            y1 = yAxis.getScaleValue(domain[y1DomainIndex]);
+            y2 = yAxis.getScaleValue(domain[y2DomainIndex]);
             y2 += yAxis.constructor.type() === 'band' ? yAxis.getUnitWidth() : 0;
         }
     } else {
         y1 = y2 = undefined;
     }
 
+    if (!dragEnd) {
+        if (xDim) {
+            [x1, x2] = xDim;
+        }
+        if (yDim) {
+            [y1, y2] = yDim;
+        }
+    }
     return {
         dimension: {
-            x1: xDim ? xDim[0] : x1,
-            x2: xDim ? xDim[1] : x2,
-            y1: yDim ? yDim[0] : y1,
-            y2: yDim ? yDim[1] : y2
+            x1,
+            x2,
+            y1,
+            y2
         },
         direction
     };

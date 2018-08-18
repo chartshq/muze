@@ -85,7 +85,7 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year'], {
+        rootData = rootData.groupBy(['Year', 'Maker'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
@@ -94,8 +94,8 @@
         window.canvas = env.canvas();
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
-        let rows = ['Miles_per_Gallon'],
-            columns = ['Year'];
+        let rows = ['Miles_per_Gallon', 'Horsepower', 'Acceleration'],
+            columns = rows.reverse();
 
         canvas = canvas
 			.rows(rows)

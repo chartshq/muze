@@ -13,7 +13,7 @@ const getRangeFromData = (instance, selectionDataModel, propConfig) => {
     if (isActionSourceSame) {
         criteria = propCriteria;
     } else {
-        criteria = (!selectionDataModel[0].isEmpty() && sourceIdentifiers !== null) ? schema.reduce((acc, obj, index) => {
+        criteria = (sourceIdentifiers !== null) ? schema.reduce((acc, obj, index) => {
             let range;
             const field = obj.name;
             const fieldObj = fieldMap[field];
