@@ -58,8 +58,8 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                subtype: 'temporal',
-                format: '%Y-%m-%d'
+                // subtype: 'temporal',
+                // format: '%Y-%m-%d'
             },
             ];
 
@@ -85,7 +85,7 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Origin', 'Year', 'Cylinders'], {
+        rootData = rootData.groupBy(['Year'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
@@ -94,30 +94,72 @@
         window.canvas = env.canvas();
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
-
-        window.onresize = () => {
-            canvas.width(window.innerWidth - 30)
-            .height(window.innerHeight);
-        };
-        let rows = ['Acceleration'],
-            columns = ['Horsepower'];
+        let rows = ['Miles_per_Gallon'],
+            columns = ['Year'];
 
         canvas = canvas
 			.rows(rows)
 			.columns(columns)
             .data(rootData)
-			.width(400)
-            .height(1000)
+			.width(900)
+            .height(600)
             .layers([{
-                mark: 'point',
-                // transform: {
-                //     type: 'group'
-                // },
+                mark: 'bar',
+            }, {
+                mark: 'tick',
+                dataSource: 'transformedData',
                 encoding: {
-                    // color: {
-                    //     value: () => 'red'
-                    // }
-                } }])
+                    x: null,
+                    y: 'Miles_per_Gallon',
+                    color: { value: () => 'red' }
+                },
+                calculateDomain: false
+            }, {
+                mark: 'text',
+                dataSource: 'transformedData',
+                encoding: {
+                    x: null,
+                    y: 'Miles_per_Gallon',
+                    text: {
+                        field: 'Miles_per_Gallon',
+                        formatter: value => `Average Mileage: ${Math.round(value)}`,
+
+                    },
+                    background: {
+                        field: 'Miles_per_Gallon',
+                        value: 'red'
+                    },
+                    color: { value: () => 'red' },
+
+                },
+
+                positioner: (points, store, dependencies) => {
+                    const width = store.unit.width();
+                    const smartLabel = dependencies.smartLabel;
+                    for (let i = 0; i < points.length; i++) {
+                        const size = smartLabel.getOriSize(points[i].text);
+
+                        points[i].update.x = width - 25;
+                        points[i].textanchor = 'end';
+                        points[i].update.y -= 7;
+                    }
+                    return points;
+                },
+                calculateDomain: false
+            }])
+            .transform({
+                transformedData: dt => dt.groupBy([''], { Miles_per_Gallon: 'avg' })
+            })
+            // .layers([{
+            //     mark: 'point',
+            //     // transform: {
+            //     //     type: 'group'
+            //     // },
+            //     encoding: {
+            //         // color: {
+            //         //     value: () => 'red'
+            //         // }
+            //     } }])
             //     // transform: {
             //     //     type: 'group'
             //     // },
@@ -141,12 +183,13 @@
             // })
             // .size('Year')
             // .shape('Year')
-                .size({
-                    field: 'Displacement',
-                    // scheme: ['R//ed']
-                    // scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)']
-                    // interpolate: true
-                })
+                // .color({
+                //     field: 'Displacement',
+                //     // scheme: ['red', 'dark green']
+                //     // scheme: ['R//ed']
+                //     // scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)'],
+                //     // interpolate: true
+                // })
                 // .size('Origin')
             .config({
                 facetConfig: {
@@ -163,15 +206,13 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        // padding: 0,
-                        axisNamePadding: 20
+                        labels: {
+                            rotation: 180
+                        },
 
                     },
                     y: {
                         showAxisName: true,
-                        // padding: 0,
-                        // name: 'Acceleration per year',
-                        axisNamePadding: 20,
                     }
                 }
             });

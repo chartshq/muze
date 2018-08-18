@@ -1,7 +1,7 @@
 import SimpleLegend from './simple-legend';
-import { DISCRETE, LEFT, SIZE } from '../enums/constants';
-import { getScaleInfo } from './legend-helper';
-import { createLegendSkeleton, createItemSkeleton, renderDiscreteItem } from './renderer';
+import { getScaleInfo, getInterpolatedData, } from './legend-helper';
+import { GRADIENT, LEFT, HORIZONTAL, BOTTOM, RIGHT, SIZE } from '../enums/constants';
+import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
 
 /**
@@ -10,7 +10,7 @@ import '../styles.scss';
  * @param {Object} dependencies : legend data
  * @class Legend
  */
-export default class DiscreteLegend extends SimpleLegend {
+export default class GradientLegend extends SimpleLegend {
 
     /**
      * Initializes an instance of the class
@@ -21,7 +21,7 @@ export default class DiscreteLegend extends SimpleLegend {
      * @memberof Legend
      */
     static create (dependencies) {
-        return new DiscreteLegend(dependencies);
+        return new GradientLegend(dependencies);
     }
 
     /**
@@ -29,10 +29,25 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      * @static
      * @returns
-     * @memberof DiscreteLegend
+     * @memberof GradientLegend
      */
     static type () {
-        return DISCRETE;
+        return GRADIENT;
+    }
+
+    /**
+     *
+     *
+     * @param {*} axis
+     * @returns
+     * @memberof GradientLegend
+     */
+    axis (...axis) {
+        if (axis.length) {
+            this._axis = axis[0];
+            return this;
+        }
+        return this._axis;
     }
 
     /**
@@ -40,22 +55,71 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      * @param {*} scale
      * @returns
-     * @memberof DiscreteLegend
+     * @memberof GradientLegend
      */
     dataFromScale (scale) {
-        const { scaleType, domain, scaleFn } = getScaleInfo(scale);
-        let domainForLegend = [...new Set(domain)];
+        let domainForLegend = [];
+        const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
 
-        domainForLegend = domainForLegend.map((ele, i) => ({
-            [scaleType]: scale[scaleFn](ele),
-            value: typeof +domainForLegend[i] === 'number' && !isNaN(+domainForLegend[i])
-                ? (+domainForLegend[i]).toFixed(0) : domainForLegend[i],
-            id: i
-        })).filter(d => d.value !== null);
+        if (steps instanceof Array) {
+            if (domain[0] < steps[0]) {
+                domainForLegend[0] = domain[0];
+            }
+            domainForLegend = [...domainForLegend, ...steps];
+            if (domain[domain.length - 1] > steps[steps.length - 1]) {
+                domainForLegend.push(domain[1]);
+            }
+        } else {
+            domainForLegend = getInterpolatedData(domain, steps);
+        }
+        domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
 
-        domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
-            : domainForLegend;
-        return domainForLegend;
+        return domainForLegend.map((ele, i) => {
+            const value = domainForLegend[i];
+            return {
+                [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](Math.floor(ele)),
+                value: +value.toFixed(2),
+                id: i
+            };
+        }).filter(d => d.value !== null);
+    }
+
+    /**
+     *
+     *
+     * @param {*} effPadding
+     * @param {*} align
+     * @return
+     * @memberof Legend
+     */
+    getLabelSpaces (effPadding, align) {
+        this.config({
+            item: {
+                text: {
+                    position: align === HORIZONTAL ? BOTTOM : RIGHT
+                }
+            }
+        });
+        const axis = createAxis(this);
+        const axisSpace = axis.getLogicalSpace();
+        const space = { width: axisSpace.width - effPadding, height: axisSpace.height - effPadding };
+        const axisDomainLength = axis.source().domain().length;
+        const labelSpaces = new Array(axisDomainLength).fill(space);
+
+        this.axis(axis);
+        return labelSpaces;
+    }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof GradientLegend
+     */
+    getDrawingContext () {
+        return {
+            svgContainer: this._legendGradientSvg
+        };
     }
 
     /**
@@ -67,13 +131,9 @@ export default class DiscreteLegend extends SimpleLegend {
      */
     render () {
         const firebolt = this.firebolt();
-        const data = this.data();
-        const { classPrefix } = this.config();
         const legendContainer = super.render(this.mount());
-        const { legendItem } = createLegendSkeleton(this, legendContainer, classPrefix, data);    // create Legend
-        const { itemSkeleton } = createItemSkeleton(this, legendItem);
-
-        renderDiscreteItem(this, itemSkeleton);
+        // create Legend
+        renderGradient(this, legendContainer);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
         firebolt.createSelectionSet(this.data().map(d => d.id));

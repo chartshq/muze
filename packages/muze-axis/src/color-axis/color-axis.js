@@ -6,7 +6,7 @@
 import { getUniqueId, generateGetterSetters, rgbToHsv } from 'muze-utils';
 import { createScale, getScheme, getSchemeType } from '../scale-creator';
 import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
-import { strategyGetter } from '../scale-strategy';
+import { strategyGetter } from './color-strategy';
 import { DEFAULT_CONFIG } from './defaults';
 import { PROPS, getHslString } from './props';
 

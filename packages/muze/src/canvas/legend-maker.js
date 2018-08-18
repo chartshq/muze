@@ -93,12 +93,12 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                 }
             });
             legend.scale(scale)
-                .title((title && title[index] !== null) ? title[index] : fieldName)
-                .fieldName(fieldName)
-                .config(legendConfig)
-                .metaData(canvas.data().project([fieldName]))
-                .measurement(legendMeasures)
-                .setLegendMeasures();
+                            .title((title && title[index] !== null) ? title[index] : fieldName)
+                            .fieldName(fieldName)
+                            .config(legendConfig)
+                            .metaData(canvas.data().project([fieldName]))
+                            .measurement(legendMeasures)
+                            .setLegendMeasures();
 
             legends.push({ canvas, legend });
         });

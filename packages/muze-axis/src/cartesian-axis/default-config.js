@@ -11,6 +11,7 @@ export const defaultConfig = {
         defClassName: 'axis-name',
     },
     axisNamePadding: 12,
+    base: 10,
     classPrefix: CLASSPREFIX,
     className: `${CLASSPREFIX}-axis`,
     exponent: 1,

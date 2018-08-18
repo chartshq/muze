@@ -300,12 +300,13 @@ export default class MatrixResolver {
         if (config[DETAIL]) {
             optionalProjections.push(...config.detail);
         }
+
         if (layerConfig.length) {
             layerConfig.forEach((layer) => {
                 if (layer.encoding) {
                     Object.values(layer.encoding).forEach((enc) => {
-                        if (enc.field && optionalProjections.indexOf(enc.field) === -1) {
-                            optionalProjections.push(enc.field);
+                        if (enc && optionalProjections.indexOf(enc.field) === -1) {
+                            optionalProjections.push(enc.field ? enc.field : enc);
                         }
                     });
                 }

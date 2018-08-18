@@ -1,5 +1,24 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 
+export const getNumberOfTicks = (availableSpace, labelDim, axis, interpolator) => {
+    const ticks = axis.scale().ticks();
+    const tickLength = ticks.length;
+    let numberOfValues;
+    if (interpolator === 'linear') {
+        if (tickLength * (labelDim * 1.5) > availableSpace) {
+            numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
+        }
+    }
+
+    if (numberOfValues < 1) {
+        numberOfValues = 1;
+    }
+    // if (interpolator === 'pow') {
+    //     return axis.tickSize(10, 4, -10);
+    // }
+    return axis.scale().ticks(numberOfValues);
+};
+
 /**
  *
  *

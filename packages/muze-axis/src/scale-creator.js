@@ -224,6 +224,8 @@ export function createScale (params) {
         scaleFactory = scaleMap[params.interpolator];
         if (params.interpolator === ScaleType.POW) {
             return scaleFactory().range(range).exponent(params.exponent);
+        } else if (params.interpolator === ScaleType.LOG) {
+            return scaleFactory().range(range).base([params.base]);
         }
     } else {
         scaleFactory = scaleMap[params.type];

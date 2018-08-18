@@ -2,7 +2,7 @@ import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
 import { LINEAR } from '../enums/scale-type';
 import { DOMAIN } from '../enums/constants';
-import { getTickLabelInfo } from './helper';
+import { getTickLabelInfo, getNumberOfTicks } from './helper';
 
 export default class LinearAxis extends SimpleAxis {
 
@@ -139,35 +139,23 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     getTickValues () {
-        let numberOfValues;
+        let labelDim = 0;
         const {
             orientation,
-            tickValues
+            tickValues,
+            interpolator
         } = this.config();
         const range = this.range();
         const axis = this.axis();
-        const ticks = axis.scale().ticks();
-        const tickLength = ticks.length;
+
         const availableSpace = Math.abs(range[0] - range[1]);
         const labelProps = getTickLabelInfo(this).largestLabelDim;
 
         if (tickValues) {
-            numberOfValues = tickValues;
-        } else {
-            numberOfValues = tickLength;
-            let labelDim = labelProps.height;
-            if (orientation === BOTTOM || orientation === TOP) {
-                labelDim = labelProps.width;
-            }
-            if (tickLength * (labelDim * 1.5) > availableSpace) {
-                numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
-            }
+            return axis.scale().ticks(tickValues);
         }
-
-        if (numberOfValues < 1) {
-            numberOfValues = 1;
-        }
-        return axis.scale().ticks(numberOfValues);
+        labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
+        return getNumberOfTicks(availableSpace, labelDim, axis, interpolator);
     }
 
     /**

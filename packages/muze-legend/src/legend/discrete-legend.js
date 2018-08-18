@@ -48,12 +48,13 @@ export default class DiscreteLegend extends SimpleLegend {
 
         domainForLegend = domainForLegend.map((ele, i) => ({
             [scaleType]: scale[scaleFn](ele),
-            value: domainForLegend[i],
+            value: typeof +domainForLegend[i] === 'number' && !isNaN(+domainForLegend[i])
+                ? (+domainForLegend[i]).toFixed(0) : domainForLegend[i],
             id: i
         })).filter(d => d.value !== null);
 
-        domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType]) :
-            domainForLegend;
+        domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
+            : domainForLegend;
         return domainForLegend;
     }
 

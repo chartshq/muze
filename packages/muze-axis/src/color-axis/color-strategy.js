@@ -1,6 +1,6 @@
 import { colorInterpolator, piecewiseInterpolator, numberInterpolator } from 'muze-utils';
-import { CONTINOUS, DISCRETE } from './enums/constants';
-import { LINEAR, SEQUENTIAL, ORDINAL, THRESHOLD } from './enums/scale-type';
+import { CONTINOUS, DISCRETE } from '../enums/constants';
+import { LINEAR, SEQUENTIAL, ORDINAL, THRESHOLD } from '../enums/scale-type';
 
 /**
  *
@@ -33,7 +33,7 @@ const indexedDomainMeasure = (domain) => {
  */
 const normalDomain = (domain) => {
     const uniqueVals = domain;
-    return { uniqueVals, domain };
+    return { uniqueVals, domain, nice: true };
 };
 
 /**
