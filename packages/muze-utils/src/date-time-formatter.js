@@ -702,7 +702,8 @@ DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
     const dtParams = this.dtParams = this.parse(dateTimeStamp);
 
     dtParams.unshift(null);
-    return (this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))());
+    this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))();
+    return this.nativeDate;
 };
 
 /*

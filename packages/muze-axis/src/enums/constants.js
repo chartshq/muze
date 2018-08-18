@@ -18,4 +18,5 @@ export const BAND = 'band';
 export const HIDDEN = 'hidden';
 export const NUMBER = 'number';
 export const BOTTOM = 'bottom';
+export const TOP = 'top';
 

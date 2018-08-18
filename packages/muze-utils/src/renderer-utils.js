@@ -1,7 +1,7 @@
 import { select, selectAll, event as d3event, selection, clientPoint } from 'd3-selection';
 import { drag as d3drag } from 'd3-drag';
 import 'd3-transition';
-
+import { mergeRecursive } from './common-utils';
 /**
  * This function takes a raw DOM element or
  * a string and returns a d3 selection of that element.
@@ -398,7 +398,7 @@ const getSmartComputedStyle = (group, css) => {
         textEl.attr('class', className);
     } else if (typeof css === 'object') {
         delete css['fill-opacity'];
-        extend2(mandatoryStyle, css);
+        mergeRecursive(mandatoryStyle, css);
     }
 
     textEl.style(mandatoryStyle);

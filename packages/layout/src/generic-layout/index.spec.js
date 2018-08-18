@@ -1,8 +1,7 @@
 /* global describe, it, before */
 /* eslint-disable no-unused-expressions */
-import { selectElement } from 'muze-utils';
 import { expect } from 'chai';
-import SmartlabelManager from 'fusioncharts-smartlabel';
+import { SmartlabelManager, selectElement } from 'muze-utils';
 import GenericLayout from './';
 
 describe('Generic layout', () => {
