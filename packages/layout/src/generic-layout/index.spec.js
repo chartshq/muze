@@ -1,9 +1,7 @@
 /* global describe, it, before */
 /* eslint-disable no-unused-expressions */
-
 import { expect } from 'chai';
-import SmartlabelManager from 'muze-utils';
-import { select } from 'd3-selection';
+import { SmartlabelManager, selectElement } from 'muze-utils';
 import GenericLayout from './';
 
 describe('Generic layout', () => {
@@ -26,7 +24,7 @@ describe('Generic layout', () => {
                 slManager
             }
        );
-        instance.mountPoint(select('body').node());
+        instance.mountPoint(selectElement('body').node());
         instance.config({
             style: { color: 'red' },
             attributes: { type: 'text' }
