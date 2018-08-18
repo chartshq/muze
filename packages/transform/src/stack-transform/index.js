@@ -20,45 +20,43 @@ import group from '../group-transform';
 // eslint-disable-next-line require-jsdoc
 const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
     const groupedData = group(schema, data, {
-            groupBy: uniqueField
-        }),
-        uniqueFieldIndex = schema.findIndex(d => d.name === uniqueField),
-        valueFieldIndex = schema.findIndex(d => d.name === valueField),
-        seriesKeyIndex = schema.findIndex(d => d.name === groupBy),
-        seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) =>
-            arr.indexOf(item) === pos).sort(),
-        fieldNames = schema.reduce((acc, obj, i) => {
-            acc[i] = obj.name;
-            return acc;
-        }, {}),
-        dataArr = groupedData.map((arr) => {
-            let tuples = {},
-                rowObj = arr.values.reduce((acc, row) => {
-                    acc = row.reduce((obj, value, i) => {
-                        if (i === seriesKeyIndex) {
-                            obj[value] = row[valueFieldIndex];
-                            tuples[value] = row;
-                        }
-                        else if (i !== valueFieldIndex) {
-                            obj[fieldNames[i]] = value;
-                        }
-                        return obj;
-                    }, acc);
-                    return acc;
-                }, {});
-            rowObj._tuple = tuples;
-            // Set missing values field to zero value
-            seriesKeys.forEach((seriesKey) => {
-                if (rowObj[seriesKey] === undefined) {
-                    rowObj[seriesKey] = 0;
-                    const newArr = new Array(arr.values[0].length);
-                    newArr[uniqueFieldIndex] = arr.key;
-                    newArr[seriesKeyIndex] = seriesKey;
-                    rowObj._tuple[seriesKey] = newArr;
+        groupBy: uniqueField
+    });
+    const uniqueFieldIndex = schema.findIndex(d => d.name === uniqueField);
+    const valueFieldIndex = schema.findIndex(d => d.name === valueField);
+    const seriesKeyIndex = schema.findIndex(d => d.name === groupBy);
+    const seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) => arr.indexOf(item) === pos).sort();
+    const fieldNames = schema.reduce((acc, obj, i) => {
+        acc[i] = obj.name;
+        return acc;
+    }, {});
+    const dataArr = groupedData.map((arr) => {
+        const tuples = {};
+        const rowObj = arr.values.reduce((acc, row) => {
+            acc = row.reduce((obj, value, i) => {
+                if (i === seriesKeyIndex) {
+                    obj[value] = row[valueFieldIndex];
+                    tuples[value] = row;
+                } else if (i !== valueFieldIndex) {
+                    obj[fieldNames[i]] = value;
                 }
-            });
-            return rowObj;
+                return obj;
+            }, acc);
+            return acc;
+        }, {});
+        rowObj._tuple = tuples;
+            // Set missing values field to zero value
+        seriesKeys.forEach((seriesKey) => {
+            if (rowObj[seriesKey] === undefined) {
+                rowObj[seriesKey] = 0;
+                const newArr = new Array(arr.values[0].length);
+                newArr[uniqueFieldIndex] = arr.key;
+                newArr[seriesKeyIndex] = seriesKey;
+                rowObj._tuple[seriesKey] = newArr;
+            }
         });
+        return rowObj;
+    });
 
     return {
         data: dataArr,
@@ -73,17 +71,17 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
  * @return {Array} stacked data
  */
 export default (schema, data, config) => {
-    const uniqueField = config.uniqueField,
-        valueField = config.value,
-        groupBy = config.groupBy,
-        sort = config.sort || 'descending',
-        normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy),
-        stackData = stack({
-            keys: normalizedData.keys,
-            offset: config.offset || 'diverging',
-            order: sort,
-            data: normalizedData.data
-        });
+    const uniqueField = config.uniqueField;
+    const valueField = config.value;
+    const groupBy = config.groupBy;
+    const sort = config.sort || 'descending';
+    const normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy);
+    const stackData = stack({
+        keys: normalizedData.keys,
+        offset: config.offset || 'diverging',
+        order: sort,
+        data: normalizedData.data
+    });
     stackData.forEach((seriesData) => {
         seriesData.forEach((dataObj) => {
             dataObj.data = dataObj.data._tuple[seriesData.key];

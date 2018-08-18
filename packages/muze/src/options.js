@@ -29,28 +29,28 @@ export default {
         value: 0,
         meta: {
             sanitization: intSanitizer,
-            typeCheck: Number.isInteger,
+            typeCheck: Number.isInteger
         }
     },
     height: {
         value: 0,
         meta: {
             sanitization: intSanitizer,
-            typeCheck: Number.isInteger,
+            typeCheck: Number.isInteger
         }
     },
     minUnitWidth: {
         value: 150,
         meta: {
             sanitization: intSanitizer,
-            typeCheck: Number.isInteger,
+            typeCheck: Number.isInteger
         }
     },
     minUnitHeight: {
         value: 150,
         meta: {
             sanitization: intSanitizer,
-            typeCheck: Number.isInteger,
+            typeCheck: Number.isInteger
         }
     },
     config: {

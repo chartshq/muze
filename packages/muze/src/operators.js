@@ -14,7 +14,7 @@ export const share = (...vars) => new ComposedVars(...vars.map(variable => new S
  * @param {*} node
  * @returns
  */
-function treeShakeNode(node) {
+function treeShakeNode (node) {
     if (node.nodeType !== Node.ELEMENT_NODE) { return; }
 
     if (TITLE_TEMPLATE_NOT_ALLOWED_TAGS.indexOf(node.tagName.toLowerCase()) !== -1) {
@@ -34,7 +34,7 @@ function treeShakeNode(node) {
  * @param {Array} exps - The list of evaluated expression values.
  * @return {Function} Returns a function which returns the sanitized html string.
  */
-export function html(strings, ...exps) {
+export function html (strings, ...exps) {
     let htmlCode = '';
     const expLn = exps.length;
     let i = 0;

@@ -27,8 +27,7 @@ const columnFilter = (colData, colIdx, matrix, rIdx, type) => {
             }
         }
         return (i - 1 === colIdx) ? null : colData;
-    }
-    else if (type === ROW_RIGHT) {
+    } else if (type === ROW_RIGHT) {
         if (!previousRow || colIdx === 0) {
             return colData;
         }
@@ -39,8 +38,7 @@ const columnFilter = (colData, colIdx, matrix, rIdx, type) => {
             }
         }
         return (j === currentRow.length) ? null : colData;
-    }
-    else if (type === COLUMN_BOTTOM) {
+    } else if (type === COLUMN_BOTTOM) {
         if (rIdx === 0) {
             return colData;
         }
@@ -59,8 +57,7 @@ const columnFilter = (colData, colIdx, matrix, rIdx, type) => {
             return colData;
         }
         return colData;
-    }
-    else if (type === COLUMN_TOP) {
+    } else if (type === COLUMN_TOP) {
         if (rIdx === matrix.length - 1 && matrix.length > 1) {
             return colData;
         }
@@ -139,12 +136,12 @@ const calcColSpan = (colData, colIdx, matrix, rIdx) => {
 
 // create a masking matrix to strip out repeating columns
 // and calculate rowspan.
-const mask = function(matrix, type) {
+const mask = function (matrix, type) {
     return matrix.map((row, rIdx) => {
         if (type === ROW_LEFT || type === ROW_RIGHT) {
             const filteredRow = row.map((col, colIndex) => columnFilter(col, colIndex, matrix, rIdx, type));
-            const temp = [],
-                diff = row.length - filteredRow.length;
+            const temp = [];
+            const diff = row.length - filteredRow.length;
             for (let i = 0; i < diff; i += 1) {
                 temp.push(null);
             }
@@ -173,7 +170,7 @@ const mask = function(matrix, type) {
  * @param {number} index Index of array in the row
  * @return {Object} containing the view matrix and their spans
  */
-export function cellSpanMaker(matrix, type, index) {
+export function cellSpanMaker (matrix, type, index) {
     let span = '';
     if (type === TOP || type === BOTTOM) {
         span = type === TOP ? COLUMN_TOP : COLUMN_BOTTOM;
@@ -181,8 +178,7 @@ export function cellSpanMaker(matrix, type, index) {
         const spans = viewMatrix.map((row, ridx) => row.map((col, i) => calcColSpan(col, i, viewMatrix, ridx))
                         .filter(col => col !== 1));
         return { viewMatrix, spans };
-    }
-    else if (index === 0 || index === 2) {
+    } else if (index === 0 || index === 2) {
         span = index === 0 ? ROW_LEFT : ROW_RIGHT;
         const viewMatrix = mask(matrix, span);
         const spans = [];

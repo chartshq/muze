@@ -52,12 +52,10 @@ export const transformDataModels = (transform, dataModel) => {
                         fn,
                         deps
                     };
-                }
-                else {
+                } else {
                     dataModels[key] = fn(dataModel);
                 }
-            }
-            else {
+            } else {
                 dataModels[key] = transformVal(dataModel);
             }
         }

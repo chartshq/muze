@@ -4,7 +4,7 @@
  * @param {string | number | Date} date Input using which date object to be created
  * @return {Date} : JS native date object
  */
-function convertToNativeDate(date) {
+function convertToNativeDate (date) {
     if (date instanceof Date) {
         return date;
     }
@@ -49,7 +49,7 @@ RegExp.escape = function (text) {
  * 'year: %Y, month: %b, day: %d'.
  * @class
  */
-/* istanbul ignore next */ function DateTimeFormatter(format) {
+/* istanbul ignore next */ function DateTimeFormatter (format) {
     this.format = format;
     this.dtParams = undefined;
     this.nativeDate = undefined;
@@ -197,7 +197,7 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val);
+                const d = convertToNativeDate(val);
 
                 return d.getHours().toString();
             }
@@ -424,7 +424,6 @@ DateTimeFormatter.getTokenDefinitions = function () {
         }
     };
 
-
     return definitions;
 };
 
@@ -435,7 +434,7 @@ DateTimeFormatter.getTokenDefinitions = function () {
  * @return {Object} : Formal definition of the tokens
  */
 DateTimeFormatter.getTokenFormalNames = function () {
-    let definitions = DateTimeFormatter.getTokenDefinitions();
+    const definitions = DateTimeFormatter.getTokenDefinitions();
 
     return {
         HOUR: definitions.H,
@@ -705,7 +704,7 @@ DateTimeFormatter.prototype.getNativeDate = function (dateTimeStamp) {
         return new Date(dateTimeStamp);
     }
 
-    let dtParams = this.dtParams = this.parse(dateTimeStamp);
+    const dtParams = this.dtParams = this.parse(dateTimeStamp);
 
     dtParams.unshift(null);
     return (this.nativeDate = new (Function.prototype.bind.apply(Date, dtParams))());
