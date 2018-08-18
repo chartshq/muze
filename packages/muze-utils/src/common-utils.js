@@ -68,25 +68,6 @@ const document = window.document;
  */
 const
     getUniqueId = () => `id-${new Date().getTime()}${Math.round(Math.random() * 10000)}`;
-
-/**
- * Curries a function
- * @param {Function} fn Function to be curried
- * @return {Function} Curried Function
- */
-const curry = function (fn) {
-    const cardinality = fn.length;
-    const queue = [];
-    const interFn = function (...params) {
-        queue.push(...params);
-        if (queue.length >= cardinality) {
-            return fn(...queue);
-        }
-        return interFn;
-    };
-    return interFn;
-};
-
 /**
  * Deep copies an object and returns a new object.
  * @param {Object} o Object to clone
@@ -379,56 +360,6 @@ const unique = arr => ([...new Set(arr)]);
 /* istanbul ignore next */const getQualifiedClassName = (cls, id, prefix) => {
     cls = cls.replace(/^\.*/, '');
     return [`${prefix}-${cls}`, `${prefix}-${cls}-${id}`];
-};
-
-/**
- * Apply the css rule to the stylesheet.
- * @param {StyleSheet} styleSheet DOM Stylesheet
- * @param {string} selector css selector
- * @param {string} rule css rules
- */
-/* istanbul ignore next */const applyCSSRule = (styleSheet, selector, rule) => {
-    const rules = styleSheet.rules || styleSheet.cssRules || {};
-    const len = rules.length || 0;
-    // Check whether it support the style insertStyle or addCss
-    if (styleSheet.insertRule) {
-        styleSheet.insertRule(`${selector}{${rule}}`, len);
-    } else if (styleSheet.addRule) {
-        styleSheet.addRule(selector, rule, len);
-    }
-};
-
-/**
- * Adds a css rule to a stylesheet
- *
- * @param {string} sheetName Name of the stylesheet
- * @param {string} selector css selector
- * @param {Object} styles css styles
- * @param {boolean} compressed Boolean value for checking whether to compress css rules.
- */
-/* istanbul ignore next */const addRulesToStylesheet = (sheetName, selector, styles, compressed) => {
-    const stylesheet = document.styleSheets.item(sheetName);
-    let prop;
-    let css = '';
-    const cssStyleRegEx = /\B([A-Z]{1})/g;
-    // support object style
-    if (arguments.length === 1 && (typeof selector === 'object')) {
-        for (prop in selector) {
-            if ({}.hasOwnProperty.call(selector, prop)) {
-                applyCSSRule(stylesheet, prop, selector[prop]);
-            }
-        }
-    }
-    const indent = compressed ? '' : '\t';
-    const keyseparator = compressed ? ':' : ': ';
-
-    for (prop in styles) {
-        if ({}.hasOwnProperty.call(styles, prop)) {
-            styles[prop] && (css += `${indent + prop.replace(cssStyleRegEx, '-$1').toLowerCase() +
-                keyseparator + styles[prop]};`);
-        }
-    }
-    applyCSSRule(stylesheet, selector, css);
 };
 
 /**
@@ -1496,7 +1427,6 @@ export {
     getUniqueId,
     mergeRecursive,
     unionDomain,
-    curry,
     symbolFns,
     easeFns,
     clone,
@@ -1513,7 +1443,6 @@ export {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    addRulesToStylesheet,
     Store,
     getDependencyOrder,
     objectIterator,

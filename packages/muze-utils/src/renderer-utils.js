@@ -12,44 +12,6 @@ import { mergeRecursive } from './common-utils';
 const selectElement = element => select(element);
 
 /**
- * This function takes a raw DOM element or
- * a string and returns a d3 selection of all instances of that element.
- *
- * @param {HTMLElement | string} element The element to wrap in d3 selection.
- * @return {Selection} Instance of d3 selection.
- */
-const selectAllElements = element => selectAll(element);
-
-/**
- * This method is used to create an svg element.
- *
- * @return {SVGElement} SVG dom element.
- */
-const createSVGElement = () => document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-/**
- * This method is used to create an HTML DIV.
- *
- * @export
- * @return {HTMLElement} HTML dom element.
- */
-const createHTMLDiv = () => {
-    const elem = document.createElement('div');
-    return elem;
-};
-
-/**
- * This function is used to create an SVG group.
- *
- * @export
- * @return {SVGGroupElement} instance of <g></g>
-*/
-const createSVGGroup = () => {
-    const elem = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    return elem;
-};
-
-/**
  * It creates a new d3 element on the parent element
  * @param  {Selection} parent Element to which the element is to be appended
  * @param  {Object} elemType Type of the new element
@@ -126,33 +88,6 @@ const applyStyle = (elem, styleObj) => {
         elem.style(d[0], d[1]);
     }, this);
     return elem;
-};
-
-/**
- * Creates an svg group inside an svg element
- * @param {HTMLElement} htmlContainer any type of html element
- * @param {string} className class name for selecting the svg element
- * @param {number} width width of svg element
- * @param {number} height height of svg element
- * @return {SVGElement} SVG group element
- */
-const getSVGGroup = (htmlContainer, className, width, height) => {
-    let sel;
-    if (htmlContainer.tagName === 'svg') {
-        sel = selectElement(htmlContainer);
-    } else {
-        sel = selectElement(htmlContainer)
-                                    .selectAll(`.${className}`)
-                                    .data([1]);
-        sel = sel.enter().append('svg');
-        sel.merge(sel)
-                        .attr('width', width)
-                        .attr('height', height);
-    }
-
-    return sel.merge(sel)
-                    .attr('class', className)
-                    .node();
 };
 
 /**
@@ -331,44 +266,6 @@ const getClientPoint = (...params) => {
 const createElement = (tag, mount) => select(mount).append(tag).node();
 
 /**
- * This function creates captions in the container
- * @param {Object} container The container where the caption is to be appended
- * @param {Object} config The configuration of the caption
- * @return {Object} node for caption
- */
-const createCaption = (container, config) => {
-    const caption = select(container).selectAll(config.className).data([1]);
-    const captionEl = caption.enter().append('p').merge(caption).text(config.text);
-    setStyles(captionEl.node(), config.styles);
-    return captionEl.node();
-};
-
-/**
- * Draws an invisible rectangle element
- * @param {SVGElement} container container element
- * @param {Object} config x y width, height of the tracker element
- * @return {Selection} Tracker group
- */
-const drawTracker = (container, config) => {
-    const className = config.className;
-    const group = selectElement(container).selectAll(`.${config.selector}`).data([null]);
-    const groupSel = group.enter().append('g').merge(group);
-    const rects = groupSel.selectAll('rect').data([null]);
-    const rectMerge = rects.enter().append('rect').merge(rects).node();
-    setAttrs(rectMerge, {
-        x: config.x || 0,
-        y: config.y || 0,
-        width: config.width,
-        height: config.height
-    });
-    setAttrs(rectMerge, {
-        'fill-opacity': 0
-    });
-    groupSel.attr('class', className);
-    return groupSel;
-};
-
-/**
  * Gets the d3 event function
  * @return {Object} d3 event
  */
@@ -421,25 +318,18 @@ const hasTouch = () => 'ontouchstart' in document.documentElement;
 export {
     hasTouch,
     selectElement,
-    selectAllElements,
-    createSVGElement,
-    createHTMLDiv,
-    createSVGGroup,
     makeElement,
     applyStyle,
-    getSVGGroup,
     addClass,
     removeClass,
     appendElement,
     setAttrs,
     setStyles,
     createElement,
-    createCaption,
     createElements,
     clipElement,
     getElementsByClassName,
     getMousePos,
-    drawTracker,
     getEvent,
     getD3Drag,
     getSmartComputedStyle,
