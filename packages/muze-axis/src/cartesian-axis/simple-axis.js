@@ -295,9 +295,9 @@ export default class SimpleAxis {
      * @return {Array} range values
      */
     getNearestRange (v1, v2) {
-        let p1,
-            p2,
-            extent;
+        let p1;
+        let p2;
+        let extent;
         const {
             type
         } = this.config();
@@ -471,9 +471,9 @@ export default class SimpleAxis {
      * @memberof SimpleAxis
      */
     getPixelToValueRatio () {
-        const scale = this.scale(),
-            range = scale.range(),
-            domain = scale.domain();
+        const scale = this.scale();
+        const range = scale.range();
+        const domain = scale.domain();
 
         return Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
     }

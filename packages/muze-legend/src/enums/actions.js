@@ -1,4 +1,4 @@
-export const DRAG = 'drag',
-    HOVER = 'hover',
-    SELECTIONDRAG = 'selectiondrag',
-    CLICK = 'click';
+export const DRAG = 'drag';
+export const HOVER = 'hover';
+export const SELECTIONDRAG = 'selectiondrag';
+export const CLICK = 'click';

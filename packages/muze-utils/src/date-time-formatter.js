@@ -98,13 +98,12 @@ DateTimeFormatter.defaultNumberParser = function (defVal) {
  */
 DateTimeFormatter.defaultRangeParser = function (range, defVal) {
     return (val) => {
-        let nVal,
-            i,
-            l;
+        let i;
+        let l;
 
         if (!val) { return defVal; }
 
-        nVal = val.toLowerCase();
+        const nVal = val.toLowerCase();
 
         for (i = 0, l = range.length; i < l; i++) {
             if (range[i].toLowerCase() === nVal) {
@@ -137,59 +136,58 @@ DateTimeFormatter.defaultRangeParser = function (range, defVal) {
  * @return {Object} : Definition of the all the supported tokens.
  */
 DateTimeFormatter.getTokenDefinitions = function () {
-    let daysDef = {
-            short: [
-                'Sun',
-                'Mon',
-                'Tue',
-                'Wed',
-                'Thu',
-                'Fri',
-                'Sat'
-            ],
-            long: [
-                'Sunday',
-                'Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday',
-                'Saturday'
-            ]
-        },
-        monthsDef = {
-            short: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'
-            ],
-            long: [
-                'January',
-                'February',
-                'March',
-                'April',
-                'May',
-                'June',
-                'July',
-                'August',
-                'September',
-                'October',
-                'November',
-                'December'
-            ]
-        },
-        definitions;
+    const daysDef = {
+        short: [
+            'Sun',
+            'Mon',
+            'Tue',
+            'Wed',
+            'Thu',
+            'Fri',
+            'Sat'
+        ],
+        long: [
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday'
+        ]
+    };
+    const monthsDef = {
+        short: [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+        ],
+        long: [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+        ]
+    };
 
-    definitions = {
+    const definitions = {
         H: {
             // 24 hours format
             name: 'H',
@@ -209,8 +207,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    hours = d.getHours() % 12;
+                const d = convertToNativeDate(val);
+                const hours = d.getHours() % 12;
 
                 return (hours === 0 ? 12 : hours).toString();
             }
@@ -227,8 +225,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
                 return null;
             },
             formatter: (val) => {
-                let d = convertToNativeDate(val),
-                    hours = d.getHours();
+                const d = convertToNativeDate(val);
+                const hours = d.getHours();
 
                 return (hours < 12 ? 'AM' : 'PM');
             }
@@ -245,8 +243,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
                 return null;
             },
             formatter: (val) => {
-                let d = convertToNativeDate(val),
-                    hours = d.getHours();
+                const d = convertToNativeDate(val);
+                const hours = d.getHours();
 
                 return (hours < 12 ? 'am' : 'pm');
             }
@@ -258,8 +256,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    mins = d.getMinutes();
+                const d = convertToNativeDate(val);
+                const mins = d.getMinutes();
 
                 return pad(mins);
             }
@@ -271,8 +269,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    seconds = d.getSeconds();
+                const d = convertToNativeDate(val);
+                const seconds = d.getSeconds();
 
                 return pad(seconds);
             }
@@ -284,8 +282,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    ms = d.getMilliseconds();
+                const d = convertToNativeDate(val);
+                const ms = d.getMilliseconds();
 
                 return ms.toString();
             }
@@ -297,8 +295,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return `(${daysDef.short.join('|')})`; },
             parser: DateTimeFormatter.defaultRangeParser(daysDef.short),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    day = d.getDay();
+                const d = convertToNativeDate(val);
+                const day = d.getDay();
 
                 return (daysDef.short[day]).toString();
             }
@@ -310,8 +308,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return `(${daysDef.long.join('|')})`; },
             parser: DateTimeFormatter.defaultRangeParser(daysDef.long),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    day = d.getDay();
+                const d = convertToNativeDate(val);
+                const day = d.getDay();
 
                 return (daysDef.long[day]).toString();
             }
@@ -323,8 +321,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    day = d.getDate();
+                const d = convertToNativeDate(val);
+                const day = d.getDate();
 
                 return day.toString();
             }
@@ -336,8 +334,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    day = d.getDate();
+                const d = convertToNativeDate(val);
+                const day = d.getDate();
 
                 return pad(day);
             }
@@ -349,8 +347,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return `(${monthsDef.short.join('|')})`; },
             parser: DateTimeFormatter.defaultRangeParser(monthsDef.short),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    month = d.getMonth();
+                const d = convertToNativeDate(val);
+                const month = d.getMonth();
 
                 return (monthsDef.short[month]).toString();
             }
@@ -362,8 +360,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return `(${monthsDef.long.join('|')})`; },
             parser: DateTimeFormatter.defaultNumberParser(monthsDef.long),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    month = d.getMonth();
+                const d = convertToNativeDate(val);
+                const month = d.getMonth();
 
                 return (monthsDef.long[month]).toString();
             }
@@ -375,8 +373,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d+)'; },
             parser (val) { return DateTimeFormatter.defaultNumberParser()(val) - 1; },
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    month = d.getMonth();
+                const d = convertToNativeDate(val);
+                const month = d.getMonth();
 
                 return pad(month + 1);
             }
@@ -387,19 +385,17 @@ DateTimeFormatter.getTokenDefinitions = function () {
             index: 0,
             extract () { return '(\\d{4})'; },
             parser (val) {
-                let l;
-
                 if (val) {
-                    l = val.length;
+                    const l = val.length;
                     val = val.substring(l - 2, l);
                 }
 
                 return DateTimeFormatter.defaultNumberParser()(val);
             },
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    year = d.getFullYear().toString(),
-                    l;
+                const d = convertToNativeDate(val);
+                let year = d.getFullYear().toString();
+                let l;
 
                 if (year) {
                     l = year.length;
@@ -416,8 +412,8 @@ DateTimeFormatter.getTokenDefinitions = function () {
             extract () { return '(\\d{4})'; },
             parser: DateTimeFormatter.defaultNumberParser(),
             formatter (val) {
-                let d = convertToNativeDate(val),
-                    year = d.getFullYear().toString();
+                const d = convertToNativeDate(val);
+                const year = d.getFullYear().toString();
 
                 return year;
             }
@@ -463,24 +459,24 @@ DateTimeFormatter.getTokenFormalNames = function () {
  *                  to the resolver function in that particular sequence only.
  */
 DateTimeFormatter.tokenResolver = function () {
-    let definitions = DateTimeFormatter.getTokenDefinitions(),
-        defaultResolver = (...args) => { // eslint-disable-line require-jsdoc
-            let i = 0,
-                l = args.length,
-                arg,
-                targetParam;
+    const definitions = DateTimeFormatter.getTokenDefinitions();
+    const defaultResolver = (...args) => { // eslint-disable-line require-jsdoc
+        let i = 0;
+        let arg;
+        let targetParam;
+        const l = args.length;
 
-            for (; i < l; i++) {
-                arg = args[i];
-                if (args[i]) {
-                    targetParam = arg;
-                }
+        for (; i < l; i++) {
+            arg = args[i];
+            if (args[i]) {
+                targetParam = arg;
             }
+        }
 
-            if (!targetParam) { return null; }
+        if (!targetParam) { return null; }
 
-            return targetParam[0].parser(targetParam[1]);
-        };
+        return targetParam[0].parser(targetParam[1]);
+    };
 
     return {
         YEAR: [definitions.y, definitions.Y,
@@ -494,10 +490,10 @@ DateTimeFormatter.tokenResolver = function () {
         ],
         HOUR: [definitions.H, definitions.l, definitions.p, definitions.P,
             function (hourFormat24, hourFormat12, ampmLower, ampmUpper) {
-                let targetParam,
-                    amOrpm,
-                    isPM,
-                    val;
+                let targetParam;
+                let amOrpm;
+                let isPM;
+                let val;
 
                 if (hourFormat12 && (amOrpm = (ampmLower || ampmUpper))) {
                     if (amOrpm[0].parser(amOrpm[1]) === 'pm') {
@@ -535,12 +531,12 @@ DateTimeFormatter.tokenResolver = function () {
  * @return {Array} : An array of objects which contains the available token and their occurence index in the format
  */
 DateTimeFormatter.findTokens = function (format) {
-    let tokenPrefix = DateTimeFormatter.TOKEN_PREFIX,
-        definitions = DateTimeFormatter.getTokenDefinitions(),
-        tokenLiterals = Object.keys(definitions),
-        occurrence = [],
-        i,
-        forwardChar;
+    const tokenPrefix = DateTimeFormatter.TOKEN_PREFIX;
+    const definitions = DateTimeFormatter.getTokenDefinitions();
+    const tokenLiterals = Object.keys(definitions);
+    const occurrence = [];
+    let i;
+    let forwardChar;
 
     while ((i = format.indexOf(tokenPrefix, i + 1)) >= 0) {
         forwardChar = format[i + 1];
@@ -562,15 +558,15 @@ DateTimeFormatter.findTokens = function (format) {
  * @param format {String} : The format using which the date will be formatted for display
  */
 DateTimeFormatter.formatAs = function (date, format) {
-    let nDate = convertToNativeDate(date),
-        occurrence = DateTimeFormatter.findTokens(format),
-        definitions = DateTimeFormatter.getTokenDefinitions(),
-        formattedStr = String(format),
-        tokenPrefix = DateTimeFormatter.TOKEN_PREFIX,
-        token,
-        formattedVal,
-        i,
-        l;
+    const nDate = convertToNativeDate(date);
+    const occurrence = DateTimeFormatter.findTokens(format);
+    const definitions = DateTimeFormatter.getTokenDefinitions();
+    let formattedStr = String(format);
+    const tokenPrefix = DateTimeFormatter.TOKEN_PREFIX;
+    let token;
+    let formattedVal;
+    let i;
+    let l;
 
     for (i = 0, l = occurrence.length; i < l; i++) {
         token = occurrence[i].token;
@@ -587,20 +583,20 @@ DateTimeFormatter.formatAs = function (date, format) {
  * @return {Array} : Value of date time params in an array [year, month, day, hour, minutes, seconds, milli]
  */
 DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
-    let tokenResolver = DateTimeFormatter.tokenResolver(),
-        dtParams = this.extractTokenValue(dateTimeStamp),
-        dtParamSeq = DateTimeFormatter.DATETIME_PARAM_SEQUENCE,
-        noBreak = options && options.noBreak,
-        dtParamArr = [],
-        args = [],
-        resolverKey,
-        resolverParams,
-        resolverFn,
-        val,
-        i,
-        param,
-        resolvedVal,
-        l;
+    const tokenResolver = DateTimeFormatter.tokenResolver();
+    const dtParams = this.extractTokenValue(dateTimeStamp);
+    const dtParamSeq = DateTimeFormatter.DATETIME_PARAM_SEQUENCE;
+    const noBreak = options && options.noBreak;
+    const dtParamArr = [];
+    const args = [];
+    let resolverKey;
+    let resolverParams;
+    let resolverFn;
+    let val;
+    let i;
+    let param;
+    let resolvedVal;
+    let l;
 
     for (resolverKey in tokenResolver) {
         if (!{}.hasOwnProperty.call(tokenResolver, resolverKey)) { continue; }
@@ -638,26 +634,25 @@ DateTimeFormatter.prototype.parse = function (dateTimeStamp, options) {
  * @return {Object} : An key value pair which contains the tokens as key and value as pair
  */
 DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
-    let format = this.format,
-        definitions = DateTimeFormatter.getTokenDefinitions(),
-        tokenPrefix = DateTimeFormatter.TOKEN_PREFIX,
-        occurrence = DateTimeFormatter.findTokens(format),
-        tokenObj = {},
-        tokenArr,
-        lastOccurrenceIndex,
-        occurrenceLength,
-        occObj,
-        occIndex,
-        targetText,
-        regexFormat,
-        extractValues,
-        l,
-        i;
+    const format = this.format;
+    const definitions = DateTimeFormatter.getTokenDefinitions();
+    const tokenPrefix = DateTimeFormatter.TOKEN_PREFIX;
+    const occurrence = DateTimeFormatter.findTokens(format);
+    const tokenObj = {};
+
+    let lastOccurrenceIndex;
+    let occObj;
+    let occIndex;
+    let targetText;
+    let regexFormat;
+
+    let l;
+    let i;
 
     regexFormat = String(format);
 
-    tokenArr = occurrence.map(obj => obj.token);
-    occurrenceLength = occurrence.length;
+    const tokenArr = occurrence.map(obj => obj.token);
+    const occurrenceLength = occurrence.length;
     for (i = occurrenceLength - 1; i >= 0; i--) {
         occIndex = occurrence[i].index;
 
@@ -683,7 +678,7 @@ DateTimeFormatter.prototype.extractTokenValue = function (dateTimeStamp) {
         regexFormat = regexFormat.replace(tokenPrefix + occObj.token, definitions[occObj.token].extract());
     }
 
-    extractValues = dateTimeStamp.match(new RegExp(regexFormat)) || [];
+    const extractValues = dateTimeStamp.match(new RegExp(regexFormat)) || [];
     extractValues.shift();
 
     for (i = 0, l = tokenArr.length; i < l; i++) {

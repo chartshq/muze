@@ -19,7 +19,6 @@ import {
     stackOffsetWiggle
 } from 'd3-shape';
 import { nest } from 'd3-collection';
-import * as STACK_CONFIG from './enums/stack-config';
 import {
     interpolate,
     interpolateRgb,
@@ -42,7 +41,7 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
-
+import * as STACK_CONFIG from './enums/stack-config';
 import { FieldType, DimensionSubtype, ReservedFields } from './enums';
 
 const HTMLElement = window.HTMLElement;
@@ -61,15 +60,15 @@ const
  * @return {Function} Curried Function
  */
 const curry = function (fn) {
-    let cardinality = fn.length,
-        queue = [],
-        interFn = function (...params) {
-            queue.push(...params);
-            if (queue.length >= cardinality) {
-                return fn(...queue);
-            }
-            return interFn;
-        };
+    const cardinality = fn.length;
+    const queue = [];
+    const interFn = function (...params) {
+        queue.push(...params);
+        if (queue.length >= cardinality) {
+            return fn(...queue);
+        }
+        return interFn;
+    };
     return interFn;
 };
 
@@ -79,8 +78,8 @@ const curry = function (fn) {
  * @return {Object} New Object.
  */
 const clone = (o) => {
-    let output = {},
-        v;
+    const output = {};
+    let v;
     for (const key in o) {
         if ({}.hasOwnProperty.call(o, key)) {
             v = o[key];
@@ -153,8 +152,8 @@ const getMin = (data, field) => Math.min(...data.filter(d => !isNaN(d[field])).m
  * an array of values if field type is nominal or ordinal
  */
 const getDomainFromData = (data, fields, fieldType) => {
-    let domain,
-        domArr;
+    let domain;
+    let domArr;
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
     case DimensionSubtype.CATEGORICAL:
@@ -220,11 +219,11 @@ const easeFns = {
  * @return {Object} Minimum or maximum point.
  */
 const getExtremePoint = (points, compareValue, minOrMax) => {
-    let extremePoint,
-        point,
-        len = points.length,
-        minOrMaxVal = minOrMax === 'max' ? -Infinity : Infinity,
-        val;
+    let extremePoint;
+    let point;
+    const len = points.length;
+    let minOrMaxVal = minOrMax === 'max' ? -Infinity : Infinity;
+    let val;
 
     for (let i = 0; i < len; i++) {
         point = points[i];
@@ -262,13 +261,13 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
  * @return {number} index of the closest value
  */
 /* istanbul ignore next */const getClosestIndexOf = (arr, value, side) => {
-    let low = 0,
-        arrLen = arr.length,
-        high = arrLen - 1,
-        highVal,
-        mid,
-        d1,
-        d2;
+    let low = 0;
+    const arrLen = arr.length;
+    let high = arrLen - 1;
+
+    let mid;
+    let d1;
+    let d2;
 
     while (low < high) {
         mid = Math.floor((low + high) / 2);
@@ -286,7 +285,7 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
         return high;
     }
 
-    highVal = arr[high];
+    const highVal = arr[high];
     if (highVal === value) {
         return high;
     } else if (highVal > value) {
@@ -374,10 +373,8 @@ const unique = arr => ([...new Set(arr)]);
  * @param {string} rule css rules
  */
 /* istanbul ignore next */const applyCSSRule = (styleSheet, selector, rule) => {
-    let rules,
-        len;
-    rules = styleSheet.rules || styleSheet.cssRules || {};
-    len = rules.length || 0;
+    const rules = styleSheet.rules || styleSheet.cssRules || {};
+    const len = rules.length || 0;
     // Check whether it support the style insertStyle or addCss
     if (styleSheet.insertRule) {
         styleSheet.insertRule(`${selector}{${rule}}`, len);
@@ -395,12 +392,10 @@ const unique = arr => ([...new Set(arr)]);
  * @param {boolean} compressed Boolean value for checking whether to compress css rules.
  */
 /* istanbul ignore next */const addRulesToStylesheet = (sheetName, selector, styles, compressed) => {
-    let stylesheet = document.styleSheets.item(sheetName),
-        prop,
-        css = '',
-        indent,
-        cssStyleRegEx = /\B([A-Z]{1})/g,
-        keyseparator;
+    const stylesheet = document.styleSheets.item(sheetName);
+    let prop;
+    let css = '';
+    const cssStyleRegEx = /\B([A-Z]{1})/g;
     // support object style
     if (arguments.length === 1 && (typeof selector === 'object')) {
         for (prop in selector) {
@@ -409,8 +404,8 @@ const unique = arr => ([...new Set(arr)]);
             }
         }
     }
-    indent = compressed ? '' : '\t';
-    keyseparator = compressed ? ':' : ': ';
+    const indent = compressed ? '' : '\t';
+    const keyseparator = compressed ? ':' : ': ';
 
     for (prop in styles) {
         if ({}.hasOwnProperty.call(styles, prop)) {
@@ -446,9 +441,9 @@ const unique = arr => ([...new Set(arr)]);
  * @return {Object} @todo
  */
 const getDependencyOrder = (graph) => {
-    let dependencyOrder = [],
-        visited = {},
-        keys = Object.keys(graph);
+    const dependencyOrder = [];
+    const visited = {};
+    const keys = Object.keys(graph);
     /**
      * DESCRIPTION TODO
      * @todo
@@ -677,8 +672,8 @@ const intSanitizer = (val) => {
  * @return {Array} @todo
  */
 const transactor = (holder, options, model) => {
-    let conf,
-        store = model && model instanceof Model ? model : Model.create({});
+    let conf;
+    const store = model && model instanceof Model ? model : Model.create({});
 
     for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
@@ -687,9 +682,9 @@ const transactor = (holder, options, model) => {
                 store.append({ [prop]: conf.value });
             }
             holder[prop] = ((context, key, meta) => (...params) => {
-                let val,
-                    compareTo,
-                    paramsLen = params.length;
+                let val;
+                let compareTo;
+                const paramsLen = params.length;
                 const prevVal = store.prop(prop);
                 if (paramsLen) {
                     // If parameters are passed then it's a setter
@@ -699,9 +694,9 @@ const transactor = (holder, options, model) => {
                     if (meta) {
                         for (let i = 0; i < paramsLen; i++) {
                             val = params[i];
-                            let sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
-                                meta.sanitization),
-                                typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
+                            const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
+                                meta.sanitization);
+                            const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
                             if (sanitization && typeof sanitization === 'function') {
                                 // Sanitize if required
                                 val = sanitization(val, prevVal, holder);
@@ -965,43 +960,14 @@ const transformColors = () => ({
  */
 const piecewiseInterpolator = () => piecewise;
 
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
-const rgbToHsl = (r, g, b, a = 1) => {
-    r /= 255, g /= 255, b /= 255;
-
-    let max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-    let h,
-        s,
-        l = (max + min) / 2;
-
-    if (max == min) {
-        h = s = 0; // achromatic
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-        switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-        }
-
-        h /= 6;
-    }
-
-    return [h, s, l, a];
-};
+function hue2rgb (p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+}
 
   /**
    * Converts an HSL color value to RGB. Conversion formula
@@ -1015,22 +981,13 @@ const rgbToHsl = (r, g, b, a = 1) => {
    * @return  Array           The RGB representation
    */
 const hslToRgb = (h, s, l, a = 1) => {
-    let r,
-        g,
-        b;
+    let r;
+    let g;
+    let b;
 
-    if (s == 0) {
+    if (s === 0) {
         r = g = b = l; // achromatic
     } else {
-        function hue2rgb (p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        }
-
         const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         const p = 2 * l - q;
 
@@ -1056,11 +1013,11 @@ const hslToRgb = (h, s, l, a = 1) => {
 const rgbToHsv = (r, g, b, a = 1) => {
     r = +r; g = +g; b = +b; a = +a;
     r /= 255; g /= 255; b /= 255;
-    let max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-    let h,
-        s,
-        l = (max + min) / 2;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h;
+    let s;
+    const l = (max + min) / 2;
 
     if (max === min) {
         h = s = 0; // achromatic
@@ -1071,6 +1028,7 @@ const rgbToHsv = (r, g, b, a = 1) => {
         case r: h = (g - b) / d + (g < b ? 6 : 0); break;
         case g: h = (b - r) / d + 2; break;
         case b: h = (r - g) / d + 4; break;
+        default: break;
         }
         h /= 6;
     }
@@ -1089,9 +1047,9 @@ const rgbToHsv = (r, g, b, a = 1) => {
    * @return  Array           The RGB representation
    */
 const hsvToRgb = (h, s, v, a = 1) => {
-    let r,
-        g,
-        b;
+    let r;
+    let g;
+    let b;
 
     const i = Math.floor(h * 6);
     const f = h * 6 - i;
@@ -1100,15 +1058,16 @@ const hsvToRgb = (h, s, v, a = 1) => {
     const t = v * (1 - (1 - f) * s);
 
     switch (i % 6) {
-    case 0: r = v, g = t, b = p; break;
-    case 1: r = q, g = v, b = p; break;
-    case 2: r = p, g = v, b = t; break;
-    case 3: r = p, g = q, b = v; break;
-    case 4: r = t, g = p, b = v; break;
-    case 5: r = v, g = p, b = q; break;
+    case 0: r = v; g = t; b = p; break;
+    case 1: r = q; g = v; b = p; break;
+    case 2: r = p; g = v; b = t; break;
+    case 3: r = p; g = q; b = v; break;
+    case 4: r = t; g = p; b = v; break;
+    case 5: r = v; g = p; b = q; break;
+    default: break;
     }
 
-    return [r * 255, g * 255, b * 255];
+    return [r * 255, g * 255, b * 255, a];
 };
 
 const hexToHsv = (hex) => {
@@ -1126,7 +1085,9 @@ const detectColor = (col) => {
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
 
     // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
+     // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
+     // eslint-disable-next-line
     const matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -1233,16 +1194,15 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     if (criteria === null) {
         return null;
     }
-    let selFields = Object.keys(criteria),
-        selFn = fields => selFields.every((field) => {
-            let val = fields[field].value,
-                range;
-            range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-            if (typeof range[0] === 'string') {
-                return range.find(d => d === val) !== undefined;
-            }
-            return range ? val >= range[0] && val <= range[1] : true;
-        });
+    const selFields = Object.keys(criteria);
+    const selFn = fields => selFields.every((field) => {
+        const val = fields[field].value;
+        const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
+        if (typeof range[0] === 'string') {
+            return range.find(d => d === val) !== undefined;
+        }
+        return range ? val >= range[0] && val <= range[1] : true;
+    });
 
     return dataModel.select(selFn, {
         saveChild: false,
@@ -1260,8 +1220,8 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
 const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
-        let fieldsConfig = dataModel.getFieldsConfig(),
-            rowId = ReservedFields.ROW_ID;
+        const fieldsConfig = dataModel.getFieldsConfig();
+        const rowId = ReservedFields.ROW_ID;
 
         const dataArr = identifiers.slice(1, identifiers.length);
         if (identifiers instanceof Function) {
@@ -1302,10 +1262,10 @@ const registerListeners = (context, listenerMap) => {
     const propListenerMap = listenerMap(context);
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
-            let mapObj = propListenerMap[key],
-                propType = mapObj.type,
-                props = mapObj.props,
-                listenerFn = mapObj.listener;
+            const mapObj = propListenerMap[key];
+            const propType = mapObj.type;
+            const props = mapObj.props;
+            const listenerFn = mapObj.listener;
             context.store()[propType](props, listenerFn);
         }
     }

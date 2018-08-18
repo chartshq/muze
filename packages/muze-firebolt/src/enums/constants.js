@@ -1,4 +1,4 @@
-export const CLASSPREFIX = 'muze',
-    CONSOLIDATED = 'consolidated',
-    FRAGMENTED = 'fragmented';
+export const CLASSPREFIX = 'muze';
+export const CONSOLIDATED = 'consolidated';
+export const FRAGMENTED = 'fragmented';
 

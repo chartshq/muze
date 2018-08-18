@@ -92,7 +92,7 @@ export default class Content {
                     if (d.type === 'icon') {
                         const svg = makeElement(el, 'svg', [1]);
                         const path = makeElement(svg, 'path', [1]);
-                        const shape = d.shape instanceof Function ? d.shape : getSymbol(d.shape)
+                        const shape = d.shape instanceof Function ? d.shape : getSymbol(d.shape);
 
                         setAttrs(svg, {
                             x: 0,

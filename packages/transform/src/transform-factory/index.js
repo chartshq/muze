@@ -10,7 +10,6 @@ import stack from '../stack-transform';
 /* istanbul ignore next */
 const transformMap = {
     [TransformType.IDENTITY]: identity,
-    [TransformType.FRACTURE]: fracture,
     [TransformType.GROUP]: group,
     [TransformType.STACK]: stack
 };

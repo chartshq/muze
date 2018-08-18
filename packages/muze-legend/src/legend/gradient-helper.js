@@ -114,8 +114,8 @@ export const renderAxis = (context, container, height, width) => {
  * @memberof Legend
  */
 export const renderGradient = (context, container) => {
-    let gradHeight = 0,
-        gradWidth = 0;
+    let gradHeight = 0;
+    let gradWidth = 0;
     const {
         align,
         classPrefix,

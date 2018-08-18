@@ -18,7 +18,7 @@ export function createBinnedFieldData (field, rowDiffset, config) {
     const end = [];
     let binEnd;
     let prevEndpoint;
-    let mid;
+
     let range;
 
     // create dataStore with index according to rowDiffSet
@@ -63,7 +63,9 @@ export function createBinnedFieldData (field, rowDiffset, config) {
 
     // create a bin for values more than end
     dataStore.filter(datum => datum.data >= buckets.end[buckets.end.length - 1])
-                    .forEach((datum) => { binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`; });
+                    .forEach((datum) => {
+                        binnedData[datum.index] = `${buckets.end[buckets.end.length - 1]}-${oriMax}`;
+                    });
 
     // create range and mid
     // append start to bucket marks
@@ -75,7 +77,7 @@ export function createBinnedFieldData (field, rowDiffset, config) {
     if (oriMax > buckets.end[buckets.end.length - 1]) { range.add(oriMax); }
 
     range = [...range].sort((a, b) => a - b);
-    mid = [];
+    const mid = [];
 
     for (let i = 1; i < range.length; i++) {
         mid.push((range[i - 1] + range[i]) / 2);

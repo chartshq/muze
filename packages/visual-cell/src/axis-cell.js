@@ -17,8 +17,8 @@ import { PROPS } from './props';
  * @return {Object} Returns the logical space for axis
  */
 const computeAxisSpace = (context) => {
-    let logicalWidth,
-        logicalHeight;
+    let logicalWidth;
+    let logicalHeight;
     const axis = context.source();
     const {
         spaceFixer,
@@ -178,12 +178,12 @@ class AxisCell extends SimpleCell {
             bottom,
             left,
             right
-        } = margin,
-            {
+        } = margin;
+        const {
             show
-        } = axis.config(),
-            wrapperDiv = makeElement(selectElement(mount), 'div', [this], `${CLASSPREFIX}-${AXIS_CELL}`),
-            selection = makeElement(wrapperDiv, 'svg', [1], `${CLASSPREFIX}-axis-container`);
+        } = axis.config();
+        const wrapperDiv = makeElement(selectElement(mount), 'div', [this], `${CLASSPREFIX}-${AXIS_CELL}`);
+        const selection = makeElement(wrapperDiv, 'svg', [1], `${CLASSPREFIX}-axis-container`);
 
         this.mount(mount);
         if (availWidth === 0 || !availWidth) {
