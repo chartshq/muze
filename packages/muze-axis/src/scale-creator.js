@@ -10,7 +10,8 @@ import {
 } from './enums/constants';
 
 import * as ScaleType from './enums/scale-type';
-
+console.log(scales)
+console.log(colorSchemes)
 const {
     scaleLinear,
     scaleThreshold,

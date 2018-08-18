@@ -1,3 +1,6 @@
+import * as scales from './scales';
+import * as colorSchemes from './color-schemes';
+
 export {
     DataFormat,
     DimensionSubtype,
@@ -8,10 +11,12 @@ export {
     CommonProps
 } from './enums';
 
-export { default as scales } from './scales';
-export { default as colorSchemes } from './color-schemes';
-
 export { default as DateTimeFormatter } from './date-time-formatter';
+
+export {
+    scales,
+    colorSchemes
+};
 
 export {
     transformColors,
