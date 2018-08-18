@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import SmartlabelManager from 'fusioncharts-smartlabel';
+import SmartlabelManager from 'muze-utils';
 import { select } from 'd3-selection';
 import GenericLayout from './';
 

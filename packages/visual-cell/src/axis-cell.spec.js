@@ -1,6 +1,6 @@
 /* global describe, it,document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'fusioncharts-smartlabel';
+import SmartlabelManager from 'muze-utils';
 import { BandAxis, LinearAxis } from '@chartshq/muze-axis';
 import { expect } from 'chai';
 import AxisCell from './axis-cell';

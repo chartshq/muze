@@ -106,10 +106,15 @@ const conditionsMap = {
     complete: []
 };
 
-export const getModelFromSet = (type, model, set) =>
-    model ? model.select((fields, i) => (conditionsMap[type].some(condition => set[i] === condition)), {
-        saveChild: false
-    }) : null;
+export const getModelFromSet = (type, model, set) => {
+    if (model) {
+        return model.select((fields, i) =>
+           (conditionsMap[type].some(condition => set[i] === condition)), {
+               saveChild: false
+           });
+    }
+    return null;
+};
 
 export const getSetInfo = (type, set, config) => {
     let model = null;
