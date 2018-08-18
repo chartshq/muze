@@ -51,7 +51,6 @@
         "url": "https://bitbucket.org/fusioncharts/muze"
     },
     "dependencies": {
-        "d3-shape": "^1.2.0",
         "muze-utils": "^1.0.0"
     }
 }

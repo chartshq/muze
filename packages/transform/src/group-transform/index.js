@@ -1,4 +1,5 @@
-import { nestCollection } from '../utils';
+import { nestCollection } from 'muze-utils';
+
 /**
  * Create multiple datasets from a single dataset by grouping the data using
  * a dimensional field.

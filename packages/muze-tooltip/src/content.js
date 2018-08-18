@@ -1,12 +1,11 @@
 import {
-    symbolFns,
     selectElement,
     mergeRecursive,
     makeElement,
     setAttrs,
-    setStyles
+    setStyles,
+    getSymbol
 } from 'muze-utils';
-import { symbol } from 'd3-shape';
 import { DEFAULT_STRATEGY, strategy } from './strategy';
 import { defaultConfig } from './default-config';
 
@@ -93,7 +92,7 @@ export default class Content {
                     if (d.type === 'icon') {
                         const svg = makeElement(el, 'svg', [1]);
                         const path = makeElement(svg, 'path', [1]);
-                        const shape = d.shape instanceof Function ? d.shape : symbol().type(symbolFns[d.shape]);
+                        const shape = d.shape instanceof Function ? d.shape : getSymbol(d.shape)
 
                         setAttrs(svg, {
                             x: 0,
