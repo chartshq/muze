@@ -104,7 +104,7 @@
             .width(500)
             .height(600)
         .layers([{
-            mark: 'area'
+            mark: 'bar'
         }])
             .config({
                 gridLines: {

@@ -47,14 +47,13 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
             if (bandScale) {
                 let x1DomainIndex = domain.indexOf(xRange[0]);
                 let x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
-                [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort();
+                [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort((a, b) => a - b);
                 x1Val = domain[x1DomainIndex];
                 x2Val = domain[x2DomainIndex];
             } else {
                 x1Val = xRange[0];
                 x2Val = xRange[xRange.length - 1];
             }
-
             x1 = xAxis.getScaleValue(x1Val);
             x2 = xAxis.getScaleValue(x2Val);
             x2 += bandScale ? xAxis.getUnitWidth() : 0;
