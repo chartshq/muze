@@ -50,7 +50,12 @@ export class LegendFireBolt extends Firebolt {
             uniqueIds = [];
         } else {
             values = criteria[1];
-            uniqueIds = this.context.data().filter(d => values.indexOf(d.value) !== -1).map(d => d.id);
+            if (values) {
+                uniqueIds = this.context.data().filter(d => values.indexOf(d.value) !== -1).map(d => d.id);
+            } else {
+                values = Object.values(criteria);
+                uniqueIds = this.context.data().filter(d => values.indexOf(d.range) !== -1).map(d => d.id);
+            }
         }
         return {
             uids: uniqueIds,

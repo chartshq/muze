@@ -139,4 +139,16 @@ export default class GradientLegend extends SimpleLegend {
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
+ /**
+     *
+     *
+     * @param {*} data
+     * @returns
+     * @memberof SimpleLegend
+     */
+    getCriteriaFromData (data) {
+        const fieldName = this.fieldName();
+
+        return [[fieldName], [data.value]];
+    }
 }

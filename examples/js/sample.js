@@ -85,112 +85,23 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year'], {
+        rootData = rootData.groupBy(['Year', 'Origin'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        const canvas2 = env.canvas();
-        const canvas3 = env.canvas();
         let rows = ['Miles_per_Gallon'],
             columns = ['Year'];
 
         canvas = canvas
-			.rows(rows)
-			.columns(columns)
+            .rows(rows)
+            .columns(columns)
             .data(rootData)
-			.width(900)
+            .width(1500)
             .height(600)
-            // .layers([{
-            //     mark: 'bar',
-            // }, {
-            //     mark: 'tick',
-            //     dataSource: 'transformedData',
-            //     encoding: {
-            //         x: null,
-            //         y: 'Miles_per_Gallon',
-            //         color: { value: () => 'red' }
-            //     },
-            //     calculateDomain: false
-            // }, {
-            //     mark: 'text',
-            //     dataSource: 'transformedData',
-            //     encoding: {
-            //         x: null,
-            //         y: 'Miles_per_Gallon',
-            //         text: {
-            //             field: 'Miles_per_Gallon',
-            //             formatter: value => `Average Mileage: ${Math.round(value)}`,
 
-            //         },
-            //         background: {
-            //             field: 'Miles_per_Gallon',
-            //             value: 'red'
-            //         },
-            //         color: { value: () => 'red' },
-
-            //     },
-
-            //     positioner: (points, store, dependencies) => {
-            //         const width = store.unit.width();
-            //         const smartLabel = dependencies.smartLabel;
-            //         for (let i = 0; i < points.length; i++) {
-            //             const size = smartLabel.getOriSize(points[i].text);
-
-            //             points[i].update.x = width - 25;
-            //             points[i].textanchor = 'end';
-            //             points[i].update.y -= 7;
-            //         }
-            //         return points;
-            //     },
-            //     calculateDomain: false
-            // }])
-            // .transform({
-            //     transformedData: dt => dt.groupBy([''], { Miles_per_Gallon: 'avg' })
-            // })
-            // .layers([{
-            //     mark: 'point',
-            //     // transform: {
-            //     //     type: 'group'
-            //     // },
-            //     encoding: {
-            //         // color: {
-            //         //     value: () => 'red'
-            //         // }
-            //     } }])
-            //     // transform: {
-            //     //     type: 'group'
-            //     // },
-            //     // encoding: {
-            //     //     text: {
-            //     //         field: 'Horsepower',
-
-            //     //     },
-            //         // color: {
-            //         //     value: () => 'red'
-            //         // }
-
-            //     // }
-            // }])
-            // .color({
-            //     field: 'Year',
-            //     // scheme: 'interpolateGreens',
-
-            //     // steps: [500, 1000, 2000, 3000, 4000]
-            //     // interpolate: true
-            // })
-            // .size('Year')
-            // .shape('Year')
-                // .color({
-                //     field: 'Displacement',
-                //     // scheme: ['red', 'dark green']
-                //     // scheme: ['R//ed']
-                //     // scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)'],
-                //     // interpolate: true
-                // })
-                // .size('Origin')
             .config({
                 gridLines: {
                     y: {
@@ -202,9 +113,6 @@
                         verticalAlign: 'middle',
                     }
                 },
-                // gridBands: {
-                //     y: { show: true }
-                // },
                 border: {
                     width: 2,
                 },
@@ -220,19 +128,16 @@
 
                     },
                 }
-            });
-
-        canvas.legend({
-            align: 'horizontal',
-            // title: ['Maker'],
-            position: 'right',
-
-            item: {
-                text: {
-                    position: 'right'
-                }
-            },
-        })
+            })
+            .legend({
+                align: 'horizontal',
+                position: 'right',
+                item: {
+                    text: {
+                        position: 'right'
+                    }
+                },
+            })
 
                         .title('The Muze Project', { position: 'top', align: 'left', })
                         .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })

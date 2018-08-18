@@ -38,5 +38,6 @@ export const CLASSPREFIX = 'muze',
     LOWER = 'lower',
     END = 'end',
     SIZE = 'size',
-    DISCRETE = 'discrete';
+    DISCRETE = 'discrete',
+    MEASURE = 'measure';
 
