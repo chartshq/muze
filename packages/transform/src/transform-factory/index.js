@@ -1,13 +1,11 @@
 /**
  * @module Transform
- * This file eexports the transform factory.
+ * This file exports the transform factory.
  */
 import * as TransformType from '../enums/transform-type';
 import identity from '../identity-transform';
-import fracture from '../fracture-transform';
 import group from '../group-transform';
 import stack from '../stack-transform';
-// import Facet from '../facet-transform/facet-transform';
 
 /* istanbul ignore next */
 const transformMap = {

@@ -1,5 +1,4 @@
-import { symbolFns } from 'muze-utils';
-import { symbol } from 'd3-shape';
+import { getSymbol } from 'muze-utils';
 
 export const ALIGN = {
     HORIZONTAL: 'horizontal',
@@ -34,7 +33,7 @@ export const DEFAULT_CONFIG = {
             width: 20,
             color: 'rgba(0,0,0,.5)',
             type: 'circle'
-        },
+        }
     }
 };
 
@@ -44,4 +43,4 @@ export const DEFAULT_CONFIG = {
  * @param {string} shape Accepts a shape name like 'square', 'cross', 'diamond' etc
  * @return {Object} shape object which can be used to draw the shapes
  */
-export const SHAPE_MAP = shape => shape && symbol().type(symbolFns[shape]);
+export const SHAPE_MAP = shape => shape && getSymbol(shape);

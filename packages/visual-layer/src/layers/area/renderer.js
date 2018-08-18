@@ -11,11 +11,11 @@ const curveInterpolators = {
     linear: curveLinear,
     catmullRom: curveCatmullRom
 };
-    /**
-     * Draws a line from the points
-     * Generates a svg path string
-     * @param {Object} params Contains container, points and interpolate attribute.
-     */
+/**
+ * Draws a line from the points
+ * Generates a svg path string
+ * @param {Object} params Contains container, points and interpolate attribute.
+ */
 const /* istanbul ignore next */ drawArea = (params) => {
     let filteredPoints;
     const { container, points, style, transition, className, connectNullData, interpolate } = params;

@@ -1,4 +1,4 @@
-import { stack } from '../utils';
+import { stack } from 'muze-utils';
 
 import group from '../group-transform';
 /*
