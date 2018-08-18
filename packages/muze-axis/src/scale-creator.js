@@ -1,7 +1,17 @@
-/**
- * This file exports functions to create or modify the scale of a plot.
- */
+import { scales, colorSchemes } from 'muze-utils';
+
 import {
+    SEQUENTIAL,
+    ORDINAL,
+    LINEAR,
+    CONTINOUS,
+    THRESHOLD,
+    QUANTIZE
+} from './enums/constants';
+
+import * as ScaleType from './enums/scale-type';
+
+const {
     scaleLinear,
     scaleThreshold,
     scaleLog,
@@ -16,72 +26,7 @@ import {
     schemeCategory20b,
     scaleBand,
     scaleTime
-   } from 'd3-scale';
-
-import {
-     schemeDark2,
-     schemePaired,
-     schemeAccent,
-     schemePastel1,
-     schemePastel2,
-     schemeSet1,
-     schemeSet2,
-     schemeSet3,
-     schemeBlues,
-     schemeBrBG,
-     schemePRGn,
-     schemePiYG,
-
-     interpolateBrBG,
-     interpolatePRGn,
-     interpolatePiYG,
-     interpolatePuOr,
-     interpolateRdBu,
-     interpolateRdGy,
-     interpolateRdYlBu,
-     interpolateRdYlGn,
-     interpolateSpectral,
-
-     interpolateBlues,
-     interpolateGreens,
-     interpolateGreys,
-     interpolateOranges,
-     interpolatePurples,
-     interpolateReds,
-
-     interpolateViridis,
-     interpolateInferno,
-     interpolateMagma,
-     interpolatePlasma,
-     interpolateWarm,
-     interpolateCool,
-     interpolateCubehelixDefault,
-     interpolateBuGn,
-     interpolateBuPu,
-     interpolateGnBu,
-     interpolateOrRd,
-     interpolatePuBuGn,
-     interpolatePuBu,
-     interpolatePuRd,
-     interpolateRdPu,
-     interpolateYlGnBu,
-     interpolateYlGn,
-     interpolateYlOrBr,
-     interpolateYlOrRd,
-     interpolateRainbow
-     } from 'd3-scale-chromatic';
-
-import {
-    SEQUENTIAL,
-    ORDINAL,
-    LINEAR,
-    CONTINOUS,
-    THRESHOLD,
-    QUANTIZE
-} from './enums/constants';
-
-import * as ScaleType from './enums/scale-type';
-
+} = scales;
 const scaleMap = {
     [ScaleType.LINEAR]: scaleLinear,
     [ScaleType.BAND]: scaleBand,
@@ -94,75 +39,8 @@ const scaleMap = {
     [ScaleType.IDENTITY]: scaleIdentity,
     [ScaleType.TIME]: scaleTime,
     [ScaleType.COLOR]: scaleLinear,
-    [ScaleType.ORDINAL]: scaleOrdinal,
-    scaleSequential
-};
-
-const schemes = {
-    /* Categorical schemes */
-    schemeAccent,
-    schemeBlues,
-    schemeDark2,
-    schemePaired,
-    schemePastel1,
-    schemePastel2,
-    schemeSet1,
-    schemeSet2,
-    schemeSet3,
-    schemeBrBG,
-    schemePRGn,
-    schemePiYG,
-
-    /* Diverging schemes */
-    interpolateBrBG,
-    interpolatePRGn,
-    interpolatePiYG,
-    interpolatePuOr,
-    interpolateRdBu,
-    interpolateRdGy,
-    interpolateRdYlBu,
-    interpolateRdYlGn,
-    interpolateSpectral,
-
-    /* Sequential-single hue */
-    interpolateBlues,
-    interpolateGreens,
-    interpolateGreys,
-    interpolateOranges,
-    interpolatePurples,
-    interpolateReds,
-
-     /* Sequential-multi hue */
-    interpolateViridis,
-    interpolateInferno,
-    interpolateMagma,
-    interpolatePlasma,
-    interpolateWarm,
-    interpolateCool,
-    interpolateCubehelixDefault,
-    interpolateBuGn,
-    interpolateBuPu,
-    interpolateGnBu,
-    interpolateOrRd,
-    interpolatePuBuGn,
-    interpolatePuBu,
-    interpolatePuRd,
-    interpolateRdPu,
-    interpolateYlGnBu,
-    interpolateYlGn,
-    interpolateYlOrBr,
-    interpolateYlOrRd,
-    /* Cyclical Schemes */
-    interpolateRainbow,
-
-    [ScaleType.BAND]: scaleBand,
-    [ScaleType.QUANTIZE]: scaleQuantize,
-    [ScaleType.QUANTILE]: scaleQuantile,
-    [ScaleType.TIME]: scaleTime,
-    [ScaleType.COLOR]: scaleLinear,
     [ScaleType.ORDINAL]: scaleOrdinal
 };
-
 export const SCHEMES = {
     SCHEME1: schemeCategory10,
     SCHEME2: schemeCategory20,
@@ -178,9 +56,9 @@ export const SCHEMES = {
  */
 export function getScheme (scheme) {
     if (scheme[0] === 'i') {
-        return scaleSequential(schemes[scheme]);
+        return scaleSequential(colorSchemes[scheme]);
     }
-    return scaleOrdinal(schemes[scheme]);
+    return scaleOrdinal(colorSchemes[scheme]);
 }
 
 /**

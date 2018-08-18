@@ -15,6 +15,7 @@ import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
  */
 const rotateAxis = (instance, tickText, labelManager, config) => {
     const axis = instance.axis();
+    const scale = instance.scale();
     const {
         orientation,
         labels,
@@ -28,7 +29,8 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
     tickText.each(function (datum, index) {
         let yShift;
         let xShift;
-        const temp = axis.tickFormat ? axis.tickFormat()(datum) : datum;
+        const tickFormatter = axis.tickFormat() ? axis.tickFormat : scale.tickFormat;
+        const temp = tickFormatter ? tickFormatter()(datum) : datum;
 
         datum = temp.toString();
 
