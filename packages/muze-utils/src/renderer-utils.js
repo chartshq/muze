@@ -1,4 +1,4 @@
-import { select, selectAll, event as d3event, selection, clientPoint } from 'd3-selection';
+import { select, event as d3event, selection, clientPoint } from 'd3-selection';
 import { drag as d3drag } from 'd3-drag';
 import 'd3-transition';
 import { mergeRecursive } from './common-utils';

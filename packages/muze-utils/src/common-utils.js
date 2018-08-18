@@ -60,7 +60,6 @@ import * as STACK_CONFIG from './enums/stack-config';
 import { FieldType, DimensionSubtype, ReservedFields } from './enums';
 
 const HTMLElement = window.HTMLElement;
-const document = window.document;
 
 /**
  * Returns unique id
