@@ -1,4 +1,5 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
+import { LOG } from '../enums/scale-type';
 
 export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
     const ticks = axis.scale().ticks();
@@ -14,6 +15,14 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
     }
 
     return axis.scale().ticks(numberOfValues);
+};
+
+export const sanitizeDomain = (domain, context) => {
+    const interpolator = context.config().interpolator;
+    if (interpolator === LOG && domain[0] >= 0) {
+        return [Math.max(1, domain[0]), Math.max(1, domain[1])];
+    }
+    return domain;
 };
 
 /**

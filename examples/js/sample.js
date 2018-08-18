@@ -93,7 +93,7 @@
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Year'],
-            columns = ['Horsepower'];
+            columns = ['Acceleration'];
 
         canvas = canvas
             .rows(rows)
@@ -118,9 +118,9 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        // interpolator: 'pow',
-                        // exponent: 2,
-                        // base: 10,
+                        interpolator: 'log',
+                        exponent: 2,
+                        base: 10,
                         showInnerTicks: true,
 
                     },
@@ -131,7 +131,7 @@
                 }
             })
             .color({
-                field: 'Displacement',
+                field: 'Acceleration',
                 interpolate: true
             })
             .legend({

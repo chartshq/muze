@@ -33,7 +33,6 @@ export const makeLinearGradient = (container, data, domain) => {
                 .attr('id', 'linear-gradient')
                 .attr('x1', '0%')
                 .attr('y2', '0%');
-    console.log(data);
     makeElement(linearGradient, 'stop', data, 'stop-gradient')
                     .attr('offset', d => `${(d.value - domain[0]) * 100 / (domain[1] - domain[0])}%`)
                     .attr('stop-color', d => d.color);

@@ -15,7 +15,7 @@ import {
     computeAxisDimensions,
     setOffset,
     registerChangeListeners,
-    calculateContinousSpace
+    calculateContinousSpace,
 } from './helper';
 import { PROPS } from './props';
 

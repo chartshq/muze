@@ -188,7 +188,6 @@ export const computeItemSpaces = (config, measures, data) => {
             if (textPosition === LEFT || textPosition === RIGHT) {
                 labelSpaces[i].height = totalHeight;
                 shapeSpaces[i].height = totalHeight;
-                // labelSpaces[i].width = maxItemSpaces.width - maxShapeWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxShapeWidth;
             } else {
                 labelSpaces[i].width = maxShapeWidth;

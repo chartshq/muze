@@ -2,7 +2,11 @@ import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
 import { LINEAR } from '../enums/scale-type';
 import { DOMAIN } from '../enums/constants';
-import { getTickLabelInfo, getNumberOfTicks } from './helper';
+import {
+    getTickLabelInfo,
+    getNumberOfTicks,
+    sanitizeDomain
+} from './helper';
 
 export default class LinearAxis extends SimpleAxis {
 
@@ -17,6 +21,26 @@ export default class LinearAxis extends SimpleAxis {
         let scale = super.createScale(range);
         scale = scale.nice();
         return scale;
+    }
+
+     /**
+     * This method is used to assign a domain to the axis.
+     *
+     * @param {Array} domain the domain of the scale
+     * @memberof LinearAxis
+     */
+    updateDomainBounds (domain) {
+        let currentDomain = this.domain();
+
+        if (currentDomain.length === 0) {
+            currentDomain = domain;
+        }
+        if (domain.length) {
+            currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
+        }
+        currentDomain = sanitizeDomain(currentDomain, this);
+
+        return this.domain(currentDomain);
     }
 
     /**
