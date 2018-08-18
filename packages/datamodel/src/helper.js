@@ -112,7 +112,10 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
         });
     }
     else {
-        filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)));
+        filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)), {
+            mode: FilteringMode.ALL,
+            saveChild: false
+        });
     }
 
     return filteredModel;
