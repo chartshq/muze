@@ -11,8 +11,8 @@ export const PROPS = {
         sanitization: (context, value) => {
             const measurement = mergeRecursive(context._measurement, value);
             ['padding', 'border', 'margin'].forEach((space) => {
-                measurement[space] = Math.min(measurement[space], measurement.maxWidth * 0.1,
-                    measurement.maxHeight * 0.1);
+                measurement[space] = Math.min(measurement[space] > 0 ? measurement[space] : 0,
+                     measurement.maxWidth * 0.1, measurement.maxHeight * 0.1);
             });
             return measurement;
         }

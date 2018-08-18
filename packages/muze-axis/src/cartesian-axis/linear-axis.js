@@ -62,7 +62,7 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     domain (domain) {
-        if (domain) {
+        if (domain && domain.length) {
             const { nice } = this.config();
             if (domain.length && domain[0] === domain[1]) {
                 domain = [0, +domain[0] * 2];
@@ -149,6 +149,7 @@ export default class LinearAxis extends SimpleAxis {
         const axis = this.axis();
 
         const availableSpace = Math.abs(range[0] - range[1]);
+
         const labelProps = getTickLabelInfo(this).largestLabelDim;
 
         if (tickValues) {

@@ -99,9 +99,11 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1500)
+            .width(500)
             .height(600)
-
+        .layers([{
+            mark: 'area'
+        }])
             .config({
                 gridLines: {
                     y: {
@@ -119,7 +121,8 @@
                 axes: {
                     x: {
                         showAxisName: true,
-
+                        // interpolator: 'log',
+                        base: 10,
                         showInnerTicks: true,
 
                     },
@@ -129,9 +132,11 @@
                     },
                 }
             })
+            .color('Origin')
             .legend({
                 align: 'horizontal',
-                position: 'right',
+
+                position: 'bottom',
                 item: {
                     text: {
                         position: 'right'

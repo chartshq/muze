@@ -3,7 +3,8 @@ import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 export const getNumberOfTicks = (availableSpace, labelDim, axis, interpolator) => {
     const ticks = axis.scale().ticks();
     const tickLength = ticks.length;
-    let numberOfValues;
+    let numberOfValues = tickLength;
+
     if (interpolator === 'linear') {
         if (tickLength * (labelDim * 1.5) > availableSpace) {
             numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
