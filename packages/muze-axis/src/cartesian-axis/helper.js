@@ -1,4 +1,27 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
+import { LOG } from '../enums/scale-type';
+
+export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
+    const ticks = axis.scale().ticks();
+    const tickLength = ticks.length;
+    let numberOfValues = tickLength;
+
+    if (tickLength * (labelDim * 1.5) > availableSpace) {
+        numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
+    }
+
+    numberOfValues = Math.max(1, numberOfValues);
+    return axis.scale().ticks(numberOfValues);
+};
+
+export const sanitizeDomain = (domain, context) => {
+    const interpolator = context.config().interpolator;
+    // @todo: Get from scale decorator
+    if (interpolator === LOG && domain[0] >= 0) {
+        return [Math.max(1, domain[0]), Math.max(1, domain[1])];
+    }
+    return domain;
+};
 
 /**
  *
@@ -7,10 +30,10 @@ import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
  * @memberof SimpleAxis
  */
 export const getTickLabelInfo = (context) => {
-    let largestLabel = '',
-        labelProps,
-        smartTick = {},
-        axisTickLabels;
+    let largestLabel = '';
+    let labelProps;
+    let smartTick = {};
+    let axisTickLabels;
     const scale = context.scale();
     const allLabelLengths = [];
     const { tickFormat, tickValues, numberFormat } = context.config();
@@ -20,6 +43,7 @@ export const getTickLabelInfo = (context) => {
 
     labelManager.setStyle(context._tickLabelStyle);
     // get the values along the domain
+
     axisTickLabels = tickValues || labelFunc();
     // Get the tick labels
     axisTickLabels = axisTickLabels.map((originalLabel, i) => {
@@ -197,6 +221,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
     const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 
     width = range && range.length ? range[1] - range[0] : 0;
+
     height = 0;
     if (tickValues) {
         width = tickValues.reduce((total) => {

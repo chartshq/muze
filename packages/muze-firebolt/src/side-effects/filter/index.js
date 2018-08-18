@@ -9,6 +9,10 @@ export default class FilterEffect extends SurrogateSideEffect {
         return 'visual-unit';
     }
 
+    static mutates () {
+        return true;
+    }
+
     apply (selectionSet, payload) {
         const context = this.firebolt.context;
         const entryModel = selectionSet.mergedEnter.model;

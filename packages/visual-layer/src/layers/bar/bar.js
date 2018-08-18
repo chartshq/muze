@@ -62,7 +62,7 @@ export default class BarLayer extends BaseLayer {
      * Returns the default configuration of the bar layer
      * @return {Object} Default configuration of the bar layer
      */
-    static defaultConfig() {
+    static defaultConfig () {
         return defaultConfig;
     }
 
@@ -217,7 +217,7 @@ export default class BarLayer extends BaseLayer {
                 barWidth: barWidthMetrics.width,
                 barWidthOffset: barWidthOffsets[i] || 0,
                 barHeight: barHeightMetrics.width,
-                barHeightOffset: barHeightOffsets[i] || 0,
+                barHeightOffset: barHeightOffsets[i] || 0
             }));
     }
 
@@ -239,10 +239,8 @@ export default class BarLayer extends BaseLayer {
         let index;
         let points;
         let uniqueFieldType;
-        let len;
         let uniqueFieldIndex;
         let filterData;
-        let values;
         let identifiers;
         let pointFound = null;
         const dataModel = this.data();
@@ -263,8 +261,7 @@ export default class BarLayer extends BaseLayer {
             value = axis.invert(y);
             uniqueFieldIndex = fieldsConfig[yField].index;
             uniqueFieldType = yFieldSubType;
-        }
-        else {
+        } else {
             axis = axes.x;
             value = axis.invert(x);
             uniqueFieldIndex = fieldsConfig[xField].index;
@@ -281,7 +278,7 @@ export default class BarLayer extends BaseLayer {
             value = filterData[index];
             points = pointMap[value];
         }
-        len = points && points.length;
+        const len = points && points.length;
         points && points.sort((p1, p2) => p1.update.y - p2.update.y);
         for (let i = 0; i < len; i++) {
             const point = points[i];
@@ -293,7 +290,7 @@ export default class BarLayer extends BaseLayer {
             pointFound = null;
         }
 
-        values = pointFound && pointFound._data;
+        const values = pointFound && pointFound._data;
         if (values) {
             identifiers = this.getIdentifiersFromData(values, pointFound._id);
         }

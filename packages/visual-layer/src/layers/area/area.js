@@ -4,7 +4,7 @@ import { LineLayer } from '../line';
 import drawArea from './renderer';
 import './styles.scss';
 import { STACK, ENCODING } from '../../enums/constants';
-import { getAxesScales, positionPoints } from '../../helpers';
+import { getAxesScales, positionPoints, getLayerColor } from '../../helpers';
 
 /**
  * Area Layer creates a area plot.
@@ -81,20 +81,34 @@ export default class AreaLayer extends LineLayer {
     translatePoints (data, encodingFieldsInf, axes) {
         let points = [];
         const transformType = this.transformType();
+        const colorAxis = axes.color;
+        const encoding = this.config().encoding;
+        const colorEncoding = encoding.color;
+        const colorField = colorEncoding.field;
         const fieldsConfig = this.data().getFieldsConfig();
+        const colorFieldIndex = colorField && fieldsConfig[colorField].index;
         const { xField, yField, y0Field } = encodingFieldsInf;
         const {
             xAxis,
-            yAxis,
+            yAxis
        } = getAxesScales(axes);
 
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
-        points = data.map((d) => {
+        points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
             const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : yAxis.getScaleValue(0);
+            const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
+                colorEncoding, colorAxis, colorFieldIndex });
+            const style = {};
+            const meta = {};
+            style.fill = color;
+            // style['fill-opacity'] = 0;
+            meta.stateColor = {};
+            meta.originalColor = rawColor;
+            meta.colorTransform = {};
             const point = {
                 enter: {
                     x: xPx,
@@ -107,7 +121,9 @@ export default class AreaLayer extends LineLayer {
                     y0: d.y0 === null ? d.y0 : y0Px
                 },
                 _id: d._id,
-                _data: d._data
+                _data: d._data,
+                style,
+                meta
             };
             this.cachePoint(d[key], point);
             return point;

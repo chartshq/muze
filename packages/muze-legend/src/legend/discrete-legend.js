@@ -45,15 +45,30 @@ export default class DiscreteLegend extends SimpleLegend {
     dataFromScale (scale) {
         const { scaleType, domain, scaleFn } = getScaleInfo(scale);
         let domainForLegend = [...new Set(domain)];
+        const type = this.metaData().getData().schema[0].type;
 
-        domainForLegend = domainForLegend.map((ele, i) => ({
-            [scaleType]: scale[scaleFn](ele),
-            value: domainForLegend[i],
-            id: i
-        })).filter(d => d.value !== null);
+        domainForLegend = domainForLegend.map((ele, i) => {
+            let value = 0;
+            let range = 0;
+            if (type === 'measure') {
+                value = (+domainForLegend[i]).toFixed(0);
+                const nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
+                range = [value, nextVal.toFixed(0)];
+            } else {
+                value = domainForLegend[i];
+                range = [domainForLegend[i]];
+            }
 
-        domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType]) :
-            domainForLegend;
+            return {
+                [scaleType]: scale[scaleFn](ele),
+                value,
+                id: i,
+                range
+            };
+        }).filter(d => d.value !== null);
+
+        domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
+            : domainForLegend;
         return domainForLegend;
     }
 

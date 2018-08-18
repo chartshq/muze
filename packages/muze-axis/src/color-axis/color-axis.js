@@ -6,7 +6,7 @@
 import { getUniqueId, generateGetterSetters, rgbToHsv } from 'muze-utils';
 import { createScale, getScheme, getSchemeType } from '../scale-creator';
 import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
-import { strategyGetter } from '../scale-strategy';
+import { strategyGetter } from './color-strategy';
 import { DEFAULT_CONFIG } from './defaults';
 import { PROPS, getHslString } from './props';
 
@@ -32,6 +32,7 @@ export default class ColorAxis {
         this._rangeType = this._config.interpolate ? CONTINOUS : DISCRETE;
 
         this._schemeType = getSchemeType(this._config.scheme || this._config.value || this._config.range);
+
         this._colorStrategy = this.setColorStrategy(this._domainType, this._rangeType, this._schemeType);
         this._scale = this.createScale(this._colorStrategy);
         this._id = getUniqueId();

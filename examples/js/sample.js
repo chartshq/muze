@@ -85,108 +85,64 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Origin', 'Year', 'Cylinders'], {
+        rootData = rootData.groupBy(['Year', 'Origin', 'Maker'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        const canvas2 = env.canvas();
-        const canvas3 = env.canvas();
-
-        window.onresize = () => {
-            canvas.width(window.innerWidth - 30)
-            .height(window.innerHeight);
-        };
-        let rows = ['Origin', 'Acceleration'],
-            columns = ['Year'];
+        let rows = ['Acceleration'],
+            columns = ['Horsepower'];
 
         canvas = canvas
-			.rows(rows)
-			.columns(columns)
+            .rows(rows)
+            .columns(columns)
             .data(rootData)
-			.width(600)
-            .height(1000)
-            .layers([{
-                mark: 'bar',
-                // transform: {
-                //     type: 'group'
-                // },
-                encoding: {
-                    // color: {
-                    //     value: () => 'red'
-                    // }
-                } }])
-            //     // transform: {
-            //     //     type: 'group'
-            //     // },
-            //     // encoding: {
-            //     //     text: {
-            //     //         field: 'Horsepower',
-
-            //     //     },
-            //         // color: {
-            //         //     value: () => 'red'
-            //         // }
-
-            //     // }
-            // }])
-            // .color({
-            //     field: 'Year',
-            //     // scheme: 'interpolateGreens',
-
-            //     // steps: [500, 1000, 2000, 3000, 4000]
-            //     // interpolate: true
-            // })
-            // .size('Year')
-            // .shape('Year')
-                .color({
-                    field: 'Origin',
-                    // scheme: ['R//ed']
-                    scheme: ['#fff333', 'Red', 'hsla(100,44%, 55%,1)']
-                    // interpolate: true
-                })
-                // .size('Origin')
+            .width(400)
+            .height(500)
             .config({
+                gridLines: {
+                    y: {
+                        show: true
+                    }
+                },
                 facetConfig: {
                     rows: {
                         verticalAlign: 'middle',
                     }
                 },
-                // gridBands: {
-                //     y: { show: true }
-                // },
                 border: {
                     width: 2,
                 },
                 axes: {
                     x: {
                         showAxisName: true,
-                        // padding: 0,
-                        axisNamePadding: 20
+                        showInnerTicks: true,
 
                     },
                     y: {
                         showAxisName: true,
-                        // padding: 0,
-                        // name: 'Acceleration per year',
-                        axisNamePadding: 20,
+                        // interpolator: 'log',
+                        // exponent: 2,
+                        // base: 10,
+
+                    },
+                }
+            })
+            .color({
+                field: 'Origin'
+            })
+            .legend({
+                align: 'horizontal',
+
+                position: 'top',
+                item: {
+                    text: {
+                        position: 'left'
                     }
-                }
-            });
-
-        canvas.legend({
-            align: 'horizontal',
-            // title: ['Maker'],
-            position: 'right',
-
-            item: {
-                text: {
-                    position: 'right'
-                }
-            },
-        })
+                },
+            })
 
                         .title('The Muze Project', { position: 'top', align: 'left', })
                         .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })

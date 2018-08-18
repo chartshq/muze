@@ -54,7 +54,7 @@ export default class ArcLayer extends BaseLayer {
      * @return {Object} Default configuration for arc layer
      * @memberof ArcLayer
      */
-    static defaultConfig() {
+    static defaultConfig () {
         return defaultConfig;
     }
 
@@ -89,7 +89,7 @@ export default class ArcLayer extends BaseLayer {
      */
     getTransformedData (dataModel, config) {
         let pieData = [];
-        let sizeVal;
+
         const {
             startAngle,
             endAngle,
@@ -105,9 +105,9 @@ export default class ArcLayer extends BaseLayer {
             radiusIndex,
             colorIndex
         } = getFieldIndices(encoding, fieldsConfig);
-        const dataVal = dataModel.getData(),
-            data = dataVal.data,
-            uids = dataVal.uids;
+        const dataVal = dataModel.getData();
+        const data = dataVal.data;
+        const uids = dataVal.uids;
 
         this._prevPieData = {};
         prevData.forEach((e, index) => {
@@ -126,7 +126,7 @@ export default class ArcLayer extends BaseLayer {
             } return b[radiusIndex] - a[radiusIndex];
         });
 
-        sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
+        const sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
         // Adding the radius field values to each data point in pie data
         pieData = pieData(data).map((d, i) => {
             d.outerRadiusValue = data[i][radiusIndex] || minOuterRadius;
@@ -206,7 +206,7 @@ export default class ArcLayer extends BaseLayer {
     render (container) {
         const {
             height,
-            width,
+            width
         } = this.measurement();
         const {
             classPrefix,
@@ -253,7 +253,7 @@ export default class ArcLayer extends BaseLayer {
                 index: i,
                 meta: {
                     originalColor: colorAxis.getRawColor(d.colorVal),
-                    stateColor: colorAxis.getRawColor(d.colorVal),
+                    stateColor: {},
                     colorTransform: {}
                 }
             }], `${qualClassName[0]}-path`)

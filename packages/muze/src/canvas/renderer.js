@@ -16,8 +16,8 @@ const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].config().labels.rotation < 0) {
-                    rotation = -90;
+                if (xAxes[i][j].config().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].config().labels.rotation;
                     return;
                 }
             }
@@ -70,11 +70,11 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
     });
     makeElement(mountPoint, 'div', headers)
                     .style('width', `${canvasWidth}px`)
-                    .each(function (type) {
+                    .each(function (type, i) {
                         components[type] = selectElement(this)
                             .attr('class', `${classPrefix}-${type}-container`);
                         if (type === 'group') {
-                            makeElement(components[type], 'div', legends, `${classPrefix}-${type}-container`)
+                            makeElement(components[type], 'div', legends, `${classPrefix}-${type}-container-${i}`)
                                             .each(function (layoutType) {
                                                 components[layoutType] = selectElement(this)
                                                      .classed(`${classPrefix}-${layoutType}-container`, true);
@@ -218,8 +218,8 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
         .style('height', `${height}px`)
         .style('width', `${width}px`);
     // Mount for matrices
-    const mount = makeElement(container, 'div', [1], `${classPrefix}-layout-row`)
-        .attr('id', `${classPrefix}-layout-row-${alias}`)
+    const mount = makeElement(container, 'div', [1], `${classPrefix}-layout-grid-container`)
+        .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
         .style('height', `${height}px`)
         .style('width', `${width}px`)
         .style('overflow-x', width > 300 ? 'none' : 'scroll')

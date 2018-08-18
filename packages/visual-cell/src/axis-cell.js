@@ -183,7 +183,7 @@ class AxisCell extends SimpleCell {
             show
         } = axis.config(),
             wrapperDiv = makeElement(selectElement(mount), 'div', [this], `${CLASSPREFIX}-${AXIS_CELL}`),
-            selection = makeElement(wrapperDiv, 'svg', [1]);
+            selection = makeElement(wrapperDiv, 'svg', [1], `${CLASSPREFIX}-axis-container`);
 
         this.mount(mount);
         if (availWidth === 0 || !availWidth) {

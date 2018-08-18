@@ -25,11 +25,11 @@ const resolveDimByField = (type, axesInfo, config, data) => {
         measurement
     } = config;
 
-    let sizeValue = sizeEncoding.value,
-        enter = 0,
-        pos,
-        space = 0,
-        enterSpace = 0;
+    const sizeValue = sizeEncoding.value;
+    let enter = 0;
+    let pos;
+    let space = 0;
+    let enterSpace = 0;
 
     if (fieldType !== undefined) {
         if (config[`${type}0Field`]) {
@@ -108,7 +108,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
 const resolveDimensions = (data, config, axes) => {
     const axesInfo = {
         xAxis: axes.x,
-        yAxis: axes.y,
+        yAxis: axes.y
     };
     const {
         enterSpace: enterWidth,
@@ -185,8 +185,8 @@ export const getBarMeasurement = (axis, bandScale, config) => {
         pad,
         innerPadding
     } = config;
-    const groupWidth = getGroupWidth(axis, timeDiff),
-        isAxisBandScale = axis.constructor.type() === BAND;
+    const groupWidth = getGroupWidth(axis, timeDiff);
+    const isAxisBandScale = axis.constructor.type() === BAND;
     // If it is a grouped bar then the width of each bar in a grouping is retrieved from
     // a band scale. The band scale will have range equal to width of one group of bars and
     // the domain is set to series keys.
@@ -201,7 +201,7 @@ export const getBarMeasurement = (axis, bandScale, config) => {
     } else if (pad !== undefined) {
         let offset;
         if (isAxisBandScale) {
-            let step = scale.step();
+            const step = scale.step();
             offset = scale.padding() * step;
             width = scale.bandwidth() + offset;
         } else {
@@ -244,7 +244,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             x0Field,
             y0Field,
             xFieldSubType,
-            yFieldSubType,
+            yFieldSubType
         } = context.encodingFieldsInf();
     const measurement = context._store.get(PROPS.MEASUREMENT);
     const isXDim = xFieldSubType === DimensionSubtype.CATEGORICAL || xFieldSubType === DimensionSubtype.TEMPORAL;
@@ -272,10 +272,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             { colorEncoding, colorAxis, colorFieldIndex });
 
         style.fill = color;
-        meta.stateColor = rawColor;
+        meta.stateColor = {};
         meta.originalColor = rawColor;
         meta.colorTransform = {};
-
 
         const update = dimensions.update;
 

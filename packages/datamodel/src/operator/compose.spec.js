@@ -68,33 +68,33 @@ describe('Testing compose functionality', () => {
         it('should return same data when composed with only one function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
-            let composedFn = compose(
+            const composedFn = compose(
                 select(fields => fields.profit.value <= 15),
 
             );
-            let normalDm = dataModel.select(fields => fields.profit.value <= 15);
-            let composedDm = composedFn(dataModel2);
+            const normalDm = dataModel.select(fields => fields.profit.value <= 15);
+            const composedDm = composedFn(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
 
         it('should return same data when composed with select and project function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
-            let composedFn = compose(
+            const composedFn = compose(
                 select(fields => fields.profit.value <= 15),
                 project(['profit', 'sales'])
             );
 
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             normalDm = normalDm.project(['profit', 'sales']);
-            let composedDm = composedFn(dataModel2);
+            const composedDm = composedFn(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
 
         it('should return same data when composed with select and project and groupby function', () => {
             const dataModel = new DataModel(data1, schema1);
             const dataModel2 = new DataModel(data1, schema1);
-            let composedFn = compose(
+            const composedFn = compose(
                 select(fields => fields.profit.value <= 15),
                 project(['profit', 'sales']),
                 groupBy(['profit'])
@@ -103,8 +103,7 @@ describe('Testing compose functionality', () => {
             let normalDm = dataModel.select(fields => fields.profit.value <= 15);
             normalDm = normalDm.project(['profit', 'sales']);
             normalDm = normalDm.groupBy(['profit']);
-            let composedDm = composedFn(dataModel2);
-            // debugger;
+            const composedDm = composedFn(dataModel2);
             expect(normalDm.getData()).to.deep.equal(composedDm.getData());
         });
 
@@ -130,10 +129,10 @@ describe('Testing compose functionality', () => {
             const dataModel = new DataModel(data1, schema1, 'Yo');
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
-            let composedFn = compose(
+            const composedFn = compose(
                 bin('profit', { binSize: 5, name: 'sumField' }));
 
-            let composedDm = composedFn(dataModel);
+            const composedDm = composedFn(dataModel);
             expect(bins.getData()).to.deep.equal(composedDm.getData());
         });
 
@@ -161,12 +160,12 @@ describe('Testing compose functionality', () => {
             const dataModel2 = new DataModel(data1, schema1, 'Yo');
             const bins = dataModel.bin('profit', { binSize: 5, name: 'sumField' });
 
-            let selectedBin = bins.select(fields => fields.profit.value <= 15);
-            let composedFn = compose(
+            const selectedBin = bins.select(fields => fields.profit.value <= 15);
+            const composedFn = compose(
                 bin('profit', { binSize: 5, name: 'sumField' }),
                 select(fields => fields.profit.value <= 15)
             );
-            let composedDm = composedFn(dataModel2);
+            const composedDm = composedFn(dataModel2);
             expect(selectedBin.getData()).to.deep.equal(composedDm.getData());
         });
 

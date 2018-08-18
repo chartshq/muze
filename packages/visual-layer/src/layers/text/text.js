@@ -26,7 +26,7 @@ export default class TextLayer extends BaseLayer {
      * Returns the default configuration of the text layer
      * @return {Object} Default configuration of the text layer
      */
-    static defaultConfig() {
+    static defaultConfig () {
         return defaultConfig;
     }
 
@@ -80,7 +80,7 @@ export default class TextLayer extends BaseLayer {
                 color,
                 background: colorAxis.getColor(d._data[backgroundFieldIndex]),
                 meta: {
-                    stateColor: rawColor,
+                    stateColor: {},
                     originalColor: rawColor,
                     colorTransform: {}
                 },
@@ -89,7 +89,6 @@ export default class TextLayer extends BaseLayer {
             };
         });
         points = positionPoints(this, points);
-
 
         return points;
     }

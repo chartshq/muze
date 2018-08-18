@@ -1,7 +1,7 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
 import {
     VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, HEIGHT, PADDING, BORDER, CONFIG, LINEAR, COLOR, STEP_COLOR,
-    GRADIENT, DISCRETE
+    GRADIENT, DISCRETE, WIDTH
 } from '../constants';
 
 /**
@@ -87,18 +87,24 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             }
             legendMeasures.maxHeight = align === VERTICAL ? (height - headerHeight) : height * 0.2;
             legendMeasures.maxWidth = align === HORIZONTAL ? width : width * 0.2;
-            [HEIGHT, PADDING, BORDER, CONFIG].forEach((e) => {
+            [HEIGHT, WIDTH, PADDING, BORDER, CONFIG].forEach((e) => {
                 if (legendConfig[e]) {
-                    legendMeasures[e] = legendConfig[e];
+                    if (e === HEIGHT) {
+                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, legendConfig[e]);
+                    } else if (e === WIDTH) {
+                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, legendConfig[e]);
+                    } else {
+                        legendMeasures[e] = legendConfig[e];
+                    }
                 }
             });
             legend.scale(scale)
-                .title((title && title[index] !== null) ? title[index] : fieldName)
-                .fieldName(fieldName)
-                .config(legendConfig)
-                .metaData(canvas.data().project([fieldName]))
-                .measurement(legendMeasures)
-                .setLegendMeasures();
+                            .title((title && title[index] !== null) ? title[index] : fieldName)
+                            .fieldName(fieldName)
+                            .config(legendConfig)
+                            .metaData(canvas.data().project([fieldName]))
+                            .measurement(legendMeasures)
+                            .setLegendMeasures();
 
             legends.push({ canvas, legend });
         });

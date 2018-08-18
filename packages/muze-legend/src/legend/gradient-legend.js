@@ -77,7 +77,8 @@ export default class GradientLegend extends SimpleLegend {
         return domainForLegend.map((ele, i) => {
             const value = domainForLegend[i];
             return {
-                [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele),
+                [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor()
+                    : scale[scaleFn](Math.floor(ele)),
                 value: +value.toFixed(2),
                 id: i
             };
@@ -92,11 +93,11 @@ export default class GradientLegend extends SimpleLegend {
      * @return
      * @memberof Legend
      */
-    getLabelSpaces (effPadding, align) {
+    getLabelSpaces (effPadding) {
         this.config({
             item: {
                 text: {
-                    position: align === HORIZONTAL ? BOTTOM : RIGHT
+                    position: this.config().position
                 }
             }
         });
@@ -138,5 +139,15 @@ export default class GradientLegend extends SimpleLegend {
         firebolt.mapActionsAndBehaviour();
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
+    }
+ /**
+     *
+     *
+     * @param {*} data
+     * @returns
+     * @memberof SimpleLegend
+     */
+    getCriteriaFromData (data) {
+        return [[this.fieldName()], [data.value]];
     }
 }

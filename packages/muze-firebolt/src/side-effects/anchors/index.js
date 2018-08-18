@@ -5,8 +5,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         const context = this.firebolt.context;
-        this._layers = this.getAnchorLayerConfig(context);
-        this._layers.forEach(layer => layer.data(context.data().select(() => false)));
+        this._layers = this.addAnchorLayers(context);
     }
 
     static target () {
@@ -23,28 +22,33 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 'anchors';
     }
 
-    getAnchorLayerConfig (context) {
-        const fields = context.fields();
-        const xField = `${fields.x[0]}`;
-        const yField = `${fields.y[0]}`;
-        const color = context.retinalFields().color;
-        return context.addLayer({
-            name: this.constructor.formalName(),
-            mark: 'point',
-            encoding: {
-                x: xField,
-                y: yField,
-                color: color && color.field,
-                size: {
-                    value: 100
-                }
-            },
-            dataSource: null,
-            transition: this.getTransitionConfig(),
-            calculateDomain: false,
-            render: false,
-            interactive: false
+    addAnchorLayers (context) {
+        let layers = [];
+        this.firebolt.context.layers().forEach((layer, idx) => {
+            const shouldDrawAnchors = layer.shouldDrawAnchors();
+            if (shouldDrawAnchors) {
+                const encodingFieldsInf = layer.encodingFieldsInf();
+                const config = layer.config();
+                layers = [...layers, ...context.addLayer({
+                    name: `${layer.alias()}-this.constructor.formalName()-${idx}`,
+                    mark: 'point',
+                    encoding: {
+                        x: encodingFieldsInf.xField,
+                        y: encodingFieldsInf.yField,
+                        color: encodingFieldsInf.colorField,
+                        size: {
+                            value: this.defaultSizeValue()
+                        }
+                    },
+                    transform: config.transform,
+                    transition: this.getTransitionConfig(),
+                    calculateDomain: false,
+                    dataSource: dt => dt.select(() => false),
+                    interactive: false
+                })];
+            }
         });
+        return layers;
     }
 
     getTransitionConfig () {
@@ -53,14 +57,25 @@ export default class AnchorEffect extends SpawnableSideEffect {
         };
     }
 
+    /**
+     * Returns the default area value of the anchor point.
+     * @return { number } Default area value of anchor.
+     */
+    defaultSizeValue () {
+        return 100;
+    }
+
     apply (selectionSet) {
         const dataModel = selectionSet.mergedEnter.model;
         const drawingInf = this.drawingContext()();
         const sideEffectGroup = drawingInf.sideEffectGroup;
         const className = this.config().className;
-        const anchorGroup = this.createElement(sideEffectGroup, 'g', [1], className);
-        const shouldDrawAnchors = this.firebolt.context.layers().some(layer => layer.shouldDrawAnchors());
-        shouldDrawAnchors && this._layers.forEach(layer => layer.data(dataModel).mount(anchorGroup.node()));
+        const anchorGroups = this.createElement(sideEffectGroup, 'g', this._layers.map(d => d.id()), className);
+        const layers = this._layers;
+        anchorGroups.each(function (d, i) {
+            layers[i].data(dataModel).mount(this);
+        });
+
         return this;
     }
 }

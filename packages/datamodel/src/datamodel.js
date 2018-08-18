@@ -155,7 +155,7 @@ class DataModel extends Relation {
      */
     groupBy (fieldsArr, reducers = {}, config = { saveChild: true }) {
         const groupByString = `${fieldsArr.join()}`;
-        let params = [this, fieldsArr, reducers];
+        const params = [this, fieldsArr, reducers];
         const newDataModel = groupBy(...params);
 
         if (config.saveChild) {
@@ -239,7 +239,7 @@ class DataModel extends Relation {
             return fieldSpec.index;
         });
 
-        let clone = this.clone();
+        const clone = this.clone();
 
         const fs = clone.getFieldspace().fields;
         const suppliedFields = depFieldIndices.map(idx => fs[idx]);
@@ -285,18 +285,20 @@ class DataModel extends Relation {
             propagationSourceId
         });
 
-
         if (isMutableAction) {
             propagateImmutableActions(propagationNameSpace, rootModels, propagationSourceId);
         }
         return this;
     }
 
-    addToPropNamespace (sourceId, payload, criteria, isMutableAction) {
+    addToPropNamespace (sourceId, config = {}) {
         let sourceNamespace;
-        const action = payload.action;
+        const actionName = config.actionName;
+        const payload = config.payload;
+        const isMutableAction = config.isMutableAction;
         const rootModel = getRootDataModel(this);
         const propagationNameSpace = rootModel._propagationNameSpace;
+        const criteria = config.criteria;
 
         if (isMutableAction) {
             !propagationNameSpace.mutableActions[sourceId] && (propagationNameSpace.mutableActions[sourceId] = {});
@@ -307,9 +309,9 @@ class DataModel extends Relation {
         }
 
         if (criteria === null) {
-            delete sourceNamespace[action];
+            delete sourceNamespace[actionName];
         } else {
-            sourceNamespace[action] = {
+            sourceNamespace[actionName] = {
                 criteria,
                 payload
             };
@@ -364,7 +366,7 @@ class DataModel extends Relation {
      * @memberof DataModel
      */
     handlePropagation (payload) {
-        let propListeners = this._onPropagation;
+        const propListeners = this._onPropagation;
         propListeners.forEach(fn => fn.call(this, payload));
     }
 

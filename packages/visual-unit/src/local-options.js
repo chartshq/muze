@@ -8,7 +8,7 @@ export default {
         meta: {
             sanitization: (config, oldConfig) => (
                 mergeRecursive(oldConfig || mergeRecursive({}, defaultConfig), config)
-            ),
+            )
         }
     },
     [LAYERDEFS]: {

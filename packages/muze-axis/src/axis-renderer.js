@@ -3,7 +3,7 @@
  */
 import { selectElement, makeElement, angleToRadian } from 'muze-utils';
 import * as AxisOrientation from './enums/axis-orientation';
-import { LINEAR, HIDDEN, BOTTOM } from './enums/constants';
+import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
 
 /**
  *
@@ -14,7 +14,7 @@ import { LINEAR, HIDDEN, BOTTOM } from './enums/constants';
  * @param {*} config
  */
 const rotateAxis = (instance, tickText, labelManager, config) => {
-    const scale = instance.scale();
+    const axis = instance.axis();
     const {
         orientation,
         labels,
@@ -26,9 +26,9 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
     const tickSize = instance.getTickSize();
 
     tickText.each(function (datum, index) {
-        let yShift,
-            xShift;
-        const temp = scale.tickFormat ? scale.tickFormat()(datum) : datum;
+        let yShift;
+        let xShift;
+        const temp = axis.tickFormat ? axis.tickFormat()(datum) : datum;
 
         datum = temp.toString();
 
@@ -54,6 +54,8 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
             xShift = height;
         } else if (rotation === 270) {
             xShift = -height;
+        } else {
+            xShift = 0;
         }
 
         if (orientation === AxisOrientation.TOP) {
@@ -92,8 +94,9 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
     const tickText = selectContainer.selectAll('.tick text');
     tickText.selectAll('tspan').remove();
+
    // rotate labels if not enough space is available
-    if (rotation !== 0 && isSmartTicks === false) {
+    if (rotation !== 0 && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
         rotateAxis(axisInstance, tickText, labelManager, config);
     } else if (rotation === 0 && isSmartTicks === false) {
         tickText.attr('transform', '');
@@ -145,7 +148,6 @@ const setAxisNamePos = (textNode, orientation, measures) => {
         availableSpace,
         axisNameWidth
     } = measures;
-
     switch (orientation) {
     case AxisOrientation.LEFT:
         textNode.attr('transform',
@@ -199,6 +201,7 @@ export function renderAxis (axisInstance) {
         showAxisName,
         show,
         id,
+        interpolator,
         classPrefix,
      } = config;
 
@@ -212,8 +215,11 @@ export function renderAxis (axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
+    // @to-do: Need to write a configuration override using decorator pattern
+    if (interpolator === 'linear') {
     // Set ticks for the axis
-    axisInstance.setTickValues();
+        axisInstance.setTickValues();
+    }
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);
@@ -231,7 +237,7 @@ export function renderAxis (axisInstance) {
     } else {
         selectContainer.call(axis);
     }
-
+    selectContainer.selectAll('.tick').classed(`${classPrefix}-ticks`, true);
     selectContainer.selectAll('.tick line').classed(`${classPrefix}-tick-lines`, true);
 
     // Set classes for ticks

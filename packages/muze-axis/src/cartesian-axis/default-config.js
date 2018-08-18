@@ -11,6 +11,7 @@ export const defaultConfig = {
         defClassName: 'axis-name',
     },
     axisNamePadding: 12,
+    base: 10,
     classPrefix: CLASSPREFIX,
     className: `${CLASSPREFIX}-axis`,
     exponent: 1,
@@ -21,8 +22,8 @@ export const defaultConfig = {
         smartTicks: false,
     },
     orientation: 'left',
-    maxHeight: 30,
-    maxWidth: 30,
+    maxHeight: 50, // @todo: height and width wont be hardcoded
+    maxWidth: 40,
     numberFormat: val => val,
     padding: 0.3,
     nice: true,

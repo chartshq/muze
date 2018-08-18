@@ -1,8 +1,12 @@
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
-import { LINEAR } from '../enums/scale-type';
+import { LINEAR, LOG } from '../enums/scale-type';
 import { DOMAIN } from '../enums/constants';
-import { getTickLabelInfo } from './helper';
+import {
+    getTickLabelInfo,
+    getNumberOfTicks,
+    sanitizeDomain
+} from './helper';
 
 export default class LinearAxis extends SimpleAxis {
 
@@ -19,6 +23,26 @@ export default class LinearAxis extends SimpleAxis {
         return scale;
     }
 
+     /**
+     * This method is used to assign a domain to the axis.
+     *
+     * @param {Array} domain the domain of the scale
+     * @memberof LinearAxis
+     */
+    updateDomainBounds (domain) {
+        let currentDomain = this.domain();
+
+        if (currentDomain.length === 0) {
+            currentDomain = domain;
+        }
+        if (domain.length) {
+            currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
+        }
+        currentDomain = sanitizeDomain(currentDomain, this);
+
+        return this.domain(currentDomain);
+    }
+
     /**
      *
      *
@@ -33,6 +57,9 @@ export default class LinearAxis extends SimpleAxis {
     getScaleValue (domainVal) {
         if (domainVal === null || domainVal === undefined) {
             return undefined;
+        }
+        if (this.config().interpolator === LOG && domainVal <= 0) {
+            return 1;
         }
 
         return this.scale()(domainVal) + 0.5;
@@ -62,7 +89,7 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     domain (domain) {
-        if (domain) {
+        if (domain && domain.length) {
             const { nice } = this.config();
             if (domain.length && domain[0] === domain[1]) {
                 domain = [0, +domain[0] * 2];
@@ -71,6 +98,7 @@ export default class LinearAxis extends SimpleAxis {
             nice && this.scale().nice();
             this._domain = this.scale().domain();
             this.store().commit(DOMAIN, this._domain);
+            this.logicalSpace(null);
             return this;
         } return this._domain;
     }
@@ -139,35 +167,24 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     getTickValues () {
-        let numberOfValues;
+        let labelDim = 0;
         const {
             orientation,
-            tickValues
+            tickValues,
         } = this.config();
         const range = this.range();
         const axis = this.axis();
-        const ticks = axis.scale().ticks();
-        const tickLength = ticks.length;
+
         const availableSpace = Math.abs(range[0] - range[1]);
+
         const labelProps = getTickLabelInfo(this).largestLabelDim;
 
         if (tickValues) {
-            numberOfValues = tickValues;
-        } else {
-            numberOfValues = tickLength;
-            let labelDim = labelProps.height;
-            if (orientation === BOTTOM || orientation === TOP) {
-                labelDim = labelProps.width;
-            }
-            if (tickLength * (labelDim * 1.5) > availableSpace) {
-                numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
-            }
+            return axis.scale().ticks(tickValues);
         }
+        labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 
-        if (numberOfValues < 1) {
-            numberOfValues = 1;
-        }
-        return axis.scale().ticks(numberOfValues);
+        return getNumberOfTicks(availableSpace, labelDim, axis, this);
     }
 
     /**
@@ -188,16 +205,18 @@ export default class LinearAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const labelManager = this.dependencies().labelManager;
-
         labelManager.setStyle(this._tickLabelStyle);
         axis.tickTransform((d, i) => {
-            const { width: shiftWidth, height: shiftHeight } = labelManager.getOriSize(d);
+            const temp = axis.tickFormat ? axis.tickFormat()(d) : d;
+            const datum = temp.toString();
+
+            const { width: shiftWidth, height: shiftHeight } = labelManager.getOriSize(datum);
+
             if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
                 return `translate(0, -${(shiftHeight) / 3}px)`;
             }
             if (i === 0 && (orientation === TOP || orientation === BOTTOM) && rotation === 0) {
-                return `translate(${orientation === TOP ? shiftWidth / 2 : shiftWidth / 2}px,  ${0}px)
-                    rotate(${rotation}deg)`;
+                return `translate(${shiftWidth / 2}px,  ${0}px) rotate(${rotation}deg)`;
             } return '';
         });
         return tickText;

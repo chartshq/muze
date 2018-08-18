@@ -63,7 +63,6 @@
 			Horsepower: 'mean',
 			Acceleration: 'mean'
 		});
-debugger;
         layerFactory.composeLayers('lineWithAnchors', [
 			{
 				name: 'line',

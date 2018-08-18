@@ -1,4 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
+import { CommonProps } from 'muze-utils';
 import {
     setAttrs,
     getUniqueId,
@@ -31,7 +32,8 @@ import {
     primaryXAxisUpdated,
     secondaryXAxisUpdated,
     secondaryYAxisUpdated,
-    DATADOMAIN
+    DATADOMAIN,
+    TIMEDIFFS
 } from './enums/reactive-props';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
@@ -65,10 +67,19 @@ export default class VisualUnit {
             }),
             smartLabel: dependencies.smartLabel
         };
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise((resolve) => {
+            this._renderedResolve = resolve;
+        });
+        this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
+            this._renderedResolve();
+        });
+
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
         this._gridlines = [];
         this._gridbands = [];
+        this._layerAxisIndex = {};
         this._transformedDataModels = {};
 
         layerFactory.setLayerRegistry(registry.layerRegistry);
@@ -149,7 +160,7 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    lockModel() {
+    lockModel () {
         this._store.model.lock();
         return this;
     }
@@ -160,7 +171,7 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    unlockModel() {
+    unlockModel () {
         this._store.model.unlock();
         return this;
     }
@@ -195,6 +206,9 @@ export default class VisualUnit {
         return this;
     }
 
+    done () {
+        return this._renderedPromise;
+    }
     /**
      *
      *
@@ -260,23 +274,29 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    addLayer (layerDef, render = true) {
+    addLayer (layerDef) {
         const layerName = layerDef.name;
         const layer = this.getLayerByName(layerName);
+        const measurement = {
+            width: this.width(),
+            height: this.height()
+        };
+
         if (layer) {
             return [layer];
         }
         const serializedDef = layerFactory.getSerializedConf(layerDef.mark, layerDef);
         const instances = getLayerFromDef(this, serializedDef);
         this.layers().push(...instances);
-        attachAxisToLayers(this.axes(), instances, getLayerAxisIndex(instances, this.fields()));
-        const rootSvg = this._rootSvg;
-        if (rootSvg && render) {
-            renderLayers(this, rootSvg.node(), instances, {
-                width: this.width(),
-                height: this.height()
+        const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
+        this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
+        attachAxisToLayers(this.axes(), instances, layerAxisIndex);
+        this.layers().forEach((layer) => {
+            layer.measurement(measurement);
+            layer.dataProps({
+                timeDiffs: this.store().get(TIMEDIFFS)
             });
-        }
+        });
         return instances;
     }
 
@@ -307,12 +327,12 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers) {
+    getDataModelFromIdentifiers (identifiers, mode) {
         if (identifiers === null) {
             return null;
         }
         const dataModel = this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode);
     }
 
     /**

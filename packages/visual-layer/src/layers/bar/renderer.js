@@ -33,7 +33,6 @@ const barEnterFn = (elem, d) => {
     Object.entries(enter).forEach(attr => (!isNaN(attr[1]) && selection.attr(attr[0], attr[1])));
 };
 
-
 /**
  * Draws rectangles by using d3 selection
  * @param  {Object} params Contains container element and points
@@ -42,8 +41,8 @@ const barEnterFn = (elem, d) => {
 /* istanbul ignore next */ export const drawRects = (params) => {
     const { points, container, keyFn } = params;
     const updateFns = {
-        enter(elem, d) { barEnterFn(elem, d); },
-        update(elem, d, i) { transitionBars(elem, d, i, params); }
+        enter (elem, d) { barEnterFn(elem, d); },
+        update (elem, d, i) { transitionBars(elem, d, i, params); }
     };
     return makeElement(container, 'rect', points, null, updateFns, keyFn);
 };

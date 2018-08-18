@@ -1,7 +1,7 @@
 import { assembleModelFromIdentifiers, getDataModelFromRange } from 'muze-utils';
 import { propagationBehaviourMap } from './action-behaviour-map';
 import { propagationSideEffects } from './behaviour-effect-map';
-import { STEP, GRADIENT } from '../enums/constants';
+import { STEP, GRADIENT, DISCRETE, MEASURE } from '../enums/constants';
 
 export const propagate = (firebolt, action, selectionSet, config = {}) => {
     let propagationData;
@@ -9,6 +9,8 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
     const payload = config.payload;
     const data = firebolt.context.data();
     const metaData = firebolt.context.metaData();
+    const fieldType = metaData.getData().schema[0].type;
+
     const propPayload = {};
     const sourceId = firebolt.context._id;
     propPayload.action = propagationBehaviourMap[action] || action;
@@ -20,7 +22,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
     } else {
         const entrySet = selectionSet.mergedEnter;
         let values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.value);
-        if (type === STEP) {
+        if (type === STEP || (type === DISCRETE && fieldType === MEASURE)) {
             const field = Object.keys(payload.criteria || {})[0];
             values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.range);
             propagationData = metaData.select((fields) => {
@@ -47,8 +49,12 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         }
     }
 
-    metaData.addToPropNamespace(`legend-${sourceId}`, propPayload, propPayload.criteria === null ?
-            null : propagationData, isMutableAction);
+    metaData.addToPropNamespace(`legend-${sourceId}`, {
+        payload: propPayload,
+        criteria: propPayload.criteria === null ? null : propagationData,
+        isMutableAction,
+        actionName: propPayload.action
+    });
     metaData.propagate(propagationData, propPayload, {
         isMutableAction,
         sourceId

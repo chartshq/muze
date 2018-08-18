@@ -68,7 +68,6 @@ export default class ShapeAxis {
      * @memberof ShapeAxis
      */
     getShape (value) {
-        // debugger;
         if (!this.scale() || !this.domain() || !value) {
             return this.config().value;
         }

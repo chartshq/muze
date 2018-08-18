@@ -72,7 +72,7 @@ export const tweenPie = (path, b, prevData) => {
     const prevDatum = getObjProp(prevData, uid, 0) || getIndexedPoint(prevData, uid);
     const prevObject = { startAngle: prevDatum.startAngle, endAngle: prevDatum.endAngle };
 
-    return function(t) {
+    return function (t) {
         return path(interpolator()(prevObject, datum)(t));
     };
 };

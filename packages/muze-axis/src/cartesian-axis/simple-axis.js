@@ -38,10 +38,10 @@ export default class SimpleAxis {
         this._eventList = [];
 
         const defCon = mergeRecursive({}, this.constructor.defaultConfig());
-        this._config = mergeRecursive(defCon, config);
+        const simpleConfig = mergeRecursive(defCon, config);
 
         const bodyElem = selectElement('body');
-        const classPrefix = this._config.classPrefix;
+        const classPrefix = simpleConfig.classPrefix;
         this._tickLabelStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-ticks`);
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
         dependencies.labelManager.setStyle(this._tickLabelStyle);
@@ -51,9 +51,10 @@ export default class SimpleAxis {
         this.store(new Store({
             domain: this.domain(),
             range: this.range(),
-            config: this.config(),
+            config: simpleConfig,
             mount: this.mount()
         }));
+        this.config(simpleConfig);
 
         this._scale = this.createScale(this._config);
         this._axis = this.createAxis(this._config);
@@ -122,6 +123,7 @@ export default class SimpleAxis {
             this._domain = this.scale().domain();
             this.smartTicks(this.setTickConfig());
             this.store().commit(DOMAIN, this._domain);
+            this.logicalSpace(null);
             return this;
         }
         return this._domain;
@@ -145,6 +147,7 @@ export default class SimpleAxis {
      */
     createScale (config) {
         const {
+            base,
             padding,
             interpolator,
             exponent
@@ -154,6 +157,7 @@ export default class SimpleAxis {
             padding,
             interpolator,
             exponent,
+            base,
             range,
             type: this.constructor.type()
         });
@@ -178,8 +182,9 @@ export default class SimpleAxis {
         if (axisClass) {
             let axis = axisClass(this.scale());
             let formatter = {};
+
             if (tickFormat) {
-                formatter = val => tickFormat(numberFormat(val));
+                formatter = (val, ...params) => tickFormat(numberFormat(val), ...params);
             } else {
                 formatter = val => numberFormat(val);
             }
@@ -212,7 +217,6 @@ export default class SimpleAxis {
         if (orientation === TOP || orientation === BOTTOM) {
             const range = this.range();
             const length = Math.abs(range[0] - range[1]);
-
             this.config({ labels: { rotation: 0 } });
             if (length > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > length) {
                 this.config({ labels: { rotation: -90 } });

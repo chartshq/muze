@@ -29,7 +29,7 @@ const defaultTooltipFormatters = (type, formatter) => {
             const nearestInterval = getNearestInterval(interval);
             return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
         },
-        [FieldType.MEASURE]: value => formatter(value.toFixed(2)),
+        [FieldType.MEASURE]: value => formatter(value ? value.toFixed(2) : value),
         [FieldType.DIMENSION]: value => value
     };
     return formatters[type];

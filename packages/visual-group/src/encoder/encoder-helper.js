@@ -35,6 +35,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
         id: `${axisType}-${index}-${axisIndex}`,
         name: field.toString(),
         field: field.toString(),
+        labels: { rotation: 0 },
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
         type: dataTypeScaleMap[field.subtype()],
@@ -82,7 +83,8 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
             currentAxes.push(xAxis);
         } else {
             const axes = map.get(axisKey);
-            axes[axisIndex] && axes[axisIndex].config(axisConfig);
+            axes[axisIndex]._rotationLock = false;
+            axes[axisIndex] && axes[axisIndex].config(axisConfig).domain(axisConfig.domain || []);
         }
     });
 

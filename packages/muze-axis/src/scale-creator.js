@@ -219,11 +219,13 @@ export function createScale (params) {
     }
     let scaleFactory = null;
     const range = params.range;
-
+    // @todo: do it using scale decorator
     if (params.type === LINEAR && params.interpolator) {
         scaleFactory = scaleMap[params.interpolator];
         if (params.interpolator === ScaleType.POW) {
             return scaleFactory().range(range).exponent(params.exponent);
+        } else if (params.interpolator === ScaleType.LOG) {
+            return scaleFactory().range(range).base([params.base]);
         }
     } else {
         scaleFactory = scaleMap[params.type];

@@ -33,7 +33,7 @@ export default class LifeCycleManager {
      * Creates an instance of LifeCycleManager.
      * @memberof LifeCycleManager
      */
-    constructor() {
+    constructor () {
         this._eventList = EVENT_LIST;
         this._promises = new Map();
         this._notifiers = {};
@@ -47,7 +47,7 @@ export default class LifeCycleManager {
      *
      * @memberof LifeCycleManager
      */
-    _boot() {
+    _boot () {
         this._notifiers = this._eventList.reduce((acc, name) => {
             acc[name] = resolver;
             return acc;
@@ -63,7 +63,7 @@ export default class LifeCycleManager {
      * @return {promise} promise that is passed to the user
      * @memberof LifeCycleManager
      */
-    retrieve(eventName) {
+    retrieve (eventName) {
         return this._promises.get(eventName);
     }
 
@@ -74,7 +74,7 @@ export default class LifeCycleManager {
      * @return {promise} a pending promise waiting for resolve to be called
      * @memberof LifeCycleManager
      */
-    _makeNotifierPromise(eventName) {
+    _makeNotifierPromise (eventName) {
         return new Promise((resolve) => {
             this._notifiers[eventName] = this._notifiers[eventName](resolve);
         });
@@ -86,7 +86,7 @@ export default class LifeCycleManager {
      * resolve function waiting to be called with notification object
      * @memberof LifeCycleManager
      */
-    _preparePromises() {
+    _preparePromises () {
         this._eventList.forEach((eventName) => {
             this._promises.set(eventName, this._makeNotifierPromise(eventName));
         });
@@ -103,7 +103,7 @@ export default class LifeCycleManager {
      *
      * @memberof LifeCycleManager
      */
-    _resolvePromise(eventName, notification) {
+    _resolvePromise (eventName, notification) {
         this._notifiers[eventName](notification);
     }
 
@@ -116,10 +116,10 @@ export default class LifeCycleManager {
      * @param {string} notification.action the stage name when the event happened like `beforedraw`
      * @memberof LifeCycleManager
      */
-    notify(notification) {
+    notify (notification) {
         // get the composition name from notification
         // or from static formalName() method
-        let composition = notification.formalName || notification.client.constructor.formalName();
+        const composition = notification.formalName || notification.client.constructor.formalName();
         notification.formalName = composition;
         this._releasePromisesFromCache();
         this._notify(composition, notification);
@@ -136,15 +136,15 @@ export default class LifeCycleManager {
      * @param {string} notification.action the stage name when the event happened like `beforedraw`
      * @memberof LifeCycleManager
      */
-    _notify(composition, notification) {
-        let stage = notification.action;
-        let eventName = `${composition}.${stage}`;
+    _notify (composition, notification) {
+        const stage = notification.action;
+        const eventName = `${composition}.${stage}`;
 
         // resolves promise with the notification object
         this._resolvePromise(eventName, notification);
 
         // get the promise from the promise map
-        let promise = this.retrieve(eventName);
+        const promise = this.retrieve(eventName);
 
         if (this._lifeCycles[composition]) {
             if (this._lifeCycles[composition][stage]) {
@@ -167,8 +167,8 @@ export default class LifeCycleManager {
      * @param {promise} promise promise that is passed to the user
      * @memberof LifeCycleManager
      */
-    _callLifeCycleCallback(composition, stage, promise) {
-        let eventName = `${composition}.${stage}`;
+    _callLifeCycleCallback (composition, stage, promise) {
+        const eventName = `${composition}.${stage}`;
         this._lifeCycles[composition][stage](promise);
         this._resetTargetPromise(eventName);
     }
@@ -179,15 +179,15 @@ export default class LifeCycleManager {
      *
      * @memberof LifeCycleManager
      */
-    _releasePromisesFromCache() {
-        let compositions = Object.keys(this._unreleasedLifeCycles);
+    _releasePromisesFromCache () {
+        const compositions = Object.keys(this._unreleasedLifeCycles);
         compositions.forEach((composition) => {
-            let stages = Object.keys(this._unreleasedLifeCycles[composition]);
+            const stages = Object.keys(this._unreleasedLifeCycles[composition]);
             stages.forEach((stage) => {
                 if (this._lifeCycles[composition]) {
                     if (this._lifeCycles[composition][stage]) {
                         // take the promise from unreleased lifeCycles
-                        let promise = this._unreleasedLifeCycles[composition][stage];
+                        const promise = this._unreleasedLifeCycles[composition][stage];
                         // call the user given callback with that promise
                         this._callLifeCycleCallback(composition, stage, promise);
                         // delete promise from unreleased lifeCycles
@@ -206,7 +206,7 @@ export default class LifeCycleManager {
      * @param {promise} promise promise that is passed to the user
      * @memberof LifeCycleManager
      */
-    _cachePromise(composition, stage, promise) {
+    _cachePromise (composition, stage, promise) {
         if (!hasOwn(this._unreleasedLifeCycles, composition)) {
             this._unreleasedLifeCycles[composition] = {};
         }
@@ -223,7 +223,7 @@ export default class LifeCycleManager {
      * @param {Object} [lifeCycles={}] a object with list of callbacks
      * @memberof LifeCycleManager
      */
-    register(lifeCycles = {}) {
+    register (lifeCycles = {}) {
         this._lifeCycles = lifeCycles;
         // as we get all the callbacks, try to call them
         // from unreleased promise map
@@ -236,7 +236,7 @@ export default class LifeCycleManager {
      * @param {string} eventName name of the event happening
      * @memberof LifeCycleManager
      */
-    _resetTargetPromise(eventName) {
+    _resetTargetPromise (eventName) {
         setTimeout(() => {
             this._notifiers[eventName] = resolver;
             this._promises.set(eventName, this._makeNotifierPromise(eventName));

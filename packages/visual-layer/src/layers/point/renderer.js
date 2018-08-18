@@ -28,8 +28,8 @@ const checkPath = (str) => {
  * @param {*} d
  * @param {*} elem
  */
-const createShape = function(d, elem) {
-    let groupElement = selectElement(elem);
+const createShape = function (d, elem) {
+    const groupElement = selectElement(elem);
     const { shape, size, update } = d;
 
     if (shape instanceof Promise) {
@@ -37,8 +37,7 @@ const createShape = function(d, elem) {
             d.shape = res;
             createShape(d, elem);
         });
-    }
-    else if (shape instanceof Element) {
+    } else if (shape instanceof Element) {
         let newShape = shape.cloneNode(true);
 
         if (newShape.nodeName.toLowerCase() === 'img') {
@@ -56,8 +55,7 @@ const createShape = function(d, elem) {
         shapeElement.attr('x', -size / 2);
         shapeElement.attr('y', -size / 2);
         selectElement(groupElement.node().appendChild(newShape));
-    }
-    else if (typeof shape === 'string') {
+    } else if (typeof shape === 'string') {
         let pathStr;
         if (checkPath(shape)) {
             pathStr = shape;
@@ -65,8 +63,7 @@ const createShape = function(d, elem) {
             pathStr = symbol().type(symbolFns[shape]).size(size)(update);
         }
         makeElement(groupElement, 'path', [1]).attr('d', pathStr);
-    }
-    else {
+    } else {
         d.shape = 'circle';
         createShape(d, elem);
     }
@@ -86,14 +83,14 @@ const createShape = function(d, elem) {
     const symbolGroups = mount.selectAll('g').data(points, params.keyFn);
     const symbolEnter = symbolGroups.enter().append('g').attr('transform', d => `translate(${d.enter.x},${d.enter.y})`);
     mergedGroups = symbolGroups.merge(symbolEnter)
-                    .each(function(d) {
+                    .each(function (d) {
                         createShape(d, this);
                     });
     mergedGroups = disabled ? mergedGroups : mergedGroups.transition().duration(disabled ? 0 : transition.duration);
     mergedGroups.attr('transform', d => `translate(${d.update.x},${d.update.y})`)
                     .each(function (d) {
-                        let style = d.style,
-                            element = selectElement(this);
+                        const style = d.style;
+                        const element = selectElement(this);
                         objectIterator(style, key => element.style(key, style[key]));
                         element.attr('class', `${className}`);
                         element.classed(d.className, true);
