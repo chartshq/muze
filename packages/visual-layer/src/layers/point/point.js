@@ -113,9 +113,9 @@ export default class PointLayer extends BaseLayer {
             const shape = shapeAxis.getShape(row[shapeFieldIndex]);
 
             const [xPx, yPx] = [ENCODING.X, ENCODING.Y].map((type) => {
-                let bandwidth = axes[type].getUnitWidth() / 2,
-                    value = d[type] === null ? undefined : d[type],
-                    measure = type === ENCODING.X ? measurement.width : measurement.height;
+                const bandwidth = axes[type].getUnitWidth() / 2;
+                const value = d[type] === null ? undefined : d[type];
+                const measure = type === ENCODING.X ? measurement.width : measurement.height;
                 return !encoding[type].field ? measure / 2 : axes[type].getScaleValue(value) + bandwidth;
             });
 
@@ -201,18 +201,15 @@ export default class PointLayer extends BaseLayer {
      * @return {Object} Point details
      */
     getNearestPoint (x, y) {
-        let point;
-        let dimensions;
-        let radius;
         const distanceLimit = this._maxSize;
 
         if (!this.data()) {
             return null;
         }
 
-        point = this._voronoi.find(x, y, distanceLimit);
-        dimensions = point && point.data.data.update;
-        radius = point ? Math.sqrt(point.data.data.size / Math.PI) : 0;
+        const point = this._voronoi.find(x, y, distanceLimit);
+        const dimensions = point && point.data.data.update;
+        const radius = point ? Math.sqrt(point.data.data.size / Math.PI) : 0;
 
         if (point) {
             const { _data, _id } = point.data.data;

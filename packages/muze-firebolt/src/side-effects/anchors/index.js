@@ -57,6 +57,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
         };
     }
 
+    /**
+     * Returns the default area value of the anchor point.
+     * @return { number } Default area value of anchor.
+     */
     defaultSizeValue () {
         return 100;
     }

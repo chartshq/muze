@@ -25,11 +25,11 @@ const resolveDimByField = (type, axesInfo, config, data) => {
         measurement
     } = config;
 
-    let sizeValue = sizeEncoding.value,
-        enter = 0,
-        pos,
-        space = 0,
-        enterSpace = 0;
+    const sizeValue = sizeEncoding.value;
+    let enter = 0;
+    let pos;
+    let space = 0;
+    let enterSpace = 0;
 
     if (fieldType !== undefined) {
         if (config[`${type}0Field`]) {
@@ -185,8 +185,8 @@ export const getBarMeasurement = (axis, bandScale, config) => {
         pad,
         innerPadding
     } = config;
-    const groupWidth = getGroupWidth(axis, timeDiff),
-        isAxisBandScale = axis.constructor.type() === BAND;
+    const groupWidth = getGroupWidth(axis, timeDiff);
+    const isAxisBandScale = axis.constructor.type() === BAND;
     // If it is a grouped bar then the width of each bar in a grouping is retrieved from
     // a band scale. The band scale will have range equal to width of one group of bars and
     // the domain is set to series keys.
