@@ -1414,18 +1414,6 @@ const concatModels = (dm1, dm2) => {
     return [data, commonSchema];
 };
 
-class MixinBuilder {
-    constructor (superclass) {
-        this.superclass = superclass;
-    }
-
-    with (...mixins) {
-        return mixins.reduce((c, mixin) => mixin(c), this.superclass);
-    }
-}
-
-const mix = superclass => new MixinBuilder(superclass);
-
 export {
     transformColors,
     detectColor,
@@ -1488,6 +1476,5 @@ export {
     getObjProp,
     extendsClass,
     assembleModelFromIdentifiers,
-    isValidValue,
-    mix
+    isValidValue
 };
