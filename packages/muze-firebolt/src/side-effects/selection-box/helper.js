@@ -9,7 +9,6 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
     let yRange;
     let direction;
     const criteria = payload.criteria;
-    const dragEnd = payload.dragEnd;
     const axes = sourceInf.axes;
     const axisFields = sourceInf.fields;
     const dimensions = payload.dimensions || {};
@@ -67,8 +66,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
         if ((xAxis.constructor.type() === 'band' && yLinear)) {
             y1 = y2 = undefined;
             direction = 'vertical';
-        }
-        else {
+        } else {
             const domain = yAxis.domain();
             const bandScale = yAxis.constructor.type() === 'band';
             let y1Val;

@@ -1,6 +1,7 @@
 import { FieldType, FilteringMode } from 'muze-utils';
 import Field from './fields/field';
 import fieldStore from './field-store';
+
 import Value from './value';
 import {
     rowDiffsetIterator,
@@ -9,7 +10,7 @@ import {
     selectIterator,
     calculatedVariableIterator
 } from './operator';
-import { DM_DERIVATIVES } from './constants';
+import { DM_DERIVATIVES, LOGICAL_OPERATORS } from './constants';
 import createFields from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
@@ -73,20 +74,18 @@ export const selectHelper = (rowDiffset, fields, selectFn, config) => {
 };
 
 export const filterPropagationModel = (model, propModels, config = {}) => {
-    const operation = config.operation || 'and';
+    const operation = config.operation || LOGICAL_OPERATORS.AND;
     const filterByMeasure = config.filterByMeasure || false;
     let fns = [];
     if (propModels === null) {
         fns = [() => false];
-    }
-    else {
+    } else {
         fns = propModels.map(propModel => ((dataModel) => {
-            let fn;
             const dataObj = dataModel.getData();
             const schema = dataObj.schema;
             const fieldsConfig = dataModel.getFieldsConfig();
             const data = dataObj.data;
-            fn = (fields) => {
+            return (fields) => {
                 const include = !data.length ? false : data.some(row => schema.every((propField) => {
                     if (!(propField.name in fields)) {
                         return true;
@@ -99,19 +98,17 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
                 }));
                 return include;
             };
-            return fn;
         })(propModel));
     }
 
     let filteredModel;
-    if (operation === 'and') {
+    if (operation === LOGICAL_OPERATORS.AND) {
         const clonedModel = model.clone(false, false);
         filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
             saveChild: false,
             mode: FilteringMode.ALL
         });
-    }
-    else {
+    } else {
         filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)), {
             mode: FilteringMode.ALL,
             saveChild: false
