@@ -67,22 +67,16 @@ export const setSelectionSets = (addSet, selectionSet, persistent) => {
             }
             const { exitSet } = selectionSet.getSets();
             const mergedExitSet = getMergedSet(exitSet);
-            if (exitSet[1].length !== selectionSet.getCompleteSetCount() &&
-                    mergedExitSet.length === selectionSet.getCompleteSetCount()) {
+            const completeSetCount = selectionSet.getCompleteSet().length;
+            if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
                 selectionSet.reset();
             }
-        } else if (existingAddSet.length) {
-            selectionSet.updateExit();
-            const { entrySet } = selectionSet.getSets();
-
-            selectionSet.reset(getMergedSet(entrySet));
-            selectionSet.add(addSet);
-            selectionSet.update(existingAddSet);
         } else {
             selectionSet.updateExit();
             const { entrySet } = selectionSet.getSets();
             selectionSet.reset(getMergedSet(entrySet));
             selectionSet.add(addSet);
+            selectionSet.update(existingAddSet);
         }
     } else {
         selectionSet.remove(selectionSet.getCompleteSet());
@@ -102,26 +96,33 @@ export const getSourceFields = (propagationInf, criteria = {}) => {
     return sourceFields;
 };
 
-export const getModelFromSet = (type, config) => {
-    const { dataModel, set, propagationData } = config;
-    const model = propagationData || dataModel;
-    const conditionsMap = {
-        newEntry: [SELECTION.SELECTION_NEW_ENTRY],
-        oldEntry: [SELECTION.SELECTION_OLD_ENTRY],
-        mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
-        newExit: [SELECTION.SELECTION_NEW_EXIT],
-        oldExit: [SELECTION.SELECTION_OLD_EXIT],
-        mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
-        complete: [],
-    };
-
-    return model ? model.select((fields, i) => conditionsMap[type].some(condition => set[i] === condition), {
-        saveChild: false
-    }) : null;
+const conditionsMap = {
+    newEntry: [SELECTION.SELECTION_NEW_ENTRY],
+    oldEntry: [SELECTION.SELECTION_OLD_ENTRY],
+    mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
+    newExit: [SELECTION.SELECTION_NEW_EXIT],
+    oldExit: [SELECTION.SELECTION_OLD_EXIT],
+    mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
+    complete: [],
 };
 
-export const getSetInfo = (type, set, config) => ({
-    uids: set,
-    length: set.length,
-    model: config.isSourceFieldPresent === false ? config.filteredDataModel : getModelFromSet(type, config)
-});
+export const getModelFromSet = (type, model, set) =>
+    model ? model.select((fields, i) => conditionsMap[type].some(condition => set[i] === condition), {
+        saveChild: false
+    }) : null;
+
+export const getSetInfo = (type, set, config) => {
+    let model = null;
+    const filteredDataModel = config.filteredDataModel;
+    if (!config.propagationData) {
+        model = getModelFromSet(type, config.dataModel, config.set);
+    }
+    else if (filteredDataModel) {
+        model = type === 'mergedEnter' ? filteredDataModel[0] : filteredDataModel[1];
+    }
+    return {
+        uids: set,
+        length: set.length,
+        model
+    };
+};

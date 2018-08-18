@@ -3,12 +3,14 @@ import { isSimpleObject } from 'muze-utils';
 export const propagateValues = (instance, action, config = {}) => {
     let propagationData;
     const payload = config.payload;
-    const isMutableAction = config.mutates;
     const selectionSet = config.selectionSet;
     const criteria = payload.criteria;
     const context = instance.context;
     const dataModel = context.cachedData()[0];
     const sourceId = context.id();
+    const sideEffects = config.sideEffects;
+    const mutableEffect = sideEffects.find(sideEffect =>
+        instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
     const mergedModel = selectionSet.mergedEnter.model;
 
     payload.sourceUnit = sourceId;
@@ -26,9 +28,15 @@ export const propagateValues = (instance, action, config = {}) => {
         propagationData = mergedModel.project(criteriaFields);
     }
 
-    dataModel.addToPropNamespace(sourceId, payload, propagationData, isMutableAction);
+    dataModel.addToPropNamespace(sourceId, {
+        payload,
+        criteria: propagationData,
+        isMutableAction: mutableEffect,
+        actionName: mutableEffect ? (mutableEffect.name || mutableEffect) : action
+    });
+
     dataModel.propagate(propagationData, payload, {
-        isMutableAction,
+        isMutableAction: mutableEffect,
         sourceId
     });
 };

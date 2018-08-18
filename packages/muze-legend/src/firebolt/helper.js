@@ -47,8 +47,12 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         }
     }
 
-    metaData.addToPropNamespace(`legend-${sourceId}`, propPayload, propPayload.criteria === null ?
-            null : propagationData, isMutableAction);
+    metaData.addToPropNamespace(`legend-${sourceId}`, {
+        payload: propPayload,
+        criteria: propPayload.criteria === null ? null : propagationData,
+        isMutableAction,
+        actionName: propPayload.action
+    });
     metaData.propagate(propagationData, propPayload, {
         isMutableAction,
         sourceId

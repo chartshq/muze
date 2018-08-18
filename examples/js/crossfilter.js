@@ -2,7 +2,7 @@
 let env = muze();
 const DataModel = muze.DataModel;
 const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
-d3.json('../../data/cars-2.json', (data) => {
+d3.json('../../data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
             name: 'Name',
@@ -130,26 +130,26 @@ d3.json('../../data/cars-2.json', (data) => {
                 }
             });
         }
-        const textLayer = context.getLayerByName('textMark');
-        if (!textLayer) {
-            context.addLayer({
-                name: 'textMark',
-                mark: 'text',
-                encoding: {
-                    x: xField,
-                    y: yField,
-                    text: {
-                        field: yField,
-                        formatter: value => value.toFixed(2)
-                    },
-                    color: {
-                        value: () => '#fff'
-                    }
-                }
-            });
-        }
+        // const textLayer = context.getLayerByName('textMark');
+        // if (!textLayer) {
+        //     context.addLayer({
+        //         name: 'textMark',
+        //         mark: 'text',
+        //         encoding: {
+        //             x: xField,
+        //             y: yField,
+        //             text: {
+        //                 field: yField,
+        //                 formatter: value => value.toFixed(2)
+        //             },
+        //             color: {
+        //                 value: () => '#fff'
+        //             }
+        //         }
+        //     });
+        // }
+        // context.getLayerByName('lineMark').data(entrySet);
         context.getLayerByName('lineMark').data(entrySet);
-        context.getLayerByName('textMark').data(entrySet);
     }
 		}
 	);

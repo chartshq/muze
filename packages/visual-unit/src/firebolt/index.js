@@ -24,7 +24,8 @@ export default class UnitFireBolt extends Firebolt {
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
         let actionInf;
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
-        const action = this._actions.behavioural[behaviour];
+        const behaviouralActions = this._actions.behavioural;
+        const action = behaviouralActions[behaviour];
         const context = this.context;
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
@@ -38,7 +39,7 @@ export default class UnitFireBolt extends Firebolt {
             propagateValues(this, behaviour, {
                 payload,
                 selectionSet: selectionSet.find(d => d.sourceSelectionSet),
-                mutable: action.constructor.mutates()
+                sideEffects
             });
         } else {
             const applicableSideEffects = getApplicableSideEffects(this, payload, sideEffects, propagationInfo);
@@ -77,11 +78,12 @@ export default class UnitFireBolt extends Firebolt {
             if (sourceIdentifiers) {
                 const fieldsConfig = sourceIdentifiers.getFieldsConfig();
                 const sourceIdentifierFields = Object.keys(fieldsConfig);
-                const propFields = Object.keys(data.getFieldsConfig());
+                const propFields = Object.keys(data[0].getFieldsConfig());
                 if (!Object.values(fieldsConfig).some(d => d.def.type === FieldType.MEASURE)) {
-                    isSourceFieldPresent = sourceIdentifierFields.every(d => propFields.indexOf(d) !== -1);
+                    isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1);
                 }
             }
+
             const payload = payloadFn(this.context, data, propValue);
             payload && this.dispatchBehaviour(action, payload, {
                 propagate: false,

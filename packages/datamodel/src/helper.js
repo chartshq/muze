@@ -13,23 +13,22 @@ import { DM_DERIVATIVES } from './constants';
 import createFields from './field-creator';
 import defaultConfig from './default-config';
 import * as converter from './converter';
-import { compose, select } from './operator/compose';
 
 /**
  * Prepares the selection data.
  */
 function prepareSelectionData (fields, i) {
     const resp = {};
-    for (let field of fields) {
+    for (const field of fields) {
         resp[field.name] = new Value(field.data[i], field);
     }
     return resp;
 }
 
 export const updateFields = ([rowDiffset, colIdentifier], partialFieldspace, fieldStoreName) => {
-    let collID = colIdentifier.length ? colIdentifier.split(',') : [];
-    let partialFieldMap = partialFieldspace.fieldsObj();
-    let newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
+    const collID = colIdentifier.length ? colIdentifier.split(',') : [];
+    const partialFieldMap = partialFieldspace.fieldsObj();
+    const newFields = collID.map(coll => new Field(partialFieldMap[coll], rowDiffset));
     return fieldStore.createNamespace(newFields, fieldStoreName);
 };
 
@@ -53,7 +52,7 @@ export const persistDerivation = (model, operation, config = {}, criteriaFn) => 
 export const selectHelper = (rowDiffset, fields, selectFn, config) => {
     const newRowDiffSet = [];
     let lastInsertedValue = -1;
-    let { mode } = config;
+    const { mode } = config;
     let li;
     let checker = index => selectFn(prepareSelectionData(fields, index), index);
     if (mode === FilteringMode.INVERSE) {
@@ -88,7 +87,7 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             const fieldsConfig = dataModel.getFieldsConfig();
             const data = dataObj.data;
             fn = (fields) => {
-                let include = data.some(row => schema.every((propField) => {
+                const include = !data.length ? true : data.some(row => schema.every((propField) => {
                     if (!(propField.name in fields)) {
                         return true;
                     }
@@ -103,11 +102,19 @@ export const filterPropagationModel = (model, propModels, config = {}) => {
             return fn;
         })(propModel));
     }
-    const filteredModel = operation === 'and' ? compose(...fns.map(fn => select(fn, {
-        saveChild: false
-    })))(model.clone(false, false), {
-        saveChild: false
-    }) : model.select(fields => fns.some(fn => fn(fields)));
+
+    let filteredModel;
+    if (operation === 'and') {
+        const clonedModel = model.clone(false, false);
+        filteredModel = clonedModel.select(fields => fns.every(fn => fn(fields)), {
+            saveChild: false,
+            mode: FilteringMode.ALL
+        });
+    }
+    else {
+        filteredModel = model.clone(false, false).select(fields => fns.some(fn => fn(fields)));
+    }
+
     return filteredModel;
 };
 
@@ -186,35 +193,44 @@ export const fieldInSchema = (schema, field) => {
     return null;
 };
 
-export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTraversingModel) => {
+export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTraversingModel, grouped) => {
     // function to propagate to target the DataModel instance.
-    const forwardPropagation = (targetDM, propagationData) => {
-        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel);
+    const forwardPropagation = (targetDM, propagationData, hasGrouped) => {
+        propagateIdentifiers(targetDM, propagationData, config, nonTraversingModel, hasGrouped);
     };
 
     dataModel !== nonTraversingModel && dataModel.handlePropagation({
         payload: config.payload,
         data: propModel,
         sourceIdentifiers: config.sourceIdentifiers,
-        sourceId: config.propagationSourceId
+        sourceId: config.propagationSourceId,
+        groupedPropModel: !!grouped
     });
 
     // propagate to children created by SELECT operation
     selectIterator(dataModel, (targetDM, criteria) => {
         if (targetDM !== nonTraversingModel) {
-            const selectedModel = propModel.select(criteria, {
+            const selectionModel = propModel[0].select(criteria, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, selectedModel);
+            const rejectionModel = propModel[1].select(criteria, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [selectionModel, rejectionModel], grouped);
         }
     });
     // propagate to children created by PROJECT operation
     projectIterator(dataModel, (targetDM, projField) => {
         if (targetDM !== nonTraversingModel) {
-            const projModel = propModel.project(projField, {
+            const projModel = propModel[0].project(projField, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, projModel);
+            const rejectionProjModel = propModel[1].project(projField, {
+                saveChild: false
+            });
+
+            forwardPropagation(targetDM, [projModel, rejectionProjModel], grouped);
         }
     });
 
@@ -226,20 +242,23 @@ export const propagateIdentifiers = (dataModel, propModel, config = {}, nonTrave
                     groupByString,
                 } = conf;
                 // group the filtered model based on groupBy string of target
-            const groupedPropModel = propModel.groupBy(groupByString.split(','), reducer, {
+            const selectionGroupedModel = propModel[0].groupBy(groupByString.split(','), reducer, {
                 saveChild: false
             });
-            forwardPropagation(targetDM, groupedPropModel);
+            const rejectionGroupedModel = propModel[1].groupBy(groupByString.split(','), reducer, {
+                saveChild: false
+            });
+            forwardPropagation(targetDM, [selectionGroupedModel, rejectionGroupedModel], true);
         }
     });
 
     calculatedVariableIterator(dataModel, (targetDM, ...params) => {
         if (targetDM !== nonTraversingModel) {
-            const calculatedVariableModel = propModel.calculateVariable(...params, {
+            const calculatedVariableModel = propModel[0].calculateVariable(...params, {
                 saveChild: false,
                 replaceVar: true
             });
-            forwardPropagation(targetDM, calculatedVariableModel);
+            forwardPropagation(targetDM, [calculatedVariableModel, calculatedVariableModel], grouped);
         }
     });
 };
@@ -263,19 +282,21 @@ export const propagateToAllDataModels = (identifiers, rootModels, config) => {
     let propModel;
     const propagationNameSpace = config.propagationNameSpace;
     const payload = config.payload;
+    const propagationSourceId = config.propagationSourceId;
 
     if (identifiers === null) {
         criteria = null;
     } else {
-        criteria = [].concat(...[...Object.values(propagationNameSpace.mutableActions)
-                    .map(d => Object.values(d).map(obj => obj.criteria)), identifiers]);
+        const filteredCriteria = Object.entries(propagationNameSpace.mutableActions).filter(d => d[0] !== propagationSourceId)
+            .map(d => Object.values(d[1]).map(action => action.criteria));
+        criteria = [].concat(...[...filteredCriteria, identifiers]);
     }
 
     const rootGroupByModel = rootModels.groupByModel;
     const rootModel = rootModels.model;
     const propConfig = {
         payload,
-        propagationSourceId: config.propagationSourceId,
+        propagationSourceId,
         sourceIdentifiers: identifiers
     };
 
@@ -292,14 +313,13 @@ export const propagateToAllDataModels = (identifiers, rootModels, config) => {
     propagateIdentifiers(rootModel, propModel, propConfig, rootGroupByModel);
 };
 
-
 export const propagateImmutableActions = (propagationNameSpace, rootModels, propagationSourceId) => {
     const rootGroupByModel = rootModels.groupByModel;
     const rootModel = rootModels.model;
     const immutableActions = propagationNameSpace.immutableActions;
-    for (let sourceId in immutableActions) {
+    for (const sourceId in immutableActions) {
         const actions = immutableActions[sourceId];
-        for (let action in actions) {
+        for (const action in actions) {
             const criteriaModel = actions[action].criteria;
             propagateToAllDataModels(criteriaModel, {
                 groupByModel: rootGroupByModel,

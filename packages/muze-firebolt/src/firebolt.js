@@ -1,7 +1,15 @@
-import { mergeRecursive, getElementsByClassName, hasTouch } from 'muze-utils';
+import { mergeRecursive, getElementsByClassName, hasTouch, filterPropagationModel, FieldType } from 'muze-utils';
 import SelectionSet from './selection-set';
-import { initializeBehaviouralActions, initializeSideEffects, changeSideEffectAvailability,
-    initializePhysicalActions, setSelectionSets, getSetInfo, getMergedSet, getSourceFields } from './helper';
+import {
+    initializeBehaviouralActions,
+    initializeSideEffects,
+    changeSideEffectAvailability,
+    initializePhysicalActions,
+    setSelectionSets,
+    getSetInfo,
+    getMergedSet,
+    getSourceFields
+} from './helper';
 
 /**
  * Relient firebolt is responsible for dispatching behaviours. It has only behaviours which can be
@@ -16,6 +24,7 @@ export default class Firebolt {
             behavioural: {},
             physical: {}
         };
+        this._linkedActions = {};
         this._sourceSideEffects = {
             tooltip: true,
             selectionBox: true
@@ -176,7 +185,7 @@ export default class Firebolt {
      * Map actions and behaviours
      * @return {Firebolt} Firebolt instance
      */
-    mapActionsAndBehaviour() {
+    mapActionsAndBehaviour () {
         const initedPhysicalActions = this._actions.physical;
         const map = this._actionBehaviourMap;
 
@@ -263,6 +272,7 @@ export default class Firebolt {
                         exitSet,
                         completeSet
                     } = selectionSet.getSets();
+
                     const setConfig = {
                         isSourceFieldPresent: propagationInf.isSourceFieldPresent,
                         dataModel,
@@ -270,6 +280,7 @@ export default class Firebolt {
                         propagationData: propagationInf.data,
                         set: selectionSet._set
                     };
+
                     return {
                         entrySet: [getSetInfo('oldEntry', entrySet[0], setConfig),
                             getSetInfo('newEntry', entrySet[1], setConfig)],
@@ -289,15 +300,21 @@ export default class Firebolt {
     }
 
     getAddSetFromCriteria (criteria, propagationInf = {}) {
+        const context = this.context;
         const filteredDataModel = propagationInf.data ? propagationInf.data :
-            this.context.getDataModelFromIdentifiers(criteria);
+            context.getDataModelFromIdentifiers(criteria);
+        const xFields = context.fields().x || [];
+        const yFields = context.fields().y || [];
+        const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
+        const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
         return {
             model: filteredDataModel,
-            uids: criteria === null ? null : filteredDataModel.getData().uids
+            uids: criteria === null ? null : (propagationInf.data ? filterPropagationModel(this.getFullData(),
+                propagationInf.data[0], xMeasures && yMeasures).getData().uids : filteredDataModel[0].getData().uids)
         };
     }
 
     getFullData () {
-        return this.context.cachedData()[0];
+        return this.context.data();
     }
 }

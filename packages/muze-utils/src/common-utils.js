@@ -450,14 +450,14 @@ const getDependencyOrder = (graph) => {
      * @param {Object} name @todo
      * @return {Object} @todo
      */
-    let visit = (name) => {
+    const visit = (name) => {
         if (dependencyOrder.length === keys.length) {
             return true;
         }
         visited[name] = true;
-        let edges = graph[name];
+        const edges = graph[name];
         for (let e = 0; e < edges.length; e++) {
-            let dep = edges[e];
+            const dep = edges[e];
             if (!visited[dep]) {
                 visit(dep);
             }
@@ -481,7 +481,7 @@ const getDependencyOrder = (graph) => {
  * @param {any} fn  function to be applied on it
  */
 const objectIterator = (obj, fn) => {
-    for (let key in obj) {
+    for (const key in obj) {
         if (Object.hasOwnProperty.call(obj, key)) {
             fn(key, obj);
         }
@@ -498,7 +498,7 @@ const objectIterator = (obj, fn) => {
      * Initialize the voronoi with the data given.
      * @param {Array.<Object>} data Array of points.
      */
-    constructor(data) {
+    constructor (data) {
         this._voronoi = voronoi().x(d => d.x).y(d => d.y);
         this.data(data);
     }
@@ -508,7 +508,7 @@ const objectIterator = (obj, fn) => {
      * @param {Array.<Object>} data Array of objects.
      * @return {Voronoi} Instance of voronoi.
      */
-    data(data) {
+    data (data) {
         if (data) {
             this._voronoiFn = this._voronoi(data);
         }
@@ -522,7 +522,7 @@ const objectIterator = (obj, fn) => {
      * @param {number} radius search radius.
      * @return {Object} Details of the nearest point.
      */
-    find(x, y, radius) {
+    find (x, y, radius) {
         return this._voronoiFn.find(x, y, radius);
     }
 }
@@ -542,7 +542,7 @@ class Store {
      * @param {Object} config The object to create the state store with.
      * @memberof Store
      */
-    constructor(config) {
+    constructor (config) {
         // create reactive model
         this.model = Model.create(config);
         this._listeners = [];
@@ -555,7 +555,7 @@ class Store {
      * @return {Object} Serialized representation of state store.
      * @memberof Store
      */
-    serialize() {
+    serialize () {
         return this.model.serialize();
     }
 
@@ -566,7 +566,7 @@ class Store {
      * @param {number} value The new value of the property.
      * @memberof Store
      */
-    commit(propName, value) {
+    commit (propName, value) {
         // check if appropriate enum has been used
         this.model.prop(propName, value);
     }
@@ -579,12 +579,12 @@ class Store {
      * @param {Function} callBack The callback to execute.
      * @memberof Store
      */
-    /* istanbul ignore next */registerChangeListener(propNames, callBack, instantCall) {
+    /* istanbul ignore next */registerChangeListener (propNames, callBack, instantCall) {
         let props = propNames;
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        let fn = this.model.next(props, callBack, instantCall);
+        const fn = this.model.next(props, callBack, instantCall);
         this._listeners.push(fn);
         return this;
     }
@@ -596,12 +596,12 @@ class Store {
      * @param {Function} callBack The callback to execute.
      * @memberof Store
      */
-    /* istanbul ignore next */ registerImmediateListener(propNames, callBack, instantCall) {
+    /* istanbul ignore next */ registerImmediateListener (propNames, callBack, instantCall) {
         let props = propNames;
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        let fn = this.model.on(props, callBack, instantCall);
+        const fn = this.model.on(props, callBack, instantCall);
         this._listeners.push(fn);
         return this;
     }
@@ -613,7 +613,7 @@ class Store {
      * @return {any} The value of the field.
      * @memberof Store
      */
-    get(propName) {
+    get (propName) {
         return this.model.prop(propName);
     }
 
@@ -625,7 +625,7 @@ class Store {
      * @param {Function} callBack The function to execute when depemdent props change.
      * @memberof Store
      */
-    computed(propName, callBack) {
+    computed (propName, callBack) {
         return this.model.calculatedProp(propName, callBack);
     }
 
@@ -673,7 +673,7 @@ const transactor = (holder, options, model) => {
     let conf,
         store = model && model instanceof Model ? model : Model.create({});
 
-    for (let prop in options) {
+    for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
             conf = options[prop];
             if (!store.prop(prop)) {
@@ -686,9 +686,9 @@ const transactor = (holder, options, model) => {
                 const prevVal = store.prop(prop);
                 if (paramsLen) {
                     // If parameters are passed then it's a setter
-                    let spreadParams = meta && meta.spreadParams;
+                    const spreadParams = meta && meta.spreadParams;
                     val = params;
-                    let values = [];
+                    const values = [];
                     if (meta) {
                         for (let i = 0; i < paramsLen; i++) {
                             val = params[i];
@@ -718,7 +718,7 @@ const transactor = (holder, options, model) => {
                                     }
                                 } else if (typeof typeCheck === 'string') {
                                     if (typeCheck === 'constructor') {
-                                        let typeExpected = spreadParams ? meta.typeExpected[i] : meta.typeExpected;
+                                        const typeExpected = spreadParams ? meta.typeExpected[i] : meta.typeExpected;
                                         if (val && (val.constructor.name === typeExpected)) {
                                             values.push(val);
                                         }
@@ -886,17 +886,17 @@ const mergeRecursive = (source, sink) => {
 };
 
 const interpolateArray = (data, fitCount) => {
-    let linearInterpolate = function (before, after, atPoint) {
+    const linearInterpolate = function (before, after, atPoint) {
         return before + (after - before) * atPoint;
     };
-    let newData = [];
-    let springFactor = ((data.length - 1) / (fitCount - 1));
+    const newData = [];
+    const springFactor = ((data.length - 1) / (fitCount - 1));
     newData[0] = data[0]; // for new allocation
     for (let i = 1; i < fitCount - 1; i++) {
-        let tmp = i * springFactor;
-        let before = (Math.floor(tmp)).toFixed();
-        let after = (Math.ceil(tmp)).toFixed();
-        let atPoint = tmp - before;
+        const tmp = i * springFactor;
+        const before = (Math.floor(tmp)).toFixed();
+        const after = (Math.ceil(tmp)).toFixed();
+        const atPoint = tmp - before;
         newData[i] = linearInterpolate(data[before], data[after], atPoint);
     }
     newData[fitCount - 1] = data[data.length - 1]; // for new allocation
@@ -949,7 +949,6 @@ const numberInterpolator = () => interpolateNumber;
  */
 const colorInterpolator = () => interpolateRgb;
 
-
 const transformColors = () => ({
     color,
     rgb,
@@ -962,15 +961,43 @@ const transformColors = () => ({
  */
 const piecewiseInterpolator = () => piecewise;
 
-function hue2rgb(p, q, t) {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
-    if (t < 1 / 6) return p + (q - p) * 6 * t;
-    if (t < 1 / 2) return q;
-    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-    return p;
-}
+/**
+ * Converts an RGB color value to HSL. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and l in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSL representation
+ */
+const rgbToHsl = (r, g, b, a = 1) => {
+    r /= 255, g /= 255, b /= 255;
 
+    let max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    let h,
+        s,
+        l = (max + min) / 2;
+
+    if (max == min) {
+        h = s = 0; // achromatic
+    } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+        }
+
+        h /= 6;
+    }
+
+    return [h, s, l, a];
+};
 
   /**
    * Converts an HSL color value to RGB. Conversion formula
@@ -988,11 +1015,20 @@ const hslToRgb = (h, s, l, a = 1) => {
         g,
         b;
 
-    if (s === 0) {
+    if (s == 0) {
         r = g = b = l; // achromatic
     } else {
-        let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        let p = 2 * l - q;
+        function hue2rgb (p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+        }
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
 
         r = hue2rgb(p, q, h + 1 / 3);
         g = hue2rgb(p, q, h);
@@ -1025,13 +1061,12 @@ const rgbToHsv = (r, g, b, a = 1) => {
     if (max === min) {
         h = s = 0; // achromatic
     } else {
-        let d = max - min;
+        const d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
         switch (max) {
         case r: h = (g - b) / d + (g < b ? 6 : 0); break;
         case g: h = (b - r) / d + 2; break;
         case b: h = (r - g) / d + 4; break;
-        default: break;
         }
         h /= 6;
     }
@@ -1054,43 +1089,40 @@ const hsvToRgb = (h, s, v, a = 1) => {
         g,
         b;
 
-    let i = Math.floor(h * 6);
-    let f = h * 6 - i;
-    let p = v * (1 - s);
-    let q = v * (1 - f * s);
-    let t = v * (1 - (1 - f) * s);
+    const i = Math.floor(h * 6);
+    const f = h * 6 - i;
+    const p = v * (1 - s);
+    const q = v * (1 - f * s);
+    const t = v * (1 - (1 - f) * s);
 
     switch (i % 6) {
-    case 0: r = v; g = t; b = p; break;
-    case 1: r = q; g = v; b = p; break;
-    case 2: r = p; g = v; b = t; break;
-    case 3: r = p; g = q; b = v; break;
-    case 4: r = t; g = p; b = v; break;
-    case 5: r = v; g = p; b = q; break;
-    default: break;
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
     }
 
-    return [r * 255, g * 255, b * 255, a];
+    return [r * 255, g * 255, b * 255];
 };
 
 const hexToHsv = (hex) => {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-    let r = parseInt(result[1], 16);
-    let g = parseInt(result[2], 16);
-    let b = parseInt(result[3], 16);
-    let a = result[4] ? parseInt(result[4], 16) : 1;
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    const a = result[4] ? parseInt(result[4], 16) : 1;
     return rgbToHsv(r, g, b, a);
 };
 
 const detectColor = (col) => {
-    let matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
-    // eslint-disable-next-line
-    let matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
-    let matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
-    // eslint-disable-next-line
-    let matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
-    let matchHex = /^#([0-9a-f]{3}){1,2}$/i;
+    const matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
+    const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
+    const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
+    const matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
+    const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
     if (matchRgb.test(col) || matchRgba.test(col)) {
         return 'rgb';
@@ -1108,7 +1140,7 @@ const detectColor = (col) => {
  * @param {*} propModel
  * @returns
  */
-const filterPropagationModel = (model, propModel) => {
+const filterPropagationModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
     let filteredModel;
     if (schema.length) {
@@ -1122,10 +1154,11 @@ const filterPropagationModel = (model, propModel) => {
                 saveChild: false
             });
         } else {
-            let fieldMap = model.getFieldsConfig();
+            const fieldMap = model.getFieldsConfig();
             filteredModel = model.select((fields) => {
-                let include = data.some(row => schema.every((propField, idx) => {
-                    if (!(propField.name in fieldMap)) {
+                const include = data.some(row => schema.every((propField, idx) => {
+                    if (!measures && (!(propField.name in fieldMap) ||
+                        fieldMap[propField.name].def.type === FieldType.MEASURE)) {
                         return true;
                     }
                     return row[idx] === fields[propField.name].valueOf();
@@ -1143,16 +1176,15 @@ const filterPropagationModel = (model, propModel) => {
     return filteredModel;
 };
 
-
 const assembleModelFromIdentifiers = (model, identifiers) => {
     let schema = [];
     let data;
-    let fieldMap = model.getFieldsConfig();
+    const fieldMap = model.getFieldsConfig();
     if (identifiers.length) {
-        let fields = identifiers[0];
-        let len = fields.length;
+        const fields = identifiers[0];
+        const len = fields.length;
         for (let i = 0; i < len; i++) {
-            let field = fields[i];
+            const field = fields[i];
             let fieldObj;
             if (field === ReservedFields.ROW_ID) {
                 fieldObj = {
@@ -1210,7 +1242,8 @@ const getDataModelFromRange = (dataModel, criteria) => {
         });
 
     return dataModel.select(selFn, {
-        saveChild: false
+        saveChild: false,
+        mode: 'all'
     });
 };
 
@@ -1227,12 +1260,12 @@ const getDataModelFromIdentifiers = (dataModel, identifiers) => {
         let fieldsConfig = dataModel.getFieldsConfig(),
             rowId = ReservedFields.ROW_ID;
 
-        let dataArr = identifiers.slice(1, identifiers.length);
+        const dataArr = identifiers.slice(1, identifiers.length);
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
         }
         else if (identifiers instanceof Array && identifiers[0].length) {
-            let filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === rowId);
+            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === rowId);
             filteredDataModel = dataModel.select((fields, i) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
@@ -1243,12 +1276,13 @@ const getDataModelFromIdentifiers = (dataModel, identifiers) => {
                     else {
                         value = fields[propField].valueOf();
                     }
-                    let index = dataArr.findIndex(d => d[idx] === value);
+                    const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });
                 return include;
             }, {
-                saveChild: false
+                saveChild: false,
+                mode: 'all'
             });
         }
     }
@@ -1265,8 +1299,8 @@ const getDataModelFromIdentifiers = (dataModel, identifiers) => {
  * @param {*} listenerMap
  */
 const registerListeners = (context, listenerMap) => {
-    let propListenerMap = listenerMap(context);
-    for (let key in propListenerMap) {
+    const propListenerMap = listenerMap(context);
+    for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
             let mapObj = propListenerMap[key],
                 propType = mapObj.type,
@@ -1350,8 +1384,8 @@ const concatModels = (dm1, dm2) => {
     const data2 = dataObj2.data;
     const schema1 = dataObj1.schema;
     const schema2 = dataObj2.schema;
-    let tuples1 = {};
-    let tuples2 = {};
+    const tuples1 = {};
+    const tuples2 = {};
     const commonTuples = {};
     for (let i = 0; i < data1.length; i++) {
         for (let ii = 0; ii < data2.length; ii++) {

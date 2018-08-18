@@ -16,7 +16,7 @@ export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colo
 };
 
 const transfromColor = (colorAxis, datum, intensity) => {
-    let fillColorInfo = colorAxis.transformColor(datum.meta.stateColor, intensity);
+    const fillColorInfo = colorAxis.transformColor(datum.meta.stateColor, intensity);
     datum.meta.stateColor = fillColorInfo.hsla;
     return fillColorInfo;
 };
@@ -47,7 +47,6 @@ const applyInteractionStyle = (context, selectionSet, interactionType, config) =
     });
 };
 
-
 /**
  *
  *
@@ -56,10 +55,9 @@ const applyInteractionStyle = (context, selectionSet, interactionType, config) =
  * @param {*} hasFaded
  */
 export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction) => {
-    let interactionConfig = { interaction, apply: hasFaded };
+    const interactionConfig = { interaction, apply: hasFaded };
     applyInteractionStyle(context, selectionSet, 'fade', interactionConfig);
 };
-
 
 /**
  *
@@ -69,7 +67,7 @@ export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction
  * @param {*} hasFaded
  */
 export const focusUnfocusSelection = (context, selectionSet, isFocussed, interaction) => {
-    let interactionConfig = { interaction, apply: isFocussed };
+    const interactionConfig = { interaction, apply: isFocussed };
     applyInteractionStyle(context, selectionSet, 'focus', interactionConfig);
 };
 
@@ -283,7 +281,7 @@ export const calculateDomainFromData = (data, encodingFieldInf, transformType) =
 
 export const attachDataToVoronoi = (voronoi, points) => {
     voronoi.data([].concat(...points).filter(d => d._id !== undefined).map((d) => {
-        let point = d.update;
+        const point = d.update;
         return {
             x: point.x,
             y: point.y,
@@ -300,7 +298,7 @@ export const attachDataToVoronoi = (voronoi, points) => {
  * @param {*} remove
  */
 export const updateStyle = (target, styles, remove) => {
-    for (let key in styles) {
+    for (const key in styles) {
         if ({}.hasOwnProperty.call(styles, key)) {
             target.style(key, remove ? null : styles[key]);
         }
