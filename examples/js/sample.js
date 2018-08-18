@@ -99,11 +99,8 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(300)
-            .height(350)
-        .layers([{
-            mark: 'line'
-        }])
+            .width(600)
+            .height(450)
             .config({
                 gridLines: {
                     y: {
@@ -125,7 +122,6 @@
                         // exponent: 2,
                         // base: 10,
                         showInnerTicks: true,
-                        labels: { rotation: -45 },
 
                     },
                     y: {
@@ -134,7 +130,9 @@
                     },
                 }
             })
-            // .color('Ori.gin')
+            .color({
+                field: 'Displacement'
+            })
             .legend({
                 align: 'horizontal',
 

@@ -1,7 +1,6 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 
 export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
-    const { interpolator, exponent } = context.config();
     const ticks = axis.scale().ticks();
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
@@ -24,10 +23,10 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
  * @memberof SimpleAxis
  */
 export const getTickLabelInfo = (context) => {
-    let largestLabel = '',
-        labelProps,
-        smartTick = {},
-        axisTickLabels;
+    let largestLabel = '';
+    let labelProps;
+    let smartTick = {};
+    let axisTickLabels;
     const scale = context.scale();
     const allLabelLengths = [];
     const { tickFormat, tickValues, numberFormat } = context.config();

@@ -71,8 +71,8 @@ export const titleCreator = (container, text, measurement, classPrefix) =>
  * @return
  */
 export const getMaxMeasures = (data, prop, labelManager) => {
-    let maxHeight = -Infinity,
-        maxWidth = -Infinity;
+    let maxHeight = -Infinity;
+    let maxWidth = -Infinity;
 
     data.forEach((item) => {
         const value = prop ? item[prop] : item;

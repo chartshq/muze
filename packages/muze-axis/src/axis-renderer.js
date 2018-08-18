@@ -3,7 +3,7 @@
  */
 import { selectElement, makeElement, angleToRadian } from 'muze-utils';
 import * as AxisOrientation from './enums/axis-orientation';
-import { LINEAR, HIDDEN, BOTTOM } from './enums/constants';
+import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
 
 /**
  *
@@ -96,7 +96,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     tickText.selectAll('tspan').remove();
 
    // rotate labels if not enough space is available
-    if (rotation !== 0 && isSmartTicks === false) {
+    if (rotation !== 0 && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
         rotateAxis(axisInstance, tickText, labelManager, config);
     } else if (rotation === 0 && isSmartTicks === false) {
         tickText.attr('transform', '');

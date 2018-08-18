@@ -32,6 +32,7 @@ export default class ColorAxis {
         this._rangeType = this._config.interpolate ? CONTINOUS : DISCRETE;
 
         this._schemeType = getSchemeType(this._config.scheme || this._config.value || this._config.range);
+
         this._colorStrategy = this.setColorStrategy(this._domainType, this._rangeType, this._schemeType);
         this._scale = this.createScale(this._colorStrategy);
         this._id = getUniqueId();
