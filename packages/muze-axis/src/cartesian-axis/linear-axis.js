@@ -84,7 +84,6 @@ export default class LinearAxis extends SimpleAxis {
      * @memberof AxisCell
      */
     setAvailableSpace (width = 0, height, padding, isOffset) {
-        debugger;
         const {
             left,
             right,
@@ -144,7 +143,6 @@ export default class LinearAxis extends SimpleAxis {
         const {
             orientation,
             tickValues,
-            interpolator
         } = this.config();
         const range = this.range();
         const axis = this.axis();
@@ -158,7 +156,7 @@ export default class LinearAxis extends SimpleAxis {
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 
-        return getNumberOfTicks(availableSpace, labelDim, axis, interpolator);
+        return getNumberOfTicks(availableSpace, labelDim, axis, this);
     }
 
     /**

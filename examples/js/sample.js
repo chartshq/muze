@@ -92,18 +92,18 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Displacement'],
-            columns = ['Weight_in_lbs'];
+        let rows = ['Year'],
+            columns = ['Horsepower'];
 
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(590)
+            .width(300)
             .height(350)
-        // .layers([{
-        //     mark: 'area'
-        // }])
+        .layers([{
+            mark: 'line'
+        }])
             .config({
                 gridLines: {
                     y: {
@@ -121,10 +121,11 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        interpolator: 'pow',
-                        exponent: 3,
+                        // interpolator: 'pow',
+                        // exponent: 2,
                         // base: 10,
                         showInnerTicks: true,
+                        labels: { rotation: -45 },
 
                     },
                     y: {

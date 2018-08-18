@@ -201,6 +201,7 @@ export function renderAxis (axisInstance) {
         showAxisName,
         show,
         id,
+        interpolator,
         classPrefix,
      } = config;
 
@@ -214,8 +215,10 @@ export function renderAxis (axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
+    if (interpolator === 'linear') {
     // Set ticks for the axis
-    axisInstance.setTickValues();
+        axisInstance.setTickValues();
+    }
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

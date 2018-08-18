@@ -16,8 +16,8 @@ const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].config().labels.rotation < 0) {
-                    rotation = -90;
+                if (xAxes[i][j].config().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].config().labels.rotation;
                     return;
                 }
             }

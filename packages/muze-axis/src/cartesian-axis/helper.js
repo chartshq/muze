@@ -1,25 +1,17 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 
-export const getNumberOfTicks = (availableSpace, labelDim, axis, interpolator) => {
+export const getNumberOfTicks = (availableSpace, labelDim, axis, context) => {
+    const { interpolator, exponent } = context.config();
     const ticks = axis.scale().ticks();
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
     if (tickLength * (labelDim * 1.5) > availableSpace) {
-        numberOfValues = Math.floor(availableSpace / (labelDim * 1.25));
+        numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
     if (numberOfValues < 1) {
         numberOfValues = 1;
-    }
-    if (interpolator === 'log' || interpolator === 'pow') {
-        let x = 1;
-        for (let i = 0; i <= numberOfValues; i++) {
-            if (axis.scale().ticks(i).length <= numberOfValues) {
-                x = i;
-            }
-        }
-        return axis.scale().ticks(x);
     }
 
     return axis.scale().ticks(numberOfValues);
