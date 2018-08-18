@@ -176,15 +176,18 @@ export default class LinearAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const labelManager = this.dependencies().labelManager;
-
         labelManager.setStyle(this._tickLabelStyle);
         axis.tickTransform((d, i) => {
-            const { width: shiftWidth, height: shiftHeight } = labelManager.getOriSize(d);
+            const temp = axis.tickFormat ? axis.tickFormat()(d) : d;
+            const datum = temp.toString();
+
+            const { width: shiftWidth, height: shiftHeight } = labelManager.getOriSize(datum);
+
             if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
                 return `translate(0, -${(shiftHeight) / 3}px)`;
             }
             if (i === 0 && (orientation === TOP || orientation === BOTTOM) && rotation === 0) {
-                return `translate(${orientation === TOP ? shiftWidth / 2 : shiftWidth / 2}px,  ${0}px)
+                return `translate(${shiftWidth / 2}px,  ${0}px)
                     rotate(${rotation}deg)`;
             } return '';
         });

@@ -94,13 +94,15 @@ export default class BandAxis extends SimpleAxis {
         const { maxWidth, maxHeight } = this.config();
         const { labelManager } = this._dependencies;
         const domain = this.axis().scale().domain();
+        const axis = this.axis();
 
         smartTicks = domain;
+        const tickFormatter = axis.tickFormat();
 
         if (domain && domain.length) {
             smartTicks = domain.map((d) => {
                 labelManager.useEllipsesOnOverflow(true);
-                smartlabel = labelManager.getSmartText(d, maxWidth, maxHeight);
+                smartlabel = labelManager.getSmartText(tickFormatter(d), maxWidth, maxHeight);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }

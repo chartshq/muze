@@ -103,53 +103,53 @@
             .data(rootData)
 			.width(900)
             .height(600)
-            .layers([{
-                mark: 'bar',
-            }, {
-                mark: 'tick',
-                dataSource: 'transformedData',
-                encoding: {
-                    x: null,
-                    y: 'Miles_per_Gallon',
-                    color: { value: () => 'red' }
-                },
-                calculateDomain: false
-            }, {
-                mark: 'text',
-                dataSource: 'transformedData',
-                encoding: {
-                    x: null,
-                    y: 'Miles_per_Gallon',
-                    text: {
-                        field: 'Miles_per_Gallon',
-                        formatter: value => `Average Mileage: ${Math.round(value)}`,
+            // .layers([{
+            //     mark: 'bar',
+            // }, {
+            //     mark: 'tick',
+            //     dataSource: 'transformedData',
+            //     encoding: {
+            //         x: null,
+            //         y: 'Miles_per_Gallon',
+            //         color: { value: () => 'red' }
+            //     },
+            //     calculateDomain: false
+            // }, {
+            //     mark: 'text',
+            //     dataSource: 'transformedData',
+            //     encoding: {
+            //         x: null,
+            //         y: 'Miles_per_Gallon',
+            //         text: {
+            //             field: 'Miles_per_Gallon',
+            //             formatter: value => `Average Mileage: ${Math.round(value)}`,
 
-                    },
-                    background: {
-                        field: 'Miles_per_Gallon',
-                        value: 'red'
-                    },
-                    color: { value: () => 'red' },
+            //         },
+            //         background: {
+            //             field: 'Miles_per_Gallon',
+            //             value: 'red'
+            //         },
+            //         color: { value: () => 'red' },
 
-                },
+            //     },
 
-                positioner: (points, store, dependencies) => {
-                    const width = store.unit.width();
-                    const smartLabel = dependencies.smartLabel;
-                    for (let i = 0; i < points.length; i++) {
-                        const size = smartLabel.getOriSize(points[i].text);
+            //     positioner: (points, store, dependencies) => {
+            //         const width = store.unit.width();
+            //         const smartLabel = dependencies.smartLabel;
+            //         for (let i = 0; i < points.length; i++) {
+            //             const size = smartLabel.getOriSize(points[i].text);
 
-                        points[i].update.x = width - 25;
-                        points[i].textanchor = 'end';
-                        points[i].update.y -= 7;
-                    }
-                    return points;
-                },
-                calculateDomain: false
-            }])
-            .transform({
-                transformedData: dt => dt.groupBy([''], { Miles_per_Gallon: 'avg' })
-            })
+            //             points[i].update.x = width - 25;
+            //             points[i].textanchor = 'end';
+            //             points[i].update.y -= 7;
+            //         }
+            //         return points;
+            //     },
+            //     calculateDomain: false
+            // }])
+            // .transform({
+            //     transformedData: dt => dt.groupBy([''], { Miles_per_Gallon: 'avg' })
+            // })
             // .layers([{
             //     mark: 'point',
             //     // transform: {
@@ -192,6 +192,11 @@
                 // })
                 // .size('Origin')
             .config({
+                gridLines: {
+                    y: {
+                        show: true
+                    }
+                },
                 facetConfig: {
                     rows: {
                         verticalAlign: 'middle',
@@ -206,14 +211,14 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        labels: {
-                            rotation: 180
-                        },
+
+                        showInnerTicks: true,
 
                     },
                     y: {
                         showAxisName: true,
-                    }
+
+                    },
                 }
             });
 

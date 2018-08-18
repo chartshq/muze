@@ -181,8 +181,9 @@ export default class SimpleAxis {
         if (axisClass) {
             let axis = axisClass(this.scale());
             let formatter = {};
+
             if (tickFormat) {
-                formatter = val => tickFormat(numberFormat(val));
+                formatter = (val, ...params) => tickFormat(numberFormat(val), ...params);
             } else {
                 formatter = val => numberFormat(val);
             }

@@ -26,8 +26,8 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
     const tickSize = instance.getTickSize();
 
     tickText.each(function (datum, index) {
-        let yShift,
-            xShift;
+        let yShift;
+        let xShift;
         const temp = scale.tickFormat ? scale.tickFormat()(datum) : datum;
 
         datum = temp.toString();
@@ -54,6 +54,8 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
             xShift = height;
         } else if (rotation === 270) {
             xShift = -height;
+        } else {
+            xShift = 0;
         }
 
         if (orientation === AxisOrientation.TOP) {
