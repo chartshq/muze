@@ -22,6 +22,8 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
 
     const xAxis = axes.x[0];
     const yAxis = axes.y[0];
+    const xLinear = xAxis.constructor.type() === 'linear';
+    const yLinear = yAxis.constructor.type() === 'linear';
     const xField = `${axisFields.x[0]}`;
     const yField = `${axisFields.y[0]}`;
     const xCriteria = criteria[xField];
@@ -36,7 +38,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
     }
     direction = xCriteria && yCriteria ? 'both' : (xCriteria ? 'vertical' : 'horizontal');
     if (xRange && xRange.length) {
-        if ((yAxis.constructor.type() === 'band' && xAxis.constructor.type() === 'linear')) {
+        if ((yAxis.constructor.type() === 'band' && xLinear)) {
             x1 = x2 = undefined;
             direction = 'horizontal';
         } else {
@@ -62,7 +64,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
         x1 = x2 = undefined;
     }
     if (yRange && yRange.length) {
-        if ((xAxis.constructor.type() === 'band' && yAxis.constructor.type() === 'linear')) {
+        if ((xAxis.constructor.type() === 'band' && yLinear)) {
             y1 = y2 = undefined;
             direction = 'vertical';
         }
@@ -77,8 +79,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
                 [y1DomainIndex, y2DomainIndex] = [y1DomainIndex, y2DomainIndex].sort(((a, b) => b - a));
                 y1Val = domain[y1DomainIndex];
                 y2Val = domain[y2DomainIndex];
-            }
-            else {
+            } else {
                 y1Val = yRange[0];
                 y2Val = yRange[yRange.length - 1];
             }
@@ -90,7 +91,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
         y1 = y2 = undefined;
     }
 
-    if (!dragEnd) {
+    if ((yLinear && xLinear) || !payload.dragEnd) {
         if (xDim) {
             [x1, x2] = xDim;
         }
@@ -98,6 +99,7 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
             [y1, y2] = yDim;
         }
     }
+
     return {
         dimension: {
             x1,

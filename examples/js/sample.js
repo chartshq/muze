@@ -95,7 +95,7 @@
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
         let rows = ['Miles_per_Gallon', 'Horsepower', 'Acceleration'],
-            columns = rows.reverse();
+            columns = ['Year'];
 
         canvas = canvas
             .rows(rows)
@@ -104,7 +104,7 @@
             .width(500)
             .height(600)
         .layers([{
-            mark: 'point'
+            mark: 'bar'
         }])
             .config({
                 gridLines: {
@@ -135,8 +135,7 @@
                 }
             })
             .color({
-                field: 'Horsepower',
-                interpolate: true
+                field: 'Origin'
             })
             .legend({
                 align: 'horizontal',
