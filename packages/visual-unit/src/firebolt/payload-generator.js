@@ -2,7 +2,7 @@ import { DimensionSubtype } from 'muze-utils';
 
 const getRangeFromData = (instance, selectionDataModel, propConfig) => {
     let criteria;
-    const dataObj = selectionDataModel.getData();
+    const dataObj = selectionDataModel[0].getData();
     const propCriteria = propConfig.payload.criteria;
     const sourceIdentifiers = propConfig.sourceIdentifiers;
     const schema = dataObj.schema;
@@ -13,7 +13,7 @@ const getRangeFromData = (instance, selectionDataModel, propConfig) => {
     if (isActionSourceSame) {
         criteria = propCriteria;
     } else {
-        criteria = (!selectionDataModel.isEmpty() && sourceIdentifiers !== null) ? schema.reduce((acc, obj, index) => {
+        criteria = (sourceIdentifiers !== null) ? schema.reduce((acc, obj, index) => {
             let range;
             const field = obj.name;
             const fieldObj = fieldMap[field];
@@ -48,12 +48,12 @@ export const payloadGenerator = {
     __default: (instance, selectionDataModel, propConfig) => {
         const propPayload = propConfig.payload;
         const sourceIdentifiers = propConfig.sourceIdentifiers;
-        const dataObj = selectionDataModel.getData();
+        const dataObj = selectionDataModel[0].getData();
         let schema = dataObj.schema;
         const payload = Object.assign({}, propPayload);
         schema = dataObj.schema;
         const data = dataObj.data;
-        payload.criteria = !sourceIdentifiers || sourceIdentifiers.isEmpty() ? null : [schema.map(d => d.name),
+        payload.criteria = !sourceIdentifiers ? null : [schema.map(d => d.name),
             ...data];
         return payload;
     }

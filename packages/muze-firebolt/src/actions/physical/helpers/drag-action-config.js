@@ -53,11 +53,13 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
         if (xField === yField) {
             const xdom = selectedDomains.x;
             const ydom = selectedDomains.y;
-
-            if ((Math.abs(xdom[1] - xdom[0])) < (Math.abs(ydom[1] - ydom[0]))) {
-                rangeObj[xField] = xdom;
-            } else {
-                rangeObj[yField] = ydom;
+            const min = xdom[0] > ydom[0] ? ydom : xdom;
+            const max = min === ydom ? xdom : ydom;
+            if (min[1] < max[0]) {
+                rangeObj[xField] = [];
+            }
+            else {
+                rangeObj[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
             }
             dimensions.x = [stPos.x, endPos.x];
             dimensions.y = [stPos.y, endPos.y];

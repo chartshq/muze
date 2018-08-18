@@ -12,18 +12,11 @@ export const defaultConfig = {
         }],
         fade: [{
             type: 'fill',
-            intensity: [0, -20, +20, 0]
-        }, {
-            type: 'stroke',
-            intensity: [0, -20, +20, 0]
+            intensity: [-20, -80, +20, 0]
         }],
         focus: [{
             type: 'fill',
-            intensity: [0, 0, +20, 0]
-        },
-        {
-            type: 'stroke',
-            intensity: [0, 0, +20, 0]
+            intensity: [0, 0, +50, 0]
         }
         ]
     },

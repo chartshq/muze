@@ -3,8 +3,8 @@ import { transformFactory } from '@chartshq/transform';
 import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
 
 export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colorFieldIndex }) => {
-    let rawColor = '',
-        color = '';
+    let rawColor = '';
+    let color = '';
     if (colorEncoding && colorEncoding.value instanceof Function) {
         color = colorEncoding.value(datum, index);
         rawColor = colorEncoding.value(datum, index);

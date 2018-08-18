@@ -43,11 +43,13 @@ export const listenerMap = context => ([
     {
         type: 'computed',
         props: [PROPS.LAYERSCREATED],
-        listener: fetch => fetch(PROPS.LAYERDEFS, (layerDefs) => {
+        listener: fetch => fetch(PROPS.LAYERDEFS, PROPS.FIELDS, (layerDefs, fields) => {
             const layerDefsValue = layerDefs.value;
-            if (layerDefsValue) {
+            const fieldsVal = fields.value;
+            if (layerDefsValue && fieldsVal) {
                 const layers = createLayers(context, layerDefs.value);
                 context.layers(layers);
+                context._layerAxisIndex = getLayerAxisIndex(context.layers(), fieldsVal);
                 context._lifeCycleManager.notify({ client: layers, action: 'initialized', formalName: 'layer' });
                 return true;
             }
@@ -77,22 +79,11 @@ export const listenerMap = context => ([
     },
     {
         type: 'computed',
-        props: [PROPS.LAYERAXISINDEX],
-        listener: fetch => fetch(PROPS.FIELDS, PROPS.LAYERSCREATED, (fields, layersCreated) => {
-            const fieldsVal = fields.value;
-            if (fieldsVal && layersCreated.value) {
-                return getLayerAxisIndex(context.layers(), fieldsVal);
-            }
-            return null;
-        })
-    },
-    {
-        type: 'computed',
         props: [PROPS.DATADOMAIN],
-        listener: fetch => fetch(PROPS.DATA, PROPS.LAYERSCREATED, PROPS.AXES, PROPS.TRANSFORM, PROPS.LAYERAXISINDEX,
-            (dataModel, layersCreated, axes, transform, layerAxisIndex) => {
+        listener: fetch => fetch(PROPS.DATA, PROPS.LAYERSCREATED, PROPS.AXES, PROPS.TRANSFORM,
+            (dataModel, layersCreated, axes, transform) => {
                 const dataModelVal = dataModel.value;
-                const layerAxisIndexVal = layerAxisIndex.value;
+                const layerAxisIndexVal = context._layerAxisIndex;
                 const axesVal = axes.value;
                 if (dataModelVal && layersCreated.value && axesVal && layerAxisIndexVal) {
                     const layers = context.layers();
@@ -118,7 +109,7 @@ export const listenerMap = context => ([
         type: 'registerImmediateListener',
         props: [PROPS.DATADOMAIN],
         listener: ([, dataDomain]) => {
-            dataDomain != null && context.updateAxisDomain(dataDomain);
+            dataDomain !== null && context.updateAxisDomain(dataDomain);
         }
     },
     {

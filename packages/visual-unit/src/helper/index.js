@@ -139,9 +139,8 @@ export const createLayers = (context, layerDefinitions) => {
 export const attachDataToLayers = (layers, dm, transformedDataModels) => {
     layers.forEach((layer) => {
         const dataSource = layer.config().dataSource;
-        if (dataSource !== null) {
-            layer.data(transformedDataModels[dataSource] || dm);
-        }
+        const dataModel = dataSource instanceof Function ? dataSource(dm) : (transformedDataModels[dataSource] || dm);
+        layer.data(dataModel);
     });
 };
 
@@ -223,7 +222,7 @@ export const renderLayers = (context, container, layers, measurement) => {
             layer.dataProps({
                 timeDiffs: context.store().get(TIMEDIFFS)
             });
-            layer.config().render !== false && layer.mount(group.node());
+            layer.mount(group.node());
         }
     });
     context._lifeCycleManager.notify({ client: layers, action: 'drawn', formalName: 'layer' });
@@ -258,7 +257,8 @@ export const getNearestDimensionalValue = (context, position) => {
         const filterData = [...new Set(data.getData().data.map(d => d[index]))];
         key = filterData[getClosestIndexOf(filterData, key)];
     }
-    return [[field], [key]];
+
+    return key !== undefined ? [[field], [key]] : null;
 };
 
 export const getLayersBy = (layers, searchBy, value) => layers.filter((layer) => {

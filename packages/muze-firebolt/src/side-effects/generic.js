@@ -18,6 +18,10 @@ export default class GenericSideEffect {
         return 'all';
     }
 
+    static mutates () {
+        return false;
+    }
+
     config (...params) {
         if (params.length) {
             this._config = mergeRecursive(this._config, params[0]);
