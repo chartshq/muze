@@ -1,18 +1,56 @@
 {
   "name": "muze",
-  "description": "JavaScript Data Visualization Library",
-  "homepage": "http://www.fusioncharts.com/",
   "version": "1.0.0",
+  "description": "JavaScript Data Visualization Library based on Relational Algebra",
+  "homepage": "https://charts.com/muze",
   "license": "MIT",
-  "author": "FusionCharts Technologies <support@fusioncharts.com>",
+  "author": "Charts.com <support@charts.com>",
+  "contributors": [
+    {
+      "name": "Akash Ghoswami",
+      "email": "akash@fusioncharts.com"
+    },
+    {
+      "name": "Ranajit Banerjee",
+      "email": "ranajit.banerjee@fusioncharts.com",
+      "url": "https://github.com/ranajitbanerjee"
+    },
+    {
+      "name": "Mridul Meharia",
+      "email": "mridul@fusioncharts.com",
+      "url": "https://github.com/mridulmeh"
+    },
+    {
+      "name": "Subhash Haldar",
+      "email": "subhash@fusioncharts.com"
+    },
+    {
+      "name": "Sandeep Acharya",
+      "email": "sandeep@fusioncharts.com"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "rousan@fusioncharts.com",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Ujjal Kumar Dutta",
+      "email": "ujjal@fusioncharts.com"
+    }
+  ],
+  "main": "src/index.js",
   "keywords": [
-    "renderer",
     "muze",
     "svg",
     "vector",
     "graphics",
     "data-visualization",
-    "visualization"
+    "visualization",
+    "renderer",
+    "fusioncharts",
+    "relational",
+    "algebra",
+    "relation"
   ],
   "repository": {
     "type": "git",

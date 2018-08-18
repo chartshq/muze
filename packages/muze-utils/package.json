@@ -2,14 +2,47 @@
   "name": "muze-utils",
   "version": "1.0.0",
   "description": "It contains all the utility functions needed by components of muze",
-  "main": "src/index.js",
+  "homepage": "https://charts.com/muze",
   "license": "MIT",
-  "author": "",
+  "author": "Charts.com <support@charts.com>",
+  "contributors": [
+    {
+      "name": "Akash Ghoswami",
+      "email": "akash@fusioncharts.com"
+    },
+    {
+      "name": "Ranajit Banerjee",
+      "email": "ranajit.banerjee@fusioncharts.com",
+      "url": "https://github.com/ranajitbanerjee"
+    },
+    {
+      "name": "Mridul Meharia",
+      "email": "mridul@fusioncharts.com",
+      "url": "https://github.com/mridulmeh"
+    },
+    {
+      "name": "Subhash Haldar",
+      "email": "subhash@fusioncharts.com"
+    },
+    {
+      "name": "Sandeep Acharya",
+      "email": "sandeep@fusioncharts.com"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "rousan@fusioncharts.com",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Ujjal Kumar Dutta",
+      "email": "ujjal@fusioncharts.com"
+    }
+  ],
+  "main": "src/index.js",
   "keywords": [],
-  "preferGlobal": false,
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/muze-utils"
+    "url": "https://bitbucket.org/fusioncharts/muze"
   },
   "dependencies": {
     "d3-brush": "^1.0.4",
