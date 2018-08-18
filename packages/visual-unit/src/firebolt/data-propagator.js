@@ -22,10 +22,10 @@ export const propagateValues = (instance, action, config = {}) => {
         propagationData = null;
     } else if (isSimpleObject(criteria)) {
         const fields = Object.keys(criteria || {});
-        propagationData = mergedModel.project(fields);
+        propagationData = mergedModel ? mergedModel.project(fields) : null;
     } else {
         const criteriaFields = criteria[0];
-        propagationData = mergedModel.project(criteriaFields);
+        propagationData = mergedModel ? mergedModel.project(criteriaFields) : null;
     }
 
     dataModel.addToPropNamespace(sourceId, {

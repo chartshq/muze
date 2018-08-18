@@ -24,7 +24,6 @@ export default class Firebolt {
             behavioural: {},
             physical: {}
         };
-        this._linkedActions = {};
         this._sourceSideEffects = {
             tooltip: true,
             selectionBox: true
@@ -278,7 +277,7 @@ export default class Firebolt {
                         dataModel,
                         filteredDataModel,
                         propagationData: propagationInf.data,
-                        set: selectionSet._set
+                        selectionSet
                     };
 
                     return {
@@ -316,5 +315,9 @@ export default class Firebolt {
 
     getFullData () {
         return this.context.data();
+    }
+
+    resetted () {
+        return this._resetted;
     }
 }

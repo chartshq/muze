@@ -94,8 +94,8 @@
         window.canvas = env.canvas();
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
-        let rows = ['Miles_per_Gallon', 'Horsepower', 'Acceleration'],
-            columns = rows.reverse();
+        let rows = ['Miles_per_Gallon', 'Horsepower'],
+            columns = ['Year'];
 
         canvas = canvas
             .rows(rows)
@@ -104,7 +104,7 @@
             .width(500)
             .height(600)
         .layers([{
-            mark: 'point'
+            mark: 'area'
         }])
             .config({
                 gridLines: {

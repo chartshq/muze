@@ -185,7 +185,6 @@ class SelectionSet {
         const set = this._set;
         const updateSet = [];
 
-
         for (const key in set) {
             set[key] === SELECTION_OLD_ENTRY && updateSet.push(key);
         }
@@ -234,6 +233,10 @@ class SelectionSet {
 
     getCompleteSetCount () {
         return this._completeSetCount;
+    }
+
+    resetted () {
+        return this._resetted;
     }
 }
 

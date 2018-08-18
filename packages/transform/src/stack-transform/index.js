@@ -26,7 +26,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
         valueFieldIndex = schema.findIndex(d => d.name === valueField),
         seriesKeyIndex = schema.findIndex(d => d.name === groupBy),
         seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) =>
-            arr.indexOf(item) === pos),
+            arr.indexOf(item) === pos).sort(),
         fieldNames = schema.reduce((acc, obj, i) => {
             acc[i] = obj.name;
             return acc;
@@ -51,7 +51,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
             seriesKeys.forEach((seriesKey) => {
                 if (rowObj[seriesKey] === undefined) {
                     rowObj[seriesKey] = 0;
-                    let newArr = new Array(arr.values[0].length);
+                    const newArr = new Array(arr.values[0].length);
                     newArr[uniqueFieldIndex] = arr.key;
                     newArr[seriesKeyIndex] = seriesKey;
                     rowObj._tuple[seriesKey] = newArr;
@@ -76,11 +76,11 @@ export default (schema, data, config) => {
     const uniqueField = config.uniqueField,
         valueField = config.value,
         groupBy = config.groupBy,
-        sort = config.sort || 'none',
+        sort = config.sort || 'descending',
         normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy),
         stackData = stack({
             keys: normalizedData.keys,
-            offset: 'diverging',
+            offset: config.offset || 'diverging',
             order: sort,
             data: normalizedData.data
         });
