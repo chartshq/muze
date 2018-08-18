@@ -85,15 +85,15 @@
         ]);
         let rootData = new DataModel(jsonData, schema);
 
-        rootData = rootData.groupBy(['Year', 'Origin'], {
+        rootData = rootData.groupBy(['Year', 'Origin', 'Maker'], {
             Horsepower: 'mean',
             Acceleration: 'mean'
         });
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Year'],
-            columns = ['Acceleration'];
+        let rows = ['Displacement', 'Horsepower'],
+            columns = rows.reverse();
 
         canvas = canvas
             .rows(rows)
@@ -118,7 +118,6 @@
                 axes: {
                     x: {
                         showAxisName: true,
-                        interpolator: 'log',
                         exponent: 2,
                         base: 10,
                         showInnerTicks: true,
