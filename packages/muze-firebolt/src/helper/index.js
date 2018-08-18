@@ -118,12 +118,10 @@ export const getSetInfo = (type, set, config) => {
     if (!config.propagationData) {
         if (selectionSet.resetted()) {
             model = null;
-        }
-        else {
+        } else {
             model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
         }
-    }
-    else if (filteredDataModel) {
+    } else if (filteredDataModel) {
         model = type === 'mergedEnter' ? filteredDataModel[0] : filteredDataModel[1];
     }
     return {
