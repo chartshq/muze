@@ -41,12 +41,23 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
             direction = 'horizontal';
         } else {
             const domain = xAxis.domain();
-            let x1DomainIndex = domain.indexOf(xRange[0]);
-            let x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
-            [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort();
-            x1 = xAxis.getScaleValue(domain[x1DomainIndex]);
-            x2 = xAxis.getScaleValue(domain[x2DomainIndex]);
-            x2 += xAxis.constructor.type() === 'band' ? xAxis.getUnitWidth() : 0;
+            const bandScale = xAxis.constructor.type() === 'band';
+            let x1Val;
+            let x2Val;
+            if (bandScale) {
+                let x1DomainIndex = domain.indexOf(xRange[0]);
+                let x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
+                [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort();
+                x1Val = domain[x1DomainIndex];
+                x2Val = domain[x2DomainIndex];
+            } else {
+                x1Val = xRange[0];
+                x2Val = xRange[xRange.length - 1];
+            }
+
+            x1 = xAxis.getScaleValue(x1Val);
+            x2 = xAxis.getScaleValue(x2Val);
+            x2 += bandScale ? xAxis.getUnitWidth() : 0;
         }
     } else {
         x1 = x2 = undefined;
@@ -58,11 +69,22 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
         }
         else {
             const domain = yAxis.domain();
-            let y1DomainIndex = domain.indexOf(yRange[0]);
-            let y2DomainIndex = domain.indexOf(yRange[yRange.length - 1]);
-            [y1DomainIndex, y2DomainIndex] = [y1DomainIndex, y2DomainIndex].sort(((a, b) => b - a));
-            y1 = yAxis.getScaleValue(domain[y1DomainIndex]);
-            y2 = yAxis.getScaleValue(domain[y2DomainIndex]);
+            const bandScale = yAxis.constructor.type() === 'band';
+            let y1Val;
+            let y2Val;
+            if (bandScale) {
+                let y1DomainIndex = domain.indexOf(yRange[0]);
+                let y2DomainIndex = domain.indexOf(yRange[yRange.length - 1]);
+                [y1DomainIndex, y2DomainIndex] = [y1DomainIndex, y2DomainIndex].sort(((a, b) => b - a));
+                y1Val = domain[y1DomainIndex];
+                y2Val = domain[y2DomainIndex];
+            }
+            else {
+                y1Val = yRange[0];
+                y2Val = yRange[yRange.length - 1];
+            }
+            y1 = yAxis.getScaleValue(y1Val);
+            y2 = yAxis.getScaleValue(y2Val);
             y2 += yAxis.constructor.type() === 'band' ? yAxis.getUnitWidth() : 0;
         }
     } else {
