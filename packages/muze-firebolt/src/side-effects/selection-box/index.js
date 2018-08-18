@@ -1,7 +1,8 @@
 import {
     getQualifiedClassName,
     selectElement,
-    makeElement
+    makeElement,
+    isValidValue
 } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import './styles.scss';
@@ -126,7 +127,7 @@ class SelectionBox extends SpawnableSideEffect {
                             transition && (element = element.transition().duration(transition.duration));
                             for (const key in attrs) {
                                 if ({}.hasOwnProperty.call(attrs, key)) {
-                                    !isNaN(attrs[key]) && element.attr(key, attrs[key]);
+                                    isValidValue(attrs[key]) && element.attr(key, attrs[key]);
                                 }
                             }
                         });

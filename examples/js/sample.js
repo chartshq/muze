@@ -93,7 +93,7 @@
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Year'];
+            columns = ['Horsepower'];
 
         canvas = canvas
             .rows(rows)
@@ -131,8 +131,7 @@
                 }
             })
             .color({
-                field: 'Acceleration',
-                interpolate: true
+                field: 'Origin'
             })
             .legend({
                 align: 'horizontal',

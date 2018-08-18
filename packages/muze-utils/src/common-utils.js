@@ -1311,6 +1311,7 @@ const registerListeners = (context, listenerMap) => {
     }
 };
 
+const isValidValue = (value) => !isNaN(value) && value !== -Infinity && value !== Infinity;
 /**
  *
  *
@@ -1487,5 +1488,6 @@ export {
     replaceCSSPrefix,
     getObjProp,
     extendsClass,
-    assembleModelFromIdentifiers
+    assembleModelFromIdentifiers,
+    isValidValue
 };
