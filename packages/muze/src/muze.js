@@ -19,6 +19,12 @@ const globalCache = {};
  // @todo currently components are used as default registry
 const defaultRegistry = COMPONENTS;
 
+const overrideRegistryDefinitions = (overrideRegistry, registry) => {
+    for (const prop in overrideRegistry) {
+        registry.set(prop, overrideRegistry[prop]);
+    }
+};
+
 const muze = () => {
     // Setters and getters will be mounted on this. The object will be mutated.
     const [holder, globalStore] = transactor({}, options);
@@ -61,25 +67,46 @@ const muze = () => {
     // only from setter to avoid unwanted sync issues.
     holder.settings = () => globalStore.serialize();
 
-    holder.registry = (overrideRegistry) => {
+    holder.registry = (...overrideRegistry) => {
         // Selectively copy the properties from COMPONENTS
-        for (const prop in overrideRegistry) {
-            if (!(prop in defaultRegistry)) {
-                continue;
+        if (overrideRegistry.length) {
+            for (const prop in overrideRegistry) {
+                if (prop in defaultRegistry) {
+                    components[prop] = overrideRegistry[prop];
+                }
             }
-            components[prop] = overrideRegistry[prop];
+            return holder;
         }
+        return components;
+    };
 
-        return holder;
+    holder.cellRegistry = (...overrideRegistry) => {
+        const cellRegistry = componentSubRegistry.cellRegistry;
+        if (overrideRegistry.length) {
+            overrideRegistryDefinitions(overrideRegistry[0], cellRegistry);
+            return holder;
+        }
+        return cellRegistry.get();
+    };
+
+    holder.layerRegistry = (...overrideRegistry) => {
+        const layerRegistry = componentSubRegistry.layerRegistry;
+        if (overrideRegistry.length) {
+            overrideRegistryDefinitions(overrideRegistry[0], layerRegistry);
+        }
+        return layerRegistry.get();
     };
 
     return holder;
 };
 
-const SideEffects = Object.assign({
-    SurrogateSideEffect,
-    SpawnableSideEffect
-}, sideEffects);
+const SideEffects = {
+    concrete: sideEffects,
+    abstract: {
+        SurrogateSideEffect,
+        SpawnableSideEffect
+    }
+};
 
 muze.DataModel = DataModel;
 muze.pkg = pkg;

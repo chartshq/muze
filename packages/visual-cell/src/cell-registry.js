@@ -10,7 +10,9 @@ const cellRegistry = () => {
     const reg = DEFAULT_PLACEHOLDERS;
     return {
         set: (key, def) => {
-            reg[key] = def;
+            if (key in reg) {
+                reg[key] = def;
+            }
             return cellRegistry;
         },
         get: () => reg

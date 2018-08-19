@@ -714,19 +714,22 @@ const generateGetterSetters = (context, props) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
         const sanitization = propInfo[1].sanitization;
-        context[prop] = (...params) => {
-            if (params.length) {
-                let value = params[0];
-                if (sanitization) {
-                    value = sanitization(context, params[0]);
-                }
-                if (typeChecker && !typeChecker(value)) {
-                    return context[`_${prop}`];
-                }
-                context[`_${prop}`] = value;
-                return context;
-            } return context[`_${prop}`];
-        };
+        const prototype = context.constructor.prototype;
+        if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            context[prop] = (...params) => {
+                if (params.length) {
+                    let value = params[0];
+                    if (sanitization) {
+                        value = sanitization(context, params[0]);
+                    }
+                    if (typeChecker && !typeChecker(value)) {
+                        return context[`_${prop}`];
+                    }
+                    context[`_${prop}`] = value;
+                    return context;
+                } return context[`_${prop}`];
+            };
+        }
     });
 };
 
