@@ -4,7 +4,9 @@ export default () => {
     const reg = DEFAULT_LAYERS;
     const regObj = {
         set: (key, def) => {
-            reg[key] = def;
+            if (key in reg) {
+                reg[key] = def;
+            }
             return regObj;
         },
         get: () => reg
