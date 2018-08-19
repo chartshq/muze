@@ -1,7 +1,3 @@
-/**
- * The accumulator factory namespace muze which provides an consistence api to work with the renderer.
- * Please read the usage.md file for usage informaiton.
- */
 import Smartlabel from 'fusioncharts-smartlabel';
 import { transactor, enableChainedTransaction, LifeCycleManager, DataModel } from 'muze-utils';
 import { SurrogateSideEffect, SpawnableSideEffect, sideEffects } from '@chartshq/muze-firebolt';
@@ -14,16 +10,14 @@ import { Canvas } from './canvas';
 import { COMPONENTS, SUBREGISTRIES } from './default-registry';
 import './muze.scss';
 
-// Holder of singleton instances
+// Cache singleton instances which should be included only once in a page
 const globalCache = {};
- // @todo currently components are used as default registry
 const defaultRegistry = COMPONENTS;
 
 const muze = () => {
-    // Setters and getters will be mounted on this. The object will be mutated.
+    // Setters and getters will be mounted on this. Object will be mutated.
     const [holder, globalStore] = transactor({}, options);
     const components = Object.assign({}, COMPONENTS);
-    // Create instance of sub-registries
     const componentSubRegistryDef = Object.assign(SUBREGISTRIES);
     const componentSubRegistry = {};
 
@@ -40,7 +34,7 @@ const muze = () => {
             componentSubRegistry
         }, holder.globalDependencies());
 
-        // Whenever settings will be changed canvas will be changed to update its settings
+        // Whenever settings is changed canvas is updated
         enableChainedTransaction(globalStore, canvas, Object.keys(settings));
 
         return canvas;
@@ -62,7 +56,6 @@ const muze = () => {
     holder.settings = () => globalStore.serialize();
 
     holder.registry = (overrideRegistry) => {
-        // Selectively copy the properties from COMPONENTS
         for (const prop in overrideRegistry) {
             if (!(prop in defaultRegistry)) {
                 continue;
