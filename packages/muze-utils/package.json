@@ -58,6 +58,7 @@
     "datamodel": "^1.0.0",
     "d3-axis": "git+ssh://git@bitbucket.org:fusioncharts/d3-axis.git",
     "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
+    "d3-scale-chromatic": "^1.2.0",
     "hyperdis": "git+ssh://git@bitbucket.org/fusioncharts/hyperdis.git#develop"
   }
 }

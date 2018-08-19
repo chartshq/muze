@@ -1,7 +1,15 @@
+import * as scales from './scales';
+import * as colorSchemes from './color-schemes';
+
 export {
     ReservedFields,
     CommonProps
 } from './enums';
+
+export {
+    scales,
+    colorSchemes
+};
 
 export {
     transformColors,
