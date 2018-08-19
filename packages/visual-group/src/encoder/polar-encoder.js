@@ -21,7 +21,7 @@ export default class PolarEncoder extends VisualEncoder {
      */
     createAxis (axesCreators, fieldInfo) {
         const {
-            axes,
+            axes
         } = axesCreators;
         const geomCellAxes = axes;
         const {
@@ -124,8 +124,8 @@ export default class PolarEncoder extends VisualEncoder {
      * @memberof PolarEncoder
      */
     fieldSanitizer (datamodel, config) {
-        let sanitizedRows = [[], []],
-            sanitizedColumns = [[], []];
+        let sanitizedRows = [[], []];
+        let sanitizedColumns = [[], []];
         const fields = super.fieldSanitizer(datamodel, config);
         const {
             layers
@@ -144,7 +144,8 @@ export default class PolarEncoder extends VisualEncoder {
             fieldType.forEach((fieldSet, i) => fieldSet.forEach((field) => {
                 if (field.toString() !== radius && field.toString() !== angle && field.type() !== MEASURE) {
                     sanitizedFields[typeIndex][i].push(field);
-                } }));
+                }
+            }));
         });
         sanitizedColumns = [...new Set(sanitizedColumns)];
         sanitizedRows = [...new Set(sanitizedRows)];

@@ -2,7 +2,6 @@
 import { expect } from 'chai';
 import { dataSelect, DataObject } from './index';
 
-
 describe('Data system Methods Test', () => {
     it('tests datasystem functionality', () => {
         /**
@@ -16,7 +15,7 @@ describe('Data system Methods Test', () => {
              * @param {any} number class property
              * @memberof MyObject
              */
-            constructor(number) {
+            constructor (number) {
                 super();
                 this.preciousNumber = number;
             }

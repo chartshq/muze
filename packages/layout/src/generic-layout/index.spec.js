@@ -1,9 +1,7 @@
 /* global describe, it, before */
 /* eslint-disable no-unused-expressions */
-
 import { expect } from 'chai';
-import SmartlabelManager from 'fusioncharts-smartlabel';
-import { select } from 'd3-selection';
+import { SmartlabelManager, selectElement } from 'muze-utils';
 import GenericLayout from './';
 
 describe('Generic layout', () => {
@@ -16,7 +14,7 @@ describe('Generic layout', () => {
             null,
             {
                 width: 500,
-                height: 500,
+                height: 500
             },
             {
                 row: rowOrient,
@@ -26,7 +24,7 @@ describe('Generic layout', () => {
                 slManager
             }
        );
-        instance.mountPoint(select('body').node());
+        instance.mountPoint(selectElement('body').node());
         instance.config({
             style: { color: 'red' },
             attributes: { type: 'text' }
@@ -40,7 +38,7 @@ describe('Generic layout', () => {
         expect(instance.serialize()).to.deep.equal({
             measurement: {
                 height: 500,
-                width: 500,
+                width: 500
             },
             config: {
                 style: { color: 'red' },
@@ -72,11 +70,11 @@ describe('Generic layout', () => {
     it('tests measurement setter and getter', () => {
         instance.measurement({
             width: 5100,
-            height: 1500,
+            height: 1500
         });
         expect(instance.measurement()).to.deep.equal({
             width: 5100,
-            height: 1500,
+            height: 1500
         });
     });
     it('tests mountPoint setter and getter', () => {

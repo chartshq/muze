@@ -1,6 +1,6 @@
 /* global describe, it, document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'fusioncharts-smartlabel';
+import SmartlabelManager from 'muze-utils';
 import { expect } from 'chai';
 import { LinearAxis } from '@chartshq/muze-axis';
 import AxisCell from './axis-cell';
@@ -10,7 +10,7 @@ import { GEOM } from './enums/cell-type';
 
 const sm = new SmartlabelManager(12);
 const header = new TextCell({}, {
-    labelManager: sm,
+    labelManager: sm
 }).source('Hey Judey');
 const axis = new AxisCell({
     margin: {
@@ -33,9 +33,9 @@ const axis = new AxisCell({
          style: {
              fill: 'black'
          },
-         draw: true,
+         draw: true
      }, {
-         labelManager: sm,
+         labelManager: sm
      }));
 describe('Geom Cell', () => {
     const unitCell1 = new GeomCell({}).source(
@@ -46,30 +46,30 @@ describe('Geom Cell', () => {
                     unlock: () => {}
                 }
             },
-            id() {
+            id () {
                 return 'uuid_stuff';
             },
-            serialize() {
+            serialize () {
                 return {};
             },
-            config() {
+            config () {
                 return {
                     width: 1e9,
-                    height: 2e5,
+                    height: 2e5
                 };
             },
-            lockModel() { return this; },
-            unlockModel() { return this; },
-            data() { return this; },
-            axes() { return this; },
-            facetByFields() { return this; },
-            fields() { return this; },
-            transform() { return this; },
-            layerDef() { return this; },
-            mount() { return this; },
-            remove() { return this; },
-            width() { return this; },
-            height() { return this; }
+            lockModel () { return this; },
+            unlockModel () { return this; },
+            data () { return this; },
+            axes () { return this; },
+            facetByFields () { return this; },
+            fields () { return this; },
+            transform () { return this; },
+            layerDef () { return this; },
+            mount () { return this; },
+            remove () { return this; },
+            width () { return this; },
+            height () { return this; }
         }).caption(header);
     const unitWithoutCaption = new GeomCell();
     const newUnit = {
@@ -79,22 +79,22 @@ describe('Geom Cell', () => {
                 unlock: () => {}
             }
         },
-        id() {
+        id () {
             return 'uuid_stuff';
         },
-        serialize() {
+        serialize () {
             return {};
         },
-        config() {
+        config () {
             return {
                 width: 1e9,
-                height: 2e5,
+                height: 2e5
             };
         },
-        lockModel() { return this; },
-        unlockModel() { return this; },
-        width() { return this; },
-        height() { return this; }
+        lockModel () { return this; },
+        unlockModel () { return this; },
+        width () { return this; },
+        height () { return this; }
 
     };
     it('tests construction of geom cell', () => {

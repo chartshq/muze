@@ -9,33 +9,33 @@ describe('Stack transform', () => {
             [2, 300, 'FB', 'Kolkata'],
             [3, 200, 'FC', 'Bangalore'],
             [4, 300, 'FB', 'Bangalore']
-        ],
-        schema = [{
-            name: 'id',
-            type: 'identifier'
-        }, {
-            name: 'Downloads',
-            type: 'measure',
-        },
-        {
-            name: 'Product',
-            type: 'dimension'
-        },
-        {
-            name: 'Region',
-            type: 'dimension'
-        }],
-        config = {
-            groupBy: 'Region',
-            value: 'Downloads',
-            uniqueField: 'Product'
-        },
+    ];
+    const schema = [{
+        name: 'id',
+        type: 'identifier'
+    }, {
+        name: 'Downloads',
+        type: 'measure'
+    },
+    {
+        name: 'Product',
+        type: 'dimension'
+    },
+    {
+        name: 'Region',
+        type: 'dimension'
+    }];
+    const config = {
+        groupBy: 'Region',
+        value: 'Downloads',
+        uniqueField: 'Product'
+    };
         // eslint-disable-next-line require-jsdoc
-        extractStackedValues = dataArr => dataArr.map(series => series.map(d => [d[0], d[1]]));
+    const extractStackedValues = dataArr => dataArr.map(series => series.map(d => [d[0], d[1]]));
 
     it('should return two datasets stacked when schema, data and config is passed', () => {
-        const stackedData = stack(schema, data, config),
-            keys = stackedData.map(d => d.key);
+        const stackedData = stack(schema, data, config);
+        const keys = stackedData.map(d => d.key);
         expect(stackedData.length).to.equals(2);
         expect(keys).to.deep.equals(['Kolkata', 'Bangalore']);
     });
@@ -52,9 +52,9 @@ describe('Stack transform', () => {
         const data2 = [
                 [1, 200, 'FC', 'Kolkata'],
                 [2, 200, 'FC', 'Bangalore']
-            ],
-            stackedData = stack(schema, data2, config),
-            stackedValues = extractStackedValues(stackedData);
+        ];
+        const stackedData = stack(schema, data2, config);
+        const stackedValues = extractStackedValues(stackedData);
 
         expect(stackedValues).to.deep.equal([
             [[0, 200]],
@@ -74,21 +74,21 @@ describe('Stack transform', () => {
                 [7, 'C', 3000, 'South'],
                 [8, 'C', 2000, 'North'],
                 [9, 'C', 2000, 'East']
-            ],
-            schema2 = [{
-                name: 'Product',
-                type: 'dimension',
-            },
-            {
-                name: 'Downloads',
-                type: 'measure'
-            },
-            {
-                name: 'Region',
-                type: 'dimension'
-            }],
-            stackedData = stack(schema2, data2, config),
-            stackedValues = extractStackedValues(stackedData);
+        ];
+        const schema2 = [{
+            name: 'Product',
+            type: 'dimension'
+        },
+        {
+            name: 'Downloads',
+            type: 'measure'
+        },
+        {
+            name: 'Region',
+            type: 'dimension'
+        }];
+        const stackedData = stack(schema2, data2, config);
+        const stackedValues = extractStackedValues(stackedData);
         expect(stackedValues.length).to.equals(3);
     });
 
@@ -97,15 +97,15 @@ describe('Stack transform', () => {
         const data2 = [
                 [1, 200, 'FC', 'Kolkata'],
                 [2, 200, 'FC', 'Bangalore']
-            ],
-            config2 = {
-                groupBy: 'Region',
-                uniqueField: 'Product',
-                value: 'Downloads',
-                sort: 'descending'
-            },
-            stackedData = stack(schema, data2, config2),
-            stackedValues = extractStackedValues(stackedData);
+        ];
+        const config2 = {
+            groupBy: 'Region',
+            uniqueField: 'Product',
+            value: 'Downloads',
+            sort: 'descending'
+        };
+        const stackedData = stack(schema, data2, config2);
+        const stackedValues = extractStackedValues(stackedData);
 
         expect(stackedValues).to.deep.equal([
             [[200, 400]],

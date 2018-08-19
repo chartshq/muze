@@ -1,9 +1,17 @@
-import { DataFormat, DimensionSubtype, MeasureSubtype, FieldType, FilteringMode, ReservedFields,
-    CommonProps } from './enums';
+import * as scales from './scales';
+import * as colorSchemes from './color-schemes';
 
-import DateTimeFormatter from './date-time-formatter';
+export {
+    ReservedFields,
+    CommonProps
+} from './enums';
 
-import {
+export {
+    scales,
+    colorSchemes
+};
+
+export {
     transformColors,
     detectColor,
     hslToRgb,
@@ -28,7 +36,6 @@ import {
     mergeRecursive,
     unionDomain,
     replaceCSSPrefix,
-    curry,
     symbolFns,
     defaultValue,
     easeFns,
@@ -45,7 +52,6 @@ import {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    addRulesToStylesheet,
     Store,
     getDependencyOrder,
     objectIterator,
@@ -65,26 +71,25 @@ import {
     extendsClass,
     concatModels,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    nestCollection,
+    stack,
+    getSymbol,
+    Scales,
+    Symbols,
+    pathInterpolators
 } from './common-utils';
 
-import {
+export {
     selectElement,
-    selectAllElements,
-    createSVGElement,
-    createHTMLDiv,
-    createSVGGroup,
     makeElement,
-    getBrush,
     applyStyle,
-    getSVGGroup,
     addClass,
     removeClass,
     appendElement,
     setAttrs,
     setStyles,
     createElement,
-    createCaption,
     createElements,
     clipElement,
     getElementsByClassName,
@@ -97,108 +102,8 @@ import {
     hasTouch
 } from './renderer-utils';
 
-import { dataSelect, DataObject } from './DataSystem';
+export { dataSelect, DataObject } from './DataSystem';
 
-import LifeCycleManager from './lifecycle-manager';
+export { default as LifeCycleManager } from './lifecycle-manager';
 
-export {
-    assembleModelFromIdentifiers,
-    transformColors,
-    detectColor,
-    hslToRgb,
-    rgbToHsv,
-    hsvToRgb,
-    hexToHsv,
-    toArray,
-    escapeHTML,
-    angleToRadian,
-    generateGetterSetters,
-    getArraySum,
-    DataFormat,
-    interpolator,
-    colorInterpolator,
-    numberInterpolator,
-    piecewiseInterpolator,
-    replaceCSSPrefix,
-    DimensionSubtype,
-    MeasureSubtype,
-    FieldType,
-    extendsClass,
-    FilteringMode,
-    reqAnimFrame,
-    cancelAnimFrame,
-    getMax,
-    getMin,
-    getDomainFromData,
-    getUniqueId,
-    isEqual,
-    filterPropagationModel,
-    interpolateArray,
-    mergeRecursive,
-    unionDomain,
-    curry,
-    symbolFns,
-    easeFns,
-    clone,
-    getMinPoint,
-    getMaxPoint,
-    getClosestIndexOf,
-    Voronoi,
-    checkExistence,
-    sanitizeIP,
-    selectElement,
-    selectAllElements,
-    createSVGElement,
-    createHTMLDiv,
-    createSVGGroup,
-    defaultValue,
-    makeElement,
-    applyStyle,
-    getSVGGroup,
-    getMinDiff,
-    capitalizeFirst,
-    DateTimeFormatter,
-    getWindow,
-    getQualifiedClassName,
-    addRulesToStylesheet,
-    addClass,
-    removeClass,
-    appendElement,
-    setAttrs,
-    setStyles,
-    createElement,
-    createCaption,
-    createElements,
-    clipElement,
-    getElementsByClassName,
-    getMousePos,
-    drawTracker,
-    Store,
-    getDependencyOrder,
-    objectIterator,
-    dataSelect,
-    DataObject,
-    getEvent,
-    getD3Drag,
-    intSanitizer,
-    transactor,
-    enableChainedTransaction,
-    isHTMLElem,
-    ERROR_MSG,
-    getSmartComputedStyle,
-    isSimpleObject,
-    nextFrame,
-    getBrush,
-    ReservedFields,
-    LifeCycleManager,
-    registerListeners,
-    getObjProp,
-    getDataModelFromIdentifiers,
-    getDataModelFromRange,
-    transposeArray,
-    CommonProps,
-    concatModels,
-    getClientPoint,
-    hasTouch,
-    isValidValue
-};
+export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';

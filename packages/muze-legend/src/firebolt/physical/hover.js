@@ -1,4 +1,3 @@
-import { selectElement } from 'muze-utils';
 /**
  * Adds mouse interactions to target element.
  * @param {Firebolt} Firebolt instance of firebolt.
@@ -13,7 +12,7 @@ import { selectElement } from 'muze-utils';
         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
     };
 
-    selectElement(targetEl).on('mouseover', dispatchBehaviour)
+    targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
                         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {

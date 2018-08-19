@@ -60,7 +60,7 @@ export const initializeCacheMaps = () => ({
     xAxesMap: new Map(),
     yAxesMap: new Map(),
     entryCellMap: new Map(),
-    exitCellMap: new Map(),
+    exitCellMap: new Map()
 });
 
 /**
@@ -273,8 +273,8 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
     let headerFrom = '';
     const options = type === ROW ? [LEFT, RIGHT] : [BOTTOM, TOP];
     const [firstField, secondField] = fields;
-    const firstFieldType = i => firstField.length ? firstField[i].type() : null;
-    const secondFieldType = i => secondField.length ? secondField[i].type() : null;
+    const firstFieldType = i => (firstField.length ? firstField[i].type() : null);
+    const secondFieldType = i => (secondField.length ? secondField[i].type() : null);
 
     if (firstFieldType(firstField.length - 1) === DIMENSION && secondFieldType(0) === DIMENSION) {
         headerFrom = axisFrom ? options[1 - options.indexOf(axisFrom)] : options[1];

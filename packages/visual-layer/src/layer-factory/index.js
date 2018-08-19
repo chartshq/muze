@@ -14,8 +14,7 @@ const parseLayerDefinition = (sink, definition, layerDef, layerType) => {
                 if (propValue !== undefined) {
                     sink[key] = propValue;
                 }
-            }
-            else {
+            } else {
                 sink[key] = def;
             }
         }

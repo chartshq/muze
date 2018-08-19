@@ -14,7 +14,7 @@ import {
     SUB_TITLE,
     RESOLVE
 } from '../constants';
-import { LEGEND_CONFIG, TITLE_CONFIG, SUB_TITLE_CONFIG, } from './defaults';
+import { LEGEND_CONFIG, TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
 /**
  * @module
  * This is the local options semantics based on which setters getters are created and reactivity is initiated.
@@ -98,7 +98,7 @@ export const localOptions = {
         value: [],
         meta: {
             typeCheck: 'constructor',
-            typeExpected: 'Array',
+            typeExpected: 'Array'
         }
     },
 
@@ -138,7 +138,7 @@ export const canvasOptions = {
             }, (titleConfig) => {
                 const defConfig = mergeRecursive({}, TITLE_CONFIG);
                 return mergeRecursive(defConfig, titleConfig);
-            }],
+            }]
         }
     },
     [SUB_TITLE]: {
@@ -157,7 +157,7 @@ export const canvasOptions = {
             }, (subtitleConfig) => {
                 const defConfig = mergeRecursive({}, SUB_TITLE_CONFIG);
                 return mergeRecursive(defConfig, subtitleConfig);
-            }],
+            }]
         }
     },
     [LEGEND]: {

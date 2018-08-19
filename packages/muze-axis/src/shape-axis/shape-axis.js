@@ -3,8 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { symbol } from 'd3-shape';
-import { getUniqueId, symbolFns, generateGetterSetters } from 'muze-utils';
+import { getUniqueId, getSymbol, generateGetterSetters } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { DEFAULT_CONFIG } from './defaults';
 import { SHAPE } from '../enums/constants';
@@ -16,7 +15,6 @@ import { PROPS } from './props';
 * @class SimpleAxis
 */
 export default class ShapeAxis {
-
     /**
     * Creates an instance of SimpleAxis.
     * @param {Object} params input parameters.
@@ -78,7 +76,7 @@ export default class ShapeAxis {
 
         const shapeType = this.scale()(value);
         if (shapeType === 'string') {
-            return symbol().type(symbolFns[shapeType]);
+            return getSymbol(shapeType);
         }
 
         return shapeType;

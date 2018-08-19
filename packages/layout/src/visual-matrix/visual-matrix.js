@@ -126,7 +126,7 @@ export default class VisualMatrix {
      */
     setLogicalSpace () {
         const {
-            isTransposed,
+            isTransposed
         } = this.config();
         const matrixTree = this.tree();
         createMatrixEachLevel(matrixTree, isTransposed);
@@ -193,8 +193,8 @@ export default class VisualMatrix {
      * @memberof VisualMatrix
      */
     calculateDepth (widthMeasures, heightMeasures) {
-        let i,
-            j;
+        let i;
+        let j;
         const { height, width } = this.availableSpace();
 
         for (i = 0; i < heightMeasures.length; i++) {
@@ -233,8 +233,8 @@ export default class VisualMatrix {
         });
 
         const measurements = viewableMatrix.map((matrixInst, i) => {
-            let heightMeasures,
-                columnMeasures;
+            let heightMeasures;
+            let columnMeasures;
             const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i };
             const { heights, widths, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
 
@@ -261,7 +261,7 @@ export default class VisualMatrix {
                 width: {
                     primary: columnMeasures[0],
                     secondary: columnMeasures[1]
-                },
+                }
             };
         });
 
@@ -390,7 +390,7 @@ export default class VisualMatrix {
         const cWidths = getDistributedWidth({
             row: matrix[this._lastLevelKey],
             width: mWidth,
-            availableWidth: width,
+            availableWidth: width
         }, this.config());
 
         matrix.forEach((row, rIdx) => row.forEach((col, cIdx) => {
@@ -430,9 +430,9 @@ export default class VisualMatrix {
         } = this.config();
         const borderWidth = measures.border;
         const { matrixInst, maxWidths, maxHeights, matrixIndex } = options;
-        const matrix = matrixInst.matrix,
-            rowHeights = [[0], [0]],
-            columnWidths = [[0], [0]];
+        const matrix = matrixInst.matrix;
+        const rowHeights = [[0], [0]];
+        const columnWidths = [[0], [0]];
         const heights = [0, 0];
         const widths = [0, 0];
         const breakPointer = this._breakPointer;

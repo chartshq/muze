@@ -1,10 +1,10 @@
-import { pie, arc } from 'd3-shape';
 import {
     makeElement,
     selectElement,
     getQualifiedClassName,
     isSimpleObject,
-    getDomainFromData
+    getDomainFromData,
+    Symbols
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
@@ -12,6 +12,9 @@ import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
 import { getRangeValue, getRadiusRange, tweenPie, getFieldIndices } from './arc-helper';
 import './styles.scss';
+
+const pie = Symbols.pie;
+const arc = Symbols.arc;
 
 /**
  * Arc Layer creates a plot with polar coordinates

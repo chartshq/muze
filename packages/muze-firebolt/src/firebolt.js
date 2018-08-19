@@ -1,4 +1,11 @@
-import { mergeRecursive, getElementsByClassName, hasTouch, filterPropagationModel, FieldType } from 'muze-utils';
+import {
+    mergeRecursive,
+    getElementsByClassName,
+    hasTouch,
+    filterPropagationModel,
+    FieldType,
+    selectElement
+} from 'muze-utils';
 import SelectionSet from './selection-set';
 import {
     initializeBehaviouralActions,
@@ -221,11 +228,19 @@ export default class Firebolt {
             targets = [targets];
         }
         targets.forEach((target) => {
-            const nodes = getElementsByClassName(this.context.mount(), `.${target}`);
-            if (nodes) {
+            let nodes;
+            const mount = this.context.mount();
+            if (target[0] === '.') {
+                nodes = getElementsByClassName(mount, target);
+            } else {
+                nodes = selectElement(mount).selectAll(target);
+            }
+            if (nodes instanceof Array) {
                 nodes.forEach((node) => {
-                    action(node, behaviourList);
+                    action(selectElement(node), behaviourList);
                 });
+            } else {
+                action(nodes, behaviourList);
             }
         });
         return this;

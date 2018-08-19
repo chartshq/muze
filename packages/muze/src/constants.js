@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG = {
         color: '#d6d6d6',
         width: 2,
         collapse: true,
-        spacing: 0,
+        spacing: 0
     }
 };
 

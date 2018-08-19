@@ -128,7 +128,7 @@ const strategies = () => ({
     [`${DISCRETE}-${CONTINOUS}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
         domain: () => indexedDomain,
-        range: () => uniqueRange,
+        range: () => uniqueRange
     },
     [`${CONTINOUS}-${DISCRETE}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
@@ -138,7 +138,7 @@ const strategies = () => ({
     [`${DISCRETE}-${DISCRETE}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
         domain: () => indexedDomain,
-        range: () => uniqueRange,
+        range: () => uniqueRange
     },
     [`${DISCRETE}-${CONTINOUS}-${ORDINAL}`]: {
         scale: LINEAR,
@@ -152,19 +152,19 @@ const strategies = () => ({
     [`${DISCRETE}-${DISCRETE}-${ORDINAL}`]: {
         scale: ORDINAL,
         domain: () => normalDomain,
-        range: () => normalRange,
+        range: () => normalRange
     },
     [`${CONTINOUS}-${CONTINOUS}-${ORDINAL}`]: {
         scale: LINEAR,
         domain: () => normalDomain,
-        range: () => normalRange,
+        range: () => normalRange
     },
     [`${CONTINOUS}-${DISCRETE}-${ORDINAL}`]: {
         scale: THRESHOLD,
         domain: () => steppedDomain,
         range: () => normalRange
 
-    },
+    }
 });
 
 /**

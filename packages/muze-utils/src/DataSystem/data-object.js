@@ -10,7 +10,7 @@ class DataObject {
  * Creates an instance of DataObject.
  * @memberof DataObject
  */
-    constructor() {
+    constructor () {
         this._id = getUniqueId();
     }
     /**
@@ -19,7 +19,7 @@ class DataObject {
      * @readonly
      * @memberof DataObject
      */
-    get id() {
+    get id () {
         return this._id;
     }
 
@@ -30,7 +30,7 @@ class DataObject {
      * @param {any} value Value associated with prop.
      * @memberof DataObject
      */
-    attr(key, value) {
+    attr (key, value) {
         this[key] = value;
     }
 
@@ -40,7 +40,7 @@ class DataObject {
      * @override
      * @memberof DataObject
      */
-    remove() {
+    remove () {
         // cleanup
     }
 }

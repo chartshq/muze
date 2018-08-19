@@ -38,7 +38,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
         labels: { rotation: 0 },
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
-        type: dataTypeScaleMap[field.subtype()],
+        type: dataTypeScaleMap[field.subtype()]
     };
     return mergeRecursive(axisConfig, userAxisConfig);
 };
@@ -202,10 +202,10 @@ export const getLayerConfFromFields = (colFields, rowFields, userLayerConfig) =>
     const userConf = conf instanceof Array ? conf : [conf];
     const encodingArr = [].concat(...userConf.map((d) => {
         if (d.def instanceof Array) {
-            return d.def.map(def => def.axis ? {
+            return d.def.map(def => (def.axis ? {
                 y: { field: def.axis.y },
                 x: { field: def.axis.x }
-            } : def.encoding);
+            } : def.encoding));
         }
         return d.def.encoding;
     })).filter(d => d !== undefined);

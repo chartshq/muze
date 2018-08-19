@@ -25,7 +25,7 @@ const computeGeomSpace = (context) => {
     const { width, height } = config;
     return {
         width: Math.ceil(width),
-        height: Math.ceil(height + context.getCaptionSpace().height),
+        height: Math.ceil(height + context.getCaptionSpace().height)
     };
 };
 
@@ -98,7 +98,7 @@ class GeomCell extends SimpleCell {
         return {
             type: GEOM,
             unit: this.source().serialize(),
-            caption: this.caption(),
+            caption: this.caption()
         };
     }
 

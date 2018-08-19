@@ -1,8 +1,7 @@
-
 import {
     ERROR_MSG,
     getUniqueId,
-    mergeRecursive,
+    mergeRecursive
 } from 'muze-utils';
 import { SIMPLE } from './enums/cell-type';
 

@@ -117,7 +117,7 @@ export const computeAxisDimensions = (context) => {
         tickLabelDim,
         axisLabelDim: labelManager.getOriSize(name),
         largestLabelDim,
-        axisTickLabels,
+        axisTickLabels
     };
 };
 
@@ -127,8 +127,8 @@ export const computeAxisDimensions = (context) => {
 * @memberof SimpleAxis
 */
 export const setOffset = (context) => {
-    let x = 0,
-        y = 0;
+    let x = 0;
+    let y = 0;
     const logicalSpace = context.logicalSpace();
     const config = context.config();
     const {
@@ -205,12 +205,12 @@ export const registerChangeListeners = (context) => {
  * @returns
  */
 export const getHorizontalAxisSpace = (context, axisDimensions, config, range) => {
-    let width,
-        height;
+    let width;
+    let height;
     const {
         tickSize,
         tickLabelDim,
-        axisLabelDim,
+        axisLabelDim
     } = axisDimensions;
     const {
         axisNamePadding,
@@ -250,12 +250,12 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
  * @returns
  */
 export const getVerticalAxisSpace = (context, axisDimensions, config) => {
-    let height,
-        width;
+    let height;
+    let width;
     const {
         tickSize,
         tickLabelDim,
-        axisLabelDim,
+        axisLabelDim
     } = axisDimensions;
     const {
         axisNamePadding,
@@ -289,12 +289,12 @@ export const calculateBandSpace = (context) => {
     const config = context.config();
     const {
         orientation,
-        show,
+        show
     } = config;
     const axisDimensions = context.getAxisDimensions();
     const {
         largestLabelDim,
-        axisTickLabels,
+        axisTickLabels
     } = axisDimensions;
     const { height: largestDimHeight, width: largestDimWidth } = largestLabelDim;
 
@@ -338,7 +338,7 @@ export const calculateContinousSpace = (context) => {
 
     const {
         orientation,
-        show,
+        show
     } = config;
     const {
         axisLabelDim

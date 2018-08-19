@@ -25,7 +25,7 @@ const resolveTitleSubTitleContent = (rawContent) => {
  */
 const headerCreator = (config, cellType, labelManager, prevCell) => {
     const {
-        content,
+        content
     } = config;
     const cell = prevCell || new TextCell({ type: cellType }, { labelManager });
 

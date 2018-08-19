@@ -1,4 +1,3 @@
-
 import VisualMatrix from '../visual-matrix/visual-matrix';
 
 /**

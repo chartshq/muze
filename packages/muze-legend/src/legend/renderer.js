@@ -118,7 +118,7 @@ export const getItemContainers = (container, data, legendInstance) => {
 
     const rows = makeElement(container, 'div', datasets.row, `${classPrefix}-legend-row`);
     rows.style(HEIGHT, (d, i) => `${itemSpaces[i].height}px`);
-    align === VERTICAL && rows.style(WIDTH, (d, i) => `${maxItemSpaces.width}px`);
+    align === VERTICAL && rows.style(WIDTH, () => `${maxItemSpaces.width}px`);
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
     return columns;
@@ -134,10 +134,10 @@ export const getItemContainers = (container, data, legendInstance) => {
  * @memberof DiscreteLegend
  */
 export const createLegendSkeleton = (context, container, classPrefix, data) => {
-    let gradWidth = 0,
-        gradHeight = 0,
-        maxGradHeight = 0,
-        maxGradWidth = 0;
+    let gradWidth = 0;
+    let gradHeight = 0;
+    let maxGradHeight = 0;
+    let maxGradWidth = 0;
     const measurement = context.measurement();
     const {
             margin,
@@ -146,7 +146,7 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
             width,
             height,
             maxWidth,
-            maxHeight,
+            maxHeight
         } = measurement;
 
     gradHeight = height - (titleSpaces.height + 2 * margin + 2 * border);
@@ -235,7 +235,7 @@ export const renderDiscreteItem = (context, container) => {
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, false, context),
         height: d => applyItemStyle(d, HEIGHT, false, context),
-        'text-align': CENTER,
+        'text-align': CENTER
     });
 
     labelManager.setStyle(context._computedStyle);
@@ -263,8 +263,8 @@ export const renderDiscreteItem = (context, container) => {
 * @memberof Legend
 */
 export const renderStepItem = (context, container) => {
-    let shapeWidth,
-        shapeHeight;
+    let shapeWidth;
+    let shapeHeight;
     const labelManager = context._labelManager;
     const {
       item,
@@ -301,7 +301,7 @@ export const renderStepItem = (context, container) => {
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, stepColor.horizontal, context),
         height: d => applyItemStyle(d, HEIGHT, stepColor.vertical, context),
-        'text-align': 'center',
+        'text-align': 'center'
     });
 
     labelManager.setStyle(context._computedStyle);

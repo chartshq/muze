@@ -10,7 +10,7 @@
       "error",
       "never"
     ],
-    
+
     "import/extensions": "off",
     "indent": [
       "error",
@@ -54,6 +54,7 @@
     "guard-for-in": "warn",
     "no-nested-ternary": "off",
     "import/no-extraneous-dependencies": "off",
+    "no-cond-assign": "off",
     "no-restricted-syntax": [
       "error",
       "LabeledStatement",

@@ -1,6 +1,6 @@
 /* global describe, it,document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'fusioncharts-smartlabel';
+import SmartlabelManager from 'muze-utils';
 import { BandAxis, LinearAxis } from '@chartshq/muze-axis';
 import { expect } from 'chai';
 import AxisCell from './axis-cell';
@@ -11,10 +11,10 @@ describe('Axis Cell', () => {
     const axis = new AxisCell().source({
         orientation: 'top',
         id: 'uuid_stuff',
-        serialize() {
+        serialize () {
             return {};
         },
-        range() {
+        range () {
             // shabang
         }
     });
@@ -38,9 +38,9 @@ describe('Axis Cell', () => {
              style: {
                  fill: 'black'
              },
-             draw: true,
+             draw: true
          }, {
-             labelManager: sm,
+             labelManager: sm
          }));
     const bandAxis = new AxisCell({
         margin: {
@@ -62,9 +62,9 @@ describe('Axis Cell', () => {
              style: {
                  fill: 'black'
              },
-             draw: true,
+             draw: true
          }, {
-             labelManager: sm,
+             labelManager: sm
          }));
 
     it('tests construction of axis cell', () => {
@@ -119,12 +119,12 @@ describe('Axis Cell', () => {
         const newInstance = new AxisCell().source(
             {
                 orientation: 'top',
-                range(width, height) {
+                range (width, height) {
                     return [width, height];
-                },
+                }
             }
         );
-        newInstance.setAvailableSpace = function(width, height) { return this.source().range(width, height); };
+        newInstance.setAvailableSpace = function (width, height) { return this.source().range(width, height); };
 
         expect(
             newInstance.setAvailableSpace(1, 1)

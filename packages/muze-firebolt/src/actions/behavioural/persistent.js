@@ -6,7 +6,7 @@ export default class PersistentBehaviour extends GenericBehaviour {
         const firebolt = this.firebolt;
         const formalName = this.constructor.formalName();
         const selectionSet = firebolt.select(criteria, formalName, {
-            persist: propagationInf.persistent !== undefined ? propagationInf.persistent : true,
+            persist: propagationInf.persistent !== undefined ? propagationInf.persistent : true
         }, propagationInf);
 
         return selectionSet();

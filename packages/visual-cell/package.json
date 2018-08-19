@@ -51,5 +51,8 @@
   },
   "dependencies": {
     "muze-utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "@chartshq/muze-axis": "^1.0.0"
   }
 }

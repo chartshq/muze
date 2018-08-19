@@ -1,5 +1,5 @@
 /* global setTimeout */
-import { selectElement, getEvent } from 'muze-utils';
+import { getEvent } from 'muze-utils';
 import { generatePayloadFromEvent } from './helpers';
 
 /**
@@ -19,14 +19,13 @@ export const longtouch = firebolt => (targetEl, behaviours) => {
 
     touchEnd = false;
     event = getEvent();
-    selectElement(targetEl).on('touchstart', (args) => {
+    targetEl.on('touchstart', (args) => {
         event = getEvent();
         touchEnd = false;
         setTimeout(() => {
             if (!touchEnd) {
                 dispatchBehaviour(args);
-            }
-            else {
+            } else {
                 behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
                     criteria: null
                 }));

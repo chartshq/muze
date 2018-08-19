@@ -1,6 +1,6 @@
 import SimpleLegend from './simple-legend';
-import { getScaleInfo, getInterpolatedData, } from './legend-helper';
-import { GRADIENT, LEFT, HORIZONTAL, BOTTOM, RIGHT, SIZE } from '../enums/constants';
+import { getScaleInfo, getInterpolatedData } from './legend-helper';
+import { GRADIENT, LEFT, SIZE } from '../enums/constants';
 import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
 

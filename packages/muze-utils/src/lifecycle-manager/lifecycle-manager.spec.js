@@ -2,10 +2,9 @@
 import { expect } from 'chai';
 import LifeCycleManager from './lifecycle-manager';
 
-
 describe('LifeCycleManager', () => {
-    let lcm = new LifeCycleManager();
-    let eventName = 'canvas.initialized';
+    const lcm = new LifeCycleManager();
+    const eventName = 'canvas.initialized';
     describe('#constructor', () => {
         it('should create an instance of LifeCycleManager', () => {
             expect(lcm).to.be.an.instanceOf(LifeCycleManager);
@@ -24,23 +23,23 @@ describe('LifeCycleManager', () => {
         });
 
         it('should have promise inside promise map', () => {
-            let promise = lcm._promises.get(eventName);
+            const promise = lcm._promises.get(eventName);
             expect(promise).to.be.an.instanceOf(Promise);
         });
 
         it('should have function in notifers', () => {
-            let fn = lcm._notifiers[eventName];
+            const fn = lcm._notifiers[eventName];
             expect(fn).to.be.an.instanceOf(Function);
         });
 
         it('should have same keys for promise map', () => {
-            let keys = [...lcm._promises.keys()];
+            const keys = [...lcm._promises.keys()];
             expect(keys).to.be.deep.equal(lcm._eventList);
         });
     });
     describe('#register', () => {
         it('should set the lifecyle callbacks', () => {
-            let lifeCycles = {
+            const lifeCycles = {
                 canvas: {
                     initialized: (p) => {
                         p.then(() => {});
@@ -54,7 +53,7 @@ describe('LifeCycleManager', () => {
     describe('#notify', () => {
         it('should call the user given callback', () => {
             let flag = false;
-            let lifeCycles = {
+            const lifeCycles = {
                 canvas: {
                     initialized: (p) => {
                         flag = true;
@@ -73,7 +72,7 @@ describe('LifeCycleManager', () => {
     });
     describe('#retrieve', () => {
         it('should return the promise', () => {
-            let lifeCycles = {
+            const lifeCycles = {
                 canvas: {
                     initialized: (p) => {
                         p.then(() => {});
@@ -86,7 +85,7 @@ describe('LifeCycleManager', () => {
                 action: 'initialized',
                 formalName: 'canvas'
             });
-            let promise = lcm.retrieve(eventName);
+            const promise = lcm.retrieve(eventName);
             expect(promise).to.be.an.instanceOf(Promise);
         });
     });

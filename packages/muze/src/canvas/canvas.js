@@ -46,7 +46,7 @@ export default class Canvas extends TransactionSupport {
         this._store = new Store({});
 
         this.firebolt(new GroupFireBolt(this, {
-            behavioural: behaviouralActions,
+            behavioural: behaviouralActions
         }, sideEffects, behaviourEffectMap));
 
         // Setters and getters will be mounted on this. The object will be mutated.
@@ -91,6 +91,7 @@ export default class Canvas extends TransactionSupport {
     done () {
         return this._renderedPromise;
     }
+
     /**
      *
      *

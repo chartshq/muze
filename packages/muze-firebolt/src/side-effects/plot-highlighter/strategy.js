@@ -18,7 +18,7 @@ export const strategies = {
         const {
             mergedEnter,
             mergedExit,
-            completeSet,
+            completeSet
         } = set;
         if (!mergedEnter.length && !mergedExit.length) {
             context.focusSelection(completeSet);

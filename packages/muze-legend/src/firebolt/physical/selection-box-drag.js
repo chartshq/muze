@@ -1,8 +1,7 @@
 import {
     getMousePos,
     getEvent,
-    getD3Drag,
-    selectElement
+    getD3Drag
  } from 'muze-utils';
 import { HEIGHT, WIDTH, HORIZONTAL } from '../../enums/constants';
 
@@ -52,7 +51,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
     };
     let subject = {};
 
-    selectElement(targetEl).call(d3Drag().on('start', function () {
+    targetEl.call(d3Drag().on('start', function () {
         const event = getEvent();
         startPos = getMousePos(this, event.sourceEvent);
         subject = event.subject;
@@ -66,7 +65,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         measures.selectionBoxMeasure = selectionBoxMeasure;
         measures.startPos = startPos;
         measures.endPos = endPos;
-        const criteria = getSelectionCriteria(subject, { axisScale, axisType, }, measures);
+        const criteria = getSelectionCriteria(subject, { axisScale, axisType }, measures);
 
         payload = {
             criteria: {
@@ -81,7 +80,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         measures.selectionBoxMeasure = selectionBoxMeasure;
         measures.startPos = startPos;
         measures.endPos = endPos;
-        const criteria = getSelectionCriteria(event, { axisScale, axisType, }, measures);
+        const criteria = getSelectionCriteria(event, { axisScale, axisType }, measures);
         payload = {
             criteria: {
                 [context.fieldName()]: criteria

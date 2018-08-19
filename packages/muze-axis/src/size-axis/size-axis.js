@@ -4,7 +4,7 @@
  * plots.
  */
 import { getUniqueId, generateGetterSetters } from 'muze-utils';
-import { createScale, } from '../scale-creator';
+import { createScale } from '../scale-creator';
 import { DEFAULT_CONFIG } from './defaults';
 import { SIZE, CONTINOUS, DISCRETE } from '../enums/constants';
 import { strategyGetter } from './size-strategy';
@@ -64,7 +64,7 @@ export default class SizeAxis {
         } = this.config();
         return createScale({
             type: strategy.scale,
-            range,
+            range
         });
     }
 

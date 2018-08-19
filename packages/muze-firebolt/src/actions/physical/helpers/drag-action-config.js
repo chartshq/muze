@@ -57,8 +57,7 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
             const max = min === ydom ? xdom : ydom;
             if (min[1] < max[0]) {
                 rangeObj[xField] = [];
-            }
-            else {
+            } else {
                 rangeObj[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
             }
             dimensions.x = [stPos.x, endPos.x];

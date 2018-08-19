@@ -15,11 +15,12 @@ import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
  */
 const rotateAxis = (instance, tickText, labelManager, config) => {
     const axis = instance.axis();
+    const scale = instance.scale();
     const {
         orientation,
         labels,
         fixedBaseline,
-        type,
+        type
      } = config;
     let { rotation } = labels;
 
@@ -28,7 +29,8 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
     tickText.each(function (datum, index) {
         let yShift;
         let xShift;
-        const temp = axis.tickFormat ? axis.tickFormat()(datum) : datum;
+        const tickFormatter = axis.tickFormat() ? axis.tickFormat : scale.tickFormat;
+        const temp = tickFormatter ? tickFormatter()(datum) : datum;
 
         datum = temp.toString();
 
@@ -79,13 +81,13 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
  */
 const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     const {
-        _smartTicks,
+        _smartTicks
     } = axisInstance;
     const config = axisInstance.config();
     const labelManager = axisInstance.dependencies().labelManager;
     const {
         labels,
-        orientation,
+        orientation
     } = config;
     const {
         rotation,
@@ -125,7 +127,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
 const setFixedBaseline = (axisInstance) => {
     const {
-        fixedBaseline,
+        fixedBaseline
     } = axisInstance.config();
     if (fixedBaseline) {
         axisInstance.setFixedBaseline();
@@ -202,7 +204,7 @@ export function renderAxis (axisInstance) {
         show,
         id,
         interpolator,
-        classPrefix,
+        classPrefix
      } = config;
 
     if (!show) {

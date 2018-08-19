@@ -1,6 +1,6 @@
 import { makeElement, applyStyle } from 'muze-utils';
 import { LinearAxis } from '@chartshq/muze-axis';
-import { BOTTOM, RIGHT, } from '../enums/constants';
+import { BOTTOM, RIGHT } from '../enums/constants';
 import { ALIGN } from './defaults';
 import '../styles.scss';
 
@@ -114,8 +114,8 @@ export const renderAxis = (context, container, height, width) => {
  * @memberof Legend
  */
 export const renderGradient = (context, container) => {
-    let gradHeight = 0,
-        gradWidth = 0;
+    let gradHeight = 0;
+    let gradWidth = 0;
     const {
         align,
         classPrefix,
@@ -137,7 +137,7 @@ export const renderGradient = (context, container) => {
         border,
         titleSpaces,
         height,
-        width,
+        width
     } = context.measurement();
     const gradientDimensions = {};
 

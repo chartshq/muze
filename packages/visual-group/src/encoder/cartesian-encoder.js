@@ -34,11 +34,11 @@ export default class CartesianEncoder extends VisualEncoder {
     createAxis (axesCreators, fieldInfo) {
         const geomCellAxes = {};
         const {
-            axes,
+            axes
         } = axesCreators;
         const {
             projections,
-            indices,
+            indices
         } = fieldInfo;
         const {
             rowFields,
@@ -216,7 +216,7 @@ export default class CartesianEncoder extends VisualEncoder {
                 const rowFieldName = rowField.toString();
                 const encoding = {
                     x: {
-                        field: colFieldName,
+                        field: colFieldName
                     },
                     y: {
                         field: rowFieldName

@@ -1,4 +1,3 @@
-
 import { mergeRecursive } from 'muze-utils';
 import { GEOM, TEXT, AXIS, BLANK } from './enums/cell-type';
 
@@ -13,7 +12,7 @@ const DEFAULT_PROPS = {
     source: {}
 };
 
-let geomProps = {
+const geomProps = {
     data: {},
     caption: {},
     config: {},
@@ -30,5 +29,5 @@ export const PROPS = {
     [TEXT]: DEFAULT_PROPS,
     [GEOM]: mergeRecursive(geomProps, DEFAULT_PROPS),
     [AXIS]: DEFAULT_PROPS,
-    [BLANK]: DEFAULT_PROPS,
+    [BLANK]: DEFAULT_PROPS
 };

@@ -83,13 +83,13 @@ describe('#Canvas', () => {
                 { profit: 10, sales: 20, city: 'kol', state: 'wb' },
                 { profit: 15, sales: 25, city: 'dgp', state: 'wb' },
                 { profit: 10, sales: 20, city: 'bang', state: 'kar' },
-                { profit: 15, sales: 25, city: 'mang', state: 'kar' },
+                { profit: 15, sales: 25, city: 'mang', state: 'kar' }
             ];
             schema = [
                 { name: 'profit', type: 'measure' },
                 { name: 'sales', type: 'measure' },
                 { name: 'city', type: 'dimension' },
-                { name: 'state', type: 'dimension' },
+                { name: 'state', type: 'dimension' }
             ];
             datamodel = new DataModel(data, schema, 'Yo');
         });

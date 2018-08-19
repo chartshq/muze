@@ -16,8 +16,7 @@ export const strategies = (firebolt) => {
             const classPrefix = context.config().classPrefix;
             if (!set.mergedEnter.length && !set.mergedExit.length) {
                 classed(set.completeSet, config.className || `${classPrefix}-legend-fadeout`, false);
-            }
-            else {
+            } else {
                 classed(set.mergedExit, config.className || `${classPrefix}-legend-brighten`, false);
                 classed(set.mergedExit, config.className || `${classPrefix}-legend-fadeout`, true);
                 classed(set.mergedEnter, config.className || `${classPrefix}-legend-fadeout`, false);
@@ -27,8 +26,7 @@ export const strategies = (firebolt) => {
             const classPrefix = context.config().classPrefix;
             if (!set.mergedEnter.length && !set.mergedExit.length) {
                 classed(set.completeSet, config.className || `${classPrefix}-legend-brighten`, false);
-            }
-            else {
+            } else {
                 classed(set.mergedEnter, config.className || `${classPrefix}-legend-brighten`, true);
                 classed(set.mergedExit, config.className || `${classPrefix}-legend-brighten`, false);
             }

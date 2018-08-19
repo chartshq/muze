@@ -101,13 +101,13 @@ const strategies = () => ({
     [`${CONTINOUS}-${CONTINOUS}`]: {
         scale: LINEAR,
         domain: normalDomain,
-        range: normalRange,
+        range: normalRange
     },
     [`${CONTINOUS}-${DISCRETE}`]: {
         scale: THRESHOLD,
         domain: steppedDomain,
         range: discreteRange
-    },
+    }
 });
 
 /**

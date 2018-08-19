@@ -1,9 +1,10 @@
 /**
  * This file exports utility functions that are used across the layout module
  */
-import { nest } from 'd3-collection';
+import { Symbols } from 'muze-utils';
 import { PRIMARY, SECONDARY, HEIGHT, WIDTH } from '../enums/constants';
 
+const nest = Symbols.nest;
 /**
  *
  *
@@ -200,11 +201,11 @@ export const getMinMeasures = (isTransposed, unitMeasures) => {
  */
 export const getLogicalSpace = (item, measures, minMeasures, maxMeasure = []) => {
     const { firstMeasure, secondMeasure } = measures;
-    let firstMeasureValue = 0,
-        secondMeasureValue = 0;
+    let firstMeasureValue = 0;
+    let secondMeasureValue = 0;
     item.values.forEach((valueArray) => {
-        let fMeasure = 0,
-            sMeasure = 0;
+        let fMeasure = 0;
+        let sMeasure = 0;
         valueArray.forEach((placeholder, colIndex) => {
             placeholder.logicalSpace(null);
             const space = placeholder.getLogicalSpace();
@@ -285,11 +286,11 @@ export const spaceTakenByRow = (row) => {
  * @return {Object} dimension of the column
  */
 export const spaceTakenByColumn = (matrix, colIndex) => {
-    let height = 0,
-        width = 0;
+    let height = 0;
+    let width = 0;
     matrix.forEach((row) => {
-        const col = row[colIndex],
-            spaces = col.getLogicalSpace();
+        const col = row[colIndex];
+        const spaces = col.getLogicalSpace();
         width = Math.max(width, spaces.width);
         height += spaces.height;
     });
@@ -340,8 +341,8 @@ export const createMatrixEachLevel = (item, isTransposed) => {
  * @return {Array} two broken matrix
  */
 export const breakMatrix = (matrix, isTransposed, breakPointer) => {
-    const primaryMatrix = [],
-        secondaryMatrix = [];
+    const primaryMatrix = [];
+    const secondaryMatrix = [];
     if (isTransposed) {
         matrix.forEach((row, rowIndex) => {
             if (rowIndex >= breakPointer) {
@@ -381,7 +382,7 @@ export const getDistributedWidth = (context, layoutConfig) => {
     const {
         isDistributionEqual,
         isTransposed,
-        distribution,
+        distribution
     } = layoutConfig;
     let distSum = 0;
     if (distribution && distribution[0]) {

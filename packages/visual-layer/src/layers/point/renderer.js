@@ -2,12 +2,10 @@
 import {
     makeElement,
     selectElement,
-    symbolFns,
     easeFns,
-    objectIterator
+    objectIterator,
+    getSymbol
 } from 'muze-utils';
-
-import { symbol } from 'd3-shape';
 
 /**
  *
@@ -60,9 +58,9 @@ const createShape = function (d, elem) {
         if (checkPath(shape)) {
             pathStr = shape;
         } else {
-            pathStr = symbol().type(symbolFns[shape]).size(size)(update);
+            pathStr = getSymbol(shape).size(size)(update);
         }
-        makeElement(groupElement, 'path', [1]).attr('d', pathStr);
+        makeElement(groupElement, 'path', data => [data]).attr('d', pathStr);
     } else {
         d.shape = 'circle';
         createShape(d, elem);

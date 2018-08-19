@@ -5,9 +5,9 @@ import {
     createElements,
     clipElement,
     DimensionSubtype,
-    FieldType
+    FieldType,
+    Scales
 } from 'muze-utils';
-import { scaleBand } from 'd3-scale';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
@@ -16,6 +16,7 @@ import './styles.scss';
 import { getTranslatedPoints, getBarMeasurement } from './bar-helper';
 
 const MEASURE = FieldType.MEASURE;
+const scaleBand = Scales.band;
 /**
  * Bar Layer creates a bar plot. It needs to be passed a data table, axes and configuration of the layer.
  *

@@ -8,7 +8,7 @@ import { CLASSPREFIX } from '../enums/constants';
 export const defaultConfig = {
     id: getUniqueId(),
     axisName: {
-        defClassName: 'axis-name',
+        defClassName: 'axis-name'
     },
     axisNamePadding: 12,
     base: 10,
@@ -19,7 +19,7 @@ export const defaultConfig = {
     fixedBaseline: true,
     labels: {
         rotation: 0,
-        smartTicks: false,
+        smartTicks: false
     },
     orientation: 'left',
     maxHeight: 50, // @todo: height and width wont be hardcoded

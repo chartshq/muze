@@ -1,6 +1,5 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
-import DataModel from 'datamodel';
 import { layerFactory } from '@chartshq/visual-layer';
 import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS } from '../enums/constants';
 
@@ -22,8 +21,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             [orientation]: `${orientation}value`,
             [`${orientation}0`]: `${orientation}value0`
         };
-    }
-    else {
+    } else {
         encoding = {
             [orientation]: isLinearScale ? `${orientation}value` : `${orientation}dim`
         };
@@ -105,8 +103,8 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
             type: 'dimension',
             subtype: ySubType
         }
-        ],
-        len = Math.max(yticks.length, xticks.length);
+    ];
+    const len = Math.max(yticks.length, xticks.length);
     xticks = xSubType === DimensionSubtype.TEMPORAL ? xticks.map(d => d.getTime()) : xticks;
     yticks = ySubType === DimensionSubtype.TEMPORAL ? yticks.map(d => d.getTime()) : yticks;
     for (let i = 0; i < len; i += 1) {
@@ -131,15 +129,14 @@ export const createGridLineLayer = (context, data) => {
     };
 
     ['band', 'line'].forEach((type) => {
-        let mark,
-            config,
-            instances;
+        let mark;
+        let config;
+        let instances;
         if (type === 'band') {
             mark = 'bar';
             config = vuConf.gridBands;
             instances = context._gridbands;
-        }
-        else {
+        } else {
             mark = 'tick';
             config = vuConf.gridLines;
             instances = context._gridlines;

@@ -3,5 +3,6 @@ export const PROPS = {
     domain: {},
     scale: {},
     uniqueValues: {},
-    generator: {},
+    generator: {}
 };
+

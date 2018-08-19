@@ -1,5 +1,11 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-
+import { FieldType, DimensionSubtype } from 'datamodel';
+import {
+    axisLeft,
+    axisRight,
+    axisTop,
+    axisBottom
+} from 'd3-axis';
 import {
     symbolCircle,
     symbolCross,
@@ -7,8 +13,28 @@ import {
     symbolSquare,
     symbolStar,
     symbolWye,
-    symbolTriangle
+    symbolTriangle,
+    symbol,
+    stack as d3Stack,
+    stackOffsetDiverging,
+    stackOrderNone,
+    stackOrderAscending,
+    stackOrderDescending,
+    stackOffsetNone,
+    stackOffsetExpand,
+    stackOffsetWiggle,
+    pie,
+    arc,
+    line,
+    curveLinear,
+    curveStepAfter,
+    curveStepBefore,
+    curveStep,
+    curveCatmullRom,
+    area
 } from 'd3-shape';
+import { scaleBand } from 'd3-scale';
+import { nest } from 'd3-collection';
 import {
     interpolate,
     interpolateRgb,
@@ -31,11 +57,9 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
-
-import { FieldType, DimensionSubtype, ReservedFields } from './enums';
+import * as STACK_CONFIG from './enums/stack-config';
 
 const HTMLElement = window.HTMLElement;
-const document = window.document;
 
 /**
  * Returns unique id
@@ -43,33 +67,14 @@ const document = window.document;
  */
 const
     getUniqueId = () => `id-${new Date().getTime()}${Math.round(Math.random() * 10000)}`;
-
-/**
- * Curries a function
- * @param {Function} fn Function to be curried
- * @return {Function} Curried Function
- */
-const curry = function (fn) {
-    let cardinality = fn.length,
-        queue = [],
-        interFn = function (...params) {
-            queue.push(...params);
-            if (queue.length >= cardinality) {
-                return fn(...queue);
-            }
-            return interFn;
-        };
-    return interFn;
-};
-
 /**
  * Deep copies an object and returns a new object.
  * @param {Object} o Object to clone
  * @return {Object} New Object.
  */
 const clone = (o) => {
-    let output = {},
-        v;
+    const output = {};
+    let v;
     for (const key in o) {
         if ({}.hasOwnProperty.call(o, key)) {
             v = o[key];
@@ -142,8 +147,8 @@ const getMin = (data, field) => Math.min(...data.filter(d => !isNaN(d[field])).m
  * an array of values if field type is nominal or ordinal
  */
 const getDomainFromData = (data, fields, fieldType) => {
-    let domain,
-        domArr;
+    let domain;
+    let domArr;
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
     case DimensionSubtype.CATEGORICAL:
@@ -174,8 +179,7 @@ const unionDomain = (domains, fieldType) => {
     domains = domains.filter(dom => dom.length);
     if (fieldType === DimensionSubtype.CATEGORICAL) {
         domain = domain = [].concat(...domains);
-    }
-    else {
+    } else {
         domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
     }
 
@@ -210,11 +214,11 @@ const easeFns = {
  * @return {Object} Minimum or maximum point.
  */
 const getExtremePoint = (points, compareValue, minOrMax) => {
-    let extremePoint,
-        point,
-        len = points.length,
-        minOrMaxVal = minOrMax === 'max' ? -Infinity : Infinity,
-        val;
+    let extremePoint;
+    let point;
+    const len = points.length;
+    let minOrMaxVal = minOrMax === 'max' ? -Infinity : Infinity;
+    let val;
 
     for (let i = 0; i < len; i++) {
         point = points[i];
@@ -252,13 +256,13 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
  * @return {number} index of the closest value
  */
 /* istanbul ignore next */const getClosestIndexOf = (arr, value, side) => {
-    let low = 0,
-        arrLen = arr.length,
-        high = arrLen - 1,
-        highVal,
-        mid,
-        d1,
-        d2;
+    let low = 0;
+    const arrLen = arr.length;
+    let high = arrLen - 1;
+
+    let mid;
+    let d1;
+    let d2;
 
     while (low < high) {
         mid = Math.floor((low + high) / 2);
@@ -267,8 +271,7 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
 
         if (d2 <= d1) {
             low = mid + 1;
-        }
-        else {
+        } else {
             high = mid;
         }
     }
@@ -277,7 +280,7 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
         return high;
     }
 
-    highVal = arr[high];
+    const highVal = arr[high];
     if (highVal === value) {
         return high;
     } else if (highVal > value) {
@@ -331,8 +334,7 @@ const unique = arr => ([...new Set(arr)]);
     let uniqueVals;
     if (index !== undefined) {
         uniqueVals = unique(arr.map(d => d[index]));
-    }
-    else {
+    } else {
         uniqueVals = unique(arr);
     }
     if (uniqueVals.length > 1) {
@@ -340,8 +342,7 @@ const unique = arr => ([...new Set(arr)]);
         for (let i = 2, len = uniqueVals.length; i < len; i++) {
             diff = Math.min(diff, Math.abs(uniqueVals[i] - uniqueVals[i - 1]));
         }
-    }
-    else {
+    } else {
         diff = uniqueVals[0];
     }
 
@@ -358,60 +359,6 @@ const unique = arr => ([...new Set(arr)]);
 /* istanbul ignore next */const getQualifiedClassName = (cls, id, prefix) => {
     cls = cls.replace(/^\.*/, '');
     return [`${prefix}-${cls}`, `${prefix}-${cls}-${id}`];
-};
-
-/**
- * Apply the css rule to the stylesheet.
- * @param {StyleSheet} styleSheet DOM Stylesheet
- * @param {string} selector css selector
- * @param {string} rule css rules
- */
-/* istanbul ignore next */const applyCSSRule = (styleSheet, selector, rule) => {
-    let rules,
-        len;
-    rules = styleSheet.rules || styleSheet.cssRules || {};
-    len = rules.length || 0;
-    // Check whether it support the style insertStyle or addCss
-    if (styleSheet.insertRule) {
-        styleSheet.insertRule(`${selector}{${rule}}`, len);
-    } else if (styleSheet.addRule) {
-        styleSheet.addRule(selector, rule, len);
-    }
-};
-
-/**
- * Adds a css rule to a stylesheet
- *
- * @param {string} sheetName Name of the stylesheet
- * @param {string} selector css selector
- * @param {Object} styles css styles
- * @param {boolean} compressed Boolean value for checking whether to compress css rules.
- */
-/* istanbul ignore next */const addRulesToStylesheet = (sheetName, selector, styles, compressed) => {
-    let stylesheet = document.styleSheets.item(sheetName),
-        prop,
-        css = '',
-        indent,
-        cssStyleRegEx = /\B([A-Z]{1})/g,
-        keyseparator;
-    // support object style
-    if (arguments.length === 1 && (typeof selector === 'object')) {
-        for (prop in selector) {
-            if ({}.hasOwnProperty.call(selector, prop)) {
-                applyCSSRule(stylesheet, prop, selector[prop]);
-            }
-        }
-    }
-    indent = compressed ? '' : '\t';
-    keyseparator = compressed ? ':' : ': ';
-
-    for (prop in styles) {
-        if ({}.hasOwnProperty.call(styles, prop)) {
-            styles[prop] && (css += `${indent + prop.replace(cssStyleRegEx, '-$1').toLowerCase() +
-                keyseparator + styles[prop]};`);
-        }
-    }
-    applyCSSRule(stylesheet, selector, css);
 };
 
 /**
@@ -439,9 +386,9 @@ const unique = arr => ([...new Set(arr)]);
  * @return {Object} @todo
  */
 const getDependencyOrder = (graph) => {
-    let dependencyOrder = [],
-        visited = {},
-        keys = Object.keys(graph);
+    const dependencyOrder = [];
+    const visited = {};
+    const keys = Object.keys(graph);
     /**
      * DESCRIPTION TODO
      * @todo
@@ -670,8 +617,8 @@ const intSanitizer = (val) => {
  * @return {Array} @todo
  */
 const transactor = (holder, options, model) => {
-    let conf,
-        store = model && model instanceof Model ? model : Model.create({});
+    let conf;
+    const store = model && model instanceof Model ? model : Model.create({});
 
     for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
@@ -680,9 +627,9 @@ const transactor = (holder, options, model) => {
                 store.append({ [prop]: conf.value });
             }
             holder[prop] = ((context, key, meta) => (...params) => {
-                let val,
-                    compareTo,
-                    paramsLen = params.length;
+                let val;
+                let compareTo;
+                const paramsLen = params.length;
                 const prevVal = store.prop(prop);
                 if (paramsLen) {
                     // If parameters are passed then it's a setter
@@ -692,9 +639,9 @@ const transactor = (holder, options, model) => {
                     if (meta) {
                         for (let i = 0; i < paramsLen; i++) {
                             val = params[i];
-                            let sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
-                                meta.sanitization),
-                                typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
+                            const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
+                                meta.sanitization);
+                            const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
                             if (sanitization && typeof sanitization === 'function') {
                                 // Sanitize if required
                                 val = sanitization(val, prevVal, holder);
@@ -802,11 +749,9 @@ const getArraySum = (arr, prop) => arr.reduce((total, elem) => {
  * @returns
  */
 const arraysEqual = (arr1, arr2) => {
-    if (arr1.length !== arr2.length)
-        { return false; }
+    if (arr1.length !== arr2.length) { return false; }
     for (let i = arr1.length; i--;) {
-        if (arr1[i] !== arr2[i])
-            { return false; }
+        if (arr1[i] !== arr2[i]) { return false; }
     }
 
     return true;
@@ -877,8 +822,7 @@ const mergeRecursive = (source, sink) => {
         } else if (sink[prop] instanceof Object && sink[prop].constructor === Object) {
             source[prop] = {};
             mergeRecursive(source[prop], sink[prop]);
-        }
-        else {
+        } else {
             source[prop] = sink[prop];
         }
     }
@@ -961,43 +905,14 @@ const transformColors = () => ({
  */
 const piecewiseInterpolator = () => piecewise;
 
-/**
- * Converts an RGB color value to HSL. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and l in the set [0, 1].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSL representation
- */
-const rgbToHsl = (r, g, b, a = 1) => {
-    r /= 255, g /= 255, b /= 255;
-
-    let max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-    let h,
-        s,
-        l = (max + min) / 2;
-
-    if (max == min) {
-        h = s = 0; // achromatic
-    } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-        switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-        }
-
-        h /= 6;
-    }
-
-    return [h, s, l, a];
-};
+function hue2rgb (p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+}
 
   /**
    * Converts an HSL color value to RGB. Conversion formula
@@ -1011,22 +926,13 @@ const rgbToHsl = (r, g, b, a = 1) => {
    * @return  Array           The RGB representation
    */
 const hslToRgb = (h, s, l, a = 1) => {
-    let r,
-        g,
-        b;
+    let r;
+    let g;
+    let b;
 
-    if (s == 0) {
+    if (s === 0) {
         r = g = b = l; // achromatic
     } else {
-        function hue2rgb (p, q, t) {
-            if (t < 0) t += 1;
-            if (t > 1) t -= 1;
-            if (t < 1 / 6) return p + (q - p) * 6 * t;
-            if (t < 1 / 2) return q;
-            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-            return p;
-        }
-
         const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         const p = 2 * l - q;
 
@@ -1052,11 +958,11 @@ const hslToRgb = (h, s, l, a = 1) => {
 const rgbToHsv = (r, g, b, a = 1) => {
     r = +r; g = +g; b = +b; a = +a;
     r /= 255; g /= 255; b /= 255;
-    let max = Math.max(r, g, b),
-        min = Math.min(r, g, b);
-    let h,
-        s,
-        l = (max + min) / 2;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h;
+    let s;
+    const l = (max + min) / 2;
 
     if (max === min) {
         h = s = 0; // achromatic
@@ -1067,6 +973,7 @@ const rgbToHsv = (r, g, b, a = 1) => {
         case r: h = (g - b) / d + (g < b ? 6 : 0); break;
         case g: h = (b - r) / d + 2; break;
         case b: h = (r - g) / d + 4; break;
+        default: break;
         }
         h /= 6;
     }
@@ -1085,9 +992,9 @@ const rgbToHsv = (r, g, b, a = 1) => {
    * @return  Array           The RGB representation
    */
 const hsvToRgb = (h, s, v, a = 1) => {
-    let r,
-        g,
-        b;
+    let r;
+    let g;
+    let b;
 
     const i = Math.floor(h * 6);
     const f = h * 6 - i;
@@ -1096,15 +1003,16 @@ const hsvToRgb = (h, s, v, a = 1) => {
     const t = v * (1 - (1 - f) * s);
 
     switch (i % 6) {
-    case 0: r = v, g = t, b = p; break;
-    case 1: r = q, g = v, b = p; break;
-    case 2: r = p, g = v, b = t; break;
-    case 3: r = p, g = q, b = v; break;
-    case 4: r = t, g = p, b = v; break;
-    case 5: r = v, g = p, b = q; break;
+    case 0: r = v; g = t; b = p; break;
+    case 1: r = q; g = v; b = p; break;
+    case 2: r = p; g = v; b = t; break;
+    case 3: r = p; g = q; b = v; break;
+    case 4: r = t; g = p; b = v; break;
+    case 5: r = v; g = p; b = q; break;
+    default: break;
     }
 
-    return [r * 255, g * 255, b * 255];
+    return [r * 255, g * 255, b * 255, a];
 };
 
 const hexToHsv = (hex) => {
@@ -1122,7 +1030,9 @@ const detectColor = (col) => {
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
 
     // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
+     // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
+     // eslint-disable-next-line
     const matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -1146,32 +1056,20 @@ const filterPropagationModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
     let filteredModel;
     if (schema.length) {
-        if (schema[0].name === ReservedFields.ROW_ID) {
-            // iterate over data and create occurence map
-            const occMap = {};
-            data.forEach((val) => {
-                occMap[val[0]] = true;
-            });
-            filteredModel = model.select((fields, rIdx) => occMap[rIdx], {
-                saveChild: false
-            });
-        } else {
-            const fieldMap = model.getFieldsConfig();
-            filteredModel = model.select((fields) => {
-                const include = data.some(row => schema.every((propField, idx) => {
-                    if (!measures && (!(propField.name in fieldMap) ||
+        const fieldMap = model.getFieldsConfig();
+        filteredModel = model.select((fields) => {
+            const include = data.some(row => schema.every((propField, idx) => {
+                if (!measures && (!(propField.name in fieldMap) ||
                         fieldMap[propField.name].def.type === FieldType.MEASURE)) {
-                        return true;
-                    }
-                    return row[idx] === fields[propField.name].valueOf();
-                }));
-                return include;
-            }, {
-                saveChild: false
-            });
-        }
-    }
-    else {
+                    return true;
+                }
+                return row[idx] === fields[propField.name].valueOf();
+            }));
+            return include;
+        }, {
+            saveChild: false
+        });
+    } else {
         filteredModel = propModel;
     }
 
@@ -1187,16 +1085,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
         const len = fields.length;
         for (let i = 0; i < len; i++) {
             const field = fields[i];
-            let fieldObj;
-            if (field === ReservedFields.ROW_ID) {
-                fieldObj = {
-                    name: field,
-                    type: FieldType.DIMENSION
-                };
-            }
-            else {
-                fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
-            }
+            const fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
             if (fieldObj) {
                 schema.push(Object.assign(fieldObj));
             }
@@ -1212,8 +1101,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
             });
             data.push(temp);
         }
-    }
-    else {
+    } else {
         data = [];
         schema = [];
     }
@@ -1232,16 +1120,15 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     if (criteria === null) {
         return null;
     }
-    let selFields = Object.keys(criteria),
-        selFn = fields => selFields.every((field) => {
-            let val = fields[field].value,
-                range;
-            range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-            if (typeof range[0] === 'string') {
-                return range.find(d => d === val) !== undefined;
-            }
-            return range ? val >= range[0] && val <= range[1] : true;
-        });
+    const selFields = Object.keys(criteria);
+    const selFn = fields => selFields.every((field) => {
+        const val = fields[field].value;
+        const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
+        if (typeof range[0] === 'string') {
+            return range.find(d => d === val) !== undefined;
+        }
+        return range ? val >= range[0] && val <= range[1] : true;
+    });
 
     return dataModel.select(selFn, {
         saveChild: false,
@@ -1259,25 +1146,17 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
 const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
-        let fieldsConfig = dataModel.getFieldsConfig(),
-            rowId = ReservedFields.ROW_ID;
+        const fieldsConfig = dataModel.getFieldsConfig();
 
         const dataArr = identifiers.slice(1, identifiers.length);
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
-        }
-        else if (identifiers instanceof Array && identifiers[0].length) {
-            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === rowId);
-            filteredDataModel = dataModel.select((fields, i) => {
+        } else if (identifiers instanceof Array && identifiers[0].length) {
+            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig);
+            filteredDataModel = dataModel.select((fields) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    let value;
-                    if (propField === rowId) {
-                        value = i;
-                    }
-                    else {
-                        value = fields[propField].valueOf();
-                    }
+                    const value = fields[propField].valueOf();
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });
@@ -1287,8 +1166,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                 mode
             });
         }
-    }
-    else {
+    } else {
         filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
     }
     return filteredDataModel;
@@ -1304,16 +1182,16 @@ const registerListeners = (context, listenerMap) => {
     const propListenerMap = listenerMap(context);
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
-            let mapObj = propListenerMap[key],
-                propType = mapObj.type,
-                props = mapObj.props,
-                listenerFn = mapObj.listener;
+            const mapObj = propListenerMap[key];
+            const propType = mapObj.type;
+            const props = mapObj.props;
+            const listenerFn = mapObj.listener;
             context.store()[propType](props, listenerFn);
         }
     }
 };
 
-const isValidValue = (value) => !isNaN(value) && value !== -Infinity && value !== Infinity;
+const isValidValue = value => !isNaN(value) && value !== -Infinity && value !== Infinity;
 /**
  *
  *
@@ -1368,8 +1246,7 @@ const extendsClass = (cls, extendsFrom, found) => {
     const prototype = cls.prototype;
     if (prototype instanceof extendsFrom) {
         found = true;
-    }
-    else {
+    } else {
         found = extendsClass(prototype, extendsFrom, found);
     }
     return found;
@@ -1406,8 +1283,7 @@ const concatModels = (dm1, dm2) => {
                 row2.forEach((value, idx) => {
                     commonTuples[key][schema2[idx].name] = value;
                 });
-            }
-            else {
+            } else {
                 const dm1Key = dim1Values.join();
                 const dm2Key = dim2Values.join();
                 if (!commonTuples[dm1Key] && !commonTuples[dm2Key]) {
@@ -1429,7 +1305,73 @@ const concatModels = (dm1, dm2) => {
     return [data, commonSchema];
 };
 
+const getSymbol = type => symbol().type(symbolFns[type]);
+
+const stackOrders = {
+    [STACK_CONFIG.ORDER_NONE]: stackOrderNone,
+    [STACK_CONFIG.ORDER_ASCENDING]: stackOrderAscending,
+    [STACK_CONFIG.ORDER_DESCENDING]: stackOrderDescending
+};
+const stackOffsets = {
+    [STACK_CONFIG.OFFSET_DIVERGING]: stackOffsetDiverging,
+    [STACK_CONFIG.OFFSET_NONE]: stackOffsetNone,
+    [STACK_CONFIG.OFFSET_EXPAND]: stackOffsetExpand,
+    [STACK_CONFIG.OFFSET_WIGGLE]: stackOffsetWiggle
+};
+
+// eslint-disable-next-line require-jsdoc
+const stack = params => d3Stack().keys(params.keys).offset(stackOffsets[params.offset])
+                .order(stackOrders[params.order])(params.data);
+
+/**
+ * Groups the data into a hierarchical tree structure based on one or more fields.
+ * @param { Object } params Configuration properties for nesting data
+ * @param { Array.<Array> } params.data Data which needs to be grouped
+ * @param { Array.<number> } params.keys Field indices by which the data will be grouped
+ * @return { Array.<Object> } Grouped data array
+ */
+const nestCollection = (params) => {
+    const nestFn = nest();
+    params.keys.forEach(key => nestFn.key(d => d[key]));
+    return nestFn.entries(params.data);
+};
+
+const pathInterpolators = {
+    curveLinear,
+    curveStepAfter,
+    curveStepBefore,
+    curveStep,
+    curveCatmullRom,
+    stepAfter: curveStepAfter,
+    catmullRom: curveCatmullRom,
+    step: curveStep,
+    stepBefore: curveStepBefore,
+    linear: curveLinear
+};
+
+const Symbols = {
+    axisLeft,
+    axisRight,
+    axisTop,
+    axisBottom,
+    line,
+    area,
+    pie,
+    arc,
+    nest
+};
+
+const Scales = {
+    band: scaleBand
+};
+
 export {
+    Scales,
+    Symbols,
+    pathInterpolators,
+    stack,
+    nestCollection,
+    getSymbol,
     transformColors,
     detectColor,
     hexToHsv,
@@ -1459,7 +1401,6 @@ export {
     getUniqueId,
     mergeRecursive,
     unionDomain,
-    curry,
     symbolFns,
     easeFns,
     clone,
@@ -1476,7 +1417,6 @@ export {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    addRulesToStylesheet,
     Store,
     getDependencyOrder,
     objectIterator,

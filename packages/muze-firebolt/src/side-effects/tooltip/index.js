@@ -60,8 +60,7 @@ export default class Tooltip extends SpawnableSideEffect {
             dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
                 saveChild: false
             })));
-        }
-        else {
+        } else {
             dataModels.push(dataModel);
         }
         // Show tooltip for each datamodel
@@ -122,7 +121,6 @@ export default class Tooltip extends SpawnableSideEffect {
                 delete tooltips[key];
             }
         }
-
 
         if (fragmented) {
             spaceOutBoxes(boxes, boundBox, showVertically);

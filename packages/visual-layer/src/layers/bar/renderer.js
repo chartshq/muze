@@ -1,5 +1,4 @@
-import { makeElement } from 'muze-utils';
-import { easeCubic } from 'd3-ease';
+import { makeElement, easeFns } from 'muze-utils';
 
 /**
  *
@@ -11,9 +10,9 @@ import { easeCubic } from 'd3-ease';
  */
 const transitionBars = (elem, datum, index, context) => {
     const { transition, classnameFn } = context;
-    const { duration, disabled } = transition;
+    const { duration, disabled, effect } = transition;
     const selection = elem;
-    const selTransition = disabled ? selection : selection.transition().duration(duration).ease(easeCubic);
+    const selTransition = disabled ? selection : selection.transition().duration(duration).ease(easeFns[effect]);
     const update = datum.update || datum;
     const updateStyle = datum.style || {};
     classnameFn && selection.classed(classnameFn(datum, index), true);

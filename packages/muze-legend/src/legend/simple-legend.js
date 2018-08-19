@@ -159,7 +159,7 @@ export default class SimpleLegend {
            border
        } = this.measurement();
         const {
-            align,
+            align
         } = this.config();
 
         // Effective padding, margin and padding

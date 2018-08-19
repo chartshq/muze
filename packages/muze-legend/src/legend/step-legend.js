@@ -2,7 +2,7 @@ import SimpleLegend from './simple-legend';
 import {
     getScaleInfo,
     getInterpolatedData,
-    getDomainBounds,
+    getDomainBounds
 } from './legend-helper';
 import {
     createLegendSkeleton,

@@ -135,7 +135,7 @@ export const getRenderDetails = (context, mount) => {
         isRowSizeEqual,
         rows,
         columns,
-        values,
+        values
     } = context.getPlaceholderDetails();
     const {
         minWidth,

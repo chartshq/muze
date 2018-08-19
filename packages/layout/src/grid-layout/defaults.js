@@ -1,4 +1,3 @@
-
 import * as FieldNames from '../enums/constants';
 
 /**
@@ -11,7 +10,7 @@ export const DEFAULT_CONFIGURATION = {
         [FieldNames.COLOR]: '#d6d6d6',
         [FieldNames.WIDTH]: 2,
         [FieldNames.COLLAPSE]: true,
-        [FieldNames.SPACING]: 0,
+        [FieldNames.SPACING]: 0
     },
     [FieldNames.GUTTERSPACE]: { rows: [], columns: [] },
     [FieldNames.DISTRIBUTION]: { rows: [], columns: [] },

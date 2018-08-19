@@ -38,28 +38,28 @@ describe('Utils', () => {
     });
 
     it('Gets domain from data correctly', () => {
-        const yDomain = getDomainFromData([data], [1, 1], 'measure'),
-            xDomain = getDomainFromData([data], [0], 'dimension'),
-            rangeDomain = getDomainFromData([data], [2, 1], 'measure');
+        const yDomain = getDomainFromData([data], [1, 1], 'measure');
+        const xDomain = getDomainFromData([data], [0], 'dimension');
+        const rangeDomain = getDomainFromData([data], [2, 1], 'measure');
         expect(yDomain).to.deep.equals([1000, 3000]);
         expect(xDomain).to.deep.equals(['A', 'B', 'C']);
         expect(rangeDomain).to.deep.equals([100, 3000]);
     });
 
     it('getUniqueId returns unique ids', () => {
-        const uniqueId1 = getUniqueId(),
-            uniqueId2 = getUniqueId();
+        const uniqueId1 = getUniqueId();
+        const uniqueId2 = getUniqueId();
 
         expect(uniqueId1 !== uniqueId2).to.be.true;
     });
 
     it('Should check if the object has the right properties', () => {
         const object = {
-                rows: [], columns: [], values: []
-            },
-            cloneObj = sanitizeIP.typeObj(['rows', 'columns', 'values'], object),
-            cloneObj2 = sanitizeIP.typeObj(['sum', 'minus'], object),
-            cloneObj3 = sanitizeIP.typeObj(['rows', 'columns'], 'hi');
+            rows: [], columns: [], values: []
+        };
+        const cloneObj = sanitizeIP.typeObj(['rows', 'columns', 'values'], object);
+        const cloneObj2 = sanitizeIP.typeObj(['sum', 'minus'], object);
+        const cloneObj3 = sanitizeIP.typeObj(['rows', 'columns'], 'hi');
         expect(cloneObj === object).to.be.true;
         expect(cloneObj2).to.be.an.instanceOf(Error);
         expect(cloneObj3).to.be.an.instanceOf(Error).with.property('message', 'Argument type object expected');
@@ -81,7 +81,7 @@ describe('Utils', () => {
                 min: 20
             }
         };
-        let newObject = clone(obj);
+        const newObject = clone(obj);
         expect(newObject !== obj).to.equals(true);
         expect(newObject.a !== obj.a).to.equals(true);
     });
@@ -124,7 +124,7 @@ describe('Utils', () => {
     });
 
     it('Should capitalize the first letter of a word', () => {
-        let word = capitalizeFirst('simple');
+        const word = capitalizeFirst('simple');
         expect(word).to.equals('Simple');
     });
 
@@ -151,10 +151,10 @@ describe('Utils', () => {
     });
 
     describe('Transaction related', () => {
-        let options,
-            holder,
-            model,
-            subject;
+        let options;
+        let holder;
+        let model;
+        let subject;
 
         /* in this section the order of test cases matte */
 
@@ -196,14 +196,14 @@ describe('Utils', () => {
                     value: 0,
                     meta: {
                         sanitization: intSanitizer,
-                        typeCheck: Number.isInteger,
+                        typeCheck: Number.isInteger
                     }
                 },
                 height: {
                     value: 0,
                     meta: {
                         sanitization: intSanitizer,
-                        typeCheck: Number.isInteger,
+                        typeCheck: Number.isInteger
                     }
                 },
                 config: {
@@ -233,7 +233,6 @@ describe('Utils', () => {
                 holder.height(10);
                 expect(holder.height()).to.equal(10);
             });
-
 
             it('should not set a value if wrong value is passed', () => {
                 holder.config(null);
@@ -266,11 +265,11 @@ describe('Utils', () => {
 
         describe('#isSimpleObject', () => {
             it('Should return false if array is given', () => {
-                let a = [1, 2, 3];
+                const a = [1, 2, 3];
                 expect(isSimpleObject(a)).to.equals(false);
             });
             it('Should return true for object', () => {
-                let a = {
+                const a = {
                     b: 2
                 };
                 expect(isSimpleObject(a)).to.equals(true);
