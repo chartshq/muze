@@ -138,4 +138,5 @@ export const x11Colors = {
     LightSlateGrey: { hex: '778899', rgb: '119,136,153' },
     SlateGrey: { hex: '708090', rgb: '112,128,144' },
     DarkSlateGrey: { hex: '2f4f4f', rgb: '47,79,79' },
-    Black: { hex: '000000', rgb: '0,0,0' } };
+    Black: { hex: '000000', rgb: '0,0,0' }
+};
