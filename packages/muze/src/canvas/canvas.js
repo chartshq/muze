@@ -91,6 +91,7 @@ export default class Canvas extends TransactionSupport {
     done () {
         return this._renderedPromise;
     }
+
     /**
      *
      *

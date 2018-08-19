@@ -1,5 +1,4 @@
 import {
-    selectElement,
     getEvent,
     getD3Drag
  } from 'muze-utils';
@@ -16,9 +15,9 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
     let startPos = {};
     let endPos = {};
     const d3Drag = getD3Drag();
-    const boundingBox = targetEl.getBoundingClientRect();
+    const boundingBox = targetEl.node().getBoundingClientRect();
     let touchStart;
-    selectElement(targetEl).call(d3Drag().on('start', () => {
+    targetEl.call(d3Drag().on('start', () => {
         const event = getEvent();
         startPos = {
             x: event.x,

@@ -1,6 +1,12 @@
 import { Firebolt } from '@chartshq/muze-firebolt';
-import DataModel from 'datamodel';
-import { FieldType, DimensionSubtype, CommonProps, getDataModelFromIdentifiers, concatModels } from 'muze-utils';
+import {
+    FieldType,
+    DimensionSubtype,
+    CommonProps,
+    getDataModelFromIdentifiers,
+    concatModels,
+    DataModel
+} from 'muze-utils';
 import * as COMPONENTS from '../enums/components';
 import { changeSideEffectAvailability, getDrawingContext, getSourceInfo, getMarksFromIdentifiers } from './helper';
 

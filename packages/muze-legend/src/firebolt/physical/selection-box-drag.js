@@ -1,8 +1,7 @@
 import {
     getMousePos,
     getEvent,
-    getD3Drag,
-    selectElement
+    getD3Drag
  } from 'muze-utils';
 import { HEIGHT, WIDTH, HORIZONTAL } from '../../enums/constants';
 
@@ -52,7 +51,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
     };
     let subject = {};
 
-    selectElement(targetEl).call(d3Drag().on('start', function () {
+    targetEl.call(d3Drag().on('start', function () {
         const event = getEvent();
         startPos = getMousePos(this, event.sourceEvent);
         subject = event.subject;

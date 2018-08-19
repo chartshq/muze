@@ -60,7 +60,7 @@ const createShape = function (d, elem) {
         } else {
             pathStr = getSymbol(shape).size(size)(update);
         }
-        makeElement(groupElement, 'path', [1]).attr('d', pathStr);
+        makeElement(groupElement, 'path', data => [data]).attr('d', pathStr);
     } else {
         d.shape = 'circle';
         createShape(d, elem);

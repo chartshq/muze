@@ -1,14 +1,7 @@
 export {
-    DataFormat,
-    DimensionSubtype,
-    MeasureSubtype,
-    FieldType,
-    FilteringMode,
     ReservedFields,
     CommonProps
 } from './enums';
-
-export { default as DateTimeFormatter } from './date-time-formatter';
 
 export {
     transformColors,
@@ -104,3 +97,5 @@ export {
 export { dataSelect, DataObject } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
+
+export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';

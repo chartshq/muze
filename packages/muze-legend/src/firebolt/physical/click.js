@@ -1,5 +1,3 @@
-import { selectElement } from 'muze-utils';
-
 /**
  * Adds mouse interactions to target element.
  * @param {VisualUnit} instance instance of visual unit.
@@ -14,7 +12,7 @@ const click = firebolt => (targetEl, behaviours) => {
         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
     };
 
-    selectElement(targetEl).on('click', dispatchBehaviour);
+    targetEl.on('click', dispatchBehaviour);
 };
 
 export default click;

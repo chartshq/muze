@@ -369,7 +369,7 @@ export default class VisualUnit {
      */
     getDefaultTargetContainer () {
         const { classPrefix, defClassName, arcLayerClassName } = this.config();
-        return [`${classPrefix}-${defClassName}`, `${classPrefix}-${arcLayerClassName} path`];
+        return [`.${classPrefix}-${defClassName}`, `.${classPrefix}-${arcLayerClassName} path`];
     }
 
     /**

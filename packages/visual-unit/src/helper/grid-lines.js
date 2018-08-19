@@ -1,6 +1,5 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
-import DataModel from 'datamodel';
 import { layerFactory } from '@chartshq/visual-layer';
 import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS } from '../enums/constants';
 
