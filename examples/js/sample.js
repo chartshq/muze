@@ -76,26 +76,14 @@
             .columns(columns)
             .color('Cylinders')
             // .size('Origin')
-            .layers([{
-                mark: 'arc', 
-                encoding: {
-                    angle: 'Displacement'
-                }
-            }])
+           
             .data(rootData)
 			.width(900)
             .height(600)
             .config({
                 border:{
                     width: 2,
-                    showRowBorders: false,
-                    showColBorders:false,
-                    showValueBorders: {
-                        top: false,
-                        bottom: true,
-                        left: true,
-                        right: false
-                    }
+                   
                 },
                 axes:{
                         x:{

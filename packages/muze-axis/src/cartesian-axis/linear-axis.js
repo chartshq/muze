@@ -188,6 +188,21 @@ export default class LinearAxis extends SimpleAxis {
     }
 
     /**
+     *
+     *
+     * @param {*} domain
+     * @returns
+     * @memberof SimpleAxis
+     */
+    updateDomainCache (domain) {
+        if (this._domainLock === false) {
+            this.domain([1, 1]);
+            this._domainLock = true;
+        }
+        return this.updateDomainBounds(domain || []);
+    }
+
+    /**
      * Sets a fixed baseline for the first ticks so that they can render effectively within
      * the given area
      *
