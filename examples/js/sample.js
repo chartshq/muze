@@ -66,15 +66,16 @@
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
 		let rows = [[ 'Acceleration']],
-			columns = ['Year'];
+			columns = ['Horsepower'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .size('Acceleration')
+            .shape('Origin')
             .color({
                field: 'Acceleration',
-               interpolate: true,
-               steps: [-10000, -4500, -1500, 2500, 7000],
+               interpolate: false,
+               steps: [30,100],
+               scheme:['red', 'blue', 'green']
          
             })
             // .size('Origin')
@@ -94,9 +95,12 @@
                             orientation: 'right'
                         },
                         item:{
-                            shape:{
+                            icon:{
                                 type: 'cross',
                                 height: 40,
+                            },
+                            text:{
+                                orientation: 'top'
                             }
                         }
                     }

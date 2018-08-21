@@ -1,5 +1,5 @@
 import { makeElement, selectElement, applyStyle } from 'muze-utils';
-import { SHAPE_MAP } from './defaults';
+import { ICON_MAP } from './defaults';
 import {
     VERTICAL,
     WIDTH,
@@ -26,64 +26,65 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
     const {
         padding,
         labelSpaces,
-        shapeSpaces,
-        maxShapeWidth
+        iconSpaces,
+        maxIconWidth
     } = context.measurement();
     const diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
-    return `${measureType === 'width' && !stepColorCheck ? maxShapeWidth : shapeSpaces[item[6]][measureType] - diff}px`;
+    console.log(maxIconWidth);
+    return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
 };
 
  /**
- * Returns the shape of the legend item
+ * Returns the icon of the legend item
  *
  * @param {Object} datum Data property attached to the item
  * @param {number} width width of the item
  * @param {number} height height of the item
- * @return {Object|string} returns the path string or the string name of the shape
+ * @return {Object|string} returns the path string or the string name of the icon
  * @memberof Legend
  */
-export const getLegendShape = (datum, width, height, defaultShape) => {
-    const shape = SHAPE_MAP(datum[1]);
+export const getLegendIcon = (datum, width, height, defaultIcon) => {
+    const icon = ICON_MAP(datum[1]);
 
-    if (shape) {
-        return shape.size(datum[3] || Math.min(width, height) * Math.PI);
+    if (icon) {
+        return icon.size(datum[3] || Math.min(width, height) * Math.PI);
     }
-    return SHAPE_MAP(datum[3] ? 'circle' : defaultShape).size(datum[3] || Math.min(width, height) * Math.PI);
+    return ICON_MAP(datum[3] ? 'circle' : defaultIcon).size(datum[3] || Math.min(width, height) * Math.PI);
 };
 
 /**
  *
  *
  */
-export const renderShape = (shape, container, datum, context) => {
+export const renderIcon = (icon, container, datum, context) => {
     const {
         classPrefix,
-        shapeHeight,
-        maxShapeWidth,
+        iconHeight,
+        maxIconWidth,
         padding,
         color
     } = context;
-    const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-shape-svg`)
-    .attr(WIDTH, maxShapeWidth)
-    .attr(HEIGHT, shapeHeight)
-    .style(WIDTH, `${maxShapeWidth}px`)
-    .style(HEIGHT, `${shapeHeight}px`);
+    const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-icon-svg`)
+    .attr(WIDTH, maxIconWidth)
+    .attr(HEIGHT, iconHeight)
+    .style(WIDTH, `${maxIconWidth}px`)
+    .style(HEIGHT, `${iconHeight}px`);
 
-    if (shape !== RECT) {
-        makeElement(svg, 'path', [datum[1]], `${classPrefix}-legend-shape`)
-                        .attr('d', shape)
-                        .attr('transform', `translate(${maxShapeWidth / 2 - padding} ${shapeHeight / 2})`)
+    if (icon !== RECT) {
+        makeElement(svg, 'path', [datum[1]], `${classPrefix}-legend-icon`)
+                        .attr('d', icon)
+                        .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
                         .attr('fill', datum[2] || color);
     } else {
-        makeElement(svg, RECT, [datum[1]], `${classPrefix}-legend-shape`)
+        makeElement(svg, RECT, [datum[1]], `${classPrefix}-legend-icon`)
                         .attr('x', 0)
                         .attr('y', 0)
-                        .attr(WIDTH, maxShapeWidth)
-                        .attr(HEIGHT, shapeHeight)
+                        .attr(WIDTH, maxIconWidth)
+                        .attr(HEIGHT, iconHeight)
                         .attr('fill', datum[2] || color);
     }
 };
@@ -176,7 +177,7 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
 };
 
 /**
- * Creates legend item based on alignment and text position
+ * Creates legend item based on alignment and text orientation
  *
  * @param {Selection} container Point where items are to be mounted
  * @return {Instance} Current instance
@@ -190,10 +191,10 @@ export const createItemSkeleton = (context, container) => {
     const {
            padding
         } = context.measurement();
-    const textPosition = item.text.position;
+    const textOrientation = item.text.orientation;
 
     let stack = [VALUE, SHAPE];
-    if (textPosition === RIGHT || textPosition === BOTTOM) {
+    if (textOrientation === RIGHT || textOrientation === BOTTOM) {
         stack = [SHAPE, VALUE];
     }
 
@@ -201,15 +202,15 @@ export const createItemSkeleton = (context, container) => {
         d.value, context.fieldName(), i]), `${classPrefix}-legend-item-info`);
     itemSkeleton.style('padding', `${padding}px`);
 
-    const alignClass = textPosition === BOTTOM || textPosition === TOP ?
-        CENTER : (textPosition === RIGHT ? START : END);
+    const alignClass = textOrientation === BOTTOM || textOrientation === TOP ?
+        CENTER : (textOrientation === RIGHT ? START : END);
 
     itemSkeleton.classed(alignClass, true);
     return { itemSkeleton };
 };
 
 /**
- * Renders the items in the legend i.e, shape and text
+ * Renders the items in the legend i.e, icon and text
  *
  * @param {DOM} container Point where item is to be mounted
  * @memberof Legend
@@ -221,15 +222,15 @@ export const renderDiscreteItem = (context, container) => {
            classPrefix
     } = context.config();
     const {
-        maxShapeWidth,
+        maxIconWidth,
         padding
     } = context.measurement();
     const {
-            width: shapeWidth,
-            height: shapeHeight,
+            width: iconWidth,
+            height: iconHeight,
             color,
             type
-        } = item.shape;
+        } = item.icon;
 
     labelManager.useEllipsesOnOverflow(true);
     applyStyle(container, {
@@ -243,12 +244,12 @@ export const renderDiscreteItem = (context, container) => {
         if (d[0] === VALUE) {
             selectElement(this).text(d[1]);
         } else {
-            const shape = getLegendShape(d, shapeWidth, shapeHeight, type);
-            renderShape(shape, selectElement(this), d, {
+            const icon = getLegendIcon(d, iconWidth, iconHeight, type);
+            renderIcon(icon, selectElement(this), d, {
                 classPrefix,
-                shapeWidth: 2 * Math.sqrt(d[3] / Math.PI) || shapeWidth,
-                shapeHeight,
-                maxShapeWidth,
+                iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
+                iconHeight,
+                maxIconWidth,
                 padding,
                 color
             });
@@ -257,14 +258,14 @@ export const renderDiscreteItem = (context, container) => {
 };
 
 /**
-* Renders the items in the legend i.e, shape and text
+* Renders the items in the legend i.e, icon and text
 *
 * @param {DOM} container Point where item is to be mounted
 * @memberof Legend
 */
 export const renderStepItem = (context, container) => {
-    let shapeWidth;
-    let shapeHeight;
+    let iconWidth;
+    let iconHeight;
     const labelManager = context._labelManager;
     const {
       item,
@@ -273,28 +274,28 @@ export const renderStepItem = (context, container) => {
    } = context.config();
     const {
       maxItemSpaces,
-      maxShapeWidth
+      maxIconWidth
    } = context.measurement();
     const {
        width,
        height,
        color
-   } = item.shape;
+   } = item.icon;
     const stepColor = {
         horizontal: false,
         vertical: false
     };
 
-    shapeHeight = height;
-    shapeWidth = width;
+    iconHeight = height;
+    iconWidth = width;
 
     labelManager.useEllipsesOnOverflow(true);
 
     if (position === BOTTOM || position === TOP) {
-        shapeWidth = maxItemSpaces.width;
+        iconWidth = maxItemSpaces.width;
         stepColor.horizontal = true;
     } else if (position === LEFT || position === RIGHT) {
-        shapeHeight = maxItemSpaces.height;
+        iconHeight = maxItemSpaces.height;
         stepColor.vertical = true;
     }
 
@@ -309,11 +310,11 @@ export const renderStepItem = (context, container) => {
         if (d[0] === VALUE) {
             selectElement(this).text(d[1]);
         } else {
-            renderShape(RECT, selectElement(this), d, {
+            renderIcon(RECT, selectElement(this), d, {
                 classPrefix,
-                shapeWidth,
-                shapeHeight,
-                maxShapeWidth,
+                iconWidth,
+                iconHeight,
+                maxIconWidth,
                 color
             });
         }

@@ -107,11 +107,10 @@ export default class StepLegend extends SimpleLegend {
      * @memberof Legend
      */
     getLabelSpaces (effPadding, align) {
-        const position = this.config().position;
         this.config({
             item: {
                 text: {
-                    position
+                    orientation: this.config().position
                 }
             }
         });

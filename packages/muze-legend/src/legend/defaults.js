@@ -40,10 +40,10 @@ export const DEFAULT_CONFIG = {
     },
     item: {
         text: {
-            position: 'right',
+            orientation: 'right',
             width: 10
         },
-        shape: {
+        icon: {
             height: 20,
             width: 20,
             color: 'rgba(0,0,0,.5)',
@@ -53,9 +53,9 @@ export const DEFAULT_CONFIG = {
 };
 
 /**
- * Creates a map of pre defined shapes
+ * Creates a map of pre defined icons
  *
- * @param {string} shape Accepts a shape name like 'square', 'cross', 'diamond' etc
- * @return {Object} shape object which can be used to draw the shapes
+ * @param {string} icon Accepts a icon name like 'square', 'cross', 'diamond' etc
+ * @return {Object} icon object which can be used to draw the icons
  */
-export const SHAPE_MAP = shape => shape && getSymbol(shape);
+export const ICON_MAP = icon => icon && getSymbol(icon);

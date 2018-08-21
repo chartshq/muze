@@ -81,7 +81,7 @@ const createLegendSkeleton = (container, classPrefix, data) => {
     const legendGradSvg = makeElement(legendContainer, 'svg', [1], `${classPrefix}-gradient`);
     const legendGradCont = makeElement(legendGradSvg, 'g', [1], `${classPrefix}-gradient-group`);
     const linearGradient = makeLinearGradient(legendGradSvg, data, domain);
-    const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-shape`);
+    const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-rect`);
 
     return {
         legendContainer,
@@ -108,10 +108,10 @@ export const renderAxis = (context, container, height, width) => {
 };
 
 /**
- * Renders gradient legends (shape, size and color)
+ * Renders gradient legends
  *
  * @param {Selection} container Point where the legend is to be appended
- * @memberof Legend
+ * @memberof GradientLegend
  */
 export const renderGradient = (context, container) => {
     let gradHeight = 0;
@@ -145,17 +145,17 @@ export const renderGradient = (context, container) => {
     gradWidth = Math.floor(width - (margin * 2 + border * 2));
 
     if (align === ALIGN.HORIZONTAL) {
-        gradientDimensions.height = item.shape.height;
+        gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
         linearGradient.attr('x2', '100%');
         legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
-        renderAxis(context, legendContainer, gradHeight - item.shape.height - padding, gradWidth - 2 * padding - 1);
+        renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
     } else {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
-        gradientDimensions.width = item.shape.width;
+        gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
         legendGradCont.attr('transform', `translate(0 ${labelDim.height / 2})`);
-        renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.shape.width - padding * 2);
+        renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
     }
 
     // Apply styles to the legend container

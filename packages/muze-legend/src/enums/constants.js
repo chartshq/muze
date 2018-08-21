@@ -32,6 +32,7 @@ export const CENTER = 'center';
 export const VALUE = 'value';
 export const PATH = 'path';
 export const SHAPE = 'shape';
+export const ICON = 'icon';
 export const RECT = 'rect';
 export const START = 'start';
 export const UPPER = 'upper';

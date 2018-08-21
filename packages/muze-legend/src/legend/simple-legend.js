@@ -178,7 +178,7 @@ export default class SimpleLegend {
         const labelSpaces = this.getLabelSpaces(effPadding, align);
 
         const {
-            totalHeight, totalWidth, itemSpaces, shapeSpaces, maxItemSpaces, maxShapeWidth
+            totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth
         } = computeItemSpaces(this.config(),
         { effPadding, titleWidth, labelSpaces, titleHeight, maxWidth, maxHeight }, this.data());
 
@@ -186,10 +186,10 @@ export default class SimpleLegend {
             width: Math.max(totalWidth, width) + effMargin + effBorder,
             height: Math.max(totalHeight, height) + effMargin + effBorder,
             labelSpaces,
-            shapeSpaces,
+            iconSpaces,
             itemSpaces,
             maxItemSpaces,
-            maxShapeWidth,
+            maxIconWidth,
             titleSpaces: {
                 width: Math.min(maxWidth, this.measurement().width) - effMargin - effBorder,
                 height: titleHeight
