@@ -16,13 +16,13 @@ const defaultRegistry = COMPONENTS;
 
 /**
  * Entry point to renderer. Initializes an environment with settings and registries for canvas. This is a simple wrapper
- * over {@link Canvas} which enables common configuration passing to multiple such canvas.
- * 
- * Everytime `muze()` is called it creates an environment. These environment supports subset of APIs of Canvas. If a 
+ * over {@link Canvas} which enables common configuration passing to multiple such canvases.
+ *
+ * Everytime `muze()` is called it creates an environment. These environment supports subset of APIs of Canvas. If
  * common configuration is used to render multiple canvases then it can be set directly in the env. Like if data is
  * common across all the visulization then its better to set the data in env. When a canvas is created it receives all
  * those configuration from env.
- * 
+ *
  * ```
  *  // Creates an environment
  *  const env = muze()
@@ -32,12 +32,13 @@ const defaultRegistry = COMPONENTS;
  *  // Creates canvas, by default env pushes data to canvas instance
  *  const canvas = env.canvas();
  * ```
+ *
  * If a property is set on both environment and canvas instance, property set on canvas instance gets more priority.
- * 
+ *
  * @public
  * @module muze
  * @namespace Muze
- * 
+ *
  * @return {Env} Instance of an environment
  */
 const muze = () => {
