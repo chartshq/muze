@@ -24,16 +24,16 @@ function renderTable (mount, className, rowData) {
 }
 
 function applyRowBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [TOP, BOTTOM].forEach((borderType) => {
-        showBorders[borderType] && cells.style(`border-${borderType}`, style);
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
+        cells.style(`border-${borderType}`, style);
     });
 }
 
 function applyColBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [LEFT, RIGHT].forEach((borderType) => {
-        showBorders[borderType] && cells.style(`border-${borderType}`, style);
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
+        cells.style(`border-${borderType}`, style);
     });
 }
 
@@ -102,7 +102,7 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.availHeight());
+                    placeholder.setAvailableSpace(0, placeholder.availableHeight());
                 }
                 cells.style('height', `${placeholder.availHeight()}px`);
                 return span;
