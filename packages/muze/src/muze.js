@@ -1,7 +1,3 @@
-/**
- * The accumulator factory namespace muze which provides an consistence api to work with the renderer.
- * Please read the usage.md file for usage informaiton.
- */
 import Smartlabel from 'fusioncharts-smartlabel';
 import {
     transactor,
@@ -22,9 +18,8 @@ import { Canvas } from './canvas';
 import { COMPONENTS, SUBREGISTRIES } from './default-registry';
 import './muze.scss';
 
-// Holder of singleton instances
+// Cache singleton instances which should be included only once in a page
 const globalCache = {};
- // @todo currently components are used as default registry
 const defaultRegistry = COMPONENTS;
 
 const overrideRegistryDefinitions = (overrideRegistry, registry) => {
@@ -33,11 +28,37 @@ const overrideRegistryDefinitions = (overrideRegistry, registry) => {
     }
 };
 
+/**
+ * Entry point to renderer. Initializes an environment with settings and registries for canvas. This is a simple wrapper
+ * over {@link Canvas} which enables common configuration passing to multiple such canvases.
+ *
+ * Everytime `muze()` is called it creates an environment. These environment supports subset of APIs of Canvas. If
+ * common configuration is used to render multiple canvases then it can be set directly in the env. Like if data is
+ * common across all the visulization then its better to set the data in env. When a canvas is created it receives all
+ * those configuration from env.
+ *
+ * ```
+ *  // Creates an environment
+ *  const env = muze()
+ *  // Set data property in environment, so that all the canvas created from the same environment gets this data
+ *  // automatically
+ *  env.data(dm);
+ *  // Creates canvas, by default env pushes data to canvas instance
+ *  const canvas = env.canvas();
+ * ```
+ *
+ * If a property is set on both environment and canvas instance, property set on canvas instance gets more priority.
+ *
+ * @public
+ * @module muze
+ * @namespace Muze
+ *
+ * @return {Env} Instance of an environment
+ */
 const muze = () => {
-    // Setters and getters will be mounted on this. The object will be mutated.
-    const [holder, globalStore] = transactor({}, options);
+    // Setters and getters will be mounted on this. Object will be mutated.
+    const [env, globalStore] = transactor({}, options);
     const components = Object.assign({}, COMPONENTS);
-    // Create instance of sub-registries
     const componentSubRegistryDef = Object.assign(SUBREGISTRIES);
     const componentSubRegistry = {};
 
@@ -46,22 +67,22 @@ const muze = () => {
     }
 
     // Apart form the setter getter, an instance method is injected to create real renderer instances
-    holder.canvas = () => {
+    env.canvas = () => {
         // Create a canvas instance with this settings
         const settings = globalStore.serialize();
         const canvas = Canvas.withSettings(settings, { /* registry */
             components,
             componentSubRegistry
-        }, holder.globalDependencies());
+        }, env.globalDependencies());
 
-        // Whenever settings will be changed canvas will be changed to update its settings
+        // Whenever settings is changed canvas is updated
         enableChainedTransaction(globalStore, canvas, Object.keys(settings));
 
         return canvas;
     };
 
     // Global dependencies for for compositions. Only one copy of the same should be in the page
-    holder.globalDependencies = () => {
+    env.globalDependencies = () => {
         if (!globalCache.smartlabel) {
             globalCache.smartlabel = new Smartlabel(1, 'body');
         }
@@ -73,9 +94,9 @@ const muze = () => {
 
     // Retrieves global settings. This getter is readonly so that user can't change this as change should happen
     // only from setter to avoid unwanted sync issues.
-    holder.settings = () => globalStore.serialize();
+    env.settings = () => globalStore.serialize();
 
-    holder.registry = (...overrideRegistry) => {
+    env.registry = (...overrideRegistry) => {
         // Selectively copy the properties from COMPONENTS
         if (overrideRegistry.length) {
             for (const prop in overrideRegistry) {
@@ -83,29 +104,30 @@ const muze = () => {
                     components[prop] = overrideRegistry[prop];
                 }
             }
-            return holder;
+            return env;
         }
         return components;
     };
 
-    holder.cellRegistry = (...overrideRegistry) => {
+    env.cellRegistry = (...overrideRegistry) => {
         const cellRegistry = componentSubRegistry.cellRegistry;
         if (overrideRegistry.length) {
             overrideRegistryDefinitions(overrideRegistry[0], cellRegistry);
-            return holder;
+            return env;
         }
         return cellRegistry.get();
     };
 
-    holder.layerRegistry = (...overrideRegistry) => {
+    env.layerRegistry = (...overrideRegistry) => {
         const layerRegistry = componentSubRegistry.layerRegistry;
         if (overrideRegistry.length) {
             overrideRegistryDefinitions(overrideRegistry[0], layerRegistry);
+            return env;
         }
         return layerRegistry.get();
     };
 
-    return holder;
+    return env;
 };
 
 const SideEffects = {

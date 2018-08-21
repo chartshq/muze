@@ -236,7 +236,8 @@ export default class LineLayer extends BaseLayer {
                     transition,
                     groupAnimateStyle: {
                         enter: {
-                            'stroke-opacity': 0
+                            'stroke-opacity': 0,
+                            'fill-opacity': this.getPathStyle()['fill-opacity']
                         },
                         update: {
                             'stroke-opacity': encoding.strokeOpacity.value

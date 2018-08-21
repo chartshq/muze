@@ -70,7 +70,7 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('Origin')
+            .color('Displacement')
             // .size('Origin')
            
             .data(rootData)
