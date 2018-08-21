@@ -18,14 +18,12 @@ $prefix: muze-;
     align-items: center;
     justify-content: center;
     text-align: center;
+    font-size: 14px;
     height: 30px;
-    fill:#4F4F4F;
-    font-weight:800;
+    fill:#5F5F5F;
+    font-weight:600;
 }
 .#{$prefix}legend-overflow {
-    // display: flex;
-    // align-items: center;
-    // justify-content: center;
     text-align: center
 }
 
