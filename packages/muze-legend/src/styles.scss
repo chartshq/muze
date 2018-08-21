@@ -14,10 +14,10 @@ $prefix: muze-;
 
 .#{$prefix}legend-title {
     border-bottom: solid rgba(0,0,0,0);
-    display: flex;
+    display: block;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    float: left;
+    text-align: left;
     font-size: 14px;
     height: 30px;
     fill:#5F5F5F;

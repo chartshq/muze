@@ -223,7 +223,7 @@ export default class SimpleLegend {
             height: titleSpaces.height,
             border,
             padding
-        }, this.config().classPrefix);
+        }, this.config());
     }
 
     /**

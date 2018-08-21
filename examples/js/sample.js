@@ -108,6 +108,7 @@
                     }
                 }
             })
+            // .legend()
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
 		.mount(document.getElementsByTagName('body')[0]);

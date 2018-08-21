@@ -51,14 +51,15 @@ export const getInterpolatedData = (domain, steps) => {
  * @param {*} measurement
  * @param {*} classPrefix
  */
-export const titleCreator = (container, text, measurement, classPrefix) =>
-                makeElement(container, 'div', [1], `${classPrefix}-legend-title`)
+export const titleCreator = (container, text, measurement, config) =>
+                makeElement(container, 'div', [1], `${config.classPrefix}-legend-title`)
                                 .style(WIDTH, '100%')
                                 .style(HEIGHT, `${measurement.height}px`)
                                 .style('padding-left', `${measurement.padding}px`)
                                 .style('padding-right', `${measurement.padding}px`)
                                 .style('border-bottom-width', `${measurement.border}px`)
-                                .style('text-align', CENTER)
+                                .style('text-align', (config.position === LEFT || config.position === RIGHT)
+                                    ? LEFT : CENTER)
                                 .text(text)
                                 .node();
 
