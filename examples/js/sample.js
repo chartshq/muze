@@ -76,15 +76,13 @@
             .columns(columns)
             .color('Cylinders')
             // .size('Origin')
-            .data(rootData)
             .layers([{
-             
-                    mark: 'arc',
-                    encoding: {
-                        angle: 'Acceleration'
-                    }
-                
+                mark: 'arc', 
+                encoding: {
+                    angle: 'Displacement'
+                }
             }])
+            .data(rootData)
 			.width(900)
             .height(600)
             .config({

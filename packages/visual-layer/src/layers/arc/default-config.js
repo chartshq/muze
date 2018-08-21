@@ -26,8 +26,8 @@ export const defaultConfig = {
     cornerRadius: 0,
     padAngle: 0,
     padRadius: 0,
-    startAngle: 360,
-    endAngle: 0,
+    startAngle: 0,
+    endAngle: 360,
     colors: ['#F44336', 'blue', 'green', 'yellow', 'orange', 'purple'],
     transform: {
         type: 'identity'
