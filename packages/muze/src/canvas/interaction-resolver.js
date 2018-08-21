@@ -12,12 +12,13 @@ export const mergeInteractionPolicy = policy => mergeRecursive(mergeRecursive({}
 export const resolveInteractionPolicy = (context, policies) => {
     const { sideEffect, tooltip } = policies;
     const firebolt = context.firebolt();
-
+    const visGroup = context.composition().visualGroup;
+    const valueMatrix = visGroup.matrixInstance().value;
     if (sideEffect === SIDE_EFFECT_COMMON) {
         firebolt.enable(instance => instance instanceof SpawnableSideEffect);
         const sideEffects = firebolt.sideEffects();
 
-        context.getValueMatrix().each(cell => cell.valueOf().firebolt().disable((instance =>
+        valueMatrix.each(cell => cell.valueOf().firebolt().disable((instance =>
             instance instanceof SpawnableSideEffect && sideEffects[instance.constructor.formalName()])));
     } else if (sideEffect instanceof Function) {
         sideEffect(context);
@@ -31,7 +32,7 @@ export const resolveInteractionPolicy = (context, policies) => {
         for (const key in tooltipSideEffects) {
             tooltipSideEffects[key].enable();
         }
-        context.getValueMatrix().each(cell => cell.valueOf().firebolt().sideEffects().tooltip.disable());
+        valueMatrix.each(cell => cell.valueOf().firebolt().sideEffects().tooltip.disable());
     } else if (tooltip === TOOLTIP_FRAGMENTED) {
         const tooltipSideEffects = firebolt.sideEffects().tooltip;
 
@@ -39,7 +40,7 @@ export const resolveInteractionPolicy = (context, policies) => {
             tooltipSideEffects[key].disable();
         }
 
-        context.getValueMatrix().each((cell) => {
+        valueMatrix.each((cell) => {
             const unitFirebolt = cell.valueOf().firebolt();
             unitFirebolt.enableSideEffectOnPropagation('tooltip');
             unitFirebolt.sideEffects().tooltip.enable();

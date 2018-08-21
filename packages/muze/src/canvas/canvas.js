@@ -1,7 +1,7 @@
 import { GridLayout } from '@chartshq/layout';
 import { sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
-import { transactor, Store, getUniqueId, CommonProps, isEqual } from 'muze-utils';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, RETINAL, DETAIL } from '../constants';
+import { transactor, Store, getUniqueId, CommonProps } from 'muze-utils';
+import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
@@ -9,7 +9,7 @@ import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
 import options from '../options';
 import { resolveInteractionPolicy, mergeInteractionPolicy } from './interaction-resolver';
-import { initCanvas, dispatchProps } from './helper';
+import { initCanvas, setupChangeListener } from './helper';
 
 /**
  * This is the primary class which manages highlevel components like visualGroup, Titles, Legend, Extensions
@@ -58,7 +58,7 @@ export default class Canvas extends TransactionSupport {
         this.title('', {});
         this.subtitle('', {});
         this.legend({});
-        this.setupChangeListener();
+        setupChangeListener(this);
     }
 
     /**
@@ -210,21 +210,6 @@ export default class Canvas extends TransactionSupport {
      * @returns
      * @memberof Canvas
      */
-    headerHeight (...height) {
-        if (height.length > 0) {
-            this._headerHeight = height[0];
-            return this;
-        }
-        return this._headerHeight;
-    }
-
-    /**
-     *
-     *
-     * @param {*} lifeCycles
-     * @returns
-     * @memberof Canvas
-     */
     legendComponents (...legComp) {
         if (legComp.length > 0) {
             this._legendComponents = legComp[0];
@@ -246,54 +231,13 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
-     *
-     *
-     * @memberof Canvas
-     */
-    setupChangeListener () {
-        const store = this._store;
-
-        store.registerImmediateListener(MOUNT, () => {
-            const allOptions = Object.keys(this._allOptions);
-            const props = [...allOptions, ...Object.keys(canvasOptions)];
-            store.registerChangeListener(props, (...params) => {
-                const updateProps = allOptions.every((option, i) => {
-                    let equalityChecker = () => false;
-                    switch (option) {
-                    case ROWS:
-                    case COLUMNS:
-                        equalityChecker = isEqual('Array');
-                        break;
-
-                    case SHAPE:
-                    case SIZE:
-                    case COLOR:
-                    case DETAIL:
-                        equalityChecker = isEqual('Object');
-                        break;
-
-                    default:
-                        break;
-                    }
-                    const oldVal = params[i][0];
-                    const newVal = params[i][1];
-                    return !equalityChecker(oldVal, newVal);
-                });
-
-                // inform attached board to rerender
-                !updateProps && dispatchProps(this);
-                this.render();
-            }, true);
-        });
-    }
-
-    /**
      * Internal function to trigger render, this method is cognizant of all the properties of the core modules and
      * establish a passive reactivity. Passive reactivity is not always a bad thing :)
      * @internal
      */
     render () {
         const mount = this.mount();
+        const visGroup = this.composition().visualGroup;
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         const resolvePolicy = this.resolve();
         const firebolt = this.firebolt();
@@ -311,54 +255,12 @@ export default class Canvas extends TransactionSupport {
         resolveInteractionPolicy(this, mergeInteractionPolicy(resolvePolicy || {}));
         firebolt.throwback(this._throwback);
         const promises = [];
-        this.getValueMatrix().each((el) => {
+        visGroup.matrixInstance().value.each((el) => {
             promises.push(el.valueOf().done());
         });
         Promise.all(promises).then(() => {
             this._renderedResolve();
         });
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Canvas
-     */
-    getPlaceholderDetails () {
-        return this.composition().visualGroup.placeholderInfo();
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Canvas
-     */
-    getCornerMatrices () {
-        return this.composition().visualGroup.cornerMatrices();
-    }
-
-    /**
-     *
-     *
-     * @param {*} variable
-     * @returns
-     * @memberof Canvas
-     */
-    where (variable) {
-        return this.composition().visualGroup.where(variable);
-    }
-
-    /**
-     *
-     *
-     * @param {*} channel
-     * @returns
-     * @memberof Canvas
-     */
-    getFieldsFromChannel (channel) {
-        return this.composition().visualGroup.getFieldsFromChannel(channel);
     }
 
     /**
@@ -387,40 +289,8 @@ export default class Canvas extends TransactionSupport {
      * @returns
      * @memberof Canvas
      */
-    getGroupMetaData () {
-        return this.composition().visualGroup.metaData();
-    }
-
-    /**
-     *
-     *
-     * @param {*} type
-     * @returns
-     * @memberof Canvas
-     */
-    getMatrixInstance (type) {
-        const visualGroup = this.composition().visualGroup;
-        return visualGroup.matrixInstance()[type];
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Canvas
-     */
     getRetinalAxes () {
         const visualGroup = this.composition().visualGroup;
         return visualGroup.getAxes(RETINAL);
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Canvas
-     */
-    getValueMatrix () {
-        return this.composition().visualGroup.matrixInstance().value;
     }
 }

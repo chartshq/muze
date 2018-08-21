@@ -1,5 +1,7 @@
-import { makeElement, selectElement } from 'muze-utils';
+import { makeElement, selectElement, isEqual } from 'muze-utils';
 import { SideEffectContainer } from '../enums/class-names';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL } from '../constants';
+import { canvasOptions } from './local-options';
 
 /**
  * Instantiate high level components. Canvas knows what all high level component it has.
@@ -129,8 +131,8 @@ export const getSourceInfo = (context, facetKey) => () => {
             shape: retinalAxes.shape
         },
         fields: {
-            x: context.getFieldsFromChannel('x'),
-            y: context.getFieldsFromChannel('y')
+            x: group.getFieldsFromChannel('x'),
+            y: group.getFieldsFromChannel('y')
         }
     };
 };
@@ -145,3 +147,45 @@ export const getMarksFromIdentifiers = (context, facetKey) => (identifiers) => {
 
     return null;
 };
+
+/**
+ *
+ *
+ */
+export const setupChangeListener = (context) => {
+    const store = context._store;
+
+    store.registerImmediateListener(MOUNT, () => {
+        const allOptions = Object.keys(context._allOptions);
+        const props = [...allOptions, ...Object.keys(canvasOptions)];
+        store.registerChangeListener(props, (...params) => {
+            const updateProps = allOptions.every((option, i) => {
+                let equalityChecker = () => false;
+                switch (option) {
+                case ROWS:
+                case COLUMNS:
+                    equalityChecker = isEqual('Array');
+                    break;
+
+                case SHAPE:
+                case SIZE:
+                case COLOR:
+                case DETAIL:
+                    equalityChecker = isEqual('Object');
+                    break;
+
+                default:
+                    break;
+                }
+                const oldVal = params[i][0];
+                const newVal = params[i][1];
+                return !equalityChecker(oldVal, newVal);
+            });
+
+            // inform attached board to rerender
+            !updateProps && dispatchProps(context);
+            context.render();
+        }, true);
+    });
+};
+
