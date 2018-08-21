@@ -74,7 +74,7 @@
             .color({
                field: 'Acceleration',
                interpolate: true,
-            //    steps: [-10000, -4500, -1500, 2500, 7000],
+               steps: [-10000, -4500, -1500, 2500, 7000],
          
             })
             // .size('Origin')

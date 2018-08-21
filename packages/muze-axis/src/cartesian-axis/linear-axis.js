@@ -1,3 +1,4 @@
+import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
 import { LINEAR, LOG } from '../enums/scale-type';
@@ -187,6 +188,10 @@ export default class LinearAxis extends SimpleAxis {
         return getNumberOfTicks(availableSpace, labelDim, axis, this);
     }
 
+    getMinTickDifference () {
+        return getSmallestDiff(this.config().tickValues);
+    }
+
     /**
      *
      *
@@ -238,3 +243,4 @@ export default class LinearAxis extends SimpleAxis {
     }
 
 }
+
