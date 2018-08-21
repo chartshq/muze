@@ -59,7 +59,7 @@
 			];
 		let rootData = new DataModel(jsonData, schema);
 
-		rootData = rootData.groupBy([ 'Year','Origin'], {
+		rootData = rootData.groupBy([], {
 			Horsepower: 'mean',
 			Acceleration: 'mean'
 		});
@@ -74,7 +74,7 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('Origin')
+            // .color('Origin')
             .data(rootData)
             .layers({
                 'Horsepower':{

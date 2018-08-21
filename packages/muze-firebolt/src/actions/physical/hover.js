@@ -1,4 +1,4 @@
-import { getClientPoint, selectElement, getEvent } from 'muze-utils';
+import { getClientPoint, getEvent } from 'muze-utils';
 import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
 
 /**
@@ -30,7 +30,7 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
         event.stopPropagation();
     };
 
-    selectElement(targetEl).on('mouseover', dispatchBehaviour)
+    targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
                         behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {

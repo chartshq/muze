@@ -25,7 +25,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         if (type === STEP || (type === DISCRETE && fieldType === MEASURE)) {
             const field = Object.keys(payload.criteria || {})[0];
             values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.range);
-            propagationData = metaData.select((fields) => {
+            propagationData = values.length ? metaData.select((fields) => {
                 let check = false;
                 for (let i = 0; i < values.length; i++) {
                     check = fields[field].value >= values[i][0] && fields[field].value <= values[i][1];
@@ -36,7 +36,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
                 return check;
             }, {
                 saveChild: false
-            });
+            }) : null;
         } else if (type === GRADIENT) {
             propagationData = getDataModelFromRange(metaData, payload.criteria);
         } else if (values.length) {

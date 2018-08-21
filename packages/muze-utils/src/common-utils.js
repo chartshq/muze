@@ -1,4 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
+import { FieldType, DimensionSubtype } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -57,7 +58,6 @@ import {
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import * as STACK_CONFIG from './enums/stack-config';
-import { FieldType, DimensionSubtype, ReservedFields } from './enums';
 
 const HTMLElement = window.HTMLElement;
 
@@ -714,19 +714,22 @@ const generateGetterSetters = (context, props) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
         const sanitization = propInfo[1].sanitization;
-        context[prop] = (...params) => {
-            if (params.length) {
-                let value = params[0];
-                if (sanitization) {
-                    value = sanitization(context, params[0]);
-                }
-                if (typeChecker && !typeChecker(value)) {
-                    return context[`_${prop}`];
-                }
-                context[`_${prop}`] = value;
-                return context;
-            } return context[`_${prop}`];
-        };
+        const prototype = context.constructor.prototype;
+        if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            context[prop] = (...params) => {
+                if (params.length) {
+                    let value = params[0];
+                    if (sanitization) {
+                        value = sanitization(context, params[0]);
+                    }
+                    if (typeChecker && !typeChecker(value)) {
+                        return context[`_${prop}`];
+                    }
+                    context[`_${prop}`] = value;
+                    return context;
+                } return context[`_${prop}`];
+            };
+        }
     });
 };
 
@@ -1056,30 +1059,19 @@ const filterPropagationModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
     let filteredModel;
     if (schema.length) {
-        if (schema[0].name === ReservedFields.ROW_ID) {
-            // iterate over data and create occurence map
-            const occMap = {};
-            data.forEach((val) => {
-                occMap[val[0]] = true;
-            });
-            filteredModel = model.select((fields, rIdx) => occMap[rIdx], {
-                saveChild: false
-            });
-        } else {
-            const fieldMap = model.getFieldsConfig();
-            filteredModel = model.select((fields) => {
-                const include = data.some(row => schema.every((propField, idx) => {
-                    if (!measures && (!(propField.name in fieldMap) ||
+        const fieldMap = model.getFieldsConfig();
+        filteredModel = model.select((fields) => {
+            const include = data.some(row => schema.every((propField, idx) => {
+                if (!measures && (!(propField.name in fieldMap) ||
                         fieldMap[propField.name].def.type === FieldType.MEASURE)) {
-                        return true;
-                    }
-                    return row[idx] === fields[propField.name].valueOf();
-                }));
-                return include;
-            }, {
-                saveChild: false
-            });
-        }
+                    return true;
+                }
+                return row[idx] === fields[propField.name].valueOf();
+            }));
+            return include;
+        }, {
+            saveChild: false
+        });
     } else {
         filteredModel = propModel;
     }
@@ -1096,15 +1088,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
         const len = fields.length;
         for (let i = 0; i < len; i++) {
             const field = fields[i];
-            let fieldObj;
-            if (field === ReservedFields.ROW_ID) {
-                fieldObj = {
-                    name: field,
-                    type: FieldType.DIMENSION
-                };
-            } else {
-                fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
-            }
+            const fieldObj = fieldMap[field] && Object.assign({}, fieldMap[field].def);
             if (fieldObj) {
                 schema.push(Object.assign(fieldObj));
             }
@@ -1166,22 +1150,16 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
         const fieldsConfig = dataModel.getFieldsConfig();
-        const rowId = ReservedFields.ROW_ID;
 
         const dataArr = identifiers.slice(1, identifiers.length);
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
         } else if (identifiers instanceof Array && identifiers[0].length) {
-            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === rowId);
-            filteredDataModel = dataModel.select((fields, i) => {
+            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig);
+            filteredDataModel = dataModel.select((fields) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    let value;
-                    if (propField === rowId) {
-                        value = i;
-                    } else {
-                        value = fields[propField].valueOf();
-                    }
+                    const value = fields[propField].valueOf();
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });

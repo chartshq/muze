@@ -65,7 +65,7 @@ import './styles.scss';
             width = gradientDimension;
         }
         const enterFn = function (el) {
-            selectionBoxDrag(firebolt)(el.node(), ['brush']);
+            selectionBoxDrag(firebolt)(el, ['brush']);
         };
         const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,
             { enter: enterFn });

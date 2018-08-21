@@ -54,7 +54,6 @@ export const setupChangeListeners = (context) => {
             };
             // Create the encoders for the group
             const encoders = {};
-
             encoders.retinalEncoder = new RetinalEncoder();
             encoders.simpleEncoder = getEncoder(layers[1]);
 
@@ -64,21 +63,22 @@ export const setupChangeListeners = (context) => {
             // Get sanitized fields as instances of the Vars Class
             const fields = encoders.simpleEncoder.fieldSanitizer(datamodel, matrixConfig);
             encoders.simpleEncoder.setAxisAndHeaders(config[1] ? config[1].axisFrom : {}, fields);
-
             // Setting layers for the code
             layers[1] && resolver.layerConfig(layers[1]);
             // Set the row and column axes
             resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
             // Getting the placeholders
             const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
+            context._groupedModel = placeholderInfo.dataModels.groupedModel;
             // Set the selection object
             context.selection(placeholderInfo.selection);
 
             // Create retinal axes
-            resolver.createRetinalAxes(datamodel, retinalConfig, encoders);
+            resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
+                encoders);
 
             // Domains are evaluated for each of the axes for commonality
-            resolver.setDomains(matrixConfig, datamodel, encoders);
+            resolver.setDomains(matrixConfig, placeholderInfo.dataModels, encoders);
 
             // Create matrix instances
             setMatrixInstances(context, placeholderInfo);

@@ -12,7 +12,7 @@ export default class SpawnableSideEffect extends GenericSideEffect {
             this._drawingContext = drawingContext[0];
             return this;
         }
-        return this._drawingContext;
+        return this._drawingContext();
     }
 
     show () {

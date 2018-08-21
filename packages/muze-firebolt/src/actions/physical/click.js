@@ -1,4 +1,4 @@
-import { selectElement, getEvent } from 'muze-utils';
+import { getEvent } from 'muze-utils';
 import { generatePayloadFromEvent } from './helpers';
 
 /**
@@ -15,6 +15,6 @@ import { generatePayloadFromEvent } from './helpers';
         event.stopPropagation();
     };
 
-    selectElement(targetEl).on('click', dispatchBehaviour);
+    targetEl.on('click', dispatchBehaviour);
 };
 export default click;

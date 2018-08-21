@@ -1,6 +1,5 @@
 import { GridLayout } from '@chartshq/layout';
-import { sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
-import { transactor, Store, getUniqueId, CommonProps, isEqual } from 'muze-utils';
+import { transactor, Store, getUniqueId, isEqual } from 'muze-utils';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, RETINAL, DETAIL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout } from './layout-maker';
@@ -8,7 +7,6 @@ import { localOptions, canvasOptions } from './local-options';
 import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { resolveInteractionPolicy, mergeInteractionPolicy } from './interaction-resolver';
 import { initCanvas, dispatchProps } from './helper';
 
 /**
@@ -40,14 +38,9 @@ export default class Canvas extends TransactionSupport {
             this._renderedResolve = resolve;
         });
         this._layout = new GridLayout();
-        this._throwback = new Store({
-            [CommonProps.ACTION_INF]: null
-        });
         this._store = new Store({});
 
-        this.firebolt(new GroupFireBolt(this, {
-            behavioural: behaviouralActions
-        }, sideEffects, behaviourEffectMap));
+        this.firebolt(new GroupFireBolt(this));
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const [, store] = transactor(this, options, this._store.model);
@@ -91,6 +84,7 @@ export default class Canvas extends TransactionSupport {
     done () {
         return this._renderedPromise;
     }
+
     /**
      *
      *
@@ -294,8 +288,6 @@ export default class Canvas extends TransactionSupport {
     render () {
         const mount = this.mount();
         const lifeCycleManager = this.dependencies().lifeCycleManager;
-        const resolvePolicy = this.resolve();
-        const firebolt = this.firebolt();
         // Get render details including arrangement and measurement
         const { components, layoutConfig, measurement } = getRenderDetails(this, mount);
 
@@ -306,9 +298,6 @@ export default class Canvas extends TransactionSupport {
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle
         lifeCycleManager.notify({ client: this, action: 'drawn' });
-        firebolt.initializeSideEffects();
-        resolveInteractionPolicy(this, mergeInteractionPolicy(resolvePolicy || {}));
-        firebolt.throwback(this._throwback);
         const promises = [];
         this.getValueMatrix().each((el) => {
             promises.push(el.valueOf().done());

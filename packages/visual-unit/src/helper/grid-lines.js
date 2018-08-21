@@ -1,8 +1,8 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
-import DataModel from 'datamodel';
 import { layerFactory } from '@chartshq/visual-layer';
 import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS } from '../enums/constants';
+import { TIMEDIFFS } from '../enums/reactive-props';
 
 const LINEAR = ScaleType.LINEAR;
 
@@ -51,7 +51,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
                 }
                 return className;
             },
-            padY: type === 'band' ? 0 : undefined,
+            [`pad${orientation.toUpperCase()}`]: type === 'band' ? 0 : undefined,
             encoding
         },
         axes: {
@@ -72,53 +72,52 @@ export const getGridLayerDefinitions = (context, config, type) => ['x', 'y'].map
     const show = defaultValue(config[axisType] && config[axisType].show,
         getDefaultVisibilty(config.show, context.axes()[axisType][0]));
 
-    return show && getLayerDefinition(context, context.axes(), type, axisType);
+    return show ? getLayerDefinition(context, context.axes(), type, axisType) : undefined;
 }).filter(d => d !== undefined);
 
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
-    let xticks = axes.x[0].getTickValues();
-    let yticks = axes.y[0].getTickValues();
-    const xSubType = getObjProp(fieldsConfig, getObjProp(fields, 'x', 0).getMembers()[0], 'def', 'subtype');
-    const ySubType = getObjProp(fieldsConfig, getObjProp(fields, 'y', 0).getMembers()[0], 'def', 'subtype');
-    const jsonData = [];
-    const schema = [
-        {
-            name: 'yvalue',
-            type: 'measure'
-        }, {
-            name: 'xvalue',
-            type: 'measure'
-        },
-        {
-            name: 'yvalue0',
-            type: 'measure'
-        }, {
-            name: 'xvalue0',
-            type: 'measure'
-        }, {
-            name: 'xdim',
-            type: 'dimension',
-            subtype: xSubType
-        }, {
-            name: 'ydim',
-            type: 'dimension',
-            subtype: ySubType
+    const gridData = {};
+    ['x', 'y'].forEach((type) => {
+        let ticks = axes[type][0].getTickValues();
+        const subtype = getObjProp(fieldsConfig, getObjProp(fields, type, 0).getMembers()[0], 'def', 'subtype');
+        const jsonData = [];
+        const schema = [
+            {
+                name: 'yvalue',
+                type: 'measure'
+            }, {
+                name: 'xvalue',
+                type: 'measure'
+            },
+            {
+                name: 'yvalue0',
+                type: 'measure'
+            }, {
+                name: 'xvalue0',
+                type: 'measure'
+            }, {
+                name: 'xdim',
+                type: 'dimension',
+                subtype
+            }, {
+                name: 'ydim',
+                type: 'dimension',
+                subtype
+            }
+        ];
+        const len = Math.max(ticks.length);
+        ticks = subtype === DimensionSubtype.TEMPORAL ? ticks.map(d => d.getTime()) : ticks;
+        for (let i = 0; i < len; i += 1) {
+            jsonData.push({
+                [`${type}value`]: ticks[i],
+                [`${type}value0`]: ticks[i + 1],
+                [`${type}dim`]: ticks[i],
+                [`${type}dim`]: ticks[i]
+            });
         }
-    ];
-    const len = Math.max(yticks.length, xticks.length);
-    xticks = xSubType === DimensionSubtype.TEMPORAL ? xticks.map(d => d.getTime()) : xticks;
-    yticks = ySubType === DimensionSubtype.TEMPORAL ? yticks.map(d => d.getTime()) : yticks;
-    for (let i = 0; i < len; i += 1) {
-        jsonData.push({
-            yvalue: yticks[i],
-            yvalue0: yticks[i + 1],
-            xvalue: xticks[i],
-            xvalue0: xticks[i + 1],
-            xdim: xticks[i],
-            ydim: yticks[i]
-        });
-    }
-    return new DataModel(jsonData, schema);
+        gridData[type] = new DataModel(jsonData, schema);
+    });
+    return gridData;
 };
 
 export const createGridLineLayer = (context, data) => {
@@ -159,7 +158,10 @@ export const createGridLineLayer = (context, data) => {
 
             layer.config(sConf)
                             .measurement(measurement)
-                            .data(data)
+                            .data(axesObj.y ? data.y : data.x)
+                            .dataProps({
+                                timeDiffs: context.store().get(TIMEDIFFS)
+                            })
                             .axes(axesObj);
             instances[i] = layer;
         });

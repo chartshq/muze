@@ -231,6 +231,10 @@ class VisualGroup extends SimpleGroup {
     findUnitById (id) {
         return this.matrixInstance().value.findPlaceHolderById(id);
     }
+
+    getGroupByData () {
+        return this._groupedModel;
+    }
 }
 
 export default VisualGroup;

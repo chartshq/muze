@@ -1,5 +1,4 @@
 import {
-    selectElement,
     getEvent,
     getD3Drag
  } from 'muze-utils';
@@ -21,7 +20,7 @@ import {
     const axisScale = context.axis().source().scale();
     const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
 
-    selectElement(targetEl).call(d3Drag().on('start', () => {
+    targetEl.call(d3Drag().on('start', () => {
         const event = getEvent();
         startPos = {
             x: event.x,

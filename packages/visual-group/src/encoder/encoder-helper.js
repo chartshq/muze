@@ -159,12 +159,12 @@ export const getDefaultMark = (colFieldType, rowFieldType) => {
  * @return
  */
 export const createRetinalAxis = (axesCreators, fieldProps = {}) => {
-    const { axisType, datamodel } = axesCreators;
+    const { axisType, fieldsConfig } = axesCreators;
     const field = fieldProps.field;
     const axis = [];
     const Cls = scaleMaps[axisType];
 
-    fieldProps.type = fieldProps.type ? fieldProps.type : getAxisType(datamodel, field || null);
+    fieldProps.type = fieldProps.type ? fieldProps.type : getAxisType(fieldsConfig, field || null);
     axis.push(new Cls(fieldProps));
     return axis;
 };

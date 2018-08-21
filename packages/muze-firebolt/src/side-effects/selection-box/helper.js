@@ -1,6 +1,6 @@
 import { selectElement } from 'muze-utils';
 
-export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
+export const getBoxDimensionsFromPayload = (payload, axes, axisFields) => {
     let x1;
     let x2;
     let y1;
@@ -9,8 +9,6 @@ export const getBoxDimensionsFromPayload = (payload, sourceInf) => {
     let yRange;
     let direction;
     const criteria = payload.criteria;
-    const axes = sourceInf.axes;
-    const axisFields = sourceInf.fields;
     const dimensions = payload.dimensions || {};
     const xDim = dimensions.x;
     const yDim = dimensions.y;

@@ -102,7 +102,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                             .title((title && title[index] !== null) ? title[index] : fieldName)
                             .fieldName(fieldName)
                             .config(legendConfig)
-                            .metaData(canvas.data().project([fieldName]))
+                            .metaData(canvas.composition().visualGroup.getGroupByData().project([fieldName]))
                             .measurement(legendMeasures)
                             .setLegendMeasures();
 
