@@ -74,13 +74,8 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color({
-                field: 'Horsepower',
-                steps: [100, 200],
-                scheme: 'interpolateBlues',
-                interpolate:false
-            })
-            // .size('Origin')
+            .color('Origin')
+            .size('Origin')
             .data(rootData)
             .layers({
                 'Horsepower':{

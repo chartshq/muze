@@ -52,7 +52,7 @@ export const getLegendShape = (datum, width, height, defaultShape) => {
     if (shape) {
         return shape.size(datum[3] || Math.min(width, height) * Math.PI);
     }
-    return SHAPE_MAP(defaultShape).size(datum[3] || Math.min(width, height) * Math.PI);
+    return SHAPE_MAP(datum[3] ? 'circle' : defaultShape).size(datum[3] || Math.min(width, height) * Math.PI);
 };
 
 /**
