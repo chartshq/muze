@@ -202,6 +202,18 @@ export const getAxisType = (fieldsConfig, field) => {
 /**
  *
  *
+ * @param {*} datamodel
+ * @param {*} fieldName
+ * @return
+ */
+export const retriveDomainFromData = (datamodel, fieldName) => {
+    const field = datamodel.getFieldspace().fields.find(d => d._ref.name === fieldName.toString());
+    return field.domain();
+};
+
+/**
+ *
+ *
  * @memberof MatrixResolver
  */
 export const mutateAxesFromMap = (cacheMaps, axes) => {
