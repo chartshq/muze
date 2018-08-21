@@ -37,12 +37,12 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             const maxVal = data[`${type}0`];
             let min;
             let max;
-            if ((minVal === undefined && maxVal === undefined) || (minVal === null && maxVal === null)) {
+            if (minVal === null || maxVal === null) {
                 return {
-                    enterSpace: null,
-                    enter: null,
-                    pos: null,
-                    space: null
+                    enterSpace: undefined,
+                    enter: undefined,
+                    pos: undefined,
+                    space: undefined
                 };
             } else if (fieldType === FieldType.MEASURE || fieldType === DimensionSubtype.TEMPORAL) {
                 min = Math.min(minVal, maxVal);

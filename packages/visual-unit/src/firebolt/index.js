@@ -1,4 +1,4 @@
-import { FieldType, CommonProps } from 'muze-utils';
+import { FieldType } from 'muze-utils';
 import { Firebolt, SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { registerListeners, getApplicableSideEffects } from './helper';
 import { payloadGenerator } from './payload-generator';
@@ -22,15 +22,11 @@ export default class UnitFireBolt extends Firebolt {
      * @return {VisualUnit} Instance of visual unit.
      */
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
-        let actionInf;
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
         const behaviouralActions = this._actions.behavioural;
         const action = behaviouralActions[behaviour];
-        const context = this.context;
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
-        const throwback = this.throwback();
-        const unitId = context.id();
         const selectionSet = action.dispatch(payload, propagationInfo)();
         const propagationSelectionSet = selectionSet.find(d => !d.sourceSelectionSet);
         this._entryExitSet[behaviour] = propagationSelectionSet;
@@ -46,13 +42,6 @@ export default class UnitFireBolt extends Firebolt {
             this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
         }
 
-        actionInf = throwback.get(CommonProps.ACTION_INF);
-        !actionInf && (actionInf = {});
-        actionInf[behaviour] = {
-            payload,
-            sourceUnit: propagate ? unitId : payload.sourceUnit
-        };
-        throwback.commit(CommonProps.ACTION_INF, actionInf);
         return this;
     }
 
@@ -106,19 +95,8 @@ export default class UnitFireBolt extends Firebolt {
                     const context = this.context;
                     return context.getDrawingContext();
                 });
-                sideEffects[key].sourceInf(() => this.context.getSourceInfo());
-                sideEffects[key].marksFromIdentifiers(identifiers =>
-                    this.context.getPlotPointsFromIdentifiers(identifiers));
             }
         }
-    }
-
-    throwback (...throwback) {
-        if (throwback.length) {
-            this._throwback = throwback[0];
-            return this;
-        }
-        return this._throwback;
     }
 
     remove () {

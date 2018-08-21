@@ -1,5 +1,6 @@
-import { Store, dataSelect } from 'muze-utils';
+import { Store, dataSelect, FieldType } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
+import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
 import {
     DIMENSION,
@@ -189,25 +190,13 @@ export const findInGroup = (variable, allFields) => {
  * @param {*} datamodel
  * @param {*} field
  */
-export const getAxisType = (datamodel, field) => {
+export const getAxisType = (fieldsConfig, field) => {
     let fieldType = ORDINAL;
 
-    if (field && datamodel.getFieldsConfig()[field].def.type !== DIMENSION) {
+    if (field && fieldsConfig[field].def.type !== DIMENSION) {
         fieldType = LINEAR;
     }
     return fieldType;
-};
-
-/**
- *
- *
- * @param {*} datamodel
- * @param {*} fieldName
- * @return
- */
-export const retriveDomainFromData = (datamodel, fieldName) => {
-    const field = datamodel.getFieldspace().fields.find(d => d._ref.name === fieldName.toString());
-    return field.domain();
 };
 
 /**
@@ -439,4 +428,30 @@ export const getBorders = (matrices, encoder) => {
         showValueBorders.right = true;
     }
     return { showRowBorders, showColBorders, showValueBorders };
+};
+
+export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
+    let fields = [];
+    const encodingArr = suppliedLayerConfig.map((conf) => {
+        if (conf.def instanceof Array) {
+            return conf.def.map(def => def.encoding);
+        }
+        return conf.def.encoding || {};
+    });
+    fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
+    fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
+    return fields;
+};
+
+export const extractFields = (facetsAndProjections, layerFields) => {
+    const fields = Object.values(facetsAndProjections).map((arr) => {
+        const flattenArray = [].concat(...arr);
+        return [].concat(...flattenArray.map((field) => {
+            if (field instanceof Variable) {
+                return field.getMembers();
+            }
+            return field;
+        }));
+    });
+    return [].concat(...fields, ...layerFields);
 };

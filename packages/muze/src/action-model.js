@@ -1,9 +1,6 @@
-import * as COMPONENTS from './enums/components';
-
 class ActionModel {
     constructor () {
         this._registrableComponents = [];
-        this._targetComponent = COMPONENTS.ALL;
     }
 
     /**
@@ -72,17 +69,11 @@ class ActionModel {
      */
     mapSideEffects (map) {
         const canvases = this._registrableComponents;
-        const targetComponent = this._targetComponent;
 
         canvases.forEach((canvas) => {
-            if (targetComponent === COMPONENTS.GROUP || targetComponent === COMPONENTS.ALL) {
-                canvas.firebolt().mapSideEffects(map);
-            }
             canvas.once('canvas.updated').then(() => {
-                if (targetComponent === COMPONENTS.UNIT || targetComponent === COMPONENTS.ALL) {
-                    const matrix = canvas.getMatrixInstance('value');
-                    matrix.each(cell => cell.valueOf().firebolt().mapSideEffects(map));
-                }
+                const matrix = canvas.getMatrixInstance('value');
+                matrix.each(cell => cell.valueOf().firebolt().mapSideEffects(map));
             });
         });
         return this;
@@ -100,11 +91,6 @@ class ActionModel {
         return this;
     }
 
-    target (componentName) {
-        this._targetComponent = componentName;
-        return this;
-    }
-
     /**
      *
      *
@@ -114,18 +100,12 @@ class ActionModel {
      */
     registerSideEffects (...sideEffects) {
         const registrableComponents = this._registrableComponents;
-        const targetComponent = this._targetComponent;
 
         registrableComponents.forEach((canvas) => {
-            if (targetComponent === COMPONENTS.GROUP || targetComponent === COMPONENTS.ALL) {
-                canvas.firebolt().registerSideEffects(sideEffects);
-            }
-            if (targetComponent === COMPONENTS.UNIT || targetComponent === COMPONENTS.ALL) {
-                canvas.once('canvas.updated').then((args) => {
-                    const matrix = args.client.getMatrixInstance('value');
-                    matrix.each(cell => cell.valueOf().firebolt().registerSideEffects(sideEffects));
-                });
-            }
+            canvas.once('canvas.updated').then((args) => {
+                const matrix = args.client.getMatrixInstance('value');
+                matrix.each(cell => cell.valueOf().firebolt().registerSideEffects(sideEffects));
+            });
         });
 
         return this;

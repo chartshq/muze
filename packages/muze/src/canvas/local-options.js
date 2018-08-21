@@ -11,8 +11,7 @@ import {
     MOUNT,
     LEGEND,
     TITLE,
-    SUB_TITLE,
-    RESOLVE
+    SUB_TITLE
 } from '../constants';
 import { LEGEND_CONFIG, TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
 /**
@@ -168,9 +167,5 @@ export const canvasOptions = {
                 return mergeRecursive(defConfig, legend);
             }
         }
-    },
-
-    [RESOLVE]: {
-        value: null
     }
 };

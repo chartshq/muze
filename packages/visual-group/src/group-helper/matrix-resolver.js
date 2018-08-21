@@ -1,6 +1,10 @@
 import { VisualUnit } from '@chartshq/visual-unit';
 import {
-     initializeCacheMaps, headerCreator, extractUnitConfig, setFacetsAndProjections } from './group-utils';
+     initializeCacheMaps,
+     headerCreator,
+     extractUnitConfig,
+     setFacetsAndProjections
+} from './group-utils';
 import {
      ROW, COL, LEFT, RIGHT, COLOR, SIZE, SHAPE, DETAIL, CELL, X_AXES, Y_AXES, ENTRY_CELLS, EXIT_CELLS, INITIALIZED,
      AXIS, UNIT, BEFORE_UPDATE, UPDATED, VALUE_MATRIX, FACET_HEADERS
@@ -373,18 +377,9 @@ export default class MatrixResolver {
      * @return {Object} Created cell
      * @memberof MatrixResolver
      */
-    valueCellsCreator (GeomCell, valueCellConfig, encoder, newCacheMap) {
+    valueCellsCreator (context) {
         // reset matrix layers
         this.matrixLayers([]);
-
-        const context = {
-            config: valueCellConfig,
-            suppliedLayers: encoder.serializeLayerConfig(this.layerConfig()),
-            resolver: this,
-            cell: GeomCell,
-            encoder,
-            newCacheMap
-        };
 
         return (datamodel, fieldInfo, facets) => createValueCells(context, datamodel, fieldInfo, facets);
     }
@@ -487,21 +482,24 @@ export default class MatrixResolver {
         const {
             color,
             shape,
-            size
+            size,
+            globalConfig
         } = config;
+        const groupBy = globalConfig.groupBy;
         const {
             rowFacets,
             colFacets
         } = this.getAllFields();
+        const encoding = {
+            color,
+            shape,
+            size
+        };
         const facetFields = [...rowFacets.map(e => e.toString()), ...colFacets.map(e => e.toString())];
         const retContext = {
-            datamodel: encoders.simpleEncoder.datamodelForEncoder(datamodel, config, facetFields),
+            domains: encoders.simpleEncoder.getRetinalFieldsDomain(datamodel, encoding, facetFields, groupBy),
             axes: this.axes(),
-            encoding: {
-                color,
-                shape,
-                size
-            }
+            encoding
         };
         encoders.retinalEncoder.setCommonDomain(retContext);
         return this;
@@ -545,12 +543,11 @@ export default class MatrixResolver {
      * @param {*} config
      * @memberof MatrixResolver
      */
-    createRetinalAxes (datamodel, config, encoders) {
+    createRetinalAxes (fieldsConfig, config, encoders) {
         const layerConfig = this.layerConfig();
         this.optionalProjections(config, layerConfig);
-
         const retinalAxes = encoders.retinalEncoder.createAxis({
-            datamodel,
+            fieldsConfig,
             config,
             axes: this.axes()
         });

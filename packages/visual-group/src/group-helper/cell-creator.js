@@ -1,7 +1,14 @@
 import { AxisOrientation } from '@chartshq/muze-axis';
-import { getObjProp } from 'muze-utils';
+import { getObjProp, FieldType } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
-import { getCellKey, isDistributionEqual, mutateAxesFromMap, createSelection } from './group-utils';
+import {
+    getCellKey,
+    isDistributionEqual,
+    mutateAxesFromMap,
+    createSelection,
+    getFieldsFromSuppliedLayers,
+    extractFields
+} from './group-utils';
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP, BOTTOM, PRIMARY, SECONDARY, X, Y } from '../enums/constants';
 
 /**
@@ -437,6 +444,7 @@ export const computeMatrices = (context, config) => {
             selection,
             transform
         } = config;
+    const groupBy = globalConfig.groupBy;
     const { smartlabel: labelManager } = resolver.dependencies();
     const fieldMap = datamodel.getFieldsConfig();
     const layerConfig = resolver.layerConfig();
@@ -484,10 +492,30 @@ export const computeMatrices = (context, config) => {
     };
 
     resolver.cacheMaps(newCacheMap);
-    // return a callbac function to create the cells from the matrix
-    const cellCreator = resolver.valueCellsCreator(cells.GeomCell, globalConfig, encoders.simpleEncoder);
+
+    const valueCellContext = {
+        config: globalConfig,
+        suppliedLayers: encoders.simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+        resolver,
+        cell: cells.GeomCell,
+        encoder: encoders.simpleEncoder,
+        newCacheMap
+    };
+    const fieldsConfig = datamodel.getFieldsConfig();
+    let groupedModel = datamodel;
+    if (!groupBy.disabled) {
+        const fields = getFieldsFromSuppliedLayers(valueCellContext.suppliedLayers,
+            datamodel.getFieldsConfig());
+        const allFields = extractFields(facetsAndProjections, fields).filter(field =>
+            fieldsConfig[field].def.type === FieldType.DIMENSION);
+        const aggregationFns = encoders.simpleEncoder.getAggregationFns(groupBy.measures);
+        groupedModel = datamodel.groupBy(allFields, aggregationFns);
+    }
+
+    // return a callback function to create the cells from the matrix
+    const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
-    const valueMatrixInfo = getMatrixModel(datamodel, facetsAndProjections, cellCreator);
+    const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator);
 
     resolver.cacheMaps().exitCellMap.forEach((placeholder) => {
         placeholder.remove();
@@ -519,6 +547,10 @@ export const computeMatrices = (context, config) => {
         values: resolver.valueMatrix(),
         isColumnSizeEqual,
         isRowSizeEqual,
-        selection: selectionObj
+        selection: selectionObj,
+        dataModels: {
+            groupedModel,
+            parentModel: datamodel
+        }
     };
 };

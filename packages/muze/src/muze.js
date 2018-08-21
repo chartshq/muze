@@ -3,7 +3,15 @@
  * Please read the usage.md file for usage informaiton.
  */
 import Smartlabel from 'fusioncharts-smartlabel';
-import { transactor, enableChainedTransaction, LifeCycleManager, DataModel } from 'muze-utils';
+import {
+    transactor,
+    enableChainedTransaction,
+    LifeCycleManager,
+    DataModel,
+    makeElement,
+    getClientPoint,
+    getEvent
+} from 'muze-utils';
 import { SurrogateSideEffect, SpawnableSideEffect, sideEffects } from '@chartshq/muze-firebolt';
 import { layerFactory } from '@chartshq/visual-layer';
 import pkg from '../package.json';
@@ -114,5 +122,10 @@ muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
 muze.operators = operators;
+muze.utils = {
+    getClientPoint,
+    getEvent,
+    makeElement
+};
 
 export default muze;

@@ -50,6 +50,9 @@ export const DEFAULT_CONFIG = {
         width: 2,
         collapse: true,
         spacing: 0
+    },
+    groupBy: {
+        disabled: false
     }
 };
 

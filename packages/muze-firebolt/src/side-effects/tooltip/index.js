@@ -25,7 +25,7 @@ export default class Tooltip extends SpawnableSideEffect {
         let totalHeight = 0;
         let totalWidth = 0;
         const dataModel = selectionSet.mergedEnter.model;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         if (payload.criteria && dataModel && dataModel.isEmpty()) {
             return this;
         }
@@ -43,8 +43,9 @@ export default class Tooltip extends SpawnableSideEffect {
         const showInPosition = payload.showInPosition;
         const pad = config.padding;
         const dataModels = [];
-        const plotDimensions = this.marksFromIdentifiers()(payload.criteria);
-        const sourceInf = this.sourceInf()();
+        const context = this.firebolt.context;
+        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.criteria);
+        const sourceInf = context.getSourceInfo();
         const fields = sourceInf.fields;
         const xField = `${fields.x[0]}`;
         const fieldsConfig = dataModel.getFieldsConfig();
@@ -84,8 +85,8 @@ export default class Tooltip extends SpawnableSideEffect {
                 tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
             } else if (plotDim) {
                 tooltipInst.positionRelativeTo({
-                    x: plotDim.x + drawingInf.xOffset,
-                    y: plotDim.y + drawingInf.yOffset,
+                    x: plotDim.x,
+                    y: plotDim.y,
                     width: plotDim.width || 0,
                     height: plotDim.height || 0
                 }, {

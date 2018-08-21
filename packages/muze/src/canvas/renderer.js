@@ -1,5 +1,4 @@
 import { makeElement, selectElement } from 'muze-utils';
-import { SideEffectContainer } from '../enums/class-names';
 import { VERTICAL, HORIZONTAL, TOP, LEFT, RIGHT, BOTTOM } from '../constants';
 
 /**
@@ -231,31 +230,6 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     };
 };
 
-const createSideEffectContainer = (context) => {
-    const layout = context.layout();
-    const mountPoint = layout.mountPoint();
-    const layoutDimensions = layout.getViewInformation().layoutDimensions;
-    const [topSpace, centerHeight] = layoutDimensions.viewHeight;
-    const [leftSpace, centerWidth] = layoutDimensions.viewWidth;
-    const {
-        classPrefix
-    } = context.config();
-    const container = makeElement(mountPoint, 'div', [1], `${classPrefix}-${SideEffectContainer}`);
-
-    container.style('position', 'absolute')
-                    .style(LEFT, `${leftSpace}px`)
-                    .style(TOP, `${topSpace}px`)
-                    .style('width', `${centerWidth}px`)
-                    .style('height', `${centerHeight}px`)
-                    .style('pointer-events', 'none');
-
-    makeElement(container, 'svg', [1], `${classPrefix}-${SideEffectContainer}`)
-                    .style('position', 'absolute')
-                    .attr('width', centerWidth)
-                    .attr('height', centerHeight)
-                    .style('pointer-events', 'none');
-};
-
 /**
  *
  *
@@ -292,6 +266,5 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
 
-    createSideEffectContainer(context);
     shiftHeaders(layoutConfig, padding, measurement);
 };

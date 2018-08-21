@@ -1,6 +1,8 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import { mergeRecursive } from 'muze-utils';
 import { generateAxisFromMap, getDefaultMark, getIndex, getLayerConfFromFields } from './encoder-helper';
+import { retriveDomainFromData } from '../group-helper';
+
 import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
@@ -171,8 +173,19 @@ export default class CartesianEncoder extends VisualEncoder {
      * @return
      * @memberof CartesianEncoder
      */
-    datamodelForEncoder (datamodel) {
-        return datamodel;
+    getRetinalFieldsDomain (dataModels, encoding) {
+        const groupedModel = dataModels.groupedModel;
+        const domains = {};
+        Object.entries(encoding).forEach((enc) => {
+            if (enc[1] && enc[1].field) {
+                const field = enc[1].field;
+                if (field && (!field[1] || (field[1] && !field[1].domain))) {
+                    const domain = retriveDomainFromData(groupedModel, field);
+                    domains[field] = domain;
+                }
+            }
+        });
+        return domains;
     }
 
     /**
@@ -255,6 +268,10 @@ export default class CartesianEncoder extends VisualEncoder {
             });
         });
         return layerConfig;
+    }
+
+    getAggregationFns (groupByFns) {
+        return groupByFns;
     }
 }
 
