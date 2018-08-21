@@ -130,13 +130,14 @@ export const prepareLayout = (layout, components, config, measurement) => {
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
+    const visGroup = context.composition().visualGroup;
     const {
         isColumnSizeEqual,
         isRowSizeEqual,
         rows,
         columns,
         values
-    } = context.getPlaceholderDetails();
+    } = visGroup.placeholderInfo();
     const {
         minWidth,
         minHeight,
@@ -177,7 +178,7 @@ export const getRenderDetails = (context, mount) => {
         rows,
         columns,
         values,
-        cornerMatrices: context.getCornerMatrices()
+        cornerMatrices: visGroup.cornerMatrices()
     };
     const measurement = {
         mountSpace: {
@@ -196,7 +197,7 @@ export const getRenderDetails = (context, mount) => {
     layoutConfig = mergeRecursive(layoutConfig, {
         classPrefix,
         showHeaders,
-        border: mergeRecursive(context.getGroupMetaData().border, context.config().border),
+        border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
         legend: legendConfig,
         title: titleConfig,

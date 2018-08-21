@@ -18,7 +18,7 @@ class ActionModel {
 
         canvases.forEach((canvas) => {
             canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.getMatrixInstance('value');
+                const matrix = args.client.composition().visualGroup.matrixInstance().value;
                 matrix.each(cell => cell.valueOf().firebolt().registerPhysicalActions(action));
             });
         });
@@ -37,7 +37,7 @@ class ActionModel {
 
         canvases.forEach((canvas) => {
             canvas.once('canvas.updated').then(() => {
-                const matrix = canvas.getMatrixInstance('value');
+                const matrix = canvas.composition().visualGroup.matrixInstance().value;
                 matrix.each(cell => cell.valueOf().firebolt().registerBehaviouralActions(...actions));
             });
         });
@@ -56,7 +56,7 @@ class ActionModel {
 
         canvases.forEach((canvas) => {
             canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.getMatrixInstance('value');
+                const matrix = args.client.composition().visualGroup.matrixInstance().value;
                 matrix.each(cell => cell.valueOf().firebolt().registerPhysicalBehaviouralMap(map));
             });
         });
@@ -80,7 +80,7 @@ class ActionModel {
             }
             canvas.once('canvas.updated').then(() => {
                 if (targetComponent === COMPONENTS.UNIT || targetComponent === COMPONENTS.ALL) {
-                    const matrix = canvas.getMatrixInstance('value');
+                    const matrix = canvas.composition().visualGroup.matrixInstance().value;
                     matrix.each(cell => cell.valueOf().firebolt().mapSideEffects(map));
                 }
             });
@@ -122,7 +122,7 @@ class ActionModel {
             }
             if (targetComponent === COMPONENTS.UNIT || targetComponent === COMPONENTS.ALL) {
                 canvas.once('canvas.updated').then((args) => {
-                    const matrix = args.client.getMatrixInstance('value');
+                    const matrix = args.client.composition().visualGroup.matrixInstance().value;
                     matrix.each(cell => cell.valueOf().firebolt().registerSideEffects(sideEffects));
                 });
             }

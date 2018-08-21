@@ -26,8 +26,9 @@ export default class GroupFireBolt extends Firebolt {
 
     throwback (throwback) {
         const context = this.context;
-
-        context.getValueMatrix().each((el) => {
+        const visGroup = context.composition().visualGroup;
+        const valueMatrix = visGroup.matrixInstance().value;
+        valueMatrix.each((el) => {
             el.valueOf().firebolt().throwback(throwback);
         });
 
@@ -103,10 +104,11 @@ export default class GroupFireBolt extends Firebolt {
         let vStack = true;
 
         const canvas = this.context;
+        const visGroup = canvas.composition().visualGroup;
         const sideEffectDefinitions = this._sideEffectDefinitions;
         const sideEffects = this._sideEffects;
-        const xFields = canvas.getFieldsFromChannel('x');
-        const yFields = canvas.getFieldsFromChannel('y');
+        const xFields = visGroup.getFieldsFromChannel('x');
+        const yFields = visGroup.getFieldsFromChannel('y');
         if (xFields.length) {
             const xFieldType = xFields[0][xFields[0].length - 1].type();
             vStack = vStack && (xFieldType === FieldType.DIMENSION || xFieldType === DimensionSubtype.TEMPORAL);
