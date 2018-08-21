@@ -33,14 +33,17 @@ $prefix: muze-;
 .#{$prefix}legend-shape {
     cursor: pointer;
     fill-opacity: 0.8;
+    opacity: 0.8;
 }
 
 .#{$prefix}legend-fadeout {
     fill-opacity: 0.3;
+    opacity: 0.3;
 }
 
 .#{$prefix}legend-brighten {
     fill-opacity: 1;
+    opacity: 1;
     // fill: #ff0000;
 }
 .#{$prefix}legend-item-info {
