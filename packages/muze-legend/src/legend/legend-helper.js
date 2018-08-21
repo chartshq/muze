@@ -4,7 +4,6 @@ import {
     SCALE_FUNCTIONS,
     WIDTH,
     HEIGHT,
-    CENTER,
     LEFT,
     RIGHT,
     TOP,
@@ -51,16 +50,16 @@ export const getInterpolatedData = (domain, steps) => {
  * @param {*} measurement
  * @param {*} classPrefix
  */
-export const titleCreator = (container, text, measurement, config) =>
+export const titleCreator = (container, title, measurement, config) =>
                 makeElement(container, 'div', [1], `${config.classPrefix}-legend-title`)
                                 .style(WIDTH, '100%')
                                 .style(HEIGHT, `${measurement.height}px`)
                                 .style('padding-left', `${measurement.padding}px`)
                                 .style('padding-right', `${measurement.padding}px`)
                                 .style('border-bottom-width', `${measurement.border}px`)
-                                .style('text-align', (config.position === LEFT || config.position === RIGHT)
-                                    ? LEFT : CENTER)
-                                .text(text)
+                                .style('text-align', title.orientation instanceof Function ?
+                                        title.orientation(config) : title.orientation)
+                                .text(title.text)
                                 .node();
 
 /**

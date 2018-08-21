@@ -35,8 +35,11 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     encoding: {
                         x: encodingFieldsInf.xField,
                         y: encodingFieldsInf.yField,
-                        color: encodingFieldsInf.colorField,
+                        color: {
+                            field: encodingFieldsInf.colorField
+                        },
                         size: {
+                            field: encodingFieldsInf.sizeField,
                             value: this.defaultSizeValue()
                         }
                     },

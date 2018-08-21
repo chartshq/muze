@@ -142,16 +142,15 @@ export const getRenderDetails = (context, mount) => {
         minWidth,
         minHeight,
         classPrefix,
-        showHeaders
+        showHeaders,
+        legend
     } = context.config();
-    // Get the legend configuration
-    const legendConfig = context.legend();
     // Get title configuration
     const titleConfig = context.title()[1];
      // Get subtitle configuration
     const subtitleConfig = context.subtitle()[1];
     // Get legend position
-    const legendPosition = legendConfig.position;
+    const legendPosition = legend.position;
     // Arrange components according to config
     const layoutArrangement = arrangeComponents(context);
 
@@ -164,7 +163,7 @@ export const getRenderDetails = (context, mount) => {
     const { headers, headerHeight } = createHeaders(context, availableHeightForCanvas, availableWidthForCanvas);
 
     // Create legends and determine legend space
-    context.legendComponents(createLegend(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas));
+    context._legend = createLegend(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas);
 
     const legendSpace = getLegendSpace(context, availableHeightForCanvas, availableWidthForCanvas);
     const legendWidth = (legendPosition === LEFT || legendPosition === RIGHT) ? legendSpace.width : 0;
@@ -173,7 +172,7 @@ export const getRenderDetails = (context, mount) => {
     // Set components for layouting
     const components = {
         headers,
-        legends: context.legendComponents(),
+        legends: context.legend(),
         canvases: [context],
         rows,
         columns,
@@ -199,7 +198,7 @@ export const getRenderDetails = (context, mount) => {
         showHeaders,
         border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
-        legend: legendConfig,
+        legend,
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,

@@ -30,5 +30,7 @@ export const PROPS = {
     scale: {},
     smartTicks: {},
     store: {},
-    title: {}
+    title: {
+        sanitization: (context, value) => mergeRecursive(context._title || {}, value)
+    }
 };

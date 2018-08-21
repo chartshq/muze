@@ -13,8 +13,8 @@ import '../styles.scss';
 export const getGradientDomain = (data) => {
     if (typeof data[0].value === 'number') {
         return data.reduce((accumulator, currentValue) =>
-    [Math.min(currentValue.value, accumulator[0]), Math.max(currentValue.value, accumulator[1])],
-    [Number.MAX_VALUE, Number.MIN_VALUE]);
+            [Math.min(currentValue.value, accumulator[0]), Math.max(currentValue.value, accumulator[1])],
+                [Number.MAX_VALUE, Number.MIN_VALUE]);
     }
     return data.map(e => e.value);
 };

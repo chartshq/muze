@@ -1,4 +1,9 @@
 import { getSymbol } from 'muze-utils';
+import {
+    CENTER,
+    LEFT,
+    RIGHT
+} from '../enums/constants';
 
 export const ALIGN = {
     HORIZONTAL: 'horizontal',
@@ -15,8 +20,18 @@ export const DEFAULT_MEASUREMENT = {
     border: 1
 };
 
+export const LEGEND_TITLE = {
+    text: '',
+    orientation: (pos) => {
+        if (pos === LEFT || pos === RIGHT) {
+            return LEFT;
+        } return CENTER;
+    }
+};
+
 export const DEFAULT_CONFIG = {
     classPrefix: 'muze',
+
     formatter: {
         bounds: {
             lower: 'less than',

@@ -158,14 +158,5 @@ export const canvasOptions = {
                 return mergeRecursive(defConfig, subtitleConfig);
             }]
         }
-    },
-    [LEGEND]: {
-        value: null,
-        meta: {
-            sanitization: (legend) => {
-                const defConfig = mergeRecursive({}, LEGEND_CONFIG);
-                return mergeRecursive(defConfig, legend);
-            }
-        }
     }
 };

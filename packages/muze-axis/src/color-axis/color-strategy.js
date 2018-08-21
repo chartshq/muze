@@ -65,7 +65,7 @@ const steppedDomain = (domain, steps, range) => {
     let newRange = [];
     if (steps instanceof Array) {
         newSteps = steps.slice().sort();
-        newSteps = [domain[0], ...steps, domain[1]];
+        newSteps = [domain[0], ...steps, domain[1]].sort();
     } else {
         const interpolator = numberInterpolator()(...domain);
         for (let i = 0; i <= steps; i++) {
@@ -166,7 +166,7 @@ const strategies = () => ({
     },
     [`${CONTINOUS}-${CONTINOUS}-${ORDINAL}`]: {
         scale: LINEAR,
-        domainRange: () => normalDomain,
+        domainRange: () => steppedDomain,
         value: () => normalRange
     },
     [`${CONTINOUS}-${DISCRETE}-${ORDINAL}`]: {

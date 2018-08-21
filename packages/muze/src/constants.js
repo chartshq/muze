@@ -41,6 +41,18 @@ export const DEFAULT_CONFIG = {
     interaction: {
         sideEffect: 'individual'
     },
+    legend: {
+        position: 'right',
+        color: {
+            show: true
+        },
+        shape: {
+            show: true
+        },
+        size: {
+            show: true
+        }
+    },
     showHeaders: false,
     minWidth: 300,
     minHeight: 200,

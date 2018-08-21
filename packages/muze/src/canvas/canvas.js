@@ -199,16 +199,14 @@ export default class Canvas extends TransactionSupport {
     /**
      *
      *
-     * @param {*} lifeCycles
-     * @returns
+     * @readonly
      * @memberof Canvas
      */
-    legendComponents (...legComp) {
-        if (legComp.length > 0) {
-            this._legendComponents = legComp[0];
+    legend (...params) {
+        if (params.length) {
             return this;
         }
-        return this._legendComponents;
+        return this._legend;
     }
 
     /**

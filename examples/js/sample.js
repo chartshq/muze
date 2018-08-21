@@ -52,8 +52,8 @@
 				{
 					name: 'Year',
 					type: 'dimension',
-					subtype: 'temporal',
-					format: '%Y-%m-%d'
+					// subtype: 'temporal',
+					// format: '%Y-%m-%d'
 				},
 
 			];
@@ -70,7 +70,13 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('Displacement')
+            .size('Acceleration')
+            .color({
+               field: 'Acceleration',
+               interpolate: true,
+            //    steps: [-10000, -4500, -1500, 2500, 7000],
+         
+            })
             // .size('Origin')
            
             .data(rootData)
@@ -80,6 +86,20 @@
                 border:{
                     width: 2,
                    
+                },
+                legend: {
+                    position: 'right',
+                    size: {
+                        title:{
+                            orientation: 'right'
+                        },
+                        item:{
+                            shape:{
+                                type: 'cross',
+                                height: 40,
+                            }
+                        }
+                    }
                 },
                 axes:{
                         x:{
@@ -93,7 +113,7 @@
                     }
                 }
             })
-            // .legend()
+        
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
 		.mount(document.getElementsByTagName('body')[0]);

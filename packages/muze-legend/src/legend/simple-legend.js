@@ -3,7 +3,8 @@ import {
     selectElement,
     getUniqueId,
     getSmartComputedStyle,
-    generateGetterSetters
+    generateGetterSetters,
+    mergeRecursive
 } from 'muze-utils';
 import { behaviouralActions } from '@chartshq/muze-firebolt';
 import { LegendFireBolt } from '../firebolt/legend-firebolt';
@@ -13,7 +14,7 @@ import * as sideEffects from '../firebolt/side-effects';
 import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
 import { VALUE, PATH } from '../enums/constants';
 import { PROPS } from './props';
-import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG } from './defaults';
+import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
 import { getItemMeasures, titleCreator, computeItemSpaces } from './legend-helper';
 
 /**
@@ -34,13 +35,13 @@ export default class SimpleLegend {
         this._metaData = [];
         this._mount = null;
         this._fieldName = null;
-        this._title = '';
+        this._title = Object.assign({}, LEGEND_TITLE);
         this._metaData = null;
         this._labelManager = dependencies.labelManager;
         this._cells = dependencies.cells;
         this._id = getUniqueId();
         this._measurement = Object.assign({}, this.constructor.defaultMeasurement());
-        this._config = Object.assign({}, this.constructor.defaultConfig());
+        this._config = mergeRecursive({}, this.constructor.defaultConfig());
 
         generateGetterSetters(this, PROPS);
         this._computedStyle = getSmartComputedStyle(selectElement('body'),
@@ -206,7 +207,7 @@ export default class SimpleLegend {
     getTitleSpace () {
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
                                                  `${this.config().classPrefix}-legend-title`));
-        return this._labelManager.getOriSize(this.title() ? this.title() : '');
+        return this._labelManager.getOriSize(this.title().text ? this.title().text : '');
     }
 
     /**
@@ -218,7 +219,6 @@ export default class SimpleLegend {
      */
     renderTitle (container) {
         const { titleSpaces, border, padding } = this.measurement();
-
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
             border,

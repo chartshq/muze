@@ -9,7 +9,7 @@ import {
     createItemSkeleton,
     renderStepItem
 } from './renderer';
-import { STEP, RECT, LEFT, SIZE, UPPER, LOWER } from '../enums/constants';
+import { STEP, RECT, LEFT, RIGHT, SIZE, UPPER, LOWER } from '../enums/constants';
 import '../styles.scss';
 
 /**
@@ -137,8 +137,9 @@ export default class StepLegend extends SimpleLegend {
      */
     render () {
         const firebolt = this.firebolt();
-        const data = this.data();
-        const { classPrefix } = this.config();
+        const { classPrefix, position } = this.config();
+        const data = (position === LEFT || position === RIGHT) ? this.data().reverse() : this.data();
+
         const legendContainer = super.render(this.mount());
 
         // create Legend
