@@ -39,7 +39,8 @@ import {
     interpolate,
     interpolateRgb,
     piecewise,
-    interpolateNumber
+    interpolateNumber,
+    interpolateHslLong
 } from 'd3-interpolate';
 import {
     easeCubic,
@@ -896,6 +897,12 @@ const numberInterpolator = () => interpolateNumber;
  */
 const colorInterpolator = () => interpolateRgb;
 
+/**
+ *
+ *
+ */
+const hslInterpolator = () => interpolateHslLong;
+
 const transformColors = () => ({
     color,
     rgb,
@@ -1434,5 +1441,6 @@ export {
     getObjProp,
     extendsClass,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    hslInterpolator
 };

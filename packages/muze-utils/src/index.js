@@ -77,7 +77,8 @@ export {
     getSymbol,
     Scales,
     Symbols,
-    pathInterpolators
+    pathInterpolators,
+    hslInterpolator
 } from './common-utils';
 
 export {

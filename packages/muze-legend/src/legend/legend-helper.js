@@ -233,7 +233,7 @@ export const getDomainBounds = (type, scaleInfo, domainInfo) => {
         domainLeg,
         steps
     } = domainInfo;
-    const ele = domain[type === 'lower' ? 0 : steps.length - 1];
+    const ele = domain[type === 'lower' ? 0 : domain.length - 1];
     const step = steps[type === 'lower' ? 0 : steps.length - 1];
 
     return {

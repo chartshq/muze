@@ -74,7 +74,13 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            // .color('Origin')
+            .color({
+                field: 'Horsepower',
+                steps: [100, 200],
+                scheme: 'interpolateBlues',
+                interpolate:false
+            })
+            // .size('Origin')
             .data(rootData)
             .layers({
                 'Horsepower':{
@@ -107,18 +113,6 @@
                     }
                 }
             })
-
-        canvas.legend({
-            align:'vertical',
-            // ,
-            item:{
-                text:{
-                    position:'right'
-                }
-            }, 
-            steps: 6
-        })
-    
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
 		.mount(document.getElementsByTagName('body')[0]);

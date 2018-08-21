@@ -123,7 +123,8 @@ export default class ColorAxis {
     getRawColor (domainVal) {
         const scale = this.scale();
         const range = scale.range ? scale.range() : null;
-        const color = this._colorStrategy.range(range)(domainVal, scale, this.domain(), this.uniqueValues());
+        const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
+
         if (typeof color === 'string') {
             const rgbArr = color.substring(4, color.length - 1)
                             .replace(/ /g, '')
@@ -141,12 +142,16 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     updateDomain (domain = []) {
-        const domainFn = this._colorStrategy.domain();
-        const domainInfo = domainFn(domain, this.config().steps);
+        const scale = this.scale();
+        const range = scale.range ? scale.range() : null;
+        const domainRangeFn = this._colorStrategy.domainRange();
+        const scaleInfo = domainRangeFn(domain, this.config().steps, range);
 
-        this.domain(domainInfo.domain);
-        this.uniqueValues(domainInfo.uniqueVals);
-        this.scale().domain(domainInfo.scaleDomain || this.domain());
+        this.domain(scaleInfo.domain);
+        scaleInfo.range && this.scale().range(scaleInfo.range);
+        this.uniqueValues(scaleInfo.uniqueVals);
+        this.scale().domain(scaleInfo.scaleDomain || this.domain());
+
         return this;
     }
 

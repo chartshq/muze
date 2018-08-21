@@ -23,7 +23,7 @@ export const PROPS = {
                     if (typeof e === 'string') {
                         e = e.replace(/ /g, '');
                     }
-                    if (detectColor(e) === 'hsl') {
+                    if (detectColor(e) === 'hsl' || detectColor(e) === 'hsla') {
                         color = e.match(/(\d+(\.\d+)?)/g);
                         color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
                     } else if (detectColor(e) === 'hex') {

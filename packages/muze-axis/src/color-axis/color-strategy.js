@@ -1,6 +1,7 @@
-import { colorInterpolator, piecewiseInterpolator, numberInterpolator } from 'muze-utils';
+import { hslInterpolator, piecewiseInterpolator, numberInterpolator } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
-import { LINEAR, SEQUENTIAL, ORDINAL, THRESHOLD } from '../enums/scale-type';
+import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
+import { getHslString } from './props';
 
 /**
  *
@@ -8,6 +9,22 @@ import { LINEAR, SEQUENTIAL, ORDINAL, THRESHOLD } from '../enums/scale-type';
  * @param {*} domain
  * @returns
  */
+const piecewiseDomain = (domain, steps, range) => {
+    let newRange = [];
+    const uniqueVals = domain;
+    const retDomain = domain.map((d, i) => (i) / (domain.length - 1));
+    const hslValues = range.map(e => getHslString(e));
+    const fn = piecewiseInterpolator()(hslInterpolator(), [...hslValues]);
+    newRange = retDomain.map(e => fn(e));
+    return { domain: retDomain, uniqueVals, scaleDomain: [0, 1], range: newRange };
+};
+
+/**
+*
+*
+* @param {*} domain
+* @returns
+*/
 const indexedDomain = (domain) => {
     const uniqueVals = domain;
     const retDomain = domain.map((d, i) => (i) / (domain.length - 1));
@@ -20,9 +37,9 @@ const indexedDomain = (domain) => {
  * @param {*} domain
  * @returns
  */
-const indexedDomainMeasure = (domain) => {
+const indexedDomainMeasure = (domain, steps, range) => {
     const uniqueVals = domain;
-    return { domain, uniqueVals, scaleDomain: [0, 1] };
+    return { domain, uniqueVals, scaleDomain: [0, 1], range };
 };
 
 /**
@@ -31,9 +48,9 @@ const indexedDomainMeasure = (domain) => {
  * @param {*} domain
  * @returns
  */
-const normalDomain = (domain) => {
+const normalDomain = (domain, steps, range) => {
     const uniqueVals = domain;
-    return { uniqueVals, domain, nice: true };
+    return { uniqueVals, domain, nice: true, range };
 };
 
 /**
@@ -43,38 +60,34 @@ const normalDomain = (domain) => {
  * @param {*} steps
  * @returns
  */
-const steppedDomain = (domain, steps) => {
+const steppedDomain = (domain, steps, range) => {
     let newSteps = [];
+    let newRange = [];
     if (steps instanceof Array) {
         newSteps = steps.slice().sort();
+        newSteps = [domain[0], ...steps, domain[1]];
     } else {
         const interpolator = numberInterpolator()(...domain);
         for (let i = 0; i <= steps; i++) {
             newSteps[i] = interpolator(i / steps);
         }
     }
+
     const uniqueVals = domain;
     if (newSteps[0] < domain[0]) {
         newSteps.shift();
     }
-    const retDomain = newSteps;
-    return { uniqueVals, domain: retDomain, nice: true };
-};
+    const maxRangeLength = Math.min(range.length, 18);
 
-/**
- *
- *
- * @param {*} domainValue
- * @param {*} scale
- * @param {*} domain
- * @param {*} uniqueVals
- * @returns
- */
-const pieceWiseRange = (domainValue, scale, domain, uniqueVals) => {
-    const index = uniqueVals.indexOf(domainValue);
-    const numVal = domain[index];
-    const fn = piecewiseInterpolator()(colorInterpolator(), [...scale.range()]);
-    return fn(numVal);
+    if (newSteps.length - 1 > maxRangeLength) {
+        const rangeCycles = Math.floor((newSteps.length - 1) / maxRangeLength);
+        for (let i = 0; i < rangeCycles; i++) {
+            newRange = [...newRange, ...range];
+        }
+    } else {
+        newRange = range.slice(0, newSteps.length - 1);
+    }
+    return { uniqueVals, domain: newSteps, nice: true, range: newRange };
 };
 
 /**
@@ -122,47 +135,44 @@ const normalRange = (domainValue, scale) => scale(domainValue);
 const strategies = () => ({
     [`${CONTINOUS}-${CONTINOUS}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
-        domain: () => indexedDomainMeasure,
-        range: () => indexedRange
+        domainRange: () => indexedDomainMeasure,
+        value: () => indexedRange
     },
     [`${DISCRETE}-${CONTINOUS}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
-        domain: () => indexedDomain,
-        range: () => uniqueRange
+        domainRange: () => indexedDomain,
+        value: () => uniqueRange
     },
     [`${CONTINOUS}-${DISCRETE}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
-        domain: () => indexedDomainMeasure,
-        range: () => indexedRange
+        domainRange: () => indexedDomainMeasure,
+        value: () => indexedRange
     },
     [`${DISCRETE}-${DISCRETE}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
-        domain: () => indexedDomain,
-        range: () => uniqueRange
+        domainRange: () => indexedDomain,
+        value: () => uniqueRange
     },
     [`${DISCRETE}-${CONTINOUS}-${ORDINAL}`]: {
-        scale: LINEAR,
-        domain: () => indexedDomain,
-        range: (range) => {
-            if (range.length) {
-                return pieceWiseRange;
-            } return indexedRange;
-        }
+        scale: ORDINAL,
+        domainRange: () => piecewiseDomain,
+        value: () => normalRange
+
     },
     [`${DISCRETE}-${DISCRETE}-${ORDINAL}`]: {
         scale: ORDINAL,
-        domain: () => normalDomain,
-        range: () => normalRange
+        domainRange: () => normalDomain,
+        value: () => normalRange
     },
     [`${CONTINOUS}-${CONTINOUS}-${ORDINAL}`]: {
         scale: LINEAR,
-        domain: () => normalDomain,
-        range: () => normalRange
+        domainRange: () => normalDomain,
+        value: () => normalRange
     },
     [`${CONTINOUS}-${DISCRETE}-${ORDINAL}`]: {
-        scale: THRESHOLD,
-        domain: () => steppedDomain,
-        range: () => normalRange
+        scale: QUANTILE,
+        domainRange: () => steppedDomain,
+        value: () => normalRange
 
     }
 });
