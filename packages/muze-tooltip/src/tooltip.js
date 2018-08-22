@@ -136,7 +136,6 @@ export default class Tooltip {
             const arrowDisabled = config.arrow.disabled;
             const arrowWidth = arrowDisabled ? 0 : config.arrow.size;
             const arrowOrient = this._arrowOrientation;
-
             const outsidePlot = arrowOrient === ARROW_LEFT || arrowOrient === ARROW_RIGHT ?
                 (y + node.offsetHeight - arrowWidth) < target.y || y > (target.y + target.height) :
                 (x + node.offsetWidth - arrowWidth) < target.x || x > (target.x + target.width);
@@ -190,6 +189,7 @@ export default class Tooltip {
         let obj;
         let orientation = tooltipConf.orientation;
         this.show();
+
         const extent = this._extent;
         const node = this._tooltipContainer.node();
         const offsetWidth = node.offsetWidth;

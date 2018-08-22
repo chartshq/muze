@@ -87,8 +87,8 @@
 		window.canvas = env.canvas();
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
-		let rows = [[ 'Displacement'], ['Horsepower']],
-			columns = ['Year'];
+		let rows = [[ 'Year','Displacement'], ['Horsepower']],
+			columns = [ 'Cylinders'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
@@ -101,8 +101,8 @@
             //     value: 'red'
             // })
             .data(rootData)
-			.width(900)
-            .height(600)
+			.width(600)
+            .height(350)
             // .size()
             // .layers([{
             //     mark: 'bar',
@@ -115,14 +115,7 @@
             .config({
                 border:{
                     width: 2,
-                    showRowBorders: false,
-                    showColBorders:false,
-                    showValueBorders: {
-                        top: false,
-                        bottom: true,
-                        left: true,
-                        right: false
-                    }
+                  
                 },
                 axes:{
                         x:{
@@ -145,7 +138,11 @@
     
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-		.mount(document.getElementsByTagName('body')[0]);
+        .mount(document.getElementsByTagName('body')[0]);
+        
+        setTimeout(function(){
+        console.log(    canvas.layout().pages('column')) 
+        }, 2000)
 	})
 
 })()

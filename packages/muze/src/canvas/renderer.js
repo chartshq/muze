@@ -253,15 +253,14 @@ export const renderComponents = (context, components, layoutConfig, measurement)
         layout
     } = getSkeletons(context.mount(), layoutConfig, measurement);
     const {
-        mount,
-        container
+        mount
    } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
     const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
     measurement.padding = padding;
     setLabelRotationForAxes(context);
 
     // Render layout
-    context.layout().renderGrid(mount).renderArrows(container);
+    context.layout().renderGrid(mount);
     renderLegend(layoutConfig, legend, legends, measurement);
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
