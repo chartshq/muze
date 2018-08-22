@@ -1,25 +1,54 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
-import { LINEAR, LOG } from '../enums/scale-type';
+import { LINEAR, LOG, POW } from '../enums/scale-type';
+import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import { DOMAIN } from '../enums/constants';
 import {
     getTickLabelInfo,
-    getNumberOfTicks,
-    sanitizeDomain
+    getNumberOfTicks
 } from './helper';
 
-export default class LinearAxis extends SimpleAxis {
+export const interpolatorMap = {
+    [LOG]: LogInterpolator,
+    [POW]: PowInterpolator,
+    [LINEAR]: LinearInterpolator
+};
+
+export default class ContinousAxis extends SimpleAxis {
 
     /**
      *
      *
-     * @param {*} range
      * @returns
-     * @memberof LinearAxis
+     * @memberof SimpleAxis
      */
-    createScale (range) {
-        let scale = super.createScale(range);
+    createScale (config) {
+        const {
+            base,
+            padding,
+            interpolator,
+            exponent
+        } = config;
+        const range = this.range();
+        const InterpolatorCls = interpolatorMap[interpolator];
+
+        this._interpolator = new InterpolatorCls();
+        let scale = this._interpolator.createScale({
+            padding,
+            exponent,
+            base,
+            range
+        });
+        // const scale = createScale({
+        //     padding,
+        //     interpolator,
+        //     exponent,
+        //     base,
+        //     range,
+        //     type: this.constructor.type()
+        // });
+
         scale = scale.nice();
         return scale;
     }
@@ -28,7 +57,7 @@ export default class LinearAxis extends SimpleAxis {
      * This method is used to assign a domain to the axis.
      *
      * @param {Array} domain the domain of the scale
-     * @memberof LinearAxis
+     * @memberof ContinousAxis
      */
     updateDomainBounds (domain) {
         let currentDomain = this.domain();
@@ -39,7 +68,7 @@ export default class LinearAxis extends SimpleAxis {
         if (domain.length) {
             currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
         }
-        currentDomain = sanitizeDomain(currentDomain, this);
+        currentDomain = this._interpolator.sanitizeDomain(currentDomain, this);
 
         return this.domain(currentDomain);
     }
@@ -49,7 +78,7 @@ export default class LinearAxis extends SimpleAxis {
      *
      * @static
      * @returns
-     * @memberof LinearAxis
+     * @memberof ContinousAxis
      */
     static type () {
         return LINEAR;
@@ -59,11 +88,7 @@ export default class LinearAxis extends SimpleAxis {
         if (domainVal === null || domainVal === undefined) {
             return undefined;
         }
-        if (this.config().interpolator === LOG && domainVal <= 0) {
-            return 1;
-        }
-
-        return this.scale()(domainVal) + 0.5;
+        return this._interpolator.getScaleValue(domainVal);
     }
  /**
      *
@@ -243,4 +268,3 @@ export default class LinearAxis extends SimpleAxis {
     }
 
 }
-

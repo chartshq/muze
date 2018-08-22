@@ -27,7 +27,7 @@ const {
     scaleBand,
     scaleTime
 } = scales;
-const scaleMap = {
+export const scaleMap = {
     [ScaleType.LINEAR]: scaleLinear,
     [ScaleType.BAND]: scaleBand,
     [ScaleType.QUANTIZE]: scaleQuantize,
