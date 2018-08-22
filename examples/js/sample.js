@@ -87,21 +87,22 @@
 		window.canvas = env.canvas();
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
-		let rows = [[ 'Actual_Displacement']],
+		let rows = [[ 'Displacement'], ['Horsepower']],
 			columns = ['Year'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color({
-                field: 'Actual_Displacement',
-                // range: ['red', 'blue'],
-                stops: 5,
-                step: true,
-                value: 'red'
-            })
+            .color('Origin')
+            // .color({
+            //     field: 'Displacement',
+            //     // range: ['red', 'blue'],
+            //     stops: 5,
+            //     step: true,
+            //     value: 'red'
+            // })
             .data(rootData)
-			.width(600)
-            .height(350)
+			.width(900)
+            .height(600)
             // .size()
             // .layers([{
             //     mark: 'bar',
@@ -110,7 +111,7 @@
             //         sort: 'none'
             //     }
             // }])
-            // .shape('Origin')
+            // .size('Origin')
             .config({
                 border:{
                     width: 2,

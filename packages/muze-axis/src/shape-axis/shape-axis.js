@@ -19,7 +19,6 @@ export default class ShapeAxis {
     * Creates an instance of SimpleAxis.
     * @param {Object} params input parameters.
     * @param {Object | undefined} params.range Type of color scheme.
-    * @param {string} params.type The type of scale to handle.
     * @memberof ShapeAxis
     */
     constructor (config) {

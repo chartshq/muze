@@ -1,5 +1,4 @@
 import {
-    capitalizeFirst,
     getClosestIndexOf,
     DateTimeFormatter,
     DimensionSubtype,
@@ -89,14 +88,14 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         };
                     }
                     if (associatedMeasures.length > 1) {
-                        values.push([icon, `${capitalizeFirst(key)}`]);
+                        values.push([icon, `${key}`]);
                         associatedMeasures.forEach((measure) => {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
                             formattedValue = defaultTooltipFormatters('measure',
                                 fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
                             values.push([{
-                                value: `${capitalizeFirst(measure)}${separator}`,
+                                value: `${measure}${separator}`,
                                 style: {
                                     'margin-left': `${config.margin}px}`
                                 },
@@ -112,7 +111,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         formattedValue = defaultTooltipFormatters('measure',
                             fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
                         values.push([icon, {
-                            value: `${capitalizeFirst(key)}${separator}`,
+                            value: `${key}${separator}`,
                             className: `${config.classPrefix}-tooltip-key`
                         }, {
                             value: `${formattedValue}`,
@@ -124,7 +123,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                     value = val;
                     formattedValue = formatterFn(value, interval);
                     values.push([{
-                        value: `${capitalizeFirst(key)}${separator}`,
+                        value: `${key}${separator}`,
                         className: `${config.classPrefix}-tooltip-key`
                     }, {
                         value: `${formattedValue}`,
