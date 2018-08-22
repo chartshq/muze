@@ -6,6 +6,8 @@ import {
     generateGetterSetters
 } from 'muze-utils';
 import { behaviouralActions } from '@chartshq/muze-firebolt';
+import * as legendBehaviours from '../firebolt/behavioural';
+
 import { LegendFireBolt } from '../firebolt/legend-firebolt';
 import { actionBehaviourMap } from '../firebolt/action-behaviour-map';
 import { physicalActions } from '../firebolt/physical';
@@ -45,8 +47,9 @@ export default class SimpleLegend {
         generateGetterSetters(this, PROPS);
         this._computedStyle = getSmartComputedStyle(selectElement('body'),
             `${this.config().classPrefix}-legend-item-info`);
+
         this._firebolt = new LegendFireBolt(this, {
-            behavioural: behaviouralActions,
+            behavioural: Object.assign({}, behaviouralActions, legendBehaviours),
             physical: physicalActions,
             physicalBehaviouralMap: actionBehaviourMap
         }, sideEffects, behaviourEffectMap);

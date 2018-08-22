@@ -1,5 +1,8 @@
 import Firebolt from './firebolt';
 import * as behaviouralActions from './actions/behavioural';
+import PersistentBehaviour from './actions/behavioural/persistent';
+import GenericBehaviour from './actions/behavioural/generic';
+import VolatileBehaviour from './actions/behavioural/volatile';
 import { physicalActions } from './actions/physical';
 import * as BEHAVIOURS from './enums/behaviours';
 import * as ACTIONS from './enums/actions';
@@ -13,6 +16,9 @@ import { behaviourEffectMap } from './behaviour-effect-map';
 
 export {
     behaviouralActions,
+    VolatileBehaviour,
+    GenericBehaviour,
+    PersistentBehaviour,
     physicalActions,
     Firebolt,
     BEHAVIOURS,

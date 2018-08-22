@@ -14,7 +14,6 @@ export const propagateValues = (instance, action, config = {}) => {
     const mergedModel = selectionSet.mergedEnter.model;
 
     payload.sourceUnit = sourceId;
-    payload.sourceFacets = context.facetByFields();
     payload.action = action;
     payload.sourceCanvas = context.parentAlias();
 

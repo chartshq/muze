@@ -27,7 +27,8 @@ export default class UnitFireBolt extends Firebolt {
         const action = behaviouralActions[behaviour];
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
-        const selectionSet = action.dispatch(payload, propagationInfo)();
+        this._propagationInf = propagationInfo;
+        const selectionSet = action.dispatch(payload);
         const propagationSelectionSet = selectionSet.find(d => !d.sourceSelectionSet);
         this._entryExitSet[behaviour] = propagationSelectionSet;
 
@@ -102,9 +103,5 @@ export default class UnitFireBolt extends Firebolt {
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
         return this;
-    }
-
-    getEntryExitSet (action) {
-        return this._entryExitSet[action];
     }
 }

@@ -238,6 +238,28 @@ class SelectionSet {
     resetted () {
         return this._resetted;
     }
+
+    /**
+     * Swaps the add set and remove set in the selection set.
+     * @return {SelectionSet} Instance of selection set.
+     */
+    toggle () {
+        const set = this._set;
+
+        for (const key in set) {
+            if (set[key] === SELECTION_NEW_ENTRY) {
+                set[key] = SELECTION_NEW_EXIT;
+            } else if (set[key] === SELECTION_NEW_EXIT) {
+                set[key] = SELECTION_NEW_ENTRY;
+            } else if (set[key] === SELECTION_OLD_ENTRY) {
+                set[key] = SELECTION_OLD_EXIT;
+            } else {
+                set[key] = SELECTION_OLD_ENTRY;
+            }
+        }
+
+        return this;
+    }
 }
 
 export default SelectionSet;

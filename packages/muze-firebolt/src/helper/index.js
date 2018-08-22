@@ -48,41 +48,6 @@ export const changeSideEffectAvailability = (sideEffects, fn, toEnable) => {
 
 export const getMergedSet = set => [...new Set([...set[0], ...set[1]])];
 
-export const setSelectionSets = (addSet, selectionSet, persistent) => {
-    if (addSet === null) {
-        selectionSet.reset();
-    } else if (addSet.length) {
-            // new add set
-        const existingAddSet = addSet.filter(d => selectionSet._set[d] === SELECTION.SELECTION_NEW_ENTRY
-                || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
-
-        // existing add set
-        if (persistent) {
-            if (existingAddSet.length) {
-                selectionSet.updateExit();
-                selectionSet.remove(existingAddSet);
-            } else {
-                selectionSet.updateEntry();
-                selectionSet.add(addSet);
-            }
-            const { exitSet } = selectionSet.getSets();
-            const mergedExitSet = getMergedSet(exitSet);
-            const completeSetCount = selectionSet.getCompleteSet().length;
-            if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
-                selectionSet.reset();
-            }
-        } else {
-            selectionSet.updateExit();
-            const { entrySet } = selectionSet.getSets();
-            selectionSet.reset(getMergedSet(entrySet));
-            selectionSet.add(addSet);
-            selectionSet.update(existingAddSet);
-        }
-    } else {
-        selectionSet.remove(selectionSet.getCompleteSet());
-    }
-};
-
 export const getSourceFields = (propagationInf, criteria = {}) => {
     const sourceIdentifiers = propagationInf.sourceIdentifiers;
     let sourceFields;

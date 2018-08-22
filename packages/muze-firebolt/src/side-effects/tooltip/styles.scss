@@ -1,0 +1,8 @@
+@import '../../prefix.scss';
+.#{$prefix}tooltip-content-container {
+    border-bottom: 1px solid black;
+}
+
+.#{$prefix}tooltip-content-parent-container :last-child {
+    border-bottom: none;
+}
