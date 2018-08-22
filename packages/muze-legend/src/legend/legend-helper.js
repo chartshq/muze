@@ -19,7 +19,7 @@ import {
 export const getScaleInfo = (scale) => {
     const scaleType = scale.constructor.type();
     const domain = scale.uniqueValues();
-    const steps = scale.config().steps;
+    const steps = scale.config().stops || 1;
     const scaleFn = SCALE_FUNCTIONS[scaleType];
 
     return { scaleType, domain, steps, scaleFn };

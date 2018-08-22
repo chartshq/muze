@@ -44,7 +44,6 @@ export const defaultConfig = {
             value: 0.5
         }
     },
-    scaleFactor: 100,
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],
     sizes: [20, 30, 40, 50, 60, 70]
 };

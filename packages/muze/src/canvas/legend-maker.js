@@ -23,12 +23,11 @@ export const legendDataCreator = (canvas) => {
         if (scaleProps && scaleProps.field) {
             const {
                 type,
-                interpolate
+                step
             } = scale.config();
             LegendCls = LEGEND_TYPE_MAP[DISCRETE];
-
             if (type === LINEAR && scaleType === COLOR) {
-                if (interpolate) {
+                if (!step) {
                     LegendCls = LEGEND_TYPE_MAP[GRADIENT];
                 } else {
                     LegendCls = LEGEND_TYPE_MAP[STEP_COLOR];

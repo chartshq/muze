@@ -3,39 +3,39 @@ import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
 
-const getSteps = (domain, steps) => {
-    let newSteps = [];
+const getStops = (domain, stops) => {
+    let newStops = [];
 
-    if (steps instanceof Array) {
-        newSteps = steps.slice().sort();
-        newSteps = [...new Set([domain[0], ...steps, domain[1]])].sort();
+    if (stops instanceof Array) {
+        newStops = stops.slice().sort();
+        newStops = [...new Set([domain[0], ...stops, domain[1]])].sort();
     } else {
         const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i <= steps; i++) {
-            newSteps[i] = interpolator(i / steps);
+        for (let i = 0; i <= stops; i++) {
+            newStops[i] = interpolator(i / stops);
         }
     }
 
-    if (newSteps[0] < domain[0]) {
-        newSteps.shift();
+    if (newStops[0] < domain[0]) {
+        newStops.shift();
     }
-    return { domain, newSteps };
+    return { domain, newStops };
 };
 
-const rangeSteps = (newSteps, range) => {
+const rangeStops = (newStopsLength, range) => {
     let newRange = [];
     const maxRangeLength = Math.min(range.length, 18);
 
-    if (newSteps.length > maxRangeLength) {
-        const rangeCycles = Math.floor((newSteps.length) / maxRangeLength);
+    if (newStopsLength > maxRangeLength) {
+        const rangeCycles = Math.floor((newStopsLength) / maxRangeLength);
         for (let i = 0; i < rangeCycles; i++) {
             newRange = [...newRange, ...range];
         }
-        newRange = [...newRange, ...range.slice(0, (newSteps.length) % maxRangeLength)];
+        newRange = [...newRange, ...range.slice(0, (newStopsLength) % maxRangeLength)];
     } else {
-        newRange = range.slice(0, newSteps.length);
+        newRange = range.slice(0, newStopsLength);
     }
-    return { range: newRange };
+    return { newRange };
 };
 
 /**
@@ -44,7 +44,7 @@ const rangeSteps = (newSteps, range) => {
  * @param {*} domain
  * @returns
  */
-const piecewiseDomain = (domain, steps, range) => {
+const piecewiseDomain = (domain, stops, range) => {
     let newRange = [];
     const uniqueVals = domain;
     const retDomain = domain.map((d, i) => (i) / (domain.length - 1));
@@ -72,7 +72,7 @@ const indexedDomain = (domain) => {
  * @param {*} domain
  * @returns
  */
-const indexedDomainMeasure = (domain, steps, range) => {
+const indexedDomainMeasure = (domain, stops, range) => {
     const uniqueVals = domain;
     return { domain, uniqueVals, scaleDomain: [0, 1], range };
 };
@@ -83,7 +83,7 @@ const indexedDomainMeasure = (domain, steps, range) => {
  * @param {*} domain
  * @returns
  */
-const normalDomain = (domain, steps, range) => {
+const normalDomain = (domain, stops, range) => {
     const uniqueVals = domain;
     return { uniqueVals, domain, nice: true, range };
 };
@@ -92,21 +92,22 @@ const normalDomain = (domain, steps, range) => {
  *
  *
  * @param {*} domain
- * @param {*} steps
+ * @param {*} stops
  * @returns
  */
-const steppedDomain = (domain, steps, range) => {
-    const { domain: uniqueVals, newSteps } = getSteps(domain, steps);
-    const { newRange } = rangeSteps(newSteps.length - 1, range);
+const steppedDomain = (domain, stops, range) => {
+    const { domain: uniqueVals, newStops } = getStops(domain, stops);
+    const { newRange } = rangeStops(newStops.length - 1, range);
 
-    return { uniqueVals, domain: newSteps, nice: true, range: newRange };
+    return { uniqueVals, domain: newStops, nice: true, range: newRange };
 };
 
-const continousSteppedDomain = (domain, steps, range) => {
-    const { domain: uniqueVals, newSteps } = getSteps(domain, steps);
-    const { newRange } = rangeSteps(newSteps.length, range);
+const continousSteppedDomain = (domain, stops, range) => {
+    const { domain: uniqueVals, newStops } = getStops(domain, stops);
 
-    return { uniqueVals, domain: newSteps, nice: true, range: newRange };
+    const { newRange } = rangeStops(newStops.length, range);
+
+    return { uniqueVals, domain: newStops, nice: true, range: newRange };
 };
 
 /**
@@ -149,7 +150,7 @@ const normalRange = (domainValue, scale) => scale(domainValue);
 /**
  *
  *
- * @param {*} steps
+ * @param {*} stops
  */
 const strategies = () => ({
     [`${CONTINOUS}-${CONTINOUS}-${SEQUENTIAL}`]: {
@@ -202,7 +203,7 @@ const strategies = () => ({
  * @param {*} domainType
  * @param {*} rangeType
  * @param {*} schemeType
- * @param {*} steps
+ * @param {*} stops
  */
-export const strategyGetter = (domainType, rangeType, schemeType, steps) =>
-     strategies(steps)[`${domainType}-${rangeType}-${schemeType || ''}`];
+export const strategyGetter = (domainType, rangeType, schemeType, stops) =>
+     strategies(stops)[`${domainType}-${rangeType}-${schemeType || ''}`];

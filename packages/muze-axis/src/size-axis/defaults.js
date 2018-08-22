@@ -1,8 +1,5 @@
 export const DEFAULT_CONFIG = {
-    interpolate: false,
-    value: 64,
+    value: 36,
     type: 'ordinal',
-    range: [50, 1000],
-    scaleFactor: 1,
-    intervals: 5
+    range: [36, 1000]
 };

@@ -223,7 +223,6 @@ export const getNormalizedData = (transformedData, fieldsConfig, encodingFieldIn
                 let y0;
                 let x;
                 let x0;
-                debugger;
                 if (d[1] >= d[0]) {
                     y = x0 = d[1];
                     x = y0 = d[0];

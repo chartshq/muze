@@ -14,8 +14,9 @@ export const palette = [
 ];
 
 export const DEFAULT_CONFIG = {
-    scheme: palette,
-    steps: 5,
-    interpolate: false,
+    range: palette,
+    value: palette[0],
+    step: false,
+    stops: 5,
     type: LINEAR
 };

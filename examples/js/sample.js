@@ -58,10 +58,10 @@
 			];
 		let rootData = new DataModel(jsonData, schema);
 
-		rootData = rootData.groupBy(['Year', 'Maker'], {
-			Horsepower: 'mean',
-			Displacement: 'mean'
-        });
+		// rootData = rootData.groupBy(['Year', 'Maker'], {
+		// 	Horsepower: 'mean',
+		// 	Displacement: 'mean'
+        // });
         rootData = rootData.calculateVariable(
             {
                 name: 'Actual_Displacement',
@@ -80,7 +80,7 @@
                return 'Less than Zero'
            } else return 'Greater than Zero'
        }])
-       rootData = rootData.groupBy(['Year', 'negativeValues'])
+    //    rootData = rootData.groupBy(['Year', 'negativeValues'])
      
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');
@@ -92,17 +92,25 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('negativeValues')
+            .color({
+                field: 'Actual_Displacement',
+                // range: ['red', 'blue'],
+                stops: 5,
+                step: true,
+                value: 'red'
+            })
             .data(rootData)
-			.width(900)
-            .height(600)
-            .layers([{
-                mark: 'bar',
-                transform: {
-                    type: 'stack',
-                    sort: 'none'
-                }
-            }])
+			.width(600)
+            .height(350)
+            // .size()
+            // .layers([{
+            //     mark: 'bar',
+            //     transform: {
+            //         type: 'stack',
+            //         sort: 'none'
+            //     }
+            // }])
+            // .shape('Origin')
             .config({
                 border:{
                     width: 2,
@@ -128,7 +136,7 @@
                 },
                 legend: {
                     color:{
-                    show: false
+                    // show: false
                     }
                 }
             })

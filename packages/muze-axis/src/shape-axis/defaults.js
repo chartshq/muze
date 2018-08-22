@@ -1,5 +1,6 @@
 export const DEFAULT_CONFIG = {
     type: 'ordinal',
-    range: [10, 100],
-    value: 'circle'
+    generator: null,
+    value: 'circle',
+    range: ['circle', 'diamond', 'star', 'cross', 'square', 'wye', 'triangle']
 };
