@@ -26,7 +26,7 @@ export class LegendFireBolt extends Firebolt {
 
         if (action) {
             const sideEffects = this._behaviourEffectMap[behaviourName];
-            const selectionSet = action.dispatch(payload, {})();
+            const selectionSet = action.dispatch(payload);
             const propagationSelectionSet = selectionSet[0];
             this.applySideEffects(sideEffects, propagationSelectionSet, payload);
             propagate(this, behaviourName, propagationSelectionSet, {

@@ -10,7 +10,9 @@ import {
     makeElement,
     registerListeners,
     generateGetterSetters,
-    getDataModelFromIdentifiers
+    getDataModelFromIdentifiers,
+    isSimpleObject,
+    transposeArray
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -498,9 +500,6 @@ export default class VisualUnit {
      * @return {Object} Nearest point.
      */
     getNearestPoint (x, y, args) {
-        let point;
-        const layers = this.layers();
-        const len = layers.length;
         const pointObj = {
             dimensions: [],
             id: null
@@ -512,8 +511,21 @@ export default class VisualUnit {
 
         if (dimValue !== null && args.getAllPoints) {
             pointObj.id = dimValue;
+            const pointInf = this.getMarkInfFromLayers(x, y, args);
+            pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
             return pointObj;
         }
+
+        const markInf = this.getMarkInfFromLayers(x, y, args) || { id: null };
+        pointObj.id = markInf.id;
+        pointObj.target = markInf.id;
+        return pointObj;
+    }
+
+    getMarkInfFromLayers (x, y, args) {
+        const layers = this.layers();
+        const len = layers.length;
+        let point = null;
         // Iterate through the layers array and fetch the nearest point from each layer. If a valid
         // nearest point is found from any layer, then return that point.
         for (let i = 0; i < len; i++) {
@@ -526,7 +538,7 @@ export default class VisualUnit {
                 return point;
             }
         }
-        return pointObj;
+        return point;
     }
 
     /**
@@ -538,12 +550,20 @@ export default class VisualUnit {
      */
     getPlotPointsFromIdentifiers (identifiers) {
         let points = [];
+        let parsedIdentifiers = identifiers;
+        if (identifiers === null) {
+            return [];
+        }
         const layers = this.layers();
         const len = layers.length;
+        if (isSimpleObject(identifiers)) {
+            parsedIdentifiers = [Object.keys(identifiers)];
+            parsedIdentifiers = [...parsedIdentifiers, ...transposeArray(Object.values(identifiers))];
+        }
         for (let i = 0; i < len; i++) {
             const layer = layers[i];
             if (layer.config().interactive !== false) {
-                points = [...points, ...layer.getPointsFromIdentifiers(identifiers)];
+                points = [...points, ...layer.getPointsFromIdentifiers(parsedIdentifiers)];
             }
         }
         return points;

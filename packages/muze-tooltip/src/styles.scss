@@ -95,3 +95,9 @@
     left: -12px;
 };
 
+.#{$prefix}tooltip-content-container {
+    float: none !important;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+}

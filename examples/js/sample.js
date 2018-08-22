@@ -104,13 +104,13 @@
 			.width(600)
             .height(350)
             // .size()
-            // .layers([{
-            //     mark: 'bar',
-            //     transform: {
-            //         type: 'stack',
-            //         sort: 'none'
-            //     }
-            // }])
+            .layers([{
+                mark: 'point',
+                encoding: {
+                    y: 'Horsepower'
+                }
+             
+            }])
             // .size('Origin')
             .config({
                 border:{
@@ -141,7 +141,7 @@
         .mount(document.getElementsByTagName('body')[0]);
         
         setTimeout(function(){
-        console.log(    canvas.layout().pages('column')) 
+        // console.log(    canvas.layout().pages('column')) 
         }, 2000)
 	})
 

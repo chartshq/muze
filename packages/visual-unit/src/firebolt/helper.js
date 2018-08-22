@@ -39,7 +39,7 @@ export const getApplicableSideEffects = (firebolt, payload, sideEffects, propaga
 
     applicableSideEffects = applicableSideEffects.filter((d) => {
         if (!actionOnSource && payload.criteria !== null) {
-            return !sourceSideEffects[d];
+            return !sourceSideEffects[d.name || d];
         }
         if (propagationSourceCanvas === aliasName) {
             return d.applyOnSource !== false;

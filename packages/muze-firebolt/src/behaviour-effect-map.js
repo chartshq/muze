@@ -3,15 +3,32 @@ import * as BEHAVIOURS from './enums/behaviours';
 export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
-        strategy: 'fade'
+        options: {
+            strategy: 'fade'
+        }
     }],
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
-        strategy: 'highlight'
-    }, 'crossline', 'tooltip', 'anchors'],
+        options: {
+            strategy: 'highlight'
+        }
+    }, 'crossline', {
+        name: 'tooltip',
+        options: {
+            order: 9999
+        }
+    }, 'anchors'],
     [BEHAVIOURS.FILTER]: ['filter'],
     [BEHAVIOURS.SELECT]: [{
         name: 'highlighter',
-        strategy: 'focus'
-    }, 'persistent-anchors']
+        options: {
+            strategy: 'focus'
+        }
+    }, 'persistent-anchors', {
+        name: 'tooltip',
+        options: {
+            strategy: 'showSelectedItems',
+            order: 0
+        }
+    }]
 };

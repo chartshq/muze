@@ -1,14 +1,18 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType } from 'muze-utils';
+import { FieldType, ReservedFields } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
-
+import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
+
+import './styles.scss';
 
 export default class Tooltip extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._tooltips = {};
+        this._strategies = strategies;
+        this._strategy = 'default';
     }
 
     static defaultConfig () {
@@ -21,7 +25,7 @@ export default class Tooltip extends SpawnableSideEffect {
         return 'tooltip';
     }
 
-    apply (selectionSet, payload) {
+    apply (selectionSet, payload, options = {}) {
         let totalHeight = 0;
         let totalWidth = 0;
         const dataModel = selectionSet.mergedEnter.model;
@@ -30,7 +34,7 @@ export default class Tooltip extends SpawnableSideEffect {
             return this;
         }
         if (payload.criteria === null || !dataModel) {
-            this.hide(drawingInf);
+            this.hide(payload, null);
             return this;
         }
 
@@ -44,7 +48,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const pad = config.padding;
         const dataModels = [];
         const context = this.firebolt.context;
-        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.criteria);
+        const fragmented = config.mode === FRAGMENTED;
         const sourceInf = context.getSourceInfo();
         const fields = sourceInf.fields;
         const xField = `${fields.x[0]}`;
@@ -53,26 +57,34 @@ export default class Tooltip extends SpawnableSideEffect {
         const showVertically = !!xFieldDim;
         const tooltipPos = payload.position;
         const boxes = [];
-        const fragmented = config.mode === FRAGMENTED;
         const enter = {};
 
+        const uids = dataModel.getData().uids;
         if (fragmented) {
-            const uids = dataModel.getData().uids;
             dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
                 saveChild: false
             })));
         } else {
             dataModels.push(dataModel);
         }
+        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target);
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
+            let plotDim = plotDimensions[i];
+            if (fragmented) {
+                plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID], dataModels[i].getData().uids]);
+                plotDim = plotDim && plotDim[0];
+            }
             const dt = dataModels[i];
             enter[i] = true;
             const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(drawingInf.htmlContainer,
                     drawingInf.svgContainer);
             tooltipInst.context(sourceInf);
-            const plotDim = plotDimensions[i];
-            tooltipInst.data(dt)
+            const strategy = strategies[options.strategy];
+            tooltipInst.content(payload.action, dt, {
+                formatter: strategy,
+                order: options.order
+            })
                             .config(this.config())
                             .extent({
                                 x: 0,
@@ -115,14 +127,17 @@ export default class Tooltip extends SpawnableSideEffect {
                 });
             }
         }
-
+        // console.log(tooltips);
         for (const key in tooltips) {
-            if (!(key in enter)) {
-                tooltips[key].remove();
-                delete tooltips[key];
+            if (!enter[key]) {
+                const tooltip = tooltips[key];
+                tooltip.content(payload.action, null);
+                if (!tooltip.getContents().length) {
+                    tooltip.remove();
+                    delete tooltips[key];
+                }
             }
         }
-
         if (fragmented) {
             spaceOutBoxes(boxes, boundBox, showVertically);
             boxes.forEach(box => box.tooltip.position(box.x, box.y, {

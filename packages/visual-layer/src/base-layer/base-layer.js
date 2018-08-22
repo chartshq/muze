@@ -554,7 +554,16 @@ export default class BaseLayer extends SimpleLayer {
                 } return false;
             });
         });
-        return getAllAttrs ? filteredPoints : filteredPoints.map(d => d.update || d).sort((a, b) => a.y - b.y);
+        return getAllAttrs ? filteredPoints : filteredPoints.map((d) => {
+            const attrs = d.update || d;
+            if (!attrs.width) {
+                attrs.width = 2;
+            }
+            if (!attrs.height) {
+                attrs.height = 2;
+            }
+            return attrs;
+        }).sort((a, b) => a.y - b.y);
     }
 
     /**
