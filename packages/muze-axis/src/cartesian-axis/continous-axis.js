@@ -40,14 +40,6 @@ export default class ContinousAxis extends SimpleAxis {
             base,
             range
         });
-        // const scale = createScale({
-        //     padding,
-        //     interpolator,
-        //     exponent,
-        //     base,
-        //     range,
-        //     type: this.constructor.type()
-        // });
 
         scale = scale.nice();
         return scale;
@@ -226,7 +218,7 @@ export default class ContinousAxis extends SimpleAxis {
      */
     updateDomainCache (domain) {
         if (this._domainLock === false) {
-            this.domain([1, 1]);
+            this._domain = [];
             this._domainLock = true;
         }
         return this.updateDomainBounds(domain || []);

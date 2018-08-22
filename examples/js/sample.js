@@ -6,9 +6,8 @@
         share = muze.operators.share,
         html = muze.operators.html,
         actionModel = muze.ActionModel;
-        
-        let layerFactory = muze.layerFactory;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
+
 
 	d3.json('../data/cars.json', (data) => {
 		const jsonData = data,
@@ -59,52 +58,61 @@
 			];
 		let rootData = new DataModel(jsonData, schema);
 
-
+		rootData = rootData.groupBy(['Year', 'Maker'], {
+			Horsepower: 'mean',
+			Displacement: 'mean'
+        });
+        rootData = rootData.calculateVariable(
+            {
+                name: 'Actual_Displacement',
+                type: 'measure'
+            }, ['Displacement', (ac) =>{
+                if(ac<500){
+                    return -ac;
+                } return ac
+            }]
+            );
+       rootData = rootData.calculateVariable({
+        name: 'negativeValues',
+        type: 'dimension'
+       }, ['Actual_Displacement',(y)=>{
+           if(y<0){
+               return 'Less than Zero'
+           } else return 'Greater than Zero'
+       }])
+       rootData = rootData.groupBy(['Year', 'negativeValues'])
+     
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');
 		window.canvas = env.canvas();
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
-		let rows = [[ 'Acceleration']],
-			columns = ['Year','Horsepower'];
+		let rows = [[ 'Actual_Displacement']],
+			columns = ['Year'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .detail(['Maker'])
-            // .shape('Origin')
-            .color({
-               field: 'Acceleration',
-               interpolate: true,
-            //    steps: 8,
-            //    steps:[1500, 2000, 2500, 3000,  3300, 3684.8],
-               scheme:['red', 'blue', 'green', 'yellow', 'grey', 'orange']
-         
-            })
-            // .size('Origin')
-           
+            .color('negativeValues')
             .data(rootData)
 			.width(900)
             .height(600)
+            .layers([{
+                mark: 'bar',
+                transform: {
+                    type: 'stack',
+                    sort: 'none'
+                }
+            }])
             .config({
                 border:{
                     width: 2,
-                   
-                },
-                legend: {
-                    // position: 'bottom',
-                    size: {
-                        title:{
-                            orientation: 'right'
-                        },
-                        item:{
-                            icon:{
-                                type: 'cross',
-                                height: 40,
-                            },
-                            text:{
-                                orientation: 'top'
-                            }
-                        }
+                    showRowBorders: false,
+                    showColBorders:false,
+                    showValueBorders: {
+                        top: false,
+                        bottom: true,
+                        left: true,
+                        right: false
                     }
                 },
                 axes:{
@@ -117,9 +125,15 @@
                         // name: 'Acceleration per year',
                         axisNamePadding: 12
                     }
+                },
+                legend: {
+                    color:{
+                    show: false
+                    }
                 }
             })
-        
+
+    
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
 		.mount(document.getElementsByTagName('body')[0]);

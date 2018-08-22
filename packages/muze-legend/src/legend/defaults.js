@@ -15,7 +15,7 @@ export const DEFAULT_MEASUREMENT = {
     width: 30,
     maxWidth: Infinity,
     maxHeight: Infinity,
-    padding: 3,
+    padding: 2,
     margin: 2,
     border: 1
 };
@@ -45,7 +45,7 @@ export const DEFAULT_CONFIG = {
         },
         icon: {
             className: 'legend-icon',
-            height: 25,
+            height: 20,
             width: 20,
             color: 'rgba(0,0,0,.5)',
             type: 'square'

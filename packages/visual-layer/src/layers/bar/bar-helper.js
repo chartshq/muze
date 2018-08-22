@@ -30,7 +30,6 @@ const resolveDimByField = (type, axesInfo, config, data) => {
     let pos;
     let space = 0;
     let enterSpace = 0;
-
     if (fieldType !== undefined) {
         if (config[`${type}0Field`]) {
             const minVal = data[type];

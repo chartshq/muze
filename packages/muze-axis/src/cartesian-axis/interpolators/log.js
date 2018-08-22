@@ -21,7 +21,7 @@ export default class LogInterpolator {
     }
 
     sanitizeDomain (domain) {
-        if (domain[0] >= 0) {
+        if (domain[0] <= 0) {
             return [Math.max(1, domain[0]), Math.max(1, domain[1])];
         } return domain;
     }
