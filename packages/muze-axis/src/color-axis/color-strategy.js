@@ -3,6 +3,41 @@ import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
 
+const getSteps = (domain, steps) => {
+    let newSteps = [];
+
+    if (steps instanceof Array) {
+        newSteps = steps.slice().sort();
+        newSteps = [...new Set([domain[0], ...steps, domain[1]])].sort();
+    } else {
+        const interpolator = numberInterpolator()(...domain);
+        for (let i = 0; i <= steps; i++) {
+            newSteps[i] = interpolator(i / steps);
+        }
+    }
+
+    if (newSteps[0] < domain[0]) {
+        newSteps.shift();
+    }
+    return { domain, newSteps };
+};
+
+const rangeSteps = (newSteps, range) => {
+    let newRange = [];
+    const maxRangeLength = Math.min(range.length, 18);
+
+    if (newSteps.length > maxRangeLength) {
+        const rangeCycles = Math.floor((newSteps.length) / maxRangeLength);
+        for (let i = 0; i < rangeCycles; i++) {
+            newRange = [...newRange, ...range];
+        }
+        newRange = [...newRange, ...range.slice(0, (newSteps.length) % maxRangeLength)];
+    } else {
+        newRange = range.slice(0, newSteps.length);
+    }
+    return { range: newRange };
+};
+
 /**
  *
  *
@@ -61,33 +96,16 @@ const normalDomain = (domain, steps, range) => {
  * @returns
  */
 const steppedDomain = (domain, steps, range) => {
-    let newSteps = [];
-    let newRange = [];
-    if (steps instanceof Array) {
-        newSteps = steps.slice().sort();
-        newSteps = [...new Set([domain[0], ...steps, domain[1]])].sort();
-    } else {
-        const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i <= steps; i++) {
-            newSteps[i] = interpolator(i / steps);
-        }
-    }
+    const { domain: uniqueVals, newSteps } = getSteps(domain, steps);
+    const { newRange } = rangeSteps(newSteps.length - 1, range);
 
-    const uniqueVals = domain;
-    if (newSteps[0] < domain[0]) {
-        newSteps.shift();
-    }
-    const maxRangeLength = Math.min(range.length, 18);
+    return { uniqueVals, domain: newSteps, nice: true, range: newRange };
+};
 
-    if (newSteps.length > maxRangeLength) {
-        const rangeCycles = Math.floor((newSteps.length) / maxRangeLength);
-        for (let i = 0; i < rangeCycles; i++) {
-            newRange = [...newRange, ...range];
-        }
-        newRange = [...newRange, ...range.slice(0, (newSteps.length) % maxRangeLength)];
-    } else {
-        newRange = range.slice(0, newSteps.length);
-    }
+const continousSteppedDomain = (domain, steps, range) => {
+    const { domain: uniqueVals, newSteps } = getSteps(domain, steps);
+    const { newRange } = rangeSteps(newSteps.length, range);
+
     return { uniqueVals, domain: newSteps, nice: true, range: newRange };
 };
 
@@ -167,7 +185,7 @@ const strategies = () => ({
     },
     [`${CONTINOUS}-${CONTINOUS}-${ORDINAL}`]: {
         scale: LINEAR,
-        domainRange: () => steppedDomain,
+        domainRange: () => continousSteppedDomain,
         value: () => normalRange
     },
     [`${CONTINOUS}-${DISCRETE}-${ORDINAL}`]: {

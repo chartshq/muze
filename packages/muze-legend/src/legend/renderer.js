@@ -279,7 +279,8 @@ export const renderStepItem = (context, container) => {
    } = context.config();
     const {
       maxItemSpaces,
-      maxIconWidth
+      maxIconWidth,
+      padding
    } = context.measurement();
     const {
        width,
@@ -307,7 +308,8 @@ export const renderStepItem = (context, container) => {
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, stepColor.horizontal, context),
         height: d => applyItemStyle(d, HEIGHT, stepColor.vertical, context),
-        'text-align': 'center'
+        'text-align': 'center',
+        padding: `${padding}px`
     });
 
     labelManager.setStyle(context._computedStyle);

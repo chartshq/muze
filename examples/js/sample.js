@@ -66,14 +66,16 @@
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
 		let rows = [[ 'Acceleration']],
-			columns = ['Horsepower'];
+			columns = ['Year','Horsepower'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .shape('Origin')
+            .detail(['Maker'])
+            // .shape('Origin')
             .color({
-               field: 'Origin',
-               interpolate: false,
+               field: 'Acceleration',
+               interpolate: true,
+            //    steps: 8,
             //    steps:[1500, 2000, 2500, 3000,  3300, 3684.8],
                scheme:['red', 'blue', 'green', 'yellow', 'grey', 'orange']
          
@@ -89,7 +91,7 @@
                    
                 },
                 legend: {
-                    position: 'bottom',
+                    // position: 'bottom',
                     size: {
                         title:{
                             orientation: 'right'
