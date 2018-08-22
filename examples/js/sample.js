@@ -72,7 +72,7 @@
             .columns(columns)
             .shape('Origin')
             .color({
-               field: 'Acceleration',
+               field: 'Origin',
                interpolate: false,
             //    steps:[1500, 2000, 2500, 3000,  3300, 3684.8],
                scheme:['red', 'blue', 'green', 'yellow', 'grey', 'orange']
@@ -89,7 +89,7 @@
                    
                 },
                 legend: {
-                    position: 'right',
+                    position: 'bottom',
                     size: {
                         title:{
                             orientation: 'right'

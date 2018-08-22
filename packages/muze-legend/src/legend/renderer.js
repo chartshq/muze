@@ -105,7 +105,8 @@ export const getItemContainers = (container, data, legendInstance) => {
     } = legendInstance.measurement();
     const {
         classPrefix,
-        align
+        align,
+        padding
     } = legendInstance.config();
 
     if (align === VERTICAL) {
@@ -119,8 +120,10 @@ export const getItemContainers = (container, data, legendInstance) => {
     const rows = makeElement(container, 'div', datasets.row, `${classPrefix}-legend-row`);
     rows.style(HEIGHT, (d, i) => `${itemSpaces[i].height}px`);
     align === VERTICAL && rows.style(WIDTH, () => `${maxItemSpaces.width}px`);
+    align === VERTICAL && rows.style('padding', `${padding}px`);
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
+    align !== VERTICAL && columns.style('padding', `${padding}px`);
     return columns;
 };
 
@@ -184,12 +187,9 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
  */
 export const createItemSkeleton = (context, container) => {
     const {
-            classPrefix,
-            item
-        } = context.config();
-    const {
-           padding
-        } = context.measurement();
+        classPrefix,
+        item
+    } = context.config();
     const textOrientation = item.text.orientation;
 
     let stack = [VALUE, SHAPE];
@@ -199,7 +199,6 @@ export const createItemSkeleton = (context, container) => {
 
     const itemSkeleton = makeElement(container, 'div', (d, i) => stack.map(e => [e, d[e], d.color, d.size,
         d.value, context.fieldName(), i]), `${classPrefix}-legend-item-info`);
-    itemSkeleton.style('padding', `${padding}px`);
 
     const alignClass = textOrientation === BOTTOM || textOrientation === TOP ?
         CENTER : (textOrientation === RIGHT ? START : END);
@@ -232,17 +231,21 @@ export const renderDiscreteItem = (context, container) => {
             className
         } = item.icon;
 
+    const textOrientation = item.text.orientation;
+
     labelManager.useEllipsesOnOverflow(true);
     applyStyle(container, {
         width: d => applyItemStyle(d, WIDTH, false, context),
         height: d => applyItemStyle(d, HEIGHT, false, context),
-        'text-align': CENTER
+        'text-align': CENTER,
+        padding: `${padding}px`
     });
 
     labelManager.setStyle(context._computedStyle);
     container.each(function (d, i) {
         if (d[0] === VALUE) {
-            selectElement(this).text(d[1]);
+            selectElement(this).text(d[1])
+                            .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px');
         } else {
             const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
