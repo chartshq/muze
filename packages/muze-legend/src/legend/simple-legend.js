@@ -3,7 +3,8 @@ import {
     selectElement,
     getUniqueId,
     getSmartComputedStyle,
-    generateGetterSetters
+    generateGetterSetters,
+    mergeRecursive
 } from 'muze-utils';
 import { behaviouralActions } from '@chartshq/muze-firebolt';
 import * as legendBehaviours from '../firebolt/behavioural';
@@ -15,7 +16,7 @@ import * as sideEffects from '../firebolt/side-effects';
 import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
 import { VALUE, PATH } from '../enums/constants';
 import { PROPS } from './props';
-import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG } from './defaults';
+import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
 import { getItemMeasures, titleCreator, computeItemSpaces } from './legend-helper';
 
 /**
@@ -36,13 +37,13 @@ export default class SimpleLegend {
         this._metaData = [];
         this._mount = null;
         this._fieldName = null;
-        this._title = '';
+        this._title = Object.assign({}, LEGEND_TITLE);
         this._metaData = null;
         this._labelManager = dependencies.labelManager;
         this._cells = dependencies.cells;
         this._id = getUniqueId();
         this._measurement = Object.assign({}, this.constructor.defaultMeasurement());
-        this._config = Object.assign({}, this.constructor.defaultConfig());
+        this._config = mergeRecursive({}, this.constructor.defaultConfig());
 
         generateGetterSetters(this, PROPS);
         this._computedStyle = getSmartComputedStyle(selectElement('body'),
@@ -180,7 +181,7 @@ export default class SimpleLegend {
         const labelSpaces = this.getLabelSpaces(effPadding, align);
 
         const {
-            totalHeight, totalWidth, itemSpaces, shapeSpaces, maxItemSpaces, maxShapeWidth
+            totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth
         } = computeItemSpaces(this.config(),
         { effPadding, titleWidth, labelSpaces, titleHeight, maxWidth, maxHeight }, this.data());
 
@@ -188,10 +189,10 @@ export default class SimpleLegend {
             width: Math.max(totalWidth, width) + effMargin + effBorder,
             height: Math.max(totalHeight, height) + effMargin + effBorder,
             labelSpaces,
-            shapeSpaces,
+            iconSpaces,
             itemSpaces,
             maxItemSpaces,
-            maxShapeWidth,
+            maxIconWidth,
             titleSpaces: {
                 width: Math.min(maxWidth, this.measurement().width) - effMargin - effBorder,
                 height: titleHeight
@@ -209,7 +210,7 @@ export default class SimpleLegend {
     getTitleSpace () {
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
                                                  `${this.config().classPrefix}-legend-title`));
-        return this._labelManager.getOriSize(this.title() ? this.title() : '');
+        return this._labelManager.getOriSize(this.title().text ? this.title().text : '');
     }
 
     /**
@@ -221,12 +222,11 @@ export default class SimpleLegend {
      */
     renderTitle (container) {
         const { titleSpaces, border, padding } = this.measurement();
-
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
             border,
             padding
-        }, this.config().classPrefix);
+        }, this.config());
     }
 
     /**

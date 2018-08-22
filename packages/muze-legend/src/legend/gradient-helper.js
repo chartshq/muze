@@ -1,5 +1,5 @@
 import { makeElement, applyStyle } from 'muze-utils';
-import { LinearAxis } from '@chartshq/muze-axis';
+import { ContinousAxis } from '@chartshq/muze-axis';
 import { BOTTOM, RIGHT } from '../enums/constants';
 import { ALIGN } from './defaults';
 import '../styles.scss';
@@ -13,8 +13,8 @@ import '../styles.scss';
 export const getGradientDomain = (data) => {
     if (typeof data[0].value === 'number') {
         return data.reduce((accumulator, currentValue) =>
-    [Math.min(currentValue.value, accumulator[0]), Math.max(currentValue.value, accumulator[1])],
-    [Number.MAX_VALUE, Number.MIN_VALUE]);
+            [Math.min(currentValue.value, accumulator[0]), Math.max(currentValue.value, accumulator[1])],
+                [Number.MAX_VALUE, Number.MIN_VALUE]);
     }
     return data.map(e => e.value);
 };
@@ -50,7 +50,7 @@ export const createAxis = (context) => {
     const data = context.data();
     const { align } = context.config();
     const AxisCell = context._cells.AxisCell;
-    const newAxis = new LinearAxis({
+    const newAxis = new ContinousAxis({
         id: `legend-${context._id}`,
         orientation: align === ALIGN.VERTICAL ? RIGHT : BOTTOM,
         style: context._computedStyle,
@@ -81,7 +81,7 @@ const createLegendSkeleton = (container, classPrefix, data) => {
     const legendGradSvg = makeElement(legendContainer, 'svg', [1], `${classPrefix}-gradient`);
     const legendGradCont = makeElement(legendGradSvg, 'g', [1], `${classPrefix}-gradient-group`);
     const linearGradient = makeLinearGradient(legendGradSvg, data, domain);
-    const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-shape`);
+    const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-rect`);
 
     return {
         legendContainer,
@@ -108,10 +108,10 @@ export const renderAxis = (context, container, height, width) => {
 };
 
 /**
- * Renders gradient legends (shape, size and color)
+ * Renders gradient legends
  *
  * @param {Selection} container Point where the legend is to be appended
- * @memberof Legend
+ * @memberof GradientLegend
  */
 export const renderGradient = (context, container) => {
     let gradHeight = 0;
@@ -136,6 +136,8 @@ export const renderGradient = (context, container) => {
         margin,
         border,
         titleSpaces,
+        maxHeight,
+        maxWidth,
         height,
         width
     } = context.measurement();
@@ -145,25 +147,31 @@ export const renderGradient = (context, container) => {
     gradWidth = Math.floor(width - (margin * 2 + border * 2));
 
     if (align === ALIGN.HORIZONTAL) {
-        gradientDimensions.height = item.shape.height;
+        gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
         linearGradient.attr('x2', '100%');
         legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
-        renderAxis(context, legendContainer, gradHeight - item.shape.height - padding, gradWidth - 2 * padding - 1);
+        renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
+        legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);
+
+        applyStyle(legendContainer, {
+            height: `${height}px`,
+            width: `${Math.min(width, maxWidth)}px`,
+            padding: `${padding}px`
+        });
     } else {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
-        gradientDimensions.width = item.shape.width;
+        gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
         legendGradCont.attr('transform', `translate(0 ${labelDim.height / 2})`);
-        renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.shape.width - padding * 2);
+        renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
+        legendContainer.classed(`${classPrefix}-overflow-y`, height > maxHeight);
+        applyStyle(legendContainer, {
+            height: `${Math.min(height, maxHeight)}px`,
+            width: `${width}px`,
+            padding: `${padding}px`
+        });
     }
-
-    // Apply styles to the legend container
-    applyStyle(legendContainer, {
-        height: `${height}px`,
-        width: `${width}px`,
-        padding: `${padding}px`
-    });
 
     // Apply Styles to the legend plot area
     applyStyle(legendGradSvg, {

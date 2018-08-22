@@ -9,11 +9,10 @@ import {
     LAYERS,
     TRANSFORM,
     MOUNT,
-    LEGEND,
     TITLE,
     SUB_TITLE
 } from '../constants';
-import { LEGEND_CONFIG, TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
 /**
  * @module
  * This is the local options semantics based on which setters getters are created and reactivity is initiated.
@@ -157,15 +156,6 @@ export const canvasOptions = {
                 const defConfig = mergeRecursive({}, SUB_TITLE_CONFIG);
                 return mergeRecursive(defConfig, subtitleConfig);
             }]
-        }
-    },
-    [LEGEND]: {
-        value: null,
-        meta: {
-            sanitization: (legend) => {
-                const defConfig = mergeRecursive({}, LEGEND_CONFIG);
-                return mergeRecursive(defConfig, legend);
-            }
         }
     }
 };

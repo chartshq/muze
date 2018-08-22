@@ -17,27 +17,44 @@ import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
 
 /**
- * Base Layer class is an abstract class which has all the common functionalities
- * of all layers. Every layer class should extend this class and overrride the necessary
- * methods. This class needs to be passed axes, configuration and data model.
+ * An abstract class which gives defination of common layer functionality like
+ * - transfromation data for various {@link mode}
+ * - calculating data domain
+ * - linking dependent layers
+ * - merging policy of configuration
+ * - interaction sideffect helpers
+ * - retrieving dom elements from data using id
+ * - retrieving the physical dimensions of marks
+ * - disposing layer
  *
- * @example
- * class BarLayer extends BaseLayer {
- *   update (params) {
- *       // super.update(params);
- *       // Update the bar layer
- *   }
- * }
+ * Every layer has to extend base layer and give concrete definition.
+ * This layer does not have any default visual. A new layer has to define the logic of `render` for rendering the
+ * visuals
+ *
+ * @public
  * @class
+ * @namespace Muze
  */
 export default class BaseLayer extends SimpleLayer {
 
     /**
-     * Creates a layer
-     * @param {DataModel} data Instance of datamodel
-     * @param {Object} axes Axes instances
-     * @param {Object} config Configuration of the layer
+     * Creates a layer using a configuration and data.
+     *
+     * @public
+     *
+     * @param {DataModel} data Instance of DataModel to be used. This DataModel instance serves as the data for a layer.
+     * @param {Object} axes Axes instances to be used for rendering the layer. Axes are used for mapping data from
+     *      value to px.
+     * @param {SimpleAxis} axes.x X axis of the layer. Based on the type of variable it gets instance of BandAxis,
+     *      TimeAxis, ContinuousAxis
+     * @param {SimpleAxis} axes.y X axis of the layer. Based on the type of variable it gets instance of BandAxis,
+     *      TimeAxis, ContinuousAxis
+     * @param {ColorAxis} axes.color Axis for coloring a layer using color interpolators
+     * @param {ShapeAxis} axes.shape Axis for providing a shape
+     * @param {SizeAxis} axes.shape Axis for determining size of a mark using size interpolator
+     * @param {LayerConfig} config Configuration of the layer
      * @param {Object} dependencies Dependencies of the layer
+     * @param {SmartLabel} smartLabel Smartlabel singleton instance
      */
     constructor (data, axes, config, dependencies) {
         super();
@@ -65,7 +82,13 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Default configuration of the layer
+     * Default configuration of the layer. This configuration gets merged to the user passed configuration using a
+     * plolicy. Base layer only returns part of configuraion, any layer overridding base layer should return its own
+     * configuration.
+     *
+     * @public
+     * @static
+     *
      * @return {Object} Default configuration
      */
     static defaultConfig () {
@@ -77,32 +100,40 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Default policy merges the user configuration with the given configuration
-     * @param {Object} conf Configuration of layer
-     * @param {Object} userConf Configuration given by the user
-     * @return {Object} merged configuration of user config and layer config
+     * Policy defines how user config gets merged to default config. The default policy here does a deep copy
+     * operation.
+     * Any policy which does more than deep copying should define the policy as a static member.
+     *
+     * @static
+     * @public
+     *
+     * @param {LayerConfig} conf Configuration with which the user config will be merged
+     * @param {LayerConfig} userConf Configuration given by the user
+     *
+     * @return {LayerConfig} Merged layer configuration
      */
     static defaultPolicy (conf, userConf) {
         return mergeRecursive(conf, userConf);
     }
 
     /**
-     *
+     * Determines a name for a layer. This name of the layer is used in the input data to refer to this layer.
+     * ```
+     *  .layer([
+     *      mark: 'bar',
+     *      encoding: { ... }
+     *  ])
+     * ```
      *
      * @static
-     * @returns
-     * @memberof BaseLayer
+     * @public
+     *
+     * @returns {string} name of layer
      */
     static formalName () {
         return 'base';
     }
 
-    /**
-     *
-     *
-     * @readonly
-     * @memberof BaseLayer
-     */
     store (...store) {
         if (store.length) {
             this._store = store[0];
@@ -120,11 +151,18 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
+     * Provides a alias for a layer. Like it's possible to have same layer (like bar) multiple times, but among multiple
+     * layers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set
+     * as the alias name.
      *
+     * @public
      *
-     * @param {*} params
-     * @returns
-     * @memberof BaseLayer
+     * If used as setter
+     * @param  {string} alias Name of the alias
+     * @return {BaseLayer} Instance of current base layer
+     *
+     * If used as getter
+     * @return {string} Alias of the current layer
      */
     alias (...params) {
         if (params.length) {
@@ -134,11 +172,6 @@ export default class BaseLayer extends SimpleLayer {
         return this._alias || this.constructor.formalName();
     }
 
-    /**
-     * Sets or gets the dependencies.
-     * @param {Object} dependencies Dependencies needed by layer
-     * @return {BaseLayer} Instance of base layer.
-     */
     dependencies (...params) {
         if (params.length) {
             this._dependencies = params[0];
@@ -147,37 +180,30 @@ export default class BaseLayer extends SimpleLayer {
         return this._dependencies;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof BaseLayer
-     */
     enableCaching () {
         this._cacheEnabled = true;
         return this;
     }
 
-    /**
-     *
-     *
-     * @memberof BaseLayer
-     */
     clearCaching () {
         this._cacheEnabled = false;
         return this.data(this._cachedData[0]);
     }
 
     /**
-     * Returns a serialized schema of the layer
-     * @return {Object} Serialized schema
+     * Serialize the schema. Merge config is used for serialization.
+     *
+     * @public
+     *
+     * @return {LayerConfig} Serialized schema
      */
     serialize () {
         return this.config();
     }
 
     /**
-     * Returns the unique identifier of this layer
+     * Returns the unique identifier of this layer. Id is auto generated during the creation proceess of a schema.
+     *
      * @return {string} id of the layer
      */
     id () {
@@ -189,10 +215,11 @@ export default class BaseLayer extends SimpleLayer {
      * transform method with the data and passes the configuration parameters of transform such as
      * groupBy, value field, etc.
      *
-     * @param {DataModel} dataModel Instance of dataModel
-     * @param {Object} config configuration for transforming data
+     * @public
+     *
+     * @param {DataModel} dataModel Instance of DataModel
+     * @param {Object} config Configuration for transforming data
      * @return {Array.<Array>} Transformed data.
-     * @private
      */
     getTransformedData (dataModel, config, transformType, encodingFieldsInf) {
         return transformData(dataModel, config, transformType, encodingFieldsInf);
@@ -210,9 +237,11 @@ export default class BaseLayer extends SimpleLayer {
     calculateDomainFromData (data) {
         let domains = {};
         const isEmpty = this.data().isEmpty();
+
         if (!isEmpty) {
             domains = calculateDomainFromData(data, this.encodingFieldsInf(), this.transformType());
-        } return domains;
+        }
+        return domains;
     }
 
     shouldDrawAnchors () {

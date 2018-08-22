@@ -23,18 +23,17 @@ export const legendDataCreator = (canvas) => {
         if (scaleProps && scaleProps.field) {
             const {
                 type,
-                interpolate
+                step
             } = scale.config();
             LegendCls = LEGEND_TYPE_MAP[DISCRETE];
-
             if (type === LINEAR && scaleType === COLOR) {
-                if (interpolate) {
+                if (!step) {
                     LegendCls = LEGEND_TYPE_MAP[GRADIENT];
                 } else {
                     LegendCls = LEGEND_TYPE_MAP[STEP_COLOR];
                 }
             }
-            dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls });
+            dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls, scaleType });
         }
     });
 
@@ -58,22 +57,28 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
         headerHeight
     } = measurement;
     const {
-        show,
-        align,
-        title
+        position,
+        align
     } = legendConfig;
 
-    if (show) {
-        const dataset = legendDataCreator(canvas);
+    const dataset = legendDataCreator(canvas);
 
-        dataset.forEach((dataInfo, index) => {
-            let legend = {};
-            const legendMeasures = {};
-            const {
+    dataset.forEach((dataInfo, index) => {
+        let legend = {};
+
+        const legendMeasures = {};
+        const {
                 LegendCls,
                 scale,
-                fieldName
+                fieldName,
+                scaleType
             } = dataInfo;
+        const config = legendConfig[scaleType] || {};
+        const title = config.title || {};
+        title.text = title.text || fieldName;
+        if (config.show) {
+            config.position = position;
+            config.align = align;
 
             if (prevLegends[index]) {
                 legend = prevLegends[index].legend;
@@ -90,25 +95,26 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             [HEIGHT, WIDTH, PADDING, BORDER, CONFIG].forEach((e) => {
                 if (legendConfig[e]) {
                     if (e === HEIGHT) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, legendConfig[e]);
+                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, config[e]);
                     } else if (e === WIDTH) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, legendConfig[e]);
+                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, config[e]);
                     } else {
-                        legendMeasures[e] = legendConfig[e];
+                        legendMeasures[e] = config[e];
                     }
                 }
             });
             legend.scale(scale)
-                            .title((title && title[index] !== null) ? title[index] : fieldName)
+                            .title(title)
                             .fieldName(fieldName)
-                            .config(legendConfig)
+                            .config(config)
                             .metaData(canvas.composition().visualGroup.getGroupByData().project([fieldName]))
                             .measurement(legendMeasures)
                             .setLegendMeasures();
 
             legends.push({ canvas, legend });
-        });
-    }
+        }
+    });
+    // }
     return legends;
 };
 
@@ -122,8 +128,8 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
  * @returns
  */
 export const getLegendSpace = (context, availableHeight, availableWidth) => {
-    const legends = context.legendComponents();
-    const legendConfig = context.legend();
+    const legends = context.legend();
+    const legendConfig = context.config().legend;
     const legendMeasures = legends.map(legendInfo => legendInfo.legend.measurement());
     const legendSpace = { width: 0, height: 0 };
 
@@ -168,13 +174,13 @@ export const createLegend = (context, headerHeight, height, width) => {
         width,
         headerHeight
     };
-    const legendConfig = context.legend();
-    const { show, position } = legendConfig;
+    const { legend } = context.config();
+    const { show, position } = legend;
 
-    legendConfig.classPrefix = context.config().classPrefix;
+    legend.classPrefix = context.config().classPrefix;
     const align = (position === LEFT || position === RIGHT) ? VERTICAL : HORIZONTAL;
 
-    legendConfig.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
-    legendConfig.align = align;
-    return legendInitializer(legendConfig, context, measurement, context.legends || []);
+    legend.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
+    legend.align = align;
+    return legendInitializer(legend, context, measurement, context.legends || []);
 };

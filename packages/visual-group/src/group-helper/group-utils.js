@@ -346,30 +346,24 @@ export const createSelection = (sel, appendObj, data, idFn) => {
 
 const getRowBorders = (left, right) => {
     const borders = {};
-    if (!left[0] || left[0].length <= 1) {
-        borders.left = false;
-    } else {
-        borders.left = true;
-    }
-    if (!right[0] || right[0].length <= 1) {
-        borders.right = false;
-    } else {
-        borders.right = true;
+    borders.top = false;
+    borders.bottom = false;
+    if (left.length > 1 || right.length > 1) {
+        borders.top = true;
+        borders.bottom = true;
     }
     return borders;
 };
 
 const getColumnsBorders = (top, bottom) => {
     const borders = {};
-    if (!top || top.length <= 1) {
-        borders.top = false;
-    } else {
-        borders.top = true;
-    }
-    if (!bottom || bottom.length <= 1) {
-        borders.bottom = false;
-    } else {
-        borders.bottom = true;
+    borders.left = false;
+    borders.right = false;
+    if (top.length || bottom.length) {
+        if ((top[0] && top[0].length > 1) || (bottom[0] && bottom[0].length > 1)) {
+            borders.left = true;
+            borders.right = true;
+        }
     }
     return borders;
 };

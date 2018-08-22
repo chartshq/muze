@@ -1,4 +1,9 @@
 import { getSymbol } from 'muze-utils';
+import {
+    CENTER,
+    LEFT,
+    RIGHT
+} from '../enums/constants';
 
 export const ALIGN = {
     HORIZONTAL: 'horizontal',
@@ -10,13 +15,23 @@ export const DEFAULT_MEASUREMENT = {
     width: 30,
     maxWidth: Infinity,
     maxHeight: Infinity,
-    padding: 3,
+    padding: 2,
     margin: 2,
     border: 1
 };
 
+export const LEGEND_TITLE = {
+    text: '',
+    orientation: (pos) => {
+        if (pos === LEFT || pos === RIGHT) {
+            return LEFT;
+        } return CENTER;
+    }
+};
+
 export const DEFAULT_CONFIG = {
     classPrefix: 'muze',
+
     formatter: {
         bounds: {
             lower: 'less than',
@@ -25,22 +40,23 @@ export const DEFAULT_CONFIG = {
     },
     item: {
         text: {
-            position: 'right',
+            orientation: 'right',
             width: 10
         },
-        shape: {
+        icon: {
+            className: 'legend-icon',
             height: 20,
             width: 20,
             color: 'rgba(0,0,0,.5)',
-            type: 'circle'
+            type: 'square'
         }
     }
 };
 
 /**
- * Creates a map of pre defined shapes
+ * Creates a map of pre defined icons
  *
- * @param {string} shape Accepts a shape name like 'square', 'cross', 'diamond' etc
- * @return {Object} shape object which can be used to draw the shapes
+ * @param {string} icon Accepts a icon name like 'square', 'cross', 'diamond' etc
+ * @return {Object} icon object which can be used to draw the icons
  */
-export const SHAPE_MAP = shape => shape && getSymbol(shape);
+export const ICON_MAP = icon => icon && getSymbol(icon);

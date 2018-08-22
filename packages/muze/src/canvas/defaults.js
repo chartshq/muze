@@ -1,5 +1,5 @@
 export const LEGEND_CONFIG = {
-    position: 'bottom',
+    position: 'right',
     show: true
 };
 

@@ -77,7 +77,9 @@ export {
     getSymbol,
     Scales,
     Symbols,
-    pathInterpolators
+    pathInterpolators,
+    hslInterpolator,
+    getSmallestDiff
 } from './common-utils';
 
 export {

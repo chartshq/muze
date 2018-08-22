@@ -4,7 +4,7 @@ const CLASSPREFIX = 'muze';
 
 export const actionBehaviourMap = {
     [ACTIONS.DRAG]: {
-        target: `.${CLASSPREFIX}-gradient-shape`,
+        target: `.${CLASSPREFIX}-gradient-rect`,
         behaviours: [BEHAVIOURS.BRUSH]
     },
     [ACTIONS.HOVER]: {

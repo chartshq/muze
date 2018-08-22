@@ -153,6 +153,7 @@ export default class Tooltip {
             const arrowDisabled = config.arrow.disabled;
             const arrowWidth = arrowDisabled ? 0 : config.arrow.size;
             const arrowOrient = this._arrowOrientation;
+
             const outsidePlot = arrowOrient === ARROW_LEFT || arrowOrient === ARROW_RIGHT ?
                 (y + node.offsetHeight - arrowWidth) < target.y || y > (target.y + target.height) :
                 (x + node.offsetWidth - arrowWidth) < target.x || x > (target.x + target.width);
@@ -222,7 +223,7 @@ export default class Tooltip {
         const offsetHeight = node.offsetHeight;
         const config = this._config;
         const arrowDisabled = config.arrow.disabled;
-        const arrowWidth = config.arrow.size;
+        const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
         const positionHorizontal = () => {
@@ -232,16 +233,16 @@ export default class Tooltip {
             // When there is no space in right
             const rightSpace = extent.width - x;
             const leftSpace = dim.x - extent.x;
-            if (rightSpace >= offsetWidth) {
+            if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
-                x += arrowWidth;
-            } else if (leftSpace >= offsetWidth) {
+                x += arrowSize;
+            } else if (leftSpace >= offsetWidth + arrowSize) {
                 x = dim.x - offsetWidth;
                 position = TOOLTIP_RIGHT;
-                x -= arrowWidth;
+                x -= arrowSize;
             } else {
                 position = 'left';
-                x += arrowWidth;
+                x += arrowSize;
             }
             if (dim.height < offsetHeight) {
                 y = Math.max(0, dim.y + dim.height / 2 - offsetHeight / 2);
@@ -265,7 +266,7 @@ export default class Tooltip {
             let position;
             // Position tooltip at the center of plot
             let x = dim.x - offsetWidth / 2 + dim.width / 2;
-            const y = dim.y - offsetHeight - arrowWidth;
+            const y = dim.y - offsetHeight - arrowSize;
             // Overflows to the right
             if ((extent.width - dim.x) < offsetWidth) {
                 x = extent.width - offsetWidth;
@@ -291,7 +292,7 @@ export default class Tooltip {
 
         this._target = dim;
         if (!orientation) {
-            orientation = topSpace > (offsetHeight + arrowWidth) ? 'vertical' : 'horizontal';
+            orientation = topSpace > (offsetHeight + arrowSize) ? 'vertical' : 'horizontal';
         }
 
         if (orientation === 'horizontal') {

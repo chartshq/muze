@@ -39,7 +39,8 @@ import {
     interpolate,
     interpolateRgb,
     piecewise,
-    interpolateNumber
+    interpolateNumber,
+    interpolateHslLong
 } from 'd3-interpolate';
 import {
     easeCubic,
@@ -896,6 +897,12 @@ const numberInterpolator = () => interpolateNumber;
  */
 const colorInterpolator = () => interpolateRgb;
 
+/**
+ *
+ *
+ */
+const hslInterpolator = () => interpolateHslLong;
+
 const transformColors = () => ({
     color,
     rgb,
@@ -1368,6 +1375,20 @@ const Scales = {
     band: scaleBand
 };
 
+/**
+ * Uses merge sort to find the smallest difference between two numbers in an array
+ *
+ */
+const getSmallestDiff = (points) => {
+    points = points.sort((a, b) => a - b);
+    let minDiff = points[1] - points[0];
+    for (let i = 2; i < points.length; i++) {
+        minDiff = Math.min(minDiff, points[i] - points[i - 1]);
+    }
+
+    return minDiff;
+};
+
 export {
     Scales,
     Symbols,
@@ -1434,5 +1455,7 @@ export {
     getObjProp,
     extendsClass,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    hslInterpolator,
+    getSmallestDiff
 };

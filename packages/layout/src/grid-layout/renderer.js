@@ -24,15 +24,15 @@ function renderTable (mount, className, rowData) {
 }
 
 function applyRowBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [TOP, BOTTOM].forEach((borderType) => {
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
         cells.style(`border-${borderType}`, style);
     });
 }
 
 function applyColBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [LEFT, RIGHT].forEach((borderType) => {
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
         cells.style(`border-${borderType}`, style);
     });
 }
@@ -62,9 +62,9 @@ function applyBorders (cells, border, type, index) {
                 color : BLANK_BORDERS}`);
         });
     } else if (type === CENTER) {
-        applyRowBorders(cells, borderStyle, showRowBorders[index === 0 ? LEFT : RIGHT], color);
+        applyRowBorders(cells, borderStyle, showRowBorders, color);
     } else if (index === 1) {
-        applyColBorders(cells, borderStyle, showColBorders[type], color);
+        applyColBorders(cells, borderStyle, showColBorders, color);
     }
 }
 
@@ -102,8 +102,9 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.height);
+                    placeholder.setAvailableSpace(0, placeholder.availableHeight());
                 }
+                cells.style('height', `${placeholder.availHeight()}px`);
                 return span;
             });
         }
@@ -246,4 +247,3 @@ export const renderArrows = (context, mountPoint, viewMatricesInfo) => {
         })
     };
 };
-

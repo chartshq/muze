@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { getUniqueId, getSymbol, generateGetterSetters } from 'muze-utils';
+import { getUniqueId, getSymbol, generateGetterSetters, mergeRecursive } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { DEFAULT_CONFIG } from './defaults';
 import { SHAPE } from '../enums/constants';
@@ -19,20 +19,18 @@ export default class ShapeAxis {
     * Creates an instance of SimpleAxis.
     * @param {Object} params input parameters.
     * @param {Object | undefined} params.range Type of color scheme.
-    * @param {string} params.type The type of scale to handle.
     * @memberof ShapeAxis
     */
     constructor (config) {
         generateGetterSetters(this, PROPS);
 
         this._id = getUniqueId();
-        this._config = Object.assign({}, this.constructor.defaultConfig(), config);
-        this._range = config.range || ['circle', 'diamond', 'star', 'cross', 'square', 'wye', 'triangle'];
-        this._generator = config.generator;
+        this._config = Object.assign({}, this.constructor.defaultConfig());
+        this._config = mergeRecursive(this._config, config);
 
         this._scale = createScale({
             type: 'ordinal',
-            range: this._range
+            range: this._config.range
         });
     }
 
@@ -93,8 +91,8 @@ export default class ShapeAxis {
         this.domain(domain);
         this.scale().domain(domain);
 
-        if (this.generator()) {
-            this._generatedShapes = shapeGenerator(domain, this.generator());
+        if (this.config().generator) {
+            this._generatedShapes = shapeGenerator(domain, this.config().generator);
         }
         return this;
     }
@@ -111,7 +109,7 @@ export default class ShapeAxis {
             type: this.constructor.type(),
             scale: this.scale(),
             domain: this.domain(),
-            range: this.range(),
+            range: this.config().range,
             config: this.config()
         };
     }
