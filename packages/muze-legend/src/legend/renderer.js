@@ -228,7 +228,8 @@ export const renderDiscreteItem = (context, container) => {
             width: iconWidth,
             height: iconHeight,
             color,
-            type
+            type,
+            className
         } = item.icon;
 
     labelManager.useEllipsesOnOverflow(true);
@@ -239,11 +240,13 @@ export const renderDiscreteItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    container.each(function (d) {
+    container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(d[1]);
         } else {
             const icon = getLegendIcon(d, iconWidth, iconHeight, type);
+            selectElement(this).classed(`${classPrefix}-${className}`, true);
+            selectElement(this).classed(`${classPrefix}-${className}-${i}`, true);
             renderIcon(icon, selectElement(this), d, {
                 classPrefix,
                 iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,

@@ -44,6 +44,7 @@ export const DEFAULT_CONFIG = {
             width: 10
         },
         icon: {
+            className: 'legend-icon',
             height: 20,
             width: 20,
             color: 'rgba(0,0,0,.5)',

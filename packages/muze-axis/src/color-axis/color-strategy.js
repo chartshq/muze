@@ -65,7 +65,7 @@ const steppedDomain = (domain, steps, range) => {
     let newRange = [];
     if (steps instanceof Array) {
         newSteps = steps.slice().sort();
-        newSteps = [domain[0], ...steps, domain[1]].sort();
+        newSteps = [...new Set([domain[0], ...steps, domain[1]])].sort();
     } else {
         const interpolator = numberInterpolator()(...domain);
         for (let i = 0; i <= steps; i++) {
@@ -79,13 +79,14 @@ const steppedDomain = (domain, steps, range) => {
     }
     const maxRangeLength = Math.min(range.length, 18);
 
-    if (newSteps.length - 1 > maxRangeLength) {
-        const rangeCycles = Math.floor((newSteps.length - 1) / maxRangeLength);
+    if (newSteps.length > maxRangeLength) {
+        const rangeCycles = Math.floor((newSteps.length) / maxRangeLength);
         for (let i = 0; i < rangeCycles; i++) {
             newRange = [...newRange, ...range];
         }
+        newRange = [...newRange, ...range.slice(0, (newSteps.length) % maxRangeLength)];
     } else {
-        newRange = range.slice(0, newSteps.length - 1);
+        newRange = range.slice(0, newSteps.length);
     }
     return { uniqueVals, domain: newSteps, nice: true, range: newRange };
 };
