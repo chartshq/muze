@@ -136,6 +136,8 @@ export const renderGradient = (context, container) => {
         margin,
         border,
         titleSpaces,
+        maxHeight,
+        maxWidth,
         height,
         width
     } = context.measurement();
@@ -150,20 +152,26 @@ export const renderGradient = (context, container) => {
         linearGradient.attr('x2', '100%');
         legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
+        legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);
+
+        applyStyle(legendContainer, {
+            height: `${height}px`,
+            width: `${Math.min(width, maxWidth)}px`,
+            padding: `${padding}px`
+        });
     } else {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
         gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
         legendGradCont.attr('transform', `translate(0 ${labelDim.height / 2})`);
         renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
+        legendContainer.classed(`${classPrefix}-overflow-y`, height > maxHeight);
+        applyStyle(legendContainer, {
+            height: `${Math.min(height, maxHeight)}px`,
+            width: `${width}px`,
+            padding: `${padding}px`
+        });
     }
-
-    // Apply styles to the legend container
-    applyStyle(legendContainer, {
-        height: `${height}px`,
-        width: `${width}px`,
-        padding: `${padding}px`
-    });
 
     // Apply Styles to the legend plot area
     applyStyle(legendGradSvg, {

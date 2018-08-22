@@ -1,5 +1,4 @@
-import { makeElement, selectElement, isEqual } from 'muze-utils';
-import { SideEffectContainer } from '../enums/class-names';
+import { isEqual } from 'muze-utils';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL } from '../constants';
 import { canvasOptions } from './local-options';
 

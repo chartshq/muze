@@ -36,6 +36,14 @@ $prefix: muze-;
     opacity: 0.8;
 }
 
+.#{$prefix}overflow-y{
+    overflow-y: scroll;
+} 
+
+.#{$prefix}overflow-x{
+    overflow-x: scroll;
+}
+
 .#{$prefix}legend-fadeout {
     fill-opacity: 0.3;
     opacity: 0.3;

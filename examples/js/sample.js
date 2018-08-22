@@ -73,9 +73,8 @@
             .shape('Origin')
             .color({
                field: 'Acceleration',
-               interpolate: false,
-               steps: [30,100],
-               scheme:['red', 'blue', 'green']
+               interpolate: true,
+               scheme:['red', 'blue', 'green', 'yellow']
          
             })
             // .size('Origin')

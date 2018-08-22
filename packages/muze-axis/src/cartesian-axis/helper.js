@@ -217,6 +217,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
         showAxisName,
         tickValues
    } = config;
+    const domain = context.domain();
     const { height: axisDimHeight } = axisLabelDim;
     const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 
@@ -224,10 +225,10 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
 
     height = 0;
     if (tickValues) {
-        width = tickValues.reduce((total) => {
-            total += tickDimWidth + context._minTickDistance.width;
-            return total;
-        }, 0);
+        const minTickDiff = context.getMinTickDifference();
+        const [min, max] = [Math.min(...tickValues, ...domain), Math.max(...tickValues, ...domain)];
+
+        width = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + context._minTickDistance.width);
     }
     if (!width || width === 0) {
         height = Math.max(tickDimWidth, tickDimHeight);

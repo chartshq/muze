@@ -34,7 +34,6 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
-    console.log(maxIconWidth);
     return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
 };
 

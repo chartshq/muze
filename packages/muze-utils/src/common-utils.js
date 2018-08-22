@@ -1380,7 +1380,7 @@ const Scales = {
  *
  */
 const getSmallestDiff = (points) => {
-    points = points.sort();
+    points = points.sort((a, b) => a - b);
     let minDiff = points[1] - points[0];
     for (let i = 2; i < points.length; i++) {
         minDiff = Math.min(minDiff, points[i] - points[i - 1]);
