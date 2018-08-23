@@ -111,7 +111,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                             .measurement(legendMeasures)
                             .setLegendMeasures();
 
-            legends.push({ canvas, legend });
+            legends.push({ canvas, legend, scaleType });
         }
     });
     // }
@@ -127,9 +127,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
  * @param {*} availableWidth
  * @returns
  */
-export const getLegendSpace = (context, availableHeight, availableWidth) => {
-    const legends = context.legend();
-    const legendConfig = context.config().legend;
+export const getLegendSpace = (legends, legendConfig, availableHeight, availableWidth) => {
     const legendMeasures = legends.map(legendInfo => legendInfo.legend.measurement());
     const legendSpace = { width: 0, height: 0 };
 

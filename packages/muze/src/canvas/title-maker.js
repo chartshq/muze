@@ -79,6 +79,7 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
                 context[`${type}Cell`]);
 
             headers[`${type}Cell`] = cell;
+            context._composition[type] = cell;
             headerHeight += height + config.padding;
         }
     });

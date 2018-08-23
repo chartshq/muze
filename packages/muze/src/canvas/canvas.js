@@ -37,7 +37,7 @@ export default class Canvas extends TransactionSupport {
         this._renderedPromise = new Promise((resolve) => {
             this._renderedResolve = resolve;
         });
-        this._layout = new GridLayout();
+        this._composition.layout = new GridLayout();
         this._store = new Store({});
 
         this.firebolt(new GroupFireBolt(this));
@@ -64,7 +64,7 @@ export default class Canvas extends TransactionSupport {
         if (params.length) {
             return this;
         }
-        return this._layout;
+        return this.composition().layout;
     }
 
     /**
@@ -161,7 +161,8 @@ export default class Canvas extends TransactionSupport {
             this._registry = { components, componentSubRegistry };
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
-            this.composition({ visualGroup: initedComponents[0] });
+            this._composition.visualGroup = initedComponents[0];
+
             this.composition().visualGroup.alias(this.alias());
             return this;
         }
@@ -206,7 +207,7 @@ export default class Canvas extends TransactionSupport {
         if (params.length) {
             return this;
         }
-        return this._legend;
+        return this.composition().legend;
     }
 
     /**

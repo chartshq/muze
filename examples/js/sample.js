@@ -164,8 +164,8 @@
             })
 
     
-        // .title('The Muze Project', { position: "top", align: "left",  })
-		// .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
+        .title('The Muze Project', { position: "top", align: "left",  })
+		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
         .mount(document.getElementById('chart2'));
         
         setTimeout(function(){
