@@ -101,7 +101,8 @@ export const getItemContainers = (container, data, legendInstance) => {
     const datasets = {};
     const {
         itemSpaces,
-        maxItemSpaces
+        maxItemSpaces,
+        width
     } = legendInstance.measurement();
     const {
         classPrefix,
@@ -120,9 +121,11 @@ export const getItemContainers = (container, data, legendInstance) => {
     const rows = makeElement(container, 'div', datasets.row, `${classPrefix}-legend-row`);
     rows.style(HEIGHT, (d, i) => `${itemSpaces[i].height}px`);
     align === VERTICAL && rows.style(WIDTH, () => `${maxItemSpaces.width}px`);
+    align !== VERTICAL && rows.style(WIDTH, () => `${width}px`);
     align === VERTICAL && rows.style('padding', `${padding}px`);
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
+    align === VERTICAL && columns.style(WIDTH, d => `${width}px`);
     align !== VERTICAL && columns.style('padding', `${padding}px`);
     return columns;
 };

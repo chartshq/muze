@@ -212,7 +212,8 @@ export function renderAxis (axisInstance) {
     }
     const tickSize = axisInstance.getTickSize();
 
-    const selectContainer = makeElement(selectElement(mount), 'g', [1], `${className}`);
+    const selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
+        key => key.config().id);
 
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
@@ -231,7 +232,6 @@ export function renderAxis (axisInstance) {
 
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
-
     setFixedBaseline(axisInstance);
     if (labels.smartTicks === false) {
         selectContainer.transition()

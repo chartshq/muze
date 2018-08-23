@@ -149,7 +149,7 @@ export const renderGradient = (context, container) => {
     if (align === ALIGN.HORIZONTAL) {
         gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
-        linearGradient.attr('x2', '100%');
+        linearGradient.attr('x2', '100%').attr('y1', '0%');
         legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
         legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);

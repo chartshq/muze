@@ -87,58 +87,62 @@
 		window.canvas = env.canvas();
 		let canvas2 = env.canvas();
 		let canvas3 = env.canvas();
-		let rows = [[ 'Year','Displacement'], ['Horsepower']],
-			columns = [ 'Cylinders'];
+		let rows = ['Acceleration'],
+            columns = [ 'Cylinders'];
+            canvas2 = canvas2
+			.rows(rows)
+            .columns(['Origin'])
+            // .color('Origin')
+            .data(rootData)
+			.width(500)
+            .height(350)
+            .mount(document.getElementById('chart'));
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('Origin')
-            // .color({
-            //     field: 'Displacement',
-            //     // range: ['red', 'blue'],
-            //     stops: 5,
-            //     step: true,
-            //     value: 'red'
-            // })
+            .color('Acceleration')
+            .size('Origin')
             .data(rootData)
-			.width(600)
+			.width(700)
             .height(350)
-            // .size()
-            .layers([{
-                mark: 'point',
-                encoding: {
-                    y: 'Horsepower'
-                }
+        //     // .size()
+        //     .layers([{
+        //         mark: 'point',
+        //         encoding: {
+        //             y: 'Horsepower'
+        //         }
              
-            }])
-            // .size('Origin')
+        //     }])
+        //     // .size('Origin')
             .config({
-                border:{
-                    width: 2,
-                  
-                },
-                axes:{
-                        x:{
-                            showAxisName: true,
+        //         border:{
+        //             width: 2,
+                  legend:{
+                      position: 'bottom'
+                  }
+                })
+        //         axes:{
+        //                 x:{
+        //                     showAxisName: true,
                           
                         
-                    }, y:{
-                        showAxisName: true,
-                        // name: 'Acceleration per year',
-                        axisNamePadding: 12
-                    }
-                },
-                legend: {
-                    color:{
-                    // show: false
-                    }
-                }
-            })
+        //             }, y:{
+        //                 showAxisName: true,
+        //                 // name: 'Acceleration per year',
+        //                 axisNamePadding: 12
+        //             }
+        //         },
+        //         legend: {
+        //             color:{
+        //             // show: false
+        //             }
+        //         }
+        //     })
 
     
-        .title('The Muze Project', { position: "top", align: "left",  })
-		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-        .mount(document.getElementsByTagName('body')[0]);
+        // .title('The Muze Project', { position: "top", align: "left",  })
+		// .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
+        .mount(document.getElementById('chart2'));
         
         setTimeout(function(){
         // console.log(    canvas.layout().pages('column')) 

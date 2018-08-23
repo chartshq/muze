@@ -139,12 +139,14 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
                         .each(function (d) { d.legendInstance.mount(this); })
                         .style('width', d => `${d.legendWidth}px`);
     } else {
-        const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section-${0}`)
+        const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section`)
                         .classed(`${classPrefix}-legend-horizontal-section`, true)
-                        .classed(`${classPrefix}-legend-section`, true)
+                        .classed(`${classPrefix}-legend-section-${0}`, true)
                         .style('width', `${legWidth}px`);
+
         makeElement(mount, 'div', legendComponents, `${classPrefix}-legend-components`)
-                        .each(function (d) { d.legend.mount(this); });
+                        .each(function (d) { d.legend.mount(this); })
+                        .style('width', d => `${d.legend.measurement().width}px`);
     }
 };
 
