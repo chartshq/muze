@@ -100,7 +100,7 @@ const env = muze();
 const DataModel = muze.DataModel;
 const mountPoint = document.getElementById('chart');
 
-const dm = new DataModel(schema, data);
+const dm = new DataModel(data, schema);
 const rows = ["Horsepower"];
 const columns = ["Origin"];
 
