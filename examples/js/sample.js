@@ -96,12 +96,36 @@
             .data(rootData)
 			.width(500)
             .height(350)
+            .config({
+                //         border:{
+                //             width: 2,
+                          legend:{
+                            //   position: 'bottom'
+                          },
+                
+                        axes:{
+                                x:{
+                                    showAxisName: true,
+                                  
+                                
+                            }, y:{
+                                showAxisName: true,
+                                // name: 'Acceleration per year',
+                                // axisNamePadding: 12
+                            }
+                        },
+                //         legend: {
+                //             color:{
+                //             // show: false
+                //             }
+                //         }
+                    })
             .mount(document.getElementById('chart'));
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
-            .color('Acceleration')
-            .size('Origin')
+            // .color({field: 'Acceleration', step: true})
+            .color('Origin')
             .data(rootData)
 			.width(700)
             .height(350)
@@ -118,26 +142,26 @@
         //         border:{
         //             width: 2,
                   legend:{
-                      position: 'bottom'
-                  }
-                })
-        //         axes:{
-        //                 x:{
-        //                     showAxisName: true,
+                    //   position: 'bottom'
+                  },
+        
+                axes:{
+                        x:{
+                            showAxisName: true,
                           
                         
-        //             }, y:{
-        //                 showAxisName: true,
-        //                 // name: 'Acceleration per year',
-        //                 axisNamePadding: 12
-        //             }
-        //         },
+                    }, y:{
+                        showAxisName: true,
+                        // name: 'Acceleration per year',
+                        // axisNamePadding: 12
+                    }
+                },
         //         legend: {
         //             color:{
         //             // show: false
         //             }
         //         }
-        //     })
+            })
 
     
         // .title('The Muze Project', { position: "top", align: "left",  })

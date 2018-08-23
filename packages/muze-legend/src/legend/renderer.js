@@ -127,6 +127,7 @@ export const getItemContainers = (container, data, legendInstance) => {
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
     align === VERTICAL && columns.style(WIDTH, d => `${width}px`);
     align !== VERTICAL && columns.style('padding', `${padding}px`);
+
     return columns;
 };
 
@@ -162,7 +163,7 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     maxGradWidth = maxWidth - (margin * 2 + border * 2);
 
     let legendBody = makeElement(container, 'div', [1], `${classPrefix}-legend-body`);
-
+    legendBody.select(`.${classPrefix}-legend-overflow`).remove();
         // Create a div with scroll when overflow
     if (maxGradWidth && maxGradWidth < gradWidth) {
         legendBody = legendBody.style(WIDTH, `${maxGradWidth}px`).style('overflow-x', 'scroll');
