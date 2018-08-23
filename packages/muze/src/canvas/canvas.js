@@ -75,7 +75,6 @@ export default class Canvas extends TransactionSupport {
      */
     composition (...params) {
         if (params.length) {
-            this._composition = params[0];
             return this;
         }
         return this._composition;

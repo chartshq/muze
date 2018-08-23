@@ -125,7 +125,7 @@ export const getItemContainers = (container, data, legendInstance) => {
     align === VERTICAL && rows.style('padding', `${padding}px`);
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
     align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
-    align === VERTICAL && columns.style(WIDTH, d => `${width}px`);
+    align === VERTICAL && columns.style(WIDTH, () => `${width}px`);
     align !== VERTICAL && columns.style('padding', `${padding}px`);
 
     return columns;

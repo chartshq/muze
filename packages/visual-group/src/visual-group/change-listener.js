@@ -10,13 +10,16 @@ import localOptions from './local-options';
  * @param {*} placeholder
  * @memberof VisualGroup
  */
-const setMatrixInstances = (context, placeholder) => context.matrixInstance({
-    value: new ValueMatrix(placeholder.values),
-    left: new ValueMatrix(placeholder.rows[0]),
-    right: new ValueMatrix(placeholder.rows[1]),
-    top: new ValueMatrix(placeholder.columns[0]),
-    bottom: new ValueMatrix(placeholder.columns[1])
-});
+const setMatrixInstances = (context, placeholder) => {
+    context._composition.matrices = {
+        value: new ValueMatrix(placeholder.values),
+        left: new ValueMatrix(placeholder.rows[0]),
+        right: new ValueMatrix(placeholder.rows[1]),
+        top: new ValueMatrix(placeholder.columns[0]),
+        bottom: new ValueMatrix(placeholder.columns[1])
+    };
+    return context;
+};
 
 /**
  *
@@ -69,7 +72,7 @@ export const setupChangeListeners = (context) => {
             resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
             // Getting the placeholders
             const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-            context._groupedModel = placeholderInfo.dataModels.groupedModel;
+            context._composition.groupDataModel = placeholderInfo.dataModels.groupedModel;
             // Set the selection object
             context.selection(placeholderInfo.selection);
 
@@ -89,6 +92,7 @@ export const setupChangeListeners = (context) => {
              // Set placeholder information
             context.placeholderInfo(placeholderInfo);
 
+            context._composition.axes = resolver.axes();
             context.metaData({
                 border: getBorders(placeholderInfo, encoders.simpleEncoder)
             });
