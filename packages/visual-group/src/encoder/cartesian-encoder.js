@@ -269,9 +269,5 @@ export default class CartesianEncoder extends VisualEncoder {
         });
         return layerConfig;
     }
-
-    getAggregationFns (groupByFns) {
-        return groupByFns;
-    }
 }
 

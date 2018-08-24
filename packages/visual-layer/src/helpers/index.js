@@ -38,7 +38,6 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
                 // fade selections
                 colorTransform[interactionType][styleType] = style.intensity;
                 const color = transfromColor(colorAxis, d, styleType, style.intensity).color;
-                // console.log(originalColor, interactionType, color);
                 return color;
             }
             if (!apply && colorTransform[interactionType][styleType]) {

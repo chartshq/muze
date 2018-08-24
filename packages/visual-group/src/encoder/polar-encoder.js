@@ -246,8 +246,4 @@ export default class PolarEncoder extends VisualEncoder {
         });
         return serializedLayers;
     }
-
-    getAggregationFns (groupByFns) {
-        return groupByFns;
-    }
 }

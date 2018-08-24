@@ -53,8 +53,8 @@
 				{
 					name: 'Year',
 					type: 'dimension',
-					// subtype: 'temporal',
-					// format: '%Y-%m-%d'
+					subtype: 'temporal',
+					format: '%Y-%m-%d'
 				},
 
 			];
@@ -93,16 +93,20 @@
 			.rows(rows)
             .columns(columns)
             // .color({field: 'Acceleration', step: true})
-            .color('Origin')
+            .color({
+                field: 'Origin',
+                step: true
+            })
             .data(rootData.select((fields) => fields.Origin.value === 'USA' || fields.Origin.value === 'Japan'))
 			.width(1200)
             .height(600)
             // .size()
             .layers([{
-                mark: 'bar',
+                mark: 'line',
                 transform: {
                     type: 'group'
                 },
+                connectNullData: false
                 // transition: {
                 //     disabled: true
                 // }

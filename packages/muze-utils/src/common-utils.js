@@ -62,6 +62,18 @@ import * as STACK_CONFIG from './enums/stack-config';
 
 const HTMLElement = window.HTMLElement;
 
+const isSimpleObject = (obj) => {
+    let token;
+    if (typeof obj === 'object') {
+        if (obj === null) { return false; }
+        token = Object.prototype.toString.call(obj);
+        if (token === '[object Object]') {
+            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
+        }
+    }
+    return false;
+};
+
 /**
  * Returns unique id
  * @return {string} Unique id string
@@ -79,7 +91,7 @@ const clone = (o) => {
     for (const key in o) {
         if ({}.hasOwnProperty.call(o, key)) {
             v = o[key];
-            output[key] = (typeof v === 'object') ? clone(v) : v;
+            output[key] = isSimpleObject(v) ? clone(v) : v;
         }
     }
     return output;
@@ -799,18 +811,6 @@ const isHTMLElem = elem => elem instanceof HTMLElement;
 
 const ERROR_MSG = {
     INTERFACE_IMPL: 'Method not implemented'
-};
-
-const isSimpleObject = (obj) => {
-    let token;
-    if (typeof obj === 'object') {
-        if (obj === null) { return false; }
-        token = Object.prototype.toString.call(obj);
-        if (token === '[object Object]') {
-            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
-        }
-    }
-    return false;
 };
 
 /**

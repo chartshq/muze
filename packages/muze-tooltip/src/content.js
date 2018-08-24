@@ -123,7 +123,6 @@ export default class Content {
 
     clear () {
         this._model = null;
-        // this._mount && this._mount.remove();
         return this;
     }
 }

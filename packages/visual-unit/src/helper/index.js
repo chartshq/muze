@@ -119,7 +119,6 @@ export const attachDataToLayers = (layers, dm, transformedDataModels) => {
     layers.forEach((layer) => {
         const dataSource = layer.config().source;
         const dataModel = dataSource instanceof Function ? dataSource(dm) : (transformedDataModels[dataSource] || dm);
-        console.log('layerData');
         layer.data(dataModel);
     });
 };

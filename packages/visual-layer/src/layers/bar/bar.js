@@ -125,7 +125,6 @@ export default class BarLayer extends BaseLayer {
      * @return {BarLayer} Instance of bar layer.
      */
     render (container) {
-        console.log('renderBar');
         const config = this.config();
         const transition = config.transition;
         const store = this._store;
