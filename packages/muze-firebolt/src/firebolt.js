@@ -116,13 +116,23 @@ export default class Firebolt {
                             params: [combinedSet, payload, options]
                         });
                     } else {
-                        sideEffectStore[name].apply(combinedSet, payload, options);
+                        this.dispatchSideEffect(name, combinedSet, payload, options);
                     }
                 }
             });
         });
         this._queuedSideEffects.push(...queuedSideEffects);
         return this;
+    }
+
+    dispatchSideEffect (name, selectionSet, payload, options = {}) {
+        const sideEffectStore = this.sideEffects();
+        const sideEffect = sideEffectStore[name];
+        let disable = false;
+        if (options.filter && options.filter(sideEffect)) {
+            disable = true;
+        }
+        !disable && sideEffectStore[name].apply(selectionSet, payload, options);
     }
 
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {

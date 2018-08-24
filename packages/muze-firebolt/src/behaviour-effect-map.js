@@ -11,7 +11,8 @@ export const behaviourEffectMap = {
         name: 'tooltip',
         options: {
             strategy: 'showSelectedItems',
-            order: 0
+            order: 0,
+            filter: context => context.config().mode === 'fragmented'
         }
     }],
     [BEHAVIOURS.HIGHLIGHT]: [{
