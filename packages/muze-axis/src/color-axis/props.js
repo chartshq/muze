@@ -12,6 +12,7 @@ export const getActualHslColor = (e, paletteColor) => {
     let color = '';
     if (typeof e === 'string') {
         e = e.replace(/ /g, '');
+        e = e.toLowerCase();
     }
     if (detectColor(e) === 'hsl' || detectColor(e) === 'hsla') {
         color = e.match(/(\d+(\.\d+)?)/g);

@@ -58,7 +58,7 @@ export const titleCreator = (container, title, measurement, config) =>
                                 .style('padding-right', `${measurement.padding}px`)
                                 .style('border-bottom-width', `${measurement.border}px`)
                                 .style('text-align', title.orientation instanceof Function ?
-                                        title.orientation(config) : title.orientation)
+                                        title.orientation(config.position) : title.orientation)
                                 .text(title.text)
                                 .node();
 
@@ -170,7 +170,6 @@ export const computeItemSpaces = (config, measures, data) => {
             totalHeight = Math.max(totalHeight, itemSpace.height);
         } else {
             totalHeight += itemSpace.height;
-
             totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
         }
         maxItemSpaces = {

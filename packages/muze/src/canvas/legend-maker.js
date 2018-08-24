@@ -1,7 +1,6 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
 import {
-    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, HEIGHT, PADDING, BORDER, CONFIG, LINEAR, COLOR, STEP_COLOR,
-    GRADIENT, DISCRETE, WIDTH
+    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, CONFIG
 } from '../constants';
 
 /**
@@ -11,28 +10,22 @@ import {
  * @param {*} canvases
  * @returns
  */
-export const legendDataCreator = (canvas) => {
+export const legendCreator = (canvas) => {
     let LegendCls;
     const dataset = [];
     const axes = canvas.getRetinalAxes();
+
     Object.entries(axes).forEach((axisInfo) => {
         const scale = axisInfo[1][0];
         const scaleType = axisInfo[0];
         const scaleProps = canvas[scaleType]();
 
-        if (scaleProps && scaleProps.field) {
+        if (scaleProps.field) {
             const {
                 type,
                 step
             } = scale.config();
-            LegendCls = LEGEND_TYPE_MAP[DISCRETE];
-            if (type === LINEAR && scaleType === COLOR) {
-                if (!step) {
-                    LegendCls = LEGEND_TYPE_MAP[GRADIENT];
-                } else {
-                    LegendCls = LEGEND_TYPE_MAP[STEP_COLOR];
-                }
-            }
+            LegendCls = LEGEND_TYPE_MAP[`${type}-${step}-${scaleType}`];
             dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls, scaleType });
         }
     });
@@ -61,9 +54,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
         align
     } = legendConfig;
 
-    const dataset = legendDataCreator(canvas);
+    const legendInfo = legendCreator(canvas);
 
-    dataset.forEach((dataInfo, index) => {
+    legendInfo.forEach((dataInfo, index) => {
         let legend = {};
 
         const legendMeasures = {};
@@ -92,16 +85,11 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             }
             legendMeasures.maxHeight = align === VERTICAL ? (height - headerHeight) : height * 0.2;
             legendMeasures.maxWidth = align === HORIZONTAL ? width : width * 0.2;
-            [HEIGHT, WIDTH, PADDING, BORDER, CONFIG].forEach((e) => {
-                if (legendConfig[e]) {
-                    if (e === HEIGHT) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, config[e]);
-                    } else if (e === WIDTH) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, config[e]);
-                    } else {
-                        legendMeasures[e] = config[e];
-                    }
-                }
+            legendMeasures.width = Math.min(legendMeasures.maxWidth, config.width);
+            legendMeasures.height = Math.min(legendMeasures.maxHeight, config.height);
+
+            [PADDING, BORDER, CONFIG].forEach((e) => {
+                legendMeasures[e] = config[e];
             });
             legend.scale(scale)
                             .title(title)
@@ -114,7 +102,6 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             legends.push({ canvas, legend, scaleType });
         }
     });
-    // }
     return legends;
 };
 

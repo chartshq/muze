@@ -112,11 +112,12 @@ export default class GridLayout extends GenericLayout {
      * @memberof GridLayout
      */
     gotoPage (type, pageNumber) {
+        const pageType = type.toLowerCase();
         const { viewMatricesInfo } = this.getViewInformation();
-        const totalPages = viewMatricesInfo[`${type}Pages`];
+        const totalPages = viewMatricesInfo[`${pageType}Pages`];
         const pointer = Math.min(Math.max(1, pageNumber), totalPages);
         this.config({
-            [`${type}Pointer`]: pointer - 1
+            [`${pageType}Pointer`]: pointer - 1
         });
         this.setViewInformation();
         this.renderGrid();
@@ -132,9 +133,10 @@ export default class GridLayout extends GenericLayout {
      */
     pages (type) {
         const { viewMatricesInfo } = this.getViewInformation();
+        const pageType = type.toLowerCase();
         return {
-            totalPages: viewMatricesInfo[`${type}Pages`],
-            currentPage: this.config()[`${type}Pointer`] + 1
+            totalPages: viewMatricesInfo[`${pageType}Pages`],
+            currentPage: this.config()[`${pageType}Pointer`] + 1
         };
     }
 

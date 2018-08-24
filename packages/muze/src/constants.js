@@ -30,48 +30,22 @@ export const DISCRETE = 'discrete';
 export const STEP_COLOR = 'step-color';
 export const GRADIENT = 'gradient';
 export const LINEAR = 'linear';
+export const ORDINAL = 'ordinal';
 
 export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'script',
     'style'
 ];
 
-export const DEFAULT_CONFIG = {
-    classPrefix: 'muze',
-    interaction: {
-        sideEffect: 'individual'
-    },
-    legend: {
-        position: 'right',
-        color: {
-            show: true
-        },
-        shape: {
-            show: true
-        },
-        size: {
-            show: true
-        }
-    },
-    showHeaders: false,
-    minWidth: 300,
-    minHeight: 200,
-    border: {
-        style: 'solid',
-        color: '#d6d6d6',
-        width: 2,
-        collapse: true,
-        spacing: 0
-    },
-    groupBy: {
-        disabled: false
-    }
-};
-
 export const LEGEND_TYPE_MAP = {
-    [DISCRETE]: DiscreteLegend,
-    [STEP_COLOR]: StepLegend,
-    [GRADIENT]: GradientLegend
+    [`${ORDINAL}-${true}-${COLOR}`]: DiscreteLegend,
+    [`${ORDINAL}-${true}-${SIZE}`]: DiscreteLegend,
+    [`${ORDINAL}-${true}-${SHAPE}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${COLOR}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${SIZE}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${SHAPE}`]: DiscreteLegend,
+    [`${LINEAR}-${true}-${COLOR}`]: StepLegend,
+    [`${LINEAR}-${false}-${COLOR}`]: GradientLegend
 };
 
 export const LEFT = 'left';

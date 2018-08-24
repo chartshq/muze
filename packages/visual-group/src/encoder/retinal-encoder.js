@@ -84,9 +84,11 @@ export default class RetinalEncoder extends VisualEncoder {
 
         Object.entries(encoding).forEach((enc) => {
             if (enc[1] && enc[1].field) {
+                const encType = enc[0];
                 const field = enc[1].field;
-                if (field && (!field[1] || (field[1] && !field[1].domain))) {
-                    axes[enc[0]].forEach((axis) => {
+
+                if (field) {
+                    axes[encType].forEach((axis) => {
                         const domain = domains[field];
                         axis.updateDomain(domain);
                     });

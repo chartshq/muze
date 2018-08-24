@@ -62,7 +62,8 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
         container.style('overflow-x', 'scroll');
     }
     const mountPoint = makeElement(container, 'div', [1], `${classPrefix}-viz`)
-       .style('width', `${canvasWidth}px`);
+       .style('width', `${canvasWidth}px`)
+       .style('height', `${canvasHeight}px`);
     headers.forEach((type) => {
         components[type] = makeElement(mountPoint, 'div', [1], `${classPrefix}-${type}-container`);
         components[type].style('width', `${canvasWidth}px`);

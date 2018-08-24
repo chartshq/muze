@@ -881,25 +881,25 @@ const replaceCSSPrefix = () => {
 };
 
 /**
- *
+ * Gets the  interpolator function from d3 color
  *
  */
 const interpolator = () => interpolate;
 
 /**
- *
+ * Gets the number interpolator from d3 color
  *
  */
 const numberInterpolator = () => interpolateNumber;
 
 /**
- *
+ * Gets the rgb interpolator from d3 color
  *
  */
 const colorInterpolator = () => interpolateRgb;
 
 /**
- *
+ * Gets the hsl interpolator from d3 color
  *
  */
 const hslInterpolator = () => interpolateHslLong;
@@ -911,7 +911,7 @@ const transformColors = () => ({
 });
 
 /**
- *
+ * Gets the piecewise interpolator from d3 color
  *
  */
 const piecewiseInterpolator = () => piecewise;
@@ -1376,10 +1376,6 @@ const Scales = {
     band: scaleBand
 };
 
-/**
- *
- *
- */
 const getSmallestDiff = (points) => {
     points = points.sort((a, b) => a - b);
     let minDiff = points[1] - points[0];

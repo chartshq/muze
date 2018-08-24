@@ -51,18 +51,8 @@ d3.json('../data/cars.json', (jsonData) => {
     }
     ];
     const rootData = new DataModel(jsonData, schema).groupBy(['Year'], {});
-    // let xAxis = new Axis.SimpleAxis({
-    //     type: 'linear',
-    // }, {});
-    // let yAxis = new Axis.SimpleAxis({
-    //     type: 'temporal',
-    //     padding: 0.3
-    // }, {});
-    // yAxis.setRange([400, 0]);
-    // xAxis.setRange([0, 400]);
+
     const fieldsObj = rootData.getFieldspace().fieldsObj();
-    // yAxis.domain(fieldsObj.Year.domain());
-    // xAxis.domain([0, fieldsObj.Displacement.domain()[1]]);
 
     const xAxis = new Axis.SimpleAxis({
         type: 'temporal',
@@ -75,19 +65,6 @@ d3.json('../data/cars.json', (jsonData) => {
     xAxis.setRange([0, 400]);
     yAxis.domain(rootData.getFieldspace().fieldsObj().Displacement.domain());
     xAxis.domain(rootData.getFieldspace().fieldsObj().Year.domain());
-
-    // let xAxis = new Axis.SimpleAxis({
-    //     type: 'band',
-    //     padding: 0
-    // }, {});
-    // let yAxis = new Axis.SimpleAxis({
-    //     type: 'band',
-    //     padding: 0
-    // }, {});
-    // yAxis.setRange([400, 0]);
-    // xAxis.setRange([0, 400]);
-    // yAxis.domain(rootData.getFieldspace().fieldsObj().Origin.domain());
-    // xAxis.domain(rootData.getFieldspace().fieldsObj().Year.domain());
 
     const barLayer = BarLayer.create(rootData, {
         x: xAxis,
