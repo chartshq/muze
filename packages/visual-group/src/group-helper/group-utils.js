@@ -289,7 +289,7 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
         headerFrom = type === ROW ? RIGHT : BOTTOM;
         axisFrom = type === ROW ? RIGHT : BOTTOM;
     } else {
-        headerFrom = type === ROW ? LEFT : BOTTOM;
+        headerFrom = type === ROW ? LEFT : TOP;
         axisFrom = type === ROW ? LEFT : TOP;
     }
     if (firstFieldType(firstField.length - 1) === MEASURE && secondFieldType(0) === MEASURE) {
@@ -299,7 +299,6 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
     } else if (firstFieldType(firstField.length - 1) === MEASURE) {
         axisFrom = type === ROW ? LEFT : TOP;
     }
-
     return [headerFrom, axisFrom];
 };
 

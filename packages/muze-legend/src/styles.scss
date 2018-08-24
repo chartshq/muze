@@ -54,8 +54,8 @@ $prefix: muze-;
     float: left;
     display: flex;
     align-items: center;
-      font-size: 12px;
-
+    cursor: pointer;
+    font-size: 12px;
 }
 .#{$prefix}legend-item-info.center{
     justify-content: center;

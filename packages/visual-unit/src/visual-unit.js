@@ -77,6 +77,7 @@ export default class VisualUnit {
         });
         this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
             this._renderedResolve();
+            this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
         });
 
         this._lifeCycleManager = dependencies.lifeCycleManager;
