@@ -1,5 +1,5 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType, ReservedFields, selectElement } from 'muze-utils';
+import { FieldType, ReservedFields } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
