@@ -28,12 +28,12 @@ export default class Tooltip {
         let connectorContainer = svgContainer;
         this._id = getUniqueId();
         this._config = {};
-        this._container = selectElement(htmlContainer);
         this.config({});
         const tooltipConf = this._config;
         const classPrefix = tooltipConf.classPrefix;
         const contentClass = tooltipConf.content.parentClassName;
-        this._tooltipContainer = this._container.append('div').style('position', 'absolute');
+        const container = makeElement(htmlContainer, 'div', [1], `${classPrefix}-tooltip-container`);
+        this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
         this._tooltipArrow = this._tooltipContainer.append('div');

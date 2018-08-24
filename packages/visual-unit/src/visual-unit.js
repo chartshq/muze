@@ -252,9 +252,8 @@ export default class VisualUnit {
             svgContainer: rootSvg,
             width,
             height,
-            boundWidth: width,
-            boundHeight: height,
             sideEffectGroup: this._sideEffectGroup,
+            parentContainer: this.parentContainer(),
             xOffset: 0,
             yOffset: 0
         };
@@ -548,5 +547,14 @@ export default class VisualUnit {
     removeLayersByType (type) {
         removeLayersBy('type', type);
         return this;
+    }
+
+    parentContainer (...container) {
+        if (container.length) {
+            this._parentContainer = container[0];
+
+            return this;
+        }
+        return this._parentContainer;
     }
 }

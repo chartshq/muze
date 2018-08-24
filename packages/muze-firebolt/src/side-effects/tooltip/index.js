@@ -75,7 +75,7 @@ export default class Tooltip extends SpawnableSideEffect {
 
             const dt = dataModels[i];
             enter[i] = true;
-            const htmlContainer = selectElement('.muze-grid-layout').node().getBoundingClientRect();
+            const htmlContainer = drawingInf.parentContainer.getBoundingClientRect();
             const layoutBoundBox = document.body.getBoundingClientRect();
             const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
             const offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);

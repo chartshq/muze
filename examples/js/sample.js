@@ -155,12 +155,9 @@
             .detail(['Acceleration'])
             .data(rootData)
 			.width(600)
-            .height(500)
+            .height(1800)
             .layers([{
-                mark: 'line',
-                transform: {
-                    type: 'stack'
-                }
+                mark: 'line'
             }])
             // .size()
 

@@ -1,4 +1,4 @@
-import { transactor, FieldType, generateGetterSetters } from 'muze-utils';
+import { transactor, generateGetterSetters } from 'muze-utils';
 import localOptions from './local-options';
 import { SimpleGroup } from '../simple-group';
 import {
@@ -209,49 +209,6 @@ class VisualGroup extends SimpleGroup {
             [CONFIG]: store.get(CONFIG),
             [MOUNT]: store.get(MOUNT)
         };
-    }
-
-    /**
-     *
-     *
-     * @param {*} facetKey
-     * @return
-     * @memberof VisualGroup
-     */
-    getDimensionMeasureMap (facetKey) {
-        const fields = this.resolver().projections();
-        const rowFacets = fields.rowFacets.map(d => `${d}`);
-        const colFacets = fields.colFacets.map(d => `${d}`);
-        const rowProjections = (fields.rowProjections && fields.rowProjections[0]) || [];
-        const colProjections = (fields.colProjections && fields.colProjections[0]) || [];
-        const dimensionMeasureMap = {};
-        const rowMeasures = rowProjections.filter(d => d.type() === FieldType.MEASURE);
-        const colMeasures = colProjections.filter(d => d.type() === FieldType.MEASURE);
-        const units = this.getCellsByFacetKey(facetKey).map(d => d.valueOf());
-
-        units.forEach((unit) => {
-            const fieldsMeasures = unit._dimensionMeasureMap;
-            for (const key in fieldsMeasures) {
-                if ({}.hasOwnProperty.call(fieldsMeasures, key)) {
-                    !dimensionMeasureMap[key] && (dimensionMeasureMap[key] = []);
-                    dimensionMeasureMap[key] = [...new Set([...dimensionMeasureMap[key], ...fieldsMeasures[key]])];
-                }
-            }
-        });
-        rowFacets.forEach((e) => { dimensionMeasureMap[e] = rowMeasures.map(d => `${d}`); });
-        colFacets.forEach((e) => { dimensionMeasureMap[e] = colMeasures.map(d => `${d}`); });
-        return dimensionMeasureMap;
-    }
-
-    /**
-     *
-     *
-     * @param {*} id
-     * @return
-     * @memberof VisualGroup
-     */
-    findUnitById (id) {
-        return this.matrixInstance().value.findPlaceHolderById(id);
     }
 
     getGroupByData () {
