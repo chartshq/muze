@@ -7,7 +7,7 @@ export const strategies = (firebolt) => {
         selectElement(context.mount())
                         .selectAll(`.${classPrefix}-legend-columns`)
                         .filter(d => set.uids.indexOf(d.id) !== -1)
-                        .selectAll(context.elemType())
+                        .selectAll('div')
                         .classed(className, change);
     };
 

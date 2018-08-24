@@ -1,6 +1,5 @@
 import { GridLayout } from '@chartshq/layout';
-import { sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
-import { transactor, Store, getUniqueId, CommonProps } from 'muze-utils';
+import { transactor, Store, getUniqueId } from 'muze-utils';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout } from './layout-maker';
@@ -8,7 +7,6 @@ import { localOptions, canvasOptions } from './local-options';
 import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { resolveInteractionPolicy, mergeInteractionPolicy } from './interaction-resolver';
 import { initCanvas, setupChangeListener } from './helper';
 
 /**
@@ -39,15 +37,10 @@ export default class Canvas extends TransactionSupport {
         this._renderedPromise = new Promise((resolve) => {
             this._renderedResolve = resolve;
         });
-        this._layout = new GridLayout();
-        this._throwback = new Store({
-            [CommonProps.ACTION_INF]: null
-        });
+        this._composition.layout = new GridLayout();
         this._store = new Store({});
 
-        this.firebolt(new GroupFireBolt(this, {
-            behavioural: behaviouralActions
-        }, sideEffects, behaviourEffectMap));
+        this.firebolt(new GroupFireBolt(this));
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const [, store] = transactor(this, options, this._store.model);
@@ -58,6 +51,9 @@ export default class Canvas extends TransactionSupport {
         this.title('', {});
         this.subtitle('', {});
         this.legend({});
+        this.color({});
+        this.shape({});
+        this.size({});
         setupChangeListener(this);
     }
 
@@ -71,7 +67,7 @@ export default class Canvas extends TransactionSupport {
         if (params.length) {
             return this;
         }
-        return this._layout;
+        return this.composition().layout;
     }
 
     /**
@@ -82,7 +78,6 @@ export default class Canvas extends TransactionSupport {
      */
     composition (...params) {
         if (params.length) {
-            this._composition = params[0];
             return this;
         }
         return this._composition;
@@ -168,7 +163,8 @@ export default class Canvas extends TransactionSupport {
             this._registry = { components, componentSubRegistry };
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
-            this.composition({ visualGroup: initedComponents[0] });
+            this._composition.visualGroup = initedComponents[0];
+
             this.composition().visualGroup.alias(this.alias());
             return this;
         }
@@ -206,16 +202,14 @@ export default class Canvas extends TransactionSupport {
     /**
      *
      *
-     * @param {*} lifeCycles
-     * @returns
+     * @readonly
      * @memberof Canvas
      */
-    legendComponents (...legComp) {
-        if (legComp.length > 0) {
-            this._legendComponents = legComp[0];
+    legend (...params) {
+        if (params.length) {
             return this;
         }
-        return this._legendComponents;
+        return this.composition().legend;
     }
 
     /**
@@ -239,8 +233,6 @@ export default class Canvas extends TransactionSupport {
         const mount = this.mount();
         const visGroup = this.composition().visualGroup;
         const lifeCycleManager = this.dependencies().lifeCycleManager;
-        const resolvePolicy = this.resolve();
-        const firebolt = this.firebolt();
         // Get render details including arrangement and measurement
         const { components, layoutConfig, measurement } = getRenderDetails(this, mount);
 
@@ -251,9 +243,6 @@ export default class Canvas extends TransactionSupport {
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle
         lifeCycleManager.notify({ client: this, action: 'drawn' });
-        firebolt.initializeSideEffects();
-        resolveInteractionPolicy(this, mergeInteractionPolicy(resolvePolicy || {}));
-        firebolt.throwback(this._throwback);
         const promises = [];
         visGroup.matrixInstance().value.each((el) => {
             promises.push(el.valueOf().done());

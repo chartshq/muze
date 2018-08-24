@@ -28,7 +28,7 @@ export default class Crossline extends SpawnableSideEffect {
             lineClass
         } = this.config();
         const dataModel = selectionSet.mergedEnter.model;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         if (payload.criteria && dataModel && dataModel.isEmpty()) {
             return this;
         }
@@ -38,7 +38,7 @@ export default class Crossline extends SpawnableSideEffect {
         }
 
         const dataObj = dataModel.getData();
-        const sourceInf = this.sourceInf()();
+        const sourceInf = this.firebolt.context.getSourceInfo();
         const axes = sourceInf.axes;
         const axisFields = sourceInf.fields;
         const fields = selectionSet.fields;
@@ -88,7 +88,7 @@ export default class Crossline extends SpawnableSideEffect {
 
     hide () {
         const className = this.config().className;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         selectElement(drawingInf.sideEffectGroup).selectAll(`.${className}`).remove();
     }
 }

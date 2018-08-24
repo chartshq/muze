@@ -13,8 +13,8 @@ export default class LegendHighlighter extends GenericSideEffect {
         return Highlighter;
     }
 
-    apply (selectionSet, payload, strategyName) {
-        const strategy = this._strategies[strategyName || this._strategy];
+    apply (selectionSet, payload, options = {}) {
+        const strategy = this._strategies[options.strategy || this._strategy];
 
         strategy(selectionSet, this);
     }

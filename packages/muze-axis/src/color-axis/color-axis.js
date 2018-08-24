@@ -19,7 +19,7 @@ export default class ColorAxis {
     /**
     * Creates an instance of SimpleAxis.
     * @param {Object} config input parameters.
-    * @param {Object | undefined} params.scheme Type of color scheme.
+    * @param {Object | undefined} params.range Type of color range.
     * @param {string} params.name the label to show on axis.
     * @param {string} params.type The type of scale to handle.
     * @memberof ColorAxis
@@ -29,12 +29,13 @@ export default class ColorAxis {
         this.config(config);
 
         this._domainType = this._config.type === 'linear' ? CONTINOUS : DISCRETE;
-        this._rangeType = this._config.interpolate ? CONTINOUS : DISCRETE;
+        this._rangeType = (this._config.type === 'linear' && !this._config.step) ? CONTINOUS : DISCRETE;
 
-        this._schemeType = getSchemeType(this._config.scheme || this._config.value || this._config.range);
+        this._schemeType = getSchemeType(this._config.range);
 
         this._colorStrategy = this.setColorStrategy(this._domainType, this._rangeType, this._schemeType);
         this._scale = this.createScale(this._colorStrategy);
+
         this._id = getUniqueId();
     }
 
@@ -68,13 +69,13 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     createScale (colorStrategy) {
-        const { scheme } = this.config();
-        if (scheme && typeof (scheme) === 'string') {
-            return getScheme(scheme);
+        const { range } = this.config();
+        if (range && typeof (range) === 'string') {
+            return getScheme(range);
         }
         return createScale({
             type: colorStrategy.scale,
-            range: scheme
+            range
         });
     }
 
@@ -88,9 +89,9 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     setColorStrategy (domainType, rangeType, schemeType) {
-        const { steps } = this.config();
+        const { stops } = this.config();
 
-        return strategyGetter(domainType, rangeType, schemeType, steps);
+        return strategyGetter(domainType, rangeType, schemeType, stops);
     }
 
     /**
@@ -121,16 +122,20 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
-        const scale = this.scale();
-        const range = scale.range ? scale.range() : null;
-        const color = this._colorStrategy.range(range)(domainVal, scale, this.domain(), this.uniqueValues());
-        if (typeof color === 'string') {
-            const rgbArr = color.substring(4, color.length - 1)
+        if (this.domain()) {
+            const scale = this.scale();
+            const range = scale.range ? scale.range() : null;
+            const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
+
+            if (typeof color === 'string') {
+                const rgbArr = color.substring(4, color.length - 1)
                             .replace(/ /g, '')
                             .split(',');
-            return rgbToHsv(...rgbArr);
+                return rgbToHsv(...rgbArr);
+            }
+            return [...color];
         }
-        return [...color];
+        return [...this.config().value];
     }
 
     /**
@@ -141,12 +146,16 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     updateDomain (domain = []) {
-        const domainFn = this._colorStrategy.domain();
-        const domainInfo = domainFn(domain, this.config().steps);
+        const scale = this.scale();
+        const range = scale.range ? scale.range() : null;
+        const domainRangeFn = this._colorStrategy.domainRange();
+        const scaleInfo = domainRangeFn(domain, this.config().stops, range);
 
-        this.domain(domainInfo.domain);
-        this.uniqueValues(domainInfo.uniqueVals);
-        this.scale().domain(domainInfo.scaleDomain || this.domain());
+        this.domain(scaleInfo.domain);
+        scaleInfo.range && this.scale().range(scaleInfo.range);
+        this.uniqueValues(scaleInfo.uniqueVals);
+        this.scale().domain(scaleInfo.scaleDomain || this.domain());
+
         return this;
     }
 
@@ -162,9 +171,7 @@ export default class ColorAxis {
             type: this.constructor.type(),
             scale: this.scale(),
             domain: this.domain(),
-            range: this.range(),
-            config: this.config(),
-            scheme: this.scheme()
+            config: this.config()
         };
     }
 

@@ -45,9 +45,9 @@ export const listenerMap = context => [
         type: 'computed'
     },
     {
-        props: [PROPS.MOUNT, PROPS.DATA, PROPS.AXES, PROPS.CONFIG],
-        listener: (mountPoint, dataModel, axes, config) => {
-            if (mountPoint[1] && dataModel[1] && config[1] && axes[1]) {
+        props: [PROPS.MOUNT],
+        listener: (mountPoint) => {
+            if (mountPoint[1]) {
                 context.render(mountPoint[1]);
                 context.dependencies().throwback.commit('onlayerdraw', true);
             }

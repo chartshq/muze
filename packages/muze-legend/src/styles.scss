@@ -14,35 +14,42 @@ $prefix: muze-;
 
 .#{$prefix}legend-title {
     border-bottom: solid rgba(0,0,0,0);
-    display: flex;
+    display: block;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    float: left;
+    text-align: left;
+    font-size: 14px;
     height: 30px;
-    fill:#4F4F4F;
-    font-weight:800;
+    fill:#5F5F5F;
+    font-weight:600;
 }
 .#{$prefix}legend-overflow {
-    // display: flex;
-    // align-items: center;
-    // justify-content: center;
     text-align: center
 }
 
-.#{$prefix}legend-shape-svg {
+.#{$prefix}legend-icon-svg {
     cursor: pointer;
 }
-.#{$prefix}legend-shape {
+.#{$prefix}legend-icon {
     cursor: pointer;
-    fill-opacity: 0.8;
+}
+
+.#{$prefix}overflow-y{
+    overflow-y: scroll;
+} 
+
+.#{$prefix}overflow-x{
+    overflow-x: scroll;
 }
 
 .#{$prefix}legend-fadeout {
     fill-opacity: 0.3;
+    opacity: 0.3;
 }
 
 .#{$prefix}legend-brighten {
     fill-opacity: 1;
+    opacity: 1;
     // fill: #ff0000;
 }
 .#{$prefix}legend-item-info {

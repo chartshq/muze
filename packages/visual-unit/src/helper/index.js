@@ -33,56 +33,16 @@ export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     return retinalEncodingsAndMeasures;
 };
 
-export const fetchDependencies = (context, depNames) => depNames.map(dep => context.axes()[`${dep}`]);
-
 export const transformDataModels = (transform, dataModel) => {
-    let transformDeps = [];
     const dataModels = {};
-    const transforms = {};
-
     for (const key in transform) {
         if ({}.hasOwnProperty.call(transform, key)) {
             const transformVal = transform[key];
-            if (transformVal instanceof Array) {
-                const deps = transformVal.slice(0, transformVal.length - 1);
-                const fn = transformVal[transformVal.length - 1];
-                if (transformVal.length > 1) {
-                    transformDeps = [...transformDeps, ...deps];
-                    transforms[key] = {
-                        fn,
-                        deps
-                    };
-                } else {
-                    dataModels[key] = fn(dataModel);
-                }
-            } else {
-                dataModels[key] = transformVal(dataModel);
-            }
+            dataModels[key] = transformVal(dataModel);
         }
     }
 
-    return {
-        dataModels,
-        queuedTransforms: transforms
-    };
-};
-
-export const linkDependencies = (context, layers, layerDeps, layerStore) => {
-    layers.forEach((layer) => {
-        const alias = layer.alias();
-        const deps = layerDeps[alias];
-        const store = {
-            unit: context
-        };
-        if (deps.length) {
-            store.layers = {};
-            deps.forEach((dep) => {
-                store.layers[dep] = layerStore[dep];
-            });
-            store.layers[alias] = layer;
-        }
-        layer.linkLayerStore(store);
-    });
+    return dataModels;
 };
 
 export const getLayerFromDef = (context, definition, existingLayer) => {
@@ -91,40 +51,61 @@ export const getLayerFromDef = (context, definition, existingLayer) => {
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
     }
-    const layerStore = {};
+    const layers = {};
     const instanceArr = toArray(instances);
     definition = toArray(definition);
-    const layerDeps = definition.reduce((acc, def, idx) => {
+    definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
         instance.config(def);
         instance.dependencies(dependencies);
         if (def.name) {
             instance.alias(def.name);
         }
-        acc[instance.alias()] = def.source || [];
-        layerStore[instance.alias()] = instance;
+        layers[instance.alias()] = instance;
         return acc;
     }, {});
-
-    const order = getDependencyOrder(layerDeps);
-    linkDependencies(context, instanceArr, layerDeps, layerStore);
-    return order.map(name => layerStore[name]);
+    return layers;
 };
 
 export const createLayers = (context, layerDefinitions) => {
     const layersMap = context._layersMap;
     const markSet = {};
-    const layers = layerDefinitions.reduce((layersArr, layerDef, i) => {
+    const store = {
+        layers: {},
+        components: {
+            unit: context
+        }
+    };
+    let layers = layerDefinitions.reduce((layersArr, layerDef, i) => {
         const mark = layerDef.mark;
         const definition = layerDef.def;
         const markId = `${mark}-${i}`;
         const instances = getLayerFromDef(context, definition, layersMap[markId]);
-        layersArr = layersArr.concat(...instances);
+        store.layers = Object.assign(store.layers, instances);
+        layersArr = layersArr.concat(...Object.values(instances));
         layersMap[markId] = instances;
         markSet[markId] = markId;
         return layersArr;
     }, []);
+    store.unit = context;
+    const layerdeps = {};
+    layers.forEach((layer) => {
+        const encodingTransform = layer.config().encodingTransform || {};
+        const resolvable = encodingTransform.resolvable;
 
+        layerdeps[layer.alias()] = [];
+        if (resolvable) {
+            const resolved = resolvable(store);
+            const depArr = resolved.depArr;
+            layerdeps[layer.alias()] = depArr;
+            layer.encodingTransform(resolved.fn);
+        } else if (encodingTransform instanceof Function) {
+            layer.encodingTransform(encodingTransform);
+        }
+    });
+
+    const order = getDependencyOrder(layerdeps);
+    layers = order.map(name => store.layers[name]);
     for (const key in layersMap) {
         if (!(key in markSet)) {
             layersMap[key].forEach(layer => layer.remove());
@@ -136,7 +117,7 @@ export const createLayers = (context, layerDefinitions) => {
 
 export const attachDataToLayers = (layers, dm, transformedDataModels) => {
     layers.forEach((layer) => {
-        const dataSource = layer.config().dataSource;
+        const dataSource = layer.config().source;
         const dataModel = dataSource instanceof Function ? dataSource(dm) : (transformedDataModels[dataSource] || dm);
         layer.data(dataModel);
     });
@@ -220,7 +201,7 @@ export const renderLayers = (context, container, layers, measurement) => {
             layer.dataProps({
                 timeDiffs: context.store().get(TIMEDIFFS)
             });
-            layer.mount(group.node());
+            layer.config().render !== false && layer.mount(group.node());
         }
     });
     return this;
@@ -275,3 +256,40 @@ export const removeLayersBy = (layers, searchBy, value) => {
 };
 
 export const createSideEffectGroup = (container, className) => makeElement(container, 'g', [1], className).node();
+
+export const getAdjustedDomain = (max, min) => {
+    const y1ratio = max[0] / (max[0] - min[0]);
+    const y2ratio = max[1] / (max[1] - min[1]);
+
+    // adjust min/max values for positive negative values zero line etc
+    let allSameSign = false;
+
+    // if all numbers are positive set floor to zero
+    if (min[0] > 0 && min[1] > 0 && min[1] > 0 && max[1] > 0) {
+        allSameSign = true;
+        min[0] = 0;
+        min[1] = 0;
+    }
+
+    // if all numbers are negative set ceiling to zero
+    if (min[0] < 0 && min[1] < 0 && min[1] < 0 && max[1] < 0) {
+        allSameSign = true;
+        max[0] = 0;
+        max[1] = 0;
+    }
+
+    // align zero line if necessary
+    if (!allSameSign && y1ratio !== y2ratio) {
+        if (y1ratio < y2ratio) {
+                    // adjust min[1]
+            min[1] = min[0] / max[0] * max[1];
+        } else {
+                    // adjust min[0]
+            min[0] = min[1] / max[1] * max[0];
+        }
+    }
+    return {
+        max,
+        min
+    };
+};

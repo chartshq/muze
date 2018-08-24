@@ -20,11 +20,11 @@ export default class PlotHighlighter extends SurrogateSideEffect {
         return this;
     }
 
-    apply (selectionSet, payload, strategyName) {
-        const strategy = strategies[strategyName || this._strategy];
+    apply (selectionSet, payload, options = {}) {
+        const strategy = strategies[options.strategy || this._strategy];
 
         if (selectionSet.isSourceFieldPresent !== false) {
-            strategy(selectionSet, this);
+            strategy(selectionSet, this, options.strategy || this._strategy);
         }
 
         return this;

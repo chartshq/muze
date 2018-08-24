@@ -53,8 +53,7 @@ export const payloadGenerator = {
         const payload = Object.assign({}, propPayload);
         schema = dataObj.schema;
         const data = dataObj.data;
-        payload.criteria = !sourceIdentifiers ? null : [schema.map(d => d.name),
-            ...data];
+        payload.criteria = !sourceIdentifiers ? null : [schema.map(d => d.name), ...data];
         return payload;
     }
 };

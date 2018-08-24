@@ -1,8 +1,3 @@
-export const LEGEND_CONFIG = {
-    position: 'bottom',
-    show: true
-};
-
 export const TITLE_CONFIG = {
     position: 'top',
     align: 'center',

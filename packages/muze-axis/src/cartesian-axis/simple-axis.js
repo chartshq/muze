@@ -347,6 +347,10 @@ export default class SimpleAxis {
         return this.updateDomainBounds(domain || []);
     }
 
+    getMinTickDifference () {
+        return this.domain();
+    }
+
     /**
      *
      *
@@ -478,3 +482,4 @@ export default class SimpleAxis {
         return Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
     }
 }
+

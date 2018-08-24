@@ -28,8 +28,7 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
 
     if (stPos.x === endPos.x && stPos.y === endPos.y) {
         return {
-            criteria: null,
-            interpolated: true
+            criteria: null
         };
     }
 
@@ -83,8 +82,7 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
 
     return {
         criteria: rangeObj,
-        dimensions,
-        interpolated: true
+        dimensions
     };
 };
 

@@ -148,21 +148,9 @@
     height: inherit;
 }
 
-.#{$prefix}tooltip-box {
-    word-wrap: none;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-}
-
 .#{$prefix}table-header {
     width: inherit;
     height: inherit;
-}
-.#{$prefix}crossline {
-    stroke: #7ab6df;
-    fill: grey;
-    fill-opacity: 0.2;
 }
 
 .#{$prefix}grid-layout {

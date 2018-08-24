@@ -1,3 +1,4 @@
+import { clone } from 'muze-utils';
 import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
@@ -47,41 +48,6 @@ export const changeSideEffectAvailability = (sideEffects, fn, toEnable) => {
 };
 
 export const getMergedSet = set => [...new Set([...set[0], ...set[1]])];
-
-export const setSelectionSets = (addSet, selectionSet, persistent) => {
-    if (addSet === null) {
-        selectionSet.reset();
-    } else if (addSet.length) {
-            // new add set
-        const existingAddSet = addSet.filter(d => selectionSet._set[d] === SELECTION.SELECTION_NEW_ENTRY
-                || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
-
-        // existing add set
-        if (persistent) {
-            if (existingAddSet.length) {
-                selectionSet.updateExit();
-                selectionSet.remove(existingAddSet);
-            } else {
-                selectionSet.updateEntry();
-                selectionSet.add(addSet);
-            }
-            const { exitSet } = selectionSet.getSets();
-            const mergedExitSet = getMergedSet(exitSet);
-            const completeSetCount = selectionSet.getCompleteSet().length;
-            if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
-                selectionSet.reset();
-            }
-        } else {
-            selectionSet.updateExit();
-            const { entrySet } = selectionSet.getSets();
-            selectionSet.reset(getMergedSet(entrySet));
-            selectionSet.add(addSet);
-            selectionSet.update(existingAddSet);
-        }
-    } else {
-        selectionSet.remove(selectionSet.getCompleteSet());
-    }
-};
 
 export const getSourceFields = (propagationInf, criteria = {}) => {
     const sourceIdentifiers = propagationInf.sourceIdentifiers;
@@ -134,4 +100,44 @@ export const getSetInfo = (type, set, config) => {
         length: set.length,
         model
     };
+};
+
+export const getSideEffects = (behaviour, behaviourEffectMap) => {
+    const sideEffects = [];
+    for (const key in behaviourEffectMap) {
+        const behaviours = key.split(',');
+        const found = behaviours.some(d => d === behaviour);
+        if (found) {
+            sideEffects.push({
+                effects: behaviourEffectMap[key],
+                behaviours
+            });
+        }
+    }
+    return sideEffects;
+};
+
+export const unionSets = (context, behaviours) => {
+    let combinedSet = {};
+    const models = {
+        mergedEnter: null,
+        mergedExit: null
+    };
+    behaviours.forEach((behaviour) => {
+        const entryExitSet = context._entryExitSet[behaviour];
+        if (entryExitSet) {
+            combinedSet = Object.assign(combinedSet, clone(entryExitSet));
+            ['mergedEnter', 'mergedExit'].forEach((type) => {
+                const model = entryExitSet[type].model;
+                let existingModel = models[type];
+                if (!existingModel) {
+                    existingModel = models[type] = model;
+                } else {
+                    existingModel = models[type] = model.union(existingModel);
+                }
+                combinedSet[type].model = existingModel;
+            });
+        }
+    });
+    return combinedSet;
 };

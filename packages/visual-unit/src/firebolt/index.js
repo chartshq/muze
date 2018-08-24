@@ -1,6 +1,6 @@
-import { FieldType, CommonProps } from 'muze-utils';
+import { FieldType } from 'muze-utils';
 import { Firebolt, SpawnableSideEffect } from '@chartshq/muze-firebolt';
-import { registerListeners, getApplicableSideEffects } from './helper';
+import { registerListeners } from './helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
 
@@ -11,49 +11,47 @@ import { propagateValues } from './data-propagator';
 export default class UnitFireBolt extends Firebolt {
     constructor (...params) {
         super(...params);
-        this._entryExitSet = {};
         registerListeners(this);
     }
 
-     /**
-     * Dispatches the behaviour with a given payload.
-     * @param {string | Array} behaviourList Name of a single behaviour or multiple behaviours
-     * @param {Object} payload Configuration parameters for action.
-     * @return {VisualUnit} Instance of visual unit.
-     */
-    dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
-        let actionInf;
-        const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
-        const behaviouralActions = this._actions.behavioural;
-        const action = behaviouralActions[behaviour];
-        const context = this.context;
-        const behaviourEffectMap = this._behaviourEffectMap;
-        const sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
-        const throwback = this.throwback();
-        const unitId = context.id();
-        const selectionSet = action.dispatch(payload, propagationInfo)();
-        const propagationSelectionSet = selectionSet.find(d => !d.sourceSelectionSet);
-        this._entryExitSet[behaviour] = propagationSelectionSet;
-
-        if (propagate) {
-            propagateValues(this, behaviour, {
-                payload,
-                selectionSet: selectionSet.find(d => d.sourceSelectionSet),
-                sideEffects
-            });
-        } else {
-            const applicableSideEffects = getApplicableSideEffects(this, payload, sideEffects, propagationInfo);
-            this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
-        }
-
-        actionInf = throwback.get(CommonProps.ACTION_INF);
-        !actionInf && (actionInf = {});
-        actionInf[behaviour] = {
+    propagate (behaviour, payload, selectionSet, sideEffects) {
+        propagateValues(this, behaviour, {
             payload,
-            sourceUnit: propagate ? unitId : payload.sourceUnit
-        };
-        throwback.commit(CommonProps.ACTION_INF, actionInf);
-        return this;
+            selectionSet,
+            sideEffects,
+            propagationFields: this._propagationFields
+        });
+    }
+
+    getApplicableSideEffects (sideEffects, payload, propagationInf) {
+        const context = this.context;
+        const unitId = context.id();
+        const aliasName = context.parentAlias();
+        const propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
+        const sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
+        const sourceSideEffects = this._sourceSideEffects;
+        const actionOnSource = sourceUnitId === unitId;
+
+        const applicableSideEffects = payload.sideEffects ? [{
+            effects: payload.sideEffects,
+            behaviours: [payload.action]
+        }] : sideEffects;
+
+        applicableSideEffects.forEach((d) => {
+            let mappedEffects = d.effects;
+            mappedEffects = mappedEffects.filter((se) => {
+                if (!actionOnSource && payload.criteria !== null) {
+                    return !sourceSideEffects[se.name || se];
+                }
+                if (propagationSourceCanvas === aliasName) {
+                    return d.applyOnSource !== false;
+                }
+                return true;
+            });
+            d.effects = mappedEffects;
+        });
+
+        return applicableSideEffects;
     }
 
     enableSideEffectOnPropagation (sideEffect) {
@@ -83,9 +81,11 @@ export default class UnitFireBolt extends Firebolt {
                     isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1);
                 }
             }
-
             const payload = payloadFn(this.context, data, propValue);
-            payload && this.dispatchBehaviour(action, payload, {
+            const sideEffects = this._behaviourEffectMap[action];
+            const mutableEffect = sideEffects.find(sideEffect =>
+                this._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
+            const propagationInf = {
                 propagate: false,
                 data,
                 propPayload,
@@ -93,7 +93,13 @@ export default class UnitFireBolt extends Firebolt {
                 persistent: false,
                 isSourceFieldPresent,
                 sourceId: propValue.sourceId
-            });
+            };
+            this._actionHistory[action] = {
+                payload,
+                propagationInf,
+                isMutableAction: mutableEffect
+            };
+            this.dispatchBehaviour(action, payload, propagationInf);
         };
     }
 
@@ -106,27 +112,12 @@ export default class UnitFireBolt extends Firebolt {
                     const context = this.context;
                     return context.getDrawingContext();
                 });
-                sideEffects[key].sourceInf(() => this.context.getSourceInfo());
-                sideEffects[key].marksFromIdentifiers(identifiers =>
-                    this.context.getPlotPointsFromIdentifiers(identifiers));
             }
         }
-    }
-
-    throwback (...throwback) {
-        if (throwback.length) {
-            this._throwback = throwback[0];
-            return this;
-        }
-        return this._throwback;
     }
 
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
         return this;
-    }
-
-    getEntryExitSet (action) {
-        return this._entryExitSet[action];
     }
 }

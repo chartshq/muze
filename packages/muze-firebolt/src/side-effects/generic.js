@@ -43,24 +43,4 @@ export default class GenericSideEffect {
     apply () {
         return this;
     }
-
-    detach () {
-        return this;
-    }
-
-    sourceInf (...sourceInf) {
-        if (sourceInf.length) {
-            this._sourceInf = sourceInf[0];
-            return this;
-        }
-        return this._sourceInf;
-    }
-
-    marksFromIdentifiers (...fn) {
-        if (fn.length) {
-            this._marksFromIdentifiers = fn[0];
-            return this;
-        }
-        return this._marksFromIdentifiers;
-    }
 }

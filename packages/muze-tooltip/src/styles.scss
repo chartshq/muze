@@ -11,15 +11,16 @@
     padding-left: 8px;
     padding-right: 8px;
     padding-top: 4px;
+    display: inline-block;
     // padding-bottom: 4px;
     pointer-events: none;
     z-index: 9999999999;
-    white-space: nowrap;
+
 }
 .#{$prefix}tooltip-row{
     padding-bottom: 8px;
-    float: none !important;
 }
+
 .#{$prefix}tooltip-row:last-child{
     padding-bottom: 4px;
 }
@@ -94,3 +95,12 @@
     left: -12px;
 };
 
+.#{$prefix}tooltip-content-container {
+    float: none !important;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+}
+.#{$prefix}-tooltip-value {
+    font-weight: bold;
+}

@@ -1,4 +1,3 @@
-
 /* global window, document, d3 */
 const BarLayer = window['visual-layer'].BarLayer;
 
@@ -30,7 +29,7 @@ d3.json('../data/cars.json', (jsonData) => {
     },
     {
         name: 'Weight_in_lbs',
-        type: 'measure',
+        type: 'measure'
     },
     {
         name: 'Acceleration',
@@ -49,46 +48,23 @@ d3.json('../data/cars.json', (jsonData) => {
         type: 'dimension',
         subtype: 'temporal',
         format: '%Y-%m-%d'
-    },
+    }
     ];
-    let rootData = new DataModel(jsonData, schema).groupBy(['Year'], {});
-    // let xAxis = new Axis.SimpleAxis({
-    //     type: 'linear',
-    // }, {});
-    // let yAxis = new Axis.SimpleAxis({
-    //     type: 'temporal',
-    //     padding: 0.3
-    // }, {});
-    // yAxis.setRange([400, 0]);
-    // xAxis.setRange([0, 400]);
-    let fieldsObj = rootData.getFieldspace().fieldsObj();
-    // yAxis.domain(fieldsObj.Year.domain());
-    // xAxis.domain([0, fieldsObj.Displacement.domain()[1]]);
+    const rootData = new DataModel(jsonData, schema).groupBy(['Year'], {});
 
-    let xAxis = new Axis.SimpleAxis({
+    const fieldsObj = rootData.getFieldspace().fieldsObj();
+
+    const xAxis = new Axis.SimpleAxis({
         type: 'temporal',
         padding: 0.3
     }, {});
-    let yAxis = new Axis.SimpleAxis({
-        type: 'linear',
+    const yAxis = new Axis.SimpleAxis({
+        type: 'linear'
     }, {});
     yAxis.setRange([400, 0]);
     xAxis.setRange([0, 400]);
     yAxis.domain(rootData.getFieldspace().fieldsObj().Displacement.domain());
     xAxis.domain(rootData.getFieldspace().fieldsObj().Year.domain());
-
-    // let xAxis = new Axis.SimpleAxis({
-    //     type: 'band',
-    //     padding: 0
-    // }, {});
-    // let yAxis = new Axis.SimpleAxis({
-    //     type: 'band',
-    //     padding: 0
-    // }, {});
-    // yAxis.setRange([400, 0]);
-    // xAxis.setRange([0, 400]);
-    // yAxis.domain(rootData.getFieldspace().fieldsObj().Origin.domain());
-    // xAxis.domain(rootData.getFieldspace().fieldsObj().Year.domain());
 
     const barLayer = BarLayer.create(rootData, {
         x: xAxis,
@@ -100,7 +76,7 @@ d3.json('../data/cars.json', (jsonData) => {
             },
             y: {
                 field: 'Displacement'
-            },
+            }
         }
     }, {
         throwback: {
@@ -118,5 +94,5 @@ d3.json('../data/cars.json', (jsonData) => {
         }
     });
     barLayer.mount(d3.select('#chart').append('svg').attr('width', 500).attr('height', 500)
-        .append('g').attr('transform', 'translate(25, 0)').node());
+                    .append('g').attr('transform', 'translate(25, 0)').node());
 });

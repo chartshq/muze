@@ -3,12 +3,13 @@ import {
     getQualifiedClassName,
     getUniqueId,
     selectElement,
-    setStyles
+    setStyles,
+    makeElement
 } from 'muze-utils';
 import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM,
     INITIAL_STYLE } from './constants';
 import { defaultConfig } from './default-config';
-import { getArrowPos, placeArrow } from './helper';
+import { getArrowPos, placeArrow, reorderContainers } from './helper';
 import './styles.scss';
 import Content from './content';
 
@@ -28,19 +29,19 @@ export default class Tooltip {
         this._id = getUniqueId();
         this._config = {};
         this._container = selectElement(htmlContainer);
-        this._tooltipContainer = this._container.append('div')
-            .style('position', 'absolute');
-        this._contentContainer = this._tooltipContainer.append('div');
-        this._tooltipBackground = this._tooltipContainer.append('div');
+        this.config({});
+        const tooltipConf = this._config;
+        const classPrefix = tooltipConf.classPrefix;
+        const contentClass = tooltipConf.content.parentClassName;
+        this._tooltipContainer = this._container.append('div').style('position', 'absolute');
+        this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
+        this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
         this._tooltipArrow = this._tooltipContainer.append('div');
 
         if (!svgContainer) {
             connectorContainer = htmlContainer.append('svg').style('pointer-events', 'none');
         }
-
-        this.content = new Content();
-        this.config({});
-        const tooltipConf = this._config;
+        this._contents = {};
         this._tooltipConnectorContainer = selectElement(connectorContainer)
             .append('g')
             .attr('class', `${tooltipConf.classPrefix}-${tooltipConf.connectorClassName}`);
@@ -64,9 +65,6 @@ export default class Tooltip {
         if (config.length > 0) {
             const defConf = mergeRecursive({}, this.constructor.defaultConfig());
             this._config = mergeRecursive(defConf, config[0]);
-            const contentConfig = this._config.content;
-            contentConfig.classPrefix = this._config.classPrefix;
-            this.content.config(contentConfig);
             return this;
         }
         return this._config;
@@ -92,27 +90,46 @@ export default class Tooltip {
     context (...ctx) {
         if (ctx.length) {
             this._context = ctx[0];
-            this.content.context(ctx[0]);
             return this;
         }
         return this._context;
     }
 
-    data (dt) {
-        if (dt === null) {
-            this.hide();
-            return this;
+    content (name, data, contentConfig = {}) {
+        const config = this.config();
+        const { classPrefix } = config;
+        const contentClass = config.content.className;
+        const formatter = config.formatter;
+        const className = contentConfig.className || `${classPrefix}-${contentClass}-${name}`;
+        const content = this._contents[name] = this._contents[name] || new Content();
+        const container = makeElement(this._contentContainer, 'div', [contentConfig.order], className);
+        container.attr('class', `${classPrefix}-${contentClass} ${className}`);
+        reorderContainers(this._contentContainer, `.${classPrefix}-${contentClass}`);
+        const contentConf = config.content;
+        contentConfig.classPrefix = this._config.classPrefix;
+        content.config(contentConf);
+
+        if (data === null) {
+            content.clear();
+            container.remove();
+            delete this._contents[name];
+        } else {
+            content.update({
+                model: data,
+                formatter: contentConfig.formatter || formatter
+            });
+            content.context(this._context);
+            content.render(container);
         }
 
-        const formatter = this._config.formatter;
-
-        this.content.update({
-            model: dt,
-            formatter
-        });
-        this.content.render(this._contentContainer);
-
+        if (!Object.keys(this._contents).length) {
+            this.hide();
+        }
         return this;
+    }
+
+    getContents () {
+        return Object.values(this._contents);
     }
 
     /**
@@ -122,7 +139,7 @@ export default class Tooltip {
      * @return {Tooltip} Instance of tooltip.
      */
     position (x, y, conf = {}) {
-        if (this._data && this._data.length === 0) {
+        if (!Object.keys(this._contents).length) {
             this.hide();
             return this;
         }
@@ -148,13 +165,13 @@ export default class Tooltip {
                 const enter = connector.enter().append('path');
                 if (arrowOrient === ARROW_LEFT) {
                     path = `M ${x} ${y + node.offsetHeight / 2} L ${target.x + target.width}`
-                        + `${target.y + target.height / 2}`;
+                        + ` ${target.y + target.height / 2}`;
                 } else if (arrowOrient === ARROW_RIGHT) {
                     path = `M ${x + node.offsetWidth} ${y + node.offsetHeight / 2}`
-                            + `L ${target.x} ${target.y + target.height / 2}`;
+                            + ` L ${target.x} ${target.y + target.height / 2}`;
                 } else if (arrowOrient === ARROW_BOTTOM) {
                     path = `M ${x + node.offsetWidth / 2} ${y + node.offsetHeight}`
-                        + `L ${target.x + target.width / 2} ${target.y}`;
+                        + ` L ${target.x + target.width / 2} ${target.y}`;
                 }
                 enter.merge(connector).attr('d', path).style('display', 'block');
             } else {
@@ -189,6 +206,10 @@ export default class Tooltip {
         let obj;
         let orientation = tooltipConf.orientation;
         this.show();
+        if (!dim) {
+            this.hide();
+            return this;
+        }
 
         const extent = this._extent;
         const node = this._tooltipContainer.node();
@@ -196,7 +217,7 @@ export default class Tooltip {
         const offsetHeight = node.offsetHeight;
         const config = this._config;
         const arrowDisabled = config.arrow.disabled;
-        const arrowWidth = config.arrow.size;
+        const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
         const positionHorizontal = () => {
@@ -206,16 +227,16 @@ export default class Tooltip {
             // When there is no space in right
             const rightSpace = extent.width - x;
             const leftSpace = dim.x - extent.x;
-            if (rightSpace >= offsetWidth) {
+            if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
-                x += arrowWidth;
-            } else if (leftSpace >= offsetWidth) {
+                x += arrowSize;
+            } else if (leftSpace >= offsetWidth + arrowSize) {
                 x = dim.x - offsetWidth;
                 position = TOOLTIP_RIGHT;
-                x -= arrowWidth;
+                x -= arrowSize;
             } else {
                 position = 'left';
-                x += arrowWidth;
+                x += arrowSize;
             }
             if (dim.height < offsetHeight) {
                 y = Math.max(0, dim.y + dim.height / 2 - offsetHeight / 2);
@@ -239,7 +260,7 @@ export default class Tooltip {
             let position;
             // Position tooltip at the center of plot
             let x = dim.x - offsetWidth / 2 + dim.width / 2;
-            const y = dim.y - offsetHeight - arrowWidth;
+            const y = dim.y - offsetHeight - arrowSize;
             // Overflows to the right
             if ((extent.width - dim.x) < offsetWidth) {
                 x = extent.width - offsetWidth;
@@ -265,7 +286,7 @@ export default class Tooltip {
 
         this._target = dim;
         if (!orientation) {
-            orientation = topSpace > (offsetHeight + arrowWidth) ? 'vertical' : 'horizontal';
+            orientation = topSpace > (offsetHeight + arrowSize) ? 'vertical' : 'horizontal';
         }
 
         if (orientation === 'horizontal') {
@@ -285,6 +306,7 @@ export default class Tooltip {
         }
         this._arrowOrientation = obj.position;
         draw && this.position(obj.x, obj.y);
+        return this;
     }
 
     /**

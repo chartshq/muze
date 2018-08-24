@@ -58,13 +58,11 @@ class SelectionBox extends SpawnableSideEffect {
         const config = this._config;
         const boxConf = config.box;
         const firebolt = this.firebolt;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         const mountPoint = drawingInf.sideEffectGroup;
         const unitWidth = drawingInf.width;
         const unitHeight = drawingInf.height;
         const classPrefix = config.classPrefix;
-        const xOffset = drawingInf.xOffset;
-        const yOffset = drawingInf.yOffset;
         const selectionGroupClassName = config.defClassName;
 
         if (payload.criteria === null) {
@@ -72,7 +70,9 @@ class SelectionBox extends SpawnableSideEffect {
             return this;
         }
 
-        const { dimension, direction } = getBoxDimensionsFromPayload(payload, this.sourceInf()());
+        const sourceInf = firebolt.context.getSourceInfo();
+        const { dimension, direction } = getBoxDimensionsFromPayload(payload, sourceInf.axes,
+            sourceInf.fields);
         const transition = payload.dragEnd && config.transition;
 
         if (direction === 'both' || direction === 'vertical') {
@@ -89,18 +89,6 @@ class SelectionBox extends SpawnableSideEffect {
             height = unitHeight;
             y = 0;
         }
-        this._direction = direction;
-
-        if (direction === 'vertical') {
-            x += xOffset;
-        } else if (direction === 'horizontal') {
-            y += yOffset;
-        } else {
-            x += xOffset;
-            y += yOffset;
-        }
-
-        this._direction = direction;
         this.show(drawingInf);
         // Create the data array for drawing the rectangle
         const points = [
@@ -108,8 +96,7 @@ class SelectionBox extends SpawnableSideEffect {
                 x,
                 y,
                 width,
-                height,
-                sourceUnit: payload.sourceUnit
+                height
             }
         ];
         // Create the container group for selection box.

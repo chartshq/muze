@@ -1,5 +1,6 @@
-import { Store, dataSelect } from 'muze-utils';
+import { Store, dataSelect, FieldType } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
+import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
 import {
     DIMENSION,
@@ -189,10 +190,10 @@ export const findInGroup = (variable, allFields) => {
  * @param {*} datamodel
  * @param {*} field
  */
-export const getAxisType = (datamodel, field) => {
+export const getAxisType = (fieldsConfig, field) => {
     let fieldType = ORDINAL;
 
-    if (field && datamodel.getFieldsConfig()[field].def.type !== DIMENSION) {
+    if (field && fieldsConfig[field].def.type !== DIMENSION) {
         fieldType = LINEAR;
     }
     return fieldType;
@@ -345,30 +346,24 @@ export const createSelection = (sel, appendObj, data, idFn) => {
 
 const getRowBorders = (left, right) => {
     const borders = {};
-    if (!left[0] || left[0].length <= 1) {
-        borders.left = false;
-    } else {
-        borders.left = true;
-    }
-    if (!right[0] || right[0].length <= 1) {
-        borders.right = false;
-    } else {
-        borders.right = true;
+    borders.top = false;
+    borders.bottom = false;
+    if (left.length > 1 || right.length > 1) {
+        borders.top = true;
+        borders.bottom = true;
     }
     return borders;
 };
 
 const getColumnsBorders = (top, bottom) => {
     const borders = {};
-    if (!top || top.length <= 1) {
-        borders.top = false;
-    } else {
-        borders.top = true;
-    }
-    if (!bottom || bottom.length <= 1) {
-        borders.bottom = false;
-    } else {
-        borders.bottom = true;
+    borders.left = false;
+    borders.right = false;
+    if (top.length || bottom.length) {
+        if ((top[0] && top[0].length > 1) || (bottom[0] && bottom[0].length > 1)) {
+            borders.left = true;
+            borders.right = true;
+        }
     }
     return borders;
 };
@@ -439,4 +434,30 @@ export const getBorders = (matrices, encoder) => {
         showValueBorders.right = true;
     }
     return { showRowBorders, showColBorders, showValueBorders };
+};
+
+export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
+    let fields = [];
+    const encodingArr = suppliedLayerConfig.map((conf) => {
+        if (conf.def instanceof Array) {
+            return conf.def.map(def => def.encoding);
+        }
+        return conf.def.encoding || {};
+    });
+    fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
+    fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
+    return fields;
+};
+
+export const extractFields = (facetsAndProjections, layerFields) => {
+    const fields = Object.values(facetsAndProjections).map((arr) => {
+        const flattenArray = [].concat(...arr);
+        return [].concat(...flattenArray.map((field) => {
+            if (field instanceof Variable) {
+                return field.getMembers();
+            }
+            return field;
+        }));
+    });
+    return [].concat(...fields, ...layerFields);
 };

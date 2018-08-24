@@ -47,6 +47,8 @@ class VisualGroup extends SimpleGroup {
         // Populate the store with default values
         this.store(initStore());
 
+        // initialize group compositions
+        this._composition = {};
         // store reference to data
         this._data = [];
         // matrix instance store each of the matrices
@@ -71,6 +73,26 @@ class VisualGroup extends SimpleGroup {
         transactor(this, localOptions, this.store().model);
         // Register listeners
         setupChangeListeners(this);
+    }
+
+    matrixInstance (...matrices) {
+        if (matrices.length) {
+            return this;
+        }
+        return this.composition().matrices;
+    }
+
+    /**
+     * Returns the composition of the Group
+     *
+     * @readonly
+     * @memberof VisualGroup
+     */
+    composition (...params) {
+        if (params.length) {
+            return this;
+        }
+        return this._composition;
     }
 
     /**
@@ -230,6 +252,10 @@ class VisualGroup extends SimpleGroup {
      */
     findUnitById (id) {
         return this.matrixInstance().value.findPlaceHolderById(id);
+    }
+
+    getGroupByData () {
+        return this._groupedDataModel;
     }
 }
 

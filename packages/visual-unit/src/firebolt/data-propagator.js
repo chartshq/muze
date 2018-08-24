@@ -4,17 +4,17 @@ export const propagateValues = (instance, action, config = {}) => {
     let propagationData;
     const payload = config.payload;
     const selectionSet = config.selectionSet;
+    const propagationFields = config.propagationFields[action] || [];
     const criteria = payload.criteria;
     const context = instance.context;
     const dataModel = context.cachedData()[0];
     const sourceId = context.id();
     const sideEffects = config.sideEffects;
-    const mutableEffect = sideEffects.find(sideEffect =>
+    const mutableEffect = [].concat(...Object.values(sideEffects).map(d => d.effects)).find(sideEffect =>
         instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
     const mergedModel = selectionSet.mergedEnter.model;
 
     payload.sourceUnit = sourceId;
-    payload.sourceFacets = context.facetByFields();
     payload.action = action;
     payload.sourceCanvas = context.parentAlias();
 
@@ -28,13 +28,13 @@ export const propagateValues = (instance, action, config = {}) => {
         propagationData = mergedModel ? mergedModel.project(criteriaFields) : null;
     }
 
+    propagationFields.length && propagationData && (propagationData = propagationData.project(propagationFields));
     dataModel.addToPropNamespace(sourceId, {
         payload,
         criteria: propagationData,
         isMutableAction: mutableEffect,
         actionName: mutableEffect ? (mutableEffect.name || mutableEffect) : action
     });
-
     dataModel.propagate(propagationData, payload, {
         isMutableAction: mutableEffect,
         sourceId

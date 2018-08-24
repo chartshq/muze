@@ -1,7 +1,7 @@
 /* global describe, it,document */
 /* eslint-disable no-unused-expressions */
 import SmartlabelManager from 'muze-utils';
-import { BandAxis, LinearAxis } from '@chartshq/muze-axis';
+import { BandAxis, ContinousAxis } from '@chartshq/muze-axis';
 import { expect } from 'chai';
 import AxisCell from './axis-cell';
 import { AXIS } from './enums/cell-type';
@@ -27,7 +27,7 @@ describe('Axis Cell', () => {
         },
         isOffset: true
     }).source(
-         new LinearAxis({
+         new ContinousAxis({
              id: 'abc',
              field: 'a',
              range: [],

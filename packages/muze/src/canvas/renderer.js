@@ -1,5 +1,4 @@
 import { makeElement, selectElement } from 'muze-utils';
-import { SideEffectContainer } from '../enums/class-names';
 import { VERTICAL, HORIZONTAL, TOP, LEFT, RIGHT, BOTTOM } from '../constants';
 
 /**
@@ -63,7 +62,8 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
         container.style('overflow-x', 'scroll');
     }
     const mountPoint = makeElement(container, 'div', [1], `${classPrefix}-viz`)
-       .style('width', `${canvasWidth}px`);
+       .style('width', `${canvasWidth}px`)
+       .style('height', `${canvasHeight}px`);
     headers.forEach((type) => {
         components[type] = makeElement(mountPoint, 'div', [1], `${classPrefix}-${type}-container`);
         components[type].style('width', `${canvasWidth}px`);
@@ -140,12 +140,14 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
                         .each(function (d) { d.legendInstance.mount(this); })
                         .style('width', d => `${d.legendWidth}px`);
     } else {
-        const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section-${0}`)
+        const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section`)
                         .classed(`${classPrefix}-legend-horizontal-section`, true)
-                        .classed(`${classPrefix}-legend-section`, true)
+                        .classed(`${classPrefix}-legend-section-${0}`, true)
                         .style('width', `${legWidth}px`);
+
         makeElement(mount, 'div', legendComponents, `${classPrefix}-legend-components`)
-                        .each(function (d) { d.legend.mount(this); });
+                        .each(function (d) { d.legend.mount(this); })
+                        .style('width', d => `${d.legend.measurement().width}px`);
     }
 };
 
@@ -231,31 +233,6 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     };
 };
 
-const createSideEffectContainer = (context) => {
-    const layout = context.layout();
-    const mountPoint = layout.mountPoint();
-    const layoutDimensions = layout.getViewInformation().layoutDimensions;
-    const [topSpace, centerHeight] = layoutDimensions.viewHeight;
-    const [leftSpace, centerWidth] = layoutDimensions.viewWidth;
-    const {
-        classPrefix
-    } = context.config();
-    const container = makeElement(mountPoint, 'div', [1], `${classPrefix}-${SideEffectContainer}`);
-
-    container.style('position', 'absolute')
-                    .style(LEFT, `${leftSpace}px`)
-                    .style(TOP, `${topSpace}px`)
-                    .style('width', `${centerWidth}px`)
-                    .style('height', `${centerHeight}px`)
-                    .style('pointer-events', 'none');
-
-    makeElement(container, 'svg', [1], `${classPrefix}-${SideEffectContainer}`)
-                    .style('position', 'absolute')
-                    .attr('width', centerWidth)
-                    .attr('height', centerHeight)
-                    .style('pointer-events', 'none');
-};
-
 /**
  *
  *
@@ -279,19 +256,17 @@ export const renderComponents = (context, components, layoutConfig, measurement)
         layout
     } = getSkeletons(context.mount(), layoutConfig, measurement);
     const {
-        mount,
-        container
+        mount
    } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
     const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
     measurement.padding = padding;
     setLabelRotationForAxes(context);
 
     // Render layout
-    context.layout().renderGrid(mount).renderArrows(container);
+    context.layout().renderGrid(mount);
     renderLegend(layoutConfig, legend, legends, measurement);
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
 
-    createSideEffectContainer(context);
     shiftHeaders(layoutConfig, padding, measurement);
 };

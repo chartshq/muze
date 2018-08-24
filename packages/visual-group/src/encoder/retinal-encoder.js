@@ -1,4 +1,3 @@
-import { retriveDomainFromData } from '../group-helper';
 import { createRetinalAxis } from './encoder-helper';
 import { COLOR, SHAPE, SIZE } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
@@ -20,11 +19,11 @@ export default class RetinalEncoder extends VisualEncoder {
      * @memberof RetinalEncoder
      */
     createAxis (axesCreators) {
-        const { datamodel, config } = axesCreators;
+        const { fieldsConfig, config } = axesCreators;
         const newAxes = {};
 
         [COLOR, SHAPE, SIZE].forEach((axisType) => {
-            newAxes[`${axisType}`] = createRetinalAxis({ axisType, datamodel }, config[axisType]);
+            newAxes[`${axisType}`] = createRetinalAxis({ axisType, fieldsConfig }, config[axisType]);
         });
         return newAxes;
     }
@@ -81,14 +80,16 @@ export default class RetinalEncoder extends VisualEncoder {
      * @memberof RetinalEncoder
      */
     setCommonDomain (context) {
-        const { datamodel, axes, encoding } = context;
+        const { domains, axes, encoding } = context;
 
         Object.entries(encoding).forEach((enc) => {
             if (enc[1] && enc[1].field) {
+                const encType = enc[0];
                 const field = enc[1].field;
-                if (field && (!field[1] || (field[1] && !field[1].domain))) {
-                    axes[enc[0]].forEach((axis) => {
-                        const domain = retriveDomainFromData(datamodel, field);
+
+                if (field) {
+                    axes[encType].forEach((axis) => {
+                        const domain = domains[field];
                         axis.updateDomain(domain);
                     });
                 }

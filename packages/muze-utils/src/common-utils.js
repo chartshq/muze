@@ -39,7 +39,8 @@ import {
     interpolate,
     interpolateRgb,
     piecewise,
-    interpolateNumber
+    interpolateNumber,
+    interpolateHslLong
 } from 'd3-interpolate';
 import {
     easeCubic,
@@ -61,12 +62,25 @@ import * as STACK_CONFIG from './enums/stack-config';
 
 const HTMLElement = window.HTMLElement;
 
+const isSimpleObject = (obj) => {
+    let token;
+    if (typeof obj === 'object') {
+        if (obj === null) { return false; }
+        token = Object.prototype.toString.call(obj);
+        if (token === '[object Object]') {
+            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
+        }
+    }
+    return false;
+};
+
 /**
  * Returns unique id
  * @return {string} Unique id string
  */
 const
     getUniqueId = () => `id-${new Date().getTime()}${Math.round(Math.random() * 10000)}`;
+
 /**
  * Deep copies an object and returns a new object.
  * @param {Object} o Object to clone
@@ -78,7 +92,7 @@ const clone = (o) => {
     for (const key in o) {
         if ({}.hasOwnProperty.call(o, key)) {
             v = o[key];
-            output[key] = (typeof v === 'object') ? clone(v) : v;
+            output[key] = isSimpleObject(v) ? clone(v) : v;
         }
     }
     return output;
@@ -714,19 +728,22 @@ const generateGetterSetters = (context, props) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
         const sanitization = propInfo[1].sanitization;
-        context[prop] = (...params) => {
-            if (params.length) {
-                let value = params[0];
-                if (sanitization) {
-                    value = sanitization(context, params[0]);
-                }
-                if (typeChecker && !typeChecker(value)) {
-                    return context[`_${prop}`];
-                }
-                context[`_${prop}`] = value;
-                return context;
-            } return context[`_${prop}`];
-        };
+        const prototype = context.constructor.prototype;
+        if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            context[prop] = (...params) => {
+                if (params.length) {
+                    let value = params[0];
+                    if (sanitization) {
+                        value = sanitization(context, params[0]);
+                    }
+                    if (typeChecker && !typeChecker(value)) {
+                        return context[`_${prop}`];
+                    }
+                    context[`_${prop}`] = value;
+                    return context;
+                } return context[`_${prop}`];
+            };
+        }
     });
 };
 
@@ -797,18 +814,6 @@ const ERROR_MSG = {
     INTERFACE_IMPL: 'Method not implemented'
 };
 
-const isSimpleObject = (obj) => {
-    let token;
-    if (typeof obj === 'object') {
-        if (obj === null) { return false; }
-        token = Object.prototype.toString.call(obj);
-        if (token === '[object Object]') {
-            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
-        }
-    }
-    return false;
-};
-
 /**
  * Merges the sink object in the source by recursively iterating through the object properties
  * @param {Object} source Source Object
@@ -876,22 +881,28 @@ const replaceCSSPrefix = () => {
 };
 
 /**
- *
+ * Gets the  interpolator function from d3 color
  *
  */
 const interpolator = () => interpolate;
 
 /**
- *
+ * Gets the number interpolator from d3 color
  *
  */
 const numberInterpolator = () => interpolateNumber;
 
 /**
- *
+ * Gets the rgb interpolator from d3 color
  *
  */
 const colorInterpolator = () => interpolateRgb;
+
+/**
+ * Gets the hsl interpolator from d3 color
+ *
+ */
+const hslInterpolator = () => interpolateHslLong;
 
 const transformColors = () => ({
     color,
@@ -900,7 +911,7 @@ const transformColors = () => ({
 });
 
 /**
- *
+ * Gets the piecewise interpolator from d3 color
  *
  */
 const piecewiseInterpolator = () => piecewise;
@@ -1365,7 +1376,32 @@ const Scales = {
     band: scaleBand
 };
 
+const getSmallestDiff = (points) => {
+    points = points.sort((a, b) => a - b);
+    let minDiff = points[1] - points[0];
+    for (let i = 2; i < points.length; i++) {
+        minDiff = Math.min(minDiff, points[i] - points[i - 1]);
+    }
+
+    return minDiff;
+};
+
+const require = (lookupWhat, lookupDetails) => ({
+    resolvable: (store) => {
+        const lookupTarget = store[lookupWhat];
+        const depArr = lookupDetails.slice(0, lookupDetails.length - 1);
+        const fn = lookupDetails[lookupDetails.length - 1]; // fn
+
+        const deps = depArr.map(str => lookupTarget[str]);
+        return {
+            fn: fn(...deps),
+            depArr
+        };
+    }
+});
+
 export {
+    require,
     Scales,
     Symbols,
     pathInterpolators,
@@ -1431,5 +1467,7 @@ export {
     getObjProp,
     extendsClass,
     assembleModelFromIdentifiers,
-    isValidValue
+    isValidValue,
+    hslInterpolator,
+    getSmallestDiff
 };

@@ -16,7 +16,9 @@ export const defaultConfig = {
         iconColor: '#ff0000',
         rowMargin: '0px',
         margin: 10,
-        separator: ':'
+        separator: ':',
+        className: 'tooltip-content-container',
+        parentClassName: 'tooltip-content-parent-container'
     },
     arrow: {
         size: 10,

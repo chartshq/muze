@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 import SmartlabelManager from 'muze-utils';
 import { expect } from 'chai';
-import { LinearAxis } from '@chartshq/muze-axis';
+import { ContinousAxis } from '@chartshq/muze-axis';
 import AxisCell from './axis-cell';
 import TextCell from './text-cell';
 import GeomCell from './geom-cell';
@@ -21,7 +21,7 @@ const axis = new AxisCell({
     },
     isOffset: true
 }).source(
-     new LinearAxis({
+     new ContinousAxis({
          id: 'abc',
          field: 'a',
          type: 'linear',

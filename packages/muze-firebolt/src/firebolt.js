@@ -12,10 +12,8 @@ import {
     initializeSideEffects,
     changeSideEffectAvailability,
     initializePhysicalActions,
-    setSelectionSets,
-    getSetInfo,
-    getMergedSet,
-    getSourceFields
+    unionSets,
+    getSideEffects
 } from './helper';
 
 /**
@@ -27,10 +25,12 @@ export default class Firebolt {
         this.context = context;
         this._sideEffectDefinitions = {};
         this._sideEffects = {};
+        this._propagationInf = {};
         this._actions = {
             behavioural: {},
             physical: {}
         };
+        this._propagationFields = {};
         this._sourceSideEffects = {
             tooltip: true,
             selectionBox: true
@@ -38,6 +38,9 @@ export default class Firebolt {
         this._actionBehaviourMap = {};
         this._config = {};
         this._behaviourEffectMap = {};
+        this._entryExitSet = {};
+        this._actionHistory = {};
+        this._queuedSideEffects = [];
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -88,32 +91,73 @@ export default class Firebolt {
 
     applySideEffects (sideEffects, selectionSet, payload) {
         const sideEffectStore = this.sideEffects();
+        const actionHistory = this._actionHistory;
+        const queuedSideEffects = [];
         sideEffects.forEach((sideEffect) => {
-            let strategy;
+            let options;
             let name;
-            if (typeof sideEffect === 'object') {
-                name = sideEffect.name;
-                strategy = sideEffect.strategy;
-            } else {
-                name = sideEffect;
-            }
+            const effects = sideEffect.effects;
+            const behaviours = sideEffect.behaviours;
+            const combinedSet = unionSets(this, behaviours, selectionSet);
+            effects.forEach((effect) => {
+                if (typeof effect === 'object') {
+                    name = effect.name;
+                    options = effect.options;
+                } else {
+                    name = effect;
+                }
 
-            const sideEffectInstance = sideEffectStore[name];
-            if (sideEffectInstance.enabled) {
-                sideEffectStore[name].apply(selectionSet, payload, strategy);
-            }
+                const sideEffectInstance = sideEffectStore[name];
+                if (sideEffectInstance.enabled) {
+                    if (!sideEffectInstance.constructor.mutates() &&
+                        Object.values(actionHistory).some(d => d.isMutableAction)) {
+                        queuedSideEffects.push({
+                            name,
+                            params: [combinedSet, payload, options]
+                        });
+                    } else {
+                        sideEffectStore[name].apply(combinedSet, payload, options);
+                    }
+                }
+            });
         });
+        this._queuedSideEffects.push(...queuedSideEffects);
         return this;
     }
 
-    dispatchBehaviour (behaviourName, payload) {
-        const action = this._actions.behavioural[behaviourName];
-        const sideEffects = this._behaviourEffectMap[behaviourName];
+    dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
+        const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
+        const behaviouralActions = this._actions.behavioural;
+        const action = behaviouralActions[behaviour];
+        const behaviourEffectMap = this._behaviourEffectMap;
+        const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
+        this._propagationInf = propagationInfo;
+        const selectionSet = action.dispatch(payload);
+        const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
+        this._entryExitSet[behaviour] = propagationSelectionSet;
+        const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
 
-        if (action) {
-            const selectionSet = action(payload);
-            this.applySideEffects(sideEffects, selectionSet, payload);
+        if (propagate) {
+            this.propagate(behaviour, payload, selectionSet.find(d => d.sourceSelectionSet), sideEffects);
         }
+        if (shouldApplySideEffects) {
+            const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+            this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+        }
+
+        return this;
+    }
+
+    getPropagationSelectionSet (selectionSet) {
+        return selectionSet.find(d => !d.sourceSelectionSet);
+    }
+
+    shouldApplySideEffects () {
+        return true;
+    }
+
+    propagate () {
+        return this;
     }
 
     sideEffects (...sideEffects) {
@@ -132,6 +176,10 @@ export default class Firebolt {
     disable (fn) {
         changeSideEffectAvailability(this.sideEffects(), fn, false);
         return this;
+    }
+
+    getApplicableSideEffects (sideEffects) {
+        return sideEffects;
     }
 
     attachPropagationListener (dataModel) {
@@ -185,6 +233,14 @@ export default class Firebolt {
         const initedActions = initializePhysicalActions(this, actions);
         Object.assign(this._actions.physical, initedActions);
         return this;
+    }
+
+    propagateWith (action, ...fields) {
+        if (fields.length) {
+            this._propagationFields[action] = fields;
+            return this;
+        }
+        return this._propagationFields;
     }
 
     /**
@@ -246,71 +302,8 @@ export default class Firebolt {
         return this;
     }
 
-    /**
-     * Selects tuples from the datamodel and returns an entry set and an exit set of the selection.
-     * It also accepts unique ids of the tuples directly.
-     * @param {Function|Array.<string>} selVal Filter method to select tuples or unique ids.
-     * @return {Array} Entry set and exit set of selection.
-     */
-    select (criteria, action, config, propagationInf = {}) {
-        return () => {
-            const returnSet = null;
-            return () => {
-                if (returnSet) {
-                    return returnSet;
-                }
-                const sourceId = this.context.id();
-                const propagationSource = propagationInf.sourceId;
-                let applicableSelectionSets = [];
-                if (propagationSource !== sourceId) {
-                    applicableSelectionSets = [this._volatileSelectionSet[action]];
-                }
-
-                if (propagationSource) {
-                    applicableSelectionSets.push(this.selectionSet()[action]);
-                }
-
-                const persistent = config.persist;
-
-                const {
-                    model: filteredDataModel,
-                    uids
-                } = this.getAddSetFromCriteria(criteria, propagationInf);
-
-                const dataModel = this.getFullData();
-
-                const returnSets = applicableSelectionSets.map((selectionSet) => {
-                    setSelectionSets(uids, selectionSet, persistent);
-                    const {
-                        entrySet,
-                        exitSet,
-                        completeSet
-                    } = selectionSet.getSets();
-
-                    const setConfig = {
-                        isSourceFieldPresent: propagationInf.isSourceFieldPresent,
-                        dataModel,
-                        filteredDataModel,
-                        propagationData: propagationInf.data,
-                        selectionSet
-                    };
-
-                    return {
-                        entrySet: [getSetInfo('oldEntry', entrySet[0], setConfig),
-                            getSetInfo('newEntry', entrySet[1], setConfig)],
-                        exitSet: [getSetInfo('oldEntry', exitSet[0], setConfig),
-                            getSetInfo('newExit', exitSet[1], setConfig)],
-                        mergedEnter: getSetInfo('mergedEnter', getMergedSet(entrySet), setConfig),
-                        mergedExit: getSetInfo('mergedExit', getMergedSet(exitSet), setConfig),
-                        completeSet: getSetInfo('complete', completeSet, setConfig),
-                        isSourceFieldPresent: propagationInf.isSourceFieldPresent,
-                        fields: getSourceFields(propagationInf, criteria),
-                        sourceSelectionSet: selectionSet._volatile === true
-                    };
-                });
-                return returnSets;
-            };
-        };
+    getPropagationInf () {
+        return this._propagationInf;
     }
 
     getAddSetFromCriteria (criteria, propagationInf = {}) {
@@ -326,6 +319,21 @@ export default class Firebolt {
             uids: criteria === null ? null : (propagationInf.data ? filterPropagationModel(this.getFullData(),
                 propagationInf.data[0], xMeasures && yMeasures).getData().uids : filteredDataModel[0].getData().uids)
         };
+    }
+
+    getSelectionSets (action) {
+        const sourceId = this.context.id();
+        const propagationInf = this._propagationInf || {};
+        const propagationSource = propagationInf.sourceId;
+        let applicableSelectionSets = [];
+        if (propagationSource !== sourceId) {
+            applicableSelectionSets = [this._volatileSelectionSet[action]];
+        }
+
+        if (propagationSource) {
+            applicableSelectionSets.push(this.selectionSet()[action]);
+        }
+        return applicableSelectionSets;
     }
 
     getFullData () {

@@ -1,14 +1,18 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType } from 'muze-utils';
+import { FieldType, ReservedFields } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
-
+import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
+
+import './styles.scss';
 
 export default class Tooltip extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._tooltips = {};
+        this._strategies = strategies;
+        this._strategy = 'default';
     }
 
     static defaultConfig () {
@@ -21,16 +25,16 @@ export default class Tooltip extends SpawnableSideEffect {
         return 'tooltip';
     }
 
-    apply (selectionSet, payload) {
+    apply (selectionSet, payload, options = {}) {
         let totalHeight = 0;
         let totalWidth = 0;
         const dataModel = selectionSet.mergedEnter.model;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         if (payload.criteria && dataModel && dataModel.isEmpty()) {
             return this;
         }
         if (payload.criteria === null || !dataModel) {
-            this.hide(drawingInf);
+            this.hide(payload, null);
             return this;
         }
 
@@ -43,8 +47,9 @@ export default class Tooltip extends SpawnableSideEffect {
         const showInPosition = payload.showInPosition;
         const pad = config.padding;
         const dataModels = [];
-        const plotDimensions = this.marksFromIdentifiers()(payload.criteria);
-        const sourceInf = this.sourceInf()();
+        const context = this.firebolt.context;
+        const fragmented = config.mode === FRAGMENTED;
+        const sourceInf = context.getSourceInfo();
         const fields = sourceInf.fields;
         const xField = `${fields.x[0]}`;
         const fieldsConfig = dataModel.getFieldsConfig();
@@ -52,26 +57,34 @@ export default class Tooltip extends SpawnableSideEffect {
         const showVertically = !!xFieldDim;
         const tooltipPos = payload.position;
         const boxes = [];
-        const fragmented = config.mode === FRAGMENTED;
         const enter = {};
-
+        const action = payload.action === 'highlight' ? 'highlight' : 'brush';
+        const uids = dataModel.getData().uids;
         if (fragmented) {
-            const uids = dataModel.getData().uids;
             dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
                 saveChild: false
             })));
         } else {
             dataModels.push(dataModel);
         }
+        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria);
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
+            let plotDim = plotDimensions[i];
+            if (fragmented) {
+                plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID], dataModels[i].getData().uids]);
+                plotDim = plotDim && plotDim[0];
+            }
             const dt = dataModels[i];
             enter[i] = true;
             const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(drawingInf.htmlContainer,
                     drawingInf.svgContainer);
             tooltipInst.context(sourceInf);
-            const plotDim = plotDimensions[i];
-            tooltipInst.data(dt)
+            const strategy = strategies[options.strategy];
+            tooltipInst.content(action, dt, {
+                formatter: strategy,
+                order: options.order
+            })
                             .config(this.config())
                             .extent({
                                 x: 0,
@@ -84,8 +97,8 @@ export default class Tooltip extends SpawnableSideEffect {
                 tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
             } else if (plotDim) {
                 tooltipInst.positionRelativeTo({
-                    x: plotDim.x + drawingInf.xOffset,
-                    y: plotDim.y + drawingInf.yOffset,
+                    x: plotDim.x,
+                    y: plotDim.y,
                     width: plotDim.width || 0,
                     height: plotDim.height || 0
                 }, {
@@ -114,14 +127,17 @@ export default class Tooltip extends SpawnableSideEffect {
                 });
             }
         }
-
+        // console.log(tooltips);
         for (const key in tooltips) {
-            if (!(key in enter)) {
-                tooltips[key].remove();
-                delete tooltips[key];
+            if (!enter[key]) {
+                const tooltip = tooltips[key];
+                tooltip.content(payload.action, null);
+                if (!tooltip.getContents().length) {
+                    tooltip.remove();
+                    delete tooltips[key];
+                }
             }
         }
-
         if (fragmented) {
             spaceOutBoxes(boxes, boundBox, showVertically);
             boxes.forEach(box => box.tooltip.position(box.x, box.y, {
@@ -131,10 +147,12 @@ export default class Tooltip extends SpawnableSideEffect {
         return this;
     }
 
-    hide () {
+    hide (payload) {
         const tooltips = this._tooltips;
         for (const key in tooltips) {
             if ({}.hasOwnProperty.call(tooltips, key)) {
+                const action = payload.action === 'highlight' ? 'highlight' : 'brush';
+                tooltips[key].content(action, null);
                 tooltips[key].hide();
             }
         }

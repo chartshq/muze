@@ -15,7 +15,7 @@
  */
 
 import { intSanitizer, mergeRecursive } from 'muze-utils';
-import { DEFAULT_CONFIG } from './constants';
+import { DEFAULT_CONFIG } from './defaults';
 
 export default {
     data: {

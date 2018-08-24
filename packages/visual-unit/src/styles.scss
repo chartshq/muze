@@ -7,3 +7,16 @@
 .#{$prefix}axis-zero-line {
     stroke-width: 1px;
 }
+
+.#{$prefix}grid-band-x-0 {
+    fill-opacity: 0;
+}
+
+.#{$prefix}grid-band-y-0 {
+    fill-opacity: 0;
+}
+
+.#{$prefix}unit {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}

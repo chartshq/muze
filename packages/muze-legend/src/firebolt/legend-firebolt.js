@@ -14,27 +14,15 @@ export class LegendFireBolt extends Firebolt {
         this.initializeSideEffects();
     }
 
-    /**
-     * Dispatches behavioural action on legend with a payload
-     * It also propagates the selection to other datatables.
-     * @param {string} behaviourName name of behaviour
-     * @param {Object} payload Information about behaviour
-     * @memberof LegendFireBolt
-     */
-    dispatchBehaviour (behaviourName, payload) {
-        const action = this._actions.behavioural[behaviourName];
-
-        if (action) {
-            const sideEffects = this._behaviourEffectMap[behaviourName];
-            const selectionSet = action.dispatch(payload, {})();
-            const propagationSelectionSet = selectionSet[0];
-            this.applySideEffects(sideEffects, propagationSelectionSet, payload);
-            propagate(this, behaviourName, propagationSelectionSet, {
-                payload
-            });
-        }
+    getPropagationSelectionSet (selectionSet) {
+        return selectionSet[0];
     }
 
+    propagate (behaviourName, payload, selectionSet) {
+        propagate(this, behaviourName, selectionSet, {
+            payload
+        });
+    }
     getAddSetFromCriteria (criteria) {
         let values;
         let uniqueIds;

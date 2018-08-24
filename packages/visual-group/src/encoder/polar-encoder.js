@@ -153,31 +153,43 @@ export default class PolarEncoder extends VisualEncoder {
         return this.fieldInfo();
     }
 
-    /**
-     *
-     *
-     * @param {*} datamodel
-     * @param {*} layerEncoding
-     * @param {*} facetFields
-     * @return
-     * @memberof PolarEncoder
-     */
-    datamodelForEncoder (datamodel, config, facetFields) {
+    getRetinalFieldsDomain (dataModels, encoding, facetFields, groupBy) {
+        let sizeField;
+        let colorField;
         const fields = [];
         const layers = this.layers();
-        const fieldsConfig = datamodel.getFieldsConfig();
+        const dataModel = dataModels.parentModel;
+        const fieldsConfig = dataModel.getFieldsConfig();
+        const domains = {};
         if (layers && layers[0]) {
             const layer = layers[0];
-            const encoding = layer.def.encoding || {};
+            const layerEncoding = layer.def.encoding || {};
 
             [RADIUS, ANGLE, SIZE, COLOR].forEach((encType) => {
-                const field = encoding[encType] ? encoding[encType].field : '';
-                fieldsConfig[field] && fieldsConfig[field].def.type !== MEASURE && fields.push(field);
+                const field = layerEncoding[encType] ? layerEncoding[encType].field : '';
+                const measureField = fieldsConfig[field] && fieldsConfig[field].def.type === MEASURE;
+                if (encType === SIZE && measureField) {
+                    sizeField = field;
+                }
+                if (encType === COLOR) {
+                    colorField = field;
+                }
+                fieldsConfig[field] && !measureField && fields.push(field);
             });
         }
-        return datamodel.groupBy([...facetFields, ...fields]);
-    }
 
+        if (sizeField) {
+            domains[sizeField] = dataModel.groupBy(facetFields, {
+                [sizeField]: 'sum'
+            }).getFieldspace().fieldsObj()[sizeField].domain();
+        }
+
+        if (colorField) {
+            const dm = dataModel.groupBy([...facetFields, ...fields], groupBy.measures);
+            domains[colorField] = dm.getFieldspace().fieldsObj()[colorField].domain();
+        }
+        return domains;
+    }
     /**
      *
      *

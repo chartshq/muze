@@ -22,7 +22,7 @@ export const defaultConfig = {
             intensity: [0, -30, +30, 0]
         }]
     },
-    nearestPointThreshold: 10,
+    nearestPointThreshold: 20,
     encoding: {
         color: {},
         x: {},

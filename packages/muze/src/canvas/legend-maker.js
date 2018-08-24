@@ -1,7 +1,6 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
 import {
-    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, HEIGHT, PADDING, BORDER, CONFIG, LINEAR, COLOR, STEP_COLOR,
-    GRADIENT, DISCRETE, WIDTH
+    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, CONFIG
 } from '../constants';
 
 /**
@@ -11,30 +10,23 @@ import {
  * @param {*} canvases
  * @returns
  */
-export const legendDataCreator = (canvas) => {
+export const legendCreator = (canvas) => {
     let LegendCls;
     const dataset = [];
     const axes = canvas.getRetinalAxes();
+
     Object.entries(axes).forEach((axisInfo) => {
         const scale = axisInfo[1][0];
         const scaleType = axisInfo[0];
         const scaleProps = canvas[scaleType]();
 
-        if (scaleProps && scaleProps.field) {
+        if (scaleProps.field) {
             const {
                 type,
-                interpolate
+                step
             } = scale.config();
-            LegendCls = LEGEND_TYPE_MAP[DISCRETE];
-
-            if (type === LINEAR && scaleType === COLOR) {
-                if (interpolate) {
-                    LegendCls = LEGEND_TYPE_MAP[GRADIENT];
-                } else {
-                    LegendCls = LEGEND_TYPE_MAP[STEP_COLOR];
-                }
-            }
-            dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls });
+            LegendCls = LEGEND_TYPE_MAP[`${type}-${step}-${scaleType}`];
+            dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls, scaleType });
         }
     });
 
@@ -58,22 +50,28 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
         headerHeight
     } = measurement;
     const {
-        show,
-        align,
-        title
+        position,
+        align
     } = legendConfig;
 
-    if (show) {
-        const dataset = legendDataCreator(canvas);
+    const legendInfo = legendCreator(canvas);
 
-        dataset.forEach((dataInfo, index) => {
-            let legend = {};
-            const legendMeasures = {};
-            const {
+    legendInfo.forEach((dataInfo, index) => {
+        let legend = {};
+
+        const legendMeasures = {};
+        const {
                 LegendCls,
                 scale,
-                fieldName
+                fieldName,
+                scaleType
             } = dataInfo;
+        const config = legendConfig[scaleType] || {};
+        const title = config.title || {};
+        title.text = title.text || fieldName;
+        if (config.show) {
+            config.position = position;
+            config.align = align;
 
             if (prevLegends[index]) {
                 legend = prevLegends[index].legend;
@@ -87,28 +85,23 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             }
             legendMeasures.maxHeight = align === VERTICAL ? (height - headerHeight) : height * 0.2;
             legendMeasures.maxWidth = align === HORIZONTAL ? width : width * 0.2;
-            [HEIGHT, WIDTH, PADDING, BORDER, CONFIG].forEach((e) => {
-                if (legendConfig[e]) {
-                    if (e === HEIGHT) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, legendConfig[e]);
-                    } else if (e === WIDTH) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, legendConfig[e]);
-                    } else {
-                        legendMeasures[e] = legendConfig[e];
-                    }
-                }
+            legendMeasures.width = Math.min(legendMeasures.maxWidth, config.width);
+            legendMeasures.height = Math.min(legendMeasures.maxHeight, config.height);
+
+            [PADDING, BORDER, CONFIG].forEach((e) => {
+                legendMeasures[e] = config[e];
             });
             legend.scale(scale)
-                            .title((title && title[index] !== null) ? title[index] : fieldName)
+                            .title(title)
                             .fieldName(fieldName)
-                            .config(legendConfig)
-                            .metaData(canvas.data().project([fieldName]))
+                            .config(config)
+                            .metaData(canvas.composition().visualGroup.getGroupByData().project([fieldName]))
                             .measurement(legendMeasures)
                             .setLegendMeasures();
 
-            legends.push({ canvas, legend });
-        });
-    }
+            legends.push({ canvas, legend, scaleType });
+        }
+    });
     return legends;
 };
 
@@ -121,9 +114,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
  * @param {*} availableWidth
  * @returns
  */
-export const getLegendSpace = (context, availableHeight, availableWidth) => {
-    const legends = context.legendComponents();
-    const legendConfig = context.legend();
+export const getLegendSpace = (legends, legendConfig, availableHeight, availableWidth) => {
     const legendMeasures = legends.map(legendInfo => legendInfo.legend.measurement());
     const legendSpace = { width: 0, height: 0 };
 
@@ -168,13 +159,13 @@ export const createLegend = (context, headerHeight, height, width) => {
         width,
         headerHeight
     };
-    const legendConfig = context.legend();
-    const { show, position } = legendConfig;
+    const { legend } = context.config();
+    const { show, position } = legend;
 
-    legendConfig.classPrefix = context.config().classPrefix;
+    legend.classPrefix = context.config().classPrefix;
     const align = (position === LEFT || position === RIGHT) ? VERTICAL : HORIZONTAL;
 
-    legendConfig.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
-    legendConfig.align = align;
-    return legendInitializer(legendConfig, context, measurement, context.legends || []);
+    legend.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
+    legend.align = align;
+    return legendInitializer(legend, context, measurement, context.legends || []);
 };

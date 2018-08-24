@@ -11,18 +11,12 @@ export const palette = [
     '#67bda0',
     '#c54e4e',
     '#ae70af'
-
-    // '#086bb6af',
-    // '#f37d45af',
-    // '#f5ce02af',
-    // '#67bda0af',
-    // '#c54e4eaf',
-    // '#ae70afaf',
 ];
 
 export const DEFAULT_CONFIG = {
-    scheme: palette,
-    steps: 5,
-    interpolate: false,
+    range: palette,
+    value: palette[0],
+    step: false,
+    stops: 5,
     type: LINEAR
 };

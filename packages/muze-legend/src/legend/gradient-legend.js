@@ -97,7 +97,7 @@ export default class GradientLegend extends SimpleLegend {
         this.config({
             item: {
                 text: {
-                    position: this.config().position
+                    orientation: this.config().position
                 }
             }
         });

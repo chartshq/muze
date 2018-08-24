@@ -72,5 +72,8 @@ export const placeArrow = (context, position, arrowPos) => {
     tooltipBackground.classed(`${classPrefix}-tooltip-background-arrow-${context._arrowOrientation}`, false);
     tooltipBackground.classed(`${classPrefix}-tooltip-background-arrow-${position}`, true);
     return this;
-}
-;
+};
+
+export const reorderContainers = (parentContainer, className) => {
+    parentContainer.selectAll(className).sort((a, b) => a - b);
+};

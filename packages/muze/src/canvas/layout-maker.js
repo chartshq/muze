@@ -142,16 +142,15 @@ export const getRenderDetails = (context, mount) => {
         minWidth,
         minHeight,
         classPrefix,
-        showHeaders
+        showHeaders,
+        legend
     } = context.config();
-    // Get the legend configuration
-    const legendConfig = context.legend();
     // Get title configuration
     const titleConfig = context.title()[1];
      // Get subtitle configuration
     const subtitleConfig = context.subtitle()[1];
     // Get legend position
-    const legendPosition = legendConfig.position;
+    const legendPosition = legend.position;
     // Arrange components according to config
     const layoutArrangement = arrangeComponents(context);
 
@@ -164,16 +163,20 @@ export const getRenderDetails = (context, mount) => {
     const { headers, headerHeight } = createHeaders(context, availableHeightForCanvas, availableWidthForCanvas);
 
     // Create legends and determine legend space
-    context.legendComponents(createLegend(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas));
+    const legends = createLegend(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas);
+    context._composition.legend = {};
+    legends.forEach((e) => {
+        context._composition.legend[e.scaleType] = e.legend;
+    });
 
-    const legendSpace = getLegendSpace(context, availableHeightForCanvas, availableWidthForCanvas);
+    const legendSpace = getLegendSpace(legends, legend, availableHeightForCanvas, availableWidthForCanvas);
     const legendWidth = (legendPosition === LEFT || legendPosition === RIGHT) ? legendSpace.width : 0;
     const legendHeight = (legendPosition === TOP || legendPosition === BOTTOM) ? legendSpace.height : 0;
 
     // Set components for layouting
     const components = {
         headers,
-        legends: context.legendComponents(),
+        legends,
         canvases: [context],
         rows,
         columns,
@@ -199,7 +202,7 @@ export const getRenderDetails = (context, mount) => {
         showHeaders,
         border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
-        legend: legendConfig,
+        legend,
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,

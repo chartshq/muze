@@ -92,7 +92,7 @@ const normalRange = (domainValue, scale) => scale(domainValue);
  *
  * @param {*} intervals
  */
-const strategies = () => ({
+const strategies = {
     [`${DISCRETE}-${CONTINOUS}`]: {
         scale: LINEAR,
         domain: indexedDomain,
@@ -108,7 +108,7 @@ const strategies = () => ({
         domain: steppedDomain,
         range: discreteRange
     }
-});
+};
 
 /**
  *
@@ -118,5 +118,5 @@ const strategies = () => ({
  * @param {*} schemeType
  * @param {*} intervals
  */
-export const strategyGetter = (domainType, rangeType, intervals) =>
-     strategies(intervals)[`${domainType}-${rangeType}`];
+export const strategyGetter = (domainType, rangeType) =>
+     strategies[`${domainType}-${rangeType}`];

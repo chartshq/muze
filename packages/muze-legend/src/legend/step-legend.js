@@ -10,6 +10,7 @@ import {
     renderStepItem
 } from './renderer';
 import { STEP, RECT, LEFT, SIZE, UPPER, LOWER } from '../enums/constants';
+import { stepData } from './position-config';
 import '../styles.scss';
 
 /**
@@ -107,11 +108,10 @@ export default class StepLegend extends SimpleLegend {
      * @memberof Legend
      */
     getLabelSpaces (effPadding, align) {
-        const position = this.config().position;
         this.config({
             item: {
                 text: {
-                    position
+                    orientation: this.config().position
                 }
             }
         });
@@ -137,8 +137,9 @@ export default class StepLegend extends SimpleLegend {
      */
     render () {
         const firebolt = this.firebolt();
-        const data = this.data();
-        const { classPrefix } = this.config();
+        const { classPrefix, position } = this.config();
+        const data = stepData(this.data())[position];
+
         const legendContainer = super.render(this.mount());
 
         // create Legend

@@ -8,6 +8,30 @@ export const getHslString = hslArr => `hsla(${hslArr[0] * 360},${hslArr[1] * 100
 export const convertToXllString = baseString => (baseString.split(' ') || [])
                 .reduce((x, e) => `${x}${e.charAt(0).toUpperCase()}${e.slice(1)}`, '');
 
+export const getActualHslColor = (e, paletteColor) => {
+    let color = '';
+    if (typeof e === 'string') {
+        e = e.replace(/ /g, '');
+        e = e.toLowerCase();
+    }
+    if (detectColor(e) === 'hsl' || detectColor(e) === 'hsla') {
+        color = e.match(/(\d+(\.\d+)?)/g);
+        color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
+    } else if (detectColor(e) === 'hex') {
+        color = hexToHsv(e);
+    } else if (detectColor(e) === 'rgb') {
+        const col = e.substring(e.indexOf('(') + 1, e.lastIndexOf(')')).split(/,\s*/);
+        color = rgbToHsv(...col);
+    } else if (x11Colors[convertToXllString(e)]) {
+        color = rgbToHsv(...x11Colors[convertToXllString(e)].rgb.split(','));
+    } else if (typeof e !== 'string' && !(e instanceof Array)) {
+        color = rgbToHsv(paletteColor);
+    } else {
+        color = e;
+    }
+    return color;
+};
+
 export const PROPS = {
     config: {
         sanitization: (context, config) => {
@@ -17,30 +41,10 @@ export const PROPS = {
             }
             const newConfig = mergeRecursive(defCon, config);
 
-            if (newConfig.scheme instanceof Array) {
-                newConfig.scheme = newConfig.scheme.map((e, i) => {
-                    let color = '';
-                    if (typeof e === 'string') {
-                        e = e.replace(/ /g, '');
-                    }
-                    if (detectColor(e) === 'hsl') {
-                        color = e.match(/(\d+(\.\d+)?)/g);
-                        color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
-                    } else if (detectColor(e) === 'hex') {
-                        color = hexToHsv(e);
-                    } else if (detectColor(e) === 'rgb') {
-                        const col = e.substring(e.indexOf('(') + 1, e.lastIndexOf(')')).split(/,\s*/);
-                        color = rgbToHsv(...col);
-                    } else if (x11Colors[convertToXllString(e)]) {
-                        color = rgbToHsv(...x11Colors[convertToXllString(e)].rgb.split(','));
-                    } else if (typeof e !== 'string' && !(e instanceof Array)) {
-                        color = rgbToHsv(palette[i]);
-                    } else {
-                        color = e;
-                    }
-                    return color;
-                });
+            if (newConfig.range instanceof Array) {
+                newConfig.range = newConfig.range.map((e, i) => getActualHslColor(e, palette[i]));
             }
+            newConfig.value = getActualHslColor(newConfig.value, newConfig.value);
             return newConfig;
         }
     },

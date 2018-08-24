@@ -7,11 +7,9 @@ import { getUniqueId } from 'muze-utils';
 import GenericLayout from '../generic-layout';
 import { DEFAULT_CONFIGURATION, DEFAULT_MEASUREMENTS } from './defaults';
 import {
-    renderArrows,
     renderMatrices
 } from './renderer';
 import { generateVisualMatrices } from './layout-helper';
-import { TOP, LEFT, RIGHT, BOTTOM, CLICK } from '../enums/constants';
 import { computeLayoutMeasurements, getViewMeasurements, getViewMatrices } from './computations';
 /**
  * This class is used to create a tabular structure that
@@ -106,43 +104,40 @@ export default class GridLayout extends GenericLayout {
     }
 
     /**
-     * Registers events on clicks of the arrows in the layout
      *
-     * @param {string} type type of arrow
-     * @param {Function} callback event function to be attached
-     * @return {Object} current instance
+     *
+     * @param {*} type
+     * @param {*} pageNumber
+     * @returns
      * @memberof GridLayout
      */
-    arrowClick (type, callback) {
-        let {
-            columnPointer,
-             rowPointer
-        } = this.config();
-        switch (type) {
-        case TOP:
-            rowPointer--;
-            break;
-        case BOTTOM:
-            rowPointer++;
-            break;
-        case LEFT:
-            columnPointer--;
-            break;
-        case RIGHT:
-            columnPointer++;
-            break;
-        default:
-            break;
-        }
+    gotoPage (type, pageNumber) {
+        const pageType = type.toLowerCase();
+        const { viewMatricesInfo } = this.getViewInformation();
+        const totalPages = viewMatricesInfo[`${pageType}Pages`];
+        const pointer = Math.min(Math.max(1, pageNumber), totalPages);
         this.config({
-            rowPointer,
-            columnPointer
+            [`${pageType}Pointer`]: pointer - 1
         });
-        callback && callback();
         this.setViewInformation();
         this.renderGrid();
-        this.renderArrows();
         return this;
+    }
+
+    /**
+     *
+     *
+     * @param {*} type
+     * @returns
+     * @memberof GridLayout
+     */
+    pages (type) {
+        const { viewMatricesInfo } = this.getViewInformation();
+        const pageType = type.toLowerCase();
+        return {
+            totalPages: viewMatricesInfo[`${pageType}Pages`],
+            currentPage: this.config()[`${pageType}Pointer`] + 1
+        };
     }
 
     /**
@@ -194,24 +189,6 @@ export default class GridLayout extends GenericLayout {
         } = this.getViewInformation();
         // Render matrices
         renderMatrices(this, viewMatricesInfo.matrices, layoutDimensions);
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} container
-     * @memberof GridLayout
-     */
-    renderArrows (container) {
-        if (!this._arrowContainer) {
-            this._arrowContainer = container;
-        }
-        const arrows = renderArrows(this, this._arrowContainer, this.getViewInformation().viewMatricesInfo);
-        Object.entries(arrows).forEach((arrowInfo) => {
-            const arrowType = arrowInfo[0];
-            arrowInfo[1].on(CLICK, () => this.arrowClick(arrowType));
-        });
         return this;
     }
 }

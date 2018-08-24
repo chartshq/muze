@@ -1,5 +1,14 @@
 import Smartlabel from 'fusioncharts-smartlabel';
-import { transactor, enableChainedTransaction, LifeCycleManager, DataModel } from 'muze-utils';
+import {
+    transactor,
+    enableChainedTransaction,
+    LifeCycleManager,
+    DataModel,
+    makeElement,
+    getClientPoint,
+    getEvent,
+    require
+} from 'muze-utils';
 import { SurrogateSideEffect, SpawnableSideEffect, sideEffects } from '@chartshq/muze-firebolt';
 import { layerFactory } from '@chartshq/visual-layer';
 import pkg from '../package.json';
@@ -13,6 +22,12 @@ import './muze.scss';
 // Cache singleton instances which should be included only once in a page
 const globalCache = {};
 const defaultRegistry = COMPONENTS;
+
+const overrideRegistryDefinitions = (overrideRegistry, registry) => {
+    for (const prop in overrideRegistry) {
+        registry.set(prop, overrideRegistry[prop]);
+    }
+};
 
 /**
  * Entry point to renderer. Initializes an environment with settings and registries for canvas. This is a simple wrapper
@@ -82,24 +97,47 @@ const muze = () => {
     // only from setter to avoid unwanted sync issues.
     env.settings = () => globalStore.serialize();
 
-    env.registry = (overrideRegistry) => {
-        for (const prop in overrideRegistry) {
-            if (!(prop in defaultRegistry)) {
-                continue;
+    env.registry = (...overrideRegistry) => {
+        // Selectively copy the properties from COMPONENTS
+        if (overrideRegistry.length) {
+            for (const prop in overrideRegistry) {
+                if (prop in defaultRegistry) {
+                    components[prop] = overrideRegistry[prop];
+                }
             }
-            components[prop] = overrideRegistry[prop];
+            return env;
         }
+        return components;
+    };
 
-        return env;
+    env.cellRegistry = (...overrideRegistry) => {
+        const cellRegistry = componentSubRegistry.cellRegistry;
+        if (overrideRegistry.length) {
+            overrideRegistryDefinitions(overrideRegistry[0], cellRegistry);
+            return env;
+        }
+        return cellRegistry.get();
+    };
+
+    env.layerRegistry = (...overrideRegistry) => {
+        const layerRegistry = componentSubRegistry.layerRegistry;
+        if (overrideRegistry.length) {
+            overrideRegistryDefinitions(overrideRegistry[0], layerRegistry);
+            return env;
+        }
+        return layerRegistry.get();
     };
 
     return env;
 };
 
-const SideEffects = Object.assign({
-    SurrogateSideEffect,
-    SpawnableSideEffect
-}, sideEffects);
+const SideEffects = {
+    concrete: sideEffects,
+    abstract: {
+        SurrogateSideEffect,
+        SpawnableSideEffect
+    }
+};
 
 muze.DataModel = DataModel;
 muze.pkg = pkg;
@@ -107,5 +145,11 @@ muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
 muze.operators = operators;
+muze.utils = {
+    getClientPoint,
+    getEvent,
+    makeElement,
+    require
+};
 
 export default muze;

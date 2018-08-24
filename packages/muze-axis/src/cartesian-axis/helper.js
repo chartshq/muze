@@ -1,8 +1,9 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 import { LOG } from '../enums/scale-type';
 
-export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
+export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) => {
     const ticks = axis.scale().ticks();
+    const { numberOfTicks } = axisInstance.config();
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
@@ -10,7 +11,7 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
-    numberOfValues = Math.max(1, numberOfValues);
+    numberOfValues = Math.min(numberOfTicks, Math.max(1, numberOfValues));
     return axis.scale().ticks(numberOfValues);
 };
 
@@ -217,6 +218,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
         showAxisName,
         tickValues
    } = config;
+    const domain = context.domain();
     const { height: axisDimHeight } = axisLabelDim;
     const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 
@@ -224,10 +226,10 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
 
     height = 0;
     if (tickValues) {
-        width = tickValues.reduce((total) => {
-            total += tickDimWidth + context._minTickDistance.width;
-            return total;
-        }, 0);
+        const minTickDiff = context.getMinTickDifference();
+        const [min, max] = [Math.min(...tickValues, ...domain), Math.max(...tickValues, ...domain)];
+
+        width = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + context._minTickDistance.width);
     }
     if (!width || width === 0) {
         height = Math.max(tickDimWidth, tickDimHeight);
@@ -262,18 +264,20 @@ export const getVerticalAxisSpace = (context, axisDimensions, config) => {
         showAxisName,
         tickValues
    } = config;
+    const domain = context.domain();
     const { height: axisDimHeight } = axisLabelDim;
     const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 
     height = 0;
     width = tickDimWidth;
     if (tickValues) {
-        height = tickValues.reduce((total) => {
-            total += tickDimHeight * 1.1;
-            return total;
-        }, 0);
+        const minTickDiff = context.getMinTickDifference();
+        const [min, max] = [Math.min(...tickValues, ...domain), Math.max(...tickValues, ...domain)];
+
+        height = ((max - min) / Math.abs(minTickDiff)) * (tickDimHeight);
     }
     width += (showAxisName ? axisDimHeight : 0) + tickSize + axisNamePadding;
+
     return {
         height,
         width
@@ -338,7 +342,8 @@ export const calculateContinousSpace = (context) => {
 
     const {
         orientation,
-        show
+        show,
+        showAxisName
     } = config;
     const {
         axisLabelDim
@@ -364,10 +369,12 @@ export const calculateContinousSpace = (context) => {
     }
 
     const { width, height } = getVerticalAxisSpace(context, axisDimensions, config, range);
-    const effHeight = Math.max(height, axisDimWidth);
+
+    const effHeight = Math.max(height, showAxisName ? axisDimWidth : 0);
 
     return {
         width,
         height: effHeight
     };
 };
+

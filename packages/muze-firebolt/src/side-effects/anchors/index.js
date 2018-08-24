@@ -30,21 +30,25 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 const encodingFieldsInf = layer.encodingFieldsInf();
                 const config = layer.config();
                 layers = [...layers, ...context.addLayer({
-                    name: `${layer.alias()}-this.constructor.formalName()-${idx}`,
+                    name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
                     mark: 'point',
                     encoding: {
                         x: encodingFieldsInf.xField,
                         y: encodingFieldsInf.yField,
-                        color: encodingFieldsInf.colorField,
+                        color: {
+                            field: encodingFieldsInf.colorField
+                        },
                         size: {
+                            field: encodingFieldsInf.sizeField,
                             value: this.defaultSizeValue()
                         }
                     },
                     transform: config.transform,
                     transition: this.getTransitionConfig(),
                     calculateDomain: false,
-                    dataSource: dt => dt.select(() => false),
-                    interactive: false
+                    source: dt => dt.select(() => false),
+                    interactive: false,
+                    render: false
                 })];
             }
         });
@@ -67,7 +71,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
 
     apply (selectionSet) {
         const dataModel = selectionSet.mergedEnter.model;
-        const drawingInf = this.drawingContext()();
+        const drawingInf = this.drawingContext();
         const sideEffectGroup = drawingInf.sideEffectGroup;
         const className = this.config().className;
         const anchorGroups = this.createElement(sideEffectGroup, 'g', this._layers.map(d => d.id()), className);

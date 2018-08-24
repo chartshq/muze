@@ -7,7 +7,7 @@ import { TOP, BOTTOM, LEFT, TITLE, SUB_TITLE, GROUP, LAYOUT, LEGEND } from '../c
  * @returns
  */
 export const arrangeComponents = (context) => {
-    const legendConfig = context.legend();
+    const legendConfig = context.config().legend;
     const titleConfig = context.title()[1];
     const subtitleConfig = context.subtitle()[1];
     const titleLayouts = {

@@ -24,15 +24,15 @@ function renderTable (mount, className, rowData) {
 }
 
 function applyRowBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [TOP, BOTTOM].forEach((borderType) => {
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
         cells.style(`border-${borderType}`, style);
     });
 }
 
 function applyColBorders (cells, borderStyle, showBorders, color) {
-    const style = `${borderStyle} ${showBorders ? color : BLANK_BORDERS}`;
     [LEFT, RIGHT].forEach((borderType) => {
+        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
         cells.style(`border-${borderType}`, style);
     });
 }
@@ -62,9 +62,9 @@ function applyBorders (cells, border, type, index) {
                 color : BLANK_BORDERS}`);
         });
     } else if (type === CENTER) {
-        applyRowBorders(cells, borderStyle, showRowBorders[index === 0 ? LEFT : RIGHT], color);
+        applyRowBorders(cells, borderStyle, showRowBorders, color);
     } else if (index === 1) {
-        applyColBorders(cells, borderStyle, showColBorders[type], color);
+        applyColBorders(cells, borderStyle, showColBorders, color);
     }
 }
 
@@ -102,8 +102,9 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.height);
+                    placeholder.setAvailableSpace(0, placeholder.availableHeight());
                 }
+                cells.style('height', `${placeholder.availHeight()}px`);
                 return span;
             });
         }
@@ -185,65 +186,3 @@ export function renderMatrices (context, matrices, layoutDimensions) {
                         return 0;
                     });
 }
-
-/**
- * Creates the pagination arrows
- *
- * @param {Selection} mount Mount point for the arrows
- * @param {Array} data Data based on which the arrows are made
- * @param {string} arrowType Arrow type(left/right/top/bottom)
- * @param {Function} clickFn Click function to be bounded with the arrow
- * @return {Selection} the arrow element
-*/
-const createArrow = (mount, data, { classPrefix, display, arrowType }) =>
-    makeElement(mount, 'div', data, `${classPrefix}-table-arrow-${arrowType}`)
-                    .classed(`${classPrefix}-table-arrow`, true).classed('hidden', !display);
-
-/**
- * Renders the arrows in the matrix
- *
- * @param {Selection} mountPoint point where arrows have to be mounted
- * @param {Object} viewMatricesInfo information on the view matrices based on which arrows are drawn
- * @param {Instance} layout instance of layout
- */
-export const renderArrows = (context, mountPoint, viewMatricesInfo) => {
-    const {
-        columnPointer,
-        rowPointer,
-        classPrefix
-    } = context.config();
-    const {
-        rowPages,
-        columnPages
-    } = viewMatricesInfo;
-
-    return {
-        // bottom arrow
-        bottom: createArrow(mountPoint, [1], {
-            classPrefix,
-            arrowType: BOTTOM,
-            display: (rowPointer + 1 !== rowPages)
-        }),
-        // render the top arrow based on row start index
-        top: createArrow(mountPoint, [1],
-            {
-                classPrefix,
-                arrowType: TOP,
-                display: rowPointer > 0
-            }),
-        // right arrow
-        right: createArrow(mountPoint, [1],
-            {
-                classPrefix,
-                arrowType: RIGHT,
-                display: (columnPointer + 1 !== columnPages)
-            }),
-        // render the left arrow based on row start index
-        left: createArrow(mountPoint, [1], {
-            classPrefix,
-            arrowType: LEFT,
-            display: (columnPointer > 0)
-        })
-    };
-};
-
