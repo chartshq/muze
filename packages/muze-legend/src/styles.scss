@@ -3,13 +3,13 @@ $prefix: muze-;
 
 .#{$prefix}legend-box {
     font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
-  
+
     line-height: 10px !important;
     height: 100px;
     float: none !important;
     display: inline-block;
     border: solid rgba(0, 0, 0, 0);
-    
+
 }
 
 .#{$prefix}legend-title {
@@ -36,7 +36,7 @@ $prefix: muze-;
 
 .#{$prefix}overflow-y{
     overflow-y: scroll;
-} 
+}
 
 .#{$prefix}overflow-x{
     overflow-x: scroll;
@@ -49,8 +49,6 @@ $prefix: muze-;
 
 .#{$prefix}legend-brighten {
     fill-opacity: 1;
-    opacity: 1;
-    // fill: #ff0000;
 }
 .#{$prefix}legend-item-info {
     float: left;
@@ -58,7 +56,6 @@ $prefix: muze-;
     align-items: center;
     cursor: pointer;
     font-size: 12px;
-  
 }
 .#{$prefix}legend-item-info.center{
     justify-content: center;

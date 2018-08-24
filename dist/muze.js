@@ -2431,14 +2431,25 @@ var filterPropagationModel = function filterPropagationModel(model, propModels) 
                 var dataObj = dataModel.getData();
                 var schema = dataObj.schema;
                 var fieldsConfig = dataModel.getFieldsConfig();
+                var fieldsSpace = dataModel.getFieldspace().fieldsObj();
                 var data = dataObj.data;
+                var domain = Object.values(fieldsConfig).reduce(function (acc, v) {
+                    acc[v.def.name] = fieldsSpace[v.def.name].domain();
+                    return acc;
+                }, {});
+
                 return function (fields) {
                     var include = !data.length ? false : data.some(function (row) {
                         return schema.every(function (propField) {
                             if (!(propField.name in fields)) {
                                 return true;
                             }
-                            if (!filterByMeasure && propField.type !== _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
+                            var value = fields[propField.name].valueOf();
+                            if (filterByMeasure && propField.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+                                return value >= domain[propField.name][0] && value <= domain[propField.name][1];
+                            }
+
+                            if (propField.type !== _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
                                 return true;
                             }
                             var idx = fieldsConfig[propField.name].index;
@@ -7269,12 +7280,14 @@ var GridLayout = function (_GenericLayout) {
     }, {
         key: 'gotoPage',
         value: function gotoPage(type, pageNumber) {
+            var pageType = type.toLowerCase();
+
             var _getViewInformation = this.getViewInformation(),
                 viewMatricesInfo = _getViewInformation.viewMatricesInfo;
 
-            var totalPages = viewMatricesInfo[type + 'Pages'];
+            var totalPages = viewMatricesInfo[pageType + 'Pages'];
             var pointer = Math.min(Math.max(1, pageNumber), totalPages);
-            this.config(_defineProperty({}, type + 'Pointer', pointer - 1));
+            this.config(_defineProperty({}, pageType + 'Pointer', pointer - 1));
             this.setViewInformation();
             this.renderGrid();
             return this;
@@ -7294,9 +7307,10 @@ var GridLayout = function (_GenericLayout) {
             var _getViewInformation2 = this.getViewInformation(),
                 viewMatricesInfo = _getViewInformation2.viewMatricesInfo;
 
+            var pageType = type.toLowerCase();
             return {
-                totalPages: viewMatricesInfo[type + 'Pages'],
-                currentPage: this.config()[type + 'Pointer'] + 1
+                totalPages: viewMatricesInfo[pageType + 'Pages'],
+                currentPage: this.config()[pageType + 'Pointer'] + 1
             };
         }
 
@@ -7502,13 +7516,14 @@ function applyBorders(cells, border, type, index) {
 function renderMatrix(matrices, mountPoint, type, dimensions, classPrefix) {
     matrices.forEach(function (matrix, index) {
         // Creating containers for each matrix individually
-        var containerForMatrix = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', [1], classPrefix + '-grid-' + type + '-' + (index + 1)).classed(classPrefix + '-grid-' + type, true).classed(classPrefix + '-grid', true).style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], dimensions.viewWidth[index] + 'px');
+        var containerForMatrix = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', [1], classPrefix + '-grid-' + type + '-' + (index + 1)).classed(classPrefix + '-grid-' + type, true).classed(classPrefix + '-grid', true);
 
         var _cellSpanMaker = Object(_span_maker__WEBPACK_IMPORTED_MODULE_1__["cellSpanMaker"])(matrix, type, index),
             viewMatrix = _cellSpanMaker.viewMatrix,
             spans = _cellSpanMaker.spans;
 
         if (type !== _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"]) {
+            containerForMatrix.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], dimensions.viewWidth[index] + 'px');
             containerForMatrix.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], dimensions.viewHeight[_enums_constants__WEBPACK_IMPORTED_MODULE_2__["VIEW_INDEX"][type]] + 'px');
         }
 
@@ -7519,6 +7534,8 @@ function renderMatrix(matrices, mountPoint, type, dimensions, classPrefix) {
 
         if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"] && spans) {
             cells.attr(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["ROW_SPAN"], function (cell, colIndex) {
+                var placeholder = cell.placeholder;
+                Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).style('height', placeholder.availHeight() + dimensions.border.width + 'px');
                 return spans[cell.rowIndex][colIndex];
             });
         } else if ((type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"] || type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]) && index === 1) {
@@ -7526,9 +7543,9 @@ function renderMatrix(matrices, mountPoint, type, dimensions, classPrefix) {
                 var span = spans[cell.rowIndex][colIndex];
                 var placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.availableHeight());
+                    placeholder.setAvailableSpace(0, placeholder.availHeight());
                 }
-                cells.style('height', placeholder.availHeight() + 'px');
+                Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).style('height', placeholder.availHeight() + 'px');
                 return span;
             });
         }
@@ -9225,10 +9242,8 @@ var setFixedBaseline = function setFixedBaseline(axisInstance) {
 var setAxisNamePos = function setAxisNamePos(textNode, orientation, measures) {
     var axisNameHeight = measures.axisNameHeight,
         yOffset = measures.yOffset,
-        xOffset = measures.xOffset,
         labelOffset = measures.labelOffset,
-        availableSpace = measures.availableSpace,
-        axisNameWidth = measures.axisNameWidth;
+        availableSpace = measures.availableSpace;
 
     switch (orientation) {
         case _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["LEFT"]:
@@ -9238,7 +9253,7 @@ var setAxisNamePos = function setAxisNamePos(textNode, orientation, measures) {
             textNode.attr('transform', 'translate(' + (availableSpace.width - axisNameHeight) + ',' + (yOffset + labelOffset) + ')rotate(90)');
             break;
         case _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"]:
-            textNode.attr('transform', 'translate(' + (labelOffset + xOffset + axisNameWidth / 2) + ',' + (-availableSpace.height + axisNameHeight) + ')');
+            textNode.attr('transform', 'translate(' + availableSpace.width / 2 + ',' + (-availableSpace.height + axisNameHeight) + ')');
             break;
         case _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"]:
             textNode.attr('transform', 'translate(' + availableSpace.width / 2 + ',' + (availableSpace.height - axisNameHeight / 2) + ')');
@@ -9285,7 +9300,9 @@ function renderAxis(axisInstance) {
     }
     var tickSize = axisInstance.getTickSize();
 
-    var selectContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mount), 'g', [1], '' + className);
+    var selectContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mount), 'g', [axisInstance], '' + className, {}, function (key) {
+        return key.config().id;
+    });
 
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
@@ -9304,7 +9321,6 @@ function renderAxis(axisInstance) {
 
     // Draw axis ticks
     selectContainer.attr('transform', 'translate(' + xOffset + ',' + yOffset + ')');
-
     setFixedBaseline(axisInstance);
     if (labels.smartTicks === false) {
         selectContainer.transition().duration(1000).call(axis);
@@ -10439,7 +10455,7 @@ var calculateContinousSpace = function calculateContinousSpace(context) {
 
 
     if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_0__["TOP"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]) {
-        var _getHorizontalAxisSpa2 = getHorizontalAxisSpace(context, axisDimensions, config, range),
+        var _getHorizontalAxisSpa2 = getHorizontalAxisSpace(context, axisDimensions, config),
             _width2 = _getHorizontalAxisSpa2.width,
             _height2 = _getHorizontalAxisSpa2.height;
 
@@ -12425,6 +12441,7 @@ var getActualHslColor = function getActualHslColor(e, paletteColor) {
     var color = '';
     if (typeof e === 'string') {
         e = e.replace(/ /g, '');
+        e = e.toLowerCase();
     }
     if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["detectColor"])(e) === 'hsl' || Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["detectColor"])(e) === 'hsla') {
         color = e.match(/(\d+(\.\d+)?)/g);
@@ -13654,6 +13671,7 @@ var GenericBehaviour = function () {
         _classCallCheck(this, GenericBehaviour);
 
         this.firebolt = firebolt;
+        this._enabled = true;
     }
 
     _createClass(GenericBehaviour, [{
@@ -13710,6 +13728,21 @@ var GenericBehaviour = function () {
                 fields: Object(_helper__WEBPACK_IMPORTED_MODULE_0__["getSourceFields"])(propagationInf, payload.criteria),
                 sourceSelectionSet: selectionSet._volatile === true
             };
+        }
+    }, {
+        key: 'enable',
+        value: function enable() {
+            this._enabled = true;
+        }
+    }, {
+        key: 'disable',
+        value: function disable() {
+            this._enabled = false;
+        }
+    }, {
+        key: 'isEnabled',
+        value: function isEnabled() {
+            return this._enabled;
         }
     }], [{
         key: 'mutates',
@@ -14358,7 +14391,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-
 var physicalActions = (_physicalActions = {}, _defineProperty(_physicalActions, _enums_actions__WEBPACK_IMPORTED_MODULE_4__["DRAG"], _drag__WEBPACK_IMPORTED_MODULE_0__["default"]), _defineProperty(_physicalActions, _enums_actions__WEBPACK_IMPORTED_MODULE_4__["HOVER"], _hover__WEBPACK_IMPORTED_MODULE_1__["default"]), _defineProperty(_physicalActions, _enums_actions__WEBPACK_IMPORTED_MODULE_4__["CLICK"], _click__WEBPACK_IMPORTED_MODULE_5__["default"]), _defineProperty(_physicalActions, _enums_actions__WEBPACK_IMPORTED_MODULE_4__["LONGTOUCH"], _longtouch__WEBPACK_IMPORTED_MODULE_2__["longtouch"]), _defineProperty(_physicalActions, _enums_actions__WEBPACK_IMPORTED_MODULE_4__["TOUCHDRAG"], _touch_drag__WEBPACK_IMPORTED_MODULE_3__["touchdrag"]), _physicalActions);
 
 /***/ }),
@@ -14554,7 +14586,13 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
     options: {
         strategy: 'fade'
     }
-}, 'brush-anchors']), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["HIGHLIGHT"], [{
+}, 'brush-anchors']), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["BRUSH"] + ',' + _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["SELECT"], [{
+    name: 'tooltip',
+    options: {
+        strategy: 'showSelectedItems',
+        order: 0
+    }
+}]), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["HIGHLIGHT"], [{
     name: 'highlighter',
     options: {
         strategy: 'highlight'
@@ -14569,13 +14607,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
     options: {
         strategy: 'focus'
     }
-}, 'persistent-anchors', {
-    name: 'tooltip',
-    options: {
-        strategy: 'showSelectedItems',
-        order: 0
-    }
-}]), _behaviourEffectMap);
+}, 'persistent-anchors']), _behaviourEffectMap);
 
 /***/ }),
 
@@ -14716,6 +14748,9 @@ var Firebolt = function () {
         this._actionBehaviourMap = {};
         this._config = {};
         this._behaviourEffectMap = {};
+        this._entryExitSet = {};
+        this._actionHistory = {};
+        this._queuedSideEffects = [];
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -14771,34 +14806,90 @@ var Firebolt = function () {
     }, {
         key: 'applySideEffects',
         value: function applySideEffects(sideEffects, selectionSet, payload) {
+            var _this = this,
+                _queuedSideEffects;
+
             var sideEffectStore = this.sideEffects();
+            var actionHistory = this._actionHistory;
+            var queuedSideEffects = [];
             sideEffects.forEach(function (sideEffect) {
                 var options = void 0;
                 var name = void 0;
-                if ((typeof sideEffect === 'undefined' ? 'undefined' : _typeof(sideEffect)) === 'object') {
-                    name = sideEffect.name;
-                    options = sideEffect.options;
-                } else {
-                    name = sideEffect;
-                }
+                var effects = sideEffect.effects;
+                var behaviours = sideEffect.behaviours;
+                var combinedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["unionSets"])(_this, behaviours, selectionSet);
+                effects.forEach(function (effect) {
+                    if ((typeof effect === 'undefined' ? 'undefined' : _typeof(effect)) === 'object') {
+                        name = effect.name;
+                        options = effect.options;
+                    } else {
+                        name = effect;
+                    }
 
-                var sideEffectInstance = sideEffectStore[name];
-                if (sideEffectInstance.enabled) {
-                    sideEffectStore[name].apply(selectionSet, payload, options);
-                }
+                    var sideEffectInstance = sideEffectStore[name];
+                    if (sideEffectInstance.isEnabled()) {
+                        if (!sideEffectInstance.constructor.mutates() && Object.values(actionHistory).some(function (d) {
+                            return d.isMutableAction;
+                        })) {
+                            queuedSideEffects.push({
+                                name: name,
+                                params: [combinedSet, payload, options]
+                            });
+                        } else {
+                            sideEffectStore[name].apply(combinedSet, payload, options);
+                        }
+                    }
+                });
             });
+            (_queuedSideEffects = this._queuedSideEffects).push.apply(_queuedSideEffects, queuedSideEffects);
             return this;
         }
     }, {
         key: 'dispatchBehaviour',
-        value: function dispatchBehaviour(behaviourName, payload) {
-            var action = this._actions.behavioural[behaviourName];
-            var sideEffects = this._behaviourEffectMap[behaviourName];
+        value: function dispatchBehaviour(behaviour, payload) {
+            var propagationInfo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-            if (action) {
-                var selectionSet = action(payload);
-                this.applySideEffects(sideEffects, selectionSet, payload);
+            var propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
+            var behaviouralActions = this._actions.behavioural;
+            var action = behaviouralActions[behaviour];
+            var behaviourEffectMap = this._behaviourEffectMap;
+            var sideEffects = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSideEffects"])(behaviour, behaviourEffectMap);
+            this._propagationInf = propagationInfo;
+            if (action && action.isEnabled()) {
+                var selectionSet = action.dispatch(payload);
+                var propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
+                this._entryExitSet[behaviour] = propagationSelectionSet;
+                var shouldApplySideEffects = this.shouldApplySideEffects(propagate);
+
+                if (propagate) {
+                    this.propagate(behaviour, payload, selectionSet.find(function (d) {
+                        return d.sourceSelectionSet;
+                    }), sideEffects);
+                }
+                if (shouldApplySideEffects) {
+                    var applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+                    this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+                }
             }
+
+            return this;
+        }
+    }, {
+        key: 'getPropagationSelectionSet',
+        value: function getPropagationSelectionSet(selectionSet) {
+            return selectionSet.find(function (d) {
+                return !d.sourceSelectionSet;
+            });
+        }
+    }, {
+        key: 'shouldApplySideEffects',
+        value: function shouldApplySideEffects() {
+            return true;
+        }
+    }, {
+        key: 'propagate',
+        value: function propagate() {
+            return this;
         }
     }, {
         key: 'sideEffects',
@@ -14810,16 +14901,45 @@ var Firebolt = function () {
             return this._sideEffects;
         }
     }, {
-        key: 'enable',
-        value: function enable(fn) {
-            Object(_helper__WEBPACK_IMPORTED_MODULE_2__["changeSideEffectAvailability"])(this.sideEffects(), fn, true);
+        key: 'enableSideEffects',
+        value: function enableSideEffects(fn) {
+            Object(_helper__WEBPACK_IMPORTED_MODULE_2__["changeSideEffectAvailability"])(this, fn, true);
             return this;
         }
     }, {
-        key: 'disable',
-        value: function disable(fn) {
-            Object(_helper__WEBPACK_IMPORTED_MODULE_2__["changeSideEffectAvailability"])(this.sideEffects(), fn, false);
+        key: 'disableSideEffects',
+        value: function disableSideEffects(fn) {
+            Object(_helper__WEBPACK_IMPORTED_MODULE_2__["changeSideEffectAvailability"])(this, fn, false);
             return this;
+        }
+    }, {
+        key: 'dissociateBehaviour',
+        value: function dissociateBehaviour(behaviour, physicalAction) {
+            var actionBehaviourMap = this._actionBehaviourMap;
+            for (var key in actionBehaviourMap) {
+                if (key === physicalAction) {
+                    var behaviourMap = actionBehaviourMap[key];
+                    behaviourMap.behaviours = behaviourMap.behaviours.filter(function (d) {
+                        return d !== behaviour;
+                    });
+                }
+            }
+
+            return this;
+        }
+    }, {
+        key: 'dissociateSideEffect',
+        value: function dissociateSideEffect(sideEffect, behaviour) {
+            var behaviourEffectMap = this._behaviourEffectMap;
+            behaviourEffectMap[behaviour] = behaviourEffectMap[behaviour].filter(function (d) {
+                return (d.name || d) !== sideEffect;
+            });
+            return this;
+        }
+    }, {
+        key: 'getApplicableSideEffects',
+        value: function getApplicableSideEffects(sideEffects) {
+            return sideEffects;
         }
     }, {
         key: 'attachPropagationListener',
@@ -14831,13 +14951,13 @@ var Firebolt = function () {
     }, {
         key: 'onDataModelPropagation',
         value: function onDataModelPropagation() {
-            var _this = this;
+            var _this2 = this;
 
             return function (propValue) {
                 var payload = propValue.payload;
                 var action = payload.action;
 
-                _this.dispatchBehaviour(action, payload, {
+                _this2.dispatchBehaviour(action, payload, {
                     propagate: false
                 });
             };
@@ -14940,25 +15060,27 @@ var Firebolt = function () {
     }, {
         key: 'bindActionWithBehaviour',
         value: function bindActionWithBehaviour(action, targets, behaviourList) {
-            var _this2 = this;
+            var _this3 = this;
 
             if (typeof targets === 'string') {
                 targets = [targets];
             }
             targets.forEach(function (target) {
                 var nodes = void 0;
-                var mount = _this2.context.mount();
+                var mount = _this3.context.mount();
                 if (target[0] === '.') {
                     nodes = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getElementsByClassName"])(mount, target);
                 } else {
                     nodes = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mount).selectAll(target);
                 }
-                if (nodes instanceof Array) {
-                    nodes.forEach(function (node) {
-                        action(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(node), behaviourList);
-                    });
-                } else {
-                    action(nodes, behaviourList);
+                if (behaviourList.length) {
+                    if (nodes instanceof Array) {
+                        nodes.forEach(function (node) {
+                            action(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(node), behaviourList);
+                        });
+                    } else {
+                        action(nodes, behaviourList);
+                    }
                 }
             });
             return this;
@@ -15027,7 +15149,7 @@ var Firebolt = function () {
 /*!****************************************************!*\
   !*** ./packages/muze-firebolt/src/helper/index.js ***!
   \****************************************************/
-/*! exports provided: initializeSideEffects, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getModelFromSet, getSetInfo */
+/*! exports provided: initializeSideEffects, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getModelFromSet, getSetInfo, getSideEffects, unionSets */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -15040,10 +15162,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSourceFields", function() { return getSourceFields; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getModelFromSet", function() { return getModelFromSet; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSetInfo", function() { return getSetInfo; });
-/* harmony import */ var _enums_selection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/selection */ "./packages/muze-firebolt/src/enums/selection.js");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSideEffects", function() { return getSideEffects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unionSets", function() { return unionSets; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _enums_selection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/selection */ "./packages/muze-firebolt/src/enums/selection.js");
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 
+
+
+var getBehaviourBySideEffect = function getBehaviourBySideEffect(behaviourEffectMap, sideEffect) {
+    return Object.keys(behaviourEffectMap).find(function (key) {
+        return behaviourEffectMap[key].find(function (effect) {
+            return (effect.name || effect) === sideEffect;
+        });
+    });
+};
 
 var initializeSideEffects = function initializeSideEffects(context, sideEffects) {
     var sideEffectsMap = context._sideEffects;
@@ -15077,11 +15211,12 @@ var initializePhysicalActions = function initializePhysicalActions(context, acti
     return physicalActions;
 };
 
-var changeSideEffectAvailability = function changeSideEffectAvailability(sideEffects, fn, toEnable) {
+var changeSideEffectAvailability = function changeSideEffectAvailability(context, fn, toEnable) {
+    var sideEffects = context.sideEffects();
     for (var key in sideEffects) {
         if ({}.hasOwnProperty.call(sideEffects, key)) {
             var change = true;
-            if (fn && fn(sideEffects[key], key) === false) {
+            if (fn && fn(key) === false) {
                 change = false;
             }
             if (change) {
@@ -15113,12 +15248,12 @@ var getSourceFields = function getSourceFields(propagationInf) {
 };
 
 var conditionsMap = {
-    newEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"]],
-    oldEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
-    mergedEnter: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]],
-    newExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]],
-    oldExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
-    mergedExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]],
+    newEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_NEW_ENTRY"]],
+    oldEntry: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_OLD_ENTRY"]],
+    mergedEnter: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_NEW_ENTRY"], _enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_OLD_ENTRY"]],
+    newExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_NEW_EXIT"]],
+    oldExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_OLD_EXIT"]],
+    mergedExit: [_enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_NEW_EXIT"], _enums_selection__WEBPACK_IMPORTED_MODULE_1__["SELECTION_OLD_EXIT"]],
     complete: []
 };
 
@@ -15153,6 +15288,48 @@ var getSetInfo = function getSetInfo(type, set, config) {
         length: set.length,
         model: model
     };
+};
+
+var getSideEffects = function getSideEffects(behaviour, behaviourEffectMap) {
+    var sideEffects = [];
+    for (var key in behaviourEffectMap) {
+        var behaviours = key.split(',');
+        var found = behaviours.some(function (d) {
+            return d === behaviour;
+        });
+        if (found) {
+            sideEffects.push({
+                effects: behaviourEffectMap[key],
+                behaviours: behaviours
+            });
+        }
+    }
+    return sideEffects;
+};
+
+var unionSets = function unionSets(context, behaviours) {
+    var combinedSet = {};
+    var models = {
+        mergedEnter: null,
+        mergedExit: null
+    };
+    behaviours.forEach(function (behaviour) {
+        var entryExitSet = context._entryExitSet[behaviour];
+        if (entryExitSet) {
+            combinedSet = Object.assign(combinedSet, Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["clone"])(entryExitSet));
+            ['mergedEnter', 'mergedExit'].forEach(function (type) {
+                var model = entryExitSet[type].model;
+                var existingModel = models[type];
+                if (!existingModel) {
+                    existingModel = models[type] = model;
+                } else {
+                    existingModel = models[type] = model.union(existingModel);
+                }
+                combinedSet[type].model = existingModel;
+            });
+        }
+    });
+    return combinedSet;
 };
 
 /***/ }),
@@ -16002,7 +16179,7 @@ var GenericSideEffect = function () {
         _classCallCheck(this, GenericSideEffect);
 
         this.firebolt = firebolt;
-        this.enabled = true;
+        this._enabled = true;
         this._strategy = 'default';
         this._config = {};
         this._id = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getUniqueId"])();
@@ -16021,14 +16198,19 @@ var GenericSideEffect = function () {
     }, {
         key: 'disable',
         value: function disable() {
-            this.enabled = false;
+            this._enabled = false;
             return this;
         }
     }, {
         key: 'enable',
         value: function enable() {
-            this.enabled = true;
+            this._enabled = true;
             return this;
+        }
+    }, {
+        key: 'isEnabled',
+        value: function isEnabled() {
+            return this._enabled;
         }
     }, {
         key: 'apply',
@@ -16275,7 +16457,7 @@ var PlotHighlighter = function (_SurrogateSideEffect) {
             var strategy = _strategy__WEBPACK_IMPORTED_MODULE_1__["strategies"][options.strategy || this._strategy];
 
             if (selectionSet.isSourceFieldPresent !== false) {
-                strategy(selectionSet, this);
+                strategy(selectionSet, this, options.strategy || this._strategy);
             }
 
             return this;
@@ -16309,31 +16491,33 @@ var PlotHighlighter = function (_SurrogateSideEffect) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategies", function() { return strategies; });
+var fadeFn = function fadeFn(set, context, strategy) {
+    var mergedEnter = set.mergedEnter,
+        mergedExit = set.mergedExit,
+        exitSet = set.exitSet,
+        completeSet = set.completeSet;
+
+
+    if (!mergedEnter.length && !mergedExit.length) {
+        context.applyInteractionStyle(completeSet, {}, strategy, false);
+    } else {
+        context.applyInteractionStyle(exitSet[1], {}, strategy, true);
+        context.applyInteractionStyle(mergedEnter, {}, strategy, false);
+    }
+};
+
 var strategies = {
-    fade: function fade(set, context) {
-        var mergedEnter = set.mergedEnter,
-            mergedExit = set.mergedExit,
-            exitSet = set.exitSet,
-            completeSet = set.completeSet;
-
-
-        if (!mergedEnter.length && !mergedExit.length) {
-            context.unfadeSelection(completeSet);
-        } else {
-            context.fadeOutSelection(exitSet[1]);
-            context.unfadeSelection(mergedEnter);
-        }
-    },
+    fade: fadeFn,
     focus: function focus(set, context) {
         var mergedEnter = set.mergedEnter,
             mergedExit = set.mergedExit,
             completeSet = set.completeSet;
 
         if (!mergedEnter.length && !mergedExit.length) {
-            context.focusSelection(completeSet);
+            context.applyInteractionStyle(completeSet, {}, 'focus', false);
         } else {
-            context.focusOutSelection(mergedExit);
-            context.focusSelection(mergedEnter);
+            context.applyInteractionStyle(mergedExit, {}, 'focus', true);
+            context.applyInteractionStyle(mergedEnter, {}, 'focus', false);
         }
     },
     highlight: function highlight(set, context) {
@@ -16344,10 +16528,10 @@ var strategies = {
             completeSet = set.completeSet;
 
         if (!mergedEnter.length && !mergedExit.length) {
-            context.dehighlightPoint(completeSet);
+            context.applyInteractionStyle(completeSet, {}, 'highlight', false);
         } else {
-            context.highlightPoint(entrySet[1]);
-            context.dehighlightPoint(exitSet[1]);
+            context.applyInteractionStyle(entrySet[1], {}, 'highlight', true);
+            context.applyInteractionStyle(exitSet[1], {}, 'highlight', false);
         }
     }
 };
@@ -16794,46 +16978,16 @@ var SurrogateSideEffect = function (_GenericSideEffect) {
     }
 
     _createClass(SurrogateSideEffect, [{
-        key: 'fadeOutSelection',
-        value: function fadeOutSelection(set) {
-            var context = this.firebolt.context;
-            context.fadeOutSelection(set);
-        }
-    }, {
-        key: 'unfadeSelection',
-        value: function unfadeSelection(set) {
-            var context = this.firebolt.context;
-            context.unfadeSelection(set);
-        }
-    }, {
-        key: 'highlightPoint',
-        value: function highlightPoint(set) {
-            var context = this.firebolt.context;
-            context.highlightPoint(set);
-        }
-    }, {
-        key: 'dehighlightPoint',
-        value: function dehighlightPoint(set) {
-            var context = this.firebolt.context;
-            context.dehighlightPoint(set);
-        }
-    }, {
-        key: 'focusSelection',
-        value: function focusSelection(set) {
-            var context = this.firebolt.context;
-            context.focusSelection(set);
-        }
-    }, {
-        key: 'focusOutSelection',
-        value: function focusOutSelection(set) {
-            var context = this.firebolt.context;
-            context.focusOutSelection(set);
-        }
-    }, {
-        key: 'resetPoint',
-        value: function resetPoint(set) {
-            var context = this.firebolt.context;
-            context.resetPoint(set);
+        key: 'applyInteractionStyle',
+        value: function applyInteractionStyle(set) {
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+            var interactionType = arguments[2];
+            var apply = arguments[3];
+
+            var layers = this.firebolt.context.layers();
+            layers.forEach(function (layer) {
+                return layer.config().interactive !== false && layer.applyInteractionStyle(interactionType, set.uids, apply);
+            });
         }
     }]);
 
@@ -16909,10 +17063,7 @@ var Tooltip = function (_SpawnableSideEffect) {
             var totalWidth = 0;
             var dataModel = selectionSet.mergedEnter.model;
             var drawingInf = this.drawingContext();
-            if (payload.criteria && dataModel && dataModel.isEmpty()) {
-                return this;
-            }
-            if (payload.criteria === null || !dataModel) {
+            if (dataModel.isEmpty() || payload.criteria === null) {
                 this.hide(payload, null);
                 return this;
             }
@@ -16937,7 +17088,7 @@ var Tooltip = function (_SpawnableSideEffect) {
             var tooltipPos = payload.position;
             var boxes = [];
             var enter = {};
-
+            var action = payload.action === 'highlight' ? 'highlight' : 'brush';
             var uids = dataModel.getData().uids;
             if (fragmented) {
                 dataModels.push.apply(dataModels, _toConsumableArray(uids.map(function (d) {
@@ -16958,19 +17109,28 @@ var Tooltip = function (_SpawnableSideEffect) {
                     plotDim = context.getPlotPointsFromIdentifiers([[muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].ROW_ID], dataModels[i].getData().uids]);
                     plotDim = plotDim && plotDim[0];
                 }
+
                 var dt = dataModels[i];
                 enter[i] = true;
-                var tooltipInst = tooltips[i] = tooltips[i] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](drawingInf.htmlContainer, drawingInf.svgContainer);
+                var htmlContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["selectElement"])('.muze-grid-layout').node().getBoundingClientRect();
+                var layoutBoundBox = document.body.getBoundingClientRect();
+                var unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
+                var offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);
+                var offsetTop = Math.abs(layoutBoundBox.top - unitBoundBox.top);
+                var tooltipInst = tooltips[i] = tooltips[i] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](document.body, drawingInf.svgContainer);
                 tooltipInst.context(sourceInf);
                 var strategy = _strategies__WEBPACK_IMPORTED_MODULE_3__["strategies"][options.strategy];
-                tooltipInst.content(payload.action, dt, {
+                tooltipInst.content(action, dt, {
                     formatter: strategy,
                     order: options.order
                 }).config(this.config()).extent({
                     x: 0,
                     y: 0,
-                    width: drawingInf.width,
-                    height: drawingInf.height
+                    width: htmlContainer.width,
+                    height: htmlContainer.height
+                }).offset({
+                    x: offsetLeft,
+                    y: offsetTop
                 });
 
                 if (showInPosition) {
@@ -16988,6 +17148,7 @@ var Tooltip = function (_SpawnableSideEffect) {
                     tooltipInst.hide();
                     break;
                 }
+
                 if (fragmented) {
                     var position = tooltipInst._position;
                     var tooltipBoundBox = tooltipInst._tooltipContainer.node().getBoundingClientRect();
@@ -17006,7 +17167,6 @@ var Tooltip = function (_SpawnableSideEffect) {
                     });
                 }
             }
-            // console.log(tooltips);
             for (var key in tooltips) {
                 if (!enter[key]) {
                     var tooltip = tooltips[key];
@@ -17033,7 +17193,8 @@ var Tooltip = function (_SpawnableSideEffect) {
             var tooltips = this._tooltips;
             for (var key in tooltips) {
                 if ({}.hasOwnProperty.call(tooltips, key)) {
-                    tooltips[key].content(payload.action, null);
+                    var action = payload.action === 'highlight' ? 'highlight' : 'brush';
+                    tooltips[key].content(action, null);
                     tooltips[key].hide();
                 }
             }
@@ -17492,7 +17653,7 @@ var propagate = function propagate(firebolt, action, selectionSet) {
             propagationData = values.length ? metaData.select(function (fields) {
                 var check = false;
                 for (var i = 0; i < values.length; i++) {
-                    check = fields[field].value >= values[i][0] && fields[field].value < values[i][1];
+                    check = fields[field].value >= values[i][0] && fields[field].value <= values[i][1];
                     if (check === true) {
                         break;
                     }
@@ -17580,29 +17741,17 @@ var LegendFireBolt = function (_Firebolt) {
         return _this;
     }
 
-    /**
-     * Dispatches behavioural action on legend with a payload
-     * It also propagates the selection to other datatables.
-     * @param {string} behaviourName name of behaviour
-     * @param {Object} payload Information about behaviour
-     * @memberof LegendFireBolt
-     */
-
-
     _createClass(LegendFireBolt, [{
-        key: 'dispatchBehaviour',
-        value: function dispatchBehaviour(behaviourName, payload) {
-            var action = this._actions.behavioural[behaviourName];
-
-            if (action) {
-                var sideEffects = this._behaviourEffectMap[behaviourName];
-                var selectionSet = action.dispatch(payload);
-                var propagationSelectionSet = selectionSet[0];
-                this.applySideEffects(sideEffects, propagationSelectionSet, payload);
-                Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagate"])(this, behaviourName, propagationSelectionSet, {
-                    payload: payload
-                });
-            }
+        key: 'getPropagationSelectionSet',
+        value: function getPropagationSelectionSet(selectionSet) {
+            return selectionSet[0];
+        }
+    }, {
+        key: 'propagate',
+        value: function propagate(behaviourName, payload, selectionSet) {
+            Object(_helper__WEBPACK_IMPORTED_MODULE_1__["propagate"])(this, behaviourName, selectionSet, {
+                payload: payload
+            });
         }
     }, {
         key: 'getAddSetFromCriteria',
@@ -18670,7 +18819,7 @@ var renderGradient = function renderGradient(context, container) {
     if (align === _defaults__WEBPACK_IMPORTED_MODULE_3__["ALIGN"].HORIZONTAL) {
         gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
-        linearGradient.attr('x2', '100%');
+        linearGradient.attr('x2', '100%').attr('y1', '0%');
         legendGradCont.attr('transform', 'translate( ' + labelDim.width / 2 + ' 0)');
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
         legendContainer.classed(classPrefix + '-overflow-x', width > maxWidth);
@@ -19042,7 +19191,7 @@ var getInterpolatedData = function getInterpolatedData(domain, steps) {
  * @param {*} classPrefix
  */
 var titleCreator = function titleCreator(container, title, measurement, config) {
-    return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], config.classPrefix + '-legend-title').style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], '100%').style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], measurement.height + 'px').style('padding-left', measurement.padding + 'px').style('padding-right', measurement.padding + 'px').style('border-bottom-width', measurement.border + 'px').style('text-align', title.orientation instanceof Function ? title.orientation(config) : title.orientation).text(title.text).node();
+    return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], config.classPrefix + '-legend-title').style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], '100%').style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], measurement.height + 'px').style('padding-left', measurement.padding + 'px').style('padding-right', measurement.padding + 'px').style('border-bottom-width', measurement.border + 'px').style('text-align', title.orientation instanceof Function ? title.orientation(config.position) : title.orientation).text(title.text).node();
 };
 
 /**
@@ -19151,7 +19300,6 @@ var computeItemSpaces = function computeItemSpaces(config, measures, data) {
             totalHeight = Math.max(totalHeight, itemSpace.height);
         } else {
             totalHeight += itemSpace.height;
-
             totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
         }
         maxItemSpaces = {
@@ -19219,6 +19367,119 @@ var getDomainBounds = function getDomainBounds(type, scaleInfo, domainInfo) {
 
     return _ref = {}, _defineProperty(_ref, scaleType, scaleType === 'size' ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele)), _defineProperty(_ref, 'value', domainBounds[type]), _defineProperty(_ref, 'id', type === 'lower' ? 0 : domainLeg.length + 2), _defineProperty(_ref, 'range', [ele, step]), _ref;
 };
+
+/***/ }),
+
+/***/ "./packages/muze-legend/src/legend/position-config.js":
+/*!************************************************************!*\
+  !*** ./packages/muze-legend/src/legend/position-config.js ***!
+  \************************************************************/
+/*! exports provided: positionConfig, alignmentMap, stepData, itemStack */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "positionConfig", function() { return positionConfig; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "alignmentMap", function() { return alignmentMap; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "stepData", function() { return stepData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "itemStack", function() { return itemStack; });
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+var _legendOrientation, _positionConfig, _alignmentMap, _itemStack;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+var legendOrientation = (_legendOrientation = {}, _defineProperty(_legendOrientation, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["HORIZONTAL"], {
+    datasets: function datasets(data) {
+        return {
+            row: [1],
+            column: data
+        };
+    },
+    itemContainerMeasures: function itemContainerMeasures(measurement) {
+        var itemSpaces = measurement.itemSpaces,
+            width = measurement.width;
+
+        return {
+            row: {
+                width: width + 'px',
+                padding: 0 + 'px'
+            },
+            column: {
+                width: function width(d, i) {
+                    return itemSpaces[i].width + 'px';
+                },
+                padding: 0 + 'px'
+            }
+        };
+    },
+    getStepSpacesInfo: function getStepSpacesInfo(measurement) {
+        var maxItemSpaces = measurement.maxItemSpaces,
+            height = measurement.height;
+
+        return {
+            iconHeight: height,
+            iconWidth: maxItemSpaces.width,
+            stepPadding: {
+                horizontal: true,
+                vertical: false
+            }
+        };
+    }
+}), _defineProperty(_legendOrientation, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL"], {
+    datasets: function datasets(data) {
+        return {
+            row: data,
+            column: function column(d) {
+                return [d];
+            }
+        };
+    },
+    itemContainerMeasures: function itemContainerMeasures(measurement, config) {
+        var maxItemSpaces = measurement.maxItemSpaces,
+            width = measurement.width;
+        var padding = config.padding;
+
+        return {
+            row: {
+                width: maxItemSpaces.width + 'px',
+                padding: padding + 'px'
+            },
+            column: {
+                width: width + 'px',
+                padding: 0 + 'px'
+            }
+        };
+    },
+    getStepSpacesInfo: function getStepSpacesInfo(measurement) {
+        var maxItemSpaces = measurement.maxItemSpaces,
+            width = measurement.width;
+
+        return {
+            iconHeight: maxItemSpaces.height,
+            iconWidth: width,
+            stepPadding: {
+                horizontal: false,
+                vertical: true
+            }
+        };
+    }
+}), _legendOrientation);
+
+var positionConfig = (_positionConfig = {}, _defineProperty(_positionConfig, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], legendOrientation[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL"]]), _defineProperty(_positionConfig, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], legendOrientation[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL"]]), _defineProperty(_positionConfig, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], legendOrientation[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["HORIZONTAL"]]), _defineProperty(_positionConfig, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], legendOrientation[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["HORIZONTAL"]]), _positionConfig);
+
+var alignmentMap = (_alignmentMap = {}, _defineProperty(_alignmentMap, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["END"]), _defineProperty(_alignmentMap, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["START"]), _defineProperty(_alignmentMap, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _defineProperty(_alignmentMap, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _alignmentMap);
+
+// Reverses data for step legend
+var stepData = function stepData(data) {
+    var _ref;
+
+    return _ref = {}, _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], data.reverse()), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], data.reverse()), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], data), _defineProperty(_ref, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], data), _ref;
+};
+
+// Changes the item layout based on the position of the text
+var itemStack = (_itemStack = {}, _defineProperty(_itemStack, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VALUE"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["SHAPE"]]), _defineProperty(_itemStack, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["SHAPE"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["VALUE"]]), _defineProperty(_itemStack, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VALUE"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["SHAPE"]]), _defineProperty(_itemStack, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["SHAPE"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["VALUE"]]), _itemStack);
 
 /***/ }),
 
@@ -19294,7 +19555,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderStepItem", function() { return renderStepItem; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./defaults */ "./packages/muze-legend/src/legend/defaults.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+/* harmony import */ var _position_config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./position-config */ "./packages/muze-legend/src/legend/position-config.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+
 
 
 
@@ -19314,7 +19577,7 @@ var applyItemStyle = function applyItemStyle(item, measureType, stepColorCheck, 
 
     var diff = stepColorCheck ? -padding * 2 : 0;
 
-    if (item[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"]) {
+    if (item[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["VALUE"]) {
         return labelSpaces[item[6]][measureType] + 'px';
     }
     return (measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff) + 'px';
@@ -19351,12 +19614,12 @@ var renderIcon = function renderIcon(icon, container, datum, context) {
 
     var svg = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'svg', function (f) {
         return [f];
-    }, classPrefix + '-legend-icon-svg').attr(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], maxIconWidth).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], iconHeight).style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], maxIconWidth + 'px').style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], iconHeight + 'px');
+    }, classPrefix + '-legend-icon-svg').attr(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], maxIconWidth).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], iconHeight).style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], maxIconWidth + 'px').style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], iconHeight + 'px');
 
-    if (icon !== _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RECT"]) {
+    if (icon !== _enums_constants__WEBPACK_IMPORTED_MODULE_3__["RECT"]) {
         Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(svg, 'path', [datum[1]], classPrefix + '-legend-icon').attr('d', icon).attr('transform', 'translate(' + (maxIconWidth / 2 - padding) + ' ' + iconHeight / 2 + ')').attr('fill', datum[2] || color);
     } else {
-        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(svg, _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RECT"], [datum[1]], classPrefix + '-legend-icon').attr('x', 0).attr('y', 0).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], maxIconWidth).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], iconHeight).attr('fill', datum[2] || color);
+        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(svg, _enums_constants__WEBPACK_IMPORTED_MODULE_3__["RECT"], [datum[1]], classPrefix + '-legend-icon').attr('x', 0).attr('y', 0).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], maxIconWidth).attr(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], iconHeight).attr('fill', datum[2] || color);
     }
 };
 
@@ -19370,40 +19633,27 @@ var renderIcon = function renderIcon(icon, container, datum, context) {
  * @return
  */
 var getItemContainers = function getItemContainers(container, data, legendInstance) {
-    var datasets = {};
+    var measurement = legendInstance.measurement();
+    var config = legendInstance.config();
+    var itemSpaces = measurement.itemSpaces;
+    var classPrefix = config.classPrefix,
+        position = config.position;
 
-    var _legendInstance$measu = legendInstance.measurement(),
-        itemSpaces = _legendInstance$measu.itemSpaces,
-        maxItemSpaces = _legendInstance$measu.maxItemSpaces;
-
-    var _legendInstance$confi = legendInstance.config(),
-        classPrefix = _legendInstance$confi.classPrefix,
-        align = _legendInstance$confi.align,
-        padding = _legendInstance$confi.padding;
-
-    if (align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"]) {
-        datasets.row = data;
-        datasets.column = function (d) {
-            return [d];
-        };
-    } else {
-        datasets.row = [1];
-        datasets.column = data;
-    }
+    var positionObj = _position_config__WEBPACK_IMPORTED_MODULE_2__["positionConfig"][position];
+    var datasets = positionObj.datasets(data);
+    var measures = positionObj.itemContainerMeasures(measurement, config);
 
     var rows = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', datasets.row, classPrefix + '-legend-row');
-    rows.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], function (d, i) {
+    rows.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], function (d, i) {
         return itemSpaces[i].height + 'px';
     });
-    align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && rows.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], function () {
-        return maxItemSpaces.width + 'px';
-    });
-    align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && rows.style('padding', padding + 'px');
+    rows.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], measures.row.width);
+    rows.style('padding', measures.row.padding);
+
     var columns = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(rows, 'div', datasets.column, classPrefix + '-legend-columns');
-    align !== _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && columns.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], function (d, i) {
-        return itemSpaces[i].width + 'px';
-    });
-    align !== _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VERTICAL"] && columns.style('padding', padding + 'px');
+    columns.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], measures.column.width);
+    columns.style('padding', measures.column.padding);
+
     return columns;
 };
 
@@ -19438,20 +19688,20 @@ var createLegendSkeleton = function createLegendSkeleton(context, container, cla
     maxGradWidth = maxWidth - (margin * 2 + border * 2);
 
     var legendBody = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-legend-body');
-
+    legendBody.select('.' + classPrefix + '-legend-overflow').remove();
     // Create a div with scroll when overflow
     if (maxGradWidth && maxGradWidth < gradWidth) {
-        legendBody = legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], maxGradWidth + 'px').style('overflow-x', 'scroll');
+        legendBody = legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], maxGradWidth + 'px').style('overflow-x', 'scroll');
         legendBody = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendBody, 'div', [1], classPrefix + '-legend-overflow');
     }
     // Create a div with scroll when overflow
     if (maxGradHeight && maxGradHeight < gradHeight) {
-        legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], maxGradHeight + 'px').style('overflow-y', 'scroll');
+        legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], maxGradHeight + 'px').style('overflow-y', 'scroll');
         legendBody = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendBody, 'div', [1], classPrefix + '-legend-overflow');
     }
 
-    legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], gradWidth + 'px');
-    legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], gradHeight + 'px');
+    legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], gradWidth + 'px');
+    legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], gradHeight + 'px');
 
     var legendItem = getItemContainers(legendBody, data, context);
     return { legendItem: legendItem };
@@ -19471,18 +19721,14 @@ var createItemSkeleton = function createItemSkeleton(context, container) {
 
     var textOrientation = item.text.orientation;
 
-    var stack = [_enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["SHAPE"]];
-    if (textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"] || textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]) {
-        stack = [_enums_constants__WEBPACK_IMPORTED_MODULE_2__["SHAPE"], _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"]];
-    }
-
+    var stack = _position_config__WEBPACK_IMPORTED_MODULE_2__["itemStack"][textOrientation];
     var itemSkeleton = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', function (d, i) {
         return stack.map(function (e) {
             return [e, d[e], d.color, d.size, d.value, context.fieldName(), i];
         });
     }, classPrefix + '-legend-item-info');
 
-    var alignClass = textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"] || textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"] : textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["START"] : _enums_constants__WEBPACK_IMPORTED_MODULE_2__["END"];
+    var alignClass = _position_config__WEBPACK_IMPORTED_MODULE_2__["alignmentMap"][textOrientation];
 
     itemSkeleton.classed(alignClass, true);
     return { itemSkeleton: itemSkeleton };
@@ -19518,19 +19764,19 @@ var renderDiscreteItem = function renderDiscreteItem(context, container) {
     labelManager.useEllipsesOnOverflow(true);
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(container, {
         width: function width(d) {
-            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], false, context);
+            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], false, context);
         },
         height: function height(d) {
-            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], false, context);
+            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], false, context);
         },
-        'text-align': _enums_constants__WEBPACK_IMPORTED_MODULE_2__["CENTER"],
+        'text-align': _enums_constants__WEBPACK_IMPORTED_MODULE_3__["CENTER"],
         padding: padding + 'px'
     });
 
     labelManager.setStyle(context._computedStyle);
     container.each(function (d, i) {
-        if (d[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"]) {
-            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).text(d[1]).style('padding-' + (textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"]), '0px');
+        if (d[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["VALUE"]) {
+            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).text(d[1]).style('padding-' + (textOrientation === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["RIGHT"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_3__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_3__["RIGHT"]), '0px');
         } else {
             var icon = getLegendIcon(d, iconWidth, iconHeight, type);
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + className, true);
@@ -19554,8 +19800,6 @@ var renderDiscreteItem = function renderDiscreteItem(context, container) {
 * @memberof Legend
 */
 var renderStepItem = function renderStepItem(context, container) {
-    var iconWidth = void 0;
-    var iconHeight = void 0;
     var labelManager = context._labelManager;
 
     var _context$config3 = context.config(),
@@ -19573,30 +19817,22 @@ var renderStepItem = function renderStepItem(context, container) {
         height = _item$icon2.height,
         color = _item$icon2.color;
 
-    var stepColor = {
-        horizontal: false,
-        vertical: false
-    };
-
-    iconHeight = height;
-    iconWidth = width;
 
     labelManager.useEllipsesOnOverflow(true);
 
-    if (position === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"] || position === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["TOP"]) {
-        iconWidth = maxItemSpaces.width;
-        stepColor.horizontal = true;
-    } else if (position === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"] || position === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"]) {
-        iconHeight = maxItemSpaces.height;
-        stepColor.vertical = true;
-    }
+    var _positionConfig$posit = _position_config__WEBPACK_IMPORTED_MODULE_2__["positionConfig"][position].getStepSpacesInfo({
+        maxItemSpaces: maxItemSpaces, height: height, width: width
+    }),
+        iconHeight = _positionConfig$posit.iconHeight,
+        iconWidth = _positionConfig$posit.iconWidth,
+        stepPadding = _positionConfig$posit.stepPadding;
 
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(container, {
         width: function width(d) {
-            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_2__["WIDTH"], stepColor.horizontal, context);
+            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], stepPadding.horizontal, context);
         },
         height: function height(d) {
-            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_2__["HEIGHT"], stepColor.vertical, context);
+            return applyItemStyle(d, _enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], stepPadding.vertical, context);
         },
         'text-align': 'center',
         padding: padding + 'px'
@@ -19604,10 +19840,10 @@ var renderStepItem = function renderStepItem(context, container) {
 
     labelManager.setStyle(context._computedStyle);
     container.each(function (d) {
-        if (d[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["VALUE"]) {
+        if (d[0] === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["VALUE"]) {
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).text(d[1]);
         } else {
-            renderIcon(_enums_constants__WEBPACK_IMPORTED_MODULE_2__["RECT"], Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), d, {
+            renderIcon(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["RECT"], Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), d, {
                 classPrefix: classPrefix,
                 iconWidth: iconWidth,
                 iconHeight: iconHeight,
@@ -19991,8 +20227,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _legend_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./legend-helper */ "./packages/muze-legend/src/legend/legend-helper.js");
 /* harmony import */ var _renderer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./renderer */ "./packages/muze-legend/src/legend/renderer.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../styles.scss */ "./packages/muze-legend/src/styles.scss");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _position_config__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./position-config */ "./packages/muze-legend/src/legend/position-config.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../styles.scss */ "./packages/muze-legend/src/styles.scss");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_5__);
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -20006,6 +20243,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 
 
 
@@ -20146,7 +20384,7 @@ var StepLegend = function (_SimpleLegend) {
                 classPrefix = _config2.classPrefix,
                 position = _config2.position;
 
-            var data = position === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["LEFT"] || position === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["RIGHT"] ? this.data().reverse() : this.data();
+            var data = Object(_position_config__WEBPACK_IMPORTED_MODULE_4__["stepData"])(this.data())[position];
 
             var legendContainer = _get(StepLegend.prototype.__proto__ || Object.getPrototypeOf(StepLegend.prototype), 'render', this).call(this, this.mount());
 
@@ -20408,7 +20646,6 @@ var Content = function () {
         key: 'clear',
         value: function clear() {
             this._model = null;
-            // this._mount && this._mount.remove();
             return this;
         }
     }], [{
@@ -21009,8 +21246,9 @@ var Tooltip = function () {
                 x: 0,
                 y: 0
             };
-
-            this._tooltipContainer.style('left', offset.x + x + 'px').style('top', offset.y + y + 'px');
+            var scrollTop = document.body.scrollTop;
+            var scrollLeft = document.body.scrollLeft;
+            this._tooltipContainer.style('left', offset.x + x - scrollLeft + 'px').style('top', offset.y + y - scrollTop + 'px');
 
             return this;
         }
@@ -21032,30 +21270,27 @@ var Tooltip = function () {
             var orientation = tooltipConf.orientation;
             this.show();
             if (!dim) {
-                dim = this._relativeDim;
-            } else {
-                this._relativeDim = dim;
-            }
-            if (!dim) {
                 this.hide();
                 return this;
             }
 
             var extent = this._extent;
             var node = this._tooltipContainer.node();
-            var offsetWidth = node.offsetWidth;
-            var offsetHeight = node.offsetHeight;
+            var offsetWidth = node.offsetWidth + 2;
+            var offsetHeight = node.offsetHeight + 2;
             var config = this._config;
+            var offset = this._offset;
             var arrowDisabled = config.arrow.disabled;
             var arrowSize = config.arrow.size;
             var draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
             var topSpace = dim.y;
             var positionHorizontal = function positionHorizontal() {
                 var position = void 0;
+                var dimX = dim.x + dim.width + offset.x;
                 var x = dim.x + dim.width;
                 var y = dim.y;
                 // When there is no space in right
-                var rightSpace = extent.width - x;
+                var rightSpace = extent.width - dimX;
                 var leftSpace = dim.x - extent.x;
                 if (rightSpace >= offsetWidth + arrowSize) {
                     position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_LEFT"];
@@ -39386,6 +39621,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var HTMLElement = window.HTMLElement;
 
+var isSimpleObject = function isSimpleObject(obj) {
+    var token = void 0;
+    if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') {
+        if (obj === null) {
+            return false;
+        }
+        token = Object.prototype.toString.call(obj);
+        if (token === '[object Object]') {
+            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
+        }
+    }
+    return false;
+};
+
 /**
  * Returns unique id
  * @return {string} Unique id string
@@ -39393,6 +39642,7 @@ var HTMLElement = window.HTMLElement;
 var getUniqueId = function getUniqueId() {
     return 'id-' + new Date().getTime() + Math.round(Math.random() * 10000);
 };
+
 /**
  * Deep copies an object and returns a new object.
  * @param {Object} o Object to clone
@@ -39404,7 +39654,7 @@ var clone = function clone(o) {
     for (var key in o) {
         if ({}.hasOwnProperty.call(o, key)) {
             v = o[key];
-            output[key] = (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' ? clone(v) : v;
+            output[key] = isSimpleObject(v) ? clone(v) : v;
         }
     }
     return output;
@@ -40192,7 +40442,7 @@ var arraysEqual = function arraysEqual(arr1, arr2) {
     if (arr1.length !== arr2.length) {
         return false;
     }
-    for (var i = arr1.length; i--;) {
+    for (var i = arr1.length; i >= 0; i--) {
         if (arr1[i] !== arr2[i]) {
             return false;
         }
@@ -40251,20 +40501,6 @@ var isHTMLElem = function isHTMLElem(elem) {
 
 var ERROR_MSG = {
     INTERFACE_IMPL: 'Method not implemented'
-};
-
-var isSimpleObject = function isSimpleObject(obj) {
-    var token = void 0;
-    if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') {
-        if (obj === null) {
-            return false;
-        }
-        token = Object.prototype.toString.call(obj);
-        if (token === '[object Object]') {
-            return (obj.constructor.toString().match(/^function (.*)\(\)/m) || [])[1] === 'Object';
-        }
-    }
-    return false;
 };
 
 /**
@@ -40336,7 +40572,7 @@ var replaceCSSPrefix = function replaceCSSPrefix() {
 };
 
 /**
- *
+ * Gets the  interpolator function from d3 color
  *
  */
 var interpolator = function interpolator() {
@@ -40344,7 +40580,7 @@ var interpolator = function interpolator() {
 };
 
 /**
- *
+ * Gets the number interpolator from d3 color
  *
  */
 var numberInterpolator = function numberInterpolator() {
@@ -40352,7 +40588,7 @@ var numberInterpolator = function numberInterpolator() {
 };
 
 /**
- *
+ * Gets the rgb interpolator from d3 color
  *
  */
 var colorInterpolator = function colorInterpolator() {
@@ -40360,7 +40596,7 @@ var colorInterpolator = function colorInterpolator() {
 };
 
 /**
- *
+ * Gets the hsl interpolator from d3 color
  *
  */
 var hslInterpolator = function hslInterpolator() {
@@ -40376,7 +40612,7 @@ var transformColors = function transformColors() {
 };
 
 /**
- *
+ * Gets the piecewise interpolator from d3 color
  *
  */
 var piecewiseInterpolator = function piecewiseInterpolator() {
@@ -40907,10 +41143,6 @@ var Scales = {
     band: d3_scale__WEBPACK_IMPORTED_MODULE_3__["scaleBand"]
 };
 
-/**
- *
- *
- */
 var getSmallestDiff = function getSmallestDiff(points) {
     points = points.sort(function (a, b) {
         return a - b;
@@ -43315,15 +43547,6 @@ var ActionModel = function () {
         this._registrableComponents = [];
     }
 
-    /**
-     *
-     *
-     * @param {*} action
-     * @returns
-     * @memberof ActionModel
-     */
-
-
     _createClass(ActionModel, [{
         key: 'registerPhysicalActions',
         value: function registerPhysicalActions(action) {
@@ -43339,15 +43562,6 @@ var ActionModel = function () {
             });
             return this;
         }
-
-        /**
-         *
-         *
-         * @param {*} actions
-         * @returns
-         * @memberof ActionModel
-         */
-
     }, {
         key: 'registerBehaviouralActions',
         value: function registerBehaviouralActions() {
@@ -43393,15 +43607,6 @@ var ActionModel = function () {
             });
             return this;
         }
-
-        /**
-         *
-         *
-         * @param {*} map
-         * @returns
-         * @memberof ActionModel
-         */
-
     }, {
         key: 'mapSideEffects',
         value: function mapSideEffects(map) {
@@ -43417,15 +43622,6 @@ var ActionModel = function () {
             });
             return this;
         }
-
-        /**
-         *
-         *
-         * @param {*} componentName
-         * @returns
-         * @memberof ActionModel
-         */
-
     }, {
         key: 'for',
         value: function _for() {
@@ -43436,15 +43632,6 @@ var ActionModel = function () {
             this._registrableComponents = components;
             return this;
         }
-
-        /**
-         *
-         *
-         * @param {*} sideEffects
-         * @returns
-         * @memberof ActionModel
-         */
-
     }, {
         key: 'registerSideEffects',
         value: function registerSideEffects() {
@@ -43459,6 +43646,38 @@ var ActionModel = function () {
                     var matrix = args.client.composition().visualGroup.matrixInstance().value;
                     matrix.each(function (cell) {
                         return cell.valueOf().firebolt().registerSideEffects(sideEffects);
+                    });
+                });
+            });
+
+            return this;
+        }
+    }, {
+        key: 'dissociateBehaviour',
+        value: function dissociateBehaviour(behaviour, physicalAction) {
+            var registrableComponents = this._registrableComponents;
+
+            registrableComponents.forEach(function (canvas) {
+                canvas.once('canvas.updated').then(function (args) {
+                    var matrix = args.client.composition().visualGroup.matrixInstance().value;
+                    matrix.each(function (cell) {
+                        return cell.valueOf().firebolt().dissociateBehaviour(behaviour, physicalAction);
+                    });
+                });
+            });
+
+            return this;
+        }
+    }, {
+        key: 'dissociateSideEffect',
+        value: function dissociateSideEffect(sideEffect, behaviour) {
+            var registrableComponents = this._registrableComponents;
+
+            registrableComponents.forEach(function (canvas) {
+                canvas.once('canvas.updated').then(function (args) {
+                    var matrix = args.client.composition().visualGroup.matrixInstance().value;
+                    matrix.each(function (cell) {
+                        return cell.valueOf().firebolt().dissociateBehaviour(sideEffect, behaviour);
                     });
                 });
             });
@@ -43548,7 +43767,7 @@ var Canvas = function (_TransactionSupport) {
         _this._renderedPromise = new Promise(function (resolve) {
             _this._renderedResolve = resolve;
         });
-        _this._layout = new _chartshq_layout__WEBPACK_IMPORTED_MODULE_0__["GridLayout"]();
+        _this._composition.layout = new _chartshq_layout__WEBPACK_IMPORTED_MODULE_0__["GridLayout"]();
         _this._store = new muze_utils__WEBPACK_IMPORTED_MODULE_1__["Store"]({});
 
         _this.firebolt(new _firebolt__WEBPACK_IMPORTED_MODULE_7__["default"](_this));
@@ -43566,6 +43785,9 @@ var Canvas = function (_TransactionSupport) {
         _this.title('', {});
         _this.subtitle('', {});
         _this.legend({});
+        _this.color({});
+        _this.shape({});
+        _this.size({});
         Object(_helper__WEBPACK_IMPORTED_MODULE_9__["setupChangeListener"])(_this);
         return _this;
     }
@@ -43584,7 +43806,7 @@ var Canvas = function (_TransactionSupport) {
             if (arguments.length) {
                 return this;
             }
-            return this._layout;
+            return this.composition().layout;
         }
 
         /**
@@ -43598,7 +43820,6 @@ var Canvas = function (_TransactionSupport) {
         key: 'composition',
         value: function composition() {
             if (arguments.length) {
-                this._composition = arguments.length <= 0 ? undefined : arguments[0];
                 return this;
             }
             return this._composition;
@@ -43678,7 +43899,8 @@ var Canvas = function (_TransactionSupport) {
                 this._registry = { components: components, componentSubRegistry: componentSubRegistry };
                 var initedComponents = Object(_helper__WEBPACK_IMPORTED_MODULE_9__["initCanvas"])(this);
                 // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
-                this.composition({ visualGroup: initedComponents[0] });
+                this._composition.visualGroup = initedComponents[0];
+
                 this.composition().visualGroup.alias(this.alias());
                 return this;
             }
@@ -43732,7 +43954,7 @@ var Canvas = function (_TransactionSupport) {
             if (arguments.length) {
                 return this;
             }
-            return this._legend;
+            return this.composition().legend;
         }
 
         /**
@@ -43905,19 +44127,13 @@ var arrangeComponents = function arrangeComponents(context) {
 /*!**********************************************!*\
   !*** ./packages/muze/src/canvas/defaults.js ***!
   \**********************************************/
-/*! exports provided: LEGEND_CONFIG, TITLE_CONFIG, SUB_TITLE_CONFIG */
+/*! exports provided: TITLE_CONFIG, SUB_TITLE_CONFIG */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LEGEND_CONFIG", function() { return LEGEND_CONFIG; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TITLE_CONFIG", function() { return TITLE_CONFIG; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SUB_TITLE_CONFIG", function() { return SUB_TITLE_CONFIG; });
-var LEGEND_CONFIG = {
-    position: 'right',
-    show: true
-};
-
 var TITLE_CONFIG = {
     position: 'top',
     align: 'center',
@@ -44048,36 +44264,40 @@ var setupChangeListener = function setupChangeListener(context) {
     store.registerImmediateListener(_constants__WEBPACK_IMPORTED_MODULE_1__["MOUNT"], function () {
         var allOptions = Object.keys(context._allOptions);
         var props = [].concat(_toConsumableArray(allOptions), _toConsumableArray(Object.keys(_local_options__WEBPACK_IMPORTED_MODULE_2__["canvasOptions"])));
+        var equalityChecker = function equalityChecker() {
+            return false;
+        };
         store.registerChangeListener(props, function () {
             for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
                 params[_key] = arguments[_key];
             }
 
-            var updateProps = allOptions.every(function (option, i) {
-                var equalityChecker = function equalityChecker() {
-                    return false;
-                };
+            var updateProps = props.every(function (option, i) {
                 switch (option) {
                     case _constants__WEBPACK_IMPORTED_MODULE_1__["ROWS"]:
                     case _constants__WEBPACK_IMPORTED_MODULE_1__["COLUMNS"]:
+                    case _constants__WEBPACK_IMPORTED_MODULE_1__["DETAIL"]:
                         equalityChecker = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isEqual"])('Array');
                         break;
 
                     case _constants__WEBPACK_IMPORTED_MODULE_1__["SHAPE"]:
                     case _constants__WEBPACK_IMPORTED_MODULE_1__["SIZE"]:
                     case _constants__WEBPACK_IMPORTED_MODULE_1__["COLOR"]:
-                    case _constants__WEBPACK_IMPORTED_MODULE_1__["DETAIL"]:
+                    case _constants__WEBPACK_IMPORTED_MODULE_1__["DATA"]:
+                    case _constants__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]:
                         equalityChecker = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isEqual"])('Object');
                         break;
-
                     default:
+                        equalityChecker = function equalityChecker() {
+                            return true;
+                        };
                         break;
                 }
                 var oldVal = params[i][0];
                 var newVal = params[i][1];
-                return !equalityChecker(oldVal, newVal);
-            });
 
+                return equalityChecker(oldVal, newVal);
+            });
             // inform attached board to rerender
             !updateProps && dispatchProps(context);
             context.render();
@@ -44315,16 +44535,20 @@ var getRenderDetails = function getRenderDetails(context, mount) {
     // Create legends and determine legend space
 
 
-    context._legend = Object(_legend_maker__WEBPACK_IMPORTED_MODULE_4__["createLegend"])(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas);
+    var legends = Object(_legend_maker__WEBPACK_IMPORTED_MODULE_4__["createLegend"])(context, headerHeight, availableHeightForCanvas, availableWidthForCanvas);
+    context._composition.legend = {};
+    legends.forEach(function (e) {
+        context._composition.legend[e.scaleType] = e.legend;
+    });
 
-    var legendSpace = Object(_legend_maker__WEBPACK_IMPORTED_MODULE_4__["getLegendSpace"])(context, availableHeightForCanvas, availableWidthForCanvas);
+    var legendSpace = Object(_legend_maker__WEBPACK_IMPORTED_MODULE_4__["getLegendSpace"])(legends, legend, availableHeightForCanvas, availableWidthForCanvas);
     var legendWidth = legendPosition === _constants__WEBPACK_IMPORTED_MODULE_5__["LEFT"] || legendPosition === _constants__WEBPACK_IMPORTED_MODULE_5__["RIGHT"] ? legendSpace.width : 0;
     var legendHeight = legendPosition === _constants__WEBPACK_IMPORTED_MODULE_5__["TOP"] || legendPosition === _constants__WEBPACK_IMPORTED_MODULE_5__["BOTTOM"] ? legendSpace.height : 0;
 
     // Set components for layouting
     var components = {
         headers: headers,
-        legends: context.legend(),
+        legends: legends,
         canvases: [context],
         rows: rows,
         columns: columns,
@@ -44369,12 +44593,12 @@ var getRenderDetails = function getRenderDetails(context, mount) {
 /*!**************************************************!*\
   !*** ./packages/muze/src/canvas/legend-maker.js ***!
   \**************************************************/
-/*! exports provided: legendDataCreator, legendInitializer, getLegendSpace, createLegend */
+/*! exports provided: legendCreator, legendInitializer, getLegendSpace, createLegend */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "legendDataCreator", function() { return legendDataCreator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "legendCreator", function() { return legendCreator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "legendInitializer", function() { return legendInitializer; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLegendSpace", function() { return getLegendSpace; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createLegend", function() { return createLegend; });
@@ -44390,28 +44614,22 @@ __webpack_require__.r(__webpack_exports__);
  * @param {*} canvases
  * @returns
  */
-var legendDataCreator = function legendDataCreator(canvas) {
+var legendCreator = function legendCreator(canvas) {
     var LegendCls = void 0;
     var dataset = [];
     var axes = canvas.getRetinalAxes();
+
     Object.entries(axes).forEach(function (axisInfo) {
         var scale = axisInfo[1][0];
         var scaleType = axisInfo[0];
         var scaleProps = canvas[scaleType]();
 
-        if (scaleProps && scaleProps.field) {
+        if (scaleProps.field) {
             var _scale$config = scale.config(),
                 type = _scale$config.type,
                 step = _scale$config.step;
 
-            LegendCls = _constants__WEBPACK_IMPORTED_MODULE_1__["LEGEND_TYPE_MAP"][_constants__WEBPACK_IMPORTED_MODULE_1__["DISCRETE"]];
-            if (type === _constants__WEBPACK_IMPORTED_MODULE_1__["LINEAR"] && scaleType === _constants__WEBPACK_IMPORTED_MODULE_1__["COLOR"]) {
-                if (!step) {
-                    LegendCls = _constants__WEBPACK_IMPORTED_MODULE_1__["LEGEND_TYPE_MAP"][_constants__WEBPACK_IMPORTED_MODULE_1__["GRADIENT"]];
-                } else {
-                    LegendCls = _constants__WEBPACK_IMPORTED_MODULE_1__["LEGEND_TYPE_MAP"][_constants__WEBPACK_IMPORTED_MODULE_1__["STEP_COLOR"]];
-                }
-            }
+            LegendCls = _constants__WEBPACK_IMPORTED_MODULE_1__["LEGEND_TYPE_MAP"][type + '-' + step + '-' + scaleType];
             dataset.push({ scale: scale, canvas: canvas, fieldName: scaleProps.field, LegendCls: LegendCls, scaleType: scaleType });
         }
     });
@@ -44437,9 +44655,9 @@ var legendInitializer = function legendInitializer(legendConfig, canvas, measure
         align = legendConfig.align;
 
 
-    var dataset = legendDataCreator(canvas);
+    var legendInfo = legendCreator(canvas);
 
-    dataset.forEach(function (dataInfo, index) {
+    legendInfo.forEach(function (dataInfo, index) {
         var legend = {};
 
         var legendMeasures = {};
@@ -44467,23 +44685,17 @@ var legendInitializer = function legendInitializer(legendConfig, canvas, measure
             }
             legendMeasures.maxHeight = align === _constants__WEBPACK_IMPORTED_MODULE_1__["VERTICAL"] ? height - headerHeight : height * 0.2;
             legendMeasures.maxWidth = align === _constants__WEBPACK_IMPORTED_MODULE_1__["HORIZONTAL"] ? width : width * 0.2;
-            [_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], _constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], _constants__WEBPACK_IMPORTED_MODULE_1__["PADDING"], _constants__WEBPACK_IMPORTED_MODULE_1__["BORDER"], _constants__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]].forEach(function (e) {
-                if (legendConfig[e]) {
-                    if (e === _constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"]) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxHeight, config[e]);
-                    } else if (e === _constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"]) {
-                        legendMeasures[e] = Math.min(legendMeasures.maxWidth, config[e]);
-                    } else {
-                        legendMeasures[e] = config[e];
-                    }
-                }
+            legendMeasures.width = Math.min(legendMeasures.maxWidth, config.width);
+            legendMeasures.height = Math.min(legendMeasures.maxHeight, config.height);
+
+            [_constants__WEBPACK_IMPORTED_MODULE_1__["PADDING"], _constants__WEBPACK_IMPORTED_MODULE_1__["BORDER"], _constants__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]].forEach(function (e) {
+                legendMeasures[e] = config[e];
             });
             legend.scale(scale).title(title).fieldName(fieldName).config(config).metaData(canvas.composition().visualGroup.getGroupByData().project([fieldName])).measurement(legendMeasures).setLegendMeasures();
 
-            legends.push({ canvas: canvas, legend: legend });
+            legends.push({ canvas: canvas, legend: legend, scaleType: scaleType });
         }
     });
-    // }
     return legends;
 };
 
@@ -44496,9 +44708,7 @@ var legendInitializer = function legendInitializer(legendConfig, canvas, measure
  * @param {*} availableWidth
  * @returns
  */
-var getLegendSpace = function getLegendSpace(context, availableHeight, availableWidth) {
-    var legends = context.legend();
-    var legendConfig = context.config().legend;
+var getLegendSpace = function getLegendSpace(legends, legendConfig, availableHeight, availableWidth) {
     var legendMeasures = legends.map(function (legendInfo) {
         return legendInfo.legend.measurement();
     });
@@ -44795,15 +45005,19 @@ var getSkeletons = function getSkeletons(mount, layoutConfig, measurement) {
     if (mountSpace.width && mountSpace.width < canvasWidth) {
         container.style('overflow-x', 'scroll');
     }
-    var mountPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-viz').style('width', canvasWidth + 'px');
-    headers.forEach(function (type) {
-        components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', [1], classPrefix + '-' + type + '-container');
-        components[type].style('width', canvasWidth + 'px');
-    });
-    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', headers).style('width', canvasWidth + 'px').each(function (type, i) {
-        components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).attr('class', classPrefix + '-' + type + '-container');
+    var mountPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-viz').style('width', canvasWidth + 'px').style('height', canvasHeight + 'px');
+    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', headers, classPrefix + '-container', {}, function (d) {
+        return d;
+    }).sort(function () {
+        return -1;
+    }).style('width', canvasWidth + 'px').each(function (type) {
+        components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + type + '-container', true);
         if (type === 'group') {
-            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(components[type], 'div', legends, classPrefix + '-' + type + '-container-' + i).each(function (layoutType) {
+            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(components[type], 'div', legends, classPrefix + '-' + type + '-inner-container', {}, function (d) {
+                return d;
+            }).sort(function () {
+                return -1;
+            }).each(function (layoutType) {
                 components[layoutType] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + layoutType + '-container', true);
             });
         }
@@ -44856,7 +45070,7 @@ var renderLegend = function renderLegend(legendConfig, container, legendComponen
             currHeight -= Math.min(leg.measurement().height, currHeight);
             currWidth = Math.max(leg.measurement().width, currWidth);
             sectionComponents[sections].push({
-                legendInstance: leg,
+                legend: leg,
                 legendHeight: legHeight,
                 legendWidth: currWidth
             });
@@ -44869,15 +45083,22 @@ var renderLegend = function renderLegend(legendConfig, container, legendComponen
         });
         Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mount, ['div'], function (d) {
             return d;
-        }, classPrefix + '-legend-components').each(function (d) {
-            d.legendInstance.mount(this);
+        }, classPrefix + '-legend-components', {}, function (d) {
+            return d.legend.id();
+        }).each(function (d) {
+            d.legend.mount(this);
         }).style('width', function (d) {
             return d.legendWidth + 'px';
         });
     } else {
-        var _mount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendMount, 'div', [1], classPrefix + '-legend-section-' + 0).classed(classPrefix + '-legend-horizontal-section', true).classed(classPrefix + '-legend-section', true).style('width', legWidth + 'px');
-        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(_mount, 'div', legendComponents, classPrefix + '-legend-components').each(function (d) {
+        var _mount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendMount, 'div', [1], classPrefix + '-legend-section').classed(classPrefix + '-legend-horizontal-section', true).classed(classPrefix + '-legend-section-' + 0, true).style('width', legWidth + 'px');
+
+        Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(_mount, 'div', legendComponents, classPrefix + '-legend-components', {}, function (d) {
+            return d.legend.id();
+        }).each(function (d) {
             d.legend.mount(this);
+        }).style('width', function (d) {
+            return d.legend.measurement().width + 'px';
         });
     }
 };
@@ -44926,6 +45147,7 @@ var shiftHeaders = function shiftHeaders(config, shifter, measurement) {
     title && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-title-container').style('padding-left', title.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
     subtitle && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-subtitle-container').style('padding-left', subtitle.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-legend-horizontal-section').style('padding-left', shifter + 'px').selectAll('.' + classPrefix + '-legend-body, .' + classPrefix + '-legend-title').style('max-width', legendSpace.width - shifter + 'px');
+    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-legend-vertical-section').style('padding-left', null).selectAll('.' + classPrefix + '-legend-body, .' + classPrefix + '-legend-title').style('max-width', null);
 };
 
 /**
@@ -45082,6 +45304,7 @@ var createHeaders = function createHeaders(context, canvasHeight, canvasWidth) {
                 cell = _createHeading.cell;
 
             headers[type + 'Cell'] = cell;
+            context._composition[type] = cell;
             headerHeight += height + config.padding;
         }
     });
@@ -45094,13 +45317,14 @@ var createHeaders = function createHeaders(context, canvasHeight, canvasWidth) {
 /*!****************************************!*\
   !*** ./packages/muze/src/constants.js ***!
   \****************************************/
-/*! exports provided: ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, DEFAULT_CONFIG, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL */
+/*! exports provided: ROWS, COLUMNS, DATA, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, ORDINAL, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ROWS", function() { return ROWS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COLUMNS", function() { return COLUMNS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DATA", function() { return DATA; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COLOR", function() { return COLOR; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SHAPE", function() { return SHAPE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SIZE", function() { return SIZE; });
@@ -45126,8 +45350,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "STEP_COLOR", function() { return STEP_COLOR; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GRADIENT", function() { return GRADIENT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LINEAR", function() { return LINEAR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ORDINAL", function() { return ORDINAL; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TITLE_TEMPLATE_NOT_ALLOWED_TAGS", function() { return TITLE_TEMPLATE_NOT_ALLOWED_TAGS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LEGEND_TYPE_MAP", function() { return LEGEND_TYPE_MAP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LEFT", function() { return LEFT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RIGHT", function() { return RIGHT; });
@@ -45152,6 +45376,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  */
 var ROWS = 'rows';
 var COLUMNS = 'columns';
+var DATA = 'data';
 var COLOR = 'color';
 var SHAPE = 'shape';
 var SIZE = 'size';
@@ -45177,42 +45402,11 @@ var DISCRETE = 'discrete';
 var STEP_COLOR = 'step-color';
 var GRADIENT = 'gradient';
 var LINEAR = 'linear';
+var ORDINAL = 'ordinal';
 
 var TITLE_TEMPLATE_NOT_ALLOWED_TAGS = ['script', 'style'];
 
-var DEFAULT_CONFIG = {
-    classPrefix: 'muze',
-    interaction: {
-        sideEffect: 'individual'
-    },
-    legend: {
-        position: 'right',
-        color: {
-            show: true
-        },
-        shape: {
-            show: true
-        },
-        size: {
-            show: true
-        }
-    },
-    showHeaders: false,
-    minWidth: 300,
-    minHeight: 200,
-    border: {
-        style: 'solid',
-        color: '#d6d6d6',
-        width: 2,
-        collapse: true,
-        spacing: 0
-    },
-    groupBy: {
-        disabled: false
-    }
-};
-
-var LEGEND_TYPE_MAP = (_LEGEND_TYPE_MAP = {}, _defineProperty(_LEGEND_TYPE_MAP, DISCRETE, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, STEP_COLOR, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["StepLegend"]), _defineProperty(_LEGEND_TYPE_MAP, GRADIENT, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["GradientLegend"]), _LEGEND_TYPE_MAP);
+var LEGEND_TYPE_MAP = (_LEGEND_TYPE_MAP = {}, _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + true + '-' + COLOR, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + true + '-' + SIZE, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + true + '-' + SHAPE, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + false + '-' + COLOR, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + false + '-' + SIZE, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, ORDINAL + '-' + false + '-' + SHAPE, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["DiscreteLegend"]), _defineProperty(_LEGEND_TYPE_MAP, LINEAR + '-' + true + '-' + COLOR, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["StepLegend"]), _defineProperty(_LEGEND_TYPE_MAP, LINEAR + '-' + false + '-' + COLOR, _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__["GradientLegend"]), _LEGEND_TYPE_MAP);
 
 var LEFT = 'left';
 var RIGHT = 'right';
@@ -45260,6 +45454,65 @@ var SUBREGISTRIES = {
 var INTERFACES = {
     SimpleGroup: _chartshq_visual_group__WEBPACK_IMPORTED_MODULE_3__["SimpleGroup"],
     SimpleCell: _chartshq_visual_cell__WEBPACK_IMPORTED_MODULE_0__["SimpleCell"]
+};
+
+/***/ }),
+
+/***/ "./packages/muze/src/defaults.js":
+/*!***************************************!*\
+  !*** ./packages/muze/src/defaults.js ***!
+  \***************************************/
+/*! exports provided: DEFAULT_CONFIG */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
+var DEFAULT_CONFIG = {
+    classPrefix: 'muze',
+    interaction: {
+        sideEffect: 'individual'
+    },
+    legend: {
+        position: 'right',
+        color: {
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
+        },
+        shape: {
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
+        },
+        size: {
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
+        }
+    },
+    showHeaders: false,
+    minWidth: 300,
+    minHeight: 200,
+    border: {
+        style: 'solid',
+        color: '#d6d6d6',
+        width: 2,
+        collapse: true,
+        spacing: 0
+    },
+    groupBy: {
+        disabled: false
+    }
 };
 
 /***/ }),
@@ -45591,7 +45844,7 @@ function html(strings) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./constants */ "./packages/muze/src/constants.js");
+/* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./defaults */ "./packages/muze/src/defaults.js");
 /**
  * @module
  * This is the global options semantics based on which setters getters are created and reactivity is initiated.
@@ -45653,8 +45906,10 @@ __webpack_require__.r(__webpack_exports__);
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: function sanitization(config, oldConfig) {
-                var defConfig = Object.assign(oldConfig || {}, _constants__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_CONFIG"]);
-                return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(defConfig, config);
+                var oldConf = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, oldConfig);
+                var defConfig = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(oldConf, _defaults__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_CONFIG"]);
+                var newConf = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(defConfig, config);
+                return newConf;
             }
 
         }
@@ -47835,15 +48090,16 @@ var CartesianEncoder = function (_VisualEncoder) {
         value: function getRetinalFieldsDomain(dataModels, encoding) {
             var groupedModel = dataModels.groupedModel;
             var domains = {};
-            Object.entries(encoding).forEach(function (enc) {
-                if (enc[1] && enc[1].field) {
-                    var field = enc[1].field;
-                    if (field && (!field[1] || field[1] && !field[1].domain)) {
+            for (var key in encoding) {
+                if ({}.hasOwnProperty.call(encoding, key)) {
+                    var encodingObj = encoding[key];
+                    var field = encodingObj.field;
+                    if (!encodingObj.domain && field) {
                         var domain = Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["retriveDomainFromData"])(groupedModel, field);
                         domains[field] = domain;
                     }
                 }
-            });
+            }
             return domains;
         }
 
@@ -47933,11 +48189,6 @@ var CartesianEncoder = function (_VisualEncoder) {
                 });
             });
             return layerConfig;
-        }
-    }, {
-        key: 'getAggregationFns',
-        value: function getAggregationFns(groupByFns) {
-            return groupByFns;
         }
     }], [{
         key: 'type',
@@ -48077,6 +48328,7 @@ var generateAxisFromMap = function generateAxisFromMap(axisType, fieldInfo, axes
             currentAxes.push(xAxis);
         } else {
             var axes = map.get(axisKey);
+            axes[axisIndex] = axes[axisIndex] ? axes[axisIndex] : createSimpleAxis(axisConfig, field, axesCreators);
             axes[axisIndex]._rotationLock = false;
             axes[axisIndex] && axes[axisIndex].config(axisConfig).domain(axisConfig.domain || []);
         }
@@ -48765,11 +49017,6 @@ var PolarEncoder = function (_VisualEncoder) {
             });
             return serializedLayers;
         }
-    }, {
-        key: 'getAggregationFns',
-        value: function getAggregationFns(groupByFns) {
-            return groupByFns;
-        }
     }], [{
         key: 'type',
         value: function type() {
@@ -48911,9 +49158,11 @@ var RetinalEncoder = function (_VisualEncoder) {
 
             Object.entries(encoding).forEach(function (enc) {
                 if (enc[1] && enc[1].field) {
+                    var encType = enc[0];
                     var field = enc[1].field;
-                    if (field && (!field[1] || field[1] && !field[1].domain)) {
-                        axes[enc[0]].forEach(function (axis) {
+
+                    if (field) {
+                        axes[encType].forEach(function (axis) {
                             var domain = domains[field];
                             axis.updateDomain(domain);
                         });
@@ -50058,7 +50307,7 @@ var computeMatrices = function computeMatrices(context, config) {
             return fieldsConfig[field] && fieldsConfig[field].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION;
         });
 
-        var aggregationFns = encoders.simpleEncoder.getAggregationFns(groupBy.measures);
+        var aggregationFns = groupBy.measures;
         groupedModel = datamodel.groupBy(allFields, aggregationFns);
     }
 
@@ -50404,13 +50653,13 @@ var getEncoder = function getEncoder(layers) {
 };
 
 /**
-*
-*
-* @param {*} type
-* @param {*} fields
-* @param {*} userAxisFromConfig
-* @return
-*/
+ *
+ *
+ * @param {*} type
+ * @param {*} fields
+ * @param {*} userAxisFromConfig
+ * @return
+ */
 var getHeaderAxisFrom = function getHeaderAxisFrom(type, fields, userAxisFromConfig) {
     var axisFrom = userAxisFromConfig[type];
     var headerFrom = '';
@@ -50439,14 +50688,17 @@ var getHeaderAxisFrom = function getHeaderAxisFrom(type, fields, userAxisFromCon
         headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["BOTTOM"];
         axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["BOTTOM"];
     } else {
-        headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["TOP"];
+        headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["BOTTOM"];
         axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["TOP"];
     }
     if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["MEASURE"] && secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["MEASURE"]) {
         axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["TOP"];
     } else if (secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["MEASURE"]) {
         axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["BOTTOM"];
+    } else if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["MEASURE"]) {
+        axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_4__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_4__["TOP"];
     }
+
     return [headerFrom, axisFrom];
 };
 
@@ -52394,6 +52646,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 
 
+var sanitizeRetinalConfig = function sanitizeRetinalConfig(retinalConf) {
+    var conf = {};
+    for (var key in retinalConf) {
+        var confValue = retinalConf[key];
+        if (typeof confValue === 'string' || !confValue) {
+            conf[key] = {
+                field: retinalConf[key]
+            };
+        } else {
+            conf[key] = confValue;
+        }
+    }
+    return conf;
+};
+
 /**
  *
  *
@@ -52401,13 +52668,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
  * @memberof VisualGroup
  */
 var setMatrixInstances = function setMatrixInstances(context, placeholder) {
-    return context.matrixInstance({
+    context._composition.matrices = {
         value: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](placeholder.values),
         left: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](placeholder.rows[0]),
         right: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](placeholder.rows[1]),
         top: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](placeholder.columns[0]),
         bottom: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](placeholder.columns[1])
-    });
+    };
+    return context;
 };
 
 /**
@@ -52444,19 +52712,18 @@ var setupChangeListeners = function setupChangeListeners(context) {
                 globalConfig: config[1] || {},
                 rows: rows[1],
                 columns: columns[1],
-                color: color[1],
-                shape: shape[1],
-                size: size[1],
                 detail: detail[1],
                 layers: layers[1],
                 transform: transform[1]
             };
-            // Prepare configuration for retinal configs
-            var retinalConfig = {
+
+            var retinalConfig = sanitizeRetinalConfig({
                 color: color[1],
                 shape: shape[1],
                 size: size[1]
-            };
+            });
+
+            matrixConfig = Object.assign(matrixConfig, retinalConfig);
             // Create the encoders for the group
             var encoders = {};
             encoders.retinalEncoder = new _encoder__WEBPACK_IMPORTED_MODULE_0__["RetinalEncoder"]();
@@ -52474,7 +52741,7 @@ var setupChangeListeners = function setupChangeListeners(context) {
             resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
             // Getting the placeholders
             var placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-            context._groupedModel = placeholderInfo.dataModels.groupedModel;
+            context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
             // Set the selection object
             context.selection(placeholderInfo.selection);
 
@@ -52493,6 +52760,7 @@ var setupChangeListeners = function setupChangeListeners(context) {
             // Set placeholder information
             context.placeholderInfo(placeholderInfo);
 
+            context._composition.axes = resolver.axes();
             context.metaData({
                 border: Object(_group_helper__WEBPACK_IMPORTED_MODULE_2__["getBorders"])(placeholderInfo, encoders.simpleEncoder)
             });
@@ -52880,6 +53148,8 @@ var VisualGroup = function (_SimpleGroup) {
         // Populate the store with default values
         _this.store(Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["initStore"])());
 
+        // initialize group compositions
+        _this._composition = {};
         // store reference to data
         _this._data = [];
         // matrix instance store each of the matrices
@@ -52907,15 +53177,39 @@ var VisualGroup = function (_SimpleGroup) {
         return _this;
     }
 
-    /**
-     * Locks the model to prevent change listeners to be triggered until unlocked
-     *
-     * @return {Object} Instance of class VisualGroup
-     * @memberof VisualGroup
-     */
-
-
     _createClass(VisualGroup, [{
+        key: 'matrixInstance',
+        value: function matrixInstance() {
+            if (arguments.length) {
+                return this;
+            }
+            return this.composition().matrices;
+        }
+
+        /**
+         * Returns the composition of the Group
+         *
+         * @readonly
+         * @memberof VisualGroup
+         */
+
+    }, {
+        key: 'composition',
+        value: function composition() {
+            if (arguments.length) {
+                return this;
+            }
+            return this._composition;
+        }
+
+        /**
+         * Locks the model to prevent change listeners to be triggered until unlocked
+         *
+         * @return {Object} Instance of class VisualGroup
+         * @memberof VisualGroup
+         */
+
+    }, {
         key: 'lockModel',
         value: function lockModel() {
             this.store().model.lock();
@@ -53118,7 +53412,7 @@ var VisualGroup = function (_SimpleGroup) {
     }, {
         key: 'getGroupByData',
         value: function getGroupByData() {
-            return this._groupedModel;
+            return this._groupedDataModel;
         }
     }]);
 
@@ -53217,6 +53511,7 @@ var BaseLayer = function (_SimpleLayer) {
         _this.data(data);
         _this.axes(axes);
         _this.config(config);
+        _this.alias(_this.constructor.formalName() + Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getUniqueId"])());
         _this.dependencies(dependencies);
         _this._points = [];
         _this._cachedData = [];
@@ -53414,178 +53709,18 @@ var BaseLayer = function (_SimpleLayer) {
         value: function getNearestPoint() {
             return null;
         }
-
-        /**
-         * Applies selection styles to the elements that fall within the selection set.
-         * @param {Array} selectionSet Array of tuple ids.
-         * @param {Object} config Configuration for selection.
-         * @return {BarLayer} Instance of bar layer.
-         */
-
     }, {
-        key: 'highlightPoint',
-        value: function highlightPoint(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        key: 'applyInteractionStyle',
+        value: function applyInteractionStyle(interactionType, selectionSet, apply) {
+            var interactionConfig = this.config().interaction || {};
 
-            var elements = this.getPlotElementsFromSet(selectionSet);
-            var axes = this.axes();
-            var colorAxis = axes.color;
-            var highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
-            highlightStyles.forEach(function (highlight) {
-                var styleType = highlight.type;
-                elements.style(styleType, function (d) {
-                    var _d$meta = d.meta,
-                        colorTransform = _d$meta.colorTransform,
-                        stateColor = _d$meta.stateColor,
-                        originalColor = _d$meta.originalColor;
-
-                    colorTransform.highlight = colorTransform.highlight || {};
-                    stateColor[styleType] = stateColor[styleType] || originalColor;
-                    var fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity);
-                    colorTransform.highlight[styleType] = highlight.intensity;
-                    stateColor[styleType] = fillColorInfo.hsla;
-                    return fillColorInfo.color;
+            var interactionStyles = interactionConfig[interactionType];
+            if (interactionStyles) {
+                Object(_helpers__WEBPACK_IMPORTED_MODULE_3__["applyInteractionStyle"])(this, selectionSet, interactionStyles, {
+                    apply: apply,
+                    interactionType: interactionType
                 });
-            });
-            return this;
-        }
-
-        /**
-         * Removes selection styles to the elements that fall within the selection set.
-         * @param {Array} selectionSet Array of tuple ids.
-         * @param {Object} config Configuration for selection.
-         * @return {BarLayer} Instance of bar layer.
-         */
-
-    }, {
-        key: 'dehighlightPoint',
-        value: function dehighlightPoint(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var elements = this.getPlotElementsFromSet(selectionSet);
-            var axes = this.axes();
-            var colorAxis = axes.color;
-            var highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
-            highlightStyles.forEach(function (highlight) {
-                var styleType = highlight.type;
-                elements.style(styleType, function (d) {
-                    var _d$meta2 = d.meta,
-                        colorTransform = _d$meta2.colorTransform,
-                        stateColor = _d$meta2.stateColor,
-                        originalColor = _d$meta2.originalColor;
-
-                    colorTransform.highlight = colorTransform.highlight || {};
-                    if (colorTransform.highlight && colorTransform.highlight[styleType]) {
-                        stateColor[styleType] = stateColor[styleType] || originalColor;
-                        var fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity.map(function (e) {
-                            return -e;
-                        }));
-                        stateColor[styleType] = fillColorInfo.hsla;
-                        colorTransform.highlight[styleType] = null;
-                        return fillColorInfo.color;
-                    }
-                    colorTransform.highlight = null;
-
-                    var _ref = stateColor[styleType] ? stateColor[styleType] : originalColor,
-                        _ref2 = _slicedToArray(_ref, 3),
-                        h = _ref2[0],
-                        s = _ref2[1],
-                        l = _ref2[2];
-
-                    return 'hsl(' + h * 360 + ',' + s * 100 + '%,' + l * 100 + '%)';
-                });
-            });
-            return this;
-        }
-
-        /**
-         * Removes selection styles to the elements that fall within the selection set.
-         * @param {Array} selectionSet Array of tuple ids.
-         * @param {Object} config Configuration for selection.
-         * @return {BarLayer} Instance of bar layer.
-         */
-
-    }, {
-        key: 'focusOutSelection',
-        value: function focusOutSelection(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var interaction = config.interaction || this.config().interaction;
-            Object(_helpers__WEBPACK_IMPORTED_MODULE_3__["focusUnfocusSelection"])(this, selectionSet, true, interaction);
-            return this;
-        }
-
-        /**
-         * Removes selection styles to the elements that fall within the selection set.
-         * @param {Array} selectionSet Array of tuple ids.
-         * @param {Object} config Configuration for selection.
-         * @return {BarLayer} Instance of bar layer.
-         */
-
-    }, {
-        key: 'focusSelection',
-        value: function focusSelection(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var interaction = config.interaction || this.config().interaction;
-            Object(_helpers__WEBPACK_IMPORTED_MODULE_3__["focusUnfocusSelection"])(this, selectionSet, false, interaction);
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} selectionSet
-         * @param {*} [config={}]
-         * @returns
-         * @memberof BaseLayer
-         */
-
-    }, {
-        key: 'fadeOutSelection',
-        value: function fadeOutSelection(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var interaction = config.interaction || this.config().interaction;
-            Object(_helpers__WEBPACK_IMPORTED_MODULE_3__["fadeUnfadeSelection"])(this, selectionSet, true, interaction);
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} selectionSet
-         * @param {*} [config={}]
-         * @returns
-         * @memberof BaseLayer
-         */
-
-    }, {
-        key: 'unfadeSelection',
-        value: function unfadeSelection(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var interaction = config.interaction || this.config().interaction;
-            Object(_helpers__WEBPACK_IMPORTED_MODULE_3__["fadeUnfadeSelection"])(this, selectionSet, false, interaction);
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} params
-         * @returns
-         * @memberof BaseLayer
-         */
-
-    }, {
-        key: 'linkLayerStore',
-        value: function linkLayerStore() {
-            if (arguments.length) {
-                this._linkedLayerStore = arguments.length <= 0 ? undefined : arguments[0];
-                return this;
             }
-            return this._linkedLayerStore;
         }
 
         /**
@@ -53755,7 +53890,7 @@ var BaseLayer = function (_SimpleLayer) {
     }, {
         key: 'getPointsFromIdentifiers',
         value: function getPointsFromIdentifiers(identifiers, getAllAttrs) {
-            var _ref3;
+            var _ref;
 
             if (!this.data()) {
                 return [];
@@ -53765,7 +53900,7 @@ var BaseLayer = function (_SimpleLayer) {
             var points = this._points;
             var fieldsConfig = this.data().getFieldsConfig();
 
-            var filteredPoints = (_ref3 = []).concat.apply(_ref3, _toConsumableArray(points)).filter(function (point) {
+            var filteredPoints = (_ref = []).concat.apply(_ref, _toConsumableArray(points)).filter(function (point) {
                 var _data = point._data,
                     _id = point._id;
 
@@ -54016,9 +54151,9 @@ var listenerMap = function listenerMap(context) {
         },
         type: 'computed'
     }, {
-        props: [_enums_props__WEBPACK_IMPORTED_MODULE_1__["MOUNT"], _enums_props__WEBPACK_IMPORTED_MODULE_1__["DATA"], _enums_props__WEBPACK_IMPORTED_MODULE_1__["AXES"], _enums_props__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]],
-        listener: function listener(mountPoint, dataModel, axes, config) {
-            if (mountPoint[1] && dataModel[1] && config[1] && axes[1]) {
+        props: [_enums_props__WEBPACK_IMPORTED_MODULE_1__["MOUNT"]],
+        listener: function listener(mountPoint) {
+            if (mountPoint[1]) {
                 context.render(mountPoint[1]);
                 context.dependencies().throwback.commit('onlayerdraw', true);
             }
@@ -54163,12 +54298,13 @@ var FIELDMAP = 'fieldMap';
 /*!****************************************************!*\
   !*** ./packages/visual-layer/src/helpers/index.js ***!
   \****************************************************/
-/*! exports provided: getLayerColor, fadeUnfadeSelection, focusUnfocusSelection, getAxesScales, getEncodingFieldInf, getValidTransform, transformData, getNormalizedData, calculateDomainFromData, attachDataToVoronoi, updateStyle, animateGroup, positionPoints */
+/*! exports provided: getLayerColor, applyInteractionStyle, fadeUnfadeSelection, focusUnfocusSelection, getAxesScales, getEncodingFieldInf, getValidTransform, transformData, getNormalizedData, calculateDomainFromData, attachDataToVoronoi, updateStyle, animateGroup, positionPoints */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLayerColor", function() { return getLayerColor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "applyInteractionStyle", function() { return applyInteractionStyle; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fadeUnfadeSelection", function() { return fadeUnfadeSelection; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "focusUnfocusSelection", function() { return focusUnfocusSelection; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAxesScales", function() { return getAxesScales; });
@@ -54219,15 +54355,12 @@ var transfromColor = function transfromColor(colorAxis, datum, styleType, intens
     return fillColorInfo;
 };
 
-var applyInteractionStyle = function applyInteractionStyle(context, selectionSet, interactionType, config) {
+var applyInteractionStyle = function applyInteractionStyle(context, selectionSet, interactionStyles, config) {
     var elements = context.getPlotElementsFromSet(selectionSet);
     var axes = context.axes();
     var colorAxis = axes.color;
-    var apply = config.apply,
-        interaction = config.interaction;
-
-    var interactionStyles = interaction[interactionType];
-
+    var apply = config.apply;
+    var interactionType = config.interactionType;
     interactionStyles.forEach(function (style) {
         var styleType = style.type;
         elements.style(styleType, function (d) {
@@ -54240,7 +54373,8 @@ var applyInteractionStyle = function applyInteractionStyle(context, selectionSet
             if (apply && !colorTransform[interactionType][styleType]) {
                 // fade selections
                 colorTransform[interactionType][styleType] = style.intensity;
-                return transfromColor(colorAxis, d, styleType, style.intensity).color;
+                var color = transfromColor(colorAxis, d, styleType, style.intensity).color;
+                return color;
             }
             if (!apply && colorTransform[interactionType][styleType]) {
                 // unfade selections
@@ -55606,6 +55740,7 @@ var defaultConfig = {
     transform: {
         type: _enums_constants__WEBPACK_IMPORTED_MODULE_0__["STACK"]
     },
+    interaction: {},
     nearestPointThreshold: 10,
     encoding: {
         color: {},
@@ -55620,18 +55755,7 @@ var defaultConfig = {
         effect: 'cubic',
         duration: 1000
     },
-    connectNullData: false,
-    states: {
-        highlight: {
-            className: 'layer-area-highlight'
-        },
-        fadeout: {
-            className: 'layer-area-fadeout'
-        },
-        selected: {
-            className: 'layer-area-selected'
-        }
-    }
+    connectNullData: false
 };
 
 /***/ }),
@@ -56222,7 +56346,6 @@ var BarLayer = function (_BaseLayer) {
             }).map(function (e) {
                 return e.index;
             });
-
             containerSelection.classed(qualifiedClassName.join(' '), true);
             containerSelection.classed(className, true);
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["clipElement"])(container, {
@@ -56660,7 +56783,7 @@ var defaultConfig = {
             intensity: [0, -30, +30, 0]
         }]
     },
-    nearestPointThreshold: 10,
+    nearestPointThreshold: 20,
     encoding: {
         color: {},
         x: {},
@@ -58869,9 +58992,13 @@ var actionBehaviourMap = (_actionBehaviourMap = {}, _defineProperty(_actionBehav
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "propagateValues", function() { return propagateValues; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 
 
 var propagateValues = function propagateValues(instance, action) {
+    var _ref;
+
     var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
     var propagationData = void 0;
@@ -58883,7 +59010,9 @@ var propagateValues = function propagateValues(instance, action) {
     var dataModel = context.cachedData()[0];
     var sourceId = context.id();
     var sideEffects = config.sideEffects;
-    var mutableEffect = sideEffects.find(function (sideEffect) {
+    var mutableEffect = (_ref = []).concat.apply(_ref, _toConsumableArray(Object.values(sideEffects).map(function (d) {
+        return d.effects;
+    }))).find(function (sideEffect) {
         return instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true);
     });
     var mergedModel = selectionSet.mergedEnter.model;
@@ -58902,14 +59031,13 @@ var propagateValues = function propagateValues(instance, action) {
         propagationData = mergedModel ? mergedModel.project(criteriaFields) : null;
     }
 
+    propagationFields.length && propagationData && (propagationData = propagationData.project(propagationFields));
     dataModel.addToPropNamespace(sourceId, {
         payload: payload,
         criteria: propagationData,
         isMutableAction: mutableEffect,
         actionName: mutableEffect ? mutableEffect.name || mutableEffect : action
     });
-
-    propagationFields.length && propagationData && (propagationData = propagationData.project(propagationFields));
     dataModel.propagate(propagationData, payload, {
         isMutableAction: mutableEffect,
         sourceId: sourceId
@@ -58922,19 +59050,42 @@ var propagateValues = function propagateValues(instance, action) {
 /*!*****************************************************!*\
   !*** ./packages/visual-unit/src/firebolt/helper.js ***!
   \*****************************************************/
-/*! exports provided: registerListeners, getApplicableSideEffects */
+/*! exports provided: clearActionHistory, dispatchQueuedSideEffects, registerListeners */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clearActionHistory", function() { return clearActionHistory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatchQueuedSideEffects", function() { return dispatchQueuedSideEffects; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "registerListeners", function() { return registerListeners; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getApplicableSideEffects", function() { return getApplicableSideEffects; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/reactive-props */ "./packages/visual-unit/src/enums/reactive-props.js");
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 
+
+
+var clearActionHistory = function clearActionHistory(context) {
+    var actionHistory = context._actionHistory;
+    for (var key in actionHistory) {
+        if (actionHistory[key].isMutableAction) {
+            delete context._actionHistory[key];
+        }
+    }
+};
+
+var dispatchQueuedSideEffects = function dispatchQueuedSideEffects(context) {
+    var queuedSideEffects = context._queuedSideEffects;
+    var sideEffectStore = context.sideEffects();
+    queuedSideEffects.forEach(function (sideEffect) {
+        var _sideEffectStore$side;
+
+        (_sideEffectStore$side = sideEffectStore[sideEffect.name]).apply.apply(_sideEffectStore$side, _toConsumableArray(sideEffect.params));
+    });
+    context._queuedSideEffects = [];
+};
 
 var registerListeners = function registerListeners(firebolt) {
     var context = firebolt.context;
@@ -58958,35 +59109,10 @@ var registerListeners = function registerListeners(firebolt) {
             firebolt.initializeSideEffects();
             firebolt.config(context.config().interaction);
             firebolt.mapActionsAndBehaviour();
+            dispatchQueuedSideEffects(firebolt);
+            clearActionHistory(firebolt);
         }
     });
-};
-
-var getApplicableSideEffects = function getApplicableSideEffects(firebolt, payload, sideEffects) {
-    var propagationInf = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-    var applicableSideEffects = void 0;
-    var context = firebolt.context;
-    var unitId = context.id();
-    var aliasName = context.parentAlias();
-    var propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
-    var sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
-    var sourceSideEffects = firebolt._sourceSideEffects;
-    var actionOnSource = sourceUnitId === unitId;
-
-    applicableSideEffects = payload.sideEffects ? payload.sideEffects : sideEffects;
-
-    applicableSideEffects = applicableSideEffects.filter(function (d) {
-        if (!actionOnSource && payload.criteria !== null) {
-            return !sourceSideEffects[d.name || d];
-        }
-        if (propagationSourceCanvas === aliasName) {
-            return d.applyOnSource !== false;
-        }
-        return true;
-    });
-
-    return applicableSideEffects;
 };
 
 /***/ }),
@@ -59040,51 +59166,49 @@ var UnitFireBolt = function (_Firebolt) {
 
         var _this = _possibleConstructorReturn(this, (_ref = UnitFireBolt.__proto__ || Object.getPrototypeOf(UnitFireBolt)).call.apply(_ref, [this].concat(params)));
 
-        _this._entryExitSet = {};
         Object(_helper__WEBPACK_IMPORTED_MODULE_2__["registerListeners"])(_this);
         return _this;
     }
 
-    /**
-    * Dispatches the behaviour with a given payload.
-    * @param {string | Array} behaviourList Name of a single behaviour or multiple behaviours
-    * @param {Object} payload Configuration parameters for action.
-    * @return {VisualUnit} Instance of visual unit.
-    */
-
-
     _createClass(UnitFireBolt, [{
-        key: 'dispatchBehaviour',
-        value: function dispatchBehaviour(behaviour, payload) {
-            var propagationInfo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-            var propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
-            var behaviouralActions = this._actions.behavioural;
-            var action = behaviouralActions[behaviour];
-            var behaviourEffectMap = this._behaviourEffectMap;
-            var sideEffects = behaviourEffectMap[behaviour] && behaviourEffectMap[behaviour];
-            this._propagationInf = propagationInfo;
-            var selectionSet = action.dispatch(payload);
-            var propagationSelectionSet = selectionSet.find(function (d) {
-                return !d.sourceSelectionSet;
+        key: 'propagate',
+        value: function propagate(behaviour, payload, selectionSet, sideEffects) {
+            Object(_data_propagator__WEBPACK_IMPORTED_MODULE_4__["propagateValues"])(this, behaviour, {
+                payload: payload,
+                selectionSet: selectionSet,
+                sideEffects: sideEffects,
+                propagationFields: this._propagationFields
             });
-            this._entryExitSet[behaviour] = propagationSelectionSet;
+        }
+    }, {
+        key: 'getApplicableSideEffects',
+        value: function getApplicableSideEffects(sideEffects, payload, propagationInf) {
+            var context = this.context;
+            var unitId = context.id();
+            var aliasName = context.parentAlias();
+            var propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
+            var sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
+            var sourceSideEffects = this._sourceSideEffects;
+            var actionOnSource = sourceUnitId === unitId;
 
-            if (propagate) {
-                Object(_data_propagator__WEBPACK_IMPORTED_MODULE_4__["propagateValues"])(this, behaviour, {
-                    payload: payload,
-                    selectionSet: selectionSet.find(function (d) {
-                        return d.sourceSelectionSet;
-                    }),
-                    sideEffects: sideEffects,
-                    propagationFields: this._propagationFields
+            var applicableSideEffects = payload.sideEffects ? [{
+                effects: payload.sideEffects,
+                behaviours: [payload.action]
+            }] : sideEffects;
+            applicableSideEffects.forEach(function (d) {
+                var mappedEffects = d.effects;
+                mappedEffects = mappedEffects.filter(function (se) {
+                    if (!actionOnSource && payload.criteria !== null) {
+                        return !sourceSideEffects[se.name || se];
+                    }
+                    if (propagationSourceCanvas === aliasName) {
+                        return d.applyOnSource !== false;
+                    }
+                    return true;
                 });
-            } else {
-                var applicableSideEffects = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getApplicableSideEffects"])(this, payload, sideEffects, propagationInfo);
-                this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
-            }
-
-            return this;
+                d.effects = mappedEffects;
+            });
+            return applicableSideEffects;
         }
     }, {
         key: 'enableSideEffectOnPropagation',
@@ -59123,9 +59247,12 @@ var UnitFireBolt = function (_Firebolt) {
                         });
                     }
                 }
-
                 var payload = payloadFn(_this2.context, data, propValue);
-                _this2.dispatchBehaviour(action, payload, {
+                var sideEffects = _this2._behaviourEffectMap[action];
+                var mutableEffect = sideEffects.find(function (sideEffect) {
+                    return _this2._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true);
+                });
+                var propagationInf = {
                     propagate: false,
                     data: data,
                     propPayload: propPayload,
@@ -59133,7 +59260,13 @@ var UnitFireBolt = function (_Firebolt) {
                     persistent: false,
                     isSourceFieldPresent: isSourceFieldPresent,
                     sourceId: propValue.sourceId
-                });
+                };
+                _this2._actionHistory[action] = {
+                    payload: payload,
+                    propagationInf: propagationInf,
+                    isMutableAction: mutableEffect
+                };
+                _this2.dispatchBehaviour(action, payload, propagationInf);
             };
         }
     }, {
@@ -59578,8 +59711,9 @@ var createLayers = function createLayers(context, layerDefinitions) {
         var markId = mark + '-' + i;
         var instances = getLayerFromDef(context, definition, layersMap[markId]);
         store.layers = Object.assign(store.layers, instances);
-        layersArr = (_layersArr = layersArr).concat.apply(_layersArr, _toConsumableArray(Object.values(instances)));
-        layersMap[markId] = instances;
+        var instanceValues = Object.values(instances);
+        layersArr = (_layersArr = layersArr).concat.apply(_layersArr, _toConsumableArray(instanceValues));
+        layersMap[markId] = instanceValues;
         markSet[markId] = markId;
         return layersArr;
     }, []);
@@ -59948,22 +60082,11 @@ var listenerMap = function listenerMap(context) {
             dataDomain !== null && context.updateAxisDomain(dataDomain);
         }
     }, {
-        type: 'registerImmediateListener',
-        props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["MOUNT"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["CONFIG"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"]].concat(axisProps),
-        listener: function listener(_ref7, _ref8, _ref9, _ref10) {
-            var _ref14 = _slicedToArray(_ref7, 2),
-                container = _ref14[1];
-
-            var _ref13 = _slicedToArray(_ref8, 2),
-                config = _ref13[1];
-
-            var _ref12 = _slicedToArray(_ref9, 2),
-                width = _ref12[1];
-
-            var _ref11 = _slicedToArray(_ref10, 2),
-                height = _ref11[1];
-
-            if (container && width && height && config) {
+        type: 'registerChangeListener',
+        props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["MOUNT"]].concat(axisProps),
+        listener: function listener(mount) {
+            var container = mount[1];
+            if (container) {
                 context.render(container);
             }
         }
@@ -60497,126 +60620,6 @@ var VisualUnit = function () {
         }
 
         /**
-         * Applies the selection styles to the elements of the corresponding data tuples.
-         * @param {Array} selectionSet Array of selected tuple ids.
-         * @param {Object} config Configuration for highlighting elments.
-         * @return {VisualUnit} Instance of visual unit.
-         */
-
-    }, {
-        key: 'highlightPoint',
-        value: function highlightPoint(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            this._layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.highlightPoint(selectionSet.uids, config);
-            });
-            return this;
-        }
-
-        /**
-         * Removes the selection styles from the elements of the corresponding data tuples.
-         * @param {Array} selectionSet Array of selected tuple ids.
-         * @param {Object} config Configuration for highlighting elments.
-         * @return {VisualUnit} Instance of visual unit.
-         */
-
-    }, {
-        key: 'dehighlightPoint',
-        value: function dehighlightPoint(selectionSet) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            this._layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.dehighlightPoint(selectionSet.uids, config);
-            });
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} set
-         * @param {*} [config={}]
-         * @returns
-         * @memberof VisualUnit
-         */
-
-    }, {
-        key: 'fadeOutSelection',
-        value: function fadeOutSelection(set) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var layers = this.layers();
-            layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.fadeOutSelection(set.uids, config);
-            });
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} set
-         * @param {*} [config={}]
-         * @returns
-         * @memberof VisualUnit
-         */
-
-    }, {
-        key: 'unfadeSelection',
-        value: function unfadeSelection(set) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var layers = this.layers();
-            layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.unfadeSelection(set.uids, config);
-            });
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} set
-         * @param {*} [config={}]
-         * @returns
-         * @memberof VisualUnit
-         */
-
-    }, {
-        key: 'focusSelection',
-        value: function focusSelection(set) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var layers = this.layers();
-            layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.focusSelection(set.uids, config);
-            });
-            return this;
-        }
-
-        /**
-         *
-         *
-         * @param {*} set
-         * @param {*} [config={}]
-         * @returns
-         * @memberof VisualUnit
-         */
-
-    }, {
-        key: 'focusOutSelection',
-        value: function focusOutSelection(set) {
-            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            var layers = this.layers();
-            layers.forEach(function (layer) {
-                return layer.config().interactive !== false && layer.focusOutSelection(set.uids, config);
-            });
-            return this;
-        }
-
-        /**
          *
          *
          * @param {*} type
@@ -60667,6 +60670,7 @@ var VisualUnit = function () {
                 axes && axes.forEach(function (axis, i) {
                     var field = _this3.fields()[type][i];
                     dom = domain['' + _this3.fields()[type][i]];
+
                     if (field.type() !== muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION && dom) {
                         min[i] = dom[0];
                         max[i] = dom[1];
@@ -60675,19 +60679,24 @@ var VisualUnit = function () {
                 if (axes) {
                     if (axes.length > 1) {
                         var axisConf = axes[0].config();
-                        if (axisConf.alignZeroLine) {
-                            axes.forEach(function (axis) {
-                                return axis.config({
-                                    nice: false
+                        if (axes[0].constructor.type() === 'linear') {
+                            if (axisConf.alignZeroLine) {
+                                axes.forEach(function (axis) {
+                                    return axis.config({
+                                        nice: false
+                                    });
                                 });
-                            });
-                            var adjustedDomain = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getAdjustedDomain"])(max, min);
-                            min = adjustedDomain.min;
-                            max = adjustedDomain.max;
-                        }
+                                var adjustedDomain = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getAdjustedDomain"])(max, min);
+                                min = adjustedDomain.min;
+                                max = adjustedDomain.max;
+                            }
 
-                        axes[0].updateDomainCache([min[0], max[0]]);
-                        axes[1].updateDomainCache([min[1], max[1]]);
+                            axes[0].updateDomainCache([min[0], max[0]]);
+                            axes[1].updateDomainCache([min[1], max[1]]);
+                        } else {
+                            axes[0].updateDomainCache(dom);
+                            axes[1].updateDomainCache(dom);
+                        }
                     } else {
                         axes[0].updateDomainCache(dom);
                     }

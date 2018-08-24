@@ -36,7 +36,6 @@ export default class UnitFireBolt extends Firebolt {
             effects: payload.sideEffects,
             behaviours: [payload.action]
         }] : sideEffects;
-
         applicableSideEffects.forEach((d) => {
             let mappedEffects = d.effects;
             mappedEffects = mappedEffects.filter((se) => {
@@ -50,7 +49,6 @@ export default class UnitFireBolt extends Firebolt {
             });
             d.effects = mappedEffects;
         });
-
         return applicableSideEffects;
     }
 

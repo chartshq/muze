@@ -247,6 +247,10 @@
 .muze-grid-band-y-0 {
   fill-opacity: 0; }
 
+.muze-unit {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none; }
+
 .muze-legend-selection-box {
   fill: #777777;
   fill-opacity: 0.3;
@@ -282,9 +286,7 @@
   cursor: pointer; }
 
 .muze-legend-icon {
-  cursor: pointer;
-  fill-opacity: 0.8;
-  opacity: 0.8; }
+  cursor: pointer; }
 
 .muze-overflow-y {
   overflow-y: scroll; }

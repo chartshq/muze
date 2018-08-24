@@ -457,8 +457,7 @@ export default class VisualUnit {
      * @return {Object} Nearest point.
      */
     getNearestPoint (x, y, args) {
-        const pointObj = {
-            dimensions: [],
+        let pointObj = {
             id: null
         };
         const dimValue = getNearestDimensionalValue(this, {
@@ -474,7 +473,8 @@ export default class VisualUnit {
         }
 
         const markInf = this.getMarkInfFromLayers(x, y, args) || { id: null };
-        pointObj.id = markInf.id;
+        pointObj = Object.assign({}, markInf);
+
         pointObj.target = markInf.id;
         return pointObj;
     }

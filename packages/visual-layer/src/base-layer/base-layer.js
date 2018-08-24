@@ -290,12 +290,15 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     applyInteractionStyle (interactionType, selectionSet, apply) {
-        const interactionConfig = this.config().interaction;
+        const interactionConfig = this.config().interaction || {};
+
         const interactionStyles = interactionConfig[interactionType];
-        applyInteractionStyle(this, selectionSet, interactionStyles, {
-            apply,
-            interactionType
-        });
+        if (interactionStyles) {
+            applyInteractionStyle(this, selectionSet, interactionStyles, {
+                apply,
+                interactionType
+            });
+        }
     }
 
     /**
