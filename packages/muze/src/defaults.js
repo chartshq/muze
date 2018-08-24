@@ -6,13 +6,28 @@ export const DEFAULT_CONFIG = {
     legend: {
         position: 'right',
         color: {
-            show: true
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
         },
         shape: {
-            show: true
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
         },
         size: {
-            show: true
+            show: true,
+            padding: 2,
+            margin: 2,
+            border: 1,
+            height: 30,
+            width: 30
         }
     },
     showHeaders: false,

@@ -51,6 +51,9 @@ export default class Canvas extends TransactionSupport {
         this.title('', {});
         this.subtitle('', {});
         this.legend({});
+        this.color({});
+        this.shape({});
+        this.size({});
         setupChangeListener(this);
     }
 

@@ -30,6 +30,7 @@ export const DISCRETE = 'discrete';
 export const STEP_COLOR = 'step-color';
 export const GRADIENT = 'gradient';
 export const LINEAR = 'linear';
+export const ORDINAL = 'ordinal';
 
 export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'script',
@@ -37,13 +38,14 @@ export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
 ];
 
 export const LEGEND_TYPE_MAP = {
-    [DISCRETE]: DiscreteLegend,
-    [STEP_COLOR]: StepLegend,
-    [GRADIENT]: GradientLegend,
-    [`${LINEAR}-${true}`]: StepLegend,
-    [`${LINEAR}-${false}`]: GradientLegend,
-    [STEP_COLOR]: StepLegend,
-    [GRADIENT]: GradientLegend
+    [`${ORDINAL}-${true}-${COLOR}`]: DiscreteLegend,
+    [`${ORDINAL}-${true}-${SIZE}`]: DiscreteLegend,
+    [`${ORDINAL}-${true}-${SHAPE}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${COLOR}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${SIZE}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${SHAPE}`]: DiscreteLegend,
+    [`${LINEAR}-${true}-${COLOR}`]: StepLegend,
+    [`${LINEAR}-${false}-${COLOR}`]: GradientLegend
 };
 
 export const LEFT = 'left';

@@ -90,10 +90,7 @@
         canvas2 = canvas2
             .rows(rows)
             .columns(['Origin'])
-            .color({
-                field: 'Acceleration',
-                step: true
-            })
+
             .data(rootData)
             .width(600)
             .height(350)
@@ -126,9 +123,10 @@
             .rows(rows)
             .columns(columns)
             // .color({field: 'Acceleration', step: true})
-            .color({
-                value: 'RED'
-            })
+            .color('Origin')
+            //     field: 'Origin',
+            //     step: false
+            // })
             .data(rootData)
             .width(600)
             .height(550)
@@ -171,62 +169,62 @@
             .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
             .mount(document.getElementById('chart2'));
 
-        muze.ActionModel
-                        .for(canvas, canvas2)
-                        .registerPhysicalActions({
-                            ctrlClick: firebolt => (targetEl, behaviours) => {
-                                targetEl.on('d.click', function (args) {
-                                    if (event.metaKey) {
-                                        const event = utils.getEvent();
-                                        const mousePos = utils.getClientPoint(this, event);
-                                        const nearestPoint = firebolt.context.getNearestPoint(mousePos.x, mousePos.y, {
-                                            data: args
-                                        });
-                                        behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
-                                            criteria: nearestPoint.id
-                                        }));
-                                    }
-                                });
-                            }
-                        }).registerPhysicalBehaviouralMap({
-                            ctrlClick: {
-                                behaviours: ['select']
-                            }
-                        })
-                        .registerSideEffects(class TextSideEffect extends SpawnableSideEffect {
-                            static formalName () {
-                                return 'selection-text';
-                            }
+        // muze.ActionModel
+        //                 .for(canvas, canvas2)
+        //                 .registerPhysicalActions({
+        //                     ctrlClick: firebolt => (targetEl, behaviours) => {
+        //                         targetEl.on('d.click', function (args) {
+        //                             if (event.metaKey) {
+        //                                 const event = utils.getEvent();
+        //                                 const mousePos = utils.getClientPoint(this, event);
+        //                                 const nearestPoint = firebolt.context.getNearestPoint(mousePos.x, mousePos.y, {
+        //                                     data: args
+        //                                 });
+        //                                 behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
+        //                                     criteria: nearestPoint.id
+        //                                 }));
+        //                             }
+        //                         });
+        //                     }
+        //                 }).registerPhysicalBehaviouralMap({
+        //                     ctrlClick: {
+        //                         behaviours: ['select']
+        //                     }
+        //                 })
+        //                 .registerSideEffects(class TextSideEffect extends SpawnableSideEffect {
+        //                     static formalName () {
+        //                         return 'selection-text';
+        //                     }
 
-                            apply (selectionSet) {
-                                const dataModel = selectionSet.mergedEnter.model;
-                                const drawingInf = this.drawingContext();
-                                const sideEffectGroup = drawingInf.sideEffectGroup;
+        //                     apply (selectionSet) {
+        //                         const dataModel = selectionSet.mergedEnter.model;
+        //                         const drawingInf = this.drawingContext();
+        //                         const sideEffectGroup = drawingInf.sideEffectGroup;
 
-                                const textGroups = this.createElement(drawingInf.htmlContainer, 'div', [1], 'selected');
-                                textGroups.html(`Selected:${dataModel.getData().data.map(e => e.join(', '))}`);
-                                textGroups.style('position', 'absolute');
-                                return this;
-                            }
-            }).registerSideEffects(class StrokeSideEffect extends SpawnableSideEffect {
-                static formalName () {
-                    return 'stroke-effect';
-                }
+        //                         const textGroups = this.createElement(drawingInf.htmlContainer, 'div', [1], 'selected');
+        //                         textGroups.html(`Selected:${dataModel.getData().data.map(e => e.join(', '))}`);
+        //                         textGroups.style('position', 'absolute');
+        //                         return this;
+        //                     }
+        //     }).registerSideEffects(class StrokeSideEffect extends SpawnableSideEffect {
+        //         static formalName () {
+        //             return 'stroke-effect';
+        //         }
 
-                apply (selectionSet) {
-                    const { completeSet, mergedExit, mergedEnter } = selectionSet;
-                    const context = this.firebolt.context;
-                    const layers = context.layers();
-                    layers.forEach((e) => {
-                        const enterElements = e.getPlotElementsFromSet(mergedEnter.uids);
-                        enterElements.style('stroke', 'red');
-                        const exitElements = e.getPlotElementsFromSet(mergedExit.uids);
-                        exitElements.style('stroke', '');
-                    });
-                }
-            }).mapSideEffects({
-                select: ['selection-text', 'stroke-effect']
+        //         apply (selectionSet) {
+        //             const { completeSet, mergedExit, mergedEnter } = selectionSet;
+        //             const context = this.firebolt.context;
+        //             const layers = context.layers();
+        //             layers.forEach((e) => {
+        //                 const enterElements = e.getPlotElementsFromSet(mergedEnter.uids);
+        //                 enterElements.style('stroke', 'red');
+        //                 const exitElements = e.getPlotElementsFromSet(mergedExit.uids);
+        //                 exitElements.style('stroke', '');
+        //             });
+        //         }
+        //     }).mapSideEffects({
+        //         select: ['selection-text', 'stroke-effect']
 
-            });
+        //     });
     });
 }());

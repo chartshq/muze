@@ -83,7 +83,7 @@ class VisualGroup extends SimpleGroup {
     }
 
     /**
-     *
+     * Returns the composition of the Group
      *
      * @readonly
      * @memberof VisualGroup
