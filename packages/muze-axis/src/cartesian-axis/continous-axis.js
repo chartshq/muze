@@ -241,19 +241,13 @@ export default class ContinousAxis extends SimpleAxis {
             rotation
         } = labels;
         const axis = this.axis();
-        const labelManager = this.dependencies().labelManager;
-        labelManager.setStyle(this._tickLabelStyle);
+        const { width, height } = this._axisDimensions.largestLabelDim;
         axis.tickTransform((d, i) => {
-            const temp = axis.tickFormat ? axis.tickFormat()(d) : d;
-            const datum = temp.toString();
-
-            const { width: shiftWidth, height: shiftHeight } = labelManager.getOriSize(datum);
-
             if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
-                return `translate(0, -${(shiftHeight) / 3}px)`;
+                return `translate(0, -${(height) / 3}px)`;
             }
             if (i === 0 && (orientation === TOP || orientation === BOTTOM) && rotation === 0) {
-                return `translate(${shiftWidth / 2}px,  ${0}px) rotate(${rotation}deg)`;
+                return `translate(${width / 2}px,  ${0}px) rotate(${rotation}deg)`;
             } return '';
         });
         return tickText;

@@ -61,13 +61,15 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
         }
 
         if (orientation === AxisOrientation.TOP) {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 4 : xShift;
+            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 2 : xShift;
             selectElement(this)
-                            .attr('transform', `translate(${-xShift * 2} ${-yShift - tickSize}) rotate(${rotation})`);
+                            .attr('transform', `translate(${-xShift + tickSize} 
+                                ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 4 : xShift;
+            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
             selectElement(this)
-                            .attr('transform', `translate(${xShift * 2} ${yShift + tickSize}) rotate(${rotation})`);
+                            .attr('transform', `translate(${xShift - tickSize} 
+                                ${yShift + tickSize}) rotate(${rotation})`);
         }
     });
     return tickText;

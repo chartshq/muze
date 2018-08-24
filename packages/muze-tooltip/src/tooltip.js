@@ -220,6 +220,7 @@ export default class Tooltip {
         const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
+
         const positionHorizontal = () => {
             let position;
             let x = dim.x + dim.width;
@@ -256,11 +257,16 @@ export default class Tooltip {
                 y
             };
         };
+
         const positionVertical = () => {
             let position;
             // Position tooltip at the center of plot
+            // dim -> point dimensions
+            // extent -> complete view dimensions
+            // offset -> tooltip width height
             let x = dim.x - offsetWidth / 2 + dim.width / 2;
             const y = dim.y - offsetHeight - arrowSize;
+
             // Overflows to the right
             if ((extent.width - dim.x) < offsetWidth) {
                 x = extent.width - offsetWidth;

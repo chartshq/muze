@@ -267,7 +267,10 @@ export const renderComponents = (context, components, layoutConfig, measurement)
 
     // Render layout
     context.layout().renderGrid(mount);
-    renderLegend(layoutConfig, legend, legends, measurement);
+    context.once('layer.drawn').then(() => {
+        renderLegend(layoutConfig, legend, legends, measurement);
+    });
+
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
 

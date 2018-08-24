@@ -109,7 +109,7 @@ export const listenerMap = context => ([
     },
     {
         type: 'registerChangeListener',
-        props: [...axisProps],
+        props: [...axisProps, PROPS.MOUNT],
         listener: () => {
             const container = context.mount();
             if (container) {
