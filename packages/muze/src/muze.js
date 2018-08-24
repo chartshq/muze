@@ -6,7 +6,8 @@ import {
     DataModel,
     makeElement,
     getClientPoint,
-    getEvent
+    getEvent,
+    require
 } from 'muze-utils';
 import { SurrogateSideEffect, SpawnableSideEffect, sideEffects } from '@chartshq/muze-firebolt';
 import { layerFactory } from '@chartshq/visual-layer';
@@ -147,7 +148,8 @@ muze.operators = operators;
 muze.utils = {
     getClientPoint,
     getEvent,
-    makeElement
+    makeElement,
+    require
 };
 
 export default muze;

@@ -186,11 +186,12 @@ export const getBarMeasurement = (axis, bandScale, config) => {
     } = config;
     const groupWidth = getGroupWidth(axis, timeDiff);
     const isAxisBandScale = axis.constructor.type() === BAND;
+    const axisPadding = axis.config().padding;
     // If it is a grouped bar then the width of each bar in a grouping is retrieved from
     // a band scale. The band scale will have range equal to width of one group of bars and
     // the domain is set to series keys.
     if (transformType === 'group') {
-        const groupPadding = isAxisBandScale ? 0 : axis.config().padding * groupWidth / 2;
+        const groupPadding = isAxisBandScale ? 0 : axisPadding * groupWidth / 2;
         bandScale.range([groupPadding, groupWidth - groupPadding])
                         .domain(keys);
         isAxisBandScale ? bandScale.paddingInner(innerPadding) : bandScale.paddingInner(innerPadding);
@@ -208,7 +209,7 @@ export const getBarMeasurement = (axis, bandScale, config) => {
         }
         offsetValues = keys.map(() => (isAxisBandScale ? -(offset / 2) : -(width / 2)));
     } else {
-        padding = isAxisBandScale ? 0 : innerPadding * groupWidth;
+        padding = isAxisBandScale ? 0 : axisPadding * groupWidth;
         width = groupWidth - padding;
         actualGroupWidth = width;
         offsetValues = keys.map(() => (isAxisBandScale ? 0 : -(width / 2)));
@@ -218,7 +219,7 @@ export const getBarMeasurement = (axis, bandScale, config) => {
         width,
         offsetValues,
         groupWidth: actualGroupWidth,
-        padding: isAxisBandScale ? innerPadding * axis.scale().step() : innerPadding * groupWidth
+        padding: isAxisBandScale ? axisPadding * axis.scale().step() : axisPadding * groupWidth
     };
 };
 

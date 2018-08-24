@@ -1,19 +1,21 @@
-export const strategies = {
-    fade: (set, context) => {
-        const {
-            mergedEnter,
-            mergedExit,
-            exitSet,
-            completeSet
-        } = set;
+const fadeFn = (set, context, strategy) => {
+    const {
+        mergedEnter,
+        mergedExit,
+        exitSet,
+        completeSet
+    } = set;
 
-        if (!mergedEnter.length && !mergedExit.length) {
-            context.unfadeSelection(completeSet);
-        } else {
-            context.fadeOutSelection(exitSet[1]);
-            context.unfadeSelection(mergedEnter);
-        }
-    },
+    if (!mergedEnter.length && !mergedExit.length) {
+        context.applyInteractionStyle(completeSet, {}, strategy, false);
+    } else {
+        context.applyInteractionStyle(exitSet[1], {}, strategy, true);
+        context.applyInteractionStyle(mergedEnter, {}, strategy, false);
+    }
+};
+
+export const strategies = {
+    fade: fadeFn,
     focus: (set, context) => {
         const {
             mergedEnter,
@@ -21,10 +23,10 @@ export const strategies = {
             completeSet
         } = set;
         if (!mergedEnter.length && !mergedExit.length) {
-            context.focusSelection(completeSet);
+            context.applyInteractionStyle(completeSet, {}, 'focus', false);
         } else {
-            context.focusOutSelection(mergedExit);
-            context.focusSelection(mergedEnter);
+            context.applyInteractionStyle(mergedExit, {}, 'focus', true);
+            context.applyInteractionStyle(mergedEnter, {}, 'focus', false);
         }
     },
     highlight: (set, context) => {
@@ -36,10 +38,10 @@ export const strategies = {
             completeSet
         } = set;
         if (!mergedEnter.length && !mergedExit.length) {
-            context.dehighlightPoint(completeSet);
+            context.applyInteractionStyle(completeSet, {}, 'highlight', false);
         } else {
-            context.highlightPoint(entrySet[1]);
-            context.dehighlightPoint(exitSet[1]);
+            context.applyInteractionStyle(entrySet[1], {}, 'highlight', true);
+            context.applyInteractionStyle(exitSet[1], {}, 'highlight', false);
         }
     }
 };

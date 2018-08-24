@@ -11,7 +11,9 @@ import {
     initializeBehaviouralActions,
     initializeSideEffects,
     changeSideEffectAvailability,
-    initializePhysicalActions
+    initializePhysicalActions,
+    unionSets,
+    getSideEffects
 } from './helper';
 
 /**
@@ -28,6 +30,7 @@ export default class Firebolt {
             behavioural: {},
             physical: {}
         };
+        this._propagationFields = {};
         this._sourceSideEffects = {
             tooltip: true,
             selectionBox: true
@@ -35,6 +38,9 @@ export default class Firebolt {
         this._actionBehaviourMap = {};
         this._config = {};
         this._behaviourEffectMap = {};
+        this._entryExitSet = {};
+        this._actionHistory = {};
+        this._queuedSideEffects = [];
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -85,32 +91,73 @@ export default class Firebolt {
 
     applySideEffects (sideEffects, selectionSet, payload) {
         const sideEffectStore = this.sideEffects();
+        const actionHistory = this._actionHistory;
+        const queuedSideEffects = [];
         sideEffects.forEach((sideEffect) => {
             let options;
             let name;
-            if (typeof sideEffect === 'object') {
-                name = sideEffect.name;
-                options = sideEffect.options;
-            } else {
-                name = sideEffect;
-            }
+            const effects = sideEffect.effects;
+            const behaviours = sideEffect.behaviours;
+            const combinedSet = unionSets(this, behaviours, selectionSet);
+            effects.forEach((effect) => {
+                if (typeof effect === 'object') {
+                    name = effect.name;
+                    options = effect.options;
+                } else {
+                    name = effect;
+                }
 
-            const sideEffectInstance = sideEffectStore[name];
-            if (sideEffectInstance.enabled) {
-                sideEffectStore[name].apply(selectionSet, payload, options);
-            }
+                const sideEffectInstance = sideEffectStore[name];
+                if (sideEffectInstance.enabled) {
+                    if (!sideEffectInstance.constructor.mutates() &&
+                        Object.values(actionHistory).some(d => d.isMutableAction)) {
+                        queuedSideEffects.push({
+                            name,
+                            params: [combinedSet, payload, options]
+                        });
+                    } else {
+                        sideEffectStore[name].apply(combinedSet, payload, options);
+                    }
+                }
+            });
         });
+        this._queuedSideEffects.push(...queuedSideEffects);
         return this;
     }
 
-    dispatchBehaviour (behaviourName, payload) {
-        const action = this._actions.behavioural[behaviourName];
-        const sideEffects = this._behaviourEffectMap[behaviourName];
+    dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
+        const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
+        const behaviouralActions = this._actions.behavioural;
+        const action = behaviouralActions[behaviour];
+        const behaviourEffectMap = this._behaviourEffectMap;
+        const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
+        this._propagationInf = propagationInfo;
+        const selectionSet = action.dispatch(payload);
+        const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
+        this._entryExitSet[behaviour] = propagationSelectionSet;
+        const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
 
-        if (action) {
-            const selectionSet = action(payload);
-            this.applySideEffects(sideEffects, selectionSet, payload);
+        if (propagate) {
+            this.propagate(behaviour, payload, selectionSet.find(d => d.sourceSelectionSet), sideEffects);
         }
+        if (shouldApplySideEffects) {
+            const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+            this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+        }
+
+        return this;
+    }
+
+    getPropagationSelectionSet (selectionSet) {
+        return selectionSet.find(d => !d.sourceSelectionSet);
+    }
+
+    shouldApplySideEffects () {
+        return true;
+    }
+
+    propagate () {
+        return this;
     }
 
     sideEffects (...sideEffects) {
@@ -129,6 +176,10 @@ export default class Firebolt {
     disable (fn) {
         changeSideEffectAvailability(this.sideEffects(), fn, false);
         return this;
+    }
+
+    getApplicableSideEffects (sideEffects) {
+        return sideEffects;
     }
 
     attachPropagationListener (dataModel) {
@@ -182,6 +233,14 @@ export default class Firebolt {
         const initedActions = initializePhysicalActions(this, actions);
         Object.assign(this._actions.physical, initedActions);
         return this;
+    }
+
+    propagateWith (action, ...fields) {
+        if (fields.length) {
+            this._propagationFields[action] = fields;
+            return this;
+        }
+        return this._propagationFields;
     }
 
     /**

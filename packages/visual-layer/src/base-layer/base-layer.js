@@ -11,7 +11,10 @@ import {
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
 import {
-    transformData, calculateDomainFromData, getNormalizedData, fadeUnfadeSelection, focusUnfocusSelection
+    transformData,
+    calculateDomainFromData,
+    getNormalizedData,
+    applyInteractionStyle
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
@@ -150,6 +153,14 @@ export default class BaseLayer extends SimpleLayer {
         return this._encodingFieldsInf;
     }
 
+    encodingTransform (...encodingTransform) {
+        if (encodingTransform.length) {
+            this._encodingTransform = encodingTransform[0];
+            return this;
+        }
+        return this._encodingTransform;
+    }
+
     /**
      * Provides a alias for a layer. Like it's possible to have same layer (like bar) multiple times, but among multiple
      * layers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set
@@ -277,129 +288,13 @@ export default class BaseLayer extends SimpleLayer {
         return null;
     }
 
-    /**
-     * Applies selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    highlightPoint (selectionSet, config = {}) {
-        const elements = this.getPlotElementsFromSet(selectionSet);
-        const axes = this.axes();
-        const colorAxis = axes.color;
-        const highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
-        highlightStyles.forEach((highlight) => {
-            const styleType = highlight.type;
-            elements.style(styleType, (d) => {
-                const { colorTransform, stateColor, originalColor } = d.meta;
-                colorTransform.highlight = colorTransform.highlight || {};
-                stateColor[styleType] = stateColor[styleType] || originalColor;
-                const fillColorInfo = colorAxis.transformColor(stateColor[styleType], highlight.intensity);
-                colorTransform.highlight[styleType] = highlight.intensity;
-                stateColor[styleType] = fillColorInfo.hsla;
-                return fillColorInfo.color;
-            });
+    applyInteractionStyle (interactionType, selectionSet, apply) {
+        const interactionConfig = this.config().interaction;
+        const interactionStyles = interactionConfig[interactionType];
+        applyInteractionStyle(this, selectionSet, interactionStyles, {
+            apply,
+            interactionType
         });
-        return this;
-    }
-
-    /**
-     * Removes selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    dehighlightPoint (selectionSet, config = {}) {
-        const elements = this.getPlotElementsFromSet(selectionSet);
-        const axes = this.axes();
-        const colorAxis = axes.color;
-        const highlightStyles = config.interaction ? config.interaction.highlight : this.config().interaction.highlight;
-        highlightStyles.forEach((highlight) => {
-            const styleType = highlight.type;
-            elements.style(styleType, (d) => {
-                const { colorTransform, stateColor, originalColor } = d.meta;
-                colorTransform.highlight = colorTransform.highlight || {};
-                if (colorTransform.highlight && colorTransform.highlight[styleType]) {
-                    stateColor[styleType] = stateColor[styleType] || originalColor;
-                    const fillColorInfo = colorAxis.transformColor(stateColor[styleType],
-                        highlight.intensity.map(e => -e));
-                    stateColor[styleType] = fillColorInfo.hsla;
-                    colorTransform.highlight[styleType] = null;
-                    return fillColorInfo.color;
-                }
-                colorTransform.highlight = null;
-                const [h, s, l] = stateColor[styleType] ? stateColor[styleType] : originalColor;
-                return `hsl(${h * 360},${s * 100}%,${l * 100}%)`;
-            });
-        });
-        return this;
-    }
-
-    /**
-     * Removes selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    focusOutSelection (selectionSet, config = {}) {
-        const interaction = config.interaction || this.config().interaction;
-        focusUnfocusSelection(this, selectionSet, true, interaction);
-        return this;
-    }
-
-    /**
-     * Removes selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    focusSelection (selectionSet, config = {}) {
-        const interaction = config.interaction || this.config().interaction;
-        focusUnfocusSelection(this, selectionSet, false, interaction);
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} selectionSet
-     * @param {*} [config={}]
-     * @returns
-     * @memberof BaseLayer
-     */
-    fadeOutSelection (selectionSet, config = {}) {
-        const interaction = config.interaction || this.config().interaction;
-        fadeUnfadeSelection(this, selectionSet, true, interaction);
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} selectionSet
-     * @param {*} [config={}]
-     * @returns
-     * @memberof BaseLayer
-     */
-    unfadeSelection (selectionSet, config = {}) {
-        const interaction = config.interaction || this.config().interaction;
-        fadeUnfadeSelection(this, selectionSet, false, interaction);
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} params
-     * @returns
-     * @memberof BaseLayer
-     */
-    linkLayerStore (...params) {
-        if (params.length) {
-            this._linkedLayerStore = params[0];
-            return this;
-        }
-        return this._linkedLayerStore;
     }
 
     /**

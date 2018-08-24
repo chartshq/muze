@@ -1,8 +1,9 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 import { LOG } from '../enums/scale-type';
 
-export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
+export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) => {
     const ticks = axis.scale().ticks();
+    const { numberOfTicks } = axisInstance.config();
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
@@ -10,7 +11,7 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis) => {
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
-    numberOfValues = Math.max(1, numberOfValues);
+    numberOfValues = Math.min(numberOfTicks, Math.max(1, numberOfValues));
     return axis.scale().ticks(numberOfValues);
 };
 

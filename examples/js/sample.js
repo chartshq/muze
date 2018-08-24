@@ -6,6 +6,7 @@
         share = muze.operators.share,
         html = muze.operators.html,
         actionModel = muze.ActionModel;
+    const require = muze.utils.require;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -26,7 +27,8 @@
 
 				{
 					name: 'Displacement',
-					type: 'measure'
+                    type: 'measure',
+                    defAggFn: 'avg'
 				},
 				{
 					name: 'Horsepower',
@@ -81,47 +83,38 @@
            } else return 'Greater than Zero'
        }])
     //    rootData = rootData.groupBy(['Year', 'negativeValues'])
-     
+
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');
 		window.canvas = env.canvas();
-		let canvas2 = env.canvas();
-		let canvas3 = env.canvas();
-		let rows = [[ 'Year','Displacement'], ['Horsepower']],
-			columns = [ 'Cylinders'];
+		let rows = ['Displacement'],
+			columns = ['Year'];
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
             .color('Origin')
-            // .color({
-            //     field: 'Displacement',
-            //     // range: ['red', 'blue'],
-            //     stops: 5,
-            //     step: true,
-            //     value: 'red'
-            // })
-            .data(rootData)
-			.width(600)
-            .height(350)
+            .data(rootData.select((fields) => fields.Origin.value === 'USA' || fields.Origin.value === 'Japan'))
+			.width(1200)
+            .height(600)
             // .size()
             .layers([{
-                mark: 'point',
-                encoding: {
-                    y: 'Horsepower'
-                }
-             
+                mark: 'bar',
+                transform: {
+                    type: 'group'
+                },
+                // transition: {
+                //     disabled: true
+                // }
             }])
             // .size('Origin')
             .config({
                 border:{
-                    width: 2,
-                  
+                    width: 2
                 },
                 axes:{
                         x:{
-                            showAxisName: true,
-                          
-                        
+                            showAxisName: true
+
                     }, y:{
                         showAxisName: true,
                         // name: 'Acceleration per year',
@@ -135,14 +128,16 @@
                 }
             })
 
-    
+
         .title('The Muze Project', { position: "top", align: "left",  })
 		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
         .mount(document.getElementsByTagName('body')[0]);
-        
-        setTimeout(function(){
-        // console.log(    canvas.layout().pages('column')) 
-        }, 2000)
-	})
+
+    // canvas.once('canvas.updated').then((args) => {
+    //     const valueMatrix = args.client.composition().visualGroup.matrixInstance().value;
+    //     valueMatrix.each((el) => el.valueOf().firebolt().propagateWith('select', 'Year'));
+    // });
+    });
+
 
 })()

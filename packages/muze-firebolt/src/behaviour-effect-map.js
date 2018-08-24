@@ -6,6 +6,13 @@ export const behaviourEffectMap = {
         options: {
             strategy: 'fade'
         }
+    }, 'brush-anchors'],
+    [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
+        name: 'tooltip',
+        options: {
+            strategy: 'showSelectedItems',
+            order: 0
+        }
     }],
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
@@ -24,11 +31,5 @@ export const behaviourEffectMap = {
         options: {
             strategy: 'focus'
         }
-    }, 'persistent-anchors', {
-        name: 'tooltip',
-        options: {
-            strategy: 'showSelectedItems',
-            order: 0
-        }
-    }]
+    }, 'persistent-anchors']
 };

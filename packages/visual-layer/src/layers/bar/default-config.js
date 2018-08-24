@@ -13,6 +13,10 @@ export const defaultConfig = {
             type: 'fill',
             intensity: [0, 0, +20, 0]
         }],
+        legendfade: [{
+            type: 'fill',
+            intensity: [0, 0, +20, 0]
+        }],
         focus: [{
             type: 'fill',
             intensity: [0, 0, +20, 0]

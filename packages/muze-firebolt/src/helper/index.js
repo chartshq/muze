@@ -100,3 +100,37 @@ export const getSetInfo = (type, set, config) => {
         model
     };
 };
+
+export const getSideEffects = (behaviour, behaviourEffectMap) => {
+    const sideEffects = [];
+    for (const key in behaviourEffectMap) {
+        const behaviours = key.split(',');
+        const found = behaviours.some(d => d === behaviour);
+        if (found) {
+            sideEffects.push({
+                effects: behaviourEffectMap[key],
+                behaviours
+            });
+        }
+    }
+    return sideEffects;
+};
+
+export const unionSets = (context, behaviours) => {
+    let combinedSet = {};
+    let model = null;
+    behaviours.forEach((behaviour) => {
+        const entryExitSet = context._entryExitSet[behaviour];
+        if (entryExitSet) {
+            const entryModel = entryExitSet.mergedEnter.model;
+            if (!model) {
+                model = entryModel;
+            } else {
+                model = model.union(entryModel);
+            }
+            combinedSet = Object.assign(combinedSet, entryExitSet);
+            combinedSet.mergedEnter.model = model;
+        }
+    });
+    return combinedSet;
+};

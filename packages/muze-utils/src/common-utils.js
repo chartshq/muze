@@ -1376,7 +1376,7 @@ const Scales = {
 };
 
 /**
- * Uses merge sort to find the smallest difference between two numbers in an array
+ *
  *
  */
 const getSmallestDiff = (points) => {
@@ -1389,7 +1389,22 @@ const getSmallestDiff = (points) => {
     return minDiff;
 };
 
+const require = (lookupWhat, lookupDetails) => ({
+    resolvable: (store) => {
+        const lookupTarget = store[lookupWhat];
+        const depArr = lookupDetails.slice(0, lookupDetails.length - 1);
+        const fn = lookupDetails[lookupDetails.length - 1]; // fn
+
+        const deps = depArr.map(str => lookupTarget[str]);
+        return {
+            fn: fn(...deps),
+            depArr
+        };
+    }
+});
+
 export {
+    require,
     Scales,
     Symbols,
     pathInterpolators,

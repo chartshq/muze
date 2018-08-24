@@ -23,13 +23,12 @@ const transfromColor = (colorAxis, datum, styleType, intensity) => {
     return fillColorInfo;
 };
 
-const applyInteractionStyle = (context, selectionSet, interactionType, config) => {
+export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
     const axes = context.axes();
     const colorAxis = axes.color;
-    const { apply, interaction } = config;
-    const interactionStyles = interaction[interactionType];
-
+    const apply = config.apply;
+    const interactionType = config.interactionType;
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.style(styleType, ((d) => {
@@ -38,7 +37,9 @@ const applyInteractionStyle = (context, selectionSet, interactionType, config) =
             if (apply && !colorTransform[interactionType][styleType]) {
                 // fade selections
                 colorTransform[interactionType][styleType] = style.intensity;
-                return transfromColor(colorAxis, d, styleType, style.intensity).color;
+                const color = transfromColor(colorAxis, d, styleType, style.intensity).color;
+                // console.log(originalColor, interactionType, color);
+                return color;
             }
             if (!apply && colorTransform[interactionType][styleType]) {
                  // unfade selections
@@ -338,9 +339,9 @@ export const animateGroup = (mount, context) => {
 };
 
 export const positionPoints = (context, points) => {
-    const positioner = context.config().positioner;
+    const positioner = context.encodingTransform();
     if (positioner) {
-        return positioner(points, context.linkLayerStore(), { smartLabel: context._dependencies.smartLabel });
+        return positioner(points, { smartLabel: context._dependencies.smartLabel });
     }
     return points;
 };
