@@ -3,13 +3,6 @@ class ActionModel {
         this._registrableComponents = [];
     }
 
-    /**
-     *
-     *
-     * @param {*} action
-     * @returns
-     * @memberof ActionModel
-     */
     registerPhysicalActions (action) {
         const canvases = this._registrableComponents;
 
@@ -22,13 +15,6 @@ class ActionModel {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} actions
-     * @returns
-     * @memberof ActionModel
-     */
     registerBehaviouralActions (...actions) {
         const canvases = this._registrableComponents;
 
@@ -60,13 +46,6 @@ class ActionModel {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} map
-     * @returns
-     * @memberof ActionModel
-     */
     mapSideEffects (map) {
         const canvases = this._registrableComponents;
 
@@ -79,25 +58,11 @@ class ActionModel {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} componentName
-     * @returns
-     * @memberof ActionModel
-     */
     for (...components) {
         this._registrableComponents = components;
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} sideEffects
-     * @returns
-     * @memberof ActionModel
-     */
     registerSideEffects (...sideEffects) {
         const registrableComponents = this._registrableComponents;
 
@@ -105,6 +70,32 @@ class ActionModel {
             canvas.once('canvas.updated').then((args) => {
                 const matrix = args.client.composition().visualGroup.matrixInstance().value;
                 matrix.each(cell => cell.valueOf().firebolt().registerSideEffects(sideEffects));
+            });
+        });
+
+        return this;
+    }
+
+    dissociateBehaviour (behaviour, physicalAction) {
+        const registrableComponents = this._registrableComponents;
+
+        registrableComponents.forEach((canvas) => {
+            canvas.once('canvas.updated').then((args) => {
+                const matrix = args.client.composition().visualGroup.matrixInstance().value;
+                matrix.each(cell => cell.valueOf().firebolt().dissociateBehaviour(behaviour, physicalAction));
+            });
+        });
+
+        return this;
+    }
+
+    dissociateSideEffect (sideEffect, behaviour) {
+        const registrableComponents = this._registrableComponents;
+
+        registrableComponents.forEach((canvas) => {
+            canvas.once('canvas.updated').then((args) => {
+                const matrix = args.client.composition().visualGroup.matrixInstance().value;
+                matrix.each(cell => cell.valueOf().firebolt().dissociateBehaviour(sideEffect, behaviour));
             });
         });
 

@@ -85,22 +85,23 @@
         window.canvas = env.canvas();
         // const canvas2 = env.canvas();
         // const canvas3 = env.canvas();
-        let rows = [['Acceleration'], []],
-            columns = [[], ['Horsepower', 'Origin']];
+        let rows = ['Acceleration', 'Displacement'],
+            columns = ['Year'];
         canvas = canvas
 
-        .detail(['Name'])
+        // .detail(['Name', 'Maker'])
             .rows(rows)
             .columns(columns)
 
             // .color({field: 'Acceleration', step: true})
             .color({
-                field: 'Acceleration'
+                field: 'Origin'
                 // step: true
             })
+            // .detail(['Name'])
             .data(rootData)
 			.width(600)
-            .height(400)
+            .height(600)
             // .size()
 
             // .size('Origin')
@@ -139,6 +140,12 @@
             .title('The Muze Project', { position: 'top', align: 'left' })
             .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
             .mount(document.getElementById('chart2'));
+
+        // canvas.once('canvas.updated').then((args) => {
+        //     args.client.composition().visualGroup.matrixInstance().value.each((cell) => {
+        //         cell.valueOf().firebolt().propagateWith('brush', 'Horsepower');
+        //     });
+        // });
 
         // muze.ActionModel
         //                 .for(canvas, canvas2)

@@ -3,7 +3,7 @@ import { mergeRecursive, getUniqueId } from 'muze-utils';
 export default class GenericSideEffect {
     constructor (firebolt) {
         this.firebolt = firebolt;
-        this.enabled = true;
+        this._enabled = true;
         this._strategy = 'default';
         this._config = {};
         this._id = getUniqueId();
@@ -31,13 +31,17 @@ export default class GenericSideEffect {
     }
 
     disable () {
-        this.enabled = false;
+        this._enabled = false;
         return this;
     }
 
     enable () {
-        this.enabled = true;
+        this._enabled = true;
         return this;
+    }
+
+    isEnabled () {
+        return this._enabled;
     }
 
     apply () {

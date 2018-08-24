@@ -1,5 +1,5 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType, ReservedFields } from 'muze-utils';
+import { FieldType, ReservedFields, selectElement } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
@@ -30,11 +30,12 @@ export default class Tooltip extends SpawnableSideEffect {
         let totalWidth = 0;
         const dataModel = selectionSet.mergedEnter.model;
         const drawingInf = this.drawingContext();
-        if (payload.criteria && dataModel && dataModel.isEmpty()) {
+        if (!selectionSet.mergedEnter.length) {
+            this.hide(payload, null);
             return this;
         }
-        if (payload.criteria === null || !dataModel) {
-            this.hide(payload, null);
+
+        if (!selectionSet.entrySet[1].length) {
             return this;
         }
 
@@ -75,9 +76,15 @@ export default class Tooltip extends SpawnableSideEffect {
                 plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID], dataModels[i].getData().uids]);
                 plotDim = plotDim && plotDim[0];
             }
+
             const dt = dataModels[i];
             enter[i] = true;
-            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(drawingInf.htmlContainer,
+            const htmlContainer = selectElement('.muze-grid-layout').node();
+            const layoutBoundBox = htmlContainer.getBoundingClientRect();
+            const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
+            const offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);
+            const offsetTop = Math.abs(layoutBoundBox.top - unitBoundBox.top);
+            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(htmlContainer,
                     drawingInf.svgContainer);
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
@@ -89,16 +96,16 @@ export default class Tooltip extends SpawnableSideEffect {
                             .extent({
                                 x: 0,
                                 y: 0,
-                                width: drawingInf.width,
-                                height: drawingInf.height
+                                width: layoutBoundBox.width,
+                                height: layoutBoundBox.height
                             });
 
             if (showInPosition) {
-                tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
+                tooltipInst.position(tooltipPos.x + pad + offsetLeft, tooltipPos.y + pad + offsetTop);
             } else if (plotDim) {
                 tooltipInst.positionRelativeTo({
-                    x: plotDim.x,
-                    y: plotDim.y,
+                    x: plotDim.x + offsetLeft,
+                    y: plotDim.y + offsetTop,
                     width: plotDim.width || 0,
                     height: plotDim.height || 0
                 }, {

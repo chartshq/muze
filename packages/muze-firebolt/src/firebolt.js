@@ -108,7 +108,7 @@ export default class Firebolt {
                 }
 
                 const sideEffectInstance = sideEffectStore[name];
-                if (sideEffectInstance.enabled) {
+                if (sideEffectInstance.isEnabled()) {
                     if (!sideEffectInstance.constructor.mutates() &&
                         Object.values(actionHistory).some(d => d.isMutableAction)) {
                         queuedSideEffects.push({
@@ -132,17 +132,19 @@ export default class Firebolt {
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
         this._propagationInf = propagationInfo;
-        const selectionSet = action.dispatch(payload);
-        const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
-        this._entryExitSet[behaviour] = propagationSelectionSet;
-        const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
+        if (action && action.isEnabled()) {
+            const selectionSet = action.dispatch(payload);
+            const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
+            this._entryExitSet[behaviour] = propagationSelectionSet;
+            const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
 
-        if (propagate) {
-            this.propagate(behaviour, payload, selectionSet.find(d => d.sourceSelectionSet), sideEffects);
-        }
-        if (shouldApplySideEffects) {
-            const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
-            this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+            if (propagate) {
+                this.propagate(behaviour, payload, selectionSet.find(d => d.sourceSelectionSet), sideEffects);
+            }
+            if (shouldApplySideEffects) {
+                const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+                this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+            }
         }
 
         return this;
@@ -168,13 +170,31 @@ export default class Firebolt {
         return this._sideEffects;
     }
 
-    enable (fn) {
-        changeSideEffectAvailability(this.sideEffects(), fn, true);
+    enableSideEffects (fn) {
+        changeSideEffectAvailability(this, fn, true);
         return this;
     }
 
-    disable (fn) {
-        changeSideEffectAvailability(this.sideEffects(), fn, false);
+    disableSideEffects (fn) {
+        changeSideEffectAvailability(this, fn, false);
+        return this;
+    }
+
+    dissociateBehaviour (behaviour, physicalAction) {
+        const actionBehaviourMap = this._actionBehaviourMap;
+        for (const key in actionBehaviourMap) {
+            if (key === physicalAction) {
+                const behaviourMap = actionBehaviourMap[key];
+                behaviourMap.behaviours = behaviourMap.behaviours.filter(d => d !== behaviour);
+            }
+        }
+
+        return this;
+    }
+
+    dissociateSideEffect (sideEffect, behaviour) {
+        const behaviourEffectMap = this._behaviourEffectMap;
+        behaviourEffectMap[behaviour] = behaviourEffectMap[behaviour].filter(d => (d.name || d) !== sideEffect);
         return this;
     }
 
@@ -291,12 +311,14 @@ export default class Firebolt {
             } else {
                 nodes = selectElement(mount).selectAll(target);
             }
-            if (nodes instanceof Array) {
-                nodes.forEach((node) => {
-                    action(selectElement(node), behaviourList);
-                });
-            } else {
-                action(nodes, behaviourList);
+            if (behaviourList.length) {
+                if (nodes instanceof Array) {
+                    nodes.forEach((node) => {
+                        action(selectElement(node), behaviourList);
+                    });
+                } else {
+                    action(nodes, behaviourList);
+                }
             }
         });
         return this;
