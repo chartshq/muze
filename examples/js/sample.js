@@ -85,8 +85,8 @@
         window.canvas = env.canvas();
         // const canvas2 = env.canvas();
         // const canvas3 = env.canvas();
-        let rows = ['Acceleration', 'Displacement'],
-            columns = ['Year'];
+        let rows = [[], ['Cylinders']],
+            columns = [['Acceleration'], []];
         canvas = canvas
 
         // .detail(['Name', 'Maker'])
