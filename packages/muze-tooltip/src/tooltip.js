@@ -207,11 +207,6 @@ export default class Tooltip {
         let orientation = tooltipConf.orientation;
         this.show();
         if (!dim) {
-            dim = this._relativeDim;
-        } else {
-            this._relativeDim = dim;
-        }
-        if (!dim) {
             this.hide();
             return this;
         }

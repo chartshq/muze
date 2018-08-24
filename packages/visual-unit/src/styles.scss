@@ -15,3 +15,8 @@
 .#{$prefix}grid-band-y-0 {
     fill-opacity: 0;
 }
+
+.#{$prefix}unit {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}

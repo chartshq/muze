@@ -97,16 +97,12 @@
                 field: 'Origin',
                 step: true
             })
-            .data(rootData.select((fields) => fields.Origin.value === 'USA' || fields.Origin.value === 'Japan'))
-			.width(1200)
-            .height(600)
+            .data(rootData)
+			.width(700)
+            .height(500)
             // .size()
             .layers([{
-                mark: 'line',
-                transform: {
-                    type: 'group'
-                },
-                connectNullData: false
+                mark: 'line'
                 // transition: {
                 //     disabled: true
                 // }
