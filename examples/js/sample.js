@@ -92,6 +92,7 @@
 		canvas = canvas
 			.rows(rows)
             .columns(columns)
+            // .color({field: 'Acceleration', step: true})
             .color('Origin')
             .data(rootData.select((fields) => fields.Origin.value === 'USA' || fields.Origin.value === 'Japan'))
 			.width(1200)
@@ -118,14 +119,14 @@
                     }, y:{
                         showAxisName: true,
                         // name: 'Acceleration per year',
-                        axisNamePadding: 12
+                        // axisNamePadding: 12
                     }
                 },
-                legend: {
-                    color:{
-                    // show: false
-                    }
-                }
+        //         legend: {
+        //             color:{
+        //             // show: false
+        //             }
+        //         }
             })
 
 
