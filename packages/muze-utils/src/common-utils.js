@@ -1376,10 +1376,6 @@ const Scales = {
     band: scaleBand
 };
 
-/**
- *
- *
- */
 const getSmallestDiff = (points) => {
     points = points.sort((a, b) => a - b);
     let minDiff = points[1] - points[0];

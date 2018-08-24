@@ -255,8 +255,6 @@ export const renderDiscreteItem = (context, container) => {
 * @memberof Legend
 */
 export const renderStepItem = (context, container) => {
-    // let iconWidth;
-    // let iconHeight;
     const labelManager = context._labelManager;
     const {
       item,
