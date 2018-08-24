@@ -141,7 +141,6 @@ export default class BarLayer extends BaseLayer {
         const containerSelection = selectElement(container);
         const dimensions = Object.values(fieldsConfig).filter(e => e.def.type === FieldType.DIMENSION)
             .map(e => e.index);
-
         containerSelection.classed(qualifiedClassName.join(' '), true);
         containerSelection.classed(className, true);
         clipElement(container, {

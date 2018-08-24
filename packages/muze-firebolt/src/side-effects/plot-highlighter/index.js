@@ -24,7 +24,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
         const strategy = strategies[options.strategy || this._strategy];
 
         if (selectionSet.isSourceFieldPresent !== false) {
-            strategy(selectionSet, this);
+            strategy(selectionSet, this, options.strategy || this._strategy);
         }
 
         return this;

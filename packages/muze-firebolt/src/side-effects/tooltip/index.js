@@ -58,7 +58,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const tooltipPos = payload.position;
         const boxes = [];
         const enter = {};
-
+        const action = payload.action === 'highlight' ? 'highlight' : 'brush';
         const uids = dataModel.getData().uids;
         if (fragmented) {
             dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
@@ -81,7 +81,7 @@ export default class Tooltip extends SpawnableSideEffect {
                     drawingInf.svgContainer);
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
-            tooltipInst.content(payload.action, dt, {
+            tooltipInst.content(action, dt, {
                 formatter: strategy,
                 order: options.order
             })
@@ -147,10 +147,12 @@ export default class Tooltip extends SpawnableSideEffect {
         return this;
     }
 
-    hide () {
+    hide (payload) {
         const tooltips = this._tooltips;
         for (const key in tooltips) {
             if ({}.hasOwnProperty.call(tooltips, key)) {
+                const action = payload.action === 'highlight' ? 'highlight' : 'brush';
+                tooltips[key].content(action, null);
                 tooltips[key].hide();
             }
         }

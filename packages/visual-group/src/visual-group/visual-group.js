@@ -255,7 +255,7 @@ class VisualGroup extends SimpleGroup {
     }
 
     getGroupByData () {
-        return this.composition().groupDataModel;
+        return this._groupedDataModel;
     }
 }
 

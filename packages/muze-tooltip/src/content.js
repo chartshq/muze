@@ -34,7 +34,7 @@ export default class Content {
 
     config (...c) {
         if (c.length > 0) {
-            this._config = mergeRecursive(this._config, c);
+            this._config = mergeRecursive(this._config, c[0]);
             return this;
         }
         return this._config;
@@ -85,6 +85,7 @@ export default class Content {
                 display: 'inline-block',
                 'margin-right': `${config.spacing}px`
             });
+
             cells.each(function (d) {
                 const el = selectElement(this);
                 el.html('');
@@ -122,7 +123,6 @@ export default class Content {
 
     clear () {
         this._model = null;
-        this._mount && this._mount.remove();
         return this;
     }
 }

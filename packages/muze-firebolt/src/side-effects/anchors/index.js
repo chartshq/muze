@@ -30,7 +30,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 const encodingFieldsInf = layer.encodingFieldsInf();
                 const config = layer.config();
                 layers = [...layers, ...context.addLayer({
-                    name: `${layer.alias()}-this.constructor.formalName()-${idx}`,
+                    name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
                     mark: 'point',
                     encoding: {
                         x: encodingFieldsInf.xField,
@@ -46,8 +46,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     transform: config.transform,
                     transition: this.getTransitionConfig(),
                     calculateDomain: false,
-                    dataSource: dt => dt.select(() => false),
-                    interactive: false
+                    source: dt => dt.select(() => false),
+                    interactive: false,
+                    render: false
                 })];
             }
         });

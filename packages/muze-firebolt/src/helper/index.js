@@ -1,3 +1,4 @@
+import { clone } from 'muze-utils';
 import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
@@ -99,4 +100,44 @@ export const getSetInfo = (type, set, config) => {
         length: set.length,
         model
     };
+};
+
+export const getSideEffects = (behaviour, behaviourEffectMap) => {
+    const sideEffects = [];
+    for (const key in behaviourEffectMap) {
+        const behaviours = key.split(',');
+        const found = behaviours.some(d => d === behaviour);
+        if (found) {
+            sideEffects.push({
+                effects: behaviourEffectMap[key],
+                behaviours
+            });
+        }
+    }
+    return sideEffects;
+};
+
+export const unionSets = (context, behaviours) => {
+    let combinedSet = {};
+    const models = {
+        mergedEnter: null,
+        mergedExit: null
+    };
+    behaviours.forEach((behaviour) => {
+        const entryExitSet = context._entryExitSet[behaviour];
+        if (entryExitSet) {
+            combinedSet = Object.assign(combinedSet, clone(entryExitSet));
+            ['mergedEnter', 'mergedExit'].forEach((type) => {
+                const model = entryExitSet[type].model;
+                let existingModel = models[type];
+                if (!existingModel) {
+                    existingModel = models[type] = model;
+                } else {
+                    existingModel = models[type] = model.union(existingModel);
+                }
+                combinedSet[type].model = existingModel;
+            });
+        }
+    });
+    return combinedSet;
 };

@@ -12,7 +12,8 @@ import {
     generateGetterSetters,
     getDataModelFromIdentifiers,
     isSimpleObject,
-    transposeArray
+    transposeArray,
+    FieldType
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -24,7 +25,8 @@ import {
     getLayerFromDef,
     attachAxisToLayers,
     getLayerAxisIndex,
-    createSideEffectGroup
+    createSideEffectGroup,
+    getAdjustedDomain
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -288,7 +290,7 @@ export default class VisualUnit {
             return [layer];
         }
         const serializedDef = layerFactory.getSerializedConf(layerDef.mark, layerDef);
-        const instances = getLayerFromDef(this, serializedDef);
+        const instances = Object.values(getLayerFromDef(this, serializedDef));
         this.layers().push(...instances);
         const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
         this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
@@ -375,86 +377,6 @@ export default class VisualUnit {
     }
 
     /**
-     * Applies the selection styles to the elements of the corresponding data tuples.
-     * @param {Array} selectionSet Array of selected tuple ids.
-     * @param {Object} config Configuration for highlighting elments.
-     * @return {VisualUnit} Instance of visual unit.
-     */
-    highlightPoint (selectionSet, config = {}) {
-        this._layers.forEach(layer => layer.config().interactive !== false &&
-            layer.highlightPoint(selectionSet.uids, config));
-        return this;
-    }
-
-    /**
-     * Removes the selection styles from the elements of the corresponding data tuples.
-     * @param {Array} selectionSet Array of selected tuple ids.
-     * @param {Object} config Configuration for highlighting elments.
-     * @return {VisualUnit} Instance of visual unit.
-     */
-    dehighlightPoint (selectionSet, config = {}) {
-        this._layers.forEach(layer => layer.config().interactive !== false &&
-            layer.dehighlightPoint(selectionSet.uids, config));
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} set
-     * @param {*} [config={}]
-     * @returns
-     * @memberof VisualUnit
-     */
-    fadeOutSelection (set, config = {}) {
-        const layers = this.layers();
-        layers.forEach(layer => layer.config().interactive !== false && layer.fadeOutSelection(set.uids, config));
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} set
-     * @param {*} [config={}]
-     * @returns
-     * @memberof VisualUnit
-     */
-    unfadeSelection (set, config = {}) {
-        const layers = this.layers();
-        layers.forEach(layer => layer.config().interactive !== false && layer.unfadeSelection(set.uids, config));
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} set
-     * @param {*} [config={}]
-     * @returns
-     * @memberof VisualUnit
-     */
-    focusSelection (set, config = {}) {
-        const layers = this.layers();
-        layers.forEach(layer => layer.config().interactive !== false && layer.focusSelection(set.uids, config));
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} set
-     * @param {*} [config={}]
-     * @returns
-     * @memberof VisualUnit
-     */
-    focusOutSelection (set, config = {}) {
-        const layers = this.layers();
-        layers.forEach(layer => layer.config().interactive !== false && layer.focusOutSelection(set.uids, config));
-        return this;
-    }
-
-    /**
      *
      *
      * @param {*} type
@@ -488,7 +410,35 @@ export default class VisualUnit {
     updateAxisDomain (domain) {
         ['x', 'y'].forEach((type) => {
             const axes = this.axes()[type];
-            axes && axes.forEach((axis, i) => axis.updateDomainCache(domain[`${this.fields()[type][i]}`]));
+            let min = [];
+            let max = [];
+            let dom;
+            axes && axes.forEach((axis, i) => {
+                const field = this.fields()[type][i];
+                dom = domain[`${this.fields()[type][i]}`];
+                if (field.type() !== FieldType.DIMENSION && dom) {
+                    min[i] = dom[0];
+                    max[i] = dom[1];
+                }
+            });
+            if (axes) {
+                if (axes.length > 1) {
+                    const axisConf = axes[0].config();
+                    if (axisConf.alignZeroLine) {
+                        axes.forEach(axis => axis.config({
+                            nice: false
+                        }));
+                        const adjustedDomain = getAdjustedDomain(max, min);
+                        min = adjustedDomain.min;
+                        max = adjustedDomain.max;
+                    }
+
+                    axes[0].updateDomainCache([min[0], max[0]]);
+                    axes[1].updateDomainCache([min[1], max[1]]);
+                } else {
+                    axes[0].updateDomainCache(dom);
+                }
+            }
         });
         return this;
     }

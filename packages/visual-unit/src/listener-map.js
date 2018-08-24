@@ -3,7 +3,6 @@ import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
     getDimensionMeasureMap,
-    fetchDependencies,
     createLayers,
     attachDataToLayers,
     attachAxisToLayers,
@@ -87,12 +86,8 @@ export const listenerMap = context => ([
                 const axesVal = axes.value;
                 if (dataModelVal && layersCreated.value && axesVal && layerAxisIndexVal) {
                     const layers = context.layers();
-                    const {
-                        dataModels,
-                        queuedTransforms
-                    } = transformDataModels(transform.value, dataModelVal);
+                    const dataModels = transformDataModels(transform.value, dataModelVal);
                     context._transformedDataModels = dataModels;
-                    context._queuedTransforms = queuedTransforms;
                     context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
                     attachDataToLayers(layers, dataModelVal, context._transformedDataModels);
                     context._dimensionMeasureMap = getDimensionMeasureMap(layers,
@@ -113,30 +108,11 @@ export const listenerMap = context => ([
         }
     },
     {
-        type: 'registerImmediateListener',
-        props: [PROPS.MOUNT, ...axisProps],
+        type: 'registerChangeListener',
+        props: [...axisProps],
         listener: () => {
-            const queuedTransforms = context._queuedTransforms;
-            const transformedDataModels = context._transformedDataModels;
-            const { x, y } = context.axes();
-            if (y && y[0].domain().length && x && x[0].domain().length) {
-                for (const key in queuedTransforms) {
-                    if ({}.hasOwnProperty.call(queuedTransforms, key)) {
-                        const transformVal = queuedTransforms[key];
-                        const dependencies = fetchDependencies(context, transformVal.deps);
-                        const data = context.data();
-                        transformedDataModels[key] = transformVal.fn(...dependencies, data);
-                        attachDataToLayers(context.layers(), data, transformedDataModels);
-                    }
-                }
-            }
-        }
-    },
-    {
-        type: 'registerImmediateListener',
-        props: [PROPS.MOUNT, PROPS.CONFIG, PROPS.WIDTH, PROPS.HEIGHT, ...axisProps],
-        listener: ([, container], [, config], [, width], [, height]) => {
-            if (container && width && height && config) {
+            const container = context.mount();
+            if (container) {
                 context.render(container);
             }
         }

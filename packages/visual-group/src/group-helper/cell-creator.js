@@ -509,7 +509,7 @@ export const computeMatrices = (context, config) => {
         const allFields = extractFields(facetsAndProjections, fields).filter(field =>
             fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
 
-        const aggregationFns = encoders.simpleEncoder.getAggregationFns(groupBy.measures);
+        const aggregationFns = groupBy.measures;
         groupedModel = datamodel.groupBy(allFields, aggregationFns);
     }
 

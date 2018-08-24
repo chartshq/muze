@@ -4,6 +4,21 @@ import { getEncoder, getBorders } from '../group-helper';
 import ValueMatrix from './value-matrix';
 import localOptions from './local-options';
 
+const sanitizeRetinalConfig = (retinalConf) => {
+    const conf = {};
+    for (const key in retinalConf) {
+        const confValue = retinalConf[key];
+        if (typeof confValue === 'string' || !confValue) {
+            conf[key] = {
+                field: retinalConf[key]
+            };
+        } else {
+            conf[key] = confValue;
+        }
+    }
+    return conf;
+};
+
 /**
  *
  *
@@ -36,25 +51,24 @@ export const setupChangeListeners = (context) => {
             // Get the resolver for the matrices
             const resolver = context.resolver();
             // Prepare configuration for matrix preparation
-            const matrixConfig = {
+            let matrixConfig = {
                 selection: context.selection(),
                 alias: context.alias(),
                 globalConfig: config[1] || {},
                 rows: rows[1],
                 columns: columns[1],
-                color: color[1],
-                shape: shape[1],
-                size: size[1],
                 detail: detail[1],
                 layers: layers[1],
                 transform: transform[1]
             };
-            // Prepare configuration for retinal configs
-            const retinalConfig = {
+
+            const retinalConfig = sanitizeRetinalConfig({
                 color: color[1],
                 shape: shape[1],
                 size: size[1]
-            };
+            });
+
+            matrixConfig = Object.assign(matrixConfig, retinalConfig);
             // Create the encoders for the group
             const encoders = {};
             encoders.retinalEncoder = new RetinalEncoder();
@@ -72,7 +86,7 @@ export const setupChangeListeners = (context) => {
             resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
             // Getting the placeholders
             const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-            context._composition.groupDataModel = placeholderInfo.dataModels.groupedModel;
+            context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
             // Set the selection object
             context.selection(placeholderInfo.selection);
 
