@@ -93,6 +93,7 @@
             .rows(rows)
             .columns(columns)
 
+            // .detail(['Maker', 'Name'])
             // .color({field: 'Acceleration', step: true})
             .color({
                 field: 'Origin'
@@ -121,7 +122,7 @@
 
                 axes: {
                     x: {
-                        // showAxisName: true
+                        showAxisName: true
 
                     },
                     y: {
