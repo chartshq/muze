@@ -83,21 +83,59 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        // const canvas2 = env.canvas();
-        // const canvas3 = env.canvas();
-        let rows = [['Acceleration'], []],
-            columns = [[], ['Horsepower', 'Origin']];
+        const Horsepower = 'Horsepower';
+        const Acceleration = 'Acceleration';
+        const Weight_in_lbs = 'Weight_in_lbs';
+        const Miles_per_Gallon = 'Miles_per_Gallon';
+        const Displacement = 'Displacement';
+        const Origin = 'Origin';
+        const Year = 'Year';
+        const Name = 'Name';
+        const Maker = 'Maker';
+        const Cylinders = 'Cylinders';
+        const schemaNames = [Horsepower, Displacement, Origin, Year, Cylinders];
+
+        let rows = [['Origin'], []],
+            columns = [['Origin', 'Displacement'], ['Horsepower']];
+        // let rows = [['Displacement', 'Horsepower'], ['Horsepower' ]],
+        //     columns = [['Horsepower', 'Origin', 'Displacement'], ['Horsepower']];
+        function update () {
+            const newRows = [[], []];
+            const newColumns = [[], []];
+
+            const random = [0, 1, 2, 3].map(e => new Array(Math.floor(Math.random() * 10)).fill(1));
+            // console.log(random);
+            // debugger;
+            newRows[0] = random[0].map(e => schemaNames[Math.floor(Math.random() * (schemaNames.length - 1))]);
+            newRows[1] = random[1].map(e => schemaNames[Math.floor(Math.random() * (schemaNames.length - 1))]);
+            newColumns[0] = random[2].map(e => schemaNames[Math.floor(Math.random() * (schemaNames.length - 1))]);
+            newColumns[1] = random[3].map(e => schemaNames[Math.floor(Math.random() * (schemaNames.length - 1))]);
+            // newRows[1] = new Array(Math.floor(Math.random() * 10)).map(e => schemaNames[Math.floor(Math.random() * schemaNames.length)]);
+            // newColumns[0] = new Array(Math.floor(Math.random() * 10)).map(e => schemaNames[Math.floor(Math.random() * schemaNames.length)]);
+            // newColumns[1] = new Array(Math.floor(Math.random() * 10)).map(e => schemaNames[Math.floor(Math.random() * schemaNames.length)]);
+
+            newRows[0] = [...new Set(newRows[0])];
+            newRows[1] = [...new Set(newRows[1])];
+            newColumns[0] = [...new Set(newColumns[0])];
+            newColumns[1] = [...new Set(newColumns[1])];
+            console.log(newRows);
+            console.log(newColumns);
+            canvas.rows(newRows).columns(newColumns);
+        }
+        setTimeout(() => {
+            // update();
+        }, 2000);
         canvas = canvas
 
-        .detail(['Name'])
             .rows(rows)
             .columns(columns)
 
+            // .detail(['Maker', 'Name'])
             // .color({field: 'Acceleration', step: true})
-            .color({
-                field: 'Acceleration'
-                // step: true
-            })
+            // .color({
+            //     field: 'Acceleration'
+            //     // step: true
+            // })
             .data(rootData)
 			.width(600)
             .height(400)
@@ -120,7 +158,7 @@
 
                 axes: {
                     x: {
-                        // showAxisName: true
+                        showAxisName: true
 
                     },
                     y: {
