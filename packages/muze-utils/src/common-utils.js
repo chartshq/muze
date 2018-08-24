@@ -80,6 +80,7 @@ const isSimpleObject = (obj) => {
  */
 const
     getUniqueId = () => `id-${new Date().getTime()}${Math.round(Math.random() * 10000)}`;
+
 /**
  * Deep copies an object and returns a new object.
  * @param {Object} o Object to clone

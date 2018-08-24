@@ -176,15 +176,16 @@ export default class CartesianEncoder extends VisualEncoder {
     getRetinalFieldsDomain (dataModels, encoding) {
         const groupedModel = dataModels.groupedModel;
         const domains = {};
-        Object.entries(encoding).forEach((enc) => {
-            if (enc[1] && enc[1].field) {
-                const field = enc[1].field;
-                if (field && (!field[1] || (field[1] && !field[1].domain))) {
+        for (const key in encoding) {
+            if ({}.hasOwnProperty.call(encoding, key)) {
+                const encodingObj = encoding[key];
+                const field = encodingObj.field;
+                if (!encodingObj.domain && field) {
                     const domain = retriveDomainFromData(groupedModel, field);
                     domains[field] = domain;
                 }
             }
-        });
+        }
         return domains;
     }
 
