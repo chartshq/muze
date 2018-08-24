@@ -1,19 +1,14 @@
 import { makeElement, selectElement, applyStyle } from 'muze-utils';
 import { ICON_MAP } from './defaults';
+import { positionConfig, alignmentMap, itemStack } from './position-config';
 import {
-    VERTICAL,
     WIDTH,
     HEIGHT,
-    START,
-    END,
     CENTER,
     VALUE,
     RECT,
     LEFT,
-    RIGHT,
-    TOP,
-    BOTTOM,
-    SHAPE
+    RIGHT
 } from '../enums/constants';
 
 /**
@@ -98,35 +93,27 @@ export const renderIcon = (icon, container, datum, context) => {
  * @return
  */
 export const getItemContainers = (container, data, legendInstance) => {
-    const datasets = {};
+    const measurement = legendInstance.measurement();
+    const config = legendInstance.config();
     const {
-        itemSpaces,
-        maxItemSpaces,
-        width
-    } = legendInstance.measurement();
+        itemSpaces
+    } = measurement;
     const {
         classPrefix,
-        align,
-        padding
-    } = legendInstance.config();
-
-    if (align === VERTICAL) {
-        datasets.row = data;
-        datasets.column = d => [d];
-    } else {
-        datasets.row = [1];
-        datasets.column = data;
-    }
+        position
+    } = config;
+    const positionObj = positionConfig[position];
+    const datasets = positionObj.datasets(data);
+    const measures = positionObj.itemContainerMeasures(measurement, config);
 
     const rows = makeElement(container, 'div', datasets.row, `${classPrefix}-legend-row`);
     rows.style(HEIGHT, (d, i) => `${itemSpaces[i].height}px`);
-    align === VERTICAL && rows.style(WIDTH, () => `${maxItemSpaces.width}px`);
-    align !== VERTICAL && rows.style(WIDTH, () => `${width}px`);
-    align === VERTICAL && rows.style('padding', `${padding}px`);
+    rows.style(WIDTH, measures.row.width);
+    rows.style('padding', measures.row.padding);
+
     const columns = makeElement(rows, 'div', datasets.column, `${classPrefix}-legend-columns`);
-    align !== VERTICAL && columns.style(WIDTH, (d, i) => `${itemSpaces[i].width}px`);
-    align === VERTICAL && columns.style(WIDTH, () => `${width}px`);
-    align !== VERTICAL && columns.style('padding', `${padding}px`);
+    columns.style(WIDTH, measures.column.width);
+    columns.style('padding', measures.column.padding);
 
     return columns;
 };
@@ -196,16 +183,11 @@ export const createItemSkeleton = (context, container) => {
     } = context.config();
     const textOrientation = item.text.orientation;
 
-    let stack = [VALUE, SHAPE];
-    if (textOrientation === RIGHT || textOrientation === BOTTOM) {
-        stack = [SHAPE, VALUE];
-    }
-
+    const stack = itemStack[textOrientation];
     const itemSkeleton = makeElement(container, 'div', (d, i) => stack.map(e => [e, d[e], d.color, d.size,
         d.value, context.fieldName(), i]), `${classPrefix}-legend-item-info`);
 
-    const alignClass = textOrientation === BOTTOM || textOrientation === TOP ?
-        CENTER : (textOrientation === RIGHT ? START : END);
+    const alignClass = alignmentMap[textOrientation];
 
     itemSkeleton.classed(alignClass, true);
     return { itemSkeleton };
@@ -273,8 +255,8 @@ export const renderDiscreteItem = (context, container) => {
 * @memberof Legend
 */
 export const renderStepItem = (context, container) => {
-    let iconWidth;
-    let iconHeight;
+    // let iconWidth;
+    // let iconHeight;
     const labelManager = context._labelManager;
     const {
       item,
@@ -291,27 +273,15 @@ export const renderStepItem = (context, container) => {
        height,
        color
    } = item.icon;
-    const stepColor = {
-        horizontal: false,
-        vertical: false
-    };
-
-    iconHeight = height;
-    iconWidth = width;
 
     labelManager.useEllipsesOnOverflow(true);
-
-    if (position === BOTTOM || position === TOP) {
-        iconWidth = maxItemSpaces.width;
-        stepColor.horizontal = true;
-    } else if (position === LEFT || position === RIGHT) {
-        iconHeight = maxItemSpaces.height;
-        stepColor.vertical = true;
-    }
+    const { iconHeight, iconWidth, stepPadding } = positionConfig[position].getStepSpacesInfo({
+        maxItemSpaces, height, width
+    });
 
     applyStyle(container, {
-        width: d => applyItemStyle(d, WIDTH, stepColor.horizontal, context),
-        height: d => applyItemStyle(d, HEIGHT, stepColor.vertical, context),
+        width: d => applyItemStyle(d, WIDTH, stepPadding.horizontal, context),
+        height: d => applyItemStyle(d, HEIGHT, stepPadding.vertical, context),
         'text-align': 'center',
         padding: `${padding}px`
     });

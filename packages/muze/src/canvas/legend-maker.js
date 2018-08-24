@@ -11,10 +11,11 @@ import {
  * @param {*} canvases
  * @returns
  */
-export const legendDataCreator = (canvas) => {
+export const legendCreator = (canvas) => {
     let LegendCls;
     const dataset = [];
     const axes = canvas.getRetinalAxes();
+
     Object.entries(axes).forEach((axisInfo) => {
         const scale = axisInfo[1][0];
         const scaleType = axisInfo[0];
@@ -61,9 +62,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
         align
     } = legendConfig;
 
-    const dataset = legendDataCreator(canvas);
+    const legendInfo = legendCreator(canvas);
 
-    dataset.forEach((dataInfo, index) => {
+    legendInfo.forEach((dataInfo, index) => {
         let legend = {};
 
         const legendMeasures = {};
@@ -114,7 +115,6 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             legends.push({ canvas, legend, scaleType });
         }
     });
-    // }
     return legends;
 };
 

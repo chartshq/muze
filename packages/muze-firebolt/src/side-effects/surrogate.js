@@ -33,6 +33,6 @@ export default class SurrogateSideEffect extends GenericSideEffect {
 
     resetPoint (set) {
         const context = this.firebolt.context;
-        context.resetPoint(set);
+        context.utils(set);
     }
 }

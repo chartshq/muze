@@ -36,40 +36,12 @@ export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'style'
 ];
 
-export const DEFAULT_CONFIG = {
-    classPrefix: 'muze',
-    interaction: {
-        sideEffect: 'individual'
-    },
-    legend: {
-        position: 'right',
-        color: {
-            show: true
-        },
-        shape: {
-            show: true
-        },
-        size: {
-            show: true
-        }
-    },
-    showHeaders: false,
-    minWidth: 300,
-    minHeight: 200,
-    border: {
-        style: 'solid',
-        color: '#d6d6d6',
-        width: 2,
-        collapse: true,
-        spacing: 0
-    },
-    groupBy: {
-        disabled: false
-    }
-};
-
 export const LEGEND_TYPE_MAP = {
     [DISCRETE]: DiscreteLegend,
+    [STEP_COLOR]: StepLegend,
+    [GRADIENT]: GradientLegend,
+    [`${LINEAR}-${true}`]: StepLegend,
+    [`${LINEAR}-${false}`]: GradientLegend,
     [STEP_COLOR]: StepLegend,
     [GRADIENT]: GradientLegend
 };

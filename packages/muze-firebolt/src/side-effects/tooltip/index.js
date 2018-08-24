@@ -67,7 +67,7 @@ export default class Tooltip extends SpawnableSideEffect {
         } else {
             dataModels.push(dataModel);
         }
-        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target);
+        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria);
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];

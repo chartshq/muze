@@ -27,7 +27,7 @@ d3.json('../../data/cars.json', (data) => {
         },
         {
             name: 'Weight_in_lbs',
-            type: 'measure',
+            type: 'measure'
         },
         {
             name: 'Acceleration',
@@ -46,7 +46,7 @@ d3.json('../../data/cars.json', (data) => {
             type: 'dimension',
             subtype: 'temporal',
             format: '%Y-%m-%d'
-        },
+        }
         ];
 
     const rootData = new DataModel(jsonData, schema);
@@ -60,100 +60,81 @@ d3.json('../../data/cars.json', (data) => {
     let rows = ['Displacement'],
         columns = ['Year'];
     canvas = canvas
-			.rows(rows)
-			.columns(columns)
-			.width(400)
-			.height(600)
-			.data(rootData.groupBy(['Year', 'Origin']))
-			.config({
-    axes: {
-        x: {
+        .rows(rows)
+        .columns(columns)
+        .width(400)
+        .height(600)
+        .data(rootData.groupBy(['Year', 'Origin']))
+        .config({
+            axes: {
+                x: {
 
-            showAxisName: true
-        },
-        y: {
+                    showAxisName: true
+                },
+                y: {
 
-            showAxisName: true
-        }
-    }
-})
-			.layers([{
-    mark: 'bar',
-    transition: {
-        effect: 'bounce'
-    }
-}])
-				.color('Origin')
+                    showAxisName: true
+                }
+            }
+        })
+        .layers([{
+            mark: 'bar',
+            transition: {
+                effect: 'bounce'
+            }
+        }])
+        .color('Origin')
 
-	.mount(document.getElementById('chart'));
+        .mount(document.getElementById('chart'));
 
     rows = ['Cylinders'],
         columns = ['Horsepower'];
     canvas2 = canvas2
-		.rows(rows)
-		.columns(columns)
-		.width(600)
-		.height(600)
-		.data(rootData.groupBy(['Cylinders', 'Origin']))
-		.layers([{
-    mark: 'bar'
-}])
-.color('Origin')
+        .rows(rows)
+        .columns(columns)
+        .width(600)
+        .height(600)
+        .data(rootData.groupBy(['Cylinders', 'Origin']))
+        .layers([{
+            mark: 'bar'
+        }])
+        .color('Origin')
 
-.mount(document.getElementById('chart2'));
+        .mount(document.getElementById('chart2'));
 
-    // muze.ActionModel.for(canvas, canvas2).mapSideEffects({
-    //     select: [{
-    //         name: 'layer',
-    //         applyOnSource: false
-    //     }]
-    // }).target('visual-unit').registerSideEffects(
-	// 	class LayerEffect extends SpawnableSideEffect {
-    // static formalName () {
-    //     return 'layer';
-    // }
+    muze.ActionModel.for(canvas, canvas2).mapSideEffects({
+        select: [{
+            name: 'layer',
+            applyOnSource: false
+        }]
+    }).target('visual-unit').registerSideEffects(
+        class LayerEffect extends SpawnableSideEffect {
+            static formalName () {
+                return 'layer';
+            }
 
-    // apply (selectionSet, payload) {
-    //     const context = this.firebolt.context;
-    //     const entrySet = selectionSet.mergedEnter.model;
-    //     const layer = context.getLayerByName('lineMark');
-    //     const xField = `${context.fields().x[0]}`;
-    //     const yField = `${context.fields().y[0]}`;
-    //     if (!layer) {
-    //         context.addLayer({
-    //             name: 'lineMark',
-    //             mark: 'bar',
-    //             encoding: {
-    //                 x: xField,
-    //                 y: yField,
-    //                 size: {
-    //                     value: 0.5
-    //                 },
-    //                 color: () => '#fff'
-    //             }
-    //         });
-    //     }
-    //     // const textLayer = context.getLayerByName('textMark');
-    //     // if (!textLayer) {
-    //     //     context.addLayer({
-    //     //         name: 'textMark',
-    //     //         mark: 'text',
-    //     //         encoding: {
-    //     //             x: xField,
-    //     //             y: yField,
-    //     //             text: {
-    //     //                 field: yField,
-    //     //                 formatter: value => value.toFixed(2)
-    //     //             },
-    //     //             color: {
-    //     //                 value: () => '#fff'
-    //     //             }
-    //     //         }
-    //     //     });
-    //     // }
-    //     // context.getLayerByName('lineMark').data(entrySet);
-    //     context.getLayerByName('lineMark').data(entrySet);
-    // }
-	// 	}
-	// );
+            apply (selectionSet) {
+                const context = this.firebolt.context;
+                const entrySet = selectionSet.mergedEnter.model;
+                const layer = context.getLayerByName('lineMark');
+                const xField = `${context.fields().x[0]}`;
+                const yField = `${context.fields().y[0]}`;
+                if (!layer) {
+                    context.addLayer({
+                        name: 'lineMark',
+                        mark: 'bar',
+                        encoding: {
+                            x: xField,
+                            y: yField,
+                            size: {
+                                value: 0.5
+                            },
+                            color: () => '#fff'
+                        }
+                    });
+                }
+                context.getLayerByName('lineMark').data(entrySet);
+            }
+        }
+    );
 });
