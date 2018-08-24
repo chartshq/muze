@@ -8,6 +8,9 @@ export const defaultConfig = {
     transform: {
         type: STACK
     },
+    interaction: {
+
+    },
     nearestPointThreshold: 10,
     encoding: {
         color: {},
@@ -22,16 +25,5 @@ export const defaultConfig = {
         effect: 'cubic',
         duration: 1000
     },
-    connectNullData: false,
-    states: {
-        highlight: {
-            className: 'layer-area-highlight'
-        },
-        fadeout: {
-            className: 'layer-area-fadeout'
-        },
-        selected: {
-            className: 'layer-area-selected'
-        }
-    }
+    connectNullData: false
 };

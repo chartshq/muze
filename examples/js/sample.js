@@ -85,24 +85,29 @@
         window.canvas = env.canvas();
         // const canvas2 = env.canvas();
         // const canvas3 = env.canvas();
-        let rows = [[], ['Cylinders']],
-            columns = [['Acceleration'], []];
+        let rows = ['Year', 'Acceleration', 'Displacement'],
+            columns = [];
         canvas = canvas
 
         // .detail(['Name', 'Maker'])
             .rows(rows)
             .columns(columns)
 
-            // .detail(['Maker', 'Name'])
             // .color({field: 'Acceleration', step: true})
             .color({
                 field: 'Origin'
                 // step: true
             })
-            // .detail(['Name'])
+            .detail(['Acceleration'])
             .data(rootData)
 			.width(600)
-            .height(600)
+            .height(1000)
+            .layers([{
+                mark: 'arc',
+                encoding: {
+                    angle: 'Origin'
+                }
+            }])
             // .size()
 
             // .size('Origin')
@@ -119,10 +124,28 @@
                         }
                     }
                 },
-
+                interaction: {
+                    tooltip: {
+                        formatter: (dt, context) => {
+                            const colorAxis = context.axes.color[0];
+                            const sizeAxis = context.axes.size[0];
+                            const dataArr = dt.getData().data;
+                            const fieldsConfig = dt.getFieldsConfig();
+                            const dataVal = dataArr[0][fieldsConfig.Origin.index];
+                            return [
+                                [{
+                                    type: 'icon',
+                                    color: colorAxis.getColor(dataVal),
+                                    shape: 'circle',
+                                    size: sizeAxis.getSize(dataVal) * 2
+                                }, dataArr[0][fieldsConfig.Origin.index], ':', dataArr[0][fieldsConfig.Acceleration.index]]
+                            ];
+                        }
+                    }
+                },
                 axes: {
                     x: {
-                        showAxisName: true
+                        // showAxisName: true
 
                     },
                     y: {
@@ -141,12 +164,6 @@
             .title('The Muze Project', { position: 'top', align: 'left' })
             .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
             .mount(document.getElementById('chart2'));
-
-        // canvas.once('canvas.updated').then((args) => {
-        //     args.client.composition().visualGroup.matrixInstance().value.each((cell) => {
-        //         cell.valueOf().firebolt().propagateWith('brush', 'Horsepower');
-        //     });
-        // });
 
         // muze.ActionModel
         //                 .for(canvas, canvas2)

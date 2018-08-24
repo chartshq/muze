@@ -7,19 +7,22 @@ export const strategies = {
         const aggregatedModel = dm.groupBy(['']);
         const fieldsObj = dm.getFieldspace().fieldsObj();
         const fieldsConf = aggregatedModel.getFieldsConfig();
-        return [
-            [{
-                value: `${dataObj.data.length}`,
-                style: {
-                    'font-weight': 'bold'
-                }
-            }, 'Items Selected', `(${fieldsObj[measures[0]].defAggFn().toUpperCase()}) ${measures[0]}`,
-            {
-                value: `${aggregatedModel.getData().data[0][fieldsConf[measures[0]].index].toFixed(2)}`,
-                style: {
-                    'font-weight': 'bold'
-                }
-            }]
-        ];
+        console.log(dataObj.data.length);
+        let values = [{
+            value: `${dataObj.data.length}`,
+            style: {
+                'font-weight': 'bold'
+            }
+        }, 'Items Selected'];
+        if (measures.length) {
+            values = [...values, ...[`(${fieldsObj[measures[0]].defAggFn().toUpperCase()}) ${measures[0]}`,
+                {
+                    value: `${aggregatedModel.getData().data[0][fieldsConf[measures[0]].index].toFixed(2)}`,
+                    style: {
+                        'font-weight': 'bold'
+                    }
+                }]];
+        }
+        return [values];
     }
 };

@@ -1,9 +1,6 @@
 import { clone } from 'muze-utils';
 import * as SELECTION from '../enums/selection';
 
-const getBehaviourBySideEffect = (behaviourEffectMap, sideEffect) => Object.keys(behaviourEffectMap).find(key => behaviourEffectMap[key]
-                .find(effect => (effect.name || effect) === sideEffect));
-
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
 

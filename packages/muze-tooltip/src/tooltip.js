@@ -191,8 +191,10 @@ export default class Tooltip {
             x: 0,
             y: 0
         };
-
-        this._tooltipContainer.style('left', `${offset.x + x}px`).style('top', `${offset.y + y}px`);
+        const scrollTop = document.body.scrollTop;
+        const scrollLeft = document.body.scrollLeft;
+        this._tooltipContainer.style('left', `${offset.x + x - scrollLeft}px`).style('top',
+            `${offset.y + y - scrollTop}px`);
 
         return this;
     }
@@ -213,19 +215,21 @@ export default class Tooltip {
 
         const extent = this._extent;
         const node = this._tooltipContainer.node();
-        const offsetWidth = node.offsetWidth;
-        const offsetHeight = node.offsetHeight;
+        const offsetWidth = node.offsetWidth + 2;
+        const offsetHeight = node.offsetHeight + 2;
         const config = this._config;
+        const offset = this._offset;
         const arrowDisabled = config.arrow.disabled;
         const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
         const positionHorizontal = () => {
             let position;
+            const dimX = dim.x + dim.width + offset.x;
             let x = dim.x + dim.width;
             let y = dim.y;
             // When there is no space in right
-            const rightSpace = extent.width - x;
+            const rightSpace = extent.width - dimX;
             const leftSpace = dim.x - extent.x;
             if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
