@@ -83,71 +83,44 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let canvas2 = env.canvas();
-        const canvas3 = env.canvas();
-        let rows = ['Acceleration'],
-            columns = ['Cylinders'];
-        canvas2 = canvas2
-            .rows(rows)
-            .columns(['Origin'])
-
-            .data(rootData)
-            .width(600)
-            .height(350)
-            .config({
-            //     //         border:{
-            //     //             width: 2,
-                legend: {
-                    position: 'right'
-                }
-            })
-
-            //             axes:{
-            //                     x:{
-            //                         showAxisName: true,
-
-            //                 }, y:{
-            //                     showAxisName: true,
-            //                     // name: 'Acceleration per year',
-            //                     // axisNamePadding: 12
-            //                 }
-            //             },
-            //     //         legend: {
-            //     //             color:{
-            //     //             // show: false
-            //     //             }
-            //     //         }
-            //         })
-            .mount(document.getElementById('chart'));
+        // const canvas2 = env.canvas();
+        // const canvas3 = env.canvas();
+        let rows = [['Acceleration'], []],
+            columns = [[], ['Horsepower', 'Origin']];
         canvas = canvas
+
+        .detail(['Name'])
             .rows(rows)
             .columns(columns)
+
             // .color({field: 'Acceleration', step: true})
             .color({
-                field: 'Origin',
-                step: true
+                field: 'Acceleration'
+                // step: true
             })
             .data(rootData)
-			.width(700)
-            .height(500)
+			.width(600)
+            .height(400)
             // .size()
-            .layers([{
-                mark: 'line'
-                // transition: {
-                //     disabled: true
-                // }
-            }])
+
             // .size('Origin')
             .config({
                 //         border:{
                 //             width: 2,
-                //   legend:{
-                //     //   position: 'bottom'
-                //   },
+                legend: {
+                    position: 'right',
+                    color: {
+                        item: {
+                            text: {
+                                orientation: 'right'
+                            }
+                        }
+                    }
+                },
 
                 axes: {
                     x: {
-                        showAxisName: true
+                        // showAxisName: true
 
                     },
                     y: {

@@ -81,14 +81,14 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
         // Creating containers for each matrix individually
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${type}-${index + 1}`)
         .classed(`${classPrefix}-grid-${type}`, true)
-        .classed(`${classPrefix}-grid`, true)
-        .style(WIDTH, `${dimensions.viewWidth[index]}px`);
+        .classed(`${classPrefix}-grid`, true);
 
         const {
             viewMatrix,
             spans
         } = cellSpanMaker(matrix, type, index);
         if (type !== CENTER) {
+            containerForMatrix.style(WIDTH, `${dimensions.viewWidth[index]}px`);
             containerForMatrix.style(HEIGHT, `${dimensions.viewHeight[VIEW_INDEX[type]]}px`);
         }
 
@@ -96,15 +96,19 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
         const { cells } = renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
 
         if (type === CENTER && spans) {
-            cells.attr(ROW_SPAN, (cell, colIndex) => spans[cell.rowIndex][colIndex]);
+            cells.attr(ROW_SPAN, function (cell, colIndex) {
+                const placeholder = cell.placeholder;
+                selectElement(this).style('height', `${placeholder.availHeight() + dimensions.border.width}px`);
+                return spans[cell.rowIndex][colIndex];
+            });
         } else if ((type === TOP || type === BOTTOM) && index === 1) {
-            cells.attr(COL_SPAN, (cell, colIndex) => {
+            cells.attr(COL_SPAN, function (cell, colIndex) {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.availableHeight());
+                    placeholder.setAvailableSpace(0, placeholder.availHeight());
                 }
-                cells.style('height', `${placeholder.availHeight()}px`);
+                selectElement(this).style('height', `${placeholder.availHeight()}px`);
                 return span;
             });
         }

@@ -68,6 +68,7 @@ export default class BaseLayer extends SimpleLayer {
         this.data(data);
         this.axes(axes);
         this.config(config);
+        this.alias(this.constructor.formalName() + getUniqueId());
         this.dependencies(dependencies);
         this._points = [];
         this._cachedData = [];

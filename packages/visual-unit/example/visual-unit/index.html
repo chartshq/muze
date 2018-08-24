@@ -54,80 +54,80 @@
     }
 
 
-    /* ---------- PICASSO TABLE LAYOUT --------- */
+    /* ---------- MUZE TABLE LAYOUT --------- */
     table{
         float: left;
     }
-    .picasso-tablelayout-body {
+    .muze-tablelayout-body {
         position: relative;
         margin-left: 50px;
     }
-    .picasso-row-table {
+    .muze-row-table {
         border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    .picasso-row-table, .picasso-column-table {
+    .muze-row-table, .muze-column-table {
         position: relative;
     }
-    .picasso-row-section, .picasso-column-section {
+    .muze-row-section, .muze-column-section {
         height: 100%;
     }
 
 
         /* ---------- ROW SECTION --------- */
-    .picasso-rows {
+    .muze-rows {
         vertical-align: baseline;
         text-align: center;
         padding-top: 5px;
     }
-    .picasso-rows:first-child{
+    .muze-rows:first-child{
         border: 0px !important;
         vertical-align: bottom;
 
     }
-    .picasso-rows:first-child td {
+    .muze-rows:first-child td {
         border:0px;
     }
-    td.picasso-row-cells {
+    td.muze-row-cells {
         border-collapse: collapse;
         border-left: 0px;
     }
         /* ---------- END ROW SECTION --------- */
 
         /* ---------- COLUMN SECTION --------- */
-    .picasso-column-section {
+    .muze-column-section {
         width: 400px;
     }
-    tr.picasso-col-header {
+    tr.muze-col-header {
         text-align: center;
 
         border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    .picasso-col-header-cell {
+    .muze-col-header-cell {
         text-align: center;
         border-right: 1px solid rgba(0,0,0,0.1);
         border-left:1px solid rgba(0,0,0,0.1);
         border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    tr.picasso-col-header:first-child td{
+    tr.muze-col-header:first-child td{
 
         border-right:none;
         border-left:none;
     }
-    td.picasso-value-cells {
+    td.muze-value-cells {
         vertical-align: -webkit-baseline-middle;
         padding-left: 0%;
         position: relative;
     }
-    .picasso-columns {
+    .muze-columns {
         border-top: 1px solid rgba(0,0,0,.1);
     }
-    td.picasso-column-cells {
+    td.muze-column-cells {
         text-align: center;
     }
         /* ---------- END COLUMN SECTION --------- */
 
         /* --------- SCROLL BARS -------- */
-    .picasso-hor-scroll{
+    .muze-hor-scroll{
         border-radius: 2px;
         display: flex;
         border: 1px solid rgba(0,0,0,0.1);
@@ -141,7 +141,7 @@
         cursor: pointer;
         height: 100%;
     }
-    .picasso-ver-scroll{
+    .muze-ver-scroll{
         border-radius: 2px;
         display: flex;
         border: 1px solid rgba(0,0,0,0.1);
@@ -156,94 +156,94 @@
         cursor: pointer;
         height: 12px;
     }
-    .picasso-hor-scroll[orient="right"] {
+    .muze-hor-scroll[orient="right"] {
         right: 0;
         top: 0;
     }
-    .picasso-hor-scroll[orient="left"] {
+    .muze-hor-scroll[orient="left"] {
         left: 0;
         top: 0;
     }
-    .picasso-ver-scroll[orient="top"] {
+    .muze-ver-scroll[orient="top"] {
         left: 0;
         top: 0;
     }
-    .picasso-ver-scroll[orient="bottom"] {
+    .muze-ver-scroll[orient="bottom"] {
         left: 0;
         bottom: 0;
     }
-    .picasso-hor-scroll:hover {
+    .muze-hor-scroll:hover {
         width: 12px;
         font-size: 20px;
 
         box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.1);
     }
-    .picasso-ver-scroll:hover {
+    .muze-ver-scroll:hover {
 
         font-size: 20px;
 
         box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.1);
     }
-    .picasso-hor-scroll-arrow , .picasso-ver-scroll-arrow{
+    .muze-hor-scroll-arrow , .muze-ver-scroll-arrow{
         position:relative;
         display:block;
         height:16px;/*height should be double border*/
     }
-    .picasso-hor-scroll-arrow:before,
-    .picasso-hor-scroll-arrow:after,
-    .picasso-ver-scroll-arrow:before,
-    .picasso-ver-scroll-arrow:after{
+    .muze-hor-scroll-arrow:before,
+    .muze-hor-scroll-arrow:after,
+    .muze-ver-scroll-arrow:before,
+    .muze-ver-scroll-arrow:after{
         position:absolute;
         display:block;
         content:"";
         border: 8px solid transparent;/*adjust size*/
     }
     /*Change four 'top' values below to rotate (top/right/bottom/left)*/
-    .picasso-hor-scroll[orient="right"] .picasso-hor-scroll-arrow:before{
+    .muze-hor-scroll[orient="right"] .muze-hor-scroll-arrow:before{
         left:2px;
-        border-left-color:black;/*picasso-hor-scroll-arrow Color*/
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
     }
-    .picasso-hor-scroll[orient="right"] .picasso-hor-scroll-arrow:after{
+    .muze-hor-scroll[orient="right"] .muze-hor-scroll-arrow:after{
         left:0px;/*adjust thickness*/
         border-left-color:#E0E0E0;;/*Match background colour*/
     }
-    .picasso-hor-scroll[orient="left"] .picasso-hor-scroll-arrow:before{
+    .muze-hor-scroll[orient="left"] .muze-hor-scroll-arrow:before{
         right:-8px;
-        border-right-color:black;/*picasso-hor-scroll-arrow Color*/
+        border-right-color:black;/*muze-hor-scroll-arrow Color*/
     }
-    .picasso-hor-scroll[orient="left"] .picasso-hor-scroll-arrow:after{
+    .muze-hor-scroll[orient="left"] .muze-hor-scroll-arrow:after{
         right:-10px;/*adjust thickness*/
         border-right-color:#E0E0E0;;/*Match background colour*/
     }
 
     /*Change four 'top' values below to rotate (top/right/bottom/left)*/
-    .picasso-ver-scroll[orient="top"] .picasso-ver-scroll-arrow:before{
+    .muze-ver-scroll[orient="top"] .muze-ver-scroll-arrow:before{
         left:-8px;
         top: -4px;
         transform: rotate(-90deg);
-        border-left-color:black;/*picasso-hor-scroll-arrow Color*/
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
     }
-    .picasso-ver-scroll[orient="top"] .picasso-ver-scroll-arrow:after{
+    .muze-ver-scroll[orient="top"] .muze-ver-scroll-arrow:after{
         left:-8px;/*adjust thickness*/
         top: -2px;
         transform: rotate(-90deg);
         border-left-color:#E0E0E0;;/*Match background colour*/
     }
     /*Change four 'top' values below to rotate (top/right/bottom/left)*/
-    .picasso-ver-scroll[orient="bottom"] .picasso-ver-scroll-arrow:before{
+    .muze-ver-scroll[orient="bottom"] .muze-ver-scroll-arrow:before{
         right:-8px;
         bottom: -4px;
         transform: rotate(90deg);
-        border-left-color:black;/*picasso-hor-scroll-arrow Color*/
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
     }
-    .picasso-ver-scroll[orient="bottom"] .picasso-ver-scroll-arrow:after{
+    .muze-ver-scroll[orient="bottom"] .muze-ver-scroll-arrow:after{
         right:-8px;/*adjust thickness*/
         bottom: -2px;
         transform: rotate(90deg);
         border-left-color:#E0E0E0;;/*Match background colour*/
     }
             /* --------- END SCROLL BARS -------- */
-    /*  -------- END PICASSO TABLE LAYOUT --------- */
+    /*  -------- END MUZE TABLE LAYOUT --------- */
 svg{
     display: block;
 }

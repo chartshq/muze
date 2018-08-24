@@ -145,10 +145,8 @@ const setAxisNamePos = (textNode, orientation, measures) => {
     const {
         axisNameHeight,
         yOffset,
-        xOffset,
         labelOffset,
-        availableSpace,
-        axisNameWidth
+        availableSpace
     } = measures;
     switch (orientation) {
     case AxisOrientation.LEFT:
@@ -161,7 +159,7 @@ const setAxisNamePos = (textNode, orientation, measures) => {
         break;
     case AxisOrientation.TOP:
         textNode.attr('transform',
-             `translate(${labelOffset + xOffset + axisNameWidth / 2},${-availableSpace.height + axisNameHeight})`);
+             `translate(${availableSpace.width / 2},${-availableSpace.height + axisNameHeight})`);
         break;
     case AxisOrientation.BOTTOM:
         textNode.attr('transform',

@@ -59,8 +59,10 @@ export default {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config, oldConfig) => {
-                const defConfig = Object.assign(oldConfig || {}, DEFAULT_CONFIG);
-                return mergeRecursive(defConfig, config);
+                const oldConf = mergeRecursive({}, oldConfig);
+                const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
+                const newConf = mergeRecursive(defConfig, config);
+                return newConf;
             }
 
         }

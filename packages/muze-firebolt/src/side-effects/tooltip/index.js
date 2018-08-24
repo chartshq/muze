@@ -127,7 +127,6 @@ export default class Tooltip extends SpawnableSideEffect {
                 });
             }
         }
-        // console.log(tooltips);
         for (const key in tooltips) {
             if (!enter[key]) {
                 const tooltip = tooltips[key];

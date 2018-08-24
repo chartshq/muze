@@ -359,7 +359,7 @@ export const calculateContinousSpace = (context) => {
     const { width: axisDimWidth } = axisLabelDim;
 
     if (orientation === TOP || orientation === BOTTOM) {
-        const { width, height } = getHorizontalAxisSpace(context, axisDimensions, config, range);
+        const { width, height } = getHorizontalAxisSpace(context, axisDimensions, config);
         const axisWidth = Math.max(width, axisDimWidth);
 
         return {
