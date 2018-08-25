@@ -141,8 +141,8 @@ const muze = () => {
 };
 
 const SideEffects = {
-    concrete: sideEffects,
-    abstract: {
+    sideEffects,
+    standards: {
         SurrogateSideEffect,
         SpawnableSideEffect,
         GenericSideEffect
@@ -150,8 +150,8 @@ const SideEffects = {
 };
 
 const Behaviours = {
-    concrete: behaviouralActions,
-    abstract: {
+    behaviouralActions,
+    standards: {
         GenericBehaviour,
         PersistentBehaviour,
         VolatileBehaviour
