@@ -9,7 +9,6 @@
         const payload = {
             criteria: firebolt.context.getCriteriaFromData(args)
         };
-        console.log('mouseover');
         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
         event.stopPropagation();
     };
@@ -17,7 +16,6 @@
     targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
-                        console.log('hover');
                         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
                             criteria: null
                         }));
