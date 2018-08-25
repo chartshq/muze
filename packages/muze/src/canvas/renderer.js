@@ -100,7 +100,7 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
     const legHeight = align === VERTICAL ? height - headerHeight : legendSpace.height;
 
     [container, legendMount].forEach((elem) => {
-        elem.style('width', `${legWidth}px`)
+        elem.style('width', `${Math.floor(legWidth)}px`)
                         .style('height', `${legHeight}px`)
                         .style('float', LEFT);
     });
@@ -221,12 +221,12 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     const container = makeElement(selectElement(mountPoint), 'div', [1], `${classPrefix}-grid-layout`)
         .attr('id', `${classPrefix}-grid-layout-${alias}`)
         .style('height', `${height}px`)
-        .style('width', `${width}px`);
+        .style('width', `${Math.ceil(width)}px`);
     // Mount for matrices
     const mount = makeElement(container, 'div', [1], `${classPrefix}-layout-grid-container`)
         .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
         .style('height', `${height}px`)
-        .style('width', `${width}px`)
+        .style('width', `${Math.ceil(width)}px`)
         .style('overflow-x', width > 300 ? 'none' : 'scroll')
         .style('overflow-y', height > 300 ? 'none' : 'scroll');
 
