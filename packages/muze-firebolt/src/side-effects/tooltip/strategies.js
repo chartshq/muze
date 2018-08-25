@@ -7,7 +7,6 @@ export const strategies = {
         const aggregatedModel = dm.groupBy(['']);
         const fieldsObj = dm.getFieldspace().fieldsObj();
         const fieldsConf = aggregatedModel.getFieldsConfig();
-        console.log(dataObj.data.length);
         let values = [{
             value: `${dataObj.data.length}`,
             style: {
