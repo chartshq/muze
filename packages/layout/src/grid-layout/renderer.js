@@ -184,7 +184,7 @@ export function renderMatrices (context, matrices, layoutDimensions) {
         renderMatrix(newCenter[i], selectElement(this), CENTER, layoutDimensions, classPrefix);
         renderMatrix(newBottom[i], selectElement(this), BOTTOM, layoutDimensions, classPrefix);
     })
-                    .style(WIDTH, `${width}px`)
+                    .style(WIDTH, `${Math.ceil(width)}px`)
                     .style('margin-bottom', (d, i) => {
                         if (i !== newBottom.length - 1) { return `${Math.floor(gutter)}px`; }
                         return 0;
