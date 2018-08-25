@@ -263,7 +263,7 @@ export default class LineLayer extends BaseLayer {
                     connectNullData: config.connectNullData
                 });
             }
-        });
+        }, d => d.reduce((e, n) => n + e._id, ''));
 
         attachDataToVoronoi(this._voronoi, this._points);
         return this;

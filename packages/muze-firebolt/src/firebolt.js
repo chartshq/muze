@@ -314,14 +314,9 @@ export default class Firebolt {
             targets = [targets];
         }
         targets.forEach((target) => {
-            let nodes;
             const mount = this.context.mount();
-            if (target[0] === '.') {
-                nodes = getElementsByClassName(mount, target);
-            } else {
-                nodes = selectElement(mount).selectAll(target);
-            }
-            if (behaviourList.length) {
+            const nodes = target.node instanceof Function ? target : selectElement(mount).selectAll(target);
+            if (behaviourList.length && !nodes.empty()) {
                 if (nodes instanceof Array) {
                     nodes.forEach((node) => {
                         action(selectElement(node), behaviourList);

@@ -76,26 +76,30 @@ class ActionModel {
         return this;
     }
 
-    dissociateBehaviour (behaviour, physicalAction) {
+    dissociateBehaviour (...maps) {
         const registrableComponents = this._registrableComponents;
 
         registrableComponents.forEach((canvas) => {
             canvas.once('canvas.updated').then((args) => {
                 const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().dissociateBehaviour(behaviour, physicalAction));
+                matrix.each((cell) => {
+                    maps.forEach(val => cell.valueOf().firebolt().dissociateBehaviour(val[0], val[1]));
+                });
             });
         });
 
         return this;
     }
 
-    dissociateSideEffect (sideEffect, behaviour) {
+    dissociateSideEffect (...maps) {
         const registrableComponents = this._registrableComponents;
 
         registrableComponents.forEach((canvas) => {
             canvas.once('canvas.updated').then((args) => {
                 const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().dissociateBehaviour(sideEffect, behaviour));
+                matrix.each((cell) => {
+                    maps.forEach(val => cell.valueOf().firebolt().dissociateBehaviour(val[0], val[1]));
+                });
             });
         });
 
