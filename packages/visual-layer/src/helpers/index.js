@@ -340,7 +340,7 @@ export const animateGroup = (mount, context) => {
 export const positionPoints = (context, points) => {
     const positioner = context.encodingTransform();
     if (positioner) {
-        return positioner(points, { smartLabel: context._dependencies.smartLabel });
+        return positioner(points, context, { smartLabel: context._dependencies.smartLabel });
     }
     return points;
 };
