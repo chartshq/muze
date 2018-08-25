@@ -61,13 +61,15 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
         }
 
         if (orientation === AxisOrientation.TOP) {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 4 : xShift;
+            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 2 : xShift;
             selectElement(this)
-                            .attr('transform', `translate(${-xShift * 2} ${-yShift - tickSize}) rotate(${rotation})`);
+                            .attr('transform', `translate(${-xShift + tickSize} 
+                                ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 4 : xShift;
+            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
             selectElement(this)
-                            .attr('transform', `translate(${xShift * 2} ${yShift + tickSize}) rotate(${rotation})`);
+                            .attr('transform', `translate(${xShift - tickSize} 
+                                ${yShift + tickSize}) rotate(${rotation})`);
         }
     });
     return tickText;
@@ -145,10 +147,8 @@ const setAxisNamePos = (textNode, orientation, measures) => {
     const {
         axisNameHeight,
         yOffset,
-        xOffset,
         labelOffset,
-        availableSpace,
-        axisNameWidth
+        availableSpace
     } = measures;
     switch (orientation) {
     case AxisOrientation.LEFT:
@@ -161,7 +161,7 @@ const setAxisNamePos = (textNode, orientation, measures) => {
         break;
     case AxisOrientation.TOP:
         textNode.attr('transform',
-             `translate(${labelOffset + xOffset + axisNameWidth / 2},${-availableSpace.height + axisNameHeight})`);
+             `translate(${availableSpace.width / 2},${-availableSpace.height + axisNameHeight})`);
         break;
     case AxisOrientation.BOTTOM:
         textNode.attr('transform',

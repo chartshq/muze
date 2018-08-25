@@ -10,6 +10,7 @@
             criteria: firebolt.context.getCriteriaFromData(args)
         };
         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
+        event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour)
@@ -18,6 +19,7 @@
                         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
                             criteria: null
                         }));
+                        event.stopPropagation();
                     });
 };
 

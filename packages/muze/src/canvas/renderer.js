@@ -64,17 +64,14 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
     const mountPoint = makeElement(container, 'div', [1], `${classPrefix}-viz`)
        .style('width', `${canvasWidth}px`)
        .style('height', `${canvasHeight}px`);
-    headers.forEach((type) => {
-        components[type] = makeElement(mountPoint, 'div', [1], `${classPrefix}-${type}-container`);
-        components[type].style('width', `${canvasWidth}px`);
-    });
-    makeElement(mountPoint, 'div', headers)
+    makeElement(mountPoint, 'div', headers, `${classPrefix}-container`, {}, d => d).sort(() => -1)
                     .style('width', `${canvasWidth}px`)
-                    .each(function (type, i) {
+                    .each(function (type) {
                         components[type] = selectElement(this)
-                            .attr('class', `${classPrefix}-${type}-container`);
+                            .classed(`${classPrefix}-${type}-container`, true);
                         if (type === 'group') {
-                            makeElement(components[type], 'div', legends, `${classPrefix}-${type}-container-${i}`)
+                            makeElement(components[type], 'div', legends, `${classPrefix}-${type}-inner-container`,
+                            {}, d => d).sort(() => -1)
                                             .each(function (layoutType) {
                                                 components[layoutType] = selectElement(this)
                                                      .classed(`${classPrefix}-${layoutType}-container`, true);
@@ -103,7 +100,7 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
     const legHeight = align === VERTICAL ? height - headerHeight : legendSpace.height;
 
     [container, legendMount].forEach((elem) => {
-        elem.style('width', `${legWidth}px`)
+        elem.style('width', `${Math.floor(legWidth)}px`)
                         .style('height', `${legHeight}px`)
                         .style('float', LEFT);
     });
@@ -126,7 +123,7 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
             currHeight -= Math.min(leg.measurement().height, currHeight);
             currWidth = Math.max(leg.measurement().width, currWidth);
             sectionComponents[sections].push({
-                legendInstance: leg,
+                legend: leg,
                 legendHeight: legHeight,
                 legendWidth: currWidth
             });
@@ -136,8 +133,10 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
                         .each((d, i) => selectElement(this).classed(`${classPrefix}-legend-section-${i}`, true))
                         .classed(`${classPrefix}-legend-vertical-section`, true)
                         .style('width', d => `${d[0].legendWidth}px`);
-        makeElement(mount, ['div'], d => d, `${classPrefix}-legend-components`)
-                        .each(function (d) { d.legendInstance.mount(this); })
+        makeElement(mount, ['div'], d => d, `${classPrefix}-legend-components`, {}, d => d.legend.id())
+                        .each(function (d) {
+                            d.legend.mount(this);
+                        })
                         .style('width', d => `${d.legendWidth}px`);
     } else {
         const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section`)
@@ -145,7 +144,7 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
                         .classed(`${classPrefix}-legend-section-${0}`, true)
                         .style('width', `${legWidth}px`);
 
-        makeElement(mount, 'div', legendComponents, `${classPrefix}-legend-components`)
+        makeElement(mount, 'div', legendComponents, `${classPrefix}-legend-components`, {}, d => d.legend.id())
                         .each(function (d) { d.legend.mount(this); })
                         .style('width', d => `${d.legend.measurement().width}px`);
     }
@@ -195,6 +194,10 @@ const shiftHeaders = (config, shifter, measurement) => {
                     .style('padding-left', `${shifter}px`)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
                     .style('max-width', `${legendSpace.width - shifter}px`);
+    selectElement(`.${classPrefix}-legend-vertical-section`)
+                    .style('padding-left', null)
+                    .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
+                    .style('max-width', null);
 };
 
 /**
@@ -218,12 +221,12 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     const container = makeElement(selectElement(mountPoint), 'div', [1], `${classPrefix}-grid-layout`)
         .attr('id', `${classPrefix}-grid-layout-${alias}`)
         .style('height', `${height}px`)
-        .style('width', `${width}px`);
+        .style('width', `${Math.ceil(width)}px`);
     // Mount for matrices
     const mount = makeElement(container, 'div', [1], `${classPrefix}-layout-grid-container`)
         .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
         .style('height', `${height}px`)
-        .style('width', `${width}px`)
+        .style('width', `${Math.ceil(width)}px`)
         .style('overflow-x', width > 300 ? 'none' : 'scroll')
         .style('overflow-y', height > 300 ? 'none' : 'scroll');
 
@@ -264,9 +267,15 @@ export const renderComponents = (context, components, layoutConfig, measurement)
 
     // Render layout
     context.layout().renderGrid(mount);
-    renderLegend(layoutConfig, legend, legends, measurement);
+    context.once('layer.drawn').then(() => {
+        renderLegend(layoutConfig, legend, legends, measurement);
+    });
+
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
 
     shiftHeaders(layoutConfig, padding, measurement);
+    context.composition().visualGroup.matrixInstance().value.each((el) => {
+        el.valueOf().parentContainer(layout.node());
+    });
 };

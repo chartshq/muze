@@ -1,5 +1,5 @@
 import { isEqual } from 'muze-utils';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL } from '../constants';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL, DATA, CONFIG } from '../constants';
 import { canvasOptions } from './local-options';
 
 /**
@@ -51,30 +51,32 @@ export const setupChangeListener = (context) => {
     store.registerImmediateListener(MOUNT, () => {
         const allOptions = Object.keys(context._allOptions);
         const props = [...allOptions, ...Object.keys(canvasOptions)];
+        let equalityChecker = () => false;
         store.registerChangeListener(props, (...params) => {
-            const updateProps = allOptions.every((option, i) => {
-                let equalityChecker = () => false;
+            const updateProps = props.every((option, i) => {
                 switch (option) {
                 case ROWS:
                 case COLUMNS:
+                case DETAIL:
                     equalityChecker = isEqual('Array');
                     break;
 
                 case SHAPE:
                 case SIZE:
                 case COLOR:
-                case DETAIL:
+                case DATA:
+                case CONFIG:
                     equalityChecker = isEqual('Object');
                     break;
-
                 default:
+                    equalityChecker = () => true;
                     break;
                 }
                 const oldVal = params[i][0];
                 const newVal = params[i][1];
-                return !equalityChecker(oldVal, newVal);
-            });
 
+                return equalityChecker(oldVal, newVal);
+            });
             // inform attached board to rerender
             !updateProps && dispatchProps(context);
             context.render();

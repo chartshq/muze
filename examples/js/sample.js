@@ -1,228 +1,155 @@
+/* eslint-disable */
+
 (function () {
     let env = muze();
     let DataModel = muze.DataModel,
         share = muze.operators.share,
         html = muze.operators.html,
-        actionModel = muze.ActionModel,
-        utils = muze.utils;
-    const SpawnableSideEffect = muze.SideEffects.abstract.SpawnableSideEffect;
+        actionModel = muze.ActionModel;
 
-    d3.json('../data/cars.json', (data) => {
-        const jsonData = data,
-            schema = [{
-                name: 'Name',
-                type: 'dimension'
-            },
-            {
-                name: 'Maker',
-                type: 'dimension'
-            },
-            {
-                name: 'Miles_per_Gallon',
-                type: 'measure'
-            },
+        let layerFactory = muze.layerFactory;
+    const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
-            {
-                name: 'Displacement',
-                type: 'measure'
-            },
-            {
-                name: 'Horsepower',
-                type: 'measure'
-            },
-            {
-                name: 'Weight_in_lbs',
-                type: 'measure'
-            },
-            {
-                name: 'Acceleration',
-                type: 'measure'
-            },
-            {
-                name: 'Origin',
-                type: 'dimension'
-            },
-            {
-                name: 'Cylinders',
-                type: 'dimension'
-            },
-            {
-                name: 'Year',
-                type: 'dimension'
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
-            }
+
+	d3.json('../data/cars.json', (data) => {
+		const jsonData = data,
+			schema = [{
+					name: 'Name',
+					type: 'dimension'
+				},
+				{
+					name: 'Maker',
+					type: 'dimension'
+				},
+				{
+					name: 'Miles_per_Gallon',
+					type: 'measure'
+				},
+
+				{
+					name: 'Displacement',
+					type: 'measure'
+				},
+				{
+					name: 'Horsepower',
+					type: 'measure'
+				},
+				{
+					name: 'Weight_in_lbs',
+					type: 'measure',
+				},
+				{
+					name: 'Acceleration',
+					type: 'measure'
+				},
+				{
+					name: 'Origin',
+					type: 'dimension'
+				},
+				{
+					name: 'Cylinders',
+					type: 'dimension'
+				},
+				{
+					name: 'Year',
+					type: 'dimension',
+					// subtype: 'temporal',
+					// format: '%Y-%m-%d'
+				},
 
             ];
-        let rootData = new DataModel(jsonData, schema);
-
-        // rootData = rootData.groupBy(['Year', 'Maker'], {
-        // 	Horsepower: 'mean',
-        // 	Displacement: 'mean'
-        // });
-        rootData = rootData.calculateVariable(
-            {
-                name: 'Actual_Displacement',
-                type: 'measure'
-            }, ['Displacement', (ac) => {
-                if (ac < 500) {
-                    return -ac;
-                } return ac;
-            }]
-        );
-        rootData = rootData.calculateVariable({
-            name: 'negativeValues',
-            type: 'dimension'
-        }, ['Actual_Displacement', (y) => {
-            if (y < 0) {
-                return 'Less than Zero';
-            } return 'Greater than Zero';
-        }]);
-        //    rootData = rootData.groupBy(['Year', 'negativeValues'])
-
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        const mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
-        let canvas2 = env.canvas();
-        const canvas3 = env.canvas();
-        let rows = ['Acceleration'],
-            columns = ['Cylinders'];
-        canvas2 = canvas2
-            .rows(rows)
-            .columns(['Origin'])
-
-            .data(rootData)
-            .width(600)
-            .height(350)
-            .config({
-            //     //         border:{
-            //     //             width: 2,
-                legend: {
-                    position: 'right'
-                }
-            })
-
-            //             axes:{
-            //                     x:{
-            //                         showAxisName: true,
-
-            //                 }, y:{
-            //                     showAxisName: true,
-            //                     // name: 'Acceleration per year',
-            //                     // axisNamePadding: 12
-            //                 }
-            //             },
-            //     //         legend: {
-            //     //             color:{
-            //     //             // show: false
-            //     //             }
-            //     //         }
-            //         })
-            .mount(document.getElementById('chart'));
-        canvas = canvas
-            .rows(rows)
-            .columns(columns)
-            // .color({field: 'Acceleration', step: true})
-            .color({
-                field: 'Origin',
-                step: true
-            })
-            .data(rootData)
-			.width(700)
-            .height(500)
-            // .size()
-            .layers([{
-                mark: 'line'
-                // transition: {
-                //     disabled: true
-                // }
-            }])
-            // .size('Origin')
-            .config({
-                //         border:{
-                //             width: 2,
-                //   legend:{
-                //     //   position: 'bottom'
-                //   },
-
-                axes: {
-                    x: {
-                        showAxisName: true
-
+            
+            layerFactory.composeLayers('heatMapText', [
+                {
+                    name: 'bar',
+                    mark: 'bar',
+                    encoding: {
+                        y: 'heatMapText.encoding.y',
+                        x: 'heatMapText.encoding.x',
+                        color: 'heatMapText.encoding.color'
                     },
-                    y: {
-                        showAxisName: true
-                        // name: 'Acceleration per year',
-                        // axisNamePadding: 12
+                },
+                {
+                    name: 'text',
+                    mark: 'text',
+                    source: ['bar'],
+                        encoding: {
+                            x: 'heatMapText.encoding.x',
+                            y: 'heatMapText.encoding.y',
+                            text: 'heatMapText.encoding.text',
+                            color: {
+                                value : ()=>'black'
+                            }
+                        },
+                        positioner: (points, store, dependencies) => {
+                          store.layers.bar._points[0].forEach((e,i)=>{
+                              if(e.meta.stateColor[2] < 0.5){
+                                  points[i].color  ='white'
+                              }
+                          })
+                            return points;
+                        },
+                },
+            ]);
+		let rootData = new DataModel(jsonData, schema);
+
+		rootData = rootData.groupBy(['Year','Cylinders'], {
+			Horsepower: 'mean',
+			Acceleration: 'mean'
+		});
+
+		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+		let mountPoint = document.getElementById('chart');
+		window.canvas = env.canvas();
+		let canvas2 = env.canvas();
+		let canvas3 = env.canvas();
+		let rows = [  'Cylinders'],
+			columns = [['Year']];
+		canvas = canvas
+			.rows(rows)
+			.columns(columns)
+            .data(rootData)
+			.width(1200)
+            .height(700)
+            .layers([{
+                mark: 'heatMapText',
+                encoding: {
+                    text: {
+                        field: 'Horsepower'
                     }
                 }
-                //         legend: {
-                //             color:{
-                //             // show: false
-                //             }
-                //         }
+            }])
+            .color({
+                field: 'Horsepower',
+                // scheme: 'interpolateGreens',
+                // step: false
+
+                // interpolate: true
+            })
+            
+            .config({
+                border:{
+                    width: 2,
+                },
+                axes:{
+                        x:{
+                            showAxisName: true,
+                            padding: 0,
+                            axisNamePadding: 20
+                        
+                    }, y:{
+                        showAxisName: true,
+                        padding: 0,
+                        // name: 'Acceleration per year',
+                        axisNamePadding: 20
+                    }
+                }
             })
 
-            .title('The Muze Project', { position: 'top', align: 'left' })
-            .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
-            .mount(document.getElementById('chart2'));
+    
+        .title('The Muze Project', { position: "top", align: "left",  })
+		.subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
+		.mount(document.getElementsByTagName('body')[0]);
+	})
 
-        // muze.ActionModel
-        //                 .for(canvas, canvas2)
-        //                 .registerPhysicalActions({
-        //                     ctrlClick: firebolt => (targetEl, behaviours) => {
-        //                         targetEl.on('d.click', function (args) {
-        //                             if (event.metaKey) {
-        //                                 const event = utils.getEvent();
-        //                                 const mousePos = utils.getClientPoint(this, event);
-        //                                 const nearestPoint = firebolt.context.getNearestPoint(mousePos.x, mousePos.y, {
-        //                                     data: args
-        //                                 });
-        //                                 behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
-        //                                     criteria: nearestPoint.id
-        //                                 }));
-        //                             }
-        //                         });
-        //                     }
-        //                 }).registerPhysicalBehaviouralMap({
-        //                     ctrlClick: {
-        //                         behaviours: ['select']
-        //                     }
-        //                 })
-        //                 .registerSideEffects(class TextSideEffect extends SpawnableSideEffect {
-        //                     static formalName () {
-        //                         return 'selection-text';
-        //                     }
-
-        //                     apply (selectionSet) {
-        //                         const dataModel = selectionSet.mergedEnter.model;
-        //                         const drawingInf = this.drawingContext();
-        //                         const sideEffectGroup = drawingInf.sideEffectGroup;
-
-        //                         const textGroups = this.createElement(drawingInf.htmlContainer, 'div', [1], 'selected');
-        //                         textGroups.html(`Selected:${dataModel.getData().data.map(e => e.join(', '))}`);
-        //                         textGroups.style('position', 'absolute');
-        //                         return this;
-        //                     }
-        //     }).registerSideEffects(class StrokeSideEffect extends SpawnableSideEffect {
-        //         static formalName () {
-        //             return 'stroke-effect';
-        //         }
-
-        //         apply (selectionSet) {
-        //             const { completeSet, mergedExit, mergedEnter } = selectionSet;
-        //             const context = this.firebolt.context;
-        //             const layers = context.layers();
-        //             layers.forEach((e) => {
-        //                 const enterElements = e.getPlotElementsFromSet(mergedEnter.uids);
-        //                 enterElements.style('stroke', 'red');
-        //                 const exitElements = e.getPlotElementsFromSet(mergedExit.uids);
-        //                 exitElements.style('stroke', '');
-        //             });
-        //         }
-        //     }).mapSideEffects({
-        //         select: ['selection-text', 'stroke-effect']
-
-        //     });
-    });
-}());
+})()

@@ -109,10 +109,10 @@ export const listenerMap = context => ([
     },
     {
         type: 'registerChangeListener',
-        props: [...axisProps],
-        listener: () => {
-            const container = context.mount();
-            if (container) {
+        props: [PROPS.MOUNT, PROPS.DATA, ...axisProps],
+        listener: (mount, data) => {
+            const container = mount[1];
+            if (container && data[1]) {
                 context.render(container);
             }
         }

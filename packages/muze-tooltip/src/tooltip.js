@@ -28,12 +28,12 @@ export default class Tooltip {
         let connectorContainer = svgContainer;
         this._id = getUniqueId();
         this._config = {};
-        this._container = selectElement(htmlContainer);
         this.config({});
         const tooltipConf = this._config;
         const classPrefix = tooltipConf.classPrefix;
         const contentClass = tooltipConf.content.parentClassName;
-        this._tooltipContainer = this._container.append('div').style('position', 'absolute');
+        const container = makeElement(htmlContainer, 'div', [1], `${classPrefix}-tooltip-container`);
+        this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
         this._tooltipArrow = this._tooltipContainer.append('div');
@@ -191,8 +191,10 @@ export default class Tooltip {
             x: 0,
             y: 0
         };
-
-        this._tooltipContainer.style('left', `${offset.x + x}px`).style('top', `${offset.y + y}px`);
+        const scrollTop = document.body.scrollTop;
+        const scrollLeft = document.body.scrollLeft;
+        this._tooltipContainer.style('left', `${offset.x + x - scrollLeft}px`).style('top',
+            `${offset.y + y - scrollTop}px`);
 
         return this;
     }
@@ -213,19 +215,22 @@ export default class Tooltip {
 
         const extent = this._extent;
         const node = this._tooltipContainer.node();
-        const offsetWidth = node.offsetWidth;
-        const offsetHeight = node.offsetHeight;
+        const offsetWidth = node.offsetWidth + 2;
+        const offsetHeight = node.offsetHeight + 2;
         const config = this._config;
+        const offset = this._offset;
         const arrowDisabled = config.arrow.disabled;
         const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
+
         const positionHorizontal = () => {
             let position;
+            const dimX = dim.x + dim.width + offset.x;
             let x = dim.x + dim.width;
             let y = dim.y;
             // When there is no space in right
-            const rightSpace = extent.width - x;
+            const rightSpace = extent.width - dimX;
             const leftSpace = dim.x - extent.x;
             if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
@@ -256,11 +261,13 @@ export default class Tooltip {
                 y
             };
         };
+
         const positionVertical = () => {
             let position;
             // Position tooltip at the center of plot
             let x = dim.x - offsetWidth / 2 + dim.width / 2;
             const y = dim.y - offsetHeight - arrowSize;
+
             // Overflows to the right
             if ((extent.width - dim.x) < offsetWidth) {
                 x = extent.width - offsetWidth;

@@ -261,7 +261,7 @@ export const getEncoder = (layers) => {
     return encoder;
 };
 
- /**
+/**
  *
  *
  * @param {*} type
@@ -296,6 +296,8 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
         axisFrom = type === ROW ? LEFT : TOP;
     } else if (secondFieldType(0) === MEASURE) {
         axisFrom = type === ROW ? RIGHT : BOTTOM;
+    } else if (firstFieldType(firstField.length - 1) === MEASURE) {
+        axisFrom = type === ROW ? LEFT : TOP;
     }
     return [headerFrom, axisFrom];
 };

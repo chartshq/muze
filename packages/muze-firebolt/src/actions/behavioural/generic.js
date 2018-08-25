@@ -3,6 +3,7 @@ import { getSetInfo, getMergedSet, getSourceFields } from '../../helper';
 export default class GenericBehaviour {
     constructor (firebolt) {
         this.firebolt = firebolt;
+        this._enabled = true;
     }
 
     dispatch (payload) {
@@ -58,6 +59,18 @@ export default class GenericBehaviour {
 
     static mutates () {
         return false;
+    }
+
+    enable () {
+        this._enabled = true;
+    }
+
+    disable () {
+        this._enabled = false;
+    }
+
+    isEnabled () {
+        return this._enabled;
     }
 }
 

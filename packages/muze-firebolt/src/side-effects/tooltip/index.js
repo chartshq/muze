@@ -29,12 +29,10 @@ export default class Tooltip extends SpawnableSideEffect {
         let totalHeight = 0;
         let totalWidth = 0;
         const dataModel = selectionSet.mergedEnter.model;
+        const context = this.firebolt.context;
         const drawingInf = this.drawingContext();
-        if (payload.criteria && dataModel && dataModel.isEmpty()) {
-            return this;
-        }
-        if (payload.criteria === null || !dataModel) {
-            this.hide(payload, null);
+        if (dataModel.isEmpty() || payload.criteria === null) {
+            this.hide(options, null);
             return this;
         }
 
@@ -47,7 +45,6 @@ export default class Tooltip extends SpawnableSideEffect {
         const showInPosition = payload.showInPosition;
         const pad = config.padding;
         const dataModels = [];
-        const context = this.firebolt.context;
         const fragmented = config.mode === FRAGMENTED;
         const sourceInf = context.getSourceInfo();
         const fields = sourceInf.fields;
@@ -58,7 +55,6 @@ export default class Tooltip extends SpawnableSideEffect {
         const tooltipPos = payload.position;
         const boxes = [];
         const enter = {};
-        const action = payload.action === 'highlight' ? 'highlight' : 'brush';
         const uids = dataModel.getData().uids;
         if (fragmented) {
             dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
@@ -68,6 +64,7 @@ export default class Tooltip extends SpawnableSideEffect {
             dataModels.push(dataModel);
         }
         const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria);
+
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];
@@ -75,13 +72,19 @@ export default class Tooltip extends SpawnableSideEffect {
                 plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID], dataModels[i].getData().uids]);
                 plotDim = plotDim && plotDim[0];
             }
+
             const dt = dataModels[i];
             enter[i] = true;
-            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(drawingInf.htmlContainer,
+            const htmlContainer = drawingInf.parentContainer.getBoundingClientRect();
+            const layoutBoundBox = document.body.getBoundingClientRect();
+            const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
+            const offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);
+            const offsetTop = Math.abs(layoutBoundBox.top - unitBoundBox.top);
+            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(document.body,
                     drawingInf.svgContainer);
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
-            tooltipInst.content(action, dt, {
+            tooltipInst.content(options.strategy || this._strategy, dt, {
                 formatter: strategy,
                 order: options.order
             })
@@ -89,8 +92,12 @@ export default class Tooltip extends SpawnableSideEffect {
                             .extent({
                                 x: 0,
                                 y: 0,
-                                width: drawingInf.width,
-                                height: drawingInf.height
+                                width: htmlContainer.width,
+                                height: htmlContainer.height
+                            })
+                            .offset({
+                                x: offsetLeft,
+                                y: offsetTop
                             });
 
             if (showInPosition) {
@@ -109,6 +116,7 @@ export default class Tooltip extends SpawnableSideEffect {
                 tooltipInst.hide();
                 break;
             }
+
             if (fragmented) {
                 const position = tooltipInst._position;
                 const tooltipBoundBox = tooltipInst._tooltipContainer.node().getBoundingClientRect();
@@ -127,7 +135,6 @@ export default class Tooltip extends SpawnableSideEffect {
                 });
             }
         }
-        // console.log(tooltips);
         for (const key in tooltips) {
             if (!enter[key]) {
                 const tooltip = tooltips[key];
@@ -147,12 +154,12 @@ export default class Tooltip extends SpawnableSideEffect {
         return this;
     }
 
-    hide (payload) {
+    hide (options) {
         const tooltips = this._tooltips;
         for (const key in tooltips) {
             if ({}.hasOwnProperty.call(tooltips, key)) {
-                const action = payload.action === 'highlight' ? 'highlight' : 'brush';
-                tooltips[key].content(action, null);
+                const strategy = options.strategy || this._strategy;
+                tooltips[key].content(strategy, null);
                 tooltips[key].hide();
             }
         }

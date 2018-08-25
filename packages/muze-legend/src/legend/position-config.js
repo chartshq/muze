@@ -18,12 +18,11 @@ const legendOrientation = {
             row: [1],
             column: data
         }),
-        itemContainerMeasures: (measurement, config) => {
+        itemContainerMeasures: (measurement) => {
             const {
                 itemSpaces,
                 width
             } = measurement;
-            const { padding } = config;
             return {
                 row: {
                     width: `${width}px`,
@@ -31,7 +30,7 @@ const legendOrientation = {
                 },
                 column: {
                     width: (d, i) => `${itemSpaces[i].width}px`,
-                    padding: `${padding}px`
+                    padding: `${0}px`
                 }
             };
         },

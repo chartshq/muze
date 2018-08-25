@@ -183,7 +183,7 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
     return transformFactory(transformType)(schema, data.data, {
         groupBy: transform.groupBy,
         uniqueField,
-        sort: transform.sort,
+        sort: transform.sort || 'none',
         offset: transform.offset,
         value: yFieldType === FieldType.MEASURE ? yField : xField
     }, data.uids);
@@ -340,7 +340,7 @@ export const animateGroup = (mount, context) => {
 export const positionPoints = (context, points) => {
     const positioner = context.encodingTransform();
     if (positioner) {
-        return positioner(points, { smartLabel: context._dependencies.smartLabel });
+        return positioner(points, context, { smartLabel: context._dependencies.smartLabel });
     }
     return points;
 };

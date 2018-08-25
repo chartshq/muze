@@ -5,6 +5,7 @@ import { GradientLegend, DiscreteLegend, StepLegend } from '@chartshq/muze-legen
  */
 export const ROWS = 'rows';
 export const COLUMNS = 'columns';
+export const DATA = 'data';
 export const COLOR = 'color';
 export const SHAPE = 'shape';
 export const SIZE = 'size';

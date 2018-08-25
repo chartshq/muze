@@ -83,6 +83,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
             currentAxes.push(xAxis);
         } else {
             const axes = map.get(axisKey);
+            axes[axisIndex] = axes[axisIndex] ? axes[axisIndex] : createSimpleAxis(axisConfig, field, axesCreators);
             axes[axisIndex]._rotationLock = false;
             axes[axisIndex] && axes[axisIndex].config(axisConfig).domain(axisConfig.domain || []);
         }

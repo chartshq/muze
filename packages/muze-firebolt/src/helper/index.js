@@ -33,11 +33,12 @@ export const initializePhysicalActions = (context, actions) => {
     return physicalActions;
 };
 
-export const changeSideEffectAvailability = (sideEffects, fn, toEnable) => {
+export const changeSideEffectAvailability = (context, fn, toEnable) => {
+    const sideEffects = context.sideEffects();
     for (const key in sideEffects) {
         if ({}.hasOwnProperty.call(sideEffects, key)) {
             let change = true;
-            if (fn && fn(sideEffects[key], key) === false) {
+            if (fn && fn(key) === false) {
                 change = false;
             }
             if (change) {

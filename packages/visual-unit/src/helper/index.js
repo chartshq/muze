@@ -82,8 +82,9 @@ export const createLayers = (context, layerDefinitions) => {
         const markId = `${mark}-${i}`;
         const instances = getLayerFromDef(context, definition, layersMap[markId]);
         store.layers = Object.assign(store.layers, instances);
-        layersArr = layersArr.concat(...Object.values(instances));
-        layersMap[markId] = instances;
+        const instanceValues = Object.values(instances);
+        layersArr = layersArr.concat(...instanceValues);
+        layersMap[markId] = instanceValues;
         markSet[markId] = markId;
         return layersArr;
     }, []);
