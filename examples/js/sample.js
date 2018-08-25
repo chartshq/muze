@@ -133,19 +133,19 @@
         window.canvas = env.canvas();
         // const canvas2 = env.canvas();
         // const canvas3 = env.canvas();
-        let rows = ['Year'],
-            columns = [];
+        let rows = ['Acceleration'],
+            columns = ['Year'];
         canvas = canvas
 
         // .detail(['Name', 'Maker'])
             .rows(rows)
             .columns(columns)
-            .layers([{
-                mark: 'arc',
-                encoding: {
-                    text: 'Acceleration'
-                }
-            }])
+            // .layers([{
+            //     mark: 'arc',
+            //     encoding: {
+            //         text: 'Acceleration'
+            //     }
+            // }])
 
             // .color({field: 'Acceleration', step: true})
             .color({

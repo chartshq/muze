@@ -25,7 +25,7 @@ export const legendCreator = (canvas) => {
                 type,
                 step
             } = scale.config();
-            LegendCls = LEGEND_TYPE_MAP[`${type}-${step}-${scaleType}`];
+            LegendCls = LEGEND_TYPE_MAP[`${type}-${step || true}-${scaleType}`];
             dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls, scaleType });
         }
     });
