@@ -7,8 +7,9 @@
         html = muze.operators.html,
         actionModel = muze.ActionModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
+    console.log(muze.SideEffects, muze.Behaviours);
 
- 
+
     d3.json('../data/cars.json', (data) => {
         const jsonData = data,
             schema = [{

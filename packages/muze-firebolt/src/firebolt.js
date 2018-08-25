@@ -1,6 +1,5 @@
 import {
     mergeRecursive,
-    getElementsByClassName,
     hasTouch,
     filterPropagationModel,
     FieldType,
@@ -30,6 +29,8 @@ export default class Firebolt {
             behavioural: {},
             physical: {}
         };
+        this._selectionSet = {};
+        this._volatileSelectionSet = {};
         this._propagationFields = {};
         this._sourceSideEffects = {
             tooltip: true,
@@ -78,7 +79,12 @@ export default class Firebolt {
 
     registerBehaviouralActions (actions) {
         const behaviours = initializeBehaviouralActions(this, actions);
+        this.prepareSelectionSets(behaviours);
         Object.assign(this._actions.behavioural, behaviours);
+        return this;
+    }
+
+    prepareSelectionSets () {
         return this;
     }
 
@@ -229,10 +235,10 @@ export default class Firebolt {
         };
     }
 
-    createSelectionSet (uniqueIds) {
-        const behaviours = this._actions.behavioural;
-        const selectionSet = {};
-        const volatileSelectionSet = {};
+    createSelectionSet (uniqueIds, behaviouralActions) {
+        const behaviours = behaviouralActions || this._actions.behavioural;
+        const selectionSet = this._selectionSet;
+        const volatileSelectionSet = this._volatileSelectionSet;
 
         for (const key in behaviours) {
             if ({}.hasOwnProperty.call(behaviours, key)) {
