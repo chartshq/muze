@@ -156,9 +156,11 @@ export const getRenderDetails = (context, mount) => {
 
     // Get height width of the mount point
     const { height, width } = mount.getBoundingClientRect();
+    const heightAttr = context.height();
+    const widthAttr = context.width();
 
-    const availableHeightForCanvas = context.height() >= 0 ? context.height() : (height || minHeight);
-    const availableWidthForCanvas = context.width() >= 0 ? context.width() : (width || minWidth);
+    const availableHeightForCanvas = heightAttr > minHeight ? heightAttr : (height || minHeight);
+    const availableWidthForCanvas = widthAttr > minWidth ? widthAttr : (width || minWidth);
     // Create headers and determine header height
     const { headers, headerHeight } = createHeaders(context, availableHeightForCanvas, availableWidthForCanvas);
 

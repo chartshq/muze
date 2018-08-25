@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, selectElement } from 'muze-utils';
 import {
     ROWS,
     COLUMNS,
@@ -115,7 +115,15 @@ export const localOptions = {
         }
     },
     [MOUNT]: {
-        value: null
+        value: null,
+        meta: {
+            sanitization: (value) => {
+                if (typeof value === 'string') {
+                    return selectElement(value).node();
+                }
+                return value;
+            }
+        }
     }
 };
 
