@@ -15,10 +15,10 @@ export const actionBehaviourMap = {
     [ACTIONS.TOUCHDRAG]: {
         behaviours: [BEHAVIOURS.BRUSH],
         touch: true
-    },
-    [ACTIONS.CLICK]: {
-        behaviours: [BEHAVIOURS.SELECT],
-        touch: false
     }
+    // [ACTIONS.CLICK]: {
+    //     behaviours: [BEHAVIOURS.SELECT],
+    //     touch: false
+    // }
 };
 

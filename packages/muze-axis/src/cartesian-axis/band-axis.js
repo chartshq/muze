@@ -187,13 +187,28 @@ export default class BandAxis extends SimpleAxis {
      */
     updateDomainBounds (domain) {
         let currentDomain = this.domain();
-
-        if (currentDomain.length === 0) {
-            currentDomain = domain;
+        const sortDomain = this.config().sortDomain;
+        if (this.config().domain) {
+            currentDomain = this.config().domain;
+        } else {
+            if (currentDomain.length === 0) {
+                currentDomain = domain;
+            }
+            currentDomain = currentDomain.concat(domain);
+            currentDomain = sortDomain ? sortDomain(currentDomain) : currentDomain.sort();
         }
-        currentDomain = currentDomain.concat(domain);
-        currentDomain = currentDomain.sort();
+
         this.domain(currentDomain);
         return this;
+    }
+
+    /**
+     * Returns the value from the domain when given a value from the range.
+     * @param {number} value Value from the range.
+     * @return {number} Value
+     */
+    invert (...value) {
+        const values = value.map(d => this.scale().invert(d)) || [];
+        return value.length === 1 ? values[0].toString() : values.map(d => d.toString());
     }
 }

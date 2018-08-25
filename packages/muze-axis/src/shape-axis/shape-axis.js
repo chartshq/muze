@@ -32,6 +32,7 @@ export default class ShapeAxis {
             type: 'ordinal',
             range: this._config.range
         });
+        this.updateDomain(config.domain);
     }
 
      /**
@@ -86,13 +87,15 @@ export default class ShapeAxis {
      * @param {Array} domain the domain of the scale
      * @memberof ShapeAxis
      */
-    updateDomain (domain) {
-        this.uniqueValues(domain);
-        this.domain(domain);
-        this.scale().domain(domain);
+    updateDomain (domain = []) {
+        if (domain.length) {
+            this.uniqueValues(domain);
+            this.domain(domain);
+            this.scale().domain(domain);
 
-        if (this.config().generator) {
-            this._generatedShapes = shapeGenerator(domain, this.config().generator);
+            if (this.config().generator) {
+                this._generatedShapes = shapeGenerator(domain, this.config().generator);
+            }
         }
         return this;
     }
