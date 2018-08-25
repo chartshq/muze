@@ -41,11 +41,11 @@
             },
             {
                 name: 'Weight_in_lbs',
-                type: 'measure',
+                type: 'measure'
             },
             {
                 name: 'Acceleration',
-                type: 'measure',
+                type: 'measure'
             },
             {
                 name: 'Origin',
@@ -57,10 +57,10 @@
             },
             {
                 name: 'Year',
-                type: 'dimension',
+                type: 'dimension'
                 // subtype: 'temporal',
                 // format: '%Y-%m-%d'
-            },
+            }
             ];
 
         layerFactory.composeLayers('heatMapText', [
@@ -69,8 +69,8 @@
                 mark: 'bar',
                 encoding: {
                     y: 'heatMapText.encoding.y',
-                    x: 'heatMapText.encoding.x',
-                },
+                    x: 'heatMapText.encoding.x'
+                }
             },
             {
                 name: 'text',
@@ -79,9 +79,9 @@
                     x: 'heatMapText.encoding.x',
                     y: 'heatMapText.encoding.y',
                     text: 'heatMapText.encoding.text',
-                    color: 'heatMapText.encoding.color',
-                },
-            },
+                    color: 'heatMapText.encoding.color'
+                }
+            }
         ]);
         let rootData = new DataModel(jsonData, schema);
 
@@ -101,15 +101,16 @@
         };
         let rows = ['Origin', 'Acceleration'],
             columns = ['Year'];
-
+        
         canvas = canvas
 			.rows(rows)
 			.columns(columns)
             .data(rootData)
 			.width(600)
             .height(1000)
+            .size('Origin')
             .layers([{
-                mark: 'bar',
+                mark: 'point',
                 // transform: {
                 //     type: 'group'
                 // },
@@ -151,14 +152,14 @@
             .config({
                 facetConfig: {
                     rows: {
-                        verticalAlign: 'middle',
+                        verticalAlign: 'middle'
                     }
                 },
                 // gridBands: {
                 //     y: { show: true }
                 // },
                 border: {
-                    width: 2,
+                    width: 2
                 },
                 axes: {
                     x: {
@@ -171,24 +172,14 @@
                         showAxisName: true,
                         // padding: 0,
                         // name: 'Acceleration per year',
-                        axisNamePadding: 20,
+                        axisNamePadding: 20
                     }
                 }
             });
 
-        canvas.legend({
-            align: 'horizontal',
-            // title: ['Maker'],
-            position: 'right',
+  
 
-            item: {
-                text: {
-                    position: 'right'
-                }
-            },
-        })
-
-                        .title('The Muze Project', { position: 'top', align: 'left', })
+                        .title('The Muze Project', { position: 'top', align: 'left' })
                         .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
                         .mount(document.getElementsByTagName('body')[0]);
     });

@@ -37,6 +37,8 @@ export default class ColorAxis {
         this._scale = this.createScale(this._colorStrategy);
 
         this._id = getUniqueId();
+
+        this.updateDomain(config.domain);
     }
 
     /**
@@ -146,16 +148,17 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     updateDomain (domain = []) {
-        const scale = this.scale();
-        const range = scale.range ? scale.range() : null;
-        const domainRangeFn = this._colorStrategy.domainRange();
-        const scaleInfo = domainRangeFn(domain, this.config().stops, range);
+        if (domain.length) {
+            const scale = this.scale();
+            const range = scale.range ? scale.range() : null;
+            const domainRangeFn = this._colorStrategy.domainRange();
+            const scaleInfo = domainRangeFn(domain, this.config().stops, range);
 
-        this.domain(scaleInfo.domain);
-        scaleInfo.range && this.scale().range(scaleInfo.range);
-        this.uniqueValues(scaleInfo.uniqueVals);
-        this.scale().domain(scaleInfo.scaleDomain || this.domain());
-
+            this.domain(scaleInfo.domain);
+            scaleInfo.range && this.scale().range(scaleInfo.range);
+            this.uniqueValues(scaleInfo.uniqueVals);
+            this.scale().domain(scaleInfo.scaleDomain || this.domain());
+        }
         return this;
     }
 

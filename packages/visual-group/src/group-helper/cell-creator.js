@@ -506,10 +506,12 @@ export const computeMatrices = (context, config) => {
     if (!groupBy.disabled) {
         const fields = getFieldsFromSuppliedLayers(valueCellContext.suppliedLayers, datamodel.getFieldsConfig());
         const allFields = extractFields(facetsAndProjections, fields);
+
         const dimensions = allFields.filter(field =>
             fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
         const aggregationFns = groupBy.measures;
-        groupedModel = datamodel.groupBy(dimensions, aggregationFns).project(allFields);
+
+        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], aggregationFns).project(allFields);
     }
 
     // return a callback function to create the cells from the matrix
