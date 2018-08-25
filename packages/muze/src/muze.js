@@ -9,7 +9,16 @@ import {
     getEvent,
     require
 } from 'muze-utils';
-import { SurrogateSideEffect, SpawnableSideEffect, sideEffects } from '@chartshq/muze-firebolt';
+import {
+    SurrogateSideEffect,
+    SpawnableSideEffect,
+    sideEffects,
+    PersistentBehaviour,
+    GenericBehaviour,
+    VolatileBehaviour,
+    behaviouralActions,
+    GenericSideEffect
+} from '@chartshq/muze-firebolt';
 import { layerFactory } from '@chartshq/visual-layer';
 import pkg from '../package.json';
 import * as operators from './operators';
@@ -135,7 +144,17 @@ const SideEffects = {
     concrete: sideEffects,
     abstract: {
         SurrogateSideEffect,
-        SpawnableSideEffect
+        SpawnableSideEffect,
+        GenericSideEffect
+    }
+};
+
+const Behaviours = {
+    concrete: behaviouralActions,
+    abstract: {
+        GenericBehaviour,
+        PersistentBehaviour,
+        VolatileBehaviour
     }
 };
 
@@ -145,6 +164,7 @@ muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
 muze.operators = operators;
+muze.Behaviours = Behaviours;
 muze.utils = {
     getClientPoint,
     getEvent,
