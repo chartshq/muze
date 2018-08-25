@@ -97,7 +97,6 @@ export {
     clipElement,
     getElementsByClassName,
     getMousePos,
-    drawTracker,
     getEvent,
     getD3Drag,
     getSmartComputedStyle,
