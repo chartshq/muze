@@ -12,9 +12,8 @@ export const clearActionHistory = (context) => {
 
 export const dispatchQueuedSideEffects = (context) => {
     const queuedSideEffects = context._queuedSideEffects;
-    const sideEffectStore = context.sideEffects();
     queuedSideEffects.forEach((sideEffect) => {
-        sideEffectStore[sideEffect.name].apply(...sideEffect.params);
+        context.dispatchSideEffect(sideEffect.name, ...sideEffect.params);
     });
     context._queuedSideEffects = [];
 };

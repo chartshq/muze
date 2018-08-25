@@ -133,7 +133,7 @@
         window.canvas = env.canvas();
         // const canvas2 = env.canvas();
         // const canvas3 = env.canvas();
-        let rows = ['Acceleration'],
+        let rows = ['Acceleration', 'Displacement'],
             columns = ['Year'];
         canvas = canvas
 
@@ -155,12 +155,9 @@
             .detail(['Acceleration'])
             .data(rootData)
 			.width(600)
-            .height(2350)
+            .height(1800)
             .layers([{
-                mark: 'arc',
-                encoding: {
-                    angle: 'Origin'
-                }
+                mark: 'line'
             }])
             // .size()
 
@@ -184,21 +181,22 @@
                 },
                 interaction: {
                     tooltip: {
-                        formatter: (dt, context) => {
-                            const colorAxis = context.axes.color[0];
-                            const sizeAxis = context.axes.size[0];
-                            const dataArr = dt.getData().data;
-                            const fieldsConfig = dt.getFieldsConfig();
-                            const dataVal = dataArr[0][fieldsConfig.Origin.index];
-                            return [
-                                [{
-                                    type: 'icon',
-                                    color: colorAxis.getColor(dataVal),
-                                    shape: 'circle',
-                                    size: sizeAxis.getSize(dataVal) * 2
-                                }, dataArr[0][fieldsConfig.Origin.index], ':', dataArr[0][fieldsConfig.Acceleration.index]]
-                            ];
-                        }
+                        mode: 'consolidated'
+                        // formatter: (dt, context) => {
+                        //     const colorAxis = context.axes.color[0];
+                        //     const sizeAxis = context.axes.size[0];
+                        //     const dataArr = dt.getData().data;
+                        //     const fieldsConfig = dt.getFieldsConfig();
+                        //     const dataVal = dataArr[0][fieldsConfig.Origin.index];
+                        //     return [
+                        //         [{
+                        //             type: 'icon',
+                        //             color: colorAxis.getColor(dataVal),
+                        //             shape: 'circle',
+                        //             size: sizeAxis.getSize(dataVal) * 2
+                        //         }, dataArr[0][fieldsConfig.Origin.index], ':', dataArr[0][fieldsConfig.Acceleration.index]]
+                        //     ];
+                        // }
                     }
                 },
                 axes: {

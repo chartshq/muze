@@ -5,6 +5,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
     constructor (...params) {
         super(...params);
         this._strategy = 'highlight';
+        this._strategies = strategies;
     }
 
     static formalName () {
@@ -15,13 +16,8 @@ export default class PlotHighlighter extends SurrogateSideEffect {
         return 'visual-unit';
     }
 
-    setStrategy (strategy) {
-        this._strategy = strategy;
-        return this;
-    }
-
     apply (selectionSet, payload, options = {}) {
-        const strategy = strategies[options.strategy || this._strategy];
+        const strategy = this._strategies[options.strategy || this._strategy];
 
         if (selectionSet.isSourceFieldPresent !== false) {
             strategy(selectionSet, this, options.strategy || this._strategy);

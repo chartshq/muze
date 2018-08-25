@@ -275,4 +275,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
 
     shiftHeaders(layoutConfig, padding, measurement);
+    context.composition().visualGroup.matrixInstance().value.each((el) => {
+        el.valueOf().parentContainer(layout.node());
+    });
 };

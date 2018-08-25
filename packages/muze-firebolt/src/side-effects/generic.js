@@ -7,6 +7,7 @@ export default class GenericSideEffect {
         this._strategy = 'default';
         this._config = {};
         this._id = getUniqueId();
+        this._strategies = {};
         this.config(this.constructor.defaultConfig());
     }
 
@@ -45,6 +46,11 @@ export default class GenericSideEffect {
     }
 
     apply () {
+        return this;
+    }
+
+    addStrategy (name, fn) {
+        this._strategies[name] = fn;
         return this;
     }
 }
