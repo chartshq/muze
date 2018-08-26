@@ -226,7 +226,7 @@ export default class LineLayer extends BaseLayer {
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
         const containerSelection = selectElement(container);
         const colorField = encoding.color.field;
-        const colorFieldIndex = fieldsConfig[colorField].index;
+        const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
         const colorFieldMeasure = fieldsConfig[colorField] && fieldsConfig[colorField].def.type === FieldType.MEASURE;
 
         this._points = [];
