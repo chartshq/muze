@@ -33,6 +33,7 @@ export default class Tooltip {
         const classPrefix = tooltipConf.classPrefix;
         const contentClass = tooltipConf.content.parentClassName;
         const container = makeElement(htmlContainer, 'div', [1], `${classPrefix}-tooltip-container`);
+        this._container = container;
         this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
@@ -191,10 +192,8 @@ export default class Tooltip {
             x: 0,
             y: 0
         };
-        const scrollTop = document.body.scrollTop;
-        const scrollLeft = document.body.scrollLeft;
-        this._tooltipContainer.style('left', `${offset.x + x - scrollLeft}px`).style('top',
-            `${offset.y + y - scrollTop}px`);
+        this._tooltipContainer.style('left', `${offset.x + x}px`).style('top',
+            `${offset.y + y}px`);
 
         return this;
     }
@@ -231,7 +230,7 @@ export default class Tooltip {
             let y = dim.y;
             // When there is no space in right
             const rightSpace = extent.width - dimX;
-            const leftSpace = dim.x - extent.x;
+            const leftSpace = dim.x + offset.x - extent.x;
             if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
                 x += arrowSize;

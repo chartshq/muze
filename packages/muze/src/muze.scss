@@ -114,6 +114,7 @@
 }
 .#{$prefix}layout-container {
     float: left;
+    position: relative;
 }
 .#{$prefix}legend-section, .#{$prefix}board-legend {
     text-align: center;
