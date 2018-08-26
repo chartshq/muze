@@ -1,5 +1,9 @@
+import { DataModel } from 'muze-utils';
+
 import { CLASSPREFIX } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
+
+import './styles.scss';
 
 export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
@@ -23,33 +27,39 @@ export default class AnchorEffect extends SpawnableSideEffect {
     }
 
     addAnchorLayers (context) {
-        let layers = [];
+        const layers = [];
         this.firebolt.context.layers().forEach((layer, idx) => {
             const shouldDrawAnchors = layer.shouldDrawAnchors();
             if (shouldDrawAnchors) {
                 const encodingFieldsInf = layer.encodingFieldsInf();
-                const config = layer.config();
-                layers = [...layers, ...context.addLayer({
-                    name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
-                    mark: 'point',
-                    encoding: {
-                        x: encodingFieldsInf.xField,
-                        y: encodingFieldsInf.yField,
-                        color: {
-                            field: encodingFieldsInf.colorField
+                const layerObj = {
+                    instances: context.addLayer({
+                        name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
+                        mark: 'point',
+                        encoding: {
+                            x: encodingFieldsInf.xField,
+                            y: encodingFieldsInf.yField,
+                            color: {
+                                field: encodingFieldsInf.colorField
+                            },
+                            size: {
+                                field: encodingFieldsInf.sizeField,
+                                value: this.defaultSizeValue()
+                            }
                         },
-                        size: {
-                            field: encodingFieldsInf.sizeField,
-                            value: this.defaultSizeValue()
-                        }
-                    },
-                    transform: config.transform,
-                    transition: this.getTransitionConfig(),
-                    calculateDomain: false,
-                    source: dt => dt.select(() => false),
-                    interactive: false,
-                    render: false
-                })];
+                        transform: {
+                            type: 'identity'
+                        },
+                        transition: this.getTransitionConfig(),
+                        calculateDomain: false,
+                        source: dt => dt.select(() => false),
+                        interactive: false,
+                        render: false
+                    }),
+                    linkedLayer: layer
+                };
+
+                layers.push(layerObj);
             }
         });
         return layers;
@@ -74,10 +84,18 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const drawingInf = this.drawingContext();
         const sideEffectGroup = drawingInf.sideEffectGroup;
         const className = this.config().className;
-        const anchorGroups = this.createElement(sideEffectGroup, 'g', this._layers.map(d => d.id()), className);
+        const anchorGroup = this.createElement(sideEffectGroup, 'g', [1], className);
+
         const layers = this._layers;
-        anchorGroups.each(function (d, i) {
-            layers[i].data(dataModel).mount(this);
+        layers.forEach((layer) => {
+            const instances = layer.instances;
+            const elems = this.createElement(anchorGroup, 'g', instances, className);
+            const linkedLayer = layer.linkedLayer;
+            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel.getData().uids);
+            const transformedDataModel = new DataModel(transformedData, schema);
+            elems.each(function (d, i) {
+                instances[i].data(transformedDataModel).mount(this);
+            });
         });
 
         return this;

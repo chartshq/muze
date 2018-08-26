@@ -465,6 +465,48 @@ export default class BaseLayer extends SimpleLayer {
         }).sort((a, b) => a.y - b.y);
     }
 
+    getTransformedDataFromIdentifiers (identifiers) {
+        const normalizedData = this.store().get(PROPS.NORMALIZED_DATA);
+        const fieldsConfig = this.data().getFieldsConfig();
+        const {
+            yField,
+            xField,
+            yFieldType,
+            xFieldType
+        } = this.encodingFieldsInf();
+        let measureIndex;
+        let enc;
+        if (xFieldType === FieldType.MEASURE) {
+            measureIndex = fieldsConfig[xField].index;
+            enc = 'x';
+        } else if (yFieldType === FieldType.MEASURE) {
+            measureIndex = fieldsConfig[yField].index;
+            enc = 'y';
+        }
+
+        const transformedData = [];
+        normalizedData.forEach((dataArr) => {
+            dataArr.forEach((dataObj) => {
+                const id = dataObj._id;
+                if (identifiers.indexOf(id) !== -1) {
+                    const transformedVal = dataObj[enc];
+                    const row = dataObj._data;
+                    const tuple = {};
+                    for (const key in fieldsConfig) {
+                        const index = fieldsConfig[key].index;
+                        tuple[key] = row[index];
+                        if (index === measureIndex) {
+                            tuple[key] = transformedVal;
+                        }
+                    }
+                    transformedData.push(tuple);
+                }
+            });
+        });
+
+        return [transformedData, this.data().getData().schema];
+    }
+
     /**
      *
      *

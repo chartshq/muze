@@ -68,14 +68,21 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration', 'Horsepower', 'Miles_per_Gallon'],
-            columns = ['Miles_per_Gallon', 'Horsepower', 'Acceleration']
+            columns = ['Year']
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .detail(['Maker'])
             .width(1200)
             .height(800)
+            .color('Origin')
+            .layers([{
+                mark: 'area',
+                transform: {
+                    type: 'stack',
+                    sort: 'descending'
+                }
+            }])
             .config({
                 border: {
                     width: 2,
