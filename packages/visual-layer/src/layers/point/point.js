@@ -105,7 +105,6 @@ export default class PointLayer extends BaseLayer {
         const shapeFieldIndex = fieldsConfig[shapeField] && fieldsConfig[shapeField].index;
         const sizeFieldIndex = fieldsConfig[sizeField] && fieldsConfig[sizeField].index;
         const colorAxis = axes.color;
-
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
             const row = d._data;
@@ -145,7 +144,9 @@ export default class PointLayer extends BaseLayer {
                     },
                     style,
                     _data: row,
-                    _id: d._id
+                    _id: d._id,
+                    source: d._data,
+                    rowId: d._id
                 };
                 points.push(point);
                 this.cachePoint(d[key], point);

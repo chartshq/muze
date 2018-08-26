@@ -188,6 +188,8 @@ export default class LineLayer extends BaseLayer {
                 style,
                 _data: d._data,
                 _id: d._id,
+                rowId: d._id,
+                source: d._data,
                 meta
             };
             this.cachePoint(d[key], point);
