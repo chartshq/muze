@@ -209,6 +209,6 @@ export default class BandAxis extends SimpleAxis {
      */
     invert (...value) {
         const values = value.map(d => this.scale().invert(d)) || [];
-        return value.length === 1 ? values[0].toString() : values.map(d => d.toString());
+        return value.length === 1 ? values[0] && values[0].toString() : values.map(d => d.toString());
     }
 }
