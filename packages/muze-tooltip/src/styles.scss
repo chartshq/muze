@@ -39,7 +39,6 @@
     border-top: 10px solid #fbfbfb;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    top: 100%;
     right: 0;
 };
 .#{$prefix}tooltip-arrow-right {
@@ -60,7 +59,6 @@
     border-bottom: 10px solid #fbfbfb;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    top: 100%;
     right: 0;
 };
 
@@ -69,7 +67,7 @@
     border-bottom: 12px solid rgba(151,151,151,.19);
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
-    top: 102%;
+    top: 0%;
     right: 0;
 };
 .#{$prefix}tooltip-background-arrow-bottom {

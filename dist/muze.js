@@ -3536,7 +3536,6 @@ var BandAxis = function (_SimpleAxis) {
         key: 'updateDomainBounds',
         value: function updateDomainBounds(domain) {
             var currentDomain = this.domain();
-            var sortDomain = this.config().sortDomain;
             if (this.config().domain) {
                 currentDomain = this.config().domain;
             } else {
@@ -3544,9 +3543,7 @@ var BandAxis = function (_SimpleAxis) {
                     currentDomain = domain;
                 }
                 currentDomain = currentDomain.concat(domain);
-                currentDomain = sortDomain ? sortDomain(currentDomain) : currentDomain.sort();
             }
-
             this.domain(currentDomain);
             return this;
         }
@@ -3969,7 +3966,7 @@ var defaultConfig = {
     numberOfTicks: 10,
     rotate: false,
     show: true,
-    showAxisName: false,
+    showAxisName: true,
     showInnerTicks: null,
     showOuterTicks: null,
     style: {},
@@ -6163,14 +6160,13 @@ var steppedDomain = function steppedDomain(domain, stops, range) {
 };
 
 var continousSteppedDomain = function continousSteppedDomain(domain, stops, range) {
-    var _getStops2 = getStops(domain, stops),
+    var _getStops2 = getStops(domain, range.length - 1),
         uniqueVals = _getStops2.domain,
         newStops = _getStops2.newStops;
 
-    var _rangeStops2 = rangeStops(newStops.length, range),
-        newRange = _rangeStops2.newRange;
+    // const { newRange } = rangeStops(newStops.length, range);
 
-    return { uniqueVals: uniqueVals, domain: newStops, nice: true, range: newRange };
+    return { uniqueVals: uniqueVals, domain: newStops, nice: true, range: range };
 };
 
 /**
@@ -11121,24 +11117,28 @@ var Tooltip = function (_SpawnableSideEffect) {
             } else {
                 dataModels.push(dataModel);
             }
-            var plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria);
+            var plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria, {
+                getBBox: true
+            });
 
             // Show tooltip for each datamodel
             for (var i = 0; i < dataModels.length; i++) {
                 var plotDim = plotDimensions[i];
                 if (fragmented) {
-                    plotDim = context.getPlotPointsFromIdentifiers([[muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].ROW_ID], dataModels[i].getData().uids]);
+                    plotDim = context.getPlotPointsFromIdentifiers([[muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].ROW_ID], dataModels[i].getData().uids], { getBBox: true });
                     plotDim = plotDim && plotDim[0];
                 }
 
                 var dt = dataModels[i];
                 enter[i] = true;
-                var htmlContainer = drawingInf.parentContainer.getBoundingClientRect();
-                var layoutBoundBox = document.body.getBoundingClientRect();
+                var layoutContainer = drawingInf.parentContainer;
+                var layoutBoundBox = layoutContainer.getBoundingClientRect();
                 var unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
-                var offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);
-                var offsetTop = Math.abs(layoutBoundBox.top - unitBoundBox.top);
-                var tooltipInst = tooltips[i] = tooltips[i] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](document.body, drawingInf.svgContainer);
+
+                var offsetLeft = unitBoundBox.left - layoutBoundBox.left;
+                var offsetTop = unitBoundBox.top - layoutBoundBox.top;
+                var tooltipInst = tooltips[i] = tooltips[i] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](layoutContainer, drawingInf.svgContainer);
+
                 tooltipInst.context(sourceInf);
                 var strategy = _strategies__WEBPACK_IMPORTED_MODULE_3__["strategies"][options.strategy];
                 tooltipInst.content(options.strategy || this._strategy, dt, {
@@ -11147,8 +11147,8 @@ var Tooltip = function (_SpawnableSideEffect) {
                 }).config(this.config()).extent({
                     x: 0,
                     y: 0,
-                    width: htmlContainer.width,
-                    height: htmlContainer.height
+                    width: layoutBoundBox.width,
+                    height: layoutBoundBox.height
                 }).offset({
                     x: offsetLeft,
                     y: offsetTop
@@ -12749,6 +12749,7 @@ var createAxis = function createAxis(context) {
         orientation: align === _defaults__WEBPACK_IMPORTED_MODULE_3__["ALIGN"].VERTICAL ? _enums_constants__WEBPACK_IMPORTED_MODULE_2__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"],
         style: context._computedStyle,
         nice: false,
+        showAxisName: false,
         tickValues: data.map(function (d) {
             return d.value;
         }),
@@ -14820,9 +14821,9 @@ var placeArrow = function placeArrow(context, position, arrowPos) {
         tooltipBackground.style('top', arrowPos + 'px');
         tooltipBackground.style('left', '');
     } else {
-        tooltipArrow.style('top', '');
+        position === _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_BOTTOM"] ? tooltipArrow.style('top', '100%') : tooltipArrow.style('top', '-' + arrowConf.size + 'px');
         tooltipArrow.style('left', arrowPos + 'px');
-        tooltipBackground.style('top', '');
+        position === _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_BOTTOM"] ? tooltipBackground.style('top', '100%') : tooltipBackground.style('top', '-' + (arrowConf.size + 3) + 'px');
         tooltipBackground.style('left', arrowPos + 'px');
     }
     tooltipArrow.classed(classPrefix + '-tooltip-arrow', true);
@@ -15109,6 +15110,7 @@ var Tooltip = function () {
         var classPrefix = tooltipConf.classPrefix;
         var contentClass = tooltipConf.content.parentClassName;
         var container = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(htmlContainer, 'div', [1], classPrefix + '-tooltip-container');
+        this._container = container;
         this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', classPrefix + '-' + contentClass);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
@@ -15194,9 +15196,9 @@ var Tooltip = function () {
             content.config(contentConf);
 
             if (data === null) {
-                content.clear();
-                container.remove();
-                delete this._contents[name];
+                // content.clear();
+                // container.remove();
+                // delete this._contents[name];
             } else {
                 content.update({
                     model: data,
@@ -15276,9 +15278,7 @@ var Tooltip = function () {
                 x: 0,
                 y: 0
             };
-            var scrollTop = document.body.scrollTop;
-            var scrollLeft = document.body.scrollLeft;
-            this._tooltipContainer.style('left', offset.x + x - scrollLeft + 'px').style('top', offset.y + y - scrollTop + 'px');
+            this._tooltipContainer.style('left', offset.x + x + 'px').style('top', offset.y + y + 'px');
 
             return this;
         }
@@ -15306,6 +15306,8 @@ var Tooltip = function () {
 
             var extent = this._extent;
             var node = this._tooltipContainer.node();
+
+            this._tooltipContainer.style('top', '0px').style('left', '0px');
             var offsetWidth = node.offsetWidth + 2;
             var offsetHeight = node.offsetHeight + 2;
             var config = this._config;
@@ -15314,19 +15316,23 @@ var Tooltip = function () {
             var arrowSize = config.arrow.size;
             var draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
             var topSpace = dim.y;
+            // When there is no space in right
+            var dimX = dim.x + dim.width + offset.x;
+            var rightSpace = extent.width - dimX;
+            var leftSpace = dim.x + offset.x - extent.x;
+            var positionTop = topSpace > offsetHeight + arrowSize;
+            var positionRight = rightSpace >= offsetWidth + arrowSize;
+            var positionLeft = leftSpace >= offsetWidth + arrowSize;
 
             var positionHorizontal = function positionHorizontal() {
                 var position = void 0;
-                var dimX = dim.x + dim.width + offset.x;
                 var x = dim.x + dim.width;
                 var y = dim.y;
-                // When there is no space in right
-                var rightSpace = extent.width - dimX;
-                var leftSpace = dim.x - extent.x;
-                if (rightSpace >= offsetWidth + arrowSize) {
+
+                if (positionRight) {
                     position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_LEFT"];
                     x += arrowSize;
-                } else if (leftSpace >= offsetWidth + arrowSize) {
+                } else if (positionLeft) {
                     x = dim.x - offsetWidth;
                     position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_RIGHT"];
                     x -= arrowSize;
@@ -15355,16 +15361,24 @@ var Tooltip = function () {
 
             var positionVertical = function positionVertical() {
                 var position = void 0;
+                var y = void 0;
                 // Position tooltip at the center of plot
                 var x = dim.x - offsetWidth / 2 + dim.width / 2;
-                var y = dim.y - offsetHeight - arrowSize;
 
                 // Overflows to the right
-                if (extent.width - dim.x < offsetWidth) {
-                    x = extent.width - offsetWidth;
-                } else if (x < extent.x) {
+                if (extent.width - (dim.x + offset.x) < offsetWidth) {
+                    x = extent.width - offsetWidth - offset.x;
+                } else if (x + offset.x < extent.x) {
                     // Overflows to the left
                     x = extent.x;
+                }
+
+                if (positionTop) {
+                    y = dim.y - offsetHeight - arrowSize;
+                    position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_BOTTOM"];
+                } else {
+                    y = dim.y + dim.height + arrowSize;
+                    position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_TOP"];
                 }
 
                 var arrowPos = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getArrowPos"])(position, dim, {
@@ -15374,7 +15388,6 @@ var Tooltip = function () {
                     boxWidth: offsetWidth
                 }, _this._config);
 
-                position = _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_BOTTOM"];
                 return {
                     position: position,
                     arrowPos: arrowPos,
@@ -15385,7 +15398,13 @@ var Tooltip = function () {
 
             this._target = dim;
             if (!orientation) {
-                orientation = topSpace > offsetHeight + arrowSize ? 'vertical' : 'horizontal';
+                if (positionTop) {
+                    orientation = 'vertical';
+                } else if (positionRight || positionLeft) {
+                    orientation = 'horizontal';
+                } else {
+                    orientation = 'vertical';
+                }
             }
 
             if (orientation === 'horizontal') {
@@ -45161,23 +45180,24 @@ var getSkeletons = function getSkeletons(mount, layoutConfig, measurement) {
         container.style('overflow-x', 'scroll');
     }
     var mountPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-viz').style('width', canvasWidth + 'px').style('height', canvasHeight + 'px');
-    Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', headers, classPrefix + '-container', {}, function (d) {
-        return d;
-    }).sort(function () {
-        return -1;
-    }).style('width', canvasWidth + 'px').each(function (type) {
-        components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + type + '-container', true);
-        if (type === 'group') {
-            Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(components[type], 'div', legends, classPrefix + '-' + type + '-inner-container', {}, function (d) {
-                return d;
-            }).sort(function () {
-                return -1;
-            }).each(function (layoutType) {
-                components[layoutType] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + layoutType + '-container', true);
-            });
-        }
-    });
+    var containers = mountPoint.selectAll('.' + classPrefix + '-container').data(headers);
+    containers.exit().remove();
+    var containersEnter = containers.enter().append('div');
 
+    var mergedContainer = containersEnter.merge(containers).attr('class', classPrefix + '-container').style('width', canvasWidth + 'px').style('padding', null + 'px').each(function (type) {
+        components[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + type + '-container', true);
+    });
+    var innerContainer = mergedContainer.selectAll('.' + classPrefix + '-inner-container').data(function (d) {
+        if (d === 'group') {
+            return legends;
+        }return [];
+    });
+    innerContainer.exit().remove();
+    var innerContainerEnter = innerContainer.enter().append('div');
+
+    innerContainerEnter.merge(innerContainer).attr('class', classPrefix + '-inner-container').style('width', 'auto').style('height', 'auto').each(function (layoutType) {
+        components[layoutType] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).classed(classPrefix + '-' + layoutType + '-container', true);
+    });
     return components;
 };
 
@@ -45198,7 +45218,10 @@ var renderLegend = function renderLegend(legendConfig, container, legendComponen
         classPrefix = legendConfig.classPrefix;
     var position = legend.position;
 
-    var legendMount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-legend');
+    var legendMount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [legendComponents], classPrefix + '-inner-content', {}, function (d) {
+        return d;
+    });
+    legendMount.classed(classPrefix + '-legend', true);
     var align = position === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] || position === _constants__WEBPACK_IMPORTED_MODULE_1__["RIGHT"] ? _constants__WEBPACK_IMPORTED_MODULE_1__["VERTICAL"] : _constants__WEBPACK_IMPORTED_MODULE_1__["HORIZONTAL"];
     var legWidth = align === _constants__WEBPACK_IMPORTED_MODULE_1__["VERTICAL"] ? legendSpace.width : width;
     var legHeight = align === _constants__WEBPACK_IMPORTED_MODULE_1__["VERTICAL"] ? height - headerHeight : legendSpace.height;
@@ -45273,9 +45296,16 @@ var renderHeader = function renderHeader(layoutConfig, container, type, headers)
         align = config.align,
         padding = config.padding;
 
-    var cont = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], layoutConfig.classPrefix + '-' + type + '-container');
+    var sel = container.selectAll('.' + layoutConfig.classPrefix + '-inner-container').data([type]);
+    sel.exit().remove();
+    var selEnter = sel.enter().append('div');
+
+    var cont = selEnter.merge(sel);
+    cont.classed(layoutConfig.classPrefix + '-inner-container', true);
 
     headerCell && headerCell.render(cont.node());
+
+    cont.selectAll('div').classed(layoutConfig.classPrefix + '-inner-content', true);
     cont.style('width', 100 + '%');
 
     if (config && headerCell) {
@@ -45299,8 +45329,8 @@ var shiftHeaders = function shiftHeaders(config, shifter, measurement) {
 
 
     shifter += position === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? legendSpace.width : 0;
-    title && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-title-container').style('padding-left', title.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
-    subtitle && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-subtitle-container').style('padding-left', subtitle.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
+    title && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-title-container').select('.' + classPrefix + '-inner-content').style('padding-left', title.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
+    subtitle && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-subtitle-container').select('.' + classPrefix + '-inner-content').style('padding-left', subtitle.align === _constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"] ? shifter + 'px' : 0);
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-legend-horizontal-section').style('padding-left', shifter + 'px').selectAll('.' + classPrefix + '-legend-body, .' + classPrefix + '-legend-title').style('max-width', legendSpace.width - shifter + 'px');
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('.' + classPrefix + '-legend-vertical-section').style('padding-left', null).selectAll('.' + classPrefix + '-legend-body, .' + classPrefix + '-legend-title').style('max-width', null);
 };
@@ -45322,9 +45352,18 @@ var prepareGridContainer = function prepareGridContainer(mountPoint, measurement
         width = measurement.width;
     // Create container for the layout
 
-    var container = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mountPoint), 'div', [1], classPrefix + '-grid-layout').attr('id', classPrefix + '-grid-layout-' + alias).style('height', height + 'px').style('width', Math.ceil(width) + 'px');
+    var sel = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mountPoint).selectAll('.' + classPrefix + '-inner-content').data(['layout']);
+    sel.exit().remove();
+    var selEnter = sel.enter().append('div');
+
+    var container = selEnter.merge(sel).attr('class', classPrefix + '-inner-content').classed(classPrefix + '-grid-layout', true).attr('id', classPrefix + '-grid-layout-' + alias).style('height', height + 'px').style('padding', null).text('').style('width', Math.ceil(width) + 'px');
     // Mount for matrices
-    var mount = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], classPrefix + '-layout-grid-container').attr('id', classPrefix + '-layout-grid-container-' + alias).style('height', height + 'px').style('width', Math.ceil(width) + 'px').style('overflow-x', width > 300 ? 'none' : 'scroll').style('overflow-y', height > 300 ? 'none' : 'scroll');
+    var innerSel = container.selectAll('.' + classPrefix + '-layout-grid-container').data(['layout2']);
+    innerSel.exit().remove();
+    var innerSelEnter = innerSel.enter().append('div');
+
+    var mount = innerSelEnter.merge(innerSel);
+    mount.classed(classPrefix + '-layout-grid-container', true).attr('id', classPrefix + '-layout-grid-container-' + alias).style('height', height + 'px').style('width', Math.ceil(width) + 'px').style('overflow-x', width > 300 ? 'none' : 'scroll').style('overflow-y', height > 300 ? 'none' : 'scroll');
 
     return {
         mount: mount,
@@ -45671,7 +45710,7 @@ var DEFAULT_CONFIG = {
         collapse: true,
         spacing: 0
     },
-    groupBy: {
+    autoGroupBy: {
         disabled: false
     }
 };
@@ -45879,6 +45918,8 @@ muze.utils = {
     getClientPoint: muze_utils__WEBPACK_IMPORTED_MODULE_1__["getClientPoint"],
     getEvent: muze_utils__WEBPACK_IMPORTED_MODULE_1__["getEvent"],
     makeElement: muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"],
+    selectElement: muze_utils__WEBPACK_IMPORTED_MODULE_1__["selectElement"],
+    DateTimeFormatter: muze_utils__WEBPACK_IMPORTED_MODULE_1__["DateTimeFormatter"],
     require: muze_utils__WEBPACK_IMPORTED_MODULE_1__["require"]
 };
 
@@ -50406,7 +50447,7 @@ var computeMatrices = function computeMatrices(context, config) {
         selection = config.selection,
         transform = config.transform;
 
-    var groupBy = globalConfig.groupBy;
+    var groupBy = globalConfig.autoGroupBy;
 
     var _resolver$dependencie = resolver.dependencies(),
         labelManager = _resolver$dependencie.smartlabel;
@@ -51977,7 +52018,7 @@ var MatrixResolver = function () {
                 size = config.size,
                 globalConfig = config.globalConfig;
 
-            var groupBy = globalConfig.groupBy;
+            var groupBy = globalConfig.autoGroupBy;
 
             var _getAllFields = this.getAllFields(),
                 rowFacets = _getAllFields.rowFacets,
@@ -53993,9 +54034,13 @@ var BaseLayer = function (_SimpleLayer) {
 
     }, {
         key: 'getPointsFromIdentifiers',
-        value: function getPointsFromIdentifiers(identifiers, getAllAttrs) {
+        value: function getPointsFromIdentifiers(identifiers) {
             var _ref;
 
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            var getAllAttrs = config.getAllAttrs;
+            var getBBox = config.getBBox;
             if (!this.data()) {
                 return [];
             }
@@ -54022,14 +54067,26 @@ var BaseLayer = function (_SimpleLayer) {
                 });
             });
             return getAllAttrs ? filteredPoints : filteredPoints.map(function (d) {
-                var attrs = d.update || d;
-                if (!attrs.width) {
-                    attrs.width = 2;
+                var obj = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["clone"])(d);
+                if (getBBox) {
+                    var update = obj.update || obj;
+                    if (obj.size !== undefined) {
+                        var sizeVal = Math.sqrt(obj.size / Math.PI) * 2;
+                        update.width = sizeVal;
+                        update.height = sizeVal;
+                        update.x -= sizeVal / 2;
+                        update.y -= sizeVal / 2;
+                    } else {
+                        if (update.width === undefined) {
+                            update.width = 2;
+                        }
+                        if (update.height === undefined) {
+                            update.height = 2;
+                        }
+                    }
                 }
-                if (!attrs.height) {
-                    attrs.height = 2;
-                }
-                return attrs;
+
+                return obj.update || obj;
             }).sort(function (a, b) {
                 return a.y - b.y;
             });
@@ -55342,6 +55399,8 @@ var ArcLayer = function (_BaseLayer) {
                 d.angleVal = data[i][angleIndex];
                 d.sizeVal = sizeVal;
                 d.uid = uids[i];
+                d.rowId = d.uid;
+                d.source = data[i];
                 return d;
             });
             return pieData;
@@ -55812,6 +55871,8 @@ var AreaLayer = function (_LineLayer) {
                     },
                     _id: d._id,
                     _data: d._data,
+                    source: d._data,
+                    rowId: d._id,
                     style: style,
                     meta: meta
                 };
@@ -56314,6 +56375,8 @@ var getTranslatedPoints = function getTranslatedPoints(context, data, sizeConfig
                 style: style,
                 _data: d._data,
                 _id: d._id,
+                source: d._data,
+                rowId: d._id,
                 meta: meta
             };
             points.push(point);
@@ -57189,6 +57252,8 @@ var LineLayer = function (_BaseLayer) {
                     style: style,
                     _data: d._data,
                     _id: d._id,
+                    rowId: d._id,
+                    source: d._data,
                     meta: meta
                 };
                 _this2.cachePoint(d[key], point);
@@ -57231,6 +57296,7 @@ var LineLayer = function (_BaseLayer) {
             var qualifiedClassName = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getQualifiedClassName"])(defClassName, this.id(), config.classPrefix);
             var containerSelection = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(container);
             var colorField = encoding.color.field;
+            var colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
             var colorFieldMeasure = fieldsConfig[colorField] && fieldsConfig[colorField].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
 
             this._points = [];
@@ -57271,9 +57337,7 @@ var LineLayer = function (_BaseLayer) {
                     });
                 }
             }, function (d) {
-                return d.reduce(function (e, n) {
-                    return n + e._id;
-                }, '');
+                return d[0]._data[colorFieldIndex] || d[0]._id;
             });
 
             Object(_helpers__WEBPACK_IMPORTED_MODULE_6__["attachDataToVoronoi"])(this._voronoi, this._points);
@@ -57694,7 +57758,9 @@ var PointLayer = function (_BaseLayer) {
                         },
                         style: style,
                         _data: row,
-                        _id: d._id
+                        _id: d._id,
+                        source: d._data,
+                        rowId: d._id
                     };
                     points.push(point);
                     _this2.cachePoint(d[key], point);
@@ -58276,7 +58342,9 @@ var TextLayer = function (_BaseLayer) {
                         colorTransform: {}
                     },
                     _data: row,
-                    _id: d._id
+                    _id: d._id,
+                    source: d._data,
+                    rowId: d._id
                 };
             });
             points = Object(_helpers__WEBPACK_IMPORTED_MODULE_4__["positionPoints"])(this, points);
@@ -58661,6 +58729,8 @@ var TickLayer = function (_PointLayer) {
                         style: style,
                         _data: row,
                         _id: d._id,
+                        source: row,
+                        rowId: d._id,
                         meta: meta
                     };
                     if (individualClassName instanceof Function) {
@@ -60926,6 +60996,8 @@ var VisualUnit = function () {
     }, {
         key: 'getPlotPointsFromIdentifiers',
         value: function getPlotPointsFromIdentifiers(identifiers) {
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
             var points = [];
             var parsedIdentifiers = identifiers;
             if (identifiers === null) {
@@ -60940,7 +61012,7 @@ var VisualUnit = function () {
             for (var i = 0; i < len; i++) {
                 var layer = layers[i];
                 if (layer.config().interactive !== false) {
-                    points = [].concat(_toConsumableArray(points), _toConsumableArray(layer.getPointsFromIdentifiers(parsedIdentifiers)));
+                    points = [].concat(_toConsumableArray(points), _toConsumableArray(layer.getPointsFromIdentifiers(parsedIdentifiers, config)));
                 }
             }
             return points;

@@ -43,7 +43,6 @@
   border-top: 10px solid #fbfbfb;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  top: 100%;
   right: 0; }
 
 .muze-tooltip-arrow-right {
@@ -63,14 +62,13 @@
   border-bottom: 10px solid #fbfbfb;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  top: 100%;
   right: 0; }
 
 .muze-tooltip-background-arrow-top {
   border-bottom: 12px solid rgba(151, 151, 151, 0.19);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  top: 102%;
+  top: 0%;
   right: 0; }
 
 .muze-tooltip-background-arrow-bottom {
@@ -1111,7 +1109,8 @@
   float: left; }
 
 .muze-layout-container {
-  float: left; }
+  float: left;
+  position: relative; }
 
 .muze-legend-section, .muze-board-legend {
   text-align: center;

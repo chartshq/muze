@@ -48,7 +48,7 @@ layerFactory.composeLayers('boxMark', [
         className: 'lowerBand',
         encoding: {
             x0: 'boxMark.encoding.meanValue',
-            x: 'boxMark.encoding.quarter',
+            x: 'boxMark.encoding.quarter'
         },
         transform: {
             type: 'identity'
@@ -63,7 +63,7 @@ layerFactory.composeLayers('boxMark', [
         className: 'upperBand',
         encoding: {
             x: 'boxMark.encoding.thirdQuarter',
-            x0: 'boxMark.encoding.meanValue',
+            x0: 'boxMark.encoding.meanValue'
         },
         transform: {
             type: 'identity'
@@ -150,7 +150,7 @@ d3.json('../data/iris.cleared.json', (data) => {
     },
     transform: {
         type: 'identity'
-    },
+    }
 }])
 .color('organ')
         .mount(document.getElementsByClassName('chart')[0]);

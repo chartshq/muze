@@ -69,20 +69,19 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Maker'];
-        rootData = rootData.groupBy(['Maker']);
-        rootData = rootData.sort([['Acceleration', 'ASC']]); 
+            columns = ['Displacement'];
+        // rootData = rootData.groupBy(['Maker']);
+        // rootData = rootData.sort([['Acceleration', 'ASC']]);
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
             .width(1200)
             .height(800)
+            .detail(['Maker'])
+            .color('Origin')
             .layers([{
-                mark: 'bar',
-                transform: {
-                    type: 'stack'
-                }
+                mark: 'point'
             }])
             .config({
                 groupBy: {
