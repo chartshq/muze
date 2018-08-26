@@ -75,13 +75,15 @@ export default class Tooltip extends SpawnableSideEffect {
 
             const dt = dataModels[i];
             enter[i] = true;
-            const htmlContainer = drawingInf.parentContainer.getBoundingClientRect();
-            const layoutBoundBox = document.body.getBoundingClientRect();
+            const layoutContainer = drawingInf.parentContainer;
+            const layoutBoundBox = layoutContainer.getBoundingClientRect();
             const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
-            const offsetLeft = Math.abs(layoutBoundBox.left - unitBoundBox.left);
-            const offsetTop = Math.abs(layoutBoundBox.top - unitBoundBox.top);
-            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(document.body,
+
+            const offsetLeft = unitBoundBox.left - layoutBoundBox.left;
+            const offsetTop = unitBoundBox.top - layoutBoundBox.top;
+            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(layoutContainer,
                     drawingInf.svgContainer);
+
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
@@ -92,8 +94,8 @@ export default class Tooltip extends SpawnableSideEffect {
                             .extent({
                                 x: 0,
                                 y: 0,
-                                width: htmlContainer.width,
-                                height: htmlContainer.height
+                                width: layoutBoundBox.width,
+                                height: layoutBoundBox.height
                             })
                             .offset({
                                 x: offsetLeft,
