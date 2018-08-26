@@ -187,7 +187,6 @@ export default class BandAxis extends SimpleAxis {
      */
     updateDomainBounds (domain) {
         let currentDomain = this.domain();
-        const sortDomain = this.config().sortDomain;
         if (this.config().domain) {
             currentDomain = this.config().domain;
         } else {
@@ -195,9 +194,7 @@ export default class BandAxis extends SimpleAxis {
                 currentDomain = domain;
             }
             currentDomain = currentDomain.concat(domain);
-            currentDomain = sortDomain ? sortDomain(currentDomain) : currentDomain.sort();
         }
-
         this.domain(currentDomain);
         return this;
     }
