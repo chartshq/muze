@@ -111,9 +111,9 @@ export default class Tooltip {
         content.config(contentConf);
 
         if (data === null) {
-            // content.clear();
-            // container.remove();
-            // delete this._contents[name];
+            content.clear();
+            container.remove();
+            delete this._contents[name];
         } else {
             content.update({
                 model: data,
