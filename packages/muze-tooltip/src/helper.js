@@ -1,5 +1,5 @@
 import { getQualifiedClassName } from 'muze-utils';
-import { TOOLTIP_LEFT, TOOLTIP_RIGHT, ARROW_RIGHT, ARROW_LEFT } from './constants';
+import { TOOLTIP_LEFT, TOOLTIP_RIGHT, ARROW_RIGHT, ARROW_LEFT, TOOLTIP_BOTTOM } from './constants';
 
 export const getArrowPos = (orient, dim, measurement, config) => {
     let arrowPos;
@@ -60,9 +60,9 @@ export const placeArrow = (context, position, arrowPos) => {
         tooltipBackground.style('top', `${arrowPos}px`);
         tooltipBackground.style('left', '');
     } else {
-        tooltipArrow.style('top', '');
+        position === TOOLTIP_BOTTOM ? tooltipArrow.style('top', '100%') : tooltipArrow.style('top', `-${arrowConf.size}px`);
         tooltipArrow.style('left', `${arrowPos}px`);
-        tooltipBackground.style('top', '');
+        position === TOOLTIP_BOTTOM ? tooltipBackground.style('top', '100%') : tooltipBackground.style('top', `-${arrowConf.size + 3}px`);
         tooltipBackground.style('left', `${arrowPos}px`);
     }
     tooltipArrow.classed(`${classPrefix}-tooltip-arrow`, true);

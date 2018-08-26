@@ -6,7 +6,7 @@ import {
     setStyles,
     makeElement
 } from 'muze-utils';
-import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM,
+import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM, TOOLTIP_TOP,
     INITIAL_STYLE } from './constants';
 import { defaultConfig } from './default-config';
 import { getArrowPos, placeArrow, reorderContainers } from './helper';
@@ -225,19 +225,23 @@ export default class Tooltip {
         const arrowSize = config.arrow.size;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
+        // When there is no space in right
+        const dimX = dim.x + dim.width + offset.x;
+        const rightSpace = extent.width - dimX;
+        const leftSpace = dim.x + offset.x - extent.x;
+        const positionTop = topSpace > (offsetHeight + arrowSize);
+        const positionRight = rightSpace >= offsetWidth + arrowSize;
+        const positionLeft = leftSpace >= offsetWidth + arrowSize;
 
         const positionHorizontal = () => {
             let position;
-            const dimX = dim.x + dim.width + offset.x;
             let x = dim.x + dim.width;
             let y = dim.y;
-            // When there is no space in right
-            const rightSpace = extent.width - dimX;
-            const leftSpace = dim.x + offset.x - extent.x;
-            if (rightSpace >= offsetWidth + arrowSize) {
+
+            if (positionRight) {
                 position = TOOLTIP_LEFT;
                 x += arrowSize;
-            } else if (leftSpace >= offsetWidth + arrowSize) {
+            } else if (positionLeft) {
                 x = dim.x - offsetWidth;
                 position = TOOLTIP_RIGHT;
                 x -= arrowSize;
@@ -266,15 +270,23 @@ export default class Tooltip {
 
         const positionVertical = () => {
             let position;
+            let y;
             // Position tooltip at the center of plot
             let x = dim.x - offsetWidth / 2 + dim.width / 2;
-            const y = dim.y - offsetHeight - arrowSize;
 
             // Overflows to the right
             if ((extent.width - (dim.x + offset.x)) < offsetWidth) {
                 x = extent.width - offsetWidth - offset.x;
             } else if ((x + offset.x) < extent.x) { // Overflows to the left
                 x = extent.x;
+            }
+
+            if (positionTop) {
+                y = dim.y - offsetHeight - arrowSize;
+                position = TOOLTIP_BOTTOM;
+            } else {
+                y = dim.y + dim.height + arrowSize;
+                position = TOOLTIP_TOP;
             }
 
             const arrowPos = getArrowPos(position, dim, {
@@ -284,7 +296,6 @@ export default class Tooltip {
                 boxWidth: offsetWidth
             }, this._config);
 
-            position = TOOLTIP_BOTTOM;
             return {
                 position,
                 arrowPos,
@@ -295,7 +306,13 @@ export default class Tooltip {
 
         this._target = dim;
         if (!orientation) {
-            orientation = topSpace > (offsetHeight + arrowSize) ? 'vertical' : 'horizontal';
+            if (positionTop) {
+                orientation = 'vertical';
+            } else if (positionRight || positionLeft) {
+                orientation = 'horizontal';
+            } else {
+                orientation = 'vertical';
+            }
         }
 
         if (orientation === 'horizontal') {
