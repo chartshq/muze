@@ -122,6 +122,8 @@ export default class AreaLayer extends LineLayer {
                 },
                 _id: d._id,
                 _data: d._data,
+                source: d._data,
+                rowId: d._id,
                 style,
                 meta
             };

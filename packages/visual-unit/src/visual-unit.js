@@ -504,7 +504,7 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    getPlotPointsFromIdentifiers (identifiers) {
+    getPlotPointsFromIdentifiers (identifiers, config = {}) {
         let points = [];
         let parsedIdentifiers = identifiers;
         if (identifiers === null) {
@@ -519,7 +519,7 @@ export default class VisualUnit {
         for (let i = 0; i < len; i++) {
             const layer = layers[i];
             if (layer.config().interactive !== false) {
-                points = [...points, ...layer.getPointsFromIdentifiers(parsedIdentifiers)];
+                points = [...points, ...layer.getPointsFromIdentifiers(parsedIdentifiers, config)];
             }
         }
         return points;

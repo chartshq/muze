@@ -55,6 +55,7 @@ export const createAxis = (context) => {
         orientation: align === ALIGN.VERTICAL ? RIGHT : BOTTOM,
         style: context._computedStyle,
         nice: false,
+        showAxisName: false,
         tickValues: data.map(d => d.value),
         fixedBaseline: false
     }, { labelManager: context._labelManager });

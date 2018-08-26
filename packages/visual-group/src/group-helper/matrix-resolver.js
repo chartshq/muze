@@ -485,7 +485,7 @@ export default class MatrixResolver {
             size,
             globalConfig
         } = config;
-        const groupBy = globalConfig.groupBy;
+        const groupBy = globalConfig.autoGroupBy;
         const {
             rowFacets,
             colFacets

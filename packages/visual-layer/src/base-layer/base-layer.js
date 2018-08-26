@@ -6,7 +6,8 @@ import {
     selectElement,
     ReservedFields,
     registerListeners,
-    transactor
+    transactor,
+    clone
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
@@ -433,7 +434,9 @@ export default class BaseLayer extends SimpleLayer {
      * @returns
      * @memberof BaseLayer
      */
-    getPointsFromIdentifiers (identifiers, getAllAttrs) {
+    getPointsFromIdentifiers (identifiers, config = {}) {
+        const getAllAttrs = config.getAllAttrs;
+        const getBBox = config.getBBox;
         if (!this.data()) {
             return [];
         }
@@ -454,14 +457,26 @@ export default class BaseLayer extends SimpleLayer {
             });
         });
         return getAllAttrs ? filteredPoints : filteredPoints.map((d) => {
-            const attrs = d.update || d;
-            if (!attrs.width) {
-                attrs.width = 2;
+            const obj = clone(d);
+            if (getBBox) {
+                const update = obj.update || obj;
+                if (obj.size !== undefined) {
+                    const sizeVal = Math.sqrt(obj.size / Math.PI) * 2;
+                    update.width = sizeVal;
+                    update.height = sizeVal;
+                    update.x -= sizeVal / 2;
+                    update.y -= sizeVal / 2;
+                } else {
+                    if (update.width === undefined) {
+                        update.width = 2;
+                    }
+                    if (update.height === undefined) {
+                        update.height = 2;
+                    }
+                }
             }
-            if (!attrs.height) {
-                attrs.height = 2;
-            }
-            return attrs;
+
+            return obj.update || obj;
         }).sort((a, b) => a.y - b.y);
     }
 

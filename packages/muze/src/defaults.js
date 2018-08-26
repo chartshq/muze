@@ -40,7 +40,7 @@ export const DEFAULT_CONFIG = {
         collapse: true,
         spacing: 0
     },
-    groupBy: {
+    autoGroupBy: {
         disabled: false
     }
 };

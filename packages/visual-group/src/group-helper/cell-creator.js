@@ -444,7 +444,7 @@ export const computeMatrices = (context, config) => {
             selection,
             transform
         } = config;
-    const groupBy = globalConfig.groupBy;
+    const groupBy = globalConfig.autoGroupBy;
     const { smartlabel: labelManager } = resolver.dependencies();
     const fieldMap = datamodel.getFieldsConfig();
     const layerConfig = resolver.layerConfig();

@@ -150,6 +150,8 @@ export default class TickLayer extends PointLayer {
                     style,
                     _data: row,
                     _id: d._id,
+                    source: row,
+                    rowId: d._id,
                     meta
                 };
                 if (individualClassName instanceof Function) {

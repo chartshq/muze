@@ -286,6 +286,8 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 style,
                 _data: d._data,
                 _id: d._id,
+                source: d._data,
+                rowId: d._id,
                 meta
             };
             points.push(point);

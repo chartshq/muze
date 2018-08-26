@@ -67,7 +67,11 @@
   
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');
-		window.canvas = env.canvas();
+        window.canvas = env.canvas();
+        DataModel.calculateVariable({
+            name: 'va',
+            type: 'measure',
+        }, ['Horsepower', 'Weight', (hp, weight)=>{}])
 		let rows = [  'value'],
             columns = [['Year'], ['Year']];
 		canvas = canvas

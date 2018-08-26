@@ -7,7 +7,7 @@
         html = muze.operators.html,
         actionModel = muze.ActionModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
-    console.log(muze.SideEffects, muze.Behaviours);
+
 
 
     d3.json('../data/cars.json', (data) => {
@@ -39,7 +39,8 @@
             },
             {
                 name: 'Acceleration',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Origin',
@@ -67,23 +68,26 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Acceleration', 'Horsepower', 'Miles_per_Gallon'],
-            columns = ['Year']
+        let rows = ['Acceleration'],
+            columns = ['Maker'];
+        rootData = rootData.groupBy(['Maker']);
+        rootData = rootData.sort([['Acceleration', 'ASC']]); 
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
             .width(1200)
             .height(800)
-            .color('Origin')
             .layers([{
-                mark: 'area',
+                mark: 'bar',
                 transform: {
-                    type: 'stack',
-                    sort: 'descending'
+                    type: 'stack'
                 }
             }])
             .config({
+                groupBy: {
+                    disabled: true
+                },
                 border: {
                     width: 2,
                 },

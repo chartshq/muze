@@ -85,7 +85,9 @@ export default class TextLayer extends BaseLayer {
                     colorTransform: {}
                 },
                 _data: row,
-                _id: d._id
+                _id: d._id,
+                source: d._data,
+                rowId: d._id
             };
         });
         points = positionPoints(this, points);

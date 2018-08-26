@@ -137,6 +137,8 @@ export default class ArcLayer extends BaseLayer {
             d.angleVal = data[i][angleIndex];
             d.sizeVal = sizeVal;
             d.uid = uids[i];
+            d.rowId = d.uid;
+            d.source = data[i];
             return d;
         });
         return pieData;

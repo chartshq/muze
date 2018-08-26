@@ -33,6 +33,7 @@ export default class Tooltip {
         const classPrefix = tooltipConf.classPrefix;
         const contentClass = tooltipConf.content.parentClassName;
         const container = makeElement(htmlContainer, 'div', [1], `${classPrefix}-tooltip-container`);
+        this._container = container;
         this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
@@ -191,10 +192,8 @@ export default class Tooltip {
             x: 0,
             y: 0
         };
-        const scrollTop = document.body.scrollTop;
-        const scrollLeft = document.body.scrollLeft;
-        this._tooltipContainer.style('left', `${offset.x + x - scrollLeft}px`).style('top',
-            `${offset.y + y - scrollTop}px`);
+        this._tooltipContainer.style('left', `${offset.x + x}px`).style('top',
+            `${offset.y + y}px`);
 
         return this;
     }
@@ -215,6 +214,9 @@ export default class Tooltip {
 
         const extent = this._extent;
         const node = this._tooltipContainer.node();
+
+        this._tooltipContainer.style('top', '0px')
+                        .style('left', '0px');
         const offsetWidth = node.offsetWidth + 2;
         const offsetHeight = node.offsetHeight + 2;
         const config = this._config;
@@ -231,7 +233,7 @@ export default class Tooltip {
             let y = dim.y;
             // When there is no space in right
             const rightSpace = extent.width - dimX;
-            const leftSpace = dim.x - extent.x;
+            const leftSpace = dim.x + offset.x - extent.x;
             if (rightSpace >= offsetWidth + arrowSize) {
                 position = TOOLTIP_LEFT;
                 x += arrowSize;
@@ -269,9 +271,9 @@ export default class Tooltip {
             const y = dim.y - offsetHeight - arrowSize;
 
             // Overflows to the right
-            if ((extent.width - dim.x) < offsetWidth) {
-                x = extent.width - offsetWidth;
-            } else if (x < extent.x) { // Overflows to the left
+            if ((extent.width - (dim.x + offset.x)) < offsetWidth) {
+                x = extent.width - offsetWidth - offset.x;
+            } else if ((x + offset.x) < extent.x) { // Overflows to the left
                 x = extent.x;
             }
 

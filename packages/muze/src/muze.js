@@ -6,8 +6,10 @@ import {
     DataModel,
     makeElement,
     getClientPoint,
+    selectElement,
     getEvent,
-    require
+    require,
+    DateTimeFormatter
 } from 'muze-utils';
 import {
     SurrogateSideEffect,
@@ -169,6 +171,8 @@ muze.utils = {
     getClientPoint,
     getEvent,
     makeElement,
+    selectElement,
+    DateTimeFormatter,
     require
 };
 
