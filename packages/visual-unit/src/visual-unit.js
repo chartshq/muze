@@ -331,11 +331,11 @@ export default class VisualUnit {
      * @returns
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers, mode) {
+    getDataModelFromIdentifiers (identifiers, mode, parentModel) {
         if (identifiers === null) {
             return null;
         }
-        const dataModel = this.data();
+        const dataModel = parentModel || this.data();
         return getDataModelFromIdentifiers(dataModel, identifiers, mode);
     }
 

@@ -114,6 +114,14 @@ export default class UnitFireBolt extends Firebolt {
         }
     }
 
+    prepareSelectionSets (behaviours) {
+        const data = this.context.data();
+        if (data) {
+            this.createSelectionSet(data.getData().uids, behaviours);
+        }
+        return this;
+    }
+
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
         return this;

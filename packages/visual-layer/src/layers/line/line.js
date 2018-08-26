@@ -251,7 +251,7 @@ export default class LineLayer extends BaseLayer {
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 
                 if (!colorFieldMeasure) {
-                    style = points[i].style;
+                    style = points[0].style;
                 }
                 this.getDrawFn()({
                     container: group.node(),
@@ -263,7 +263,7 @@ export default class LineLayer extends BaseLayer {
                     connectNullData: config.connectNullData
                 });
             }
-        });
+        }, d => d.reduce((e, n) => n + e._id, ''));
 
         attachDataToVoronoi(this._voronoi, this._points);
         return this;

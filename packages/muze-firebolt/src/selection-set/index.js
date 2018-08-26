@@ -178,6 +178,22 @@ class SelectionSet {
     }
 
     /**
+     * Returns a set of unique ids which are already present in entry set
+     * @param {Array} addSet Array of unique ids which are added
+     *
+     * @return {Array} Array of unique ids which are already in old entry set or new entry set
+     */
+    getExistingEntrySet (addSet) {
+        const set = this._set;
+        return addSet.filter(d => set[d] === SELECTION_NEW_ENTRY || set[d] === SELECTION_OLD_ENTRY);
+    }
+
+    getExistingExitSet (removeSet) {
+        const set = this._set;
+        return removeSet.filter(d => set[d] === SELECTION_NEW_EXIT || set[d] === SELECTION_OLD_EXIT);
+    }
+
+    /**
      * Gets the set of ids which are added in the selection set.
      * @return {Array.<string>} Array of unique ids
      */

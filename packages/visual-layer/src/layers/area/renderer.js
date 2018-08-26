@@ -18,7 +18,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
     const curveInterpolatorFn = pathInterpolators[interpolate];
-    const selection = mount.selectAll('path').data([1]);
+    const selection = mount.selectAll('path').data([params.points]);
     const [enterAreaPath, updateAreaPath] = ['enter', 'update'].map(e => area().curve(curveInterpolatorFn)
                     .x(d => d[e].x)
                     .y1(d => d[e].y)

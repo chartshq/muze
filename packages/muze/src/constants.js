@@ -43,8 +43,11 @@ export const LEGEND_TYPE_MAP = {
     [`${ORDINAL}-${true}-${SIZE}`]: DiscreteLegend,
     [`${ORDINAL}-${true}-${SHAPE}`]: DiscreteLegend,
     [`${ORDINAL}-${false}-${COLOR}`]: DiscreteLegend,
-    [`${ORDINAL}-${false}-${SIZE}`]: DiscreteLegend,
     [`${ORDINAL}-${false}-${SHAPE}`]: DiscreteLegend,
+    [`${ORDINAL}-${false}-${SIZE}`]: DiscreteLegend,
+    [`${LINEAR}-${false}-${SIZE}`]: DiscreteLegend,
+    [`${LINEAR}-${true}-${SIZE}`]: DiscreteLegend,
+    [`${LINEAR}-${false}-${SHAPE}`]: DiscreteLegend,
     [`${LINEAR}-${true}-${COLOR}`]: StepLegend,
     [`${LINEAR}-${false}-${COLOR}`]: GradientLegend
 };

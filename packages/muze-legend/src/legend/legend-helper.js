@@ -140,11 +140,12 @@ export const computeItemSpaces = (config, measures, data) => {
     labelSpaces.forEach((labelSpace, i) => {
         const itemSpace = { width: 0, height: 0 };
         const iconSpace = { width: 0, height: 0 };
+        const datum = data[i] || {};
             // Compute each legend item height/width
         if (textOrientation === LEFT || textOrientation === RIGHT) {
             // Get label, icon and item widths
             labelSpace.width += effPadding;
-            iconSpace.width = (data[i].size ? 2 * Math.sqrt(data[i].size / Math.PI) : icon.width) + effPadding;
+            iconSpace.width = (datum.size ? 2 * Math.sqrt(datum.size / Math.PI) : icon.width) + effPadding;
             maxIconWidth = Math.max(iconSpace.width, maxIconWidth);
             itemSpace.width = labelSpace.width + maxIconWidth;
 
@@ -154,7 +155,7 @@ export const computeItemSpaces = (config, measures, data) => {
             itemSpace.height = labelSpace.height;
         } else {
             // Get label, icon and item widths
-            labelSpace.width = Math.max(labelSpace.width, data[i].size ? 2 * Math.sqrt(data[i].size / Math.PI)
+            labelSpace.width = Math.max(labelSpace.width, datum.size ? 2 * Math.sqrt(datum.size / Math.PI)
             : icon.width) + effPadding;
             iconSpace.width = labelSpace.width;
             itemSpace.width = labelSpace.width;

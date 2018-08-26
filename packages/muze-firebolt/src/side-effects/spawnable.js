@@ -3,8 +3,8 @@ import { makeElement } from 'muze-utils';
 import GenericSideEffect from './generic';
 
 export default class SpawnableSideEffect extends GenericSideEffect {
-    createElement (container, elemType, data, className) {
-        return makeElement(container, elemType, data, className);
+    createElement (container, elemType, data, className, callbacks) {
+        return makeElement(container, elemType, data, className, callbacks);
     }
 
     drawingContext (...drawingContext) {
