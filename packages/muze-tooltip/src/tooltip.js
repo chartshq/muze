@@ -214,6 +214,9 @@ export default class Tooltip {
 
         const extent = this._extent;
         const node = this._tooltipContainer.node();
+
+        this._tooltipContainer.style('top', '0px')
+                        .style('left', '0px');
         const offsetWidth = node.offsetWidth + 2;
         const offsetHeight = node.offsetHeight + 2;
         const config = this._config;
@@ -268,9 +271,9 @@ export default class Tooltip {
             const y = dim.y - offsetHeight - arrowSize;
 
             // Overflows to the right
-            if ((extent.width - dim.x) < offsetWidth) {
-                x = extent.width - offsetWidth;
-            } else if (x < extent.x) { // Overflows to the left
+            if ((extent.width - (dim.x + offset.x)) < offsetWidth) {
+                x = extent.width - offsetWidth - offset.x;
+            } else if ((x + offset.x) < extent.x) { // Overflows to the left
                 x = extent.x;
             }
 

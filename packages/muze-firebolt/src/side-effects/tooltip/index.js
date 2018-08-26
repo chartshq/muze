@@ -63,13 +63,16 @@ export default class Tooltip extends SpawnableSideEffect {
         } else {
             dataModels.push(dataModel);
         }
-        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria);
+        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria, {
+            getBBox: true
+        });
 
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];
             if (fragmented) {
-                plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID], dataModels[i].getData().uids]);
+                plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID],
+                    dataModels[i].getData().uids], { getBBox: true });
                 plotDim = plotDim && plotDim[0];
             }
 
