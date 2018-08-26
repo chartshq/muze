@@ -62,23 +62,40 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
         container.style('overflow-x', 'scroll');
     }
     const mountPoint = makeElement(container, 'div', [1], `${classPrefix}-viz`)
-       .style('width', `${canvasWidth}px`)
-       .style('height', `${canvasHeight}px`);
-    makeElement(mountPoint, 'div', headers, `${classPrefix}-container`, {}, d => d).sort(() => -1)
-                    .style('width', `${canvasWidth}px`)
-                    .each(function (type) {
-                        components[type] = selectElement(this)
-                            .classed(`${classPrefix}-${type}-container`, true);
-                        if (type === 'group') {
-                            makeElement(components[type], 'div', legends, `${classPrefix}-${type}-inner-container`,
-                            {}, d => d).sort(() => -1)
-                                            .each(function (layoutType) {
-                                                components[layoutType] = selectElement(this)
-                                                     .classed(`${classPrefix}-${layoutType}-container`, true);
-                                            });
-                        }
-                    });
+        .style('width', `${canvasWidth}px`)
+        .style('height', `${canvasHeight}px`);
+    const containers = mountPoint
+        .selectAll(`.${classPrefix}-container`)
+        .data(headers);
+    containers.exit().remove();
+    const containersEnter = containers.enter().append('div');
 
+    const mergedContainer = containersEnter.merge(containers)
+                    .attr('class', `${classPrefix}-container`)
+                    .style('width', `${canvasWidth}px`)
+                    .style('padding', `${null}px`)
+                    .each(function (type) {
+                        components[type] = selectElement(this).classed(`${classPrefix}-${type}-container`, true);
+                    });
+    const innerContainer = mergedContainer
+                    .selectAll(`.${classPrefix}-inner-container`)
+                    .data((d) => {
+                        if (d === 'group') {
+                            return legends;
+                        } return [];
+                    });
+    innerContainer.exit().remove();
+    const innerContainerEnter = innerContainer.enter().append('div');
+
+    innerContainerEnter
+                    .merge(innerContainer)
+                    .attr('class', `${classPrefix}-inner-container`)
+                    .style('width', 'auto')
+                    .style('height', 'auto')
+                    .each(function (layoutType) {
+                        components[layoutType] = selectElement(this)
+                             .classed(`${classPrefix}-${layoutType}-container`, true);
+                    });
     return components;
 };
 
@@ -94,7 +111,8 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
     const { legendSpace, headerHeight, height, width } = measurement;
     const { legend, classPrefix } = legendConfig;
     const { position } = legend;
-    const legendMount = makeElement(container, 'div', [1], `${classPrefix}-legend`);
+    const legendMount = makeElement(container, 'div', [legendComponents], `${classPrefix}-inner-content`, {}, d => d);
+    legendMount.classed(`${classPrefix}-legend`, true);
     const align = (position === LEFT || position === RIGHT) ? VERTICAL : HORIZONTAL;
     const legWidth = align === VERTICAL ? legendSpace.width : width;
     const legHeight = align === VERTICAL ? height - headerHeight : legendSpace.height;
@@ -130,9 +148,9 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
         });
 
         const mount = makeElement(legendMount, ['div'], sectionComponents, `${classPrefix}-legend-section`)
-                        .each((d, i) => selectElement(this).classed(`${classPrefix}-legend-section-${i}`, true))
-                        .classed(`${classPrefix}-legend-vertical-section`, true)
-                        .style('width', d => `${d[0].legendWidth}px`);
+            .each((d, i) => selectElement(this).classed(`${classPrefix}-legend-section-${i}`, true))
+            .classed(`${classPrefix}-legend-vertical-section`, true)
+            .style('width', d => `${d[0].legendWidth}px`);
         makeElement(mount, ['div'], d => d, `${classPrefix}-legend-components`, {}, d => d.legend.id())
                         .each(function (d) {
                             d.legend.mount(this);
@@ -140,9 +158,9 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
                         .style('width', d => `${d.legendWidth}px`);
     } else {
         const mount = makeElement(legendMount, 'div', [1], `${classPrefix}-legend-section`)
-                        .classed(`${classPrefix}-legend-horizontal-section`, true)
-                        .classed(`${classPrefix}-legend-section-${0}`, true)
-                        .style('width', `${legWidth}px`);
+            .classed(`${classPrefix}-legend-horizontal-section`, true)
+            .classed(`${classPrefix}-legend-section-${0}`, true)
+            .style('width', `${legWidth}px`);
 
         makeElement(mount, 'div', legendComponents, `${classPrefix}-legend-components`, {}, d => d.legend.id())
                         .each(function (d) { d.legend.mount(this); })
@@ -162,9 +180,18 @@ const renderHeader = (layoutConfig, container, type, headers) => {
     const headerCell = headers[`${type}Cell`];
     const config = layoutConfig[`${type}`];
     const { position, align, padding } = config;
-    const cont = makeElement(container, 'div', [1], `${layoutConfig.classPrefix}-${type}-container`);
+    const sel = container
+        .selectAll(`.${layoutConfig.classPrefix}-inner-container`)
+        .data([type]);
+    sel.exit().remove();
+    const selEnter = sel.enter().append('div');
+
+    const cont = selEnter.merge(sel);
+    cont.classed(`${layoutConfig.classPrefix}-inner-container`, true);
 
     headerCell && headerCell.render(cont.node());
+
+    cont.selectAll('div').classed(`${layoutConfig.classPrefix}-inner-content`, true);
     cont.style('width', `${100}%`);
 
     if (config && headerCell) {
@@ -186,9 +213,9 @@ const shiftHeaders = (config, shifter, measurement) => {
     const { position } = legend;
 
     shifter += position === LEFT ? legendSpace.width : 0;
-    title && selectElement(`.${classPrefix}-title-container`)
+    title && selectElement(`.${classPrefix}-title-container`).select(`.${classPrefix}-inner-content`)
                     .style('padding-left', title.align === LEFT ? `${shifter}px` : 0);
-    subtitle && selectElement(`.${classPrefix}-subtitle-container`)
+    subtitle && selectElement(`.${classPrefix}-subtitle-container`).select(`.${classPrefix}-inner-content`)
                     .style('padding-left', subtitle.align === LEFT ? `${shifter}px` : 0);
     selectElement(`.${classPrefix}-legend-horizontal-section`)
                     .style('padding-left', `${shifter}px`)
@@ -217,18 +244,35 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
         height,
         width
     } = measurement;
-     // Create container for the layout
-    const container = makeElement(selectElement(mountPoint), 'div', [1], `${classPrefix}-grid-layout`)
-        .attr('id', `${classPrefix}-grid-layout-${alias}`)
-        .style('height', `${height}px`)
-        .style('width', `${Math.ceil(width)}px`);
+    // Create container for the layout
+
+    const sel = selectElement(mountPoint)
+         .selectAll(`.${classPrefix}-inner-content`)
+         .data(['layout']);
+    sel.exit().remove();
+    const selEnter = sel.enter().append('div');
+
+    const container = selEnter.merge(sel)
+    .attr('class', `${classPrefix}-inner-content`)
+                    .classed(`${classPrefix}-grid-layout`, true)
+                    .attr('id', `${classPrefix}-grid-layout-${alias}`)
+                    .style('height', `${height}px`)
+                    .style('padding', null)
+                    .text('')
+                    .style('width', `${Math.ceil(width)}px`);
     // Mount for matrices
-    const mount = makeElement(container, 'div', [1], `${classPrefix}-layout-grid-container`)
-        .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
-        .style('height', `${height}px`)
-        .style('width', `${Math.ceil(width)}px`)
-        .style('overflow-x', width > 300 ? 'none' : 'scroll')
-        .style('overflow-y', height > 300 ? 'none' : 'scroll');
+    const innerSel = container.selectAll(`.${classPrefix}-layout-grid-container`)
+         .data(['layout2']);
+    innerSel.exit().remove();
+    const innerSelEnter = innerSel.enter().append('div');
+
+    const mount = innerSelEnter.merge(innerSel);
+    mount.classed(`${classPrefix}-layout-grid-container`, true)
+                    .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
+                    .style('height', `${height}px`)
+                    .style('width', `${Math.ceil(width)}px`)
+                    .style('overflow-x', width > 300 ? 'none' : 'scroll')
+                    .style('overflow-y', height > 300 ? 'none' : 'scroll');
 
     return {
         mount,
@@ -260,7 +304,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     } = getSkeletons(context.mount(), layoutConfig, measurement);
     const {
         mount
-   } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
+    } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
     const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
     measurement.padding = padding;
     setLabelRotationForAxes(context);

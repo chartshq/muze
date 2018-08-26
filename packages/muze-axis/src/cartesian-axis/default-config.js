@@ -30,7 +30,7 @@ export const defaultConfig = {
     numberOfTicks: 10,
     rotate: false,
     show: true,
-    showAxisName: false,
+    showAxisName: true,
     showInnerTicks: null,
     showOuterTicks: null,
     style: {},
