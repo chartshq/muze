@@ -1,0 +1,5 @@
+@import '../../prefix.scss';
+
+.#{$prefix}anchors-group {
+    pointer-events: none;
+}
