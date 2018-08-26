@@ -226,6 +226,7 @@ export default class LineLayer extends BaseLayer {
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
         const containerSelection = selectElement(container);
         const colorField = encoding.color.field;
+        const colorFieldIndex = fieldsConfig[colorField].index;
         const colorFieldMeasure = fieldsConfig[colorField] && fieldsConfig[colorField].def.type === FieldType.MEASURE;
 
         this._points = [];
@@ -265,7 +266,7 @@ export default class LineLayer extends BaseLayer {
                     connectNullData: config.connectNullData
                 });
             }
-        }, d => d.reduce((e, n) => n + e._id, ''));
+        }, d => d[0]._data[colorFieldIndex] || d[0]._id);
 
         attachDataToVoronoi(this._voronoi, this._points);
         return this;
