@@ -1,7 +1,7 @@
 <h3 align="center">
   <br />
   <br />
-  <a href="https://github.com/rousan/git-npm">
+  <a href="https://github.com/chartshq/muze">
     <img src="https://github.com/rousan/public-server/raw/master/5.png" alt="muzejs" title="muzejs" />
   </a>
 </h3>
@@ -9,14 +9,14 @@
 <br />
 <br />
 
-[![NPM version](https://img.shields.io/npm/v/git-plus-npm.svg)](https://www.npmjs.com/package/muze)
-[![NPM total downloads](https://img.shields.io/npm/dt/git-plus-npm.svg)](https://www.npmjs.com/package/muze)
-[![Contributors](https://img.shields.io/github/contributors/rousan/git-npm.svg)](https://github.com/rousan/git-npm/graphs/contributors)
-[![License](https://img.shields.io/github/license/rousan/git-npm.svg)](https://github.com/rousan/git-npm/blob/master/LICENSE)
+[![NPM version](https://img.shields.io/npm/v/muze.svg)](https://www.npmjs.com/package/muze)
+[![NPM total downloads](https://img.shields.io/npm/dt/muze.svg)](https://www.npmjs.com/package/muze)
+[![Contributors](https://img.shields.io/github/contributors/chartshq/muze.svg)](https://github.com/chartshq/muze/graphs/contributors)
+[![License](https://img.shields.io/github/license/chartshq/muze.svg)](https://github.com/chartshq/muze/blob/master/LICENSE)
 
 ## What is Muze?
 
-Muze is a data visualization library which uses a layered Grammar of Graphics(GoG) to create composable and interactive charts. It uses a data-first approach to generate cross interactivity which enables you to control any interaction in the chart directly using the data.
+Muze is a data visualization library which uses a layered `Grammar of Graphics(GoG)` to create composable and interactive charts. It uses a data-first approach to generate cross interactivity which enables you to control any interaction in the chart directly using the data.
 
 Muze uses the [DataModel](https://github.com/chartshq/datamodel) to control the behaviour of every component in the visualization, making use of the **DataModel** operations to configure complex and cross-connected charts.
 
@@ -35,13 +35,21 @@ Muze uses the [DataModel](https://github.com/chartshq/datamodel) to control the 
 ### CDN
 
 ```html
-<script src="https://unpkg.com/muze" type="text/javascript"></script>
+<script src="https://cdn.charts.com/lib/muze/core/latest/muze.js" type="text/javascript"></script>
 ```
 
-### npm
+### NPM
 
 ```bash
 $ npm install --save muze
+```
+
+### CSS
+
+Also Copy-paste the required stylesheet `<link>` into the `<head>`:
+
+```html
+<link rel="stylesheet" href="https://cdn.charts.com/lib/muze/core/latest/themes/muze.css">
 ```
 
 ## Getting started
@@ -112,13 +120,13 @@ canvas
   .mount(mountPoint)
 ```
 
-See [charts.com/muze](https://charts.com/muze) for more documentation!
+See [charts.com/muze](https://charts.com/muze/docs) for more documentation!
 
 You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
 
 ## Documentation
 
-Documentation lives on [charts.com/muze](https://charts.com/muze).
+Documentation lives on [charts.com/muze](https://charts.com/muze/docs).
 
 ## Community
 
@@ -135,4 +143,4 @@ Checkout the [CONTRIBUTING](https://github.com/chartshq/muze/CONTRIBUTING) guide
 
 ## License
 
-ISC
+MIT
