@@ -60,9 +60,11 @@ export const placeArrow = (context, position, arrowPos) => {
         tooltipBackground.style('top', `${arrowPos}px`);
         tooltipBackground.style('left', '');
     } else {
-        position === TOOLTIP_BOTTOM ? tooltipArrow.style('top', '100%') : tooltipArrow.style('top', `-${arrowConf.size}px`);
+        position === TOOLTIP_BOTTOM ? tooltipArrow.style('top', '100%') : tooltipArrow.style('top',
+            `-${arrowConf.size}px`);
         tooltipArrow.style('left', `${arrowPos}px`);
-        position === TOOLTIP_BOTTOM ? tooltipBackground.style('top', '100%') : tooltipBackground.style('top', `-${arrowConf.size + 3}px`);
+        position === TOOLTIP_BOTTOM ? tooltipBackground.style('top', '100%') : tooltipBackground.style('top',
+            `-${arrowConf.size + 3}px`);
         tooltipBackground.style('left', `${arrowPos}px`);
     }
     tooltipArrow.classed(`${classPrefix}-tooltip-arrow`, true);
