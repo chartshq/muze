@@ -16,40 +16,42 @@
 
 ## What is Muze?
 
-Muze is a data visualization library which uses a layered `Grammar of Graphics(GoG)` to create composable and interactive charts. It uses a data-first approach to generate cross interactivity which enables you to control any interaction in the chart directly using the data.
+Muze is a data visualization library which uses a layered Grammar of Graphics (GoG) to create composable and interactive charts for web. It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart. 
 
-Muze uses the [DataModel](https://github.com/chartshq/datamodel) to control the behaviour of every component in the visualization, making use of the **DataModel** operations to configure complex and cross-connected charts.
+Muze uses an in-browser [DataModel](https://github.com/chartshq/datamodel) to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
 
 ## Features
 
-[PLACEHOLDER]
-* 🚀 **Blazing fast** bundle times - multicore compilation, and a filesystem cache for fast rebuilds even after a restart.
-* 📦 Out of the box support for JS, CSS, HTML, file assets, and more - **no plugins to install**.
-* 🐠 **Automatically transforms modules** using Babel, PostCSS, and PostHTML when needed - even `node_modules`.
-* ✂️ Zero configuration **code splitting** using dynamic `import()` statements.
-* 🔥 Built in support for **hot module replacement**
-* 🚨 Friendly error logging experience - syntax highlighted code frames help pinpoint the problem.
+* 🚀 Build complex and interactive visualizations by using **composable** layer constructs.
+* 🔨 Use rich **data operators** to transform, visualize and interact with data.
+* 👯 Define custom interactions by configuring **physical behavioural model** and **side effect**.
+* ✂️ Use **css** to change look and feel of the charts.
+* ☀️ Have a **single source of truth** for all your visualization and interaction controlled from data.
+* 🔩 Integrate easily with your existing application by **dispatching actions** on demand.
 
 ## Installation
 
 ### CDN
 
+Insert the muze build and the required CSS into the `<head>`:
+
 ```html
+<link href="https://cdn.charts.com/lib/muze/core/latest/themes/muze.css" rel="stylesheet">
 <script src="https://cdn.charts.com/lib/muze/core/latest/muze.js" type="text/javascript"></script>
 ```
 
 ### NPM
 
+Install muze from NPM:
+
 ```bash
 $ npm install --save muze
 ```
 
-### CSS
+Also import the required stylesheet:
 
-Also Copy-paste the required stylesheet `<link>` into the `<head>`:
-
-```html
-<link rel="stylesheet" href="https://cdn.charts.com/lib/muze/core/latest/themes/muze.css">
+```javascript
+import 'muze/style.css';
 ```
 
 ## Getting started
@@ -69,7 +71,8 @@ const schema = [
   },
   {
     name: 'Horsepower',
-    type: 'measure'
+    type: 'measure',
+    defAggFn: 'avg'
   },
   {
     name: 'Origin',
@@ -110,26 +113,35 @@ const dm = new DataModel(data, schema);
 3. Pass the `DataModel` instance to `muze` and create your first chart:
 
 ```javascript
-import muze from 'muze'
+import muze from 'muze';
+import 'muze/style.css';
 
 // Create a global environment to share common configs across charts
 const env = muze();
 // Create a new canvas instance from the global environment
 const canvas = env.canvas();
 canvas
+  .data(dm) 
   .rows(["Horsepower"]) // Fields drawn on Y axis
   .columns(["Origin"]) // Fields drawn on X axis
-  .data(dm) 
   .mount("#chart"); // Specify an element to mount on using a CSS selector
 ```
 
-See [Charts.com](https://charts.com/muze/docs) for more documentation!
+See [charts.com/muze/docs](https://www.charts.com/muze/docs) for more documentation!
 
 You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
 
 ## Documentation
 
-Documentation lives on [Charts.com](https://charts.com/muze/docs).
+You can find detailed tutorials, concepts and API references at [charts.com/muze/docs](https://www.charts.com/muze/docs).
+
+## Support
+
+Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or contact us at [muze@charts.com](mailto:muze@charts.com).
+
+## Roadmap
+
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap][https://feedback.muze.charts.com]
 
 ## Community
 
@@ -140,9 +152,7 @@ All feedback and suggestions are welcome!
 
 ## Contributing
 
-Your PRs and stars are always welcome.
-
-Checkout the [CONTRIBUTING](https://github.com/chartshq/muze/CONTRIBUTING) guides.
+Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/CONTRIBUTING) guides.
 
 ## License
 
