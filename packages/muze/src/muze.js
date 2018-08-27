@@ -165,7 +165,7 @@ muze.pkg = pkg;
 muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
-muze.operators = operators;
+muze.Operators = operators;
 muze.Behaviours = Behaviours;
 muze.utils = {
     getClientPoint,
