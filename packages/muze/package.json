@@ -57,7 +57,6 @@
     "url": "https://bitbucket.org/fusioncharts/muze"
   },
   "dependencies": {
-    "datamodel": "^1.0.0",
     "fusioncharts-smartlabel": "^1.0.2",
     "@chartshq/layout": "^1.0.0",
     "@chartshq/muze-firebolt": "^1.0.0",

@@ -2,7 +2,7 @@
   <br />
   <br />
   <a href="https://github.com/rousan/git-npm">
-    <img src="https://staging.charts.com/static/images/muze.svg" width="400" alt="muzejs" title="muzejs" />
+    <img src="https://github.com/rousan/public-server/raw/master/5.png" alt="muzejs" title="muzejs" />
   </a>
 </h3>
 <br />

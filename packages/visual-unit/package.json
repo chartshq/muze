@@ -50,7 +50,6 @@
     "url": "https://bitbucket.org/fusioncharts/muze"
   },
   "dependencies": {
-    "datamodel": "^1.0.0",
     "@chartshq/muze-axis": "^1.0.0",
     "muze-utils": "^1.0.0",
     "@chartshq/visual-layer": "^1.0.0",

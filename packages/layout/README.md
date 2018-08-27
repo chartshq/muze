@@ -1,25 +1,22 @@
-# Muze Layout
-This repository contains the layout module of the muze renderer.
-The layout module exposes classses that are used to handle vertical/ horizontal
-positioning of charts in the viewport to create visual groupings that aid in the 
-construction of complex chart types like crosstab, trellisetc.
+# layout
 
-### How do I get set up? ###
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the layout of the canvas. This module
+exposes the APIs which is responsible for handling layouts based on which the charts will be positioned. This can help generate complex visualizations like `crosstab`, `trellis` etc.
 
+## Installation
 
-- git clone git@bitbucket.org:fusioncharts/layout.git
-- npm install
-- npm start
+```bash
+$ npm install --save @chartshq/layout
+```
 
-### Contribution guidelines ###
-- See CONTRIBUTING.md
+## Docs
 
-### Who do I talk to? ###
-Repo Owners :
+Please refer to [this](https://charts.com/muze/docs) for detailed documentation.
 
-    Akash Goswami       -   akash@fusioncharts.com
+## Contributing
 
-Other members :
-    Sushrut Shivaswamy  -   sushrut@fusioncharts.com
-    Ranajit Banerjee    -   ranajit.banerjee@fusioncharts.com
-    Mridul Meharia      -   mridul@fusioncharts.com
+Contribution and PR are welcome. Please read our [Contribution Guide](https://github.com/chartshq/muze/blob/master/CONTRIBUTING.md) before making any changes.
+
+## License
+
+MIT
