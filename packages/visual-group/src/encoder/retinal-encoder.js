@@ -57,12 +57,12 @@ export default class RetinalEncoder extends VisualEncoder {
                     if (config.def instanceof Array) {
                         def.forEach((conf) => {
                             conf.encoding = conf.encoding || {};
-                            conf.encoding[axis] = conf.encoding[axis] || {};
+                            !conf.encoding[axis] && (conf.encoding[axis] = {});
                             conf.encoding[axis].field = encodingConfigs[axis].field;
                         });
                     } else {
                         def.encoding = def.encoding || {};
-                        def.encoding[axis] = encodingConfigs[axis] || {};
+                        !def.encoding[axis] && (def.encoding[axis] = {});
                         def.encoding[axis].field = encodingConfigs[axis].field;
                     }
                 }

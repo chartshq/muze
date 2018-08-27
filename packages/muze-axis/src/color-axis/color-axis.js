@@ -124,7 +124,7 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
-        if (this.domain()) {
+        if (this.domain() && domainVal !== undefined) {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
