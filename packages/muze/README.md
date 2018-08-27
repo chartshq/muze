@@ -2,7 +2,7 @@
   <br />
   <br />
   <a href="https://github.com/chartshq/muze">
-    <img src="https://github.com/chartshq/muze/raw/master/logo.svg" alt="muzejs" title="muzejs" />
+    <img src="https://github.com/chartshq/muze/raw/develop/logo.png" alt="muzejs" title="muzejs" />
   </a>
 </h3>
 <br />
