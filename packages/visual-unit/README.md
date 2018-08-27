@@ -1,6 +1,6 @@
 # visual-unit
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. The `Visual Unit` consists of a set of layers and a set of axes and is responsible for rendering them and/or providing any transformation logic between the layers themselves.
 
 ## Installation
 

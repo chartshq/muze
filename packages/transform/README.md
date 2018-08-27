@@ -1,6 +1,6 @@
 # transform
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. `Transform` helps in modifying or transforming the plots into stacked, grouped and identity transformations.
 
 ## Installation
 

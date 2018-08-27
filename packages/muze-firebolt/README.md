@@ -1,6 +1,6 @@
 # muze-firebolt
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. `Muze Firebolt` controls the interactions of Muze. Since all charts in Muze are connected by data, Muze Firebolt acts as a mediator between the physical-behavioral models and the data. It is responsible for acting as the bridge between any context (like charts, legends) etc, with the data source.
 
 ## Installation
 

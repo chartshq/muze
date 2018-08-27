@@ -1,6 +1,7 @@
 # visual-group
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. The `Visual Group` is responsible for creating all the matrices required to create a cross tabular visualization. It creates all the axes, layers and other important visual information required by the canvas to render it.
+
 
 ## Installation
 

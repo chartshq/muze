@@ -1,6 +1,6 @@
 # muze-utils
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library.
+`Muze Utils` are the set of utility methods, classes, maps, dependencies and other data needed by [MuzeJS](https://github.com/chartshq/muze) library for all of its functioning. 
 
 ## Installation
 

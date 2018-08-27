@@ -1,6 +1,6 @@
 # visual-layer
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. The `Visual Layer` houses all the layers present in Muze, like bar, line, area, tick, point, text and arc. These layers are the plots in the chart. We can compose multiple layers to get a complicated layer. 
 
 ## Installation
 

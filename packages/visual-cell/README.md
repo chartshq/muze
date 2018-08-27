@@ -1,6 +1,6 @@
 # visual-cell
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. `Visual Cell` consists of the set of placeholders that form wrappers around any component within Muze. These placeholders are also consumed by the Layout to position and render the elements.
 
 ## Installation
 

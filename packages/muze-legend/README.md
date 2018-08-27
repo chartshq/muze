@@ -1,6 +1,6 @@
 # muze-legend
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library.` Muze legend` consists of legends created whenever retinal encodings are applied on the Canvas. It comprises of `Shape Legend`, `Size Legend` and `Color Legend`.
 
 ## Installation
 

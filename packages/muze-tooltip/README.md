@@ -1,6 +1,6 @@
 # muze-tooltip
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. It handles the positioning and content of the tooltip that is created during any interaction. 
 
 ## Installation
 

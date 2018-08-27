@@ -1,6 +1,6 @@
 # muze-axis
 
-It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axes. These consist of the `continuous`, `band` and `temporal` axes. It also is responsible for creating the retinal encodings, i.e., `color`, `shape` and `size`.
 
 ## Installation
 
