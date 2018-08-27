@@ -2,7 +2,7 @@
   "name": "@chartshq/muze-axis",
   "version": "1.0.0",
   "description": "This contains wrapper classes over d3 axis",
-  "homepage": "https://charts.com/muze",
+  "homepage": "https://www.charts.com/muze",
   "license": "MIT",
   "author": "Charts.com <support@charts.com>",
   "contributors": [

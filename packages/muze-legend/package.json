@@ -1,8 +1,8 @@
 {
     "name": "@chartshq/muze-legend",
     "version": "1.0.0",
-    "description": "D3 Legend module",
-    "homepage": "https://charts.com/muze",
+    "description": "The legend module for MuzeJS",
+    "homepage": "https://www.charts.com/muze",
     "license": "MIT",
     "author": "Charts.com <support@charts.com>",
     "contributors": [

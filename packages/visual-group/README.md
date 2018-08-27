@@ -11,7 +11,7 @@ $ npm install --save @chartshq/visual-group
 
 ## Docs
 
-Please refer to [this](https://charts.com/muze/docs) for detailed documentation.
+Please refer to [this](https://www.charts.com/muze/docs) for detailed documentation.
 
 ## Contributing
 

@@ -2,7 +2,7 @@
   "name": "@chartshq/visual-cell",
   "version": "1.0.0",
   "description": "Visual cell implementation for muzejs",
-  "homepage": "https://charts.com/muze",
+  "homepage": "https://www.charts.com/muze",
   "license": "MIT",
   "author": "Charts.com <support@charts.com>",
   "contributors": [
@@ -47,7 +47,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fusioncharts/visual-cell.git"
+    "url": "git+https://github.com/chartshq/muze.git"
   },
   "dependencies": {
     "muze-utils": "^1.0.0"

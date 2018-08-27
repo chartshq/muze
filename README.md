@@ -2,7 +2,7 @@
   <br />
   <br />
   <a href="https://github.com/chartshq/muze">
-    <img src="https://github.com/rousan/public-server/raw/master/5.png" alt="muzejs" title="muzejs" />
+    <img src="https://github.com/chartshq/muze/raw/master/logo.svg" alt="muzejs" title="muzejs" />
   </a>
 </h3>
 <br />
@@ -51,7 +51,7 @@ $ npm install --save muze
 Also import the required stylesheet:
 
 ```javascript
-import 'muze/style.css';
+import 'muze/dist/muze.css';
 ```
 
 ## Getting started
@@ -114,7 +114,7 @@ const dm = new DataModel(data, schema);
 
 ```javascript
 import muze from 'muze';
-import 'muze/style.css';
+import 'muze/dist/muze.css';
 
 // Create a global environment to share common configs across charts
 const env = muze();
@@ -143,16 +143,9 @@ Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or c
 
 Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap][https://feedback.muze.charts.com]
 
-## Community
-
-All feedback and suggestions are welcome!
-
-* 💬 Join the community on [Spectrum](https://spectrum.chat/muze)
-* 📣 Stay up to date on new features and announcements on [@muze](https://twitter.com/muze)
-
 ## Contributing
 
-Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/CONTRIBUTING) guides.
+Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/CONTRIBUTING.md) guides.
 
 ## License
 

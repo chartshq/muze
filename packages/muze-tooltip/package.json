@@ -1,8 +1,8 @@
 {
     "name": "@chartshq/muze-tooltip",
     "version": "1.0.0",
-    "description": "Tooltip Renderer",
-    "homepage": "https://charts.com/muze",
+    "description": "The tooltip renderer for MuzeJS",
+    "homepage": "https://www.charts.com/muze",
     "license": "MIT",
     "author": "Charts.com <support@charts.com>",
     "contributors": [

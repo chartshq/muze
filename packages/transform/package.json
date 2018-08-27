@@ -1,8 +1,8 @@
 {
   "name": "@chartshq/transform",
   "version": "1.0.0",
-  "description": "JavaScript Data Visualisation Library",
-  "homepage": "https://charts.com/muze",
+  "description": "The transform module used in MuzeJS",
+  "homepage": "https://www.charts.com/muze",
   "license": "MIT",
   "author": "Charts.com <support@charts.com>",
   "contributors": [
