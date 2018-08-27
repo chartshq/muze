@@ -2,47 +2,47 @@
   "name": "muze-utils",
   "version": "1.0.0",
   "description": "It contains all the utility functions needed by components of muze",
-  "homepage": "https://charts.com/muze",
+  "homepage": "https://www.charts.com/muze",
   "license": "MIT",
   "author": "Charts.com <support@charts.com>",
   "contributors": [
     {
       "name": "Akash Ghoswami",
-      "email": "akash@fusioncharts.com"
+      "email": "akash@charts.com"
     },
     {
       "name": "Ranajit Banerjee",
-      "email": "ranajit.banerjee@fusioncharts.com",
+      "email": "ranajit.banerjee@charts.com",
       "url": "https://github.com/ranajitbanerjee"
     },
     {
       "name": "Mridul Meharia",
-      "email": "mridul@fusioncharts.com",
+      "email": "mridul@charts.com",
       "url": "https://github.com/mridulmeh"
     },
     {
       "name": "Subhash Haldar",
-      "email": "subhash@fusioncharts.com"
+      "email": "subhash@charts.com"
     },
     {
       "name": "Sandeep Acharya",
-      "email": "sandeep@fusioncharts.com"
+      "email": "sandeep@charts.com"
     },
     {
       "name": "Rousan Ali",
-      "email": "rousan@fusioncharts.com",
+      "email": "rousan@charts.com",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "ujjal@fusioncharts.com"
+      "email": "ujjal@charts.com"
     }
   ],
   "main": "src/index.js",
   "keywords": [],
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/muze"
+    "url": "https://github.com/chartshq/muze"
   },
   "dependencies": {
     "d3-brush": "^1.0.4",
@@ -55,10 +55,10 @@
     "d3-transition": "^1.1.1",
     "d3-collection": "1.0.4",
     "d3-voronoi": "^1.1.2",
-    "datamodel": "git+ssh://git@bitbucket.org/fusioncharts/datamodel.git#develop",
-    "d3-axis": "git+ssh://git@bitbucket.org:fusioncharts/d3-axis.git",
-    "d3-scale": "git+ssh://git@bitbucket.org:fusioncharts/d3-scale.git",
+    "datamodel": "^1.0.0",
+    "d3-axis": "git+ssh://git@github.com:chartshq/d3-axis.git",
+    "d3-scale": "git+ssh://git@github.com:chartshq/d3-scale.git",
     "d3-scale-chromatic": "^1.2.0",
-    "hyperdis": "git+ssh://git@bitbucket.org/fusioncharts/hyperdis.git#develop"
+    "hyperdis": "^1.0.0"
   }
 }

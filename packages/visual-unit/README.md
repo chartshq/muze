@@ -1,29 +1,21 @@
-# README #
+# visual-unit
 
-This README would normally document whatever steps are necessary to get your application up and running.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library. The `Visual Unit` consists of a set of layers and a set of axes and is responsible for rendering them and/or providing any transformation logic between the layers themselves.
 
-### What is this repository for? ###
+## Installation
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+```bash
+$ npm install --save @chartshq/visual-unit
+```
 
-### How do I get set up? ###
+## Docs
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Please refer to [this](https://www.charts.com/muze/docs) for detailed documentation.
 
-### Contribution guidelines ###
+## Contributing
 
-* Writing tests
-* Code review
-* Other guidelines
+Contribution and PR are welcome. Please read our [Contribution Guide](https://github.com/chartshq/muze/blob/master/CONTRIBUTING.md) before making any changes.
 
-### Who do I talk to? ###
+## License
 
-* Repo owner or admin
-* Other community or team contact
+MIT

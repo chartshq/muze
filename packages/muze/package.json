@@ -1,41 +1,42 @@
 {
   "name": "muze",
+  "private": true,
   "version": "1.0.0",
-  "description": "JavaScript Data Visualization Library based on Relational Algebra",
-  "homepage": "https://charts.com/muze",
+  "description": "Composable visualisation library for web with a data-first approach",
+  "homepage": "https://www.charts.com/muze",
   "license": "MIT",
   "author": "Charts.com <support@charts.com>",
   "contributors": [
     {
       "name": "Akash Ghoswami",
-      "email": "akash@fusioncharts.com"
+      "email": "akash@charts.com"
     },
     {
       "name": "Ranajit Banerjee",
-      "email": "ranajit.banerjee@fusioncharts.com",
+      "email": "ranajit.banerjee@charts.com",
       "url": "https://github.com/ranajitbanerjee"
     },
     {
       "name": "Mridul Meharia",
-      "email": "mridul@fusioncharts.com",
+      "email": "mridul@charts.com",
       "url": "https://github.com/mridulmeh"
     },
     {
       "name": "Subhash Haldar",
-      "email": "subhash@fusioncharts.com"
+      "email": "subhash@charts.com"
     },
     {
       "name": "Sandeep Acharya",
-      "email": "sandeep@fusioncharts.com"
+      "email": "sandeep@charts.com"
     },
     {
       "name": "Rousan Ali",
-      "email": "rousan@fusioncharts.com",
+      "email": "rousan@charts.com",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "ujjal@fusioncharts.com"
+      "email": "ujjal@charts.com"
     }
   ],
   "main": "src/index.js",
@@ -54,10 +55,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/fusioncharts/muze"
+    "url": "https://github.com/chartshq/muze"
   },
   "dependencies": {
-    "datamodel": "^1.0.0",
     "fusioncharts-smartlabel": "^1.0.2",
     "@chartshq/layout": "^1.0.0",
     "@chartshq/muze-firebolt": "^1.0.0",
