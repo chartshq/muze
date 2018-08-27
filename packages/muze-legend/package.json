@@ -8,15 +8,15 @@
     "contributors": [
         {
             "name": "Akash Ghoswami",
-            "email": "akash@fusioncharts.com"
+            "email": "akash@charts.com"
         },
         {
             "name": "Ujjal Kumar Dutta",
-            "email": "ujjal@fusioncharts.com"
+            "email": "ujjal@charts.com"
         },
         {
             "name": "Rousan Ali",
-            "email": "rousan@fusioncharts.com",
+            "email": "rousan@charts.com",
             "url": "https://rousan.io"
         }
     ],
@@ -32,7 +32,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://bitbucket.org/fusioncharts/muze"
+        "url": "https://github.com/chartshq/muze"
     },
     "dependencies": {
         "@chartshq/muze-axis": "^1.0.0",

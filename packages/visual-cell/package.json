@@ -8,34 +8,34 @@
   "contributors": [
     {
       "name": "Akash Ghoswami",
-      "email": "akash@fusioncharts.com"
+      "email": "akash@charts.com"
     },
     {
       "name": "Ranajit Banerjee",
-      "email": "ranajit.banerjee@fusioncharts.com",
+      "email": "ranajit.banerjee@charts.com",
       "url": "https://github.com/ranajitbanerjee"
     },
     {
       "name": "Mridul Meharia",
-      "email": "mridul@fusioncharts.com",
+      "email": "mridul@charts.com",
       "url": "https://github.com/mridulmeh"
     },
     {
       "name": "Subhash Haldar",
-      "email": "subhash@fusioncharts.com"
+      "email": "subhash@charts.com"
     },
     {
       "name": "Sandeep Acharya",
-      "email": "sandeep@fusioncharts.com"
+      "email": "sandeep@charts.com"
     },
     {
       "name": "Rousan Ali",
-      "email": "rousan@fusioncharts.com",
+      "email": "rousan@charts.com",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "ujjal@fusioncharts.com"
+      "email": "ujjal@charts.com"
     }
   ],
   "main": "src/index.js",
