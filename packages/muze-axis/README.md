@@ -1,29 +1,21 @@
-# README #
+# muze-axis
 
-This README would normally document whatever steps are necessary to get your application up and running.
+It is used in the [MuzeJS](https://github.com/chartshq/muze) library to construct the chart axises.
 
-### What is this repository for? ###
+## Installation
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+```bash
+$ npm install --save @chartshq/muze-axis
+```
 
-### How do I get set up? ###
+## Docs
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Please refer to [this](https://charts.com/muze/docs) for detailed documentation.
 
-### Contribution guidelines ###
+## Contributing
 
-* Writing tests
-* Code review
-* Other guidelines
+Contribution and PR are welcome. Please read our [Contribution Guide](https://github.com/chartshq/muze/blob/master/CONTRIBUTING.md) before making any changes.
 
-### Who do I talk to? ###
+## License
 
-* Repo owner or admin
-* Other community or team contact
+MIT
