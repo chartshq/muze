@@ -141,7 +141,7 @@ Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or c
 
 ## Roadmap
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap][https://feedback.muze.charts.com]
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muze.charts.com)
 
 ## Contributing
 
