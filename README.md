@@ -54,10 +54,10 @@ Also Copy-paste the required stylesheet `<link>` into the `<head>`:
 
 ## Getting started
 
-1. Prepare the data and the corresponding schema through the [DataModel](https://github.com/chartshq/datamodel) interface:
+1. Prepare the data and the corresponding schema using [DataModel](https://github.com/chartshq/datamodel):
 
 ```javascript
-// The schema for cars.json data
+// Prepare the schema for data
 const schema = [
   {
     name: 'Name',
@@ -77,6 +77,7 @@ const schema = [
   }
 ]
 
+// Prepare the data
 const data = [
    {
     "Name": "chevrolet chevelle malibu",
@@ -99,34 +100,36 @@ const data = [
 ]
 ```
 
-2. Pass the data to muze and render the chart:
+2. Pass the data and schema to `DataModel` and create a new `DataModel` instance:
+
+```javascript
+const DataModel = muze.DataModel;
+const dm = new DataModel(data, schema);
+```
+
+3. Pass the `DataModel` instance to `muze` and create your first chart:
 
 ```javascript
 import muze from 'muze'
 
+// Create a global environment to share common configs across charts
 const env = muze();
-const DataModel = muze.DataModel;
-const mountPoint = document.getElementById('chart');
-
-const dm = new DataModel(data, schema);
-const rows = ["Horsepower"];
-const columns = ["Origin"];
-
+// Create a new canvas instance from the global environment
 const canvas = env.canvas();
 canvas
-  .rows(rows)
-  .columns(columns)
+  .rows(["Horsepower"]) // Fields drawn on Y axis
+  .columns(["Origin"]) // Fields drawn on X axis
   .data(dm) 
-  .mount(mountPoint)
+  .mount("#chart"); // Specify an element to mount on using a CSS selector
 ```
 
-See [charts.com/muze](https://charts.com/muze/docs) for more documentation!
+See [Charts.com](https://charts.com/muze/docs) for more documentation!
 
 You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
 
 ## Documentation
 
-Documentation lives on [charts.com/muze](https://charts.com/muze/docs).
+Documentation lives on [Charts.com](https://charts.com/muze/docs).
 
 ## Community
 
