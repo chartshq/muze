@@ -1,0 +1,54 @@
+import { mergeRecursive, detectColor, hexToHsv, rgbToHsv } from 'muze-utils';
+import { x11Colors } from './color-maps';
+import { palette } from './defaults';
+
+export const getHslString = hslArr => `hsla(${hslArr[0] * 360},${hslArr[1] * 100}%,${hslArr[2] * 100}%, 
+    ${hslArr[3] || 1})`;
+
+export const convertToXllString = baseString => (baseString.split(' ') || [])
+                .reduce((x, e) => `${x}${e.charAt(0).toUpperCase()}${e.slice(1)}`, '');
+
+export const getActualHslColor = (e, paletteColor) => {
+    let color = '';
+    if (typeof e === 'string') {
+        e = e.replace(/ /g, '');
+        e = e.toLowerCase();
+    }
+    if (detectColor(e) === 'hsl' || detectColor(e) === 'hsla') {
+        color = e.match(/(\d+(\.\d+)?)/g);
+        color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
+    } else if (detectColor(e) === 'hex') {
+        color = hexToHsv(e);
+    } else if (detectColor(e) === 'rgb') {
+        const col = e.substring(e.indexOf('(') + 1, e.lastIndexOf(')')).split(/,\s*/);
+        color = rgbToHsv(...col);
+    } else if (x11Colors[convertToXllString(e)]) {
+        color = rgbToHsv(...x11Colors[convertToXllString(e)].rgb.split(','));
+    } else if (typeof e !== 'string' && !(e instanceof Array)) {
+        color = rgbToHsv(paletteColor);
+    } else {
+        color = e;
+    }
+    return color;
+};
+
+export const PROPS = {
+    config: {
+        sanitization: (context, config) => {
+            const defCon = mergeRecursive({}, context.constructor.defaultConfig());
+            if (config.type === 'linear' && typeof config.interpolate !== 'boolean') {
+                config.interpolate = true;
+            }
+            const newConfig = mergeRecursive(defCon, config);
+
+            if (newConfig.range instanceof Array) {
+                newConfig.range = newConfig.range.map((e, i) => getActualHslColor(e, palette[i]));
+            }
+            newConfig.value = getActualHslColor(newConfig.value, newConfig.value);
+            return newConfig;
+        }
+    },
+    domain: {},
+    scale: {},
+    uniqueValues: {}
+};

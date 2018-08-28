@@ -1,0 +1,401 @@
+id,Market,Product Type,Product,Revenue,Expense,Profit,Order Count
+1,North,Espresso,Decaf Espresso,31492,6575,1260,150
+2,South,Espresso,Caffe Latte,19555,8392,11803,132
+3,South,Espresso,Caffe Mocha,20462,9283,14019,103
+4,West,Espresso,Caffe Mocha,14568,6831,14746,144
+5,East,Espresso,Decaf Espresso,28575,6381,13130,155
+6,West,Espresso,Caffe Latte,12740,9544,4554,155
+7,South,Espresso,Decaf Espresso,25032,8085,1580,59
+8,North,Espresso,Caffe Latte,31768,4173,12529,153
+9,East,Espresso,Caffe Mocha,38173,8992,18423,120
+10,West,Espresso,Decaf Espresso,23952,10540,510,78
+11,East,Espresso,Decaf Espresso,21848,6631,17038,92
+12,North,Espresso,Decaf Espresso,14864,11978,883,91
+13,South,Espresso,Caffe Latte,24740,10444,3734,56
+14,South,Espresso,Caffe Mocha,35314,4119,7182,106
+15,East,Espresso,Decaf Espresso,24743,9478,11679,83
+16,West,Espresso,Decaf Espresso,29130,7854,16035,72
+17,West,Espresso,Decaf Espresso,11800,4173,649,98
+18,South,Espresso,Decaf Espresso,24397,8450,8162,139
+19,North,Espresso,Caffe Latte,31459,3240,3047,62
+20,West,Espresso,Caffe Latte,26901,9071,2151,139
+21,South,Espresso,Caffe Latte,29286,11088,-928,154
+22,South,Espresso,Decaf Espresso,17834,6140,17429,34
+23,West,Espresso,Caffe Mocha,11732,9485,5356,34
+24,South,Espresso,Caffe Mocha,37677,7260,17594,146
+25,North,Espresso,Decaf Espresso,21011,3996,17425,126
+26,East,Espresso,Caffe Latte,10780,4867,18998,70
+27,South,Espresso,Caffe Latte,17597,9860,16140,47
+28,East,Espresso,Decaf Espresso,32709,4687,19050,102
+29,East,Espresso,Caffe Latte,13876,9104,17453,72
+30,West,Espresso,Decaf Espresso,22572,7034,15003,155
+31,West,Espresso,Caffe Latte,26432,6278,78,53
+32,South,Espresso,Caffe Mocha,39614,5535,-898,136
+33,East,Espresso,Decaf Espresso,28999,9307,11011,155
+34,East,Espresso,Caffe Latte,29545,9882,623,97
+35,South,Espresso,Caffe Latte,33951,10122,11838,65
+36,East,Espresso,Caffe Mocha,33109,10461,6890,33
+37,West,Espresso,Decaf Espresso,14663,5836,4511,48
+38,West,Espresso,Decaf Espresso,23060,4898,11512,121
+39,West,Espresso,Caffe Mocha,21121,4584,6296,100
+40,West,Espresso,Decaf Espresso,29324,5763,14473,37
+41,North,Espresso,Caffe Mocha,35319,4638,16844,107
+42,West,Espresso,Decaf Espresso,16070,5967,12518,79
+43,South,Espresso,Caffe Latte,21705,6674,3385,64
+44,North,Espresso,Caffe Mocha,30307,5543,6635,86
+45,West,Espresso,Caffe Mocha,38099,7033,8360,126
+46,North,Espresso,Caffe Latte,38174,7597,19514,99
+47,South,Espresso,Decaf Espresso,32207,5276,16204,57
+48,South,Espresso,Caffe Mocha,17282,7412,4737,78
+49,North,Espresso,Caffe Mocha,36114,11759,18930,67
+50,West,Espresso,Decaf Espresso,27486,6281,19045,92
+51,East,Espresso,Caffe Mocha,35496,5662,11400,131
+52,East,Espresso,Decaf Espresso,25127,4768,9406,96
+53,West,Espresso,Caffe Latte,38020,3439,18020,111
+54,North,Espresso,Decaf Espresso,17914,4552,1868,141
+55,North,Espresso,Decaf Espresso,11588,4480,11007,138
+56,West,Espresso,Caffe Mocha,27389,9484,10774,90
+57,South,Espresso,Caffe Latte,17831,5414,16966,77
+58,East,Espresso,Caffe Mocha,10454,10521,2583,51
+59,East,Espresso,Caffe Mocha,14513,3068,7442,39
+60,South,Espresso,Caffe Latte,19444,8521,11489,79
+61,West,Espresso,Caffe Mocha,14875,8237,16563,43
+62,East,Espresso,Caffe Mocha,33984,3661,16913,151
+63,North,Espresso,Caffe Mocha,37736,6803,3603,117
+64,South,Espresso,Decaf Espresso,34710,7359,6144,116
+65,West,Espresso,Caffe Latte,12313,8686,12992,62
+66,West,Espresso,Decaf Espresso,12447,3943,15382,155
+67,West,Espresso,Caffe Latte,14957,10527,738,47
+68,South,Espresso,Caffe Mocha,19359,6641,3409,148
+69,South,Espresso,Caffe Mocha,38582,10231,6998,33
+70,West,Espresso,Caffe Mocha,23607,4407,2711,157
+71,North,Espresso,Caffe Latte,28166,8389,13209,51
+72,South,Espresso,Decaf Espresso,28526,6550,552,65
+73,North,Espresso,Caffe Latte,17486,11871,167,139
+74,East,Espresso,Decaf Espresso,21880,6706,-675,151
+75,East,Espresso,Decaf Espresso,19711,11961,-968,61
+76,West,Espresso,Decaf Espresso,34480,4738,14050,85
+77,South,Espresso,Decaf Espresso,11562,8552,16242,120
+78,South,Espresso,Caffe Mocha,37709,3040,8370,143
+79,North,Espresso,Caffe Mocha,10044,5491,19366,142
+80,North,Espresso,Caffe Latte,22654,4754,15553,109
+81,South,Espresso,Decaf Espresso,39229,7612,19416,156
+82,North,Espresso,Caffe Latte,38449,7314,5385,93
+83,West,Espresso,Decaf Espresso,14414,7508,18435,140
+84,North,Espresso,Decaf Espresso,38540,7323,12390,31
+85,North,Espresso,Caffe Latte,12965,4409,11583,39
+86,West,Espresso,Caffe Latte,33230,9643,15391,129
+87,West,Espresso,Caffe Latte,38155,11629,17140,99
+88,East,Espresso,Caffe Latte,18243,4970,1886,71
+89,South,Espresso,Caffe Mocha,19117,5167,9996,130
+90,South,Espresso,Caffe Latte,22427,7517,16187,154
+91,West,Espresso,Decaf Espresso,10324,4075,12700,84
+92,North,Espresso,Caffe Latte,32731,6444,19797,108
+93,West,Espresso,Decaf Espresso,20056,9467,15353,90
+94,North,Espresso,Caffe Mocha,27458,4891,13662,82
+95,North,Espresso,Caffe Mocha,38654,11579,5001,69
+96,North,Espresso,Caffe Mocha,33537,5537,10906,78
+97,West,Espresso,Caffe Latte,17188,8099,14865,42
+98,West,Espresso,Caffe Latte,34145,11088,9429,103
+99,South,Espresso,Caffe Mocha,24936,3517,14804,136
+100,South,Espresso,Caffe Mocha,31759,5669,4876,127
+1,West,Herbal Tea,Mint,37793,8193,15467,141
+2,South,Herbal Tea,Lemon,19331,6550,3064,140
+3,East,Herbal Tea,Lemon,26302,11114,2730,45
+4,West,Herbal Tea,Mint,17474,9500,18481,57
+5,South,Herbal Tea,Lemon,10411,8110,6588,132
+6,West,Herbal Tea,Chamomile,10364,11318,6364,75
+7,West,Herbal Tea,Lemon,26377,8874,8251,46
+8,North,Herbal Tea,Mint,13359,3674,7468,80
+9,South,Herbal Tea,Mint,10441,10524,1858,37
+10,West,Herbal Tea,Lemon,19003,9353,5716,143
+11,West,Herbal Tea,Chamomile,37449,10982,17683,143
+12,East,Herbal Tea,Mint,22104,5491,10735,93
+13,North,Herbal Tea,Mint,20737,11807,16840,74
+14,East,Herbal Tea,Mint,38765,9361,13794,140
+15,East,Herbal Tea,Lemon,20588,8372,-422,122
+16,West,Herbal Tea,Chamomile,37021,9459,14651,147
+17,East,Herbal Tea,Chamomile,16856,4296,12671,117
+18,West,Herbal Tea,Mint,30053,5480,10623,70
+19,North,Herbal Tea,Mint,34504,10631,5357,147
+20,North,Herbal Tea,Mint,14745,11673,19804,116
+21,North,Herbal Tea,Lemon,32978,7556,2770,90
+22,South,Herbal Tea,Mint,10152,5588,8905,64
+23,East,Herbal Tea,Lemon,11215,8664,9035,43
+24,East,Herbal Tea,Lemon,19242,8208,1320,97
+25,North,Herbal Tea,Chamomile,13833,9027,10451,108
+26,South,Herbal Tea,Chamomile,16661,8053,8728,152
+27,West,Herbal Tea,Chamomile,23491,9274,328,60
+28,West,Herbal Tea,Chamomile,34897,5292,1737,67
+29,East,Herbal Tea,Lemon,32627,4197,12070,112
+30,North,Herbal Tea,Chamomile,17135,11024,18474,154
+31,East,Herbal Tea,Mint,23607,8524,167,83
+32,South,Herbal Tea,Mint,33740,10119,11126,56
+33,South,Herbal Tea,Chamomile,25121,7037,18113,139
+34,East,Herbal Tea,Mint,33446,11532,8901,67
+35,West,Herbal Tea,Chamomile,37898,6267,13029,36
+36,South,Herbal Tea,Chamomile,32464,11338,1199,152
+37,North,Herbal Tea,Chamomile,18548,4458,939,86
+38,North,Herbal Tea,Lemon,27527,11015,4564,80
+39,South,Herbal Tea,Mint,38671,6871,11593,138
+40,South,Herbal Tea,Lemon,22780,5848,2350,64
+41,North,Herbal Tea,Lemon,29670,11858,13035,101
+42,North,Herbal Tea,Mint,28621,4933,-836,123
+43,East,Herbal Tea,Chamomile,18631,7370,8801,79
+44,North,Herbal Tea,Chamomile,15484,6941,16005,62
+45,West,Herbal Tea,Mint,11164,10974,667,98
+46,North,Herbal Tea,Lemon,11696,9094,4657,105
+47,North,Herbal Tea,Chamomile,19685,10586,18569,152
+48,West,Herbal Tea,Chamomile,35543,9473,-897,93
+49,South,Herbal Tea,Chamomile,29547,5377,16588,127
+50,East,Herbal Tea,Chamomile,26660,11715,5590,143
+51,South,Herbal Tea,Lemon,22161,11043,13341,96
+52,South,Herbal Tea,Chamomile,38212,7478,18939,133
+53,East,Herbal Tea,Lemon,20435,7076,18604,121
+54,South,Herbal Tea,Lemon,28538,10468,11739,61
+55,East,Herbal Tea,Mint,13074,11269,2436,143
+56,South,Herbal Tea,Lemon,23412,3785,4764,127
+57,East,Herbal Tea,Chamomile,24921,6120,5507,116
+58,East,Herbal Tea,Lemon,37912,11581,145,109
+59,East,Herbal Tea,Chamomile,36694,5222,5042,110
+60,South,Herbal Tea,Mint,22825,8400,11054,94
+61,East,Herbal Tea,Lemon,28334,4592,17000,97
+62,West,Herbal Tea,Lemon,35481,11967,3488,111
+63,West,Herbal Tea,Mint,32360,5755,16989,92
+64,South,Herbal Tea,Chamomile,38853,9939,279,103
+65,North,Herbal Tea,Chamomile,31264,4229,6257,89
+66,South,Herbal Tea,Chamomile,11093,8976,8580,130
+67,West,Herbal Tea,Mint,12910,9123,1217,56
+68,East,Herbal Tea,Chamomile,13293,10591,4917,82
+69,East,Herbal Tea,Chamomile,21241,6601,2910,138
+70,West,Herbal Tea,Mint,19047,9300,4537,146
+71,West,Herbal Tea,Chamomile,18324,7168,16276,141
+72,South,Herbal Tea,Mint,33940,6817,4796,109
+73,East,Herbal Tea,Lemon,38333,5398,17904,90
+74,East,Herbal Tea,Mint,10669,6894,2783,54
+75,South,Herbal Tea,Chamomile,12580,11932,-246,114
+76,West,Herbal Tea,Chamomile,24548,10416,5542,135
+77,North,Herbal Tea,Mint,18304,4511,9603,56
+78,East,Herbal Tea,Lemon,21443,7895,4696,93
+79,East,Herbal Tea,Lemon,15364,10155,17982,151
+80,East,Herbal Tea,Mint,19831,11455,569,123
+81,South,Herbal Tea,Mint,32757,8586,12671,38
+82,South,Herbal Tea,Lemon,36853,8343,13349,31
+83,West,Herbal Tea,Lemon,21481,4030,14149,87
+84,West,Herbal Tea,Mint,21615,5114,1165,122
+85,West,Herbal Tea,Chamomile,10980,11509,2552,110
+86,East,Herbal Tea,Mint,27263,11353,19130,142
+87,East,Herbal Tea,Mint,20625,3158,10942,110
+88,East,Herbal Tea,Lemon,19422,8194,789,35
+89,North,Herbal Tea,Lemon,38820,9124,5612,41
+90,North,Herbal Tea,Chamomile,35722,3135,10685,75
+91,West,Herbal Tea,Chamomile,12486,8220,3649,67
+92,South,Herbal Tea,Mint,28650,7906,13059,106
+93,East,Herbal Tea,Mint,34053,11353,1056,101
+94,East,Herbal Tea,Mint,27281,11478,17639,139
+95,West,Herbal Tea,Lemon,34237,11880,1345,130
+96,East,Herbal Tea,Lemon,25305,9477,3091,147
+97,South,Herbal Tea,Chamomile,22967,11443,7693,156
+98,West,Herbal Tea,Chamomile,18046,11942,14432,88
+99,North,Herbal Tea,Lemon,38854,5424,17079,79
+100,East,Herbal Tea,Chamomile,18677,10739,5958,158
+1,South,Coffee,Amaretto,12109,3696,16863,97
+2,East,Coffee,Decaf Irish Cream,33726,8385,2972,81
+3,South,Coffee,Colombian,33032,11519,3697,114
+4,East,Coffee,Amaretto,24445,8072,1096,111
+5,South,Coffee,Colombian,39019,10540,9777,36
+6,West,Coffee,Decaf Irish Cream,19645,11337,18691,108
+7,North,Coffee,Colombian,17937,3793,10029,39
+8,East,Coffee,Colombian,24786,5796,12546,75
+9,East,Coffee,Decaf Irish Cream,24448,6338,17650,99
+10,South,Coffee,Decaf Irish Cream,21873,5950,40,57
+11,West,Coffee,Amaretto,34940,7586,12454,90
+12,South,Coffee,Amaretto,28414,4480,6440,109
+13,North,Coffee,Amaretto,37790,4184,13227,49
+14,West,Coffee,Amaretto,28755,8592,7780,88
+15,North,Coffee,Colombian,33002,9703,5398,86
+16,West,Coffee,Amaretto,10814,3910,7521,131
+17,West,Coffee,Colombian,23195,10152,12017,86
+18,North,Coffee,Decaf Irish Cream,24346,11288,17957,50
+19,North,Coffee,Amaretto,10287,4127,19530,51
+20,West,Coffee,Amaretto,33310,6513,3566,152
+21,North,Coffee,Amaretto,29396,6131,18211,145
+22,West,Coffee,Decaf Irish Cream,39739,8469,2490,71
+23,West,Coffee,Amaretto,15326,9812,15783,89
+24,South,Coffee,Decaf Irish Cream,29984,10676,15991,74
+25,West,Coffee,Decaf Irish Cream,30633,7746,18899,157
+26,West,Coffee,Decaf Irish Cream,39868,3177,16964,46
+27,South,Coffee,Amaretto,14669,8533,12225,142
+28,South,Coffee,Amaretto,39328,3063,1111,104
+29,East,Coffee,Amaretto,39264,6300,2025,116
+30,South,Coffee,Amaretto,37325,8658,2904,44
+31,North,Coffee,Decaf Irish Cream,33226,7885,12736,95
+32,South,Coffee,Amaretto,31151,5240,19363,115
+33,North,Coffee,Colombian,33567,6773,6993,88
+34,North,Coffee,Colombian,39089,11839,2671,50
+35,North,Coffee,Amaretto,30391,3227,15227,117
+36,South,Coffee,Decaf Irish Cream,18781,5858,4399,93
+37,North,Coffee,Amaretto,25168,10951,6636,100
+38,South,Coffee,Colombian,28333,6556,4395,73
+39,North,Coffee,Colombian,39503,8837,17107,63
+40,East,Coffee,Colombian,32383,7572,11830,63
+41,West,Coffee,Colombian,30497,6694,12083,157
+42,East,Coffee,Colombian,28866,6478,1275,153
+43,North,Coffee,Decaf Irish Cream,39479,8685,4181,117
+44,South,Coffee,Amaretto,21338,7504,10399,117
+45,South,Coffee,Amaretto,22261,9159,-255,62
+46,West,Coffee,Amaretto,22306,11671,6250,136
+47,North,Coffee,Colombian,17940,5646,3640,93
+48,South,Coffee,Colombian,30800,10778,6273,80
+49,East,Coffee,Amaretto,37902,8697,10089,42
+50,East,Coffee,Amaretto,39150,4459,2788,52
+51,West,Coffee,Decaf Irish Cream,29370,8913,3863,72
+52,South,Coffee,Amaretto,38568,10686,5903,72
+53,East,Coffee,Colombian,22304,11858,19911,58
+54,North,Coffee,Decaf Irish Cream,21203,5311,10759,31
+55,West,Coffee,Decaf Irish Cream,29218,11523,10467,30
+56,West,Coffee,Amaretto,16432,9175,229,58
+57,East,Coffee,Amaretto,15000,3553,6488,49
+58,North,Coffee,Decaf Irish Cream,34804,5012,17372,142
+59,South,Coffee,Amaretto,28909,8813,7348,124
+60,South,Coffee,Amaretto,26957,11527,14771,119
+61,South,Coffee,Colombian,25311,4899,346,131
+62,North,Coffee,Amaretto,10395,10834,3020,42
+63,East,Coffee,Amaretto,17362,5529,14969,86
+64,East,Coffee,Colombian,13166,11056,13404,107
+65,East,Coffee,Decaf Irish Cream,39097,10320,6140,100
+66,South,Coffee,Decaf Irish Cream,35749,5679,5151,117
+67,North,Coffee,Amaretto,23551,6565,14720,142
+68,West,Coffee,Decaf Irish Cream,28101,10090,10043,57
+69,West,Coffee,Decaf Irish Cream,11180,6530,1344,34
+70,West,Coffee,Colombian,18332,6698,4638,92
+71,West,Coffee,Decaf Irish Cream,10826,3623,3156,38
+72,South,Coffee,Decaf Irish Cream,18717,8932,13472,139
+73,South,Coffee,Colombian,37405,9906,16444,31
+74,West,Coffee,Colombian,13458,3951,6981,81
+75,South,Coffee,Amaretto,17748,7968,1436,84
+76,North,Coffee,Amaretto,19386,5253,19037,37
+77,East,Coffee,Decaf Irish Cream,16413,8465,7813,145
+78,South,Coffee,Colombian,29520,11246,3233,77
+79,North,Coffee,Colombian,20949,3398,850,126
+80,West,Coffee,Decaf Irish Cream,17105,7626,8045,150
+81,South,Coffee,Amaretto,10358,3926,546,34
+82,South,Coffee,Amaretto,32572,9135,5319,66
+83,South,Coffee,Decaf Irish Cream,31722,7540,16180,118
+84,North,Coffee,Colombian,24146,10765,11318,102
+85,East,Coffee,Amaretto,33540,9412,15366,115
+86,East,Coffee,Decaf Irish Cream,15024,5063,14416,95
+87,North,Coffee,Colombian,27501,4124,9327,35
+88,East,Coffee,Colombian,27396,9116,8406,143
+89,East,Coffee,Colombian,20826,6489,16564,88
+90,South,Coffee,Amaretto,24366,10316,12938,62
+91,North,Coffee,Colombian,30060,11760,11750,129
+92,West,Coffee,Decaf Irish Cream,11168,3419,5719,150
+93,North,Coffee,Decaf Irish Cream,20618,7058,14324,75
+94,West,Coffee,Amaretto,25546,5240,1734,138
+95,West,Coffee,Amaretto,39639,10911,17284,50
+96,East,Coffee,Colombian,36118,8385,11738,63
+97,South,Coffee,Colombian,18629,7163,13308,130
+98,South,Coffee,Amaretto,22886,11326,1075,127
+99,South,Coffee,Amaretto,12389,10309,15327,32
+100,North,Coffee,Decaf Irish Cream,17614,10656,14288,139
+1,South,Tea,Darjeeling,24293,7013,6407,134
+2,South,Tea,Earl Grey,14711,8018,2769,110
+3,West,Tea,Darjeeling,21451,9154,-56,136
+4,West,Tea,Earl Grey,16007,5337,-605,57
+5,East,Tea,Earl Grey,31433,3657,9035,142
+6,East,Tea,Earl Grey,22495,9009,2279,122
+7,West,Tea,Darjeeling,10889,5810,9843,146
+8,North,Tea,Green Tea,21092,9112,10867,114
+9,South,Tea,Earl Grey,15000,8244,10397,41
+10,South,Tea,Darjeeling,25677,3391,6214,55
+11,West,Tea,Green Tea,22630,10208,17861,63
+12,West,Tea,Darjeeling,18776,3459,7652,117
+13,South,Tea,Darjeeling,29282,8009,11047,61
+14,North,Tea,Green Tea,32971,9848,9157,76
+15,East,Tea,Darjeeling,15859,4777,9055,40
+16,West,Tea,Earl Grey,26389,11543,2396,139
+17,West,Tea,Earl Grey,20098,11480,11763,127
+18,East,Tea,Green Tea,25103,9526,9314,104
+19,North,Tea,Earl Grey,18514,3421,13848,106
+20,West,Tea,Darjeeling,31501,9470,9714,109
+21,East,Tea,Earl Grey,25126,6579,16642,93
+22,East,Tea,Darjeeling,39645,7113,7888,70
+23,South,Tea,Green Tea,18143,9108,18471,88
+24,East,Tea,Earl Grey,16793,9351,6028,52
+25,East,Tea,Darjeeling,17348,4759,17984,107
+26,West,Tea,Green Tea,39280,3290,32,85
+27,East,Tea,Earl Grey,14005,4962,8482,99
+28,West,Tea,Earl Grey,21914,9317,6871,46
+29,North,Tea,Green Tea,17417,4715,19157,58
+30,West,Tea,Earl Grey,30181,3242,11170,38
+31,West,Tea,Darjeeling,25739,3803,3922,67
+32,West,Tea,Green Tea,32450,6889,1686,115
+33,West,Tea,Earl Grey,38035,4136,8103,74
+34,West,Tea,Darjeeling,12687,4630,-554,152
+35,West,Tea,Earl Grey,38575,6542,10173,79
+36,West,Tea,Green Tea,12752,10823,18568,58
+37,South,Tea,Green Tea,26877,6979,5437,34
+38,East,Tea,Darjeeling,17037,3591,5142,121
+39,North,Tea,Darjeeling,37153,6207,18494,112
+40,North,Tea,Green Tea,12207,7197,9433,59
+41,North,Tea,Green Tea,21519,7326,14189,145
+42,West,Tea,Green Tea,16595,6083,7416,114
+43,West,Tea,Darjeeling,14802,5649,2308,78
+44,East,Tea,Darjeeling,12762,7882,9289,37
+45,North,Tea,Darjeeling,33064,6695,11732,160
+46,West,Tea,Earl Grey,27812,3920,11498,47
+47,North,Tea,Darjeeling,36174,6558,16484,128
+48,East,Tea,Earl Grey,13080,10998,18676,43
+49,North,Tea,Darjeeling,24578,3892,8874,125
+50,East,Tea,Darjeeling,29128,6149,2281,86
+51,East,Tea,Green Tea,32185,11572,10582,120
+52,West,Tea,Darjeeling,13616,4283,9942,35
+53,South,Tea,Earl Grey,12103,5239,821,107
+54,North,Tea,Darjeeling,11631,11656,13218,153
+55,South,Tea,Earl Grey,23461,7920,9328,139
+56,North,Tea,Green Tea,25649,4723,2328,123
+57,South,Tea,Green Tea,36415,9312,8137,59
+58,East,Tea,Green Tea,18654,4490,13862,149
+59,North,Tea,Green Tea,13231,4507,4438,86
+60,West,Tea,Earl Grey,37938,5848,5112,113
+61,West,Tea,Earl Grey,25927,5543,17445,38
+62,West,Tea,Darjeeling,19490,4718,14531,147
+63,North,Tea,Earl Grey,20387,3516,6973,94
+64,North,Tea,Darjeeling,12662,4003,16744,30
+65,West,Tea,Earl Grey,33129,9954,18616,160
+66,West,Tea,Green Tea,13372,3259,10095,88
+67,West,Tea,Green Tea,12323,3259,11755,96
+68,South,Tea,Earl Grey,12637,11474,9800,91
+69,East,Tea,Earl Grey,38795,6439,10363,60
+70,South,Tea,Green Tea,18865,3724,9953,111
+71,North,Tea,Darjeeling,21959,9685,4595,114
+72,North,Tea,Darjeeling,11258,9456,3865,136
+73,North,Tea,Darjeeling,28481,11985,19360,80
+74,North,Tea,Earl Grey,31159,7065,668,145
+75,North,Tea,Green Tea,27985,5895,6683,104
+76,East,Tea,Darjeeling,21174,3597,9078,45
+77,North,Tea,Darjeeling,24307,6070,12071,72
+78,North,Tea,Green Tea,21533,10149,17784,102
+79,East,Tea,Earl Grey,21339,4135,15816,72
+80,West,Tea,Earl Grey,15083,10931,12384,92
+81,South,Tea,Earl Grey,12892,10151,2125,159
+82,East,Tea,Earl Grey,28320,4212,13375,106
+83,West,Tea,Earl Grey,26028,7694,7695,32
+84,West,Tea,Earl Grey,10864,9737,10391,122
+85,East,Tea,Darjeeling,27085,6253,7716,140
+86,South,Tea,Darjeeling,12326,8630,1380,107
+87,West,Tea,Green Tea,19948,6591,9243,90
+88,South,Tea,Green Tea,39504,8472,10611,88
+89,West,Tea,Earl Grey,27088,8874,4710,157
+90,East,Tea,Earl Grey,11015,6386,5596,33
+91,West,Tea,Darjeeling,13393,9569,1126,101
+92,East,Tea,Earl Grey,22283,6920,15868,53
+93,East,Tea,Darjeeling,18820,4532,7392,117
+94,East,Tea,Darjeeling,17622,4928,-112,132
+95,East,Tea,Green Tea,37973,3756,2138,113
+96,East,Tea,Earl Grey,27635,11462,16418,40
+97,West,Tea,Earl Grey,23522,7531,938,116
+98,South,Tea,Earl Grey,22385,7810,3346,114
+99,South,Tea,Green Tea,26699,10685,19455,151
+100,South,Tea,Darjeeling,14802,11618,16758,74

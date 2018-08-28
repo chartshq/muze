@@ -1,0 +1,68 @@
+@import "./firebolt/side-effects/selection-box/styles.scss";
+$prefix: muze-;
+
+.#{$prefix}legend-box {
+    font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
+
+    line-height: 10px !important;
+    height: 100px;
+    float: none !important;
+    display: inline-block;
+    border: solid rgba(0, 0, 0, 0);
+
+}
+
+.#{$prefix}legend-title {
+    border-bottom: solid rgba(0,0,0,0);
+    display: block;
+    align-items: center;
+    float: left;
+    text-align: left;
+    font-size: 14px;
+    height: 30px;
+    fill:#5F5F5F;
+    font-weight:600;
+}
+.#{$prefix}legend-overflow {
+    text-align: center
+}
+
+.#{$prefix}legend-icon-svg {
+    cursor: pointer;
+}
+.#{$prefix}legend-icon {
+    cursor: pointer;
+}
+
+.#{$prefix}overflow-y{
+    overflow-y: scroll;
+}
+
+.#{$prefix}overflow-x{
+    overflow-x: scroll;
+}
+
+.#{$prefix}legend-fadeout {
+    fill-opacity: 0.3;
+    opacity: 0.3;
+}
+
+.#{$prefix}legend-brighten {
+    fill-opacity: 1;
+}
+.#{$prefix}legend-item-info {
+    float: left;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 12px;
+}
+.#{$prefix}legend-item-info.center{
+    justify-content: center;
+}
+.#{$prefix}legend-item-info.start{
+    justify-content: flex-start;
+}
+.#{$prefix}legend-item-info.end{
+    justify-content: flex-end;
+}

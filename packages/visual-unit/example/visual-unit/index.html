@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Splom Layout</title>
+
+    <!-- Bootstrap -->
+    <script src="../js/d3.js"></script>
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <style>
+            .hi {
+        fill: black;
+      }
+      #chart {
+        margin-left: 150px;
+      }
+      #axis {
+        margin-left: 100px;
+      }
+      .axiscolor {
+        fill: black;
+        font-weight: bold;
+      }
+      div {
+        float: left;
+      }
+      .rootDiv {
+        border: 0px solid !important;
+    }
+      .section, .nested {
+        border: 0px solid;
+        border-bottom: 1px solid;
+    }
+      .sectionTitle{
+          height: calc(100% - 10px);
+      }
+      .sectionTitle, .nestedTitle {
+        min-width: 100px;
+        width : 100px;
+        padding: 5px;
+    }
+    .chartInstance{
+        padding: 5px;
+    }
+    #Year {
+      opacity: 0.0;
+    }
+
+    svg[font-family="sans-serif"] path {
+        visibility: hidden;
+    }
+
+
+    /* ---------- MUZE TABLE LAYOUT --------- */
+    table{
+        float: left;
+    }
+    .muze-tablelayout-body {
+        position: relative;
+        margin-left: 50px;
+    }
+    .muze-row-table {
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .muze-row-table, .muze-column-table {
+        position: relative;
+    }
+    .muze-row-section, .muze-column-section {
+        height: 100%;
+    }
+
+
+        /* ---------- ROW SECTION --------- */
+    .muze-rows {
+        vertical-align: baseline;
+        text-align: center;
+        padding-top: 5px;
+    }
+    .muze-rows:first-child{
+        border: 0px !important;
+        vertical-align: bottom;
+
+    }
+    .muze-rows:first-child td {
+        border:0px;
+    }
+    td.muze-row-cells {
+        border-collapse: collapse;
+        border-left: 0px;
+    }
+        /* ---------- END ROW SECTION --------- */
+
+        /* ---------- COLUMN SECTION --------- */
+    .muze-column-section {
+        width: 400px;
+    }
+    tr.muze-col-header {
+        text-align: center;
+
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .muze-col-header-cell {
+        text-align: center;
+        border-right: 1px solid rgba(0,0,0,0.1);
+        border-left:1px solid rgba(0,0,0,0.1);
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    tr.muze-col-header:first-child td{
+
+        border-right:none;
+        border-left:none;
+    }
+    td.muze-value-cells {
+        vertical-align: -webkit-baseline-middle;
+        padding-left: 0%;
+        position: relative;
+    }
+    .muze-columns {
+        border-top: 1px solid rgba(0,0,0,.1);
+    }
+    td.muze-column-cells {
+        text-align: center;
+    }
+        /* ---------- END COLUMN SECTION --------- */
+
+        /* --------- SCROLL BARS -------- */
+    .muze-hor-scroll{
+        border-radius: 2px;
+        display: flex;
+        border: 1px solid rgba(0,0,0,0.1);
+        /* color: white; */
+        background: #E0E0E0;
+        transition: 0.5s;
+        align-items: center;
+        font-size: 16px;
+        position: absolute;
+        width: 12px;
+        cursor: pointer;
+        height: 100%;
+    }
+    .muze-ver-scroll{
+        border-radius: 2px;
+        display: flex;
+        border: 1px solid rgba(0,0,0,0.1);
+        /* color: white; */
+        background: #E0E0E0;
+        transition: 0.5s;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        position: absolute;
+        width: 100%;
+        cursor: pointer;
+        height: 12px;
+    }
+    .muze-hor-scroll[orient="right"] {
+        right: 0;
+        top: 0;
+    }
+    .muze-hor-scroll[orient="left"] {
+        left: 0;
+        top: 0;
+    }
+    .muze-ver-scroll[orient="top"] {
+        left: 0;
+        top: 0;
+    }
+    .muze-ver-scroll[orient="bottom"] {
+        left: 0;
+        bottom: 0;
+    }
+    .muze-hor-scroll:hover {
+        width: 12px;
+        font-size: 20px;
+
+        box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.1);
+    }
+    .muze-ver-scroll:hover {
+
+        font-size: 20px;
+
+        box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.1);
+    }
+    .muze-hor-scroll-arrow , .muze-ver-scroll-arrow{
+        position:relative;
+        display:block;
+        height:16px;/*height should be double border*/
+    }
+    .muze-hor-scroll-arrow:before,
+    .muze-hor-scroll-arrow:after,
+    .muze-ver-scroll-arrow:before,
+    .muze-ver-scroll-arrow:after{
+        position:absolute;
+        display:block;
+        content:"";
+        border: 8px solid transparent;/*adjust size*/
+    }
+    /*Change four 'top' values below to rotate (top/right/bottom/left)*/
+    .muze-hor-scroll[orient="right"] .muze-hor-scroll-arrow:before{
+        left:2px;
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
+    }
+    .muze-hor-scroll[orient="right"] .muze-hor-scroll-arrow:after{
+        left:0px;/*adjust thickness*/
+        border-left-color:#E0E0E0;;/*Match background colour*/
+    }
+    .muze-hor-scroll[orient="left"] .muze-hor-scroll-arrow:before{
+        right:-8px;
+        border-right-color:black;/*muze-hor-scroll-arrow Color*/
+    }
+    .muze-hor-scroll[orient="left"] .muze-hor-scroll-arrow:after{
+        right:-10px;/*adjust thickness*/
+        border-right-color:#E0E0E0;;/*Match background colour*/
+    }
+
+    /*Change four 'top' values below to rotate (top/right/bottom/left)*/
+    .muze-ver-scroll[orient="top"] .muze-ver-scroll-arrow:before{
+        left:-8px;
+        top: -4px;
+        transform: rotate(-90deg);
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
+    }
+    .muze-ver-scroll[orient="top"] .muze-ver-scroll-arrow:after{
+        left:-8px;/*adjust thickness*/
+        top: -2px;
+        transform: rotate(-90deg);
+        border-left-color:#E0E0E0;;/*Match background colour*/
+    }
+    /*Change four 'top' values below to rotate (top/right/bottom/left)*/
+    .muze-ver-scroll[orient="bottom"] .muze-ver-scroll-arrow:before{
+        right:-8px;
+        bottom: -4px;
+        transform: rotate(90deg);
+        border-left-color:black;/*muze-hor-scroll-arrow Color*/
+    }
+    .muze-ver-scroll[orient="bottom"] .muze-ver-scroll-arrow:after{
+        right:-8px;/*adjust thickness*/
+        bottom: -2px;
+        transform: rotate(90deg);
+        border-left-color:#E0E0E0;;/*Match background colour*/
+    }
+            /* --------- END SCROLL BARS -------- */
+    /*  -------- END MUZE TABLE LAYOUT --------- */
+svg{
+    display: block;
+}
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">FusionBoard</a>
+        </div>
+      </div>
+    </nav>
+    <h1>SPLOM Group</h1>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="../../js/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../visual-unit.js"></script>
+    <script src="./sample.js"></script>
+    <p id="text"></p>
+  </body>
+</html>

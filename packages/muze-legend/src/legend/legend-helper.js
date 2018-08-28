@@ -1,0 +1,246 @@
+import { makeElement, numberInterpolator } from 'muze-utils';
+
+import {
+    SCALE_FUNCTIONS,
+    WIDTH,
+    HEIGHT,
+    LEFT,
+    RIGHT,
+    TOP,
+    BOTTOM
+} from '../enums/constants';
+
+/**
+ *
+ *
+ * @param {*} scale
+ * @returns
+ */
+export const getScaleInfo = (scale) => {
+    const scaleType = scale.constructor.type();
+    const domain = scale.uniqueValues();
+    const steps = scale.config().stops || 1;
+    const scaleFn = SCALE_FUNCTIONS[scaleType];
+
+    return { scaleType, domain, steps, scaleFn };
+};
+
+/**
+ *
+ *
+ * @param {*} domain
+ * @param {*} steps
+ * @returns
+ */
+export const getInterpolatedData = (domain, steps) => {
+    const domainForLegend = [];
+    const interpolatedFn = numberInterpolator()(domain[0], domain[1]);
+
+    for (let i = 0; i <= steps; i++) {
+        domainForLegend[i] = interpolatedFn(i / steps);
+    }
+    return domainForLegend;
+};
+
+/**
+ *
+ *
+ * @param {*} container
+ * @param {*} text
+ * @param {*} measurement
+ * @param {*} classPrefix
+ */
+export const titleCreator = (container, title, measurement, config) =>
+                makeElement(container, 'div', [1], `${config.classPrefix}-legend-title`)
+                                .style(WIDTH, '100%')
+                                .style(HEIGHT, `${measurement.height}px`)
+                                .style('padding-left', `${measurement.padding}px`)
+                                .style('padding-right', `${measurement.padding}px`)
+                                .style('border-bottom-width', `${measurement.border}px`)
+                                .style('text-align', title.orientation instanceof Function ?
+                                        title.orientation(config.position) : title.orientation)
+                                .text(title.text)
+                                .node();
+
+/**
+ *
+ *
+ * @param {*} data
+ * @param {*} prop
+ * @param {*} labelManager
+ * @return
+ */
+export const getMaxMeasures = (data, prop, labelManager) => {
+    let maxHeight = -Infinity;
+    let maxWidth = -Infinity;
+
+    data.forEach((item) => {
+        const value = prop ? item[prop] : item;
+        const space = labelManager.getOriSize(value);
+        maxHeight = Math.max(space.height + 2, maxHeight);
+        maxWidth = Math.max(space.width + 2, maxWidth);
+    });
+
+    return { height: maxHeight, width: maxWidth };
+};
+
+/**
+ *
+ *
+ * @param {*} data
+ * @param {*} prop
+ * @param {*} labelManager
+ * @return
+ */
+export const getItemMeasures = (data, prop, labelManager) => {
+    const space = [];
+
+    data.forEach((item, index) => {
+        const value = prop ? item[prop] : item;
+        const { height, width } = labelManager.getOriSize(value);
+        space[index] = { height: height + 1, width: width + 1 };
+    });
+    return space;
+};
+
+/**
+ *
+ *
+ * @param {*} textOrientation
+ * @param {*} effPadding
+ * @param {*} titleSpace
+ * @return
+ * @memberof Legend
+ */
+export const computeItemSpaces = (config, measures, data) => {
+    let totalHeight = 0;
+    let totalWidth = 0;
+    let maxItemSpaces = {
+        width: 0, height: 0
+    };
+    const {
+        effPadding,
+        titleWidth,
+        labelSpaces,
+        titleHeight,
+        maxWidth
+    } = measures;
+    const {
+        item,
+        align
+    } = config;
+    const {
+        icon,
+        text
+    } = item;
+    const textOrientation = text.orientation;
+    const itemSpaces = [];
+    const iconSpaces = [];
+    let maxIconWidth = 0;
+    labelSpaces.forEach((labelSpace, i) => {
+        const itemSpace = { width: 0, height: 0 };
+        const iconSpace = { width: 0, height: 0 };
+        const datum = data[i] || {};
+            // Compute each legend item height/width
+        if (textOrientation === LEFT || textOrientation === RIGHT) {
+            // Get label, icon and item widths
+            labelSpace.width += effPadding;
+            iconSpace.width = (datum.size ? 2 * Math.sqrt(datum.size / Math.PI) : icon.width) + effPadding;
+            maxIconWidth = Math.max(iconSpace.width, maxIconWidth);
+            itemSpace.width = labelSpace.width + maxIconWidth;
+
+            // Get label, icon and item heights
+            labelSpace.height = Math.max(labelSpace.height, icon.height) + effPadding;
+            iconSpace.height = labelSpace.height;
+            itemSpace.height = labelSpace.height;
+        } else {
+            // Get label, icon and item widths
+            labelSpace.width = Math.max(labelSpace.width, datum.size ? 2 * Math.sqrt(datum.size / Math.PI)
+            : icon.width) + effPadding;
+            iconSpace.width = labelSpace.width;
+            itemSpace.width = labelSpace.width;
+            maxIconWidth = Math.max(iconSpace.width, maxIconWidth);
+
+            // Get label, icon and item heights
+            labelSpace.height += effPadding;
+            iconSpace.height = icon.height + effPadding;
+            itemSpace.height = labelSpace.height + iconSpace.height;
+        }
+        // Compute height and width of legend for each alignment
+        if (align === 'horizontal') {
+            totalHeight = Math.max(totalHeight, itemSpace.height);
+        } else {
+            totalHeight += itemSpace.height;
+            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
+        }
+        maxItemSpaces = {
+            width: Math.max(itemSpace.width, maxItemSpaces.width),
+            height: Math.max(itemSpace.height, maxItemSpaces.height)
+        };
+        itemSpaces.push(itemSpace);
+        iconSpaces.push(iconSpace);
+    });
+
+    itemSpaces.forEach((itemSpace, i) => {
+        if (align === 'horizontal') {
+            itemSpace.height = totalHeight;
+            iconSpaces[i].width = maxIconWidth;
+            if (textOrientation === LEFT || textOrientation === RIGHT) {
+                labelSpaces[i].height = totalHeight;
+                iconSpaces[i].height = totalHeight;
+                itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
+            } else {
+                labelSpaces[i].width = maxIconWidth;
+                itemSpaces[i].width = maxIconWidth;
+                labelSpaces[i].width = maxIconWidth;
+            }
+            totalWidth = Math.max(totalWidth + itemSpaces[i].width, titleWidth);
+        } else {
+            itemSpace.width = Math.max(totalWidth, maxWidth);
+            if (textOrientation === TOP || textOrientation === BOTTOM) {
+                labelSpaces[i].width = totalWidth;
+                iconSpaces[i].width = totalWidth;
+                maxIconWidth = totalWidth;
+            } else {
+                iconSpaces[i].width = maxIconWidth;
+                itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
+                labelSpaces[i].width = maxItemSpaces.width - maxIconWidth;
+                totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
+            }
+        }
+    });
+    totalHeight += titleHeight + effPadding;
+
+    return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };
+};
+
+/**
+ *
+ *
+ * @param {*} type
+ * @param {*} scaleInfo
+ * @param {*} domainInfo
+ * @returns
+ */
+export const getDomainBounds = (type, scaleInfo, domainInfo) => {
+    const {
+        scaleFn,
+        scaleType,
+        scale
+    } = scaleInfo;
+    const {
+        domain,
+        domainBounds,
+        domainLeg,
+        steps
+    } = domainInfo;
+    const ele = domain[type === 'lower' ? 0 : domain.length - 1];
+    const step = steps[type === 'lower' ? 0 : steps.length - 1];
+
+    return {
+        [scaleType]: scaleType === 'size' ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele),
+        value: domainBounds[type],
+        id: type === 'lower' ? 0 : domainLeg.length + 2,
+        range: [ele, step]
+    };
+};
