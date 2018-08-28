@@ -2,7 +2,7 @@
   <br />
   <br />
   <a href="https://github.com/chartshq/muze">
-    <img src="https://github.com/chartshq/muze/raw/develop/logo.png" alt="muzejs" title="muzejs" />
+    <img src="https://github.com/chartshq/muze/raw/master/logo.png" alt="muzejs" title="muzejs" />
   </a>
 </h3>
 <br />
@@ -16,7 +16,7 @@
 
 ## What is Muze?
 
-Muze is a data visualization library which uses a layered Grammar of Graphics (GoG) to create composable and interactive charts for web. It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart. 
+Muze is a data visualization library which uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart. 
 
 Muze uses an in-browser [DataModel](https://github.com/chartshq/datamodel) to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
 
@@ -141,7 +141,7 @@ Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or c
 
 ## Roadmap
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap][https://feedback.muze.charts.com]
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muze.charts.com)
 
 ## Contributing
 

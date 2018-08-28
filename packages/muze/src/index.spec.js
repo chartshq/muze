@@ -1,7 +1,7 @@
 /* global describe, it, before */
 
 import { expect } from 'chai';
-import DataModel from 'datamodel';
+import { DataModel } from 'muze-utils';
 
 import { muze } from './';
 import TransactionSupport from './transaction-support';

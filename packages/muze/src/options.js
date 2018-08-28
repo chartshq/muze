@@ -14,15 +14,14 @@
  *  }
  */
 
-import { intSanitizer, mergeRecursive } from 'muze-utils';
+import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
 import { DEFAULT_CONFIG } from './defaults';
 
 export default {
     data: {
         value: null,
         meta: {
-            typeCheck: 'constructor',
-            typeExpected: 'DataModel'
+            typeCheck: d => d instanceof DataModel
         }
     },
     width: {

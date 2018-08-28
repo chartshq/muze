@@ -1,3 +1,5 @@
+import { DataModel } from 'muze-utils';
+
 import { retriveDomainFromData } from './group-utils';
 
 /**
@@ -203,7 +205,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
                 matrix[rIndex] = matrix[rIndex] || [];
 
                 // If datamodel is not present in current row, choose parent datamodel
-                const datamodel = (dme.constructor && dme.constructor.name === 'DataModel') ? dme : dataModel;
+                const datamodel = dme instanceof DataModel ? dme : dataModel;
 
                 // Selection is made on the datamodel for the current row
                 const selectedDataModel = createSelectedDataModel(datamodel, colFacetNames, val);
