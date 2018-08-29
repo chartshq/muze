@@ -3,8 +3,8 @@
 (function () {
     let env = muze();
     let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
+        share = muze.Operators.share,
+        html = muze.Operators.html,
         actionModel = muze.ActionModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
@@ -76,8 +76,8 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1200)
-            .height(800)
+            .width(300)
+            .height(300)
             .detail(['Maker'])
             .color('Origin')
             .layers([{
@@ -102,7 +102,7 @@
             })
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-            .mount(document.getElementsByTagName('body')[0]);
+            .mount(document.getElementById('chart'));
     })
 
 })()
