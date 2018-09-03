@@ -159,7 +159,6 @@ export const getRenderDetails = (context, mount) => {
     // Get height width of the mount point
     const { height, width } = mount.getBoundingClientRect();
 
-    // @todo minimum height is currently 200, has to eliminate or make aroung 100
     const availableHeightForCanvas = Math.max(heightAttr > 0 ? heightAttr : height, minHeight);
     const availableWidthForCanvas = Math.max(widthAttr > 0 ? widthAttr : width, minWidth);
 
