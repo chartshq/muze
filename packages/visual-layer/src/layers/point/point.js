@@ -202,7 +202,7 @@ export default class PointLayer extends BaseLayer {
      * @return {Object} Point details
      */
     getNearestPoint (x, y) {
-        const distanceLimit = this._maxSize;
+        const distanceLimit = Math.max(this._maxSize, this.config().nearestPointThreshold);
 
         if (!this.data()) {
             return null;
