@@ -12,11 +12,13 @@ import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
 import * as PROPS from '../../enums/props';
+import { getPlotMeasurement } from '../../helpers';
 import './styles.scss';
-import { getTranslatedPoints, getBarMeasurement } from './bar-helper';
+import { getTranslatedPoints } from './bar-helper';
 
 const MEASURE = FieldType.MEASURE;
 const scaleBand = Scales.band;
+
 /**
  * Bar Layer creates a bar plot. It needs to be passed a data table, axes and configuration of the layer.
  *
@@ -183,28 +185,12 @@ export default class BarLayer extends BaseLayer {
      * @memberof BarLayer
      */
     generateDataPoints (normalizedData, keys) {
-        const config = this.config();
-        const axes = this.axes();
-        const transformType = this.transformType();
-        const fieldInfo = this.encodingFieldsInf();
-        const [barWidthMetrics, barHeightMetrics] = ['x', 'y'].map((type) => {
-            if (fieldInfo[`${type}FieldType`] === FieldType.DIMENSION) {
-                const isTemporal = fieldInfo[`${type}FieldSubType`] === DimensionSubtype.TEMPORAL;
-                const timeDiff = isTemporal ? this.dataProps().timeDiffs[type] : 0;
-                return getBarMeasurement(axes[type], this._bandScale, {
-                    timeDiff,
-                    transformType,
-                    keys,
-                    pad: config[`pad${type.toUpperCase()}`],
-                    innerPadding: config.innerPadding
-                });
-            } return {};
-        });
+        const [barWidthMetrics, barHeightMetrics] = getPlotMeasurement(this, keys);
         const barWidthOffsets = barWidthMetrics.offsetValues || [];
         const barHeightOffsets = barHeightMetrics.offsetValues || [];
         this._plotSpan = {
-            x: barWidthMetrics.groupWidth || 0,
-            y: barHeightMetrics.groupWidth || 0
+            x: barWidthMetrics.groupSpan || 0,
+            y: barHeightMetrics.groupSpan || 0
         };
         this._plotPadding = {
             x: barWidthMetrics.padding || 0,
@@ -214,9 +200,9 @@ export default class BarLayer extends BaseLayer {
         this._pointMap = {};
         return normalizedData.map((data, i) => this.translatePoints(data,
             {
-                barWidth: barWidthMetrics.width,
+                barWidth: barWidthMetrics.span,
                 barWidthOffset: barWidthOffsets[i] || 0,
-                barHeight: barHeightMetrics.width,
+                barHeight: barHeightMetrics.span,
                 barHeightOffset: barHeightOffsets[i] || 0
             }));
     }
@@ -224,6 +210,7 @@ export default class BarLayer extends BaseLayer {
     getPlotPadding () {
         return this._plotPadding;
     }
+
     /**
      * Gets the nearest point of the position passed.
      * @param {number} x x position

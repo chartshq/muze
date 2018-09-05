@@ -20,6 +20,7 @@ export const defaultConfig = {
         }
         ]
     },
+    innerPadding: 0.1,
     transform: {
         type: 'identity'
     },

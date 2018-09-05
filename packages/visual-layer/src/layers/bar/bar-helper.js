@@ -1,10 +1,7 @@
 import { FieldType, DimensionSubtype } from 'muze-utils';
-import { ScaleType } from '@chartshq/muze-axis';
 import * as PROPS from '../../enums/props';
 import { STACK } from '../../enums/constants';
-import { getLayerColor, positionPoints } from '../../helpers/';
-
-const BAND = ScaleType.BAND;
+import { getLayerColor, positionPoints } from '../../helpers';
 
 /**
  *
@@ -135,91 +132,6 @@ const resolveDimensions = (data, config, axes) => {
             width,
             height
         }
-    };
-};
-
-/**
-  * Gets the width of each bar. It gets the width from axis if it is available for
-  * example when the scale is nominal else it calculates the width from the
-  * range of the axis and number of data points.
-  * @param {SimpleAxis} axis instance of axis
-  * @param {number} minDiff Minimum difference between data points
-  * @return {number} width of each bar
-  * @private
-*/
-const getGroupWidth = (axis, minDiff) => {
-    let barWidth;
-    const width = axis.getUnitWidth();
-    const scale = axis.scale();
-    const range = scale.range();
-    const domain = scale.domain();
-    !width ? barWidth = (Math.abs(range[1] - range[0])
-        / Math.abs(domain[1] - domain[0])) * minDiff :
-        (barWidth = width);
-
-    return barWidth;
-};
-
-/**
- * Gets the width and offset values of the bar.
- * Bar layer can be grouped or stacked based on which the width and offsetValues are
- * calculated.
- * @param { Axis } axis Axis instance needed for calculating the group width
- * @param { number } dataLen Number of data points
- * @param { string} transformType type of transform - group, stack
- * @param { number } innerPadding padding between bars.
- * @param {number} keys Series values
- * @return { Object } Width and offset of bars.
- */
-export const getBarMeasurement = (axis, bandScale, config) => {
-    let width;
-    let offsetValues;
-    let actualGroupWidth;
-    let padding;
-    const scale = axis.scale();
-    const {
-        timeDiff,
-        transformType,
-        keys,
-        pad,
-        innerPadding
-    } = config;
-    const groupWidth = getGroupWidth(axis, timeDiff);
-    const isAxisBandScale = axis.constructor.type() === BAND;
-    const axisPadding = axis.config().padding;
-    // If it is a grouped bar then the width of each bar in a grouping is retrieved from
-    // a band scale. The band scale will have range equal to width of one group of bars and
-    // the domain is set to series keys.
-    if (transformType === 'group') {
-        const groupPadding = isAxisBandScale ? 0 : axisPadding * groupWidth / 2;
-        bandScale.range([groupPadding, groupWidth - groupPadding])
-                        .domain(keys);
-        isAxisBandScale ? bandScale.paddingInner(innerPadding) : bandScale.paddingInner(innerPadding);
-        width = bandScale.bandwidth();
-        actualGroupWidth = groupWidth - (isAxisBandScale ? 0 : innerPadding * groupWidth);
-        offsetValues = keys.map(key => bandScale(key) - (isAxisBandScale ? 0 : (groupWidth / 2)));
-    } else if (pad !== undefined) {
-        let offset;
-        if (isAxisBandScale) {
-            const step = scale.step();
-            offset = scale.padding() * step;
-            width = scale.bandwidth() + offset;
-        } else {
-            width = groupWidth;
-        }
-        offsetValues = keys.map(() => (isAxisBandScale ? -(offset / 2) : -(width / 2)));
-    } else {
-        padding = isAxisBandScale ? 0 : axisPadding * groupWidth;
-        width = groupWidth - padding;
-        actualGroupWidth = width;
-        offsetValues = keys.map(() => (isAxisBandScale ? 0 : -(width / 2)));
-    }
-
-    return {
-        width,
-        offsetValues,
-        groupWidth: actualGroupWidth,
-        padding: isAxisBandScale ? axisPadding * axis.scale().step() : axisPadding * groupWidth
     };
 };
 
