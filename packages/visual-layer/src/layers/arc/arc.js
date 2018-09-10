@@ -10,7 +10,7 @@ import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
 import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
-import { getRangeValue, getRadiusRange, tweenPie, getFieldIndices, getPreviousPoint } from './arc-helper';
+import { getRangeValue, getRadiusRange, tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint } from './arc-helper';
 import './styles.scss';
 
 const pie = Symbols.pie;
@@ -269,14 +269,19 @@ export default class ArcLayer extends BaseLayer {
                             .attr('fill', d => colorAxis.getColor(d.datum.colorVal))
                             .transition()
                             .duration(transition.duration)
-                            .attrTween('d', (...params) => tweenPie(path, params, this._prevPieData))
+                            .attrTween('d', (...params) => tweenPie(path, params))
                             .attr('class', d => `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}`);
+        };
+        const tweenExit = (elem) => {
+            elem.selectAll('path')
+                            .transition()
+                            .duration(transition.duration).attrTween('d', (...params) => tweenExitPie(path, params))
+                            .remove();
         };
         // Creating groups for all the arcs present individually
         makeElement(g, 'g', store.get(PROPS.TRANSFORMED_DATA), `${qualClassName[0]}`,
-            { update: tween }, d => d.uid)
-                        .attr('class', (d, i) => `${qualClassName[0]} ${qualClassName[1]}-${i}`)
-                        .call(tween);
+            { update: tween, exit: tweenExit }, d => d.uid)
+                        .attr('class', (d, i) => `${qualClassName[0]} ${qualClassName[1]}-${i}`);
         return this;
     }
 }

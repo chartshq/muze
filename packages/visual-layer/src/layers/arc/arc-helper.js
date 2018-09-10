@@ -70,6 +70,27 @@ export const tweenPie = (path, b) => {
     };
 };
 
+/**
+ *
+ *
+ * @param {*} path
+ * @param {*} b
+ * @returns
+ * @memberof ArcLayer
+ */
+export const tweenExitPie = (path, b) => {
+    const { datum } = b[0];
+    const startAngle = datum.startAngle;
+    const endAngle = datum.endAngle;
+    // Using the alliteration principle, the major arc will animate more than the smaller arc
+    const mid = (Math.PI * 2 * startAngle) / ((Math.PI * 2) + startAngle - endAngle);
+
+    return function (t) {
+        return path(interpolator()(datum, { startAngle: mid,
+            endAngle: mid })(t));
+    };
+};
+
 export const getFieldIndices = (encoding, fieldsConfig) => {
     const [angleField, radiusField, colorField, sizeField] = [ANGLE, RADIUS, COLOR, SIZE]
             .map(e => encoding[e].field);
