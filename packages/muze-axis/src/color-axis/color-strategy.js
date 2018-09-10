@@ -104,10 +104,8 @@ const steppedDomain = (domain, stops, range) => {
 
 const continousSteppedDomain = (domain, stops, range) => {
     const { domain: uniqueVals, newStops } = getStops(domain, range.length - 1);
-
-    // const { newRange } = rangeStops(newStops.length, range);
-
-    return { uniqueVals, domain: newStops, nice: true, range };
+    const hslRange = range.map(e => getHslString(e));
+    return { uniqueVals, domain: newStops, nice: true, range: hslRange };
 };
 
 /**

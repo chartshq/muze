@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -76,10 +73,17 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1200)
-            .height(800)
+            .width(600)
+            .height(400)
             .detail(['Maker'])
-            .color('Origin')
+            .color({
+                field: 'Horsepower',
+                // range: ['red'],
+                step: true,
+                stops: 3,
+                // stops: [2000, 3000, 4000],
+                                // range: 'interpolateBlues'
+            })
             .layers([{
                 mark: 'point'
             }])
@@ -89,6 +93,11 @@
                 },
                 border: {
                     width: 2,
+                },
+                legend: {
+                    color: {
+                        height: 200
+                    }
                 },
                 axes: {
                     x: {
