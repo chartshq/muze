@@ -28,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -78,9 +79,10 @@
             .detail(['Maker'])
             .color({
                 field: 'Horsepower',
-                // range: ['red'],
+                domain: [10, 200],
                 step: true,
                 stops: 3,
+                range: ['red', 'green', 'blue']
                 // stops: [2000, 3000, 4000],
                                 // range: 'interpolateBlues'
             })

@@ -1,4 +1,4 @@
-import { hslInterpolator, piecewiseInterpolator, numberInterpolator } from 'muze-utils';
+import { numberInterpolator } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
@@ -36,22 +36,6 @@ const rangeStops = (newStopsLength, range) => {
         newRange = range.slice(0, newStopsLength);
     }
     return { newRange };
-};
-
-/**
- *
- *
- * @param {*} domain
- * @returns
- */
-const piecewiseDomain = (domain, stops, range) => {
-    let newRange = [];
-    const uniqueVals = domain;
-    const retDomain = domain.map((d, i) => (i) / (domain.length - 1));
-    const hslValues = range.map(e => getHslString(e));
-    const fn = piecewiseInterpolator()(hslInterpolator(), [...hslValues]);
-    newRange = retDomain.map(e => fn(e));
-    return { domain: retDomain, uniqueVals, scaleDomain: [0, 1], range: newRange };
 };
 
 /**
@@ -156,11 +140,6 @@ const strategies = () => ({
         domainRange: () => indexedDomainMeasure,
         value: () => indexedRange
     },
-    [`${DISCRETE}-${CONTINOUS}-${SEQUENTIAL}`]: {
-        scale: SEQUENTIAL,
-        domainRange: () => indexedDomain,
-        value: () => uniqueRange
-    },
     [`${CONTINOUS}-${DISCRETE}-${SEQUENTIAL}`]: {
         scale: SEQUENTIAL,
         domainRange: () => indexedDomainMeasure,
@@ -170,12 +149,6 @@ const strategies = () => ({
         scale: SEQUENTIAL,
         domainRange: () => indexedDomain,
         value: () => uniqueRange
-    },
-    [`${DISCRETE}-${CONTINOUS}-${ORDINAL}`]: {
-        scale: ORDINAL,
-        domainRange: () => piecewiseDomain,
-        value: () => normalRange
-
     },
     [`${DISCRETE}-${DISCRETE}-${ORDINAL}`]: {
         scale: ORDINAL,
