@@ -10,7 +10,7 @@ import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
 import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
-import { getRangeValue, getRadiusRange, tweenPie, getFieldIndices } from './arc-helper';
+import { getRangeValue, getRadiusRange, tweenPie, getFieldIndices, getPreviousPoint } from './arc-helper';
 import './styles.scss';
 
 const pie = Symbols.pie;
@@ -92,7 +92,6 @@ export default class ArcLayer extends BaseLayer {
      */
     getTransformedData (dataModel, config) {
         let pieData = [];
-
         const {
             startAngle,
             endAngle,
@@ -118,18 +117,20 @@ export default class ArcLayer extends BaseLayer {
         });
         // Creating pie data using angle field provided. If the angle field is a dimension,
         // all the angles will be equal(360/number of dimensions)
+
         pieData = pie()
             .startAngle((startAngle / 180) * Math.PI)
             .endAngle(Math.PI * endAngle / 180)
-            .value(d => d[angleIndex] || 1);
+            .value(d => d[angleIndex] || 1)
+            .sortValues(null);
 
         sort.length && pieData.sort((a, b) => {
             if (sort === ASCENDING) {
                 return a[radiusIndex] - b[radiusIndex];
             } return b[radiusIndex] - a[radiusIndex];
         });
-
         const sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
+
         // Adding the radius field values to each data point in pie data
         pieData = pieData(data).map((d, i) => {
             d.outerRadiusValue = data[i][radiusIndex] || minOuterRadius;
@@ -139,6 +140,7 @@ export default class ArcLayer extends BaseLayer {
             d.uid = uids[i];
             d.rowId = d.uid;
             d.source = data[i];
+            d._previousInfo = this._prevPieData[d.uid] ? this._prevPieData[d.uid][0] : getPreviousPoint(prevData, i);
             return d;
         });
         return pieData;
@@ -248,10 +250,12 @@ export default class ArcLayer extends BaseLayer {
                 .cornerRadius(cornerRadius)
                 .padAngle(padAngle)
                 .padRadius(padRadius);
+
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
                 .attr('transform', `translate(${chartWidth / 2},${chartHeight / 2})`);
+
         const tween = (elem) => {
             makeElement(elem, 'path', (d, i) => [{
                 datum: d,

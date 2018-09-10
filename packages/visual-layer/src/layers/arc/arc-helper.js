@@ -38,22 +38,19 @@ export const getRadiusRange = (width, height, config) => {
     return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
         width) / 2];
 };
-
-const getIndexedPoint = (prevData, currIndex) => {
-    if (!prevData[currIndex]) {
-        const prevArc = prevData[currIndex - 1];
-        const nextArc = prevData[currIndex + 1];
-        if (prevArc && nextArc) {
-            return {
-                startAngle: prevArc[0].endAngle,
-                endAngle: nextArc[0].startAngle
-            };
-        } else if (!nextArc) {
-            return {
-                startAngle: Math.PI * 2,
-                endAngle: Math.PI * 2
-            };
-        }
+export const getPreviousPoint = (prevData, currIndex) => {
+    const prevArc = prevData[currIndex - 1];
+    const nextArc = prevData[currIndex + 1];
+    if (prevArc && nextArc) {
+        return {
+            startAngle: prevArc.endAngle,
+            endAngle: nextArc.startAngle
+        };
+    } else if (!nextArc) {
+        return {
+            startAngle: Math.PI * 2,
+            endAngle: Math.PI * 2
+        };
     }
     return { startAngle: 0, endAngle: 0 };
 };
@@ -66,14 +63,10 @@ const getIndexedPoint = (prevData, currIndex) => {
  * @returns
  * @memberof ArcLayer
  */
-export const tweenPie = (path, b, prevData) => {
+export const tweenPie = (path, b) => {
     const { datum } = b[0];
-    const uid = datum.uid;
-    const prevDatum = getObjProp(prevData, uid, 0) || getIndexedPoint(prevData, uid);
-    const prevObject = { startAngle: prevDatum.startAngle, endAngle: prevDatum.endAngle };
-
     return function (t) {
-        return path(interpolator()(prevObject, datum)(t));
+        return path(interpolator()(datum._previousInfo, datum)(t));
     };
 };
 

@@ -64,7 +64,7 @@
         //     Horsepower: 'mean',
         //     Acceleration: 'mean'
         // });
-
+            // rootData = rootData.select(fields=> fields.Year.value > '1976-01-01');
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
@@ -76,30 +76,12 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(300)
-            .height(300)
-            .detail(['Maker'])
-            .color('Origin')
+            .width(600)
+            .height(400)
+            .color('Year')
             .layers([{
-                mark: 'point'
+                mark: 'arc',
             }])
-            .config({
-                groupBy: {
-                    disabled: true
-                },
-                border: {
-                    width: 2,
-                },
-                axes: {
-                    x: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }, y: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }
-                }
-            })
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
             .mount(document.getElementById('chart'));
