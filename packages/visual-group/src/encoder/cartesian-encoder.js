@@ -198,8 +198,10 @@ export default class CartesianEncoder extends VisualEncoder {
     serializeLayerConfig (layerArray) {
         const serializedLayers = [];
 
-        layerArray.length && layerArray.forEach((layer) => {
+        layerArray.length && layerArray.forEach((layer, i) => {
             const def = layerFactory.getSerializedConf(layer.mark, layer);
+            // Set the default drawing order of the layer if not defined.
+            def.order === undefined && (def.order = i);
             serializedLayers.push({
                 mark: layer.mark,
                 def
