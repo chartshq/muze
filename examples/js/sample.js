@@ -75,7 +75,7 @@
             .columns(columns)
             .data(rootData)
             .width(600)
-            .height(400)
+            .height(500)
             .detail(['Maker'])
             .color({
                 field: 'Horsepower',
@@ -96,7 +96,9 @@
                 border: {
                     width: 2,
                 },
-               
+               legend:{
+                   position: 'bottom'
+               },
                 axes: {
                     x: {
                         showAxisName: true,
