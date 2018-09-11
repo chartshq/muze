@@ -80,11 +80,11 @@
             .color({
                 field: 'Horsepower',
                 domain: [10, 200],
-                step: true,
-                stops: 3,
-                range: ['red', 'green', 'blue']
+                // step: true,
+                // stops: 4,
+                range: ['red']
                 // stops: [2000, 3000, 4000],
-                                // range: 'interpolateBlues'
+                                // range: 'interpolatePurples'
             })
             .layers([{
                 mark: 'point'
@@ -96,11 +96,7 @@
                 border: {
                     width: 2,
                 },
-                legend: {
-                    color: {
-                        height: 200
-                    }
-                },
+               
                 axes: {
                     x: {
                         showAxisName: true,

@@ -192,7 +192,7 @@ export default class ColorAxis {
         l = newL > 100 ? newL - 100 : (newL < 0 ? newL + 100 : newL);
         a = newA > 1 ? newA - 1 : (newA < 0 ? newA + 1 : newA);
 
-        return { color: `hsl(${h},${s}%,${l}%,${a})`, hsla: [h / 360, s / 100, l / 100, a] };
+        return { color: `hsla(${h},${s}%,${l}%,${a})`, hsla: [h / 360, s / 100, l / 100, a] };
     }
 
     /**

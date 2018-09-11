@@ -4,13 +4,49 @@ import { expect } from 'chai';
 import ColorAxis from './color-axis';
 
 const palette1 = ['red'];
-const palette3 = ['red', 'green', 'blue'];
+const palette2 = ['red', 'green', 'blue'];
+
+describe('Color Axis', () => {
+    const axis = new ColorAxis({
+        type: 'ordinal',
+        domain: ['a', 'b', 'c'],
+        range: palette2
+    });
+    it('tests construction of color axis', () => {
+        expect(
+            axis
+        ).to.be.defined;
+    });
+    it('tests transformation of colors', () => {
+        expect(
+            axis.transformColor([1, 0.5, 0.5, 1], [0, 0, 20, 0])
+        ).to.deep.equal({
+            color: 'hsla(360,50%,70%,1)',
+            hsla: [1, 0.5, 0.7, 1]
+        });
+    });
+    it('tests getting raw color', () => {
+        expect(
+            axis.getRawColor('a').map(e => Math.round(e * 100) / 100)
+        ).to.deep.equal([0, 1, 0.5, 1]);
+    });
+    it('tests getting hsla color', () => {
+        expect(
+            axis.getColor('a')
+        ).to.deep.equal('hsla(0,100%,50%,1)');
+    });
+    it('tests getting correct hsl string', () => {
+        expect(
+            axis.getHslString([0.5, 0.5, 0.5, 1])
+        ).to.deep.equal('hsla(180,50%,50%,1)');
+    });
+});
 
 describe('Color Axis For Dimensions', () => {
     const bandOrdinal = new ColorAxis({
         type: 'ordinal',
         domain: ['a', 'b', 'c'],
-        range: palette3
+        range: palette2
     });
     const bandSequential = new ColorAxis({
         type: 'ordinal',
@@ -86,7 +122,7 @@ describe('Color Axis For Measures', () => {
         domain: [100, 2000],
         step: true,
         stops: 3,
-        range: palette3
+        range: palette2
     });
 
     // STEP color : DISCRETE range
@@ -112,7 +148,8 @@ describe('Color Axis For Measures', () => {
         stops: 3,
         range: 'interpolateBlues'
     });
-     // STEP color : SEQUENTIAL range
+
+    // STEP color : SEQUENTIAL range
     it('tests construction of step color scale with sequential range', () => {
         expect(
             sequentialStep
