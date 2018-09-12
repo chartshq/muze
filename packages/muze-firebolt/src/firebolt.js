@@ -5,6 +5,7 @@ import {
     FieldType,
     selectElement
 } from 'muze-utils';
+import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
 import {
     initializeBehaviouralActions,
@@ -33,8 +34,8 @@ export default class Firebolt {
         this._volatileSelectionSet = {};
         this._propagationFields = {};
         this._sourceSideEffects = {
-            tooltip: true,
-            selectionBox: true
+            tooltip: () => false,
+            selectionBox: () => false
         };
         this._actionBehaviourMap = {};
         this._config = {};
@@ -148,7 +149,9 @@ export default class Firebolt {
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
         this._propagationInf = propagationInfo;
-        if (action && action.isEnabled()) {
+        const enabled = true;
+
+        if (action && enabled) {
             const selectionSet = action.dispatch(payload);
             const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
             this._entryExitSet[behaviour] = propagationSelectionSet;
@@ -172,6 +175,24 @@ export default class Firebolt {
 
     shouldApplySideEffects () {
         return true;
+    }
+
+    enableSideEffectOnPropagation (sideEffect, fn) {
+        if (fn instanceof Function) {
+            this._sourceSideEffects[sideEffect] = fn;
+        } else {
+            this._sourceSideEffects[sideEffect] = () => false;
+        }
+        return this;
+    }
+
+    disableSideEffectOnPropagation (sideEffect, fn) {
+        if (fn instanceof Function) {
+            this._sourceSideEffects[sideEffect] = fn;
+        } else {
+            this._sourceSideEffects[sideEffect] = () => true;
+        }
+        return this;
     }
 
     propagate () {
@@ -271,9 +292,22 @@ export default class Firebolt {
         return this;
     }
 
-    propagateWith (action, ...fields) {
+    propagateWith (action, fields, append = false) {
+        const behaviouralActions = this._actions.behavioural;
         if (fields.length) {
-            this._propagationFields[action] = fields;
+            if (action === ALL_ACTIONS) {
+                for (const key in behaviouralActions) {
+                    this._propagationFields[key] = {
+                        fields,
+                        append
+                    };
+                }
+            } else {
+                this._propagationFields[action] = {
+                    fields,
+                    append
+                };
+            }
             return this;
         }
         return this._propagationFields;

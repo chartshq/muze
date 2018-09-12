@@ -25,7 +25,7 @@ import './styles.scss';
 export default class PointLayer extends BaseLayer {
 
     /**
-     *Creates an instance of PointLayer.
+     * Creates an instance of PointLayer.
      * @param {*} args
      * @memberof PointLayer
      */
