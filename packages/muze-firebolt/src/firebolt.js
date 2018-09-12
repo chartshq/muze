@@ -149,9 +149,8 @@ export default class Firebolt {
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
         this._propagationInf = propagationInfo;
-        const enabled = true;
 
-        if (action && enabled) {
+        if (action) {
             const selectionSet = action.dispatch(payload);
             const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
             this._entryExitSet[behaviour] = propagationSelectionSet;
