@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -31,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -40,7 +38,7 @@
             {
                 name: 'Acceleration',
                 type: 'measure',
-                defAggFn: 'avg'
+                defAggFn: 'sum'
             },
             {
                 name: 'Origin',
@@ -53,56 +51,101 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
             },
 
             ];
-        let rootData = new DataModel(jsonData, schema);
 
-        // rootData = rootData.groupBy(['Year'], {
-        //     Horsepower: 'mean',
-        //     Acceleration: 'mean'
-        // });
 
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        let mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
-        let rows = ['Acceleration'],
-            columns = ['Displacement'];
-        // rootData = rootData.groupBy(['Maker']);
-        // rootData = rootData.sort([['Acceleration', 'ASC']]);
-        canvas = canvas
-            .rows(rows)
-            .columns(columns)
-            .data(rootData)
-            .width(1200)
-            .height(800)
-            .detail(['Maker'])
-            .color('Origin')
-            .layers([{
-                mark: 'point'
-            }])
-            .config({
-                groupBy: {
-                    disabled: true
-                },
-                border: {
-                    width: 2,
-                },
-                axes: {
-                    x: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }, y: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }
+        // Create an instance of DataModel using the data and schema.
+        let rootData = new DataModel(data, schema);
+
+        let layerFactory = muze.layerFactory
+
+        layerFactory.composeLayers('compositeLine', [
+            {
+              name: 'verRefZone',
+              mark: 'bar',
+              source: 'verRefZoneData',
+              className: 'verRefZone',
+              encoding: {
+                y: null,
+                x: 'compositeLine.encoding.low',
+                x0: 'compositeLine.encoding.high',
+                color: {
+                  value: () => 'rgba(255, 0, 0, 0.1)'
                 }
-            })
-            .title('The Muze Project', { position: "top", align: "left", })
-            .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-            .mount(document.getElementsByTagName('body')[0]);
+              },
+              axis: {
+                x: 'Year'
+              },
+              calculateDomain: false
+            }, {
+              name: 'simpleLine',
+              mark: 'line',
+              encoding: {
+                x: 'compositeLine.encoding.x',
+                y: 'compositeLine.encoding.y',
+      
+              },
+            },
+          ])
+      
+      
+        rootData = rootData.calculateVariable({
+          name: 'highValue',
+          type: 'dimension',
+          subtype: 'temporal',
+        }, ['Year', (d) => new Date(1982,0,1)]);
+        rootData = rootData.calculateVariable({
+          name: 'lowValue',
+          type: 'dimension',
+          subtype: 'temporal',
+        }, ['Year', (d) => new Date(1979,0,1)]);
+        rootData = rootData.groupBy(['Year', 'Origin', 'highValue', 'lowValue'], {
+          Horsepower: 'mean',
+          Acceleration: 'mean',
+        });
+        // Create an environment for future rendering
+          let env = muze(); 
+            // Create an instance of canvas which houses the visualization
+          let canvas = env.canvas();
+        
+         
+           canvas
+                  .rows(['Acceleration'])
+                  .columns(['Year'])
+                  .data(rootData)
+                  .width(600)
+                  .height(400)
+                  .transform({
+                   'verRefZoneData': (dt) => dt.groupBy(['highValue', 'lowValue'])
+                 })
+                   .layers([{
+                     mark: 'compositeLine',
+                     encoding: {
+                       x: 'Year',
+                       high: 'highValue',
+                       low: 'lowValue'
+                     }
+                   }
+                           ])
+                   .color('Origin')
+                   .config({
+                   axes: {
+                     x: {
+                       showAxisName: true,
+                     }, y: {
+                       showAxisName: true,
+                     }
+                   }
+                 })
+                 .title('The Muze Visualization')
+                 .subtitle('Composable visualizations with a data first approach')
+            .mount('#chart');
     })
 
-})()
+
+
+}) ()
