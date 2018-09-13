@@ -1,5 +1,4 @@
 /* global describe, it,document */
-/* eslint-disable no-unused-expressions */
 import { expect } from 'chai';
 import ColorAxis from './color-axis';
 

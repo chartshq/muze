@@ -192,8 +192,6 @@ export const renderGradient = (context, container) => {
     legendGradSvg.attr('height', gradientDimensions.height);
     legendGradSvg.attr('width', gradientDimensions.width);
 
-
-
     context.measurement({
         gradientDimensions
     });

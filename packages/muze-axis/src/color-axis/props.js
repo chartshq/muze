@@ -1,6 +1,7 @@
 import { mergeRecursive, detectColor, hexToHsv, rgbToHsv } from 'muze-utils';
 import { x11Colors } from './color-maps';
 import { palette, DEFAULT_GRADIENT_COLOR } from './defaults';
+import { LINEAR, RGB, HEX, HSL, HSLA } from '../enums/constants';
 
 export const getHslString = hslArr => `hsla(${hslArr[0] * 360},${hslArr[1] * 100}%,${hslArr[2] * 100}%,\
 ${hslArr[3] || 1})`;
@@ -14,12 +15,12 @@ export const getActualHslColor = (e, paletteColor) => {
         e = e.replace(/ /g, '');
         e = e.toLowerCase();
 
-        if (detectColor(e) === 'hsl' || detectColor(e) === 'hsla') {
+        if (detectColor(e) === HSL || detectColor(e) === HSLA) {
             color = e.match(/(\d+(\.\d+)?)/g);
             color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
-        } else if (detectColor(e) === 'hex') {
+        } else if (detectColor(e) === HEX) {
             color = hexToHsv(e);
-        } else if (detectColor(e) === 'rgb') {
+        } else if (detectColor(e) === RGB) {
             const col = e.substring(e.indexOf('(') + 1, e.lastIndexOf(')')).split(/,\s*/);
             color = rgbToHsv(...col);
         } else if (x11Colors[convertToXllString(e)]) {
@@ -37,7 +38,7 @@ export const PROPS = {
     config: {
         sanitization: (context, config) => {
             const defCon = mergeRecursive({}, context.constructor.defaultConfig());
-            if (config.type === 'linear' && !config.step) {
+            if (config.type === LINEAR && !config.step) {
                 config.range = config.range || [defCon.range[0]];
                 config.range = config.range.length > 1 ? config.range : [DEFAULT_GRADIENT_COLOR, ...config.range];
             }

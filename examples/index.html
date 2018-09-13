@@ -87,34 +87,12 @@
     </div>
 
     <div class="chart"></div>
-    <script src="https://unpkg.com/es7-object-polyfill"></script>
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
     <script src="./js/d3.js"></script>
     <script src="./muze.js"></script>
     <script src="js/datamodel.js"></script>
     <script src="js/temp-paths.js"></script>
     <script src="./js/regression.min.js"></script>
     <script src="./js/sample.js"></script>
-    <script>
-        const reduce = Function.bind.call(Function.call, Array.prototype.reduce);
-        const isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable);
-        const concat = Function.bind.call(Function.call, Array.prototype.concat);
-        const keys = Reflect.ownKeys;
-
-        if (!Object.values) {
-            Object.values = function values(O) {
-                return reduce(keys(O), (v, k) => concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []), []);
-            };
-        }
-
-        if (!Object.entries) {
-            Object.entries = function entries(O) {
-                return reduce(keys(O), (e, k) => concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []), []);
-            };
-        }
-    </script>
-    <!-- <script src="./js/design-sample.js"></script> -->
-    hello
 </body>
     <style>
         .referenceZone rect {
