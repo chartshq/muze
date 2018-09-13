@@ -82,7 +82,7 @@
                 domain: [10, 200],
                 // step: true,
                 // stops: 4,
-                range: ['red']
+                range: ['rgba(255,0,0,0.1)']
                 // stops: [2000, 3000, 4000],
                                 // range: 'interpolatePurples'
             })

@@ -130,10 +130,8 @@ export default class ColorAxis {
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
 
             if (typeof color === 'string') {
-                const rgbArr = color.substring(4, color.length - 1)
-                            .replace(/ /g, '')
-                            .split(',');
-                return rgbToHsv(...rgbArr);
+                const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
+                return rgbToHsv(...col);
             }
             return [...color];
         }

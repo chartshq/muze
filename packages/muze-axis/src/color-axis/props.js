@@ -14,7 +14,6 @@ export const getActualHslColor = (e, paletteColor) => {
     if (typeof e === 'string') {
         e = e.replace(/ /g, '');
         e = e.toLowerCase();
-
         if (detectColor(e) === HSL || detectColor(e) === HSLA) {
             color = e.match(/(\d+(\.\d+)?)/g);
             color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
