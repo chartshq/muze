@@ -61,7 +61,7 @@ export const defaultConfig = {
     innerRadiusFixer: 10,
     transition: {
         effect: 'cubic',
-        duration: 500
+        duration: 1000
     },
     states: {
         highlight: {

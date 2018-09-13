@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.Operators.share,
-        html = muze.Operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -31,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -64,7 +62,7 @@
         //     Horsepower: 'mean',
         //     Acceleration: 'mean'
         // });
-            // rootData = rootData.select(fields=> fields.Year.value > '1976-01-01');
+
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
@@ -77,14 +75,35 @@
             .columns(columns)
             .data(rootData)
             .width(600)
-            .height(400)
+            .height(500)
+            // .detail(['Maker'])
             .color('Year')
             .layers([{
-                mark: 'arc',
+                mark: 'arc'
             }])
+            .config({
+                groupBy: {
+                    disabled: true
+                },
+                border: {
+                    width: 2,
+                },
+               legend:{
+                   position: 'bottom'
+               },
+                axes: {
+                    x: {
+                        showAxisName: true,
+                        axisNamePadding: 20,
+                    }, y: {
+                        showAxisName: true,
+                        axisNamePadding: 20,
+                    }
+                }
+            })
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-            .mount(document.getElementById('chart'));
+            .mount(document.getElementsByTagName('body')[0]);
     })
 
 })()

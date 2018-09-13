@@ -272,16 +272,28 @@ export default class ArcLayer extends BaseLayer {
                             .attrTween('d', (...params) => tweenPie(path, params))
                             .attr('class', d => `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}`);
         };
-        const tweenExit = (elem) => {
-            elem.selectAll('path')
-                            .transition()
-                            .duration(transition.duration).attrTween('d', (...params) => tweenExitPie(path, params))
-                            .remove();
+        const consecutiveExits = [];
+        let exitCounter = 0;
+        const tweenExit = (elem, d) => {
+            let exitArr = consecutiveExits[exitCounter];
+            const oldExitCounter = exitCounter;
+            if (!exitArr) {
+                exitArr = [{ elem, datum: d }];
+            } else if (exitArr[exitArr.length - 1].datum.index === d.index - 1) {
+                exitArr.push({ elem, datum: d });
+            } else {
+                exitCounter++;
+            }
+            consecutiveExits[oldExitCounter] = exitArr;
         };
         // Creating groups for all the arcs present individually
         makeElement(g, 'g', store.get(PROPS.TRANSFORMED_DATA), `${qualClassName[0]}`,
-            { update: tween, exit: tweenExit }, d => d.uid)
+            {
+                update: tween,
+                exit: tweenExit
+            }, d => d.uid)
                         .attr('class', (d, i) => `${qualClassName[0]} ${qualClassName[1]}-${i}`);
+        tweenExitPie(consecutiveExits, transition, path);
         return this;
     }
 }

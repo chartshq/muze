@@ -1,4 +1,4 @@
-import { getObjProp, interpolator, FieldType } from 'muze-utils';
+import { getObjProp, interpolator, FieldType, selectElement } from 'muze-utils';
 import { ANGLE, RADIUS, SIZE, COLOR } from '../../enums/constants';
 
 /**
@@ -78,17 +78,32 @@ export const tweenPie = (path, b) => {
  * @returns
  * @memberof ArcLayer
  */
-export const tweenExitPie = (path, b) => {
-    const { datum } = b[0];
-    const startAngle = datum.startAngle;
-    const endAngle = datum.endAngle;
-    // Using the alliteration principle, the major arc will animate more than the smaller arc
-    const mid = (Math.PI * 2 * startAngle) / ((Math.PI * 2) + startAngle - endAngle);
+export const tweenExitPie = (consecutiveExits, transition, path) => {
+    if (consecutiveExits.length > 0) {
+        consecutiveExits.forEach((consecutiveExitArr) => {
+            const startAngle = consecutiveExitArr[0].datum.startAngle;
+            const endAngle = consecutiveExitArr[consecutiveExitArr.length - 1].datum.endAngle;
+            const mid = (Math.PI * 2 * startAngle) / ((Math.PI * 2) + startAngle - endAngle);
 
-    return function (t) {
-        return path(interpolator()(datum, { startAngle: mid,
-            endAngle: mid })(t));
-    };
+            consecutiveExitArr.forEach((e) => {
+                const { elem, datum } = e;
+
+                elem.each(function () {
+                    const gElem = selectElement(this);
+                    gElem.selectAll('path')
+                                    .transition()
+                                    .duration(transition.duration)
+                                    .attrTween('d', () => function (t) {
+                                        return path(interpolator()(datum, { startAngle: mid,
+                                            endAngle: mid })(t));
+                                    })
+                                    .remove();
+                    gElem.transition()
+                                    .duration(transition.duration).remove();
+                });
+            });
+        });
+    }
 };
 
 export const getFieldIndices = (encoding, fieldsConfig) => {

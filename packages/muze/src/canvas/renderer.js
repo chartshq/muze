@@ -67,6 +67,7 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
                     .attr('class', `${classPrefix}-container`)
                     .style('width', `${canvasWidth}px`)
                     .style('padding', `${null}px`)
+                    .style('margin', null)
                     .each(function (type) {
                         components[type] = selectElement(this).classed(`${classPrefix}-${type}-container`, true);
                     });
@@ -245,7 +246,7 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
 
     const sel = selectElement(mountPoint)
          .selectAll(`.${classPrefix}-inner-content`)
-         .data(['layout']);
+         .data(['layout'], d => d);
     sel.exit().remove();
     const selEnter = sel.enter().append('div');
 
@@ -255,7 +256,6 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
                     .attr('id', `${classPrefix}-grid-layout-${alias}`)
                     .style('height', `${height}px`)
                     .style('padding', null)
-                    .text('')
                     .style('width', `${Math.ceil(width)}px`);
     // Mount for matrices
     const innerSel = container.selectAll(`.${classPrefix}-layout-grid-container`)
