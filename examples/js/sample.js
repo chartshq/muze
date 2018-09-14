@@ -2,17 +2,12 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
-    const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
-
-
+    let DataModel = muze.DataModel;
 
     d3.json('../data/cars.json', (data) => {
         const jsonData = data,
-            schema = [{
+            schema = [
+            {
                 name: 'Name',
                 type: 'dimension'
             },
@@ -55,9 +50,8 @@
                 type: 'dimension',
                 // subtype: 'temporal',
                 // format: '%Y-%m-%d'
-            },
-
-            ];
+            }
+        ];
         let rootData = new DataModel(jsonData, schema);
 
         // rootData = rootData.groupBy(['Year'], {
@@ -76,8 +70,8 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1200)
-            .height(800)
+            .width(600)
+            .height(400)
             .detail(['Maker'])
             .color('Origin')
             .layers([{
