@@ -113,4 +113,8 @@ export default class SimpleVariable extends Variable {
         const fieldSpace = this.data().getFieldspace();
         return fieldSpace.fieldsObj()[this.oneVar()].getMinDiff();
     }
+
+    equals (varInst) {
+        return this.oneVar() === varInst.oneVar();
+    }
 }

@@ -50,17 +50,10 @@ const getSkeletons = (mount, layoutConfig, measurement) => {
     } = layoutArrangement;
     const {
         canvasWidth,
-        canvasHeight,
-        mountSpace
+        canvasHeight
     } = measurement;
     const container = selectElement(mount);
     const components = {};
-    if (mountSpace.height && mountSpace.height < canvasHeight) {
-        container.style('overflow-y', 'scroll');
-    }
-    if (mountSpace.width && mountSpace.width < canvasWidth) {
-        container.style('overflow-x', 'scroll');
-    }
     const mountPoint = makeElement(container, 'div', [1], `${classPrefix}-viz`)
         .style('width', `${canvasWidth}px`)
         .style('height', `${canvasHeight}px`);
@@ -139,7 +132,7 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
             }
             sectionComponents[sections] = sectionComponents[sections] || [];
             currHeight -= Math.min(leg.measurement().height, currHeight);
-            currWidth = Math.max(leg.measurement().width, currWidth);
+            currWidth = Math.max(Math.min(leg.measurement().width, leg.measurement().maxWidth), currWidth);
             sectionComponents[sections].push({
                 legend: leg,
                 legendHeight: legHeight,
@@ -213,16 +206,20 @@ const shiftHeaders = (config, shifter, measurement) => {
     const { position } = legend;
 
     shifter += position === LEFT ? legendSpace.width : 0;
-    title && selectElement(`.${classPrefix}-title-container`).select(`.${classPrefix}-inner-content`)
-                    .style('padding-left', title.align === LEFT ? `${shifter}px` : 0);
-    subtitle && selectElement(`.${classPrefix}-subtitle-container`).select(`.${classPrefix}-inner-content`)
-                    .style('padding-left', subtitle.align === LEFT ? `${shifter}px` : 0);
+    title && selectElement(`.${classPrefix}-title-container`)
+                    .style('width', title.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
+                    .style('margin-left', title.align === LEFT ? `${shifter}px` : 0);
+    subtitle && selectElement(`.${classPrefix}-subtitle-container`)
+                    .style('width', subtitle.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
+                    .style('margin-left', subtitle.align === LEFT ? `${shifter}px` : 0);
+
     selectElement(`.${classPrefix}-legend-horizontal-section`)
-                    .style('padding-left', `${shifter}px`)
+                    .style('margin-left', `${shifter}px`)
+                    .style('width', `${legendSpace.width - shifter}px`)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
                     .style('max-width', `${legendSpace.width - shifter}px`);
     selectElement(`.${classPrefix}-legend-vertical-section`)
-                    .style('padding-left', null)
+                    .style('margin-left', null)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
                     .style('max-width', null);
 };
@@ -270,9 +267,7 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     mount.classed(`${classPrefix}-layout-grid-container`, true)
                     .attr('id', `${classPrefix}-layout-grid-container-${alias}`)
                     .style('height', `${height}px`)
-                    .style('width', `${Math.ceil(width)}px`)
-                    .style('overflow-x', width > 300 ? 'none' : 'scroll')
-                    .style('overflow-y', height > 300 ? 'none' : 'scroll');
+                    .style('width', `${Math.ceil(width)}px`);
 
     return {
         mount,
@@ -312,13 +307,11 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     // Render layout
     context.layout().renderGrid(mount);
     context.once('layer.drawn').then(() => {
+        renderHeader(layoutConfig, title, 'title', headers);
+        renderHeader(layoutConfig, subtitle, 'subtitle', headers);
         renderLegend(layoutConfig, legend, legends, measurement);
+        shiftHeaders(layoutConfig, padding, measurement);
     });
-
-    renderHeader(layoutConfig, title, 'title', headers);
-    renderHeader(layoutConfig, subtitle, 'subtitle', headers);
-
-    shiftHeaders(layoutConfig, padding, measurement);
     context.composition().visualGroup.matrixInstance().value.each((el) => {
         el.valueOf().parentContainer(layout.node());
     });

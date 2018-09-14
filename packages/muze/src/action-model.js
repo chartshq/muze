@@ -98,7 +98,7 @@ class ActionModel {
             canvas.once('canvas.updated').then((args) => {
                 const matrix = args.client.composition().visualGroup.matrixInstance().value;
                 matrix.each((cell) => {
-                    maps.forEach(val => cell.valueOf().firebolt().dissociateBehaviour(val[0], val[1]));
+                    maps.forEach(val => cell.valueOf().firebolt().dissociateSideEffect(val[0], val[1]));
                 });
             });
         });

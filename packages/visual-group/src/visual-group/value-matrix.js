@@ -17,11 +17,15 @@ class ValueMatrix {
         this.matrix(matrixArr);
         this.filter(() => true);
 
-        this.each((el) => {
+        this.each((el, rIdx, cIdx) => {
             const cellValue = el.valueOf();
             if (cellValue && cellValue.id) {
                 const id = cellValue.id();
-                instancesById[id] = cellValue;
+                instancesById[id] = {
+                    instance: cellValue,
+                    rowIndex: rIdx,
+                    colIndex: cIdx
+                };
             }
         });
 

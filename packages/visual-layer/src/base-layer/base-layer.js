@@ -63,7 +63,8 @@ export default class BaseLayer extends SimpleLayer {
     constructor (data, axes, config, dependencies) {
         super();
         this.store(new Store({
-            DATA: null
+            DATA: null,
+            [PROPS.DATA_UPDATED]: null
         }));
         transactor(this, defaultOptions, this.store().model);
         this.data(data);
@@ -481,6 +482,7 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     getTransformedDataFromIdentifiers (identifiers) {
+        const { data: identifierData, schema: identifierSchema } = identifiers.getData();
         const normalizedData = this.store().get(PROPS.NORMALIZED_DATA);
         const fieldsConfig = this.data().getFieldsConfig();
         const {
@@ -502,8 +504,10 @@ export default class BaseLayer extends SimpleLayer {
         const transformedData = [];
         normalizedData.forEach((dataArr) => {
             dataArr.forEach((dataObj) => {
-                const id = dataObj._id;
-                if (identifiers.indexOf(id) !== -1) {
+                const tupleArr = dataObj._data;
+                const exist = identifierSchema.every((obj, i) =>
+                    identifierData.findIndex(d => tupleArr[fieldsConfig[obj.name].index] === d[i]) !== -1);
+                if (exist) {
                     const transformedVal = dataObj[enc];
                     const row = dataObj._data;
                     const tuple = {};

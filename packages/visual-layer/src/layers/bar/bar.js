@@ -35,6 +35,14 @@ export default class BarLayer extends BaseLayer {
     constructor (...params) {
         super(...params);
         this._bandScale = scaleBand();
+        this._plotPadding = {
+            x: 0,
+            y: 0
+        };
+        this._plotSpan = {
+            x: 0,
+            y: 0
+        };
         this._pointMap = {};
     }
 
