@@ -9,15 +9,15 @@ export const defaultConfig = {
     interaction: {
         highlight: [{
             type: 'fill',
-            intensity: [0, 0, -20, 0]
+            intensity: [0, 0, -15, 0]
         }],
         fade: [{
             type: 'fill',
-            intensity: [0, 0, +20, 0]
+            intensity: [0, 0, +15, 0]
         }],
         focus: [{
             type: 'fill',
-            intensity: [0, 0, +20, 0]
+            intensity: [0, 0, +15, 0]
         }]
     },
     height: 100,

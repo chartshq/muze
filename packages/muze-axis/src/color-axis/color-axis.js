@@ -177,20 +177,16 @@ export default class ColorAxis {
     }
 
     transformColor (color, transformationArr) {
-        let h = color[0] * 360;
-        let s = color[1] * 100;
-        let l = color[2] * 100;
-        let a = color[3] || 1;
+        const h = color[0] * 360;
+        const s = color[1] * 100;
+        const l = color[2] * 100;
+        const a = color[3] || 1;
         const newH = h + transformationArr[0];
         const newS = s + transformationArr[1];
         const newL = l + transformationArr[2];
         const newA = a + transformationArr[3] || 0;
-        h = newH > 360 ? newH - 360 : (newH < 0 ? newH + 360 : newH);
-        s = newS > 100 ? newS - 100 : (newS < 0 ? newS + 100 : newS);
-        l = newL > 100 ? newL - 100 : (newL < 0 ? newL + 100 : newL);
-        a = newA > 1 ? newA - 1 : (newA < 0 ? newA + 1 : newA);
 
-        return { color: `hsla(${h},${s}%,${l}%,${a})`, hsla: [h / 360, s / 100, l / 100, a] };
+        return { color: `hsla(${newH},${newS}%,${newL}%,${newA})`, hsla: [newH / 360, newS / 100, newL / 100, newA] };
     }
 
     /**

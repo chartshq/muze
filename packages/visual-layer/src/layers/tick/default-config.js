@@ -7,15 +7,15 @@ export const defaultConfig = {
     interaction: {
         highlight: [{
             type: 'stroke',
-            intensity: [0, +20, -20, 0]
+            intensity: [0, 0, -15, 0]
         }],
         fade: [{
             type: 'stroke',
-            intensity: [0, -0, +30, 0]
+            intensity: [0, 0, 15, 0]
         }],
         focus: [{
             type: 'stroke',
-            intensity: [0, -30, +30, 0]
+            intensity: [0, 0, 15, 0]
         }]
     },
     innerPadding: 0.1,
