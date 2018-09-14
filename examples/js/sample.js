@@ -73,7 +73,9 @@
             .width(600)
             .height(400)
             .detail(['Maker'])
-            .color('Origin')
+            .color({
+                field: 'Horsepower'
+            })
             .layers([{
                 mark: 'point'
             }])

@@ -104,6 +104,8 @@ export {
     hasTouch
 } from './renderer-utils';
 
+export { default as Smartlabel } from 'fusioncharts-smartlabel';
+
 export { dataSelect, DataObject } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';

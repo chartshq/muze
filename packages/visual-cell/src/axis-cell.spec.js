@@ -1,12 +1,12 @@
 /* global describe, it,document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'muze-utils';
+import { Smartlabel } from 'muze-utils';
 import { BandAxis, ContinousAxis } from '@chartshq/muze-axis';
 import { expect } from 'chai';
 import AxisCell from './axis-cell';
 import { AXIS } from './enums/cell-type';
 
-const sm = new SmartlabelManager(100);
+const sm = new Smartlabel(100);
 describe('Axis Cell', () => {
     const axis = new AxisCell().source({
         orientation: 'top',

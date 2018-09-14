@@ -1,6 +1,6 @@
 /* global describe, it, document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'muze-utils';
+import { Smartlabel } from 'muze-utils';
 import { expect } from 'chai';
 import { ContinousAxis } from '@chartshq/muze-axis';
 import AxisCell from './axis-cell';
@@ -8,7 +8,7 @@ import TextCell from './text-cell';
 import GeomCell from './geom-cell';
 import { GEOM } from './enums/cell-type';
 
-const sm = new SmartlabelManager(12);
+const sm = new Smartlabel(12);
 const header = new TextCell({}, {
     labelManager: sm
 }).source('Hey Judey');
