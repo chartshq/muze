@@ -84,7 +84,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             type: 'icon',
                             color: colorAxis.getColor(val),
                             shape: shapeAxis.getShape(val),
-                            size: sizeAxis.getSize(val) * config.iconSize
+                            size: sizeAxis.getSize(val) * config.iconScale
                         };
                     }
                     if (associatedMeasures.length > 1) {

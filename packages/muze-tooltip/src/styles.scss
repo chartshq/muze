@@ -19,6 +19,7 @@
 }
 .#{$prefix}tooltip-row{
     padding-bottom: 8px;
+    overflow: auto;
 }
 
 .#{$prefix}tooltip-row:last-child{
