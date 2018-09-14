@@ -38,9 +38,10 @@ export const getRadiusRange = (width, height, config) => {
     return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
         width) / 2];
 };
-export const getPreviousPoint = (prevData, currIndex) => {
+export const getPreviousPoint = (prevData, currIndex, config) => {
     const prevArc = prevData[currIndex - 1];
-    const nextArc = prevData[currIndex + 1];
+    const nextArc = prevData[currIndex];
+
     if (prevArc && nextArc) {
         return {
             startAngle: prevArc.endAngle,
@@ -48,11 +49,14 @@ export const getPreviousPoint = (prevData, currIndex) => {
         };
     } else if (!nextArc) {
         return {
-            startAngle: Math.PI * 2,
-            endAngle: Math.PI * 2
+            startAngle: config.endAngle * Math.PI * 2 / 360,
+            endAngle: config.endAngle * Math.PI * 2 / 360
         };
     }
-    return { startAngle: 0, endAngle: 0 };
+    return {
+        startAngle: config.startAngle * Math.PI * 2 / 360,
+        endAngle: config.startAngle * Math.PI * 2 / 360
+    };
 };
 
 /**
@@ -63,8 +67,11 @@ export const getPreviousPoint = (prevData, currIndex) => {
  * @returns
  * @memberof ArcLayer
  */
-export const tweenPie = (path, b) => {
+export const tweenPie = (path, rangeValueGetter, b) => {
     const { datum } = b[0];
+    const outerRadius = rangeValueGetter(datum);
+    datum.outerRadius = outerRadius;
+    datum._previousInfo.outerRadius = datum._previousInfo.outerRadius || outerRadius;
     return function (t) {
         return path(interpolator()(datum._previousInfo, datum)(t));
     };
@@ -78,7 +85,7 @@ export const tweenPie = (path, b) => {
  * @returns
  * @memberof ArcLayer
  */
-export const tweenExitPie = (consecutiveExits, transition, path) => {
+export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, path) => {
     if (consecutiveExits.length > 0) {
         consecutiveExits.forEach((consecutiveExitArr) => {
             const startAngle = consecutiveExitArr[0].datum.startAngle;
@@ -93,13 +100,19 @@ export const tweenExitPie = (consecutiveExits, transition, path) => {
                     gElem.selectAll('path')
                                     .transition()
                                     .duration(transition.duration)
+                                    .on('end', () => gElem.remove())
                                     .attrTween('d', () => function (t) {
-                                        return path(interpolator()(datum, { startAngle: mid,
-                                            endAngle: mid })(t));
+                                        const outerRadius = rangeValueGetter(datum);
+                                        datum.outerRadius = outerRadius;
+                                        return path(interpolator()(datum, {
+                                            startAngle: mid,
+                                            endAngle: mid,
+                                            outerRadius
+                                            //  datum.innerRadius || 0
+                                            // outerRadius: /datum.innerRadius || 0
+                                        })(t));
                                     })
                                     .remove();
-                    gElem.transition()
-                                    .duration(transition.duration).remove();
                 });
             });
         });

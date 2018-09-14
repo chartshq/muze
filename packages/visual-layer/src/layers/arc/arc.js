@@ -92,6 +92,7 @@ export default class ArcLayer extends BaseLayer {
      */
     getTransformedData (dataModel, config) {
         let pieData = [];
+        const pieIndex = {};
         const {
             startAngle,
             endAngle,
@@ -112,8 +113,10 @@ export default class ArcLayer extends BaseLayer {
         const uids = dataVal.uids;
 
         this._prevPieData = {};
+
         prevData.forEach((e, index) => {
             this._prevPieData[e.uid] = [e, index];
+            pieIndex[e.index] = e;
         });
         // Creating pie data using angle field provided. If the angle field is a dimension,
         // all the angles will be equal(360/number of dimensions)
@@ -124,7 +127,7 @@ export default class ArcLayer extends BaseLayer {
             .value(d => d[angleIndex] || 1)
             .sortValues(null);
 
-        sort.length && pieData.sort((a, b) => {
+        sort.length && radiusIndex && pieData.sort((a, b) => {
             if (sort === ASCENDING) {
                 return a[radiusIndex] - b[radiusIndex];
             } return b[radiusIndex] - a[radiusIndex];
@@ -134,13 +137,15 @@ export default class ArcLayer extends BaseLayer {
         // Adding the radius field values to each data point in pie data
         pieData = pieData(data).map((d, i) => {
             d.outerRadiusValue = data[i][radiusIndex] || minOuterRadius;
+            d.innerRadius = config.innerRadius;
             d.colorVal = data[i][colorIndex];
             d.angleVal = data[i][angleIndex];
             d.sizeVal = sizeVal;
             d.uid = uids[i];
             d.rowId = d.uid;
             d.source = data[i];
-            d._previousInfo = this._prevPieData[d.uid] ? this._prevPieData[d.uid][0] : getPreviousPoint(prevData, i);
+            d._previousInfo = this._prevPieData[d.uid] ? this._prevPieData[d.uid][0] :
+                getPreviousPoint(pieIndex, d.index, config);
             return d;
         });
         return pieData;
@@ -243,9 +248,10 @@ export default class ArcLayer extends BaseLayer {
         const colorAxis = this.axes().color;
         const defaultRadius = outerRadius || Math.min(chartHeight, chartWidth) / 2;
         const radiusDomain = store.get(PROPS.DOMAIN).radius;
+        const rangeValueGetter = d => getRangeValue(d, range, radiusDomain, defaultRadius, sizeAxis);
         // This returns a function that generates the arc path based on the datum provided
         const path = arc()
-                .outerRadius(d => getRangeValue(d, range, radiusDomain, defaultRadius, sizeAxis))
+                // .outerRadius(d => rangeValueGetter(d))
                 .innerRadius(innerRadius ? Math.min(chartHeight / 2, chartWidth / 2, innerRadius) : 0)
                 .cornerRadius(cornerRadius)
                 .padAngle(padAngle)
@@ -269,7 +275,7 @@ export default class ArcLayer extends BaseLayer {
                             .attr('fill', d => colorAxis.getColor(d.datum.colorVal))
                             .transition()
                             .duration(transition.duration)
-                            .attrTween('d', (...params) => tweenPie(path, params))
+                            .attrTween('d', (...params) => tweenPie(path, rangeValueGetter, params))
                             .attr('class', d => `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}`);
         };
         const consecutiveExits = [];
@@ -293,7 +299,7 @@ export default class ArcLayer extends BaseLayer {
                 exit: tweenExit
             }, d => d.uid)
                         .attr('class', (d, i) => `${qualClassName[0]} ${qualClassName[1]}-${i}`);
-        tweenExitPie(consecutiveExits, transition, path);
+        tweenExitPie(consecutiveExits, transition, rangeValueGetter, path);
         return this;
     }
 }
