@@ -1,4 +1,4 @@
-import { nextAnimFrame } from 'muze-utils';
+import { nextFrame } from 'muze-utils';
 import { getValidTransform, getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
@@ -49,7 +49,7 @@ export const listenerMap = context => [
         props: [PROPS.DATA],
         listener: (data) => {
             if (data[1]) {
-                nextAnimFrame(() => {
+                nextFrame(() => {
                     context.store().commit(PROPS.DATA_UPDATED, true);
                 });
             }
