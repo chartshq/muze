@@ -55,13 +55,18 @@
     }
     #parentdiv {
         display: inline-block;
-        width: 1200px;
     }
     .info-box {
         display: flex;
         flex-direction: column;
         padding: 5px 0px 5px 0px;
     }
+    .muze-layer-point {
+    fill-opacity: 1 !important;
+    stroke-opacity: 1 !important;
+    /* fill: #086bb6; */
+    /* stroke: #086bb6; */
+}
     .info-section {
         display: flex;
         align-items: center;
@@ -80,20 +85,18 @@
 </style>
 <body>
     <div id = 'parentdiv'>
-  
+      
         <div id="chart"></div>
     <div id="chart2"></div>
     </div>
 
     <div class="chart"></div>
-
     <script src="./js/d3.js"></script>
     <script src="./muze.js"></script>
     <script src="js/datamodel.js"></script>
     <script src="js/temp-paths.js"></script>
     <script src="./js/regression.min.js"></script>
     <script src="./js/sample.js"></script>
-    <!-- <script src="./js/design-sample.js"></script> -->
 </body>
     <style>
         .referenceZone rect {

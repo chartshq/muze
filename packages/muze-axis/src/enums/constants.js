@@ -20,3 +20,8 @@ export const NUMBER = 'number';
 export const BOTTOM = 'bottom';
 export const TOP = 'top';
 
+export const RGB = 'rgb';
+export const HEX = 'hex';
+export const HSLA = 'hsla';
+export const HSL = 'hsl';
+

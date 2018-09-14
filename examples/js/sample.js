@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.Operators.share,
-        html = muze.Operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -31,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -69,14 +67,25 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = [['Year'], ['Year']];
+            columns = ['Year'];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(300)
+            .width(600)
+            .height(500)
+            .detail(['Maker'])
+            .color({
+                field: 'Horsepower',
+                domain: [10, 200],
+                step: true,
+                stops: 4,
+                range: ['red']
+                // stops: [2000, 3000, 4000],
+                                // range: 'interpolatePurples'
+            })
             .layers([{
                 mark: 'bar'
             }])

@@ -70,7 +70,7 @@ export default class GradientLegend extends SimpleLegend {
                 domainForLegend.push(domain[1]);
             }
         } else {
-            domainForLegend = getInterpolatedData(domain, steps);
+            domainForLegend = getInterpolatedData(domain, steps - 1);
         }
         domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
 

@@ -13,6 +13,8 @@ export const palette = [
     '#ae70af'
 ];
 
+export const DEFAULT_GRADIENT_COLOR = '#eaeaea';
+
 export const DEFAULT_CONFIG = {
     range: palette,
     value: palette[0],
