@@ -26,7 +26,7 @@ import './styles.scss';
 export default class PointLayer extends BaseLayer {
 
     /**
-     *Creates an instance of PointLayer.
+     * Creates an instance of PointLayer.
      * @param {*} args
      * @memberof PointLayer
      */
@@ -248,7 +248,7 @@ export default class PointLayer extends BaseLayer {
      * @return {Object} Point details
      */
     getNearestPoint (x, y) {
-        const distanceLimit = this._maxSize;
+        const distanceLimit = Math.max(this._maxSize, this.config().nearestPointThreshold);
 
         if (!this.data()) {
             return null;

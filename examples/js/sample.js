@@ -3,8 +3,8 @@
 (function () {
     let env = muze();
     let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
+        share = muze.Operators.share,
+        html = muze.Operators.html,
         actionModel = muze.ActionModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
@@ -53,8 +53,8 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
             },
 
             ];
@@ -69,40 +69,21 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Displacement'];
+            columns = [['Year'], ['Year']];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1200)
-            .height(800)
-            .detail(['Maker'])
-            .color('Origin')
+            .width(300)
             .layers([{
-                mark: 'point'
+                mark: 'bar'
             }])
-            .config({
-                groupBy: {
-                    disabled: true
-                },
-                border: {
-                    width: 2,
-                },
-                axes: {
-                    x: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }, y: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }
-                }
-            })
+            .height(300)
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-            .mount(document.getElementsByTagName('body')[0]);
+            .mount(document.getElementById('chart'));
     })
 
 })()

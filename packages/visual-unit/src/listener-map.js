@@ -68,7 +68,7 @@ export const listenerMap = context => ([
                     const field = axisFields[type][0];
                     if (field && field.subtype() === DimensionSubtype.TEMPORAL) {
                         timeDiffs[type] = field.getMinDiff();
-                        axesObj[type][0].minDiff(timeDiffs[type]);
+                        axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
                     }
                 });
                 return timeDiffs;
