@@ -100,7 +100,6 @@ export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, pat
                     gElem.selectAll('path')
                                     .transition()
                                     .duration(transition.duration)
-                                    .on('end', () => gElem.remove())
                                     .attrTween('d', () => function (t) {
                                         const outerRadius = rangeValueGetter(datum);
                                         datum.outerRadius = outerRadius;
@@ -108,11 +107,10 @@ export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, pat
                                             startAngle: mid,
                                             endAngle: mid,
                                             outerRadius
-                                            //  datum.innerRadius || 0
-                                            // outerRadius: /datum.innerRadius || 0
                                         })(t));
                                     })
                                     .remove();
+                    gElem.remove();
                 });
             });
         });

@@ -80,12 +80,12 @@
             .color('Year')
             .layers([{
                 mark: 'arc',
-                // encoding: {
-                //     radius: 'Horsepower'
-                // },
+                encoding: {
+                    radius: 'Horsepower'
+                },
                 innerRadius: 20,
-                // startAngle: 90,
-                // endAngle: 270,
+                startAngle: 90,
+                endAngle: 270,
                 sort: 'asc'
             }])
             .config({
