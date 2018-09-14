@@ -42,6 +42,7 @@ export default class Firebolt {
         this._entryExitSet = {};
         this._actionHistory = {};
         this._queuedSideEffects = [];
+        this._mappedActions = {};
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -286,6 +287,7 @@ export default class Firebolt {
     mapActionsAndBehaviour () {
         const initedPhysicalActions = this._actions.physical;
         const map = this._actionBehaviourMap;
+        const mappedActions = this._mappedActions;
 
         for (const action in map) {
             if (!({}).hasOwnProperty.call(action, map)) {
@@ -297,7 +299,10 @@ export default class Firebolt {
                     target = this.context.getDefaultTargetContainer();
                 }
                 const bind = hasTouch() ? touch === true || touch === undefined : !touch;
-                bind && this.bindActionWithBehaviour(initedPhysicalActions[action], target, mapObj.behaviours);
+                const keyName = `${action}-${mapObj.behaviours.join()}`;
+                bind && !mappedActions[keyName] && this.bindActionWithBehaviour(initedPhysicalActions[action],
+                    target, mapObj.behaviours);
+                mappedActions[keyName] = true;
             }
         }
         return this;
@@ -310,6 +315,7 @@ export default class Firebolt {
 
     /**
      * Binds a target element with an action.
+     *
      * @param {Function} action Action method
      * @param {string} target Class name of element
      * @param {Array} behaviourList Array of behaviours
