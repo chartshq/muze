@@ -14,8 +14,9 @@ import getDragActionConfig from './drag-action-config';
 export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
     let startPos = {};
     let endPos = {};
+    let drawingInf;
+
     const d3Drag = getD3Drag();
-    const boundingBox = targetEl.node().getBoundingClientRect();
     let touchStart;
     targetEl.call(d3Drag().on('start', () => {
         const event = getEvent();
@@ -23,6 +24,7 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
             x: event.x,
             y: event.y
         };
+        drawingInf = firebolt.context.getDrawingContext();
         touchStart = new Date().getTime();
     }).on('drag', () => {
         const event = getEvent();
@@ -33,8 +35,8 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
         if (touch && Math.abs(startPos.x - endPos.x) <= 5) {
             return;
         }
-        endPos.x = Math.max(0, Math.min(endPos.x, boundingBox.width));
-        endPos.y = Math.max(0, Math.min(endPos.y, boundingBox.height));
+        endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
+        endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
 
         const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
             startPos,
@@ -52,8 +54,8 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
         if (touch && duration > 100 && Math.abs(startPos.x - endPos.x) <= 5) {
             return;
         }
-        endPos.x = Math.max(0, Math.min(endPos.x, boundingBox.width));
-        endPos.y = Math.max(0, Math.min(endPos.y, boundingBox.height));
+        endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
+        endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
 
         const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
             startPos,

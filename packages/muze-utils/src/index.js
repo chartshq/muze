@@ -29,6 +29,7 @@ export {
     piecewiseInterpolator,
     reqAnimFrame,
     cancelAnimFrame,
+    nextAnimFrame,
     getMax,
     getMin,
     getDomainFromData,

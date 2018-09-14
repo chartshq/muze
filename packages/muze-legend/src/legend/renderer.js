@@ -154,13 +154,13 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
         // Create a div with scroll when overflow
     if (maxGradWidth && maxGradWidth < gradWidth) {
         legendBody = legendBody.style(WIDTH, `${maxGradWidth}px`).style('overflow-x', 'scroll');
-        legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
     }
         // Create a div with scroll when overflow
     if (maxGradHeight && maxGradHeight < gradHeight) {
         legendBody.style(HEIGHT, `${maxGradHeight}px`).style('overflow-y', 'scroll');
-        legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
     }
+
+    legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
 
     legendBody.style(WIDTH, `${gradWidth}px`);
     legendBody.style(HEIGHT, `${gradHeight}px`);

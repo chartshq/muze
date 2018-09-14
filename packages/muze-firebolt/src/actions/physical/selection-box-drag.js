@@ -7,8 +7,8 @@ import getDragActionConfig from './helpers/drag-action-config';
 
 export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
     let subject;
+    let drawingInf;
     const context = firebolt.context;
-    const drawingInf = context.getDrawingContext();
     const onDrag = (payload) => {
         behaviours.forEach(action => firebolt.dispatchBehaviour(action, payload));
     };
@@ -16,6 +16,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
 
     targetEl.call(d3Drag().on('start', () => {
         const event = getEvent();
+        drawingInf = context.getDrawingContext();
         subject = event.subject;
     }).on('drag', () => {
         const event = getEvent();
