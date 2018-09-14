@@ -1,14 +1,10 @@
-/* eslint-disable */
-
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel;
+    const DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
-
-
-    d3.json('../data/cars.json', (data) => {
-        const jsonData = data,
+    d3.json('./data/cars.json', (data) => {
+        let jsonData = data,
             schema = [{
                 name: 'Name',
                 type: 'dimension'
@@ -33,12 +29,12 @@
             },
             {
                 name: 'Weight_in_lbs',
-                type: 'measure',
+                type: 'measure'
             },
             {
                 name: 'Acceleration',
                 type: 'measure',
-                defAggFn: 'avg'
+                defAggFn: 'sum'
             },
             {
                 name: 'Origin',
@@ -50,26 +46,22 @@
             },
             {
                 name: 'Year',
-                type: 'dimension',
-                subtype: 'temporal',
-                format: '%Y-%m-%d'
-            },
+                type: 'dimension'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
+            }
 
             ];
-        let rootData = new DataModel(jsonData, schema);
+        const rootData = new DataModel(jsonData, schema);
 
-        // rootData = rootData.groupBy(['Year'], {
-        //     Horsepower: 'mean',
-        //     Acceleration: 'mean'
-        // });
+    // rootData = rootData.groupBy(['Year'], {
+    //     Horsepower: 'mean',
+    //     Acceleration: 'mean'
+    // });
 
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        let mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
-        let rows = ['Acceleration'],
-            columns = [['Year'], ['Year']];
-        // rootData = rootData.groupBy(['Maker']);
-        // rootData = rootData.sort([['Acceleration', 'ASC']]);
+        const mountPoint = document.getElementById('chart');
+        let canvas = env.canvas();
         canvas = canvas
             .rows(rows)
             .columns(columns)
@@ -79,9 +71,8 @@
                 mark: 'bar'
             }])
             .height(300)
-            .title('The Muze Project', { position: "top", align: "left", })
-            .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
+            .title('The Muze Project', { position: 'top', align: 'left' })
+            .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
             .mount(document.getElementById('chart'));
-    })
-
-})()
+    });
+}());

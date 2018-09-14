@@ -18,6 +18,7 @@ export const defaultConfig = {
             intensity: [0, 0, 15, 0]
         }]
     },
+    innerPadding: 0.1,
     transform: {
         type: 'identity'
     },
