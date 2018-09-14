@@ -61,6 +61,8 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         let canvas = env.canvas();
+        const rows = ['Horsepower'];
+        const columns = ['Year'];
         canvas = canvas
             .rows(rows)
             .columns(columns)
