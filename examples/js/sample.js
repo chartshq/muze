@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -31,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -72,24 +70,21 @@
             columns = ['Maker'];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
-        canvas = canvas
-            .rows(rows)
-            .columns(columns)
-            .data(rootData)
-            .width(1200)
-            .height(800)
-            .detail(['Maker'])
-            .color({
-                field: 'Horsepower',
-                domain: [10, 200],
-                // step: true,
-                stops: 4,
-                // stops: [20,40, 60, 80, 100, 199],
-                // range: ['red']
-                // stops: [2000, 3000, 4000],
-                                // range: 'interpolatePurples'
-            })
-      
+        canvas
+        .rows(["Maker"]) // Year goes in X axis
+          .columns(['Acceleration']) // Acceleration goes in Y axis
+          .width(600)
+          .height(500)
+        .data(rootData)
+          .color({
+            field: 'Miles_per_Gallon', // A measure in color encoding channel creates gradient legend
+            //    stops: 3,   // 3 stops with interpolated value
+               range: ['#eaeaea', '#258e47'] // range could be either set of color or predefined palletes
+        })
+          
+            // .layers([{
+            //     mark: 'point'
+            // }])
             .config({
                 groupBy: {
                     disabled: true
@@ -97,6 +92,14 @@
                 border: {
                     width: 2,
                 },
+               legend:{
+                   position: 'bottom'
+               },
+            
+                autoGroupBy: { // Turn off internal grouping of data because data has order wich needs to be maintained
+                    disabled: true
+                },
+        
                 axes: {
                     x: {
                         showAxisName: true,
