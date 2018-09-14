@@ -63,7 +63,8 @@ export default class BaseLayer extends SimpleLayer {
     constructor (data, axes, config, dependencies) {
         super();
         this.store(new Store({
-            DATA: null
+            DATA: null,
+            [PROPS.DATA_UPDATED]: null
         }));
         transactor(this, defaultOptions, this.store().model);
         this.data(data);

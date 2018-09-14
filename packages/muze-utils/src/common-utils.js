@@ -1400,6 +1400,12 @@ const require = (lookupWhat, lookupDetails) => ({
     }
 });
 
+const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+    function (callback) {
+        setTimeout(callback, 16);
+    };
+
 export {
     require,
     Scales,
@@ -1428,6 +1434,7 @@ export {
     numberInterpolator,
     ERROR_MSG,
     reqAnimFrame,
+    nextAnimFrame,
     filterPropagationModel,
     transposeArray,
     cancelAnimFrame,
