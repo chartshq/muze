@@ -69,7 +69,7 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Displacement'];
+            columns = ['Maker'];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
         canvas = canvas
@@ -79,10 +79,17 @@
             .width(1200)
             .height(800)
             .detail(['Maker'])
-            .color('Origin')
-            .layers([{
-                mark: 'point'
-            }])
+            .color({
+                field: 'Horsepower',
+                domain: [10, 200],
+                // step: true,
+                stops: 4,
+                // stops: [20,40, 60, 80, 100, 199],
+                // range: ['red']
+                // stops: [2000, 3000, 4000],
+                                // range: 'interpolatePurples'
+            })
+      
             .config({
                 groupBy: {
                     disabled: true
