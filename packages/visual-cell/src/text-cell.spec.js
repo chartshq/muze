@@ -1,12 +1,12 @@
 /* global describe, it, document */
 /* eslint-disable no-unused-expressions */
-import SmartlabelManager from 'muze-utils';
+import { Smartlabel } from 'muze-utils';
 import { expect } from 'chai';
 import TextCell from './text-cell';
 import { TEXT } from './enums/cell-type';
 import { CLASSPREFIX } from './enums/constants';
 
-const sm = new SmartlabelManager(200);
+const sm = new Smartlabel(200);
 const text = new TextCell({}, {
     labelManager: sm
 }).source('Hey Judey');

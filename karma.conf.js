@@ -3,7 +3,7 @@ module.exports = function (config) {
         basePath: './',
         frameworks: ['mocha', 'chai'],
         files: [
-            'test.webpack.js'
+            'packages/*/src/**/*.spec.js'
         ],
         webpack: {
             devtool: 'inline-source-map',
@@ -15,9 +15,21 @@ module.exports = function (config) {
                         use: {
                             loader: 'babel-loader',
                             query: {
-                                presets: ['es2015']
+                                presets: ['env']
                             }
                         },
+                        exclude: /node_modules/
+                    },
+                    {
+                        test: /\.(s*)css$/,
+                        use: [
+                            {
+                                loader: 'style-loader',
+                                options: { singleton: true }
+                            },
+                            { loader: 'css-loader' },
+                            { loader: 'sass-loader' }
+                        ],
                         exclude: /node_modules/
                     },
                     {
@@ -32,9 +44,15 @@ module.exports = function (config) {
                 ]
             }
         },
+        webpackMiddleware: {
+            noInfo: true,
+            stats: {
+                chunks: false
+            }
+        },
         preprocessors: {
             '**/*.js': ['sourcemap'],
-            'test.webpack.js': ['webpack']
+            'packages/*/src/**/*.spec.js': ['webpack']
         },
         exclude: [
             '**/*.swp'

@@ -58,7 +58,6 @@
     "url": "https://github.com/chartshq/muze"
   },
   "dependencies": {
-    "fusioncharts-smartlabel": "^1.0.2",
     "@chartshq/layout": "^1.0.0",
     "@chartshq/muze-firebolt": "^1.0.0",
     "@chartshq/muze-legend": "^1.0.0",
