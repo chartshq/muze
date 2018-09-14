@@ -2,10 +2,7 @@
 
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
+    let DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
 
@@ -31,7 +28,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',
@@ -76,12 +74,19 @@
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(1200)
-            .height(800)
-            .detail(['Maker'])
-            .color('Origin')
+            .width(600)
+            .height(500)
+            // .detail(['Maker'])
+            .color('Year')
             .layers([{
-                mark: 'point'
+                mark: 'arc',
+                encoding: {
+                    radius: 'Horsepower'
+                },
+                innerRadius: 20,
+                startAngle: 90,
+                endAngle: 270,
+                sort: 'asc'
             }])
             .config({
                 groupBy: {
@@ -90,6 +95,9 @@
                 border: {
                     width: 2,
                 },
+               legend:{
+                   position: 'bottom'
+               },
                 axes: {
                     x: {
                         showAxisName: true,
