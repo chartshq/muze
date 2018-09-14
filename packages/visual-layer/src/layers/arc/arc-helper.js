@@ -1,4 +1,4 @@
-import { getObjProp, interpolator, FieldType } from 'muze-utils';
+import { getObjProp, interpolator, FieldType, selectElement } from 'muze-utils';
 import { ANGLE, RADIUS, SIZE, COLOR } from '../../enums/constants';
 
 /**
@@ -38,24 +38,25 @@ export const getRadiusRange = (width, height, config) => {
     return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
         width) / 2];
 };
+export const getPreviousPoint = (prevData, currIndex, config) => {
+    const prevArc = prevData[currIndex - 1];
+    const nextArc = prevData[currIndex];
 
-const getIndexedPoint = (prevData, currIndex) => {
-    if (!prevData[currIndex]) {
-        const prevArc = prevData[currIndex - 1];
-        const nextArc = prevData[currIndex + 1];
-        if (prevArc && nextArc) {
-            return {
-                startAngle: prevArc[0].endAngle,
-                endAngle: nextArc[0].startAngle
-            };
-        } else if (!nextArc) {
-            return {
-                startAngle: Math.PI * 2,
-                endAngle: Math.PI * 2
-            };
-        }
+    if (prevArc && nextArc) {
+        return {
+            startAngle: prevArc.endAngle,
+            endAngle: nextArc.startAngle
+        };
+    } else if (!nextArc) {
+        return {
+            startAngle: config.endAngle * Math.PI * 2 / 360,
+            endAngle: config.endAngle * Math.PI * 2 / 360
+        };
     }
-    return { startAngle: 0, endAngle: 0 };
+    return {
+        startAngle: config.startAngle * Math.PI * 2 / 360,
+        endAngle: config.startAngle * Math.PI * 2 / 360
+    };
 };
 
 /**
@@ -66,15 +67,54 @@ const getIndexedPoint = (prevData, currIndex) => {
  * @returns
  * @memberof ArcLayer
  */
-export const tweenPie = (path, b, prevData) => {
+export const tweenPie = (path, rangeValueGetter, b) => {
     const { datum } = b[0];
-    const uid = datum.uid;
-    const prevDatum = getObjProp(prevData, uid, 0) || getIndexedPoint(prevData, uid);
-    const prevObject = { startAngle: prevDatum.startAngle, endAngle: prevDatum.endAngle };
-
+    const outerRadius = rangeValueGetter(datum);
+    datum.outerRadius = outerRadius;
+    datum._previousInfo.outerRadius = datum._previousInfo.outerRadius || outerRadius;
     return function (t) {
-        return path(interpolator()(prevObject, datum)(t));
+        return path(interpolator()(datum._previousInfo, datum)(t));
     };
+};
+
+/**
+ *
+ *
+ * @param {*} path
+ * @param {*} b
+ * @returns
+ * @memberof ArcLayer
+ */
+export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, path) => {
+    if (consecutiveExits.length > 0) {
+        consecutiveExits.forEach((consecutiveExitArr) => {
+            const startAngle = consecutiveExitArr[0].datum.startAngle;
+            const endAngle = consecutiveExitArr[consecutiveExitArr.length - 1].datum.endAngle;
+            const mid = (Math.PI * 2 * startAngle) / ((Math.PI * 2) + startAngle - endAngle);
+
+            consecutiveExitArr.forEach((e) => {
+                const { elem, datum } = e;
+
+                elem.each(function () {
+                    const gElem = selectElement(this);
+                    gElem.selectAll('path')
+                                    .transition()
+                                    .duration(transition.duration)
+                                    .attrTween('d', () => function (t) {
+                                        const outerRadius = rangeValueGetter(datum);
+                                        datum.outerRadius = outerRadius;
+                                        return path(interpolator()(datum, {
+                                            startAngle: mid,
+                                            endAngle: mid,
+                                            outerRadius
+                                        })(t));
+                                    })
+                                    .remove();
+                    gElem.remove();
+                });
+            });
+        });
+    }
 };
 
 export const getFieldIndices = (encoding, fieldsConfig) => {

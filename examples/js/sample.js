@@ -62,14 +62,14 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         let canvas = env.canvas();
+        const rows = ['Horsepower'];
+        const columns = ['Year'];
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(300)
-            .layers([{
-                mark: 'bar'
-            }])
+            .width(600)
+
             .height(300)
             .title('The Muze Project', { position: 'top', align: 'left' })
             .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
