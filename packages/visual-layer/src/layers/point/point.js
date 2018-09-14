@@ -225,7 +225,7 @@ export default class PointLayer extends BaseLayer {
             const measurementConf = this.getMeasurementConfig(offsetXValues[i], offsetYValues[i], widthMetrics.span,
                 heightMetrics.span);
             return this.translatePoints(dataArr, encoding, axes, measurementConf);
-        });
+        }).filter(d => d.length);
     }
 
     getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {
