@@ -34,7 +34,7 @@
             {
                 name: 'Acceleration',
                 type: 'measure',
-                defAggFn: 'avg'
+                defAggFn: 'sum'
             },
             {
                 name: 'Origin',
@@ -61,7 +61,7 @@
 
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
+        let canvas = env.canvas();
         canvas = canvas
         .rows(['Acceleration'])
         .columns(['Year'])
