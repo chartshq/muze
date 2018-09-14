@@ -1,9 +1,6 @@
 (function () {
     let env = muze();
-    let DataModel = muze.DataModel,
-        share = muze.Operators.share,
-        html = muze.Operators.html,
-        actionModel = muze.ActionModel;
+    const DataModel = muze.DataModel;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
     d3.json('./data/cars.json', (data) => {
@@ -27,7 +24,8 @@
             },
             {
                 name: 'Horsepower',
-                type: 'measure'
+                type: 'measure',
+                defAggFn: 'avg'
             },
             {
                 name: 'Weight_in_lbs',

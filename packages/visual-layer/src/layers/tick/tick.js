@@ -59,7 +59,7 @@ export default class TickLayer extends PointLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes) {
+    translatePoints (data, encoding, axes, config = {}) {
         let points = [];
         const {
                 xAxis,
@@ -83,9 +83,8 @@ export default class TickLayer extends PointLayer {
         const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
         const measurement = this._store.get(PROPS.MEASUREMENT);
         const colorAxis = axes.color;
-        const xbandwidth = xAxis ? xAxis.getUnitWidth() : 0;
-        const ybandwidth = yAxis ? yAxis.getUnitWidth() : 0;
-
+        const { x: offsetX, y: offsetY } = config.offset;
+        const { x: xSpan, y: ySpan } = config.span;
         for (let i = 0, len = data.length; i < len; i++) {
             let xPx;
             let x0Px;
@@ -94,20 +93,20 @@ export default class TickLayer extends PointLayer {
             const d = data[i];
             const row = d._data;
             if (xField) {
-                xPx = xAxis.getScaleValue(d.x);
-                x0Px = xPx + xbandwidth;
+                xPx = xAxis.getScaleValue(d.x) + offsetX;
+                x0Px = xPx + xSpan;
             }
 
             if (yField) {
-                yPx = yAxis.getScaleValue(d.y);
-                y0Px = yPx !== null ? yPx + ybandwidth : null;
+                yPx = yAxis.getScaleValue(d.y) + offsetY;
+                y0Px = yPx !== null ? yPx + ySpan : null;
             }
 
             if (!xField) {
                 xPx = 0;
                 x0Px = measurement.width;
                 if (!isNaN(yPx)) {
-                    yPx += ybandwidth / 2;
+                    yPx += ySpan / 2;
                     y0Px = yPx;
                 }
             }
@@ -115,19 +114,19 @@ export default class TickLayer extends PointLayer {
             if (!yField) {
                 yPx = 0;
                 y0Px = measurement.height;
-                x0Px = xPx += xbandwidth / 2;
+                x0Px = xPx += xSpan / 2;
             }
 
             if (x0Field) {
-                x0Px = xAxis.getScaleValue(d.x0) + xbandwidth;
-                yPx += ybandwidth / 2;
-                y0Px -= ybandwidth / 2;
+                x0Px = xAxis.getScaleValue(d.x0) + xSpan;
+                yPx += ySpan / 2;
+                y0Px -= ySpan / 2;
             }
 
             if (y0Field) {
-                y0Px = yAxis.getScaleValue(d.y0) + ybandwidth;
-                xPx += xbandwidth / 2;
-                x0Px -= xbandwidth / 2;
+                y0Px = yAxis.getScaleValue(d.y0) + ySpan;
+                xPx += xSpan / 2;
+                x0Px -= xSpan / 2;
             }
             const style = {};
             const meta = {};
@@ -164,5 +163,18 @@ export default class TickLayer extends PointLayer {
         }
         points = positionPoints(this, points);
         return points;
+    }
+
+    getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {
+        return {
+            offset: {
+                x: (offsetX || 0),
+                y: (offsetY || 0)
+            },
+            span: {
+                x: widthSpan,
+                y: heightSpan
+            }
+        };
     }
 }
