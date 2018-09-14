@@ -53,8 +53,8 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
             },
 
             ];
@@ -69,7 +69,7 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Displacement'];
+            columns = [['Year'], ['Year']];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
         canvas = canvas
@@ -77,29 +77,10 @@
             .columns(columns)
             .data(rootData)
             .width(300)
-            .height(300)
-            .detail(['Maker'])
-            .color('Origin')
             .layers([{
-                mark: 'point'
+                mark: 'bar'
             }])
-            .config({
-                groupBy: {
-                    disabled: true
-                },
-                border: {
-                    width: 2,
-                },
-                axes: {
-                    x: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }, y: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }
-                }
-            })
+            .height(300)
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
             .mount(document.getElementById('chart'));
