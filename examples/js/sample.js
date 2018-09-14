@@ -64,7 +64,7 @@ d3.json('./data/cars.json', (data) => {
     const mountPoint = document.getElementById('chart');
     window.canvas = env.canvas();
     canvas = canvas
-        .rows([['Acceleration'], ['Displacement']])
+        .rows(['Acceleration'])
         .columns(['Year'])
         .data(rootData)
         .minUnitHeight(100)
@@ -72,7 +72,7 @@ d3.json('./data/cars.json', (data) => {
         .height(600)
         .width(800)
         .layers([{
-            mark: 'line'
+            mark: 'bar'
         }])
         // .detail(['Name']) // Show all the data point
         .color('Origin') // Color the points using cylinders

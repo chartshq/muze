@@ -84,9 +84,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const dataModel = selectionSet.mergedEnter.model;
         const drawingInf = this.drawingContext();
         const sideEffectGroup = drawingInf.sideEffectGroup;
-        const className = this.config().className;
+        const className = `${this.config().className}`;
         const layers = this._layers;
-        const parentGroup = this.createElement(sideEffectGroup, 'g', [1], className);
+        const parentGroup = this.createElement(sideEffectGroup, 'g', [1], `${className}-container`);
         const anchorGroups = this.createElement(parentGroup, 'g', layers);
         anchorGroups.each(function (layer) {
             const instances = layer.instances;
