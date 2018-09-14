@@ -3,14 +3,15 @@ import {
     selectElement,
     getQualifiedClassName,
     makeElement,
-    FieldType
+    FieldType,
+    Scales
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
-import { attachDataToVoronoi, getLayerColor, positionPoints } from '../../helpers';
+import { attachDataToVoronoi, getLayerColor, positionPoints, getPlotMeasurement } from '../../helpers';
 
 import './styles.scss';
 
@@ -32,6 +33,7 @@ export default class PointLayer extends BaseLayer {
     constructor (...args) {
         super(...args);
         this._voronoi = new Voronoi();
+        this._bandScale = Scales.band();
     }
 
     /**
@@ -50,6 +52,18 @@ export default class PointLayer extends BaseLayer {
      */
     static defaultConfig () {
         return defaultConfig;
+    }
+
+    static defaultPolicy (conf, userConf) {
+        const config = BaseLayer.defaultPolicy(conf, userConf);
+        const encoding = config.encoding;
+        const transform = config.transform;
+        const colorField = encoding.color && encoding.color.field;
+
+        if (colorField) {
+            transform.groupBy = colorField;
+        }
+        return config;
     }
 
     /**
@@ -81,7 +95,7 @@ export default class PointLayer extends BaseLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes) {
+    translatePoints (data, encoding, axes, config = {}) {
         let points = [];
         const {
             size: sizeEncoding,
@@ -105,18 +119,22 @@ export default class PointLayer extends BaseLayer {
         const shapeFieldIndex = fieldsConfig[shapeField] && fieldsConfig[shapeField].index;
         const sizeFieldIndex = fieldsConfig[sizeField] && fieldsConfig[sizeField].index;
         const colorAxis = axes.color;
+        const { x: offsetX, y: offsetY } = config.offset;
+
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
             const row = d._data;
             const size = sizeAxis.getSize(row[sizeFieldIndex]);
             const shape = shapeAxis.getShape(row[shapeFieldIndex]);
 
-            const [xPx, yPx] = [ENCODING.X, ENCODING.Y].map((type) => {
-                const bandwidth = axes[type].getUnitWidth() / 2;
+            let [xPx, yPx] = [ENCODING.X, ENCODING.Y].map((type) => {
                 const value = d[type] === null ? undefined : d[type];
                 const measure = type === ENCODING.X ? measurement.width : measurement.height;
-                return !encoding[type].field ? measure / 2 : axes[type].getScaleValue(value) + bandwidth;
+                return !encoding[type].field ? measure / 2 : axes[type].getScaleValue(value);
             });
+
+            xPx += offsetX;
+            yPx += offsetY;
 
             const { color, rawColor } = getLayerColor({ datum: d, index: i },
                 { colorEncoding, colorAxis, colorFieldIndex });
@@ -125,6 +143,7 @@ export default class PointLayer extends BaseLayer {
                 fill: color,
                 stroke: color
             };
+
             if (!isNaN(xPx) && !isNaN(yPx)) {
                 const point = {
                     enter: {
@@ -157,17 +176,17 @@ export default class PointLayer extends BaseLayer {
     }
 
     /**
-     * Renders the plot in the given container
+     * Renders the plot in the given container.
+     *
      * @param  {SVGElement} container SVGElement which will hold the plot
      * @return {BarLayer} Instance of bar layer
      */
     render (container) {
-        let points;
         let maxSize = 0;
         let seriesClassName;
         const config = this.config();
-        const { transition, encoding, className, defClassName, classPrefix } = config;
-        const axes = this.axes();
+        const keys = this._store.get(PROPS.TRANSFORMED_DATA).map(d => d.key);
+        const { transition, className, defClassName, classPrefix } = config;
         const normalizedData = this._store.get(PROPS.NORMALIZED_DATA);
         const containerSelection = selectElement(container);
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
@@ -175,10 +194,11 @@ export default class PointLayer extends BaseLayer {
         this._pointMap = {};
 
         containerSelection.classed(qualifiedClassName.join(' '), true).classed(className, true);
-        makeElement(container, 'g', normalizedData, null, {
-            update: (group, dataArr, i) => {
-                points = this.translatePoints(dataArr, encoding, axes, i);
-                this._points.push(points);
+
+        this._points = this.generateDataPoints(normalizedData, keys);
+
+        makeElement(container, 'g', this._points, null, {
+            update: (group, points) => {
                 maxSize = Math.max(maxSize, ...points.map(d => d.size));
                 seriesClassName = `${qualifiedClassName[0]}`;
                 this.constructor.drawFn()({
@@ -189,10 +209,36 @@ export default class PointLayer extends BaseLayer {
                     keyFn: d => d._id
                 });
             }
-        });
+        }, data => data[0]._id);
         this._maxSize = Math.sqrt(maxSize / Math.PI) * 2;
         attachDataToVoronoi(this._voronoi, this._points);
         return this;
+    }
+
+    generateDataPoints (normalizedData, keys) {
+        const encoding = this.config().encoding;
+        const axes = this.axes();
+        const [widthMetrics, heightMetrics] = getPlotMeasurement(this, keys);
+        const offsetXValues = widthMetrics.offsetValues || [];
+        const offsetYValues = heightMetrics.offsetValues || [];
+        return normalizedData.map((dataArr, i) => {
+            const measurementConf = this.getMeasurementConfig(offsetXValues[i], offsetYValues[i], widthMetrics.span,
+                heightMetrics.span);
+            return this.translatePoints(dataArr, encoding, axes, measurementConf);
+        }).filter(d => d.length);
+    }
+
+    getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {
+        return {
+            offset: {
+                x: (offsetX || 0) + widthSpan / 2,
+                y: (offsetY || 0) + heightSpan / 2
+            },
+            span: {
+                x: widthSpan,
+                y: heightSpan
+            }
+        };
     }
 
     /**

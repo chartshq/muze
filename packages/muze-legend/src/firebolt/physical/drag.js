@@ -38,8 +38,8 @@ import {
 
         payload = {
             criteria: {
-                [context.fieldName()]: [axisScale.invert(startPos[axisType] + rangeShifter),
-                    axisScale.invert(endPos[axisType] + rangeShifter)].sort((a, b) => a - b)
+                [context.fieldName()]: [axisScale.invert(startPos[axisType] + rangeShifter * 2),
+                    axisScale.invert(endPos[axisType] + rangeShifter * 2)].sort((a, b) => a - b)
             }
         };
         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
@@ -59,8 +59,8 @@ import {
         } else {
             payload = {
                 criteria: {
-                    [context.fieldName()]: [axisScale.invert(startPos[axisType] + rangeShifter),
-                        axisScale.invert(endPos[axisType] + rangeShifter)].sort((a, b) => a - b)
+                    [context.fieldName()]: [axisScale.invert(startPos[axisType] + rangeShifter * 2),
+                        axisScale.invert(endPos[axisType] + rangeShifter * 2)].sort((a, b) => a - b)
                 }
             };
         }
