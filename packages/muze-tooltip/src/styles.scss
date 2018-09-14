@@ -14,10 +14,12 @@
     display: inline-block;
     pointer-events: none;
     z-index: 9999999999;
+    text-align: left;
 
 }
 .#{$prefix}tooltip-row{
     padding-bottom: 8px;
+    overflow: auto;
 }
 
 .#{$prefix}tooltip-row:last-child{

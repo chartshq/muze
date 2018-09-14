@@ -160,6 +160,9 @@ export const renderGradient = (context, container) => {
             width: `${Math.min(width, maxWidth)}px`,
             padding: `${padding}px`
         });
+
+        legendRect.attr('height', gradientDimensions.height);
+        legendRect.attr('width', gradientDimensions.width - labelDim.width / 2);
     } else {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
         gradientDimensions.width = item.icon.width;
@@ -172,6 +175,8 @@ export const renderGradient = (context, container) => {
             width: `${width}px`,
             padding: `${padding}px`
         });
+        legendRect.attr('height', gradientDimensions.height - labelDim.height / 2);
+        legendRect.attr('width', gradientDimensions.width);
     }
 
     // Apply Styles to the legend plot area
@@ -184,8 +189,8 @@ export const renderGradient = (context, container) => {
     applyStyle(legendRect, {
         fill: 'url(#linear-gradient)'
     });
-    legendRect.attr('height', gradientDimensions.height);
-    legendRect.attr('width', gradientDimensions.width);
+    legendGradSvg.attr('height', gradientDimensions.height);
+    legendGradSvg.attr('width', gradientDimensions.width);
 
     context.measurement({
         gradientDimensions

@@ -75,7 +75,7 @@ export default class Content {
         if (data instanceof Function) {
             mount.html(data());
         } else {
-            const rows = makeElement(mount, 'p', data, `${config.classPrefix}-tooltip-row`);
+            const rows = makeElement(mount, 'div', data, `${config.classPrefix}-tooltip-row`);
             const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
             cells.attr('class', `${config.classPrefix}-tooltip-content`);
             setStyles(rows, {
@@ -107,6 +107,10 @@ export default class Content {
                         });
                         setStyles(path, {
                             fill: d.color
+                        });
+                        setStyles(svg, {
+                            width: `${iconContainerSize}px`,
+                            height: `${iconContainerSize}px`
                         });
                     } else {
                         el.html(d.value);

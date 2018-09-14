@@ -11,7 +11,7 @@ export const defaultConfig = {
     content: {
         spacing: 5,
         iconContainerSize: 10,
-        iconSize: 30,
+        iconScale: 1,
         iconShape: 'circle',
         iconColor: '#ff0000',
         rowMargin: '0px',

@@ -39,14 +39,14 @@ export default {
         }
     },
     minUnitWidth: {
-        value: 150,
+        value: 50,
         meta: {
             sanitization: intSanitizer,
             typeCheck: Number.isInteger
         }
     },
     minUnitHeight: {
-        value: 150,
+        value: 50,
         meta: {
             sanitization: intSanitizer,
             typeCheck: Number.isInteger

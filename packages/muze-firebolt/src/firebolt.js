@@ -5,6 +5,7 @@ import {
     FieldType,
     selectElement
 } from 'muze-utils';
+import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
 import {
     initializeBehaviouralActions,
@@ -33,8 +34,8 @@ export default class Firebolt {
         this._volatileSelectionSet = {};
         this._propagationFields = {};
         this._sourceSideEffects = {
-            tooltip: true,
-            selectionBox: true
+            tooltip: () => false,
+            selectionBox: () => false
         };
         this._actionBehaviourMap = {};
         this._config = {};
@@ -42,6 +43,7 @@ export default class Firebolt {
         this._entryExitSet = {};
         this._actionHistory = {};
         this._queuedSideEffects = [];
+        this._mappedActions = {};
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -148,7 +150,8 @@ export default class Firebolt {
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
         this._propagationInf = propagationInfo;
-        if (action && action.isEnabled()) {
+
+        if (action) {
             const selectionSet = action.dispatch(payload);
             const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
             this._entryExitSet[behaviour] = propagationSelectionSet;
@@ -172,6 +175,24 @@ export default class Firebolt {
 
     shouldApplySideEffects () {
         return true;
+    }
+
+    enableSideEffectOnPropagation (sideEffect, fn) {
+        if (fn instanceof Function) {
+            this._sourceSideEffects[sideEffect] = fn;
+        } else {
+            this._sourceSideEffects[sideEffect] = () => false;
+        }
+        return this;
+    }
+
+    disableSideEffectOnPropagation (sideEffect, fn) {
+        if (fn instanceof Function) {
+            this._sourceSideEffects[sideEffect] = fn;
+        } else {
+            this._sourceSideEffects[sideEffect] = () => true;
+        }
+        return this;
     }
 
     propagate () {
@@ -271,9 +292,22 @@ export default class Firebolt {
         return this;
     }
 
-    propagateWith (action, ...fields) {
+    propagateWith (action, fields, append = false) {
+        const behaviouralActions = this._actions.behavioural;
         if (fields.length) {
-            this._propagationFields[action] = fields;
+            if (action === ALL_ACTIONS) {
+                for (const key in behaviouralActions) {
+                    this._propagationFields[key] = {
+                        fields,
+                        append
+                    };
+                }
+            } else {
+                this._propagationFields[action] = {
+                    fields,
+                    append
+                };
+            }
             return this;
         }
         return this._propagationFields;
@@ -286,6 +320,7 @@ export default class Firebolt {
     mapActionsAndBehaviour () {
         const initedPhysicalActions = this._actions.physical;
         const map = this._actionBehaviourMap;
+        const mappedActions = this._mappedActions;
 
         for (const action in map) {
             if (!({}).hasOwnProperty.call(action, map)) {
@@ -297,7 +332,10 @@ export default class Firebolt {
                     target = this.context.getDefaultTargetContainer();
                 }
                 const bind = hasTouch() ? touch === true || touch === undefined : !touch;
-                bind && this.bindActionWithBehaviour(initedPhysicalActions[action], target, mapObj.behaviours);
+                const keyName = `${action}-${mapObj.behaviours.join()}`;
+                bind && !mappedActions[keyName] && this.bindActionWithBehaviour(initedPhysicalActions[action],
+                    target, mapObj.behaviours);
+                mappedActions[keyName] = true;
             }
         }
         return this;
@@ -310,6 +348,7 @@ export default class Firebolt {
 
     /**
      * Binds a target element with an action.
+     *
      * @param {Function} action Action method
      * @param {string} target Class name of element
      * @param {Array} behaviourList Array of behaviours

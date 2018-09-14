@@ -11,15 +11,15 @@ export const defaultConfig = {
     interaction: {
         highlight: [{
             type: 'stroke',
-            intensity: [0, -10, -10, 0]
+            intensity: [0, 0, -15, 0]
         }],
         fade: [{
             type: 'stroke',
-            intensity: [0, -30, +30, 0]
+            intensity: [0, 0, +15, 0]
         }],
         focus: [{
             type: 'stroke',
-            intensity: [0, -30, +30, 0]
+            intensity: [0, 0, +15, 0]
         }]
     },
     nearestPointThreshold: 20,
