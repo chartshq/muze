@@ -20,6 +20,7 @@ export const defaultConfig = {
         }
         ]
     },
+    nearestPointThreshold: 30,
     transform: {
         type: 'identity'
     },

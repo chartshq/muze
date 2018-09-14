@@ -7,3 +7,4 @@ export const TRANSFORMED_DATA = 'transformedData';
 export const DOMAIN = 'domain';
 export const MOUNT = 'mount';
 export const FIELDMAP = 'fieldMap';
+export const DATA_UPDATED = 'dataUpdated';

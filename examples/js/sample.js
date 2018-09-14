@@ -51,8 +51,8 @@
             {
                 name: 'Year',
                 type: 'dimension',
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
             },
 
             ];
@@ -67,52 +67,21 @@
         let mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Acceleration'],
-            columns = ['Maker'];
+            columns = [['Year'], ['Year']];
         // rootData = rootData.groupBy(['Maker']);
         // rootData = rootData.sort([['Acceleration', 'ASC']]);
-        canvas
-        .rows(["Maker"]) // Year goes in X axis
-          .columns(['Acceleration']) // Acceleration goes in Y axis
-          .width(600)
-          .height(500)
-        .data(rootData)
-          .color({
-            field: 'Miles_per_Gallon', // A measure in color encoding channel creates gradient legend
-            //    stops: 3,   // 3 stops with interpolated value
-               range: ['#eaeaea', '#258e47'] // range could be either set of color or predefined palletes
-        })
-          
-            // .layers([{
-            //     mark: 'point'
-            // }])
-            .config({
-                groupBy: {
-                    disabled: true
-                },
-                border: {
-                    width: 2,
-                },
-               legend:{
-                   position: 'bottom'
-               },
-            
-                autoGroupBy: { // Turn off internal grouping of data because data has order wich needs to be maintained
-                    disabled: true
-                },
-        
-                axes: {
-                    x: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }, y: {
-                        showAxisName: true,
-                        axisNamePadding: 20,
-                    }
-                }
-            })
+        canvas = canvas
+            .rows(rows)
+            .columns(columns)
+            .data(rootData)
+            .width(300)
+            .layers([{
+                mark: 'bar'
+            }])
+            .height(300)
             .title('The Muze Project', { position: "top", align: "left", })
             .subtitle('Composable visualisations with a data first approach', { position: "top", align: "left" })
-            .mount(document.getElementsByTagName('body')[0]);
+            .mount(document.getElementById('chart'));
     })
 
 })()

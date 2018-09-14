@@ -91,7 +91,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const instances = layer.instances;
             const elems = this.createElement(anchorGroup, 'g', instances, className);
             const linkedLayer = layer.linkedLayer;
-            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel.getData().uids);
+            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
             const transformedDataModel = new DataModel(transformedData, schema);
             elems.each(function (d, i) {
                 instances[i].data(transformedDataModel).mount(this);

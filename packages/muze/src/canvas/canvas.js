@@ -40,13 +40,12 @@ export default class Canvas extends TransactionSupport {
         this._composition.layout = new GridLayout();
         this._store = new Store({});
 
-        this.firebolt(new GroupFireBolt(this));
-
         // Setters and getters will be mounted on this. The object will be mutated.
         const [, store] = transactor(this, options, this._store.model);
         transactor(this, localOptions, store);
         transactor(this, canvasOptions, store);
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
+        this.firebolt(new GroupFireBolt(this));
         this.alias(`canvas-${getUniqueId()}`);
         this.title('', {});
         this.subtitle('', {});

@@ -262,7 +262,6 @@ export default class SimpleLegend {
 
         // create title
         this.renderTitle(legendContainer);
-        firebolt.mapActionsAndBehaviour();
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }

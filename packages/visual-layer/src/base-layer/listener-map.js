@@ -1,3 +1,4 @@
+import { nextFrame } from 'muze-utils';
 import { getValidTransform, getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
@@ -45,10 +46,21 @@ export const listenerMap = context => [
         type: 'computed'
     },
     {
-        props: [PROPS.MOUNT],
-        listener: (mountPoint) => {
-            if (mountPoint[1]) {
-                context.render(mountPoint[1]);
+        props: [PROPS.DATA],
+        listener: (data) => {
+            if (data[1]) {
+                nextFrame(() => {
+                    context.store().commit(PROPS.DATA_UPDATED, true);
+                });
+            }
+        },
+        type: 'registerImmediateListener'
+    },
+    {
+        props: [PROPS.MOUNT, PROPS.DATA_UPDATED],
+        listener: (mount, dataUpdated) => {
+            if (mount[1] && dataUpdated[1]) {
+                context.render(mount[1]);
                 context.dependencies().throwback.commit('onlayerdraw', true);
             }
         },
