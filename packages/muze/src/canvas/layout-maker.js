@@ -130,6 +130,8 @@ export const prepareLayout = (layout, components, config, measurement) => {
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
+    const heightAttr = context.height();
+    const widthAttr = context.width();
     const visGroup = context.composition().visualGroup;
     const {
         isColumnSizeEqual,
@@ -156,11 +158,10 @@ export const getRenderDetails = (context, mount) => {
 
     // Get height width of the mount point
     const { height, width } = mount.getBoundingClientRect();
-    const heightAttr = context.height();
-    const widthAttr = context.width();
 
-    const availableHeightForCanvas = heightAttr > minHeight ? heightAttr : (height || minHeight);
-    const availableWidthForCanvas = widthAttr > minWidth ? widthAttr : (width || minWidth);
+    const availableHeightForCanvas = Math.max(heightAttr > 0 ? heightAttr : height, minHeight);
+    const availableWidthForCanvas = Math.max(widthAttr > 0 ? widthAttr : width, minWidth);
+
     // Create headers and determine header height
     const { headers, headerHeight } = createHeaders(context, availableHeightForCanvas, availableWidthForCanvas);
 

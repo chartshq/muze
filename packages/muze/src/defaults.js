@@ -31,8 +31,8 @@ export const DEFAULT_CONFIG = {
         }
     },
     showHeaders: false,
-    minWidth: 300,
-    minHeight: 200,
+    minWidth: 100,
+    minHeight: 100,
     border: {
         style: 'solid',
         color: '#d6d6d6',
