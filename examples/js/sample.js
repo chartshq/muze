@@ -80,9 +80,9 @@
             .color({
                 field: 'Horsepower',
                 domain: [10, 200],
-                // step: true,
+                step: true,
                 // stops: 4,
-                range: ['rgba(255,0,0,0.1)']
+                range: ['red']
                 // stops: [2000, 3000, 4000],
                                 // range: 'interpolatePurples'
             })

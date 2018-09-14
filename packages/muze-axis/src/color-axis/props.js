@@ -37,7 +37,7 @@ export const PROPS = {
     config: {
         sanitization: (context, config) => {
             const defCon = mergeRecursive({}, context.constructor.defaultConfig());
-            if (config.type === LINEAR && !config.step) {
+            if (config.type === LINEAR) {
                 config.range = config.range || [defCon.range[0]];
                 config.range = config.range.length > 1 ? config.range : [DEFAULT_GRADIENT_COLOR, ...config.range];
             }

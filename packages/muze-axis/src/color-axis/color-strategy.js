@@ -1,4 +1,4 @@
-import { numberInterpolator } from 'muze-utils';
+import { numberInterpolator, piecewiseInterpolator, hslInterpolator } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
@@ -27,11 +27,10 @@ const rangeStops = (newStopsLength, range) => {
     const maxRangeLength = Math.min(range.length, 18);
 
     if (newStopsLength > maxRangeLength) {
-        const rangeCycles = Math.floor((newStopsLength) / maxRangeLength);
-        for (let i = 0; i < rangeCycles; i++) {
-            newRange = [...newRange, ...range];
+        const interpolator = piecewiseInterpolator()(hslInterpolator(), range.map(e => getHslString(e)));
+        for (let i = 0; i < newStopsLength; i++) {
+            newRange[i] = interpolator(i / (newStopsLength - 1));
         }
-        newRange = [...newRange, ...range.slice(0, (newStopsLength) % maxRangeLength)];
     } else {
         newRange = range.slice(0, newStopsLength);
     }
