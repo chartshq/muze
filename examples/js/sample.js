@@ -46,9 +46,9 @@
                 },
                 {
                     name: 'Year',
-                    type: 'dimension'
-                    // subtype: 'temporal',
-                    // format: '%Y-%m-%d'
+                    type: 'dimension',
+                    subtype: 'temporal',
+                    format: '%Y-%m-%d'
                 }
             ];
         const rootData = new DataModel(jsonData, schema);
@@ -59,26 +59,60 @@
         // });
 
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        const mountPoint = document.getElementById('chart');
-        let canvas = env.canvas();
-        const rows = ['Horsepower'];
-        const columns = ['Year'];
+        window.canvas = env.canvas();
+        let rows = ['CountVehicle'],
+            columns = ['Year'];
         canvas = canvas
             .rows(rows)
             .columns(columns)
             .data(rootData)
-            .width(600)
-            .height(400)
-            .detail(['Maker'])
+            .width(400)
+            .height(300)
             .color({
                 field: 'Horsepower'
             })
             .layers([{
                 mark: 'bar'
             }])
-            .height(300)
-            .title('The Muze Project', { position: 'top', align: 'left' })
-            .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
-            .mount(document.getElementById('chart'));
+            .mount('#chart');
+
+        let canvas2 = env.canvas();
+        canvas2 = canvas2
+            .rows([])
+            .columns([])
+            .data(rootData)
+            .width(400)
+            .height(400)
+            // .detail(['Maker'])
+            .color('Cylinders')
+            .layers([{
+                mark: 'arc',
+                encoding: {
+                    angle: 'Maker'
+                }
+            }])
+            .mount('#chart2');
+
+        let canvas3 = env.canvas();
+        canvas3 = canvas3
+            .rows([])
+            .columns([])
+            .data(rootData)
+            .layers([{
+                // Map the Maker to angle encoding, each maker will get equal angle since Maker is dimension
+                // Map the CountVehicle to raidus encoding, the greater the number of vehicle a maker has radius for that slice will be larger
+                mark: 'arc',
+                encoding: {
+                    radius: 'CountVehicle',
+                    angle: 'Maker'
+                },
+                innerRadius: 50
+            }])
+            .width(400)
+            .height(400)
+            .color('Cylinders')
+            .mount('#chart3');
+
+        // muze.ActionModel.for(canvas, canvas2, canvas3).enableCrossInteractivity();
     });
 }());

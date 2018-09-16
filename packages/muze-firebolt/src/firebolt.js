@@ -34,9 +34,9 @@ export default class Firebolt {
         this._volatileSelectionSet = {};
         this._propagationFields = {};
         this._sourceSideEffects = {
-            tooltip: () => false,
             selectionBox: () => false
         };
+        this._sourceBehaviours = {};
         this._actionBehaviourMap = {};
         this._config = {};
         this._behaviourEffectMap = {};
@@ -177,22 +177,21 @@ export default class Firebolt {
         return true;
     }
 
-    enableSideEffectOnPropagation (sideEffect, fn) {
-        if (fn instanceof Function) {
-            this._sourceSideEffects[sideEffect] = fn;
+    changeBehaviourStateOnPropagation (behaviour, value) {
+        if (value instanceof Function) {
+            this._sourceBehaviours[behaviour] = value;
         } else {
-            this._sourceSideEffects[sideEffect] = () => false;
+            this._sourceBehaviours[behaviour] = () => value;
         }
         return this;
     }
 
-    disableSideEffectOnPropagation (sideEffect, fn) {
-        if (fn instanceof Function) {
-            this._sourceSideEffects[sideEffect] = fn;
+    changeSideEffectStateOnPropagation (sideEffect, value) {
+        if (value instanceof Function) {
+            this._sourceSideEffects[sideEffect] = value;
         } else {
-            this._sourceSideEffects[sideEffect] = () => true;
+            this._sourceSideEffects[sideEffect] = () => value;
         }
-        return this;
     }
 
     propagate () {

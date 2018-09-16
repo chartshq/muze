@@ -15,7 +15,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
     const sourceId = firebolt.context._id;
     propPayload.action = propagationBehaviourMap[action] || action;
     propPayload.sideEffects = propagationSideEffects[action];
-
+    propPayload.sourceCanvas = firebolt.context.canvasAlias();
     const isMutableAction = firebolt._actions.behavioural[propPayload.action].constructor.mutates();
     if (payload.criteria === null) {
         propagationData = null;
