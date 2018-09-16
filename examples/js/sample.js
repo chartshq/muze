@@ -51,15 +51,21 @@
                     format: '%Y-%m-%d'
                 }
             ];
-        const rootData = new DataModel(jsonData, schema);
+        let rootData = new DataModel(jsonData, schema);
 
-        // rootData = rootData.groupBy(['Year'], {
-        //     Horsepower: 'mean',
-        //     Acceleration: 'mean'
-        // });
-
+        // Create a new variable which will keep count of cars per cylinder for a particular origin
+        rootData = rootData.calculateVariable(
+            {
+                name: 'CountVehicle',
+                type: 'measure',
+                defAggFn: 'count', // When ever aggregation happens, it counts the number of elements in the bin
+                numberFormat: val => parseInt(val, 10)
+            },
+            ['Name', () => 1]
+        );
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        window.canvas = env.canvas();
+        let canvas = env.canvas();
+
         let rows = ['CountVehicle'],
             columns = ['Year'];
         canvas = canvas
