@@ -47,8 +47,8 @@
             {
                 name: 'Year',
                 type: 'dimension'
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
+                // subtype: 'temporal',
+                // format: '%Y-%m-%d'
             }
 
             ];
@@ -62,17 +62,43 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         let canvas = env.canvas();
+        const rows = ['Displacement'];
+        const columns = ['Acceleration'];
+        window.canvas = canvas;
         canvas = canvas
-            .rows(rows)
-            .columns(columns)
-            .data(rootData)
-            .width(300)
-            .layers([{
-                mark: 'bar'
-            }])
-            .height(300)
-            .title('The Muze Project', { position: 'top', align: 'left' })
-            .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
-            .mount(document.getElementById('chart'));
+        .rows(['Acceleration']) // Acceleration goes in X axis
+        .columns(['Displacement']) // Displacement goes in Y axis
+        .detail(['Maker'])
+        // .size({
+        //     field: 'Cylinders', // Size retinal encoding with Cylinders
+        //     range: [50, 360]
+        // })
+        // .color('Cylinders') // Color retinal encoding with Cylinders
+        .data(rootData)
+        // .layers([{
+        //     mark: 'point'
+        // }, {
+        //     mark: 'line',
+        //     source: (dt) => { // gets the lowest number from each category
+        //         const cylinderValues = dt.getFieldspace().fieldsObj().Cylinders.domain();
+        //         const maxs = [];
+        //         cylinderValues.forEach((val) => {
+        //             const dm = dt.select(fields => fields.Cylinders.value === val, { saveChild: false });
+        //             const domain = dm.getFieldspace().fieldsObj().Displacement.domain();
+        //             maxs.push(domain[0]);
+        //         });
+        //         return dt.select(fields => maxs.indexOf(fields.Displacement.value) !== -1);
+        //     },
+        //     transform: {
+        //         type: 'identity'
+        //     },
+        //     encoding: { color: { value: () => '#607d8b' } },
+        //     interpolate: 'catmullRom'
+        // }])
+        // .width(500)
+        // .height(500)
+        .title('Scatter plot with retinal encodings', { position: 'top', align: 'left' })
+        .subtitle('Acceleration vs Displacement with color and shape axis', { position: 'top', align: 'left' })
+        .mount('#chart');
     });
 }());
