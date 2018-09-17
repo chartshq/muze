@@ -162,7 +162,7 @@ const Behaviours = {
 };
 
 muze.DataModel = DataModel;
-muze.pkg = pkg;
+muze.version = pkg.version;
 muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;

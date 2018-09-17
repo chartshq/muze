@@ -145,7 +145,7 @@ Please contribute to our public wishlist or upvote an existing feature at [Muze 
 
 ## Contributing
 
-Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/CONTRIBUTING.md) guides.
+Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/blob/master/CONTRIBUTING.md) guides.
 
 ## License
 
