@@ -1,7 +1,7 @@
 /* eslint disable */
 let env = muze();
 const DataModel = muze.DataModel;
-const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
+const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
 d3.json('../../data/cars.json', (data) => {
     const jsonData = data,
         schema = [{
@@ -83,18 +83,18 @@ d3.json('../../data/cars.json', (data) => {
                 effect: 'bounce'
             }
         }])
-        .color('Origin')
+        // .color('Origin')
 
         .mount(document.getElementById('chart'));
 
-    rows = ['Cylinders'],
+    rows = ['Year'],
         columns = ['Horsepower'];
     canvas2 = canvas2
         .rows(rows)
         .columns(columns)
         .width(600)
         .height(600)
-        .data(rootData.groupBy(['Cylinders', 'Origin']))
+        .data(rootData.groupBy(['Year', 'Origin']))
         .layers([{
             mark: 'bar'
         }])
@@ -107,7 +107,7 @@ d3.json('../../data/cars.json', (data) => {
             name: 'layer',
             applyOnSource: false
         }]
-    }).target('visual-unit').registerSideEffects(
+    }).registerSideEffects(
         class LayerEffect extends SpawnableSideEffect {
             static formalName () {
                 return 'layer';
@@ -129,12 +129,20 @@ d3.json('../../data/cars.json', (data) => {
                             size: {
                                 value: 0.5
                             },
-                            color: () => '#fff'
+                            color: {
+                                value: () => '#fff'
+                            }
                         }
                     });
                 }
-                context.getLayerByName('lineMark').data(entrySet);
+                const barGroup = this.createElement(this.drawingContext().sideEffectGroup, 'g', [1], 'bar-group');
+                context.getLayerByName('lineMark').mount(barGroup.node()).data(entrySet);
             }
         }
-    );
+    ).enableCrossInteractivity({
+        sideEffects: {
+            tooltip: () => false,
+            crossline: () => false
+        }
+    });
 });

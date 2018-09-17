@@ -116,6 +116,14 @@ export default class SimpleLegend {
         return PATH;
     }
 
+    canvasAlias (...alias) {
+        if (alias.length) {
+            this._canvasAlias = alias[0];
+            return this;
+        }
+        return this._canvasAlias;
+    }
+
     /**
      *
      *

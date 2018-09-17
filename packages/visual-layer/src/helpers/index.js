@@ -266,7 +266,7 @@ export const getNormalizedData = (transformedData, fieldsConfig, encodingFieldIn
             }
             return pointObj;
         });
-    });
+    }).filter(d => d.length);
 };
 
 export const calculateDomainFromData = (data, encodingFieldInf, transformType) => {

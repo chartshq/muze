@@ -1,104 +1,183 @@
-(function () {
-    let env = muze();
-    const DataModel = muze.DataModel;
-    const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
+/* global muze, d3 */
 
-    d3.json('./data/cars.json', (data) => {
-        let jsonData = data,
-            schema = [{
-                name: 'Name',
-                type: 'dimension'
-            },
-            {
-                name: 'Maker',
-                type: 'dimension'
-            },
-            {
-                name: 'Miles_per_Gallon',
-                type: 'measure'
-            },
+let env = muze();
+const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
+const DataModel = muze.DataModel;
 
-            {
-                name: 'Displacement',
-                type: 'measure'
-            },
-            {
-                name: 'Horsepower',
-                type: 'measure',
-                defAggFn: 'avg'
-            },
-            {
-                name: 'Weight_in_lbs',
-                type: 'measure'
-            },
-            {
-                name: 'Acceleration',
-                type: 'measure',
-                defAggFn: 'sum'
-            },
-            {
-                name: 'Origin',
-                type: 'dimension'
-            },
-            {
-                name: 'Cylinders',
-                type: 'dimension'
-            },
-            {
-                name: 'Year',
-                type: 'dimension'
-                // subtype: 'temporal',
-                // format: '%Y-%m-%d'
-            }
+d3.json('../data/cars.json', (data) => {
+    const jsonData = data;
+    const schema = [
+        {
+            name: 'Name',
+            type: 'dimension'
+        },
+        {
+            name: 'Maker',
+            type: 'dimension'
+        },
+        {
+            name: 'Miles_per_Gallon',
+            type: 'measure'
+        },
 
-            ];
-        const rootData = new DataModel(jsonData, schema);
+        {
+            name: 'Displacement',
+            type: 'measure'
+        },
+        {
+            name: 'Horsepower',
+            type: 'measure',
+            defAggFn: 'avg'
+        },
+        {
+            name: 'Weight_in_lbs',
+            type: 'measure'
+        },
+        {
+            name: 'Acceleration',
+            type: 'measure',
+            defAggFn: 'sum'
+        },
+        {
+            name: 'Origin',
+            type: 'dimension'
+        },
+        {
+            name: 'Cylinders',
+            type: 'dimension'
+        },
+        {
+            name: 'Year',
+            type: 'dimension',
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
+        }
+    ];
+    let rootData = new DataModel(jsonData, schema);
 
-    // rootData = rootData.groupBy(['Year'], {
-    //     Horsepower: 'mean',
-    //     Acceleration: 'mean'
-    // });
+    // Create a new variable which will keep count of cars per cylinder for a particular origin
+    rootData = rootData.calculateVariable(
+        {
+            name: 'CountVehicle',
+            type: 'measure',
+            defAggFn: 'count', // When ever aggregation happens, it counts the number of elements in the bin
+            numberFormat: val => parseInt(val, 10)
+        },
+        ['Name', () => 1]
+    );
 
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        const mountPoint = document.getElementById('chart');
-        let canvas = env.canvas();
-        const rows = ['Displacement'];
-        const columns = ['Acceleration'];
-        window.canvas = canvas;
-        canvas = canvas
-        .rows(['Acceleration']) // Acceleration goes in X axis
-        .columns(['Displacement']) // Displacement goes in Y axis
-        .detail(['Maker'])
-        // .size({
-        //     field: 'Cylinders', // Size retinal encoding with Cylinders
-        //     range: [50, 360]
-        // })
-        // .color('Cylinders') // Color retinal encoding with Cylinders
+    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+
+    const crosstab = env.canvas()
+        .rows(['Cylinders', 'Origin'])
+        .columns(['Miles_per_Gallon'])
         .data(rootData)
-        // .layers([{
-        //     mark: 'point'
-        // }, {
-        //     mark: 'line',
-        //     source: (dt) => { // gets the lowest number from each category
-        //         const cylinderValues = dt.getFieldspace().fieldsObj().Cylinders.domain();
-        //         const maxs = [];
-        //         cylinderValues.forEach((val) => {
-        //             const dm = dt.select(fields => fields.Cylinders.value === val, { saveChild: false });
-        //             const domain = dm.getFieldspace().fieldsObj().Displacement.domain();
-        //             maxs.push(domain[0]);
-        //         });
-        //         return dt.select(fields => maxs.indexOf(fields.Displacement.value) !== -1);
-        //     },
-        //     transform: {
-        //         type: 'identity'
-        //     },
-        //     encoding: { color: { value: () => '#607d8b' } },
-        //     interpolate: 'catmullRom'
-        // }])
-        // .width(500)
-        // .height(500)
-        .title('Scatter plot with retinal encodings', { position: 'top', align: 'left' })
-        .subtitle('Acceleration vs Displacement with color and shape axis', { position: 'top', align: 'left' })
+        .width(600)
+        .height(400)
         .mount('#chart');
-    });
-}());
+
+    const lineChart = env.canvas()
+        .rows(['Miles_per_Gallon'])
+        .columns(['Year'])
+        .data(rootData)
+        .width(400)
+        .height(400)
+        .layers([{
+            mark: 'line'
+        }])
+        .mount('#chart2');
+
+    const barChart = env.canvas()
+        .rows(['Miles_per_Gallon'])
+        .columns(['Maker'])
+        .data(rootData.groupBy(['Maker']).sort([['Miles_per_Gallon', 'ASC']]))
+        .width(600)
+        .height(400)
+        .config({
+            autoGroupBy: {
+                disabled: true
+            }
+        })
+        .color('Miles_per_Gallon')
+        .mount('#chart3');
+
+    const pieChart = env.canvas()
+        .rows([])
+        .columns([])
+        .data(rootData)
+        .width(600)
+        .height(400)
+        .layers([{
+            mark: 'arc',
+            encoding: {
+                angle: 'CountVehicle'
+            }
+        }])
+        .color('Origin')
+        .mount('#chart4');
+
+    muze.ActionModel.for(crosstab, lineChart, pieChart).enableCrossInteractivity({
+        behaviours: {
+            // Disable all behaviours if any propagation is initiated from pie chart.
+            '*': (propagationPayload, context) => {
+                const sourcePropagationCanvas = propagationPayload.sourceCanvas;
+                const sourceCanvas = context.parentAlias();
+                if (sourcePropagationCanvas) {
+                    return sourceCanvas !== sourcePropagationCanvas ?
+                        [pieChart.alias(), lineChart.alias()].indexOf(sourcePropagationCanvas) === -1
+                        : true;
+                }
+                return true;
+            }
+        },
+        sideEffects: {
+            // Disable tooltip on propagation
+            tooltip: () => false
+        }
+    })
+                    .for(lineChart).registerSideEffects(
+            class NewSideEffect extends SpawnableSideEffect {
+                constructor (...params) {
+                    super(...params);
+                    this._layers = this.firebolt.context.addLayer({
+                        name: 'lineLayer',
+                        mark: 'line',
+                        className: 'linelayer',
+                        encoding: {
+                            x: 'Year',
+                            y: 'Miles_per_Gallon',
+                            color: {
+                                value: () => '#8e0707'
+                            }
+                        },
+                        render: false
+                    });
+                }
+
+                static formalName () {
+                    return 'lineLayer';
+                }
+
+                apply (selectionSet) {
+                    const sideEffectGroup = this.drawingContext().sideEffectGroup;
+                    const layerGroups = this.createElement(sideEffectGroup, 'g', this._layers, '.extra-layers');
+                    layerGroups.each(function (layer) {
+                        layer.mount(this).data(selectionSet.mergedEnter.model);
+                    });
+                }
+            }
+        )
+                    .mapSideEffects({
+                        select: [{
+                            name: 'lineLayer',
+                            applyOnSource: false
+                        }]
+                    })
+                    .for(pieChart)
+                    .mapSideEffects({
+                        select: [{
+                            name: 'filter',
+                            applyOnSource: false // Filter should not apply on the same canvas where action happened
+                        }]
+                    });
+});

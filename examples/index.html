@@ -18,13 +18,6 @@
 <style>
     body, html{
         font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
-        /* width:300px;
-        height: 100%; */
-        /* overflow: scroll; */
-        align-items: center;
-        justify-content: center;
-        /*margin: 50px;*/
-        margin: 100px;
     }
     .chart{
         margin-left: 20px;
@@ -46,19 +39,19 @@
     #chart2 {
         float: left;
     }
+
+    #chart4 {
+        float: left;
+    }
     #chart {
         float: left;
-         width: 200px;
         /* height: 210px;  */
         /* overflow: auto; */
         /* border: 1px solid black; */
     }
     #parentdiv {
         display: inline-block;
-        width: 1366px;
-    }
-    #chart{
-        width: 70%;
+        width: 1700px;
         height: 900px;
     }
     .info-box {
@@ -87,12 +80,17 @@
         font-size: 18px;
     }
 
+    .linelayer path {
+        stroke-dasharray: 2,4;
+    }
+
 </style>
 <body>
     <div id = 'parentdiv'>
-      
         <div id="chart"></div>
-    <div id="chart2"></div>
+        <div id="chart2"></div>
+        <div id="chart3"></div>
+        <div id="chart4"></div>
     </div>
 
 

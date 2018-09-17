@@ -450,11 +450,11 @@ export default class BaseLayer extends SimpleLayer {
             const { _data, _id } = point;
 
             return fieldNames.every((field, idx) => {
-                if (field in fieldsConfig) {
+                if (field in fieldsConfig && fieldsConfig[field].def.type === FieldType.DIMENSION) {
                     return values.findIndex(d => d[idx] === _data[fieldsConfig[field].index]) !== -1;
                 } else if (field === ReservedFields.ROW_ID) {
                     return values.findIndex(d => d[idx] === _id) !== -1;
-                } return false;
+                } return true;
             });
         });
         return getAllAttrs ? filteredPoints : filteredPoints.map((d) => {
