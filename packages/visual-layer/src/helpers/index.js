@@ -1,6 +1,16 @@
-import { FieldType, getDomainFromData, setStyles, easeFns, selectElement } from 'muze-utils';
+import {
+    FieldType,
+    getDomainFromData,
+    setStyles,
+    easeFns,
+    selectElement,
+    DimensionSubtype
+} from 'muze-utils';
+import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
 import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
+
+const BAND = ScaleType.BAND;
 
 export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colorFieldIndex }) => {
     let rawColor = '';
@@ -256,7 +266,7 @@ export const getNormalizedData = (transformedData, fieldsConfig, encodingFieldIn
             }
             return pointObj;
         });
-    });
+    }).filter(d => d.length);
 };
 
 export const calculateDomainFromData = (data, encodingFieldInf, transformType) => {
@@ -343,4 +353,89 @@ export const positionPoints = (context, points) => {
         return positioner(points, context, { smartLabel: context._dependencies.smartLabel });
     }
     return points;
+};
+
+/**
+  * Gets the width of each group. It gets the width from axis if it is available for
+  * example when the scale is nominal else it calculates the width from the
+  * range of the axis and number of data points.
+  *
+  * @param {SimpleAxis} axis instance of axis
+  * @param {number} minDiff Minimum difference between data points
+  * @return {number} width of each bar
+  * @private
+*/
+export const getGroupSpan = (axis, minDiff) => {
+    let groupSpan;
+    const width = axis.getUnitWidth();
+    const scale = axis.scale();
+    const range = scale.range();
+    const domain = scale.domain();
+    !width ? groupSpan = (Math.abs(range[1] - range[0]) / Math.abs(domain[1] - domain[0])) * minDiff :
+        (groupSpan = width);
+
+    return groupSpan;
+};
+
+export const getPlotMeasurement = (context, dimensionalValues) => {
+    const fieldInfo = context.encodingFieldsInf();
+    const axes = context.axes();
+    const transformType = context.transformType();
+    const config = context.config();
+    const bandScale = context._bandScale;
+
+    return ['x', 'y'].map((type) => {
+        let span = 0;
+        let groupSpan = 0;
+        let padding = 0;
+        let offsetValues = [];
+        if (fieldInfo[`${type}FieldType`] === FieldType.DIMENSION) {
+            let actualGroupWidth;
+            const isTemporal = fieldInfo[`${type}FieldSubType`] === DimensionSubtype.TEMPORAL;
+            const timeDiff = isTemporal ? context.dataProps().timeDiffs[type] : 0;
+            const axis = axes[type];
+            const pad = config[`pad${type.toUpperCase()}`];
+            const innerPadding = config.innerPadding;
+            const keys = dimensionalValues;
+            const scale = axis.scale();
+            groupSpan = getGroupSpan(axis, timeDiff);
+            const isAxisBandScale = axis.constructor.type() === BAND;
+            const axisPadding = axis.config().padding;
+            // If it is a grouped bar then the width of each bar in a grouping is retrieved from
+            // a band scale. The band scale will have range equal to width of one group of bars and
+            // the domain is set to series keys.
+            if (transformType === 'group') {
+                const groupPadding = isAxisBandScale ? 0 : axisPadding * groupSpan / 2;
+                bandScale.range([groupPadding, groupSpan - groupPadding]).domain(keys).paddingInner(innerPadding);
+                span = bandScale.bandwidth();
+                actualGroupWidth = groupSpan - (isAxisBandScale ? 0 : axisPadding * groupSpan);
+                offsetValues = keys.map(key => bandScale(key) - (isAxisBandScale ? 0 : (groupSpan / 2)));
+            } else if (pad !== undefined) {
+                let offset;
+                if (isAxisBandScale) {
+                    const step = scale.step();
+                    offset = scale.padding() * step;
+                    span = scale.bandwidth() + offset;
+                } else {
+                    span = groupSpan;
+                }
+                offsetValues = keys.map(() => (isAxisBandScale ? -(offset / 2) : -(span / 2)));
+            } else {
+                padding = isAxisBandScale ? 0 : axisPadding * groupSpan;
+                span = groupSpan - padding;
+                actualGroupWidth = span;
+                offsetValues = keys.map(() => (isAxisBandScale ? 0 : -(span / 2)));
+            }
+
+            groupSpan = actualGroupWidth;
+            padding = isAxisBandScale ? axisPadding * axis.scale().step() : axisPadding * groupSpan;
+        }
+
+        return {
+            span,
+            offsetValues,
+            groupSpan,
+            padding
+        };
+    });
 };

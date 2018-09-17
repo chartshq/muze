@@ -173,7 +173,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
             const selectedDataModel = createSelectedDataModel(dataModel, rowFacetFieldNames, val);
 
             // Project the datamodel based on the number of projections (based on last levels)
-            facetInfo.push([rowFacetFieldNames, val]);
+            facetInfo.push([rowFacets, val]);
             rowDataModels.push(...projectRows(selectedDataModel, fieldInfo));
         });
     } else {

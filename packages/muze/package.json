@@ -1,7 +1,7 @@
 {
   "name": "muze",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://www.charts.com/muze",
   "license": "MIT",
@@ -58,7 +58,6 @@
     "url": "https://github.com/chartshq/muze"
   },
   "dependencies": {
-    "fusioncharts-smartlabel": "^1.0.2",
     "@chartshq/layout": "^1.0.0",
     "@chartshq/muze-firebolt": "^1.0.0",
     "@chartshq/muze-legend": "^1.0.0",

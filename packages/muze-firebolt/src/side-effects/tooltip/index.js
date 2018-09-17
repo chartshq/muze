@@ -31,7 +31,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const dataModel = selectionSet.mergedEnter.model;
         const context = this.firebolt.context;
         const drawingInf = this.drawingContext();
-        if (dataModel.isEmpty() || payload.criteria === null) {
+        if ((dataModel.isEmpty() || payload.criteria === null) || selectionSet.isSourceFieldPresent === false) {
             this.hide(options, null);
             return this;
         }

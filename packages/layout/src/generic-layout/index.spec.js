@@ -1,7 +1,7 @@
 /* global describe, it, before */
 /* eslint-disable no-unused-expressions */
 import { expect } from 'chai';
-import { SmartlabelManager, selectElement } from 'muze-utils';
+import { Smartlabel, selectElement } from 'muze-utils';
 import GenericLayout from './';
 
 describe('Generic layout', () => {
@@ -9,7 +9,7 @@ describe('Generic layout', () => {
     const rowOrient = 'right';
     const columnOrient = 'top';
     before(() => {
-        const slManager = new SmartlabelManager(0, 'body');
+        const slManager = new Smartlabel(0, 'body');
         instance = new GenericLayout(
             null,
             {

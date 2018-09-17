@@ -59,6 +59,7 @@
     "d3-axis": "git+ssh://git@github.com:chartshq/d3-axis.git",
     "d3-scale": "git+ssh://git@github.com:chartshq/d3-scale.git",
     "d3-scale-chromatic": "^1.2.0",
-    "hyperdis": "^1.0.0"
+    "hyperdis": "^1.0.0",
+    "fusioncharts-smartlabel": "^1.0.2"
   }
 }

@@ -1,6 +1,6 @@
-import Smartlabel from 'fusioncharts-smartlabel';
 import {
     transactor,
+    Smartlabel,
     enableChainedTransaction,
     LifeCycleManager,
     DataModel,
@@ -11,6 +11,7 @@ import {
     require,
     DateTimeFormatter
 } from 'muze-utils';
+
 import {
     SurrogateSideEffect,
     SpawnableSideEffect,
@@ -161,7 +162,7 @@ const Behaviours = {
 };
 
 muze.DataModel = DataModel;
-muze.pkg = pkg;
+muze.version = pkg.version;
 muze.SideEffects = SideEffects;
 muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;

@@ -3,7 +3,7 @@ module.exports = function (config) {
         basePath: './',
         frameworks: ['mocha', 'chai'],
         files: [
-            'test.webpack.js',
+            'packages/*/src/**/*.spec.js'
         ],
         webpack: {
             devtool: 'inline-source-map',
@@ -15,29 +15,47 @@ module.exports = function (config) {
                         use: {
                             loader: 'babel-loader',
                             query: {
-                                presets: ['es2015'],
-                            },
+                                presets: ['env']
+                            }
                         },
-                        exclude: /node_modules/,
+                        exclude: /node_modules/
+                    },
+                    {
+                        test: /\.(s*)css$/,
+                        use: [
+                            {
+                                loader: 'style-loader',
+                                options: { singleton: true }
+                            },
+                            { loader: 'css-loader' },
+                            { loader: 'sass-loader' }
+                        ],
+                        exclude: /node_modules/
                     },
                     {
                         test: /\.js$|\.jsx$/,
                         use: {
                             loader: 'istanbul-instrumenter-loader',
-                            options: { esModules: true },
+                            options: { esModules: true }
                         },
                         enforce: 'pre',
-                        exclude: /node_modules|src\/renderer\/|\.spec\.js$/,
-                    },
-                ],
-            },
+                        exclude: /node_modules|src\/renderer\/|\.spec\.js$/
+                    }
+                ]
+            }
+        },
+        webpackMiddleware: {
+            noInfo: true,
+            stats: {
+                chunks: false
+            }
         },
         preprocessors: {
             '**/*.js': ['sourcemap'],
-            'test.webpack.js': ['webpack'],
+            'packages/*/src/**/*.spec.js': ['webpack']
         },
         exclude: [
-            '**/*.swp',
+            '**/*.swp'
         ],
 
         coverageIstanbulReporter: {
@@ -48,7 +66,7 @@ module.exports = function (config) {
                     statements: 80,
                     lines: 80,
                     branches: 80,
-                    functions: 80,
+                    functions: 80
                 },
                 each: { // thresholds per file
                     statements: 80,
@@ -57,10 +75,10 @@ module.exports = function (config) {
                     functions: 80,
                     overrides: {
                         'baz/component/**/*.js': {
-                            statements: 80,
-                        },
-                    },
-                },
+                            statements: 80
+                        }
+                    }
+                }
             },
             reports: ['html', 'lcov', 'text-summary'],
             fixWebpackSourcePaths: true,
@@ -77,7 +95,7 @@ module.exports = function (config) {
             suppressFailed: false, // do not print information about failed tests
             suppressPassed: false, // do not print information about passed tests
             suppressSkipped: true, // do not print information about skipped tests
-            showSpecTiming: false, // print the time elapsed for each spec
+            showSpecTiming: false // print the time elapsed for each spec
         },
         port: 9876,
         colors: true,
@@ -91,6 +109,6 @@ module.exports = function (config) {
             }
         },
         singleRun: true,
-        concurrency: Infinity,
+        concurrency: Infinity
     });
 };

@@ -84,3 +84,9 @@ export const setupChangeListener = (context) => {
     });
 };
 
+export const applyInteractionPolicy = (policies, firebolt) => {
+    const canvas = firebolt.context;
+    const visualGroup = canvas.composition().visualGroup;
+    const valueMatrix = visualGroup.composition().matrices.value;
+    policies.forEach(policy => policy(valueMatrix, firebolt));
+};

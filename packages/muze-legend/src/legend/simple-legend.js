@@ -116,6 +116,14 @@ export default class SimpleLegend {
         return PATH;
     }
 
+    canvasAlias (...alias) {
+        if (alias.length) {
+            this._canvasAlias = alias[0];
+            return this;
+        }
+        return this._canvasAlias;
+    }
+
     /**
      *
      *
@@ -262,7 +270,6 @@ export default class SimpleLegend {
 
         // create title
         this.renderTitle(legendContainer);
-        firebolt.mapActionsAndBehaviour();
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }

@@ -99,6 +99,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                             .config(config)
                             .metaData(canvas.composition().visualGroup.getGroupByData().project([fieldName]))
                             .measurement(legendMeasures)
+                            .canvasAlias(canvas.alias())
                             .setLegendMeasures();
 
             legends.push({ canvas, legend, scaleType });

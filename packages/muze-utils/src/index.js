@@ -29,6 +29,7 @@ export {
     piecewiseInterpolator,
     reqAnimFrame,
     cancelAnimFrame,
+    nextAnimFrame,
     getMax,
     getMin,
     getDomainFromData,
@@ -103,6 +104,8 @@ export {
     getClientPoint,
     hasTouch
 } from './renderer-utils';
+
+export { default as Smartlabel } from 'fusioncharts-smartlabel';
 
 export { dataSelect, DataObject } from './DataSystem';
 

@@ -29,7 +29,7 @@ export default class PersistentBehaviour extends GenericBehaviour {
                 const { exitSet } = selectionSet.getSets();
                 const mergedExitSet = getMergedSet(exitSet);
                 const completeSetCount = selectionSet.getCompleteSet().length;
-                if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
+                if (mergedExitSet.length === completeSetCount) {
                     selectionSet.reset();
                 }
             }

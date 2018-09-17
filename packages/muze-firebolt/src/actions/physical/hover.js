@@ -16,7 +16,8 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
         const pos = getClientPoint(context.getDrawingContext().svgContainer, event);
         const nearestPoint = context.getNearestPoint(pos.x, pos.y, {
             getAllPoints: mode === CONSOLIDATED || mode === FRAGMENTED,
-            data: args
+            data: args,
+            event
         });
         const payload = {
             criteria: nearestPoint ? nearestPoint.id : null,
