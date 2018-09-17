@@ -38,7 +38,8 @@ export const propagateValues = (instance, action, config = {}) => {
     const sourceId = context.id();
     const sideEffects = config.sideEffects;
     const mutableEffect = [].concat(...Object.values(sideEffects).map(d => d.effects)).find(sideEffect =>
-        instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
+        instance._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true) &&
+        sideEffect.applyOnSource !== false);
     const mergedModel = selectionSet.mergedEnter.model;
 
     payload.sourceUnit = sourceId;

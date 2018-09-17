@@ -1,6 +1,7 @@
 import {
     getDataModelFromIdentifiers,
-    FieldType
+    FieldType,
+    mergeRecursive
 } from 'muze-utils';
 
 import { applyInteractionPolicy } from './helper';
@@ -17,11 +18,7 @@ const defaultInteractionPolicy = (valueMatrix, firebolt) => {
     const colFacets = fieldInf.colFacets;
     valueMatrix.each((cell) => {
         const unitFireBolt = cell.valueOf().firebolt();
-        unitFireBolt.enableSideEffectOnPropagation('tooltip', (propagationPayload) => {
-            const propagationCanvasAlias = propagationPayload.sourceCanvas;
-            const canvasAlias = canvas.alias();
-            return canvasAlias !== propagationCanvasAlias;
-        });
+
         if (!(xFields.every(isMeasure) && yFields.every(isMeasure))) {
             const facetFields = cell.valueOf().facetByFields()[0];
             const unitColFacets = facetFields.filter(d => colFacets.findIndex(v => v.equals(d)) !== -1);
@@ -38,18 +35,58 @@ const defaultInteractionPolicy = (valueMatrix, firebolt) => {
     });
 };
 
+const defaultCrossInteractionPolicy = {
+    behaviours: {
+        '*': (propagationPayload, context) => {
+            const propagationCanvasAlias = propagationPayload.sourceCanvas;
+            const canvasAlias = context.parentAlias();
+            return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
+        }
+    },
+    sideEffects: {
+        tooltip: (propagationPayload, context) => {
+            const propagationUnit = propagationPayload.sourceUnit;
+            const propagationCanvas = propagationPayload.sourceCanvas;
+            const unitId = context.id();
+            const canvasAlias = context.parentAlias();
+            if (propagationCanvas) {
+                return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
+            }
+            return true;
+        }
+    }
+};
+
 export default class GroupFireBolt {
     constructor (context) {
         this.context = context;
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
+        this._crossInteractionPolicy = this.constructor.defaultCrossInteractionPolicy();
         this.context.once('canvas.updated').then(() => {
-            const policy = this._interactionPolicy;
-            applyInteractionPolicy(policy, this);
+            applyInteractionPolicy([this._interactionPolicy], this);
+            const crossInteractionPolicy = this._crossInteractionPolicy;
+            const behaviours = crossInteractionPolicy.behaviours;
+            const sideEffects = crossInteractionPolicy.sideEffects;
+            const visualGroup = context.composition().visualGroup;
+            const valueMatrix = visualGroup.composition().matrices.value;
+            valueMatrix.each((cell) => {
+                const unitFireBolt = cell.valueOf().firebolt();
+                for (const key in behaviours) {
+                    unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+                }
+                for (const key in sideEffects) {
+                    unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+                }
+            });
         });
     }
 
     static defaultInteractionPolicy () {
         return defaultInteractionPolicy;
+    }
+
+    static defaultCrossInteractionPolicy () {
+        return defaultCrossInteractionPolicy;
     }
 
     interactionPolicy (...policy) {
@@ -58,6 +95,15 @@ export default class GroupFireBolt {
             return this;
         }
         return this._interactionPolicy;
+    }
+
+    crossInteractionPolicy (...policy) {
+        if (policy.length) {
+            this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
+                this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
+            return this;
+        }
+        return this._crossInteractionPolicy;
     }
 
     dispatchBehaviour (behaviour, payload) {

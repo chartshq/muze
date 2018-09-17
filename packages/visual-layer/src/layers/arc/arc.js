@@ -4,7 +4,9 @@ import {
     getQualifiedClassName,
     isSimpleObject,
     getDomainFromData,
-    Symbols
+    Symbols,
+    FieldType,
+    ReservedFields
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
@@ -185,13 +187,12 @@ export default class ArcLayer extends BaseLayer {
      * @memberof ArcLayer
      */
     getNearestPoint (x, y, config = {}) {
-        const dataPoint = config.data;
+        const dataPoint = selectElement(config.event.target).data()[0];
         if (isSimpleObject(dataPoint)) {
             const { data, uid } = dataPoint.datum;
             return {
                 id: this.getIdentifiersFromData(data, uid),
-                layerId: this.id(),
-                showInPosition: true
+                layerId: this.id()
             };
         }
         return null;
@@ -256,7 +257,8 @@ export default class ArcLayer extends BaseLayer {
                 .cornerRadius(cornerRadius)
                 .padAngle(padAngle)
                 .padRadius(padRadius);
-
+        this._chartWidth = chartWidth;
+        this._chartHeight = chartHeight;
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
@@ -266,6 +268,7 @@ export default class ArcLayer extends BaseLayer {
             makeElement(elem, 'path', (d, i) => [{
                 datum: d,
                 index: i,
+                arcFn: path,
                 meta: {
                     originalColor: colorAxis.getRawColor(d.colorVal),
                     stateColor: {},
@@ -297,10 +300,51 @@ export default class ArcLayer extends BaseLayer {
             {
                 update: tween,
                 exit: tweenExit
-            }, d => d.uid)
+            })
                         .attr('class', (d, i) => `${qualClassName[0]} ${qualClassName[1]}-${i}`);
         tweenExitPie(consecutiveExits, transition, rangeValueGetter, path);
         return this;
+    }
+
+    /**
+     *
+     *
+     * @param {*} identifiers
+     * @returns
+     * @memberof BaseLayer
+     */
+    getPointsFromIdentifiers (identifiers) {
+        if (!this.data()) {
+            return [];
+        }
+        const fieldNames = identifiers[0];
+        const values = identifiers.slice(1, identifiers.length);
+        const pieSlices = selectElement(this.mount()).selectAll('path').data();
+        const fieldsConfig = this.data().getFieldsConfig();
+
+        const filteredPies = pieSlices.filter((tData) => {
+            const data = tData.datum.data;
+            const uid = tData.datum.uid;
+            return fieldNames.every((field, idx) => {
+                if (field in fieldsConfig && fieldsConfig[field].def.type === FieldType.DIMENSION) {
+                    return values.findIndex(d => d[idx] === data[fieldsConfig[field].index]) !== -1;
+                } else if (field === ReservedFields.ROW_ID) {
+                    return values.findIndex(d => d[idx] === uid) !== -1;
+                } return true;
+            });
+        });
+
+        const pieSliceInf = filteredPies[0];
+        if (pieSliceInf) {
+            const centroid = pieSliceInf.arcFn.centroid(pieSliceInf.datum);
+            return [{
+                x: centroid[0] + this._chartWidth / 2,
+                y: centroid[1] + this._chartHeight / 2,
+                width: 2,
+                height: 2
+            }];
+        }
+        return [];
     }
 }
 

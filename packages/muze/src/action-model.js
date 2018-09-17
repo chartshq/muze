@@ -1,3 +1,17 @@
+import { mergeRecursive } from 'muze-utils';
+
+const defaultPolicy = (registrableComponents) => {
+    const aliases = registrableComponents.map(comp => comp.alias());
+    return {
+        behaviours: {
+            '*': (propagationPayload) => {
+                const propagationCanvas = propagationPayload.sourceCanvas;
+                return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
+            }
+        }
+    };
+};
+
 class ActionModel {
     constructor () {
         this._registrableComponents = [];
@@ -101,6 +115,17 @@ class ActionModel {
                     maps.forEach(val => cell.valueOf().firebolt().dissociateSideEffect(val[0], val[1]));
                 });
             });
+        });
+
+        return this;
+    }
+
+    enableCrossInteractivity (policy = {}) {
+        const registrableComponents = this._registrableComponents;
+        const mergedPolicy = mergeRecursive(mergeRecursive({}, defaultPolicy(registrableComponents)), policy);
+
+        registrableComponents.forEach((canvas) => {
+            canvas.firebolt().crossInteractionPolicy(mergedPolicy);
         });
 
         return this;

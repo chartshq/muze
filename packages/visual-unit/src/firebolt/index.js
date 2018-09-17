@@ -81,30 +81,40 @@ export default class UnitFireBolt extends Firebolt {
             const actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
             const payload = payloadFn(this.context, data, propValue);
             const sideEffects = this._behaviourEffectMap[action];
-            const mutableEffect = sideEffects.find(sideEffect =>
-                this._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
+            const sourceBehaviours = this._sourceBehaviours;
+            const filterFn = sourceBehaviours[action] || sourceBehaviours['*'];
+            let enabled = true;
 
-            isMutableAction = !!mutableEffect;
-
-            if (actionOnSource && mutableEffect && mutableEffect.applyOnSource === false) {
-                isMutableAction = false;
+            if (filterFn) {
+                enabled = filterFn(propPayload || {}, this.context);
             }
 
-            const propagationInf = {
-                propagate: false,
-                data,
-                propPayload,
-                sourceIdentifiers,
-                persistent: false,
-                isSourceFieldPresent,
-                sourceId: propValue.sourceId
-            };
-            this._actionHistory[action] = {
-                payload,
-                propagationInf,
-                isMutableAction
-            };
-            this.dispatchBehaviour(action, payload, propagationInf);
+            if (enabled) {
+                const mutableEffect = sideEffects.find(sideEffect =>
+                    this._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
+
+                isMutableAction = !!mutableEffect;
+
+                if (actionOnSource && mutableEffect && mutableEffect.applyOnSource === false) {
+                    isMutableAction = false;
+                }
+
+                const propagationInf = {
+                    propagate: false,
+                    data,
+                    propPayload,
+                    sourceIdentifiers,
+                    persistent: false,
+                    isSourceFieldPresent,
+                    sourceId: propValue.sourceId
+                };
+                this._actionHistory[action] = {
+                    payload,
+                    propagationInf,
+                    isMutableAction
+                };
+                this.dispatchBehaviour(action, payload, propagationInf);
+            }
         };
     }
 
