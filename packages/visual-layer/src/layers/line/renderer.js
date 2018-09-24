@@ -15,7 +15,7 @@ const line = Symbols.line;
  */
 export const drawLine = (context) => {
     let filteredPoints;
-    const { container, points, interpolate, connectNullData, className, style } = context;
+    const { container, points, interpolate, connectNullData, className, style, transition } = context;
     const mount = selectElement(container).attr('class', className);
     const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
@@ -30,9 +30,11 @@ export const drawLine = (context) => {
     }
 
     updateStyle(mount, style);
-    return makeElement(mount, 'path', [1])
-                    .transition()
-                    .duration(1000)
-                    .attr('d', linepath(filteredPoints))
+    let element = makeElement(mount, 'path', [1]);
+    if (!transition.disabled) {
+        element = element.transition().duration(transition.duration);
+    }
+    element.attr('d', linepath(filteredPoints))
                     .style('fill-opacity', 0);
+    return element;
 };
