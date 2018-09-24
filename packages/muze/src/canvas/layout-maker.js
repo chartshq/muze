@@ -130,6 +130,8 @@ export const prepareLayout = (layout, components, config, measurement) => {
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
+    // Get height width of the mount point
+    let { height, width } = mount.getBoundingClientRect();
     const heightAttr = context.height();
     const widthAttr = context.width();
     const visGroup = context.composition().visualGroup;
@@ -156,8 +158,8 @@ export const getRenderDetails = (context, mount) => {
     // Arrange components according to config
     const layoutArrangement = arrangeComponents(context);
 
-    // Get height width of the mount point
-    const { height, width } = mount.getBoundingClientRect();
+    height = Math.floor(height);
+    width = Math.floor(width);
 
     const availableHeightForCanvas = Math.max(heightAttr > 0 ? heightAttr : height, minHeight);
     const availableWidthForCanvas = Math.max(widthAttr > 0 ? widthAttr : width, minWidth);
