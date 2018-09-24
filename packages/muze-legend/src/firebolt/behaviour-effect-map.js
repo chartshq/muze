@@ -29,6 +29,7 @@ export const propagationSideEffects = {
         options: {
             strategy: 'fade'
         }
-    }]
+    }],
+    [BEHAVIOURS.SELECT]: ['filter']
 };
 

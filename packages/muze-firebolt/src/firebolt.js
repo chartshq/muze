@@ -3,7 +3,8 @@ import {
     hasTouch,
     filterPropagationModel,
     FieldType,
-    selectElement
+    selectElement,
+    isSimpleObject
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -36,6 +37,7 @@ export default class Firebolt {
         this._sourceSideEffects = {
             selectionBox: () => false
         };
+        this._propagationBehaviourMap = {};
         this._sourceBehaviours = {};
         this._actionBehaviourMap = {};
         this._config = {};
@@ -72,8 +74,17 @@ export default class Firebolt {
         for (const key in behEffectMap) {
             if ({}.hasOwnProperty.call(behEffectMap, key)) {
                 const sideEffects = behEffectMap[key] || [];
+                let preventDefaultActions = false;
+                let effectNames;
+                if (isSimpleObject(sideEffects)) {
+                    effectNames = sideEffects.effects;
+                    preventDefaultActions = sideEffects.preventDefaultActions;
+                } else {
+                    effectNames = sideEffects;
+                }
                 !behaviourEffectMap[key] && (behaviourEffectMap[key] = []);
-                this._behaviourEffectMap[key] = [...new Set([...behaviourEffectMap[key], ...sideEffects])];
+                this._behaviourEffectMap[key] = [...new Set(preventDefaultActions ? effectNames :
+                    [...behaviourEffectMap[key], ...effectNames])];
             }
         }
         return this;
@@ -141,6 +152,11 @@ export default class Firebolt {
             disable = true;
         }
         !disable && sideEffectStore[name].apply(selectionSet, payload, options);
+    }
+
+    registerPropagationBehaviourMap (map) {
+        this._propagationBehaviourMap = Object.assign(this._propagationBehaviourMap, map || {});
+        return this;
     }
 
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
