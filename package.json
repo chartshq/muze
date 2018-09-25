@@ -64,7 +64,9 @@
     "docs": "jsdoc -c ./jsdoc.conf.json",
     "postinstall": "lerna bootstrap"
   },
-  "dependencies": {},
+  "dependencies": {
+    "fusioncharts-smartlabel": "^1.0.2"
+  },
   "browserslist": [
     "last 10 major versions",
     "not dead",

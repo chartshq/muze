@@ -2,7 +2,7 @@ import { GridLayout } from '@chartshq/layout';
 import { transactor, Store, getUniqueId } from 'muze-utils';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
-import { getRenderDetails, prepareLayout } from './layout-maker';
+import { getRenderDetails, prepareLayout, prepareTreeLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
 import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
@@ -238,6 +238,8 @@ export default class Canvas extends TransactionSupport {
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), components, layoutConfig, measurement);
+
+        prepareTreeLayout(layoutConfig, components, this.layout().matrices(), measurement);
         // Render each component
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle

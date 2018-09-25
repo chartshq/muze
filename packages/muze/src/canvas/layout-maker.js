@@ -4,6 +4,7 @@ import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import HeaderComponent from './components/headerComponent';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
@@ -216,4 +217,23 @@ export const getRenderDetails = (context, mount) => {
         components,
         measurement
     };
+};
+
+export const prepareTreeLayout = (layoutConfig, components, gridComponents, measurement) => {
+    // generate component wrappers
+
+    // title
+    let titleWrapper = null;
+    if (components.headers && components.headers.titleCell) {
+        const title = components.headers.titleCell;
+        let titleConfig = layoutConfig.title;
+        titleConfig = { ...titleConfig, classPrefix: layoutConfig.classPrefix };
+        titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
+    }
+
+    titleWrapper.draw(document.getElementById('chart'));
+
+    // instantiate treelayoutManager
+    // registerComponents
+    // call compute
 };
