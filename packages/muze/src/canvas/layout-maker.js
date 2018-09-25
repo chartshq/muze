@@ -5,6 +5,7 @@ import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
 import HeaderComponent from './components/headerComponent';
+import LegendComponent from './components/legendComponent';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
@@ -218,6 +219,7 @@ export const getRenderDetails = (context, mount) => {
         measurement
     };
 };
+const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
 
 export const prepareTreeLayout = (layoutConfig, components, gridComponents, measurement) => {
     // generate component wrappers
@@ -231,9 +233,58 @@ export const prepareTreeLayout = (layoutConfig, components, gridComponents, meas
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
-    titleWrapper.draw(document.getElementById('chart'));
+     // subtitle
+    let subtitleWrapper = null;
+    if (components.headers && components.headers.subtitleCell) {
+        const subtitle = components.headers.subtitleCell;
+        let subtitleConfig = layoutConfig.subtitle;
+        subtitleConfig = { ...subtitleConfig, classPrefix: layoutConfig.classPrefix };
+        subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+    }
+
+    // color legend
+    let colorLegendWrapper = null;
+    if (components.legends && components.legends.length) {
+        const colorLegend = _getLegendOf(components.legends, 'color').legend;
+        if (colorLegend) {
+            const legendConfig = layoutConfig.legend;
+            colorLegendWrapper = new LegendComponent({
+                name: 'color-legend',
+                component: colorLegend,
+                config: legendConfig });
+        }
+    }
+
+    // shape legend
+    const shapeLegendWrapper = null;
+    if (components.legends && components.legends.length) {
+        const shapeLegend = _getLegendOf(components.legends, 'shape').legend;
+        if (shapeLegend) {
+            const legendConfig = layoutConfig.legend;
+            colorLegendWrapper = new LegendComponent({
+                name: 'shape-legend',
+                component: shapeLegend,
+                config: legendConfig });
+        }
+    }
+
+    // size legend
+    let sizeLegendWrapper = null;
+    if (components.legends && components.legends.length) {
+        const sizeLegend = _getLegendOf(components.legends, 'size').legend;
+        if (sizeLegend) {
+            const legendConfig = layoutConfig.legend;
+            sizeLegendWrapper = new LegendComponent({
+                name: 'size-legend',
+                component: sizeLegend,
+                config: legendConfig });
+        }
+    }
+
+    colorLegendWrapper.draw(document.getElementById('chart'));
 
     // instantiate treelayoutManager
     // registerComponents
     // call compute
 };
+
