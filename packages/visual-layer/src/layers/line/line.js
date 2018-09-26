@@ -88,7 +88,7 @@ export default class LineLayer extends BaseLayer {
         const transform = config.transform;
         const colorField = encoding.color && encoding.color.field;
 
-        if (colorField) {
+        if (colorField && !transform.groupBy) {
             transform.groupBy = colorField;
         }
         return config;
@@ -254,7 +254,7 @@ export default class LineLayer extends BaseLayer {
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 
                 if (!colorFieldMeasure) {
-                    style = points[0].style;
+                    style = this.getPathStyle(axes.color.getColor(keys[i]));
                 }
                 this.getDrawFn()({
                     container: group.node(),

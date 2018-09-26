@@ -95,7 +95,10 @@ export default class UnitFireBolt extends Firebolt {
             }
 
             if (enabled) {
-                isMutableAction = config.isMutableAction;
+                const effects = this._behaviourEffectMap[action];
+                const sideEffectInstances = this.sideEffects();
+                isMutableAction = config.groupId ?
+                    effects.some(d => sideEffectInstances[d.name || d].constructor.mutates()) : config.isMutableAction;
 
                 const propagationInf = {
                     propagate: false,
