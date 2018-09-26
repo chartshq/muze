@@ -305,7 +305,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     setLabelRotationForAxes(context);
 
     // Render layout
-    context.layout().renderGrid(mount);
+    // context.layout().renderGrid(mount);
     context.once('layer.drawn').then(() => {
         renderHeader(layoutConfig, title, 'title', headers);
         renderHeader(layoutConfig, subtitle, 'subtitle', headers);

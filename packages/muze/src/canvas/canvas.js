@@ -239,7 +239,7 @@ export default class Canvas extends TransactionSupport {
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), components, layoutConfig, measurement);
 
-        prepareTreeLayout(layoutConfig, components, this.layout().matrices(), measurement);
+        prepareTreeLayout(layoutConfig, components, this.layout(), measurement);
         // Render each component
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle

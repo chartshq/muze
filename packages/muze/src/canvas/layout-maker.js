@@ -4,8 +4,10 @@ import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
+import MatrixComponent from './components/matrix-component';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
@@ -221,7 +223,7 @@ export const getRenderDetails = (context, mount) => {
 };
 const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
 
-export const prepareTreeLayout = (layoutConfig, components, gridComponents, measurement) => {
+export const prepareTreeLayout = (layoutConfig, components, grid, measurement) => {
     // generate component wrappers
 
     // title
@@ -281,7 +283,32 @@ export const prepareTreeLayout = (layoutConfig, components, gridComponents, meas
         }
     }
 
-    colorLegendWrapper.draw(document.getElementById('chart'));
+    // grid components
+    const { viewMatricesInfo, layoutDimensions } = grid.getViewInformation();
+    const gridComponentWrapper = [];
+    for (let i = 0; i < 3; i++) {
+        gridComponentWrapper[i] = [];
+        for (let j = 0; j < 3; j++) {
+            const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
+            const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
+            const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
+            const matrixConfig = {
+                dimensions: matrixDim,
+                border: layoutDimensions.border,
+                classPrefix: layoutConfig.classPrefix,
+                row: ROW_MATRIX_INDEX[i],
+                column: j
+            };
+            const matrixWrapper = new MatrixComponent({
+                name: matrixName,
+                component: matrix,
+                config: matrixConfig
+            });
+            gridComponentWrapper[i].push(matrixWrapper);
+        }
+    }
+
+    gridComponentWrapper[1][0].draw(document.getElementById('chart'));
 
     // instantiate treelayoutManager
     // registerComponents
