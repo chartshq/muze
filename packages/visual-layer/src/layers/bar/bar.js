@@ -176,8 +176,7 @@ export default class BarLayer extends BaseLayer {
                     className: seriesClassName,
                     transition,
                     style: {},
-                    keyFn: d => dimensions.map(key => d._data[key]).join('-'),
-                    classnameFn: config.individualClassName
+                    keyFn: d => dimensions.map(key => d._data[key]).join('-')
                 });
             }
         });

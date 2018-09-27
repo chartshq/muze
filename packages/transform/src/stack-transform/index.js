@@ -76,6 +76,19 @@ export default (schema, data, config) => {
     const groupBy = config.groupBy;
     const sort = config.sort || 'descending';
     const normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy);
+    const keys = normalizedData.keys;
+    const map = {};
+    const orderBy = config.orderBy;
+    const orderIndex = schema.findIndex(d => d.name === orderBy);
+    const groupByIndex = schema.findIndex(d => d.name === groupBy);
+    if (orderIndex !== -1) {
+        keys.forEach((key) => {
+            const name = data.find(d => d[groupByIndex] === key);
+            map[key] = name[orderIndex];
+        });
+        normalizedData.keys.sort((a, b) => map[a].localeCompare(map[b]));
+    }
+
     const stackData = stack({
         keys: normalizedData.keys,
         offset: config.offset || 'diverging',

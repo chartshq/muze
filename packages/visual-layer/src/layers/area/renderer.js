@@ -35,8 +35,10 @@ const /* istanbul ignore next */ drawArea = (params) => {
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
                     .attr('d', updateAreaPath(filteredPoints))
-                    .each(function () {
+                    .each(function (d) {
                         const element = selectElement(this);
+
+                        element.classed(d[0].className, true);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
                     });
 };

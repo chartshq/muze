@@ -31,6 +31,7 @@ export const drawLine = (context) => {
 
     updateStyle(mount, style);
     let element = makeElement(mount, 'path', [1]);
+    element.classed(points[0].className, true);
     if (!transition.disabled) {
         element = element.transition().duration(transition.duration);
     }

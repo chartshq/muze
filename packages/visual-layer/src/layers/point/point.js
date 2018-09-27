@@ -11,7 +11,13 @@ import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
-import { attachDataToVoronoi, getLayerColor, positionPoints, getPlotMeasurement } from '../../helpers';
+import {
+    attachDataToVoronoi,
+    getLayerColor,
+    positionPoints,
+    getPlotMeasurement,
+    getIndividualClassName
+} from '../../helpers';
 
 import './styles.scss';
 
@@ -167,6 +173,7 @@ export default class PointLayer extends BaseLayer {
                     source: d._data,
                     rowId: d._id
                 };
+                point.className = getIndividualClassName(d, i, data, this);
                 points.push(point);
                 this.cachePoint(d[key], point);
             }

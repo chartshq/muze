@@ -7,7 +7,7 @@ import {
 import { BaseLayer } from '../../base-layer';
 import drawText from './renderer';
 import { defaultConfig } from './default-config';
-import { getLayerColor, positionPoints } from '../../helpers';
+import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
 
@@ -70,7 +70,7 @@ export default class TextLayer extends BaseLayer {
             const { color, rawColor } = getLayerColor({ datum: d, index: i },
                 { colorEncoding, colorAxis, colorFieldIndex });
 
-            return {
+            const point = {
                 enter: {},
                 update: {
                     x: xPx,
@@ -84,11 +84,14 @@ export default class TextLayer extends BaseLayer {
                     originalColor: rawColor,
                     colorTransform: {}
                 },
+                style: {},
                 _data: row,
                 _id: d._id,
                 source: d._data,
                 rowId: d._id
             };
+            point.className = getIndividualClassName(d, i, data, this);
+            return point;
         });
         points = positionPoints(this, points);
 

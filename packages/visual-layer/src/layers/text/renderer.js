@@ -28,7 +28,7 @@ const drawText = (container, data, config, smartLabel) => {
     smartLabel.setStyle(style);
     selectionMerge.each(function (dataObj) {
         const element = selectElement(this);
-        const { update, background, text, color, textanchor } = dataObj;
+        const { update, background, text, color, textanchor, style: textStyle } = dataObj;
         if (config.backgroundEnabled) {
             let diff;
             const { width, height } = smartLabel.getOriSize(dataObj.text);
@@ -54,9 +54,11 @@ const drawText = (container, data, config, smartLabel) => {
         }
         const textEl = makeElement(element, 'text', d => [d]).text(text);
         const textNode = textEl.node();
+        textStyle && setStyles(textNode, textStyle);
         color && setStyles(textNode, {
             fill: color
         });
+        dataObj.className && textEl.classed(dataObj.className, true);
         setAttrs(textNode, update);
         textEl.attr('text-anchor', textanchor);
     });

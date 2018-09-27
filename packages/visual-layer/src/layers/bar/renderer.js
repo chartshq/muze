@@ -9,13 +9,13 @@ import { makeElement, easeFns } from 'muze-utils';
  * @param {*} context
  */
 const transitionBars = (elem, datum, index, context) => {
-    const { transition, classnameFn } = context;
+    const { transition } = context;
     const { duration, disabled, effect } = transition;
     const selection = elem;
     const selTransition = disabled ? selection : selection.transition().duration(duration).ease(easeFns[effect]);
     const update = datum.update || datum;
     const updateStyle = datum.style || {};
-    classnameFn && selection.classed(classnameFn(datum, index), true);
+    datum.className && selection.classed(datum.className, true);
     Object.entries(update).forEach(attr => (!isNaN(attr[1]) && selTransition.attr(attr[0], attr[1])));
     Object.entries(updateStyle).forEach(styleObj => selection.style(styleObj[0], styleObj[1]));
 };
