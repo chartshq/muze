@@ -17,7 +17,7 @@ export const interpolatorMap = {
 
 export default class ContinousAxis extends SimpleAxis {
     constructor (config, dependencies) {
-        config.tickFormat = val => val;
+        config.tickFormat = config.tickFormat || (val => val);
         super(config, dependencies);
     }
     /**
