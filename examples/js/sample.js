@@ -69,115 +69,35 @@ d3.json('../data/cars.json', (data) => {
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 
     const crosstab = env.canvas()
-        .rows(['Cylinders', 'Origin'])
-        .columns(['Miles_per_Gallon'])
+        .rows([['Origin', 'Horsepower'], ['Acceleration']])
+        .columns(['Miles_per_Gallon', 'Cylinders'])
         .data(rootData)
-        .width(600)
-        .height(400)
-        .mount('#chart');
-
-    const lineChart = env.canvas()
-        .rows(['Miles_per_Gallon'])
-        .columns(['Year'])
-        .data(rootData)
-        .width(400)
+        .detail(['Name'])
+        .width(1000)
         .height(400)
         .layers([{
-            mark: 'line'
+            mark: 'point',
+            encoding: {
+                y: 'Horsepower'
+            }
+        }, {
+            mark: 'point',
+            encoding: {
+                y: 'Acceleration'
+            }
         }])
-        .mount('#chart2');
-
-    const barChart = env.canvas()
-        .rows(['Miles_per_Gallon'])
-        .columns(['Maker'])
-        .data(rootData.groupBy(['Maker']).sort([['Miles_per_Gallon', 'ASC']]))
-        .width(600)
-        .height(400)
         .config({
-            autoGroupBy: {
-                disabled: true
+            border: {
+                width: 5,
+                showValueBorders: {
+                    right: true
+                }
+            },
+            axes: {
+                y: {
+                    // show: false
+                }
             }
         })
-        .color('Miles_per_Gallon')
-        .mount('#chart3');
-
-    const pieChart = env.canvas()
-        .rows([])
-        .columns([])
-        .data(rootData)
-        .width(600)
-        .height(400)
-        .layers([{
-            mark: 'arc',
-            encoding: {
-                angle: 'CountVehicle'
-            }
-        }])
-        .color('Origin')
-        .mount('#chart4');
-
-    muze.ActionModel.for(crosstab, lineChart, pieChart).enableCrossInteractivity({
-        behaviours: {
-            // Disable all behaviours if any propagation is initiated from pie chart.
-            '*': (propagationPayload, context) => {
-                const sourcePropagationCanvas = propagationPayload.sourceCanvas;
-                const sourceCanvas = context.parentAlias();
-                if (sourcePropagationCanvas) {
-                    return sourceCanvas !== sourcePropagationCanvas ?
-                        [pieChart.alias(), lineChart.alias()].indexOf(sourcePropagationCanvas) === -1
-                        : true;
-                }
-                return true;
-            }
-        },
-        sideEffects: {
-            // Disable tooltip on propagation
-            tooltip: () => false
-        }
-    })
-                    .for(lineChart).registerSideEffects(
-            class NewSideEffect extends SpawnableSideEffect {
-                constructor (...params) {
-                    super(...params);
-                    this._layers = this.firebolt.context.addLayer({
-                        name: 'lineLayer',
-                        mark: 'line',
-                        className: 'linelayer',
-                        encoding: {
-                            x: 'Year',
-                            y: 'Miles_per_Gallon',
-                            color: {
-                                value: () => '#8e0707'
-                            }
-                        },
-                        render: false
-                    });
-                }
-
-                static formalName () {
-                    return 'lineLayer';
-                }
-
-                apply (selectionSet) {
-                    const sideEffectGroup = this.drawingContext().sideEffectGroup;
-                    const layerGroups = this.createElement(sideEffectGroup, 'g', this._layers, '.extra-layers');
-                    layerGroups.each(function (layer) {
-                        layer.mount(this).data(selectionSet.mergedEnter.model);
-                    });
-                }
-            }
-        )
-                    .mapSideEffects({
-                        select: [{
-                            name: 'lineLayer',
-                            applyOnSource: false
-                        }]
-                    })
-                    .for(pieChart)
-                    .mapSideEffects({
-                        select: [{
-                            name: 'filter',
-                            applyOnSource: false // Filter should not apply on the same canvas where action happened
-                        }]
-                    });
+        .mount('#chart');
 });

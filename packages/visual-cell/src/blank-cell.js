@@ -94,13 +94,10 @@ class BlankCell extends SimpleCell {
      * @memberof BLANK
      */
     getLogicalSpace () {
-        const {
-            spaceFixer
-        } = this.config();
         if (!this.logicalSpace()) {
             return {
-                width: this.width || spaceFixer,
-                height: this.height || spaceFixer
+                width: this.width || 0,
+                height: this.height || 0
             };
         }
         return this.logicalSpace();

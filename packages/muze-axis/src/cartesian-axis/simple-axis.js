@@ -348,7 +348,11 @@ export default class SimpleAxis {
             this.domain([]);
             this._domainLock = true;
         }
-        return this.updateDomainBounds(domain || []);
+        const cachedDomain = [];
+        domain && domain.forEach((d) => {
+            d !== undefined && d !== null && cachedDomain.push(d);
+        });
+        return this.updateDomainBounds(cachedDomain);
     }
 
     getMinTickDifference () {

@@ -215,21 +215,6 @@ export default class ContinousAxis extends SimpleAxis {
     }
 
     /**
-     *
-     *
-     * @param {*} domain
-     * @returns
-     * @memberof SimpleAxis
-     */
-    updateDomainCache (domain) {
-        if (this._domainLock === false) {
-            this._domain = [];
-            this._domainLock = true;
-        }
-        return this.updateDomainBounds(domain || []);
-    }
-
-    /**
      * Sets a fixed baseline for the first ticks so that they can render effectively within
      * the given area
      *
