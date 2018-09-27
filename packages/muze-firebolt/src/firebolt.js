@@ -430,4 +430,8 @@ export default class Firebolt {
     resetted () {
         return this._resetted;
     }
+
+    getEntryExitSet (behaviour) {
+        return this._entryExitSet[behaviour];
+    }
 }
