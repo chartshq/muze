@@ -17,7 +17,7 @@ export const interpolatorMap = {
 
 export default class ContinousAxis extends SimpleAxis {
     constructor (config, dependencies) {
-        config.tickFormat = val => val;
+        config.tickFormat = config.tickFormat || (val => val);
         super(config, dependencies);
     }
     /**
@@ -212,21 +212,6 @@ export default class ContinousAxis extends SimpleAxis {
 
     getMinTickDifference () {
         return getSmallestDiff(this.config().tickValues);
-    }
-
-    /**
-     *
-     *
-     * @param {*} domain
-     * @returns
-     * @memberof SimpleAxis
-     */
-    updateDomainCache (domain) {
-        if (this._domainLock === false) {
-            this._domain = [];
-            this._domainLock = true;
-        }
-        return this.updateDomainBounds(domain || []);
     }
 
     /**

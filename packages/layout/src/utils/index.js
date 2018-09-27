@@ -393,15 +393,16 @@ export const getDistributedWidth = (context, layoutConfig) => {
     }
     return row.map((col, colIndex) => {
         const space = col.getLogicalSpace().width;
+        let distWidth = (space + (availableWidth - width) * (space / width));
         if (isTransposed) {
             if (distribution.length > 0) {
-                return (availableWidth * distribution[colIndex] / distSum) - 2;
+                distWidth = (availableWidth * distribution[colIndex] / distSum);
             } else if (isDistributionEqual || width === 0) {
                 const rowLen = row.length;
-                return (availableWidth / rowLen) - 2;
+                distWidth = (availableWidth / rowLen);
             }
         }
-        return (space + (availableWidth - width) * (space / width)) - 2;
+        return Math.floor(distWidth);
     });
 };
 
@@ -444,15 +445,16 @@ export const getDistributedHeight = (context) => {
     return matrix.map((row, rIdx) => {
         const col = row[cIdx];
         const space = col.getLogicalSpace().height;
+        let distHeight = (space + (heightWithoutGutter - height) * (space / height));
 
         if (!isTransposed) {
             if (distribution.length > 0 && colLen === distribution.length) {
-                return (heightWithoutGutter * distribution[rIdx] / distSum) - 2;
+                distHeight = (heightWithoutGutter * distribution[rIdx] / distSum);
             } else if (isDistributionEqual || context.height === 0) {
-                return (heightWithoutGutter / colLen) - 2;
+                distHeight = (heightWithoutGutter / colLen);
             }
         }
-        return (space + (heightWithoutGutter - height) * (space / height)) - 2;
+        return Math.floor(distHeight);
     });
 };
 

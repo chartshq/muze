@@ -40,6 +40,9 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
         orientation: axisOrientation,
         type: dataTypeScaleMap[field.subtype()]
     };
+    userAxisConfig.tickValues = field.format(userAxisConfig.tickValues);
+    userAxisConfig.domain = field.format(userAxisConfig.domain);
+
     return mergeRecursive(axisConfig, userAxisConfig);
 };
 
