@@ -56,7 +56,7 @@
     "build:prod": "npm run clean && webpack --mode production && npm run copy-dist && npm run copy-rdm",
     "build:dev": "npm run clean && webpack --mode development && npm run copy-dist && npm run copy-rdm",
     "build": "npm run build:prod",
-    "start:prod": "webpack-dev-server --host 0.0.0.0 --open --mode development --config webpack.config.js",
+    "start:prod": "webpack-dev-server --host 0.0.0.0 --open --mode production --config webpack.config.js",
     "start:dev": "webpack-dev-server --host 0.0.0.0 --open --mode development --config webpack.config.dev.js",
     "start": "npm run start:dev",
     "lint": "eslint ./packages",

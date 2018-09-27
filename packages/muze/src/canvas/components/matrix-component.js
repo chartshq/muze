@@ -22,7 +22,7 @@ export default class MatrixComponent extends MuzeComponent {
         // const dimensions = this.params.config.dimensions;
         const border = this.params.config.border;
 
-        const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column}`)
+        const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
                 .classed(`${classPrefix}-grid-${row}`, true)
                 .classed(`${classPrefix}-grid`, true);
 
