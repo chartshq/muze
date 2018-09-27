@@ -69,10 +69,10 @@ d3.json('../data/cars.json', (data) => {
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 
     const crosstab = env.canvas()
-        .rows([['Origin', 'Horsepower'], ['Acceleration']])
-        .columns(['Miles_per_Gallon', 'Cylinders'])
+        .rows([['Horsepower']])
+        .columns(['Year'])
         .data(rootData)
-        .detail(['Name'])
+
         .width(1000)
         .height(400)
         .layers([{
@@ -94,8 +94,15 @@ d3.json('../data/cars.json', (data) => {
                 }
             },
             axes: {
-                y: {
+                x: {
                     // show: false
+                    tickValues: ['1960-01-01', '1990-01-01'],
+                    domain: ['1960-01-01', '1990-01-01']
+                },
+                y: {
+                    domain: [50, 305],
+                    // tickValues: [60, 190, 220]
+                    nice: false
                 }
             }
         })

@@ -359,6 +359,10 @@ export default class SimpleAxis {
         return this.domain();
     }
 
+    getFormattedTickValues (tickValues) {
+        return tickValues;
+    }
+
     /**
      *
      *

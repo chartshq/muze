@@ -1,3 +1,4 @@
+import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { adjustRange } from './helper';
 import { TIME } from '../enums/scale-type';
@@ -182,6 +183,10 @@ export default class TimeAxis extends SimpleAxis {
             this.logicalSpace(null);
             return this;
         } return this._domain;
+    }
+
+    getMinTickDifference () {
+        return getSmallestDiff(this.config().tickValues);
     }
 
     /**
