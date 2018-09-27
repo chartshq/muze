@@ -55,7 +55,7 @@ export default class TextLayer extends BaseLayer {
         const fieldsConfig = this.data().getFieldsConfig();
         const backgroundField = encoding.background.field;
         const backgroundFieldIndex = backgroundField ? fieldsConfig[backgroundField].index : -1;
-        const colorFieldIndex = colorField ? fieldsConfig[colorField].index : -1;
+        const colorFieldIndex = fieldsConfig[colorField] ? fieldsConfig[colorField].index : -1;
         const textFieldIndex = textField ? fieldsConfig[textField] && fieldsConfig[textField].index : -1;
         const xEnc = ENCODING.X;
         const yEnc = ENCODING.Y;
