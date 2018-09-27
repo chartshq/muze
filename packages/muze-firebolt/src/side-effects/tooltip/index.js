@@ -63,7 +63,22 @@ export default class Tooltip extends SpawnableSideEffect {
         } else {
             dataModels.push(dataModel);
         }
-        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria, {
+
+        let target = payload.target;
+
+        if (target) {
+            const targetFields = target[0] || [];
+            const sourceFields = payload.sourceFields;
+            const indices = [];
+            for (let i = 0, len = targetFields.length; i < len; i++) {
+                if (sourceFields.indexOf(targetFields[i]) !== -1) {
+                    indices.push(i);
+                }
+            }
+            target = target.map(d => d.filter((v, i) => indices.indexOf(i) !== -1));
+        }
+
+        const plotDimensions = context.getPlotPointsFromIdentifiers(target || payload.criteria, {
             getBBox: true
         });
 
@@ -87,6 +102,8 @@ export default class Tooltip extends SpawnableSideEffect {
             const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(layoutContainer,
                     drawingInf.svgContainer);
 
+            sourceInf.payload = payload;
+            sourceInf.firebolt = this.firebolt;
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
