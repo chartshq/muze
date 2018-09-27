@@ -70,11 +70,16 @@ d3.json('../data/cars.json', (data) => {
 
     const crosstab = env.canvas()
         .rows([['Horsepower']])
-        .columns(['Year'])
+        .columns(['Acceleration'])
         .data(rootData)
-
+        // .detail(['Maker'])
         .width(1000)
         .height(400)
+        .color({
+            field: 'Cylinders',
+            domain: ['3', '4', '6', '8', '5']
+            // range: ['red', 'blue', 'green', 'yellow']
+        })
         .layers([{
             mark: 'point',
             encoding: {
@@ -88,19 +93,20 @@ d3.json('../data/cars.json', (data) => {
         }])
         .config({
             border: {
-                width: 5,
+                width: 1,
                 showValueBorders: {
+                    left: 1,
                     right: true
                 }
             },
             axes: {
                 x: {
                     // show: false
-                    tickValues: ['1960-01-01', '1990-01-01'],
-                    domain: ['1960-01-01', '1990-01-01']
+                    // tickValues: ['1960-01-01', '1990-01-01'],
+                    // domain: ['1960-01-01', '1990-01-01']
                 },
                 y: {
-                    domain: [50, 305],
+                    domain: [0, 305],
                     // tickValues: [60, 190, 220]
                     nice: false
                 }

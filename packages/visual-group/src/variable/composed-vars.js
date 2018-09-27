@@ -93,6 +93,16 @@ class ComposedVars extends Variable {
      *
      *
      * @returns
+     * @memberof ComposeVars
+     */
+    format (values) {
+        return this.vars()[0].format(values);
+    }
+
+    /**
+     *
+     *
+     * @returns
      * @memberof ComposedVars
      */
     subtype () {

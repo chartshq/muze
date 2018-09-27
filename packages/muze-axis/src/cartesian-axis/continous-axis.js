@@ -155,7 +155,7 @@ export default class ContinousAxis extends SimpleAxis {
             isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
         } else {
             const labelSpace = tickLabelDim.height;
-            this.range([height - bottom - (fixedBaseline ? 0 : (labelSpace / 2)), labelSpace / 2 + top]);
+            this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
             const axisWidth = this.getLogicalSpace().width;
             isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
         }
