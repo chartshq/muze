@@ -48,9 +48,9 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            type: 'dimension'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
     let rootData = new DataModel(jsonData, schema);
@@ -70,27 +70,12 @@ d3.json('../data/cars.json', (data) => {
 
     const crosstab = env.canvas()
         .rows([['Horsepower']])
-        .columns(['Acceleration'])
+        .columns(['Year'])
         .data(rootData)
         // .detail(['Maker'])
-        .width(1000)
+        .width(600)
         .height(400)
-        .color({
-            field: 'Cylinders',
-            domain: ['3', '4', '6', '8', '5']
-            // range: ['red', 'blue', 'green', 'yellow']
-        })
-        .layers([{
-            mark: 'point',
-            encoding: {
-                y: 'Horsepower'
-            }
-        }, {
-            mark: 'point',
-            encoding: {
-                y: 'Acceleration'
-            }
-        }])
+
         .config({
             border: {
                 width: 1,
@@ -100,13 +85,27 @@ d3.json('../data/cars.json', (data) => {
                 }
             },
             axes: {
-                x: {
+                y: {
                     // show: false
                     // tickValues: ['1960-01-01', '1990-01-01'],
                     // domain: ['1960-01-01', '1990-01-01']
+                    // domain: [0, 200],
+                    tickFormat: (val, i, labels) => {
+                        if (i === 0 || i === labels.length - 1) {
+                            // return new Date(val).getFullYear();
+                            return val;
+                        }
+                        return '';
+                    }
                 },
-                y: {
-                    domain: [0, 305],
+                x: {
+                    // domain: ['1950-01-01', '1999-01-01'],
+                    tickFormat: (val, i, labels) =>
+                        // if (i === 0 || i === labels.length - 1) {
+                            // return new Date(val).getFullYear();
+                             `${val}`,                        // }
+                        // return '';
+
                     // tickValues: [60, 190, 220]
                     nice: false
                 }
