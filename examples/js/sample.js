@@ -72,9 +72,14 @@ d3.json('../data/cars.json', (data) => {
         .rows([['Horsepower']])
         .columns(['Acceleration'])
         .data(rootData)
-
+        // .detail(['Maker'])
         .width(1000)
         .height(400)
+        .color({
+            field: 'Cylinders',
+            domain: ['3', '4', '6', '8', '5']
+            // range: ['red', 'blue', 'green', 'yellow']
+        })
         .layers([{
             mark: 'point',
             encoding: {
