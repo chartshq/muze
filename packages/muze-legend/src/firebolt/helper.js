@@ -65,5 +65,5 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         action: propPayload.action
     };
 
-    metaData.propagate(propagationData, propConfig);
+    metaData.propagate(propagationData, propConfig, true);
 };

@@ -102,6 +102,8 @@ export default class Tooltip extends SpawnableSideEffect {
             const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(layoutContainer,
                     drawingInf.svgContainer);
 
+            sourceInf.payload = payload;
+            sourceInf.firebolt = this.firebolt;
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
