@@ -83,35 +83,35 @@ export const propagateValues = (instance, action, config = {}) => {
         return entry.config.groupId !== propagationConf.groupId && mutates;
     };
 
+    const sourceBehaviour = instance._actions.behavioural[action];
+    const mutates = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
     let propConfig = {
         payload,
-        sourceId: isMutableAction ? groupId : sourceId,
+        action,
         criteria: propagationData,
-        isMutableAction,
+        isMutableAction: mutates,
         propagateInterpolatedValues,
-        action: propagationBehaviour,
         groupId,
-        applyOnSource: action === propagationBehaviour,
-        enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
-            propConf.payload.sourceCanvas !== firebolt.context.parentAlias() : true),
-        filterFn
+        sourceId: mutates ? groupId : sourceId,
+        filterFn,
+        enabled: (propConf, firebolt) => action !== propagationBehaviour ?
+            propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true
     };
 
     dataModel.propagate(propagationData, propConfig, true);
 
     if (action !== propagationBehaviour) {
-        const sourceBehaviour = instance._actions.behavioural[action];
-        const mutates = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
         propConfig = {
             payload,
-            action,
+            sourceId: isMutableAction ? groupId : sourceId,
             criteria: propagationData,
-            isMutableAction: mutates,
+            isMutableAction,
             propagateInterpolatedValues,
+            action: propagationBehaviour,
             groupId,
-            sourceId: mutates ? groupId : sourceId,
-            filterFn,
-            enabled: (propConf, firebolt) => propConf.payload.sourceCanvas === firebolt.context.parentAlias()
+            applyOnSource: action === propagationBehaviour,
+            enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.parentAlias(),
+            filterFn
         };
 
         dataModel.propagate(propagationData, propConfig, true);

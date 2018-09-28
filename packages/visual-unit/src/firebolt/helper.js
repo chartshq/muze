@@ -12,10 +12,11 @@ export const clearActionHistory = (context) => {
 
 export const dispatchQueuedSideEffects = (context) => {
     const queuedSideEffects = context._queuedSideEffects;
-    queuedSideEffects.forEach((sideEffect) => {
+    Object.entries(queuedSideEffects).forEach((entry) => {
+        const sideEffect = entry[1];
         context.dispatchSideEffect(sideEffect.name, ...sideEffect.params);
     });
-    context._queuedSideEffects = [];
+    context._queuedSideEffects = {};
 };
 
 export const registerListeners = (firebolt) => {

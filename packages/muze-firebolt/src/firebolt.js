@@ -44,7 +44,7 @@ export default class Firebolt {
         this._behaviourEffectMap = {};
         this._entryExitSet = {};
         this._actionHistory = {};
-        this._queuedSideEffects = [];
+        this._queuedSideEffects = {};
         this._mappedActions = {};
 
         this.mapSideEffects(behaviourEffectMap);
@@ -111,7 +111,7 @@ export default class Firebolt {
     applySideEffects (sideEffects, selectionSet, payload) {
         const sideEffectStore = this.sideEffects();
         const actionHistory = this._actionHistory;
-        const queuedSideEffects = [];
+        const queuedSideEffects = this._queuedSideEffects;
         sideEffects.forEach((sideEffect) => {
             let options;
             let name;
@@ -130,17 +130,16 @@ export default class Firebolt {
                 if (sideEffectInstance.isEnabled()) {
                     if (!sideEffectInstance.constructor.mutates() &&
                         Object.values(actionHistory).some(d => d.isMutableAction)) {
-                        queuedSideEffects.push({
+                        queuedSideEffects[`${name}-${behaviours.join()}`] = {
                             name,
                             params: [combinedSet, payload, options]
-                        });
+                        };
                     } else {
                         this.dispatchSideEffect(name, combinedSet, payload, options);
                     }
                 }
             });
         });
-        this._queuedSideEffects.push(...queuedSideEffects);
         return this;
     }
 
