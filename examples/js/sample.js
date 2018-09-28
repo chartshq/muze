@@ -86,25 +86,30 @@ d3.json('../data/cars.json', (data) => {
             },
             axes: {
                 y: {
-                    // show: false
+
                     // tickValues: ['1960-01-01', '1990-01-01'],
                     // domain: ['1960-01-01', '1990-01-01']
                     // domain: [0, 200],
-                    tickFormat: (val, i, labels) => {
-                        if (i === 0 || i === labels.length - 1) {
-                            // return new Date(val).getFullYear();
-                            return val;
-                        }
-                        return '';
-                    }
+                    // tickFormat: (val, i, labels) => {
+                    //     if (i === 0 || i === labels.length - 1) {
+                    //         // return new Date(val).getFullYear();
+                    //         return val;
+                    //     }
+                    //     return '';
+                    // }
                 },
                 x: {
+                    show: false,
                     // domain: ['1950-01-01', '1999-01-01'],
-                    tickFormat: (val, i, labels) =>
-                        // if (i === 0 || i === labels.length - 1) {
-                            // return new Date(val).getFullYear();
-                             `${val}`,                        // }
-                        // return '';
+                    // tickFormat: (val, i, labels) => {
+                    //     console.log(labels);
+                    //     console.log(val);
+                    //     if (i === 0 || i === labels.length - 1) {
+                    //         // return new Date(val).getFullYear();
+                    //         return `${val}`;
+                    //     }
+                    //     // return '';
+                    // },
 
                     // tickValues: [60, 190, 220]
                     nice: false
