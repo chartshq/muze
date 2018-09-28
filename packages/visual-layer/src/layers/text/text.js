@@ -46,7 +46,7 @@ export default class TextLayer extends BaseLayer {
      * @return {Array.<Object>}  Array of points
      */
     translatePoints (data, encoding, axes) {
-        let points;
+        let points = [];
         const colorAxis = axes.color;
         const textEncoding = encoding.text;
         const { field: textField, value, formatter: textFormatter } = textEncoding;
@@ -60,7 +60,8 @@ export default class TextLayer extends BaseLayer {
         const xEnc = ENCODING.X;
         const yEnc = ENCODING.Y;
 
-        points = data.map((d, i) => {
+        for (let i = 0, len = data.length; i < len; i++) {
+            const d = data[i];
             const row = d._data;
             const textValue = textField ? row[textFieldIndex] : value;
 
@@ -90,9 +91,14 @@ export default class TextLayer extends BaseLayer {
                 source: d._data,
                 rowId: d._id
             };
+
+            if (d.x !== null && d.y !== null) {
+                points.push(point);
+            }
+
             point.className = getIndividualClassName(d, i, data, this);
-            return point;
-        });
+        }
+
         points = positionPoints(this, points);
 
         return points;
