@@ -544,6 +544,7 @@ export default class BaseLayer extends SimpleLayer {
      * @memberof BaseLayer
      */
     getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(data => set.indexOf(data._id) !== -1);
+        return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
+            (data ? set.indexOf(data._id) !== -1 : false));
     }
 }
