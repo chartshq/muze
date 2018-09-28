@@ -75,8 +75,14 @@ d3.json('../data/cars.json', (data) => {
         // .detail(['Maker'])
         .width(600)
         .height(400)
+    .color({
+        field: 'Origin'
+
+        // step: true
+    })
 
         .config({
+
             border: {
                 width: 1,
                 showValueBorders: {
@@ -116,5 +122,6 @@ d3.json('../data/cars.json', (data) => {
                 }
             }
         })
+        .title('asd')
         .mount('#chart');
 });

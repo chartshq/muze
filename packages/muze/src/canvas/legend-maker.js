@@ -1,6 +1,6 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
 import {
-    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, CONFIG
+    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, MARGIN
 } from '../constants';
 
 /**
@@ -90,7 +90,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             legendMeasures.width = Math.min(legendMeasures.maxWidth, config.width);
             legendMeasures.height = Math.min(legendMeasures.maxHeight, config.height);
 
-            [PADDING, BORDER, CONFIG].forEach((e) => {
+            [PADDING, BORDER, MARGIN].forEach((e) => {
                 legendMeasures[e] = config[e];
             });
             legend.scale(scale)
