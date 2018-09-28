@@ -86,12 +86,13 @@ export default class UnitFireBolt extends Firebolt {
             const sourceBehaviours = this._sourceBehaviours;
             const filterFn = sourceBehaviours[action] || sourceBehaviours['*'];
             let enabled = true;
+
             if (filterFn) {
                 enabled = filterFn(propPayload || {}, this.context);
             }
 
             if (enabledFn) {
-                enabled = enabledFn(config, this);
+                enabled = enabledFn(config, this) && enabled !== false;
             }
 
             if (enabled) {
