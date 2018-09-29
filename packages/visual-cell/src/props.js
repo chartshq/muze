@@ -22,7 +22,8 @@ const geomProps = {
     facetByFields: {},
     fields: {},
     transform: {},
-    layerDef: {}
+    layerDef: {},
+    detailFields: {}
 };
 
 export const PROPS = {

@@ -55,7 +55,8 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         cell: GeomCell,
         resolver,
         config,
-        encoder
+        encoder,
+        detailFields
     } = context;
     const axes = resolver.axes();
     const cacheMaps = resolver.cacheMaps();
@@ -95,6 +96,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
                     .axes(groupAxes)
                     .fields(fields)
                     .transform(datamodelTransform)
+                    .detailFields(detailFields)
                     .facetByFields(allFacets);
     entryCellMap.set(geomCellKey, geomCell);
     exitCellMap.delete(geomCellKey);
@@ -499,7 +501,8 @@ export const computeMatrices = (context, config) => {
         resolver,
         cell: cells.GeomCell,
         encoder: encoders.simpleEncoder,
-        newCacheMap
+        newCacheMap,
+        detailFields: config.detail
     };
     const fieldsConfig = datamodel.getFieldsConfig();
     let groupedModel = datamodel;

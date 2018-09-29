@@ -4,7 +4,8 @@ import {
     makeElement,
     setAttrs,
     setStyles,
-    getSymbol
+    getSymbol,
+    isSimpleObject
 } from 'muze-utils';
 import { DEFAULT_STRATEGY, strategy } from './strategy';
 import { defaultConfig } from './default-config';
@@ -75,52 +76,76 @@ export default class Content {
         if (data instanceof Function) {
             mount.html(data());
         } else {
-            const rows = makeElement(mount, 'div', data, `${config.classPrefix}-tooltip-row`);
-            const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
-            cells.attr('class', `${config.classPrefix}-tooltip-content`);
-            setStyles(rows, {
-                margin: rowMargin
-            });
-            setStyles(cells, {
-                display: 'inline-block',
-                'margin-right': `${config.spacing}px`
-            });
+            let content = data;
+            let displayFormat = 'default';
 
-            cells.each(function (d) {
-                const el = selectElement(this);
-                el.html('');
-                if (d instanceof Object) {
-                    if (d.type === 'icon') {
-                        const svg = makeElement(el, 'svg', [1]);
-                        const path = makeElement(svg, 'path', [1]);
-                        const shape = d.shape instanceof Function ? d.shape : getSymbol(d.shape);
+            if (isSimpleObject(data)) {
+                content = data.content;
+                displayFormat = data.displayFormat;
+            }
 
-                        setAttrs(svg, {
-                            x: 0,
-                            y: 0,
-                            width: iconContainerSize,
-                            height: iconContainerSize
-                        });
-                        setAttrs(path, {
-                            d: shape.size(d.size)(),
-                            transform: `translate(${iconContainerSize / 2}, ${iconContainerSize / 2})`
-                        });
-                        setStyles(path, {
-                            fill: d.color
-                        });
-                        setStyles(svg, {
-                            width: `${iconContainerSize}px`,
-                            height: `${iconContainerSize}px`
-                        });
+            const body = makeElement(mount, 'div', [displayFormat], `${config.classPrefix}-tooltip-content`, {},
+                (d) => d);
+
+            if (displayFormat === 'table') {
+                const table = makeElement(body, 'table', [1], `${config.classPrefix}-tooltip-table`);
+                const tbody = makeElement(table, 'tbody', [1], `${config.classPrefix}-tooltip-table-tbody`);
+                const rows = makeElement(tbody, 'tr', content, `${config.classPrefix}-tooltip-table-row`);
+                rows.each(function (d, i) {
+                    selectElement(this).classed(`${config.classPrefix}-tooltip-table-row-${i}`, true);
+                });
+                const cells = makeElement(rows, 'td', d => d, `${config.classPrefix}-tooltip-table-cell`);
+                cells.each(function (d) {
+                    selectElement(this).html(d);
+                });
+            } else {
+                const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`);
+                const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
+                cells.attr('class', `${config.classPrefix}-tooltip-content`);
+                setStyles(rows, {
+                    margin: rowMargin
+                });
+                setStyles(cells, {
+                    display: 'inline-block',
+                    'margin-right': `${config.spacing}px`
+                });
+
+                cells.each(function (d) {
+                    const el = selectElement(this);
+                    el.html('');
+                    if (d instanceof Object) {
+                        if (d.type === 'icon') {
+                            const svg = makeElement(el, 'svg', [1]);
+                            const path = makeElement(svg, 'path', [1]);
+                            const shape = d.shape instanceof Function ? d.shape : getSymbol(d.shape);
+
+                            setAttrs(svg, {
+                                x: 0,
+                                y: 0,
+                                width: iconContainerSize,
+                                height: iconContainerSize
+                            });
+                            setAttrs(path, {
+                                d: shape.size(d.size)(),
+                                transform: `translate(${iconContainerSize / 2}, ${iconContainerSize / 2})`
+                            });
+                            setStyles(path, {
+                                fill: d.color
+                            });
+                            setStyles(svg, {
+                                width: `${iconContainerSize}px`,
+                                height: `${iconContainerSize}px`
+                            });
+                        } else {
+                            el.html(d.value);
+                            d.className && el.classed(d.className, true);
+                            setStyles(el, d.style);
+                        }
                     } else {
-                        el.html(d.value);
-                        d.className && el.classed(d.className, true);
-                        setStyles(el, d.style);
+                        el.html(d);
                     }
-                } else {
-                    el.html(d);
-                }
-            });
+                });
+            }
         }
         return this;
     }

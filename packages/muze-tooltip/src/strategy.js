@@ -34,6 +34,23 @@ const defaultTooltipFormatters = (type, formatter) => {
     return formatters[type];
 };
 
+const getTabularData = (data, schema, fieldspace, timeDiffs) => {
+    const rows = [];
+    rows.push(schema.map(d => d.name));
+    data.forEach((d) => {
+        const row = [];
+        schema.forEach((fieldObj, i) => {
+            const interval = fieldObj.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[fieldObj.name] : 0;
+            const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i]._ref.numberFormat();
+            const formatterFn = defaultTooltipFormatters(fieldObj.subtype || fieldObj.type, numberFormat);
+            const value = formatterFn(d[i], interval);
+            row.push(value);
+        });
+        rows.push(row);
+    });
+    return rows;
+};
+
 export const buildTooltipData = (dataModel, config = {}, context) => {
     let fieldValues = [];
     const dataObj = dataModel.getData();
@@ -46,8 +63,11 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const fieldsObj = fieldspace.fieldsObj();
     const dimensionMeasureMap = context.dimensionMeasureMap;
     const axes = context.axes;
+    const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
+    // const containsRetinalField = schema.find(d => d.name in dimensionMeasureMap);
+    const containsDetailField = schema.find(d => detailFields.indexOf(d.name) !== -1);
     const dataLen = data.length;
     const getRowContent = (field, type) => {
         let value;
@@ -134,21 +154,31 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         }
         return values;
     };
+    let displayFormat = 'keyValue';
 
-    dimensions.forEach((item) => {
-        const type = item.subtype ? item.subtype : item.type;
-        fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
-    });
+    if (dataLen > 1 && containsDetailField) {
+        fieldValues = getTabularData(data, schema, fieldspace, context.timeDiffs);
+        displayFormat = 'table';
+    } else {
+        dimensions.forEach((item) => {
+            const type = item.subtype ? item.subtype : item.type;
+            fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
+        });
 
-    const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
-    const filteredMeasures = dataLen > 1 ? measures.filter(d => allMeasures.indexOf(d.name) === -1)
-        : measures;
-    filteredMeasures.forEach((item) => {
-        const type = item.subtype ? item.subtype : item.type;
-        fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
-    });
+        const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
+        const filteredMeasures = dataLen > 1 ? measures.filter(d => allMeasures.indexOf(d.name) === -1)
+            : measures;
 
-    return fieldValues;
+        filteredMeasures.forEach((item) => {
+            const type = item.subtype ? item.subtype : item.type;
+            fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
+        });
+    }
+
+    return {
+        content: fieldValues,
+        displayFormat
+    };
 };
 
 /**

@@ -182,6 +182,13 @@ export default class VisualUnit {
         return this;
     }
 
+    timeDiffsByField (...params) {
+        if (params.length) {
+            return this;
+        }
+        return this._timeDiffsByField;
+    }
+
     /**
      * Renders the visual unit. It creates the layout and renders the axes and layers.
      * @return {VisualUnit} Instance of visual unit.

@@ -94,7 +94,16 @@ export default class Tooltip extends SpawnableSideEffect {
                 plotDim = plotDim && plotDim[0];
             }
 
-            const dt = dataModels[i];
+            let dt = dataModels[i];
+            if (config.fields) {
+                dt = dt.project(config.fields, {
+                    saveChild: false
+                });
+            }
+            if (config.dataTransform) {
+                dt = config.dataTransform(dt, i);
+            }
+
             enter[i] = true;
             const layoutContainer = drawingInf.parentContainer;
             const layoutBoundBox = layoutContainer.getBoundingClientRect();
@@ -107,6 +116,8 @@ export default class Tooltip extends SpawnableSideEffect {
 
             sourceInf.payload = payload;
             sourceInf.firebolt = this.firebolt;
+            sourceInf.detailFields = context.detailFields();
+            sourceInf.timeDiffs = context.timeDiffsByField();
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
