@@ -20,15 +20,7 @@
         box-sizing: border-box;
     }
 
-    table {
-        background-color: transparent;
-        border-spacing: 0;
-        table-layout: fixed;
-    }
-
-    td, th {
-        padding: 0;
-    }
+  
 
     .#{$prefix}table-arrow {
         margin: 5px;
@@ -142,6 +134,15 @@
     float: left;
 
     // overflow: scroll;
+}
+.#{$prefix}grid-table {
+    background-color: transparent;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.#{$prefix}grid-td, .#{$prefix}grid-th {
+    padding: 0;
 }
 
 .#{$prefix}table-header {
