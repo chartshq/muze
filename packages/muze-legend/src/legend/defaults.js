@@ -41,7 +41,8 @@ export const DEFAULT_CONFIG = {
     item: {
         text: {
             orientation: 'right',
-            width: 10
+            width: 10,
+            formatter: val => val
         },
         icon: {
             className: 'legend-icon',
@@ -59,4 +60,8 @@ export const DEFAULT_CONFIG = {
  * @param {string} icon Accepts a icon name like 'square', 'cross', 'diamond' etc
  * @return {Object} icon object which can be used to draw the icons
  */
-export const ICON_MAP = icon => icon && getSymbol(icon);
+export const ICON_MAP = (icon) => {
+    if (icon && typeof (icon) === 'string') {
+        return getSymbol(icon);
+    } return icon;
+};

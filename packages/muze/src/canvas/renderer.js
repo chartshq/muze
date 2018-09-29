@@ -201,25 +201,25 @@ const renderHeader = (layoutConfig, container, type, headers) => {
  * @param {*} context
  * @param {*} shifter
  */
-const shiftHeaders = (config, shifter, measurement) => {
+const shiftHeaders = (config, shifter, measurement, mount) => {
     const { classPrefix, title, subtitle, legend } = config;
     const { legendSpace } = measurement;
     const { position } = legend;
 
     shifter += position === LEFT ? legendSpace.width : 0;
-    title && selectElement(`.${classPrefix}-title-container`)
+    title && selectElement(mount).select(`.${classPrefix}-title-container`)
                     .style('width', title.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
                     .style('margin-left', title.align === LEFT ? `${shifter}px` : 0);
-    subtitle && selectElement(`.${classPrefix}-subtitle-container`)
+    subtitle && selectElement(mount).select(`.${classPrefix}-subtitle-container`)
                     .style('width', subtitle.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
                     .style('margin-left', subtitle.align === LEFT ? `${shifter}px` : 0);
 
-    selectElement(`.${classPrefix}-legend-horizontal-section`)
+    selectElement(mount).select(`.${classPrefix}-legend-horizontal-section`)
                     .style('margin-left', `${shifter}px`)
                     .style('width', `${legendSpace.width - shifter}px`)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
                     .style('max-width', `${legendSpace.width - shifter}px`);
-    selectElement(`.${classPrefix}-legend-vertical-section`)
+    selectElement(mount).select(`.${classPrefix}-legend-vertical-section`)
                     .style('margin-left', null)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
                     .style('max-width', null);
@@ -284,6 +284,7 @@ const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
  * @param {*} measurement
  */
 export const renderComponents = (context, components, layoutConfig, measurement) => {
+    const mountPoint = context.mount();
     const {
         headers,
         legends
@@ -296,7 +297,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
         legend,
         subtitle,
         layout
-    } = getSkeletons(context.mount(), layoutConfig, measurement);
+    } = getSkeletons(mountPoint, layoutConfig, measurement);
     const {
         mount
     } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
@@ -310,7 +311,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
         renderHeader(layoutConfig, title, 'title', headers);
         renderHeader(layoutConfig, subtitle, 'subtitle', headers);
         renderLegend(layoutConfig, legend, legends, measurement);
-        shiftHeaders(layoutConfig, padding, measurement);
+        shiftHeaders(layoutConfig, padding, measurement, mountPoint);
     });
     context.composition().visualGroup.matrixInstance().value.each((el) => {
         el.valueOf().parentContainer(layout.node());

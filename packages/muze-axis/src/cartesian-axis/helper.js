@@ -24,6 +24,13 @@ export const sanitizeDomain = (domain, context) => {
     return domain;
 };
 
+export const getTickFormatter = (tickFormat, numberFormat) => {
+    if (tickFormat) {
+        return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
+    }
+    return () => val => numberFormat(val);
+};
+
 /**
  *
  *
@@ -51,7 +58,7 @@ export const getTickLabelInfo = (context) => {
         const formattedLabel = numberFormat(originalLabel);
 
         //  get formats of tick if any
-        const label = tickFormat ? tickFormat(formattedLabel) : (scale.tickFormat ?
+        const label = tickFormat ? tickFormat(formattedLabel, i, axisTickLabels) : (scale.tickFormat ?
             numberFormat(scale.tickFormat()(originalLabel)) : formattedLabel);
 
         // convert to string for quant values

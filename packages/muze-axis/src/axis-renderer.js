@@ -188,9 +188,12 @@ export function renderAxis (axisInstance) {
     const mount = axisInstance.mount();
     const range = axisInstance.range();
     const axis = axisInstance.axis();
+    const scale = axisInstance.scale();
     const {
         _axisNameStyle,
-        _tickLabelStyle
+        _tickLabelStyle,
+        formatter,
+        tickValues
      } = axisInstance;
     const {
         orientation,
@@ -210,6 +213,7 @@ export function renderAxis (axisInstance) {
     if (!show) {
         return;
     }
+
     const tickSize = axisInstance.getTickSize();
 
     const selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
@@ -223,6 +227,10 @@ export function renderAxis (axisInstance) {
     // Set ticks for the axis
         axisInstance.setTickValues();
     }
+
+    const labelFunc = scale.ticks || scale.quantile || scale.domain;
+
+    formatter && axis.tickFormat(formatter(tickValues || axis.tickValues() || labelFunc()));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

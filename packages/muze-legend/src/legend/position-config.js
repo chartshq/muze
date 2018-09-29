@@ -53,13 +53,12 @@ const legendOrientation = {
         }),
         itemContainerMeasures: (measurement, config) => {
             const {
-                maxItemSpaces,
                 width
             } = measurement;
             const { padding } = config;
             return {
                 row: {
-                    width: `${maxItemSpaces.width}px`,
+                    width: `${width}px`,
                     padding: `${padding}px`
                 },
                 column: {
