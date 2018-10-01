@@ -200,19 +200,8 @@ export default class CartesianEncoder extends VisualEncoder {
         // let currentLayerIndex = 0;
         layerArray.length && layerArray.forEach((layer, i) => {
             const def = layerFactory.sanitizeLayerConfig(layer);
-            // Set the default drawing order of the layer if not defined.
-
-            // if (def instanceof Array) {
-            //     def.forEach((atomicDef, layerIndex) => {
-            //         atomicDef.order = currentLayerIndex + layerIndex;
-            //     });
-            //     currentLayerIndex += def.length;
-            // } else {
-            //     def.order === undefined && (def.order = i);
-            // }
             def.order = i;
             serializedLayers.push(def);
-            // return def;
         });
         return serializedLayers;
     }
@@ -262,17 +251,9 @@ export default class CartesianEncoder extends VisualEncoder {
                     rowField.getMembers(), userLayerConfig || []);
                 if (layerConfigs.length) {
                     configs = layerConfigs.map((layerConf) => {
-                        const mergedLayerConf = mergeRecursive(defConfigs[0].def, layerConf);
+                        const mergedLayerConf = mergeRecursive(mergeRecursive({}, defConfigs[0].def), layerConf);
                         const serializedLayerConfig = layerFactory.getSerializedConf(mergedLayerConf.mark,
                             mergedLayerConf);
-                        // let layerLen = 0;
-                        // if (serializedLayerConfig instanceof Array) {
-                        //     serializedLayerConfig.forEach((conf, i) => {
-                        //         conf.order = currentLayerIndex + i;
-                        //     });
-                        //     layerLen = serializedLayerConfig.length;
-                        // }
-                        // currentLayerIndex = layerConf.order + layerLen;
                         return {
                             mark: mergedLayerConf.mark,
                             order: mergedLayerConf.order,
