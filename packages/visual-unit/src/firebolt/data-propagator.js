@@ -114,10 +114,6 @@ export const propagateValues = (instance, action, config = {}) => {
             filterFn
         };
 
-        dataModel.propagate(propagationData, propConfig, true, {
-            filterImmutableAction: (actionInf, propInf) => {
-                return actionInf.groupId !== propInf.groupId;
-            }
-        });
+        dataModel.propagate(propagationData, propConfig, true);
     }
 };
