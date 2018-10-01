@@ -1,7 +1,7 @@
 {
   "name": "muze",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://www.charts.com/muze",
   "license": "MIT",
