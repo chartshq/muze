@@ -90,10 +90,16 @@ export const createLayers = (context, layerDefinitions) => {
             unit: context
         }
     };
-    let layers = layerDefinitions.reduce((layersArr, layerDef, i) => {
+    let layerIndex = 0;
+    let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef, i) => {
         const mark = layerDef.mark;
         const definition = layerDef.def;
         const markId = `${mark}-${i}`;
+        const defArr = toArray(definition);
+        defArr.forEach((def) => {
+            def.order = layerDef.order + layerIndex;
+        });
+        layerIndex += defArr.length;
         const instances = getLayerFromDef(context, definition, layersMap[markId]);
         store.layers = Object.assign(store.layers, instances);
         const instanceValues = Object.values(instances);
