@@ -53,13 +53,14 @@ export default class TextLayer extends BaseLayer {
         const colorEncoding = encoding.color;
         const colorField = colorEncoding && colorEncoding.field;
         const fieldsConfig = this.data().getFieldsConfig();
-        const backgroundField = encoding.background.field;
-        const backgroundFieldIndex = backgroundField ? fieldsConfig[backgroundField].index : -1;
+
+        const backgroundEncoding = encoding.text.background;
+        const backgroundPadding = backgroundEncoding.padding;
+        const backgroundValue = backgroundEncoding.value;
         const colorFieldIndex = fieldsConfig[colorField] ? fieldsConfig[colorField].index : -1;
         const textFieldIndex = textField ? fieldsConfig[textField] && fieldsConfig[textField].index : -1;
         const xEnc = ENCODING.X;
         const yEnc = ENCODING.Y;
-
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
             const row = d._data;
@@ -79,7 +80,10 @@ export default class TextLayer extends BaseLayer {
                 },
                 text: textFormatter ? textFormatter(textValue) : textValue,
                 color,
-                background: colorAxis.getColor(d._data[backgroundFieldIndex]),
+                background: {
+                    value: backgroundValue instanceof Function ? backgroundValue(d, i, data, this) : null,
+                    padding: backgroundPadding
+                },
                 meta: {
                     stateColor: {},
                     originalColor: rawColor,
@@ -115,8 +119,6 @@ export default class TextLayer extends BaseLayer {
         const encoding = config.encoding;
         const normalizedData = this._store.get(PROPS.NORMALIZED_DATA);
         const className = config.className;
-        const backgroundPadding = encoding.background.padding;
-        const backgroundEnabled = encoding.background.enabled || encoding.background.field;
         const qualifiedClassName = getQualifiedClassName(config.defClassName, this.id(), config.classPrefix);
         const axes = this.axes();
         const containerSelection = selectElement(container);
@@ -134,9 +136,7 @@ export default class TextLayer extends BaseLayer {
                     'text-anchor': TEXT_ANCHOR_MIDDLE
                 });
                 drawText(node, points, {
-                    className: qualifiedClassName[0],
-                    backgroundPadding,
-                    backgroundEnabled
+                    className: qualifiedClassName[0]
                 }, this._dependencies.smartLabel);
             }
         });

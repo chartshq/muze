@@ -85,7 +85,7 @@ export default class Content {
             }
 
             const body = makeElement(mount, 'div', [displayFormat], `${config.classPrefix}-tooltip-content`, {},
-                (d) => d);
+                d => d);
 
             if (displayFormat === 'table') {
                 const table = makeElement(body, 'table', [1], `${config.classPrefix}-tooltip-table`);

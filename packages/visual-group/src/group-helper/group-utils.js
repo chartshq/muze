@@ -440,12 +440,7 @@ export const getBorders = (matrices, encoder) => {
 
 export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
     let fields = [];
-    const encodingArr = suppliedLayerConfig.map((conf) => {
-        if (conf.def instanceof Array) {
-            return conf.def.map(def => def.encoding);
-        }
-        return conf.def.encoding || {};
-    });
+    const encodingArr = suppliedLayerConfig.map(conf => (conf.encoding || {}));
     fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
     fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
     return fields;

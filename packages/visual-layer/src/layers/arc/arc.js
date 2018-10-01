@@ -276,7 +276,7 @@ export default class ArcLayer extends BaseLayer {
                     colorTransform: {}
                 }
             }], `${qualClassName[0]}-path`)
-                            .attr('fill', d => colorAxis.getColor(d.datum.colorVal))
+                            .style('fill', d => colorAxis.getColor(d.datum.colorVal))
                             .transition()
                             .duration(transition.duration)
                             .attrTween('d', (...params) => tweenPie(path, rangeValueGetter, params))

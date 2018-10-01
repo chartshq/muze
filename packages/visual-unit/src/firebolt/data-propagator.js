@@ -94,8 +94,8 @@ export const propagateValues = (instance, action, config = {}) => {
         groupId,
         sourceId: mutates ? groupId : sourceId,
         filterFn,
-        enabled: (propConf, firebolt) => action !== propagationBehaviour ?
-            propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true
+        enabled: (propConf, firebolt) => action !== (propagationBehaviour ?
+            propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)
     };
 
     dataModel.propagate(propagationData, propConfig, true);
@@ -114,6 +114,10 @@ export const propagateValues = (instance, action, config = {}) => {
             filterFn
         };
 
-        dataModel.propagate(propagationData, propConfig, true);
+        dataModel.propagate(propagationData, propConfig, true, {
+            filterImmutableAction: (actionInf, propInf) => {
+                return actionInf.groupId !== propInf.groupId;
+            }
+        });
     }
 };

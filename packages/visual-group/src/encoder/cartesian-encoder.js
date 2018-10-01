@@ -197,23 +197,22 @@ export default class CartesianEncoder extends VisualEncoder {
      */
     serializeLayerConfig (layerArray) {
         const serializedLayers = [];
-        let currentLayerIndex = 0;
+        // let currentLayerIndex = 0;
         layerArray.length && layerArray.forEach((layer, i) => {
-            const def = layerFactory.getSerializedConf(layer.mark, layer);
+            const def = layerFactory.sanitizeLayerConfig(layer);
             // Set the default drawing order of the layer if not defined.
 
-            if (def instanceof Array) {
-                def.forEach((atomicDef, layerIndex) => {
-                    atomicDef.order = currentLayerIndex + layerIndex;
-                });
-                currentLayerIndex += def.length;
-            } else {
-                def.order === undefined && (def.order = i);
-            }
-            serializedLayers.push({
-                mark: layer.mark,
-                def
-            });
+            // if (def instanceof Array) {
+            //     def.forEach((atomicDef, layerIndex) => {
+            //         atomicDef.order = currentLayerIndex + layerIndex;
+            //     });
+            //     currentLayerIndex += def.length;
+            // } else {
+            //     def.order === undefined && (def.order = i);
+            // }
+            def.order = i;
+            serializedLayers.push(def);
+            // return def;
         });
         return serializedLayers;
     }
@@ -233,6 +232,7 @@ export default class CartesianEncoder extends VisualEncoder {
             rowFields
         } = fields;
 
+        // let currentLayerIndex = 0;
         columnFields.forEach((colField) => {
             const colFieldName = colField.toString();
             rowFields.forEach((rowField) => {
@@ -250,7 +250,7 @@ export default class CartesianEncoder extends VisualEncoder {
                 const colFieldType = colField.subtype();
                 const mark = getDefaultMark(colFieldType, rowFieldType);
 
-                configs = [{
+                const defConfigs = [{
                     mark,
                     def: {
                         mark,
@@ -260,19 +260,27 @@ export default class CartesianEncoder extends VisualEncoder {
 
                 const layerConfigs = getLayerConfFromFields(colField.getMembers(),
                     rowField.getMembers(), userLayerConfig || []);
-
                 if (layerConfigs.length) {
                     configs = layerConfigs.map((layerConf) => {
-                        const def = layerConf.def;
-                        if (def instanceof Array) {
-                            configs[0].def.mark = mark;
-                            return {
-                                mark: layerConf.mark,
-                                def: def.map(conf => mergeRecursive(mergeRecursive({}, configs[0].def), conf))
-                            };
-                        }
-                        return mergeRecursive(mergeRecursive({}, configs[0]), layerConf);
+                        const mergedLayerConf = mergeRecursive(defConfigs[0].def, layerConf);
+                        const serializedLayerConfig = layerFactory.getSerializedConf(mergedLayerConf.mark,
+                            mergedLayerConf);
+                        // let layerLen = 0;
+                        // if (serializedLayerConfig instanceof Array) {
+                        //     serializedLayerConfig.forEach((conf, i) => {
+                        //         conf.order = currentLayerIndex + i;
+                        //     });
+                        //     layerLen = serializedLayerConfig.length;
+                        // }
+                        // currentLayerIndex = layerConf.order + layerLen;
+                        return {
+                            mark: mergedLayerConf.mark,
+                            order: mergedLayerConf.order,
+                            def: serializedLayerConfig
+                        };
                     });
+                } else {
+                    configs = defConfigs;
                 }
 
                 layerConfig.push(...configs);
