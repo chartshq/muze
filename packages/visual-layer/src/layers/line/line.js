@@ -234,7 +234,6 @@ export default class LineLayer extends BaseLayer {
         const containerSelection = selectElement(container);
         const colorField = encoding.color.field;
         const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
-        const colorFieldMeasure = fieldsConfig[colorField] && fieldsConfig[colorField].def.type === FieldType.MEASURE;
 
         this._points = [];
         this._pointMap = {};
@@ -260,13 +259,18 @@ export default class LineLayer extends BaseLayer {
                 this._points.push(points);
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 
-                if (!colorFieldMeasure) {
-                    const colorVal = points.find(d => d._data[colorFieldIndex] !== null &&
+                let color;
+                const colorValFn = encoding.color.value;
+                const colorVal = points.find(d => d._data[colorFieldIndex] !== null &&
                         d._data[colorFieldIndex] !== undefined);
-                    if (colorVal) {
-                        style = this.getPathStyle(axes.color.getColor(colorVal._data[colorFieldIndex]));
-                    }
+
+                if (colorValFn) {
+                    color = colorValFn(dataArr, i, normalizedData);
+                } else {
+                    color = axes.color.getColor(colorVal && colorVal._data[colorFieldIndex]);
                 }
+
+                style = this.getPathStyle(color);
                 this.getDrawFn()({
                     container: group.node(),
                     interpolate,
