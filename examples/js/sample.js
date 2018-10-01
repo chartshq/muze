@@ -48,9 +48,9 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            type: 'dimension'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
     let rootData = new DataModel(jsonData, schema);
@@ -69,115 +69,59 @@ d3.json('../data/cars.json', (data) => {
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 
     const crosstab = env.canvas()
-        .rows(['Cylinders', 'Origin'])
-        .columns(['Miles_per_Gallon'])
-        .data(rootData)
-        .width(600)
-        .height(400)
-        .mount('#chart');
-
-    const lineChart = env.canvas()
-        .rows(['Miles_per_Gallon'])
+        .rows([['Horsepower']])
         .columns(['Year'])
         .data(rootData)
-        .width(400)
-        .height(400)
-        .layers([{
-            mark: 'line'
-        }])
-        .mount('#chart2');
-
-    const barChart = env.canvas()
-        .rows(['Miles_per_Gallon'])
-        .columns(['Maker'])
-        .data(rootData.groupBy(['Maker']).sort([['Miles_per_Gallon', 'ASC']]))
+        // .detail(['Maker'])
         .width(600)
         .height(400)
+    .color({
+        field: 'Origin'
+
+        // step: true
+    })
+
         .config({
-            autoGroupBy: {
-                disabled: true
+
+            border: {
+                width: 1,
+                showValueBorders: {
+                    left: 1,
+                    right: true
+                }
+            },
+            axes: {
+                y: {
+
+                    // tickValues: ['1960-01-01', '1990-01-01'],
+                    // domain: ['1960-01-01', '1990-01-01']
+                    // domain: [0, 200],
+                    // tickFormat: (val, i, labels) => {
+                    //     if (i === 0 || i === labels.length - 1) {
+                    //         // return new Date(val).getFullYear();
+                    //         return val;
+                    //     }
+                    //     return '';
+                    // }
+                },
+                x: {
+                    show: false,
+                    // domain: ['1950-01-01', '1999-01-01'],
+                    // tickFormat: (val, i, labels) => {
+                    //     console.log(labels);
+                    //     console.log(val);
+                    //     if (i === 0 || i === labels.length - 1) {
+                    //         // return new Date(val).getFullYear();
+                    //         return `${val}`;
+                    //     }
+                    //     // return '';
+                    // },
+
+                    // tickValues: [60, 190, 220]
+                    nice: false
+                }
             }
         })
-        .color('Miles_per_Gallon')
-        .mount('#chart3');
-
-    const pieChart = env.canvas()
-        .rows([])
-        .columns([])
-        .data(rootData)
-        .width(600)
-        .height(400)
-        .layers([{
-            mark: 'arc',
-            encoding: {
-                angle: 'CountVehicle'
-            }
-        }])
-        .color('Origin')
-        .mount('#chart4');
-
-    muze.ActionModel.for(crosstab, lineChart, pieChart).enableCrossInteractivity({
-        behaviours: {
-            // Disable all behaviours if any propagation is initiated from pie chart.
-            '*': (propagationPayload, context) => {
-                const sourcePropagationCanvas = propagationPayload.sourceCanvas;
-                const sourceCanvas = context.parentAlias();
-                if (sourcePropagationCanvas) {
-                    return sourceCanvas !== sourcePropagationCanvas ?
-                        [pieChart.alias(), lineChart.alias()].indexOf(sourcePropagationCanvas) === -1
-                        : true;
-                }
-                return true;
-            }
-        },
-        sideEffects: {
-            // Disable tooltip on propagation
-            tooltip: () => false
-        }
-    })
-                    .for(lineChart).registerSideEffects(
-            class NewSideEffect extends SpawnableSideEffect {
-                constructor (...params) {
-                    super(...params);
-                    this._layers = this.firebolt.context.addLayer({
-                        name: 'lineLayer',
-                        mark: 'line',
-                        className: 'linelayer',
-                        encoding: {
-                            x: 'Year',
-                            y: 'Miles_per_Gallon',
-                            color: {
-                                value: () => '#8e0707'
-                            }
-                        },
-                        render: false
-                    });
-                }
-
-                static formalName () {
-                    return 'lineLayer';
-                }
-
-                apply (selectionSet) {
-                    const sideEffectGroup = this.drawingContext().sideEffectGroup;
-                    const layerGroups = this.createElement(sideEffectGroup, 'g', this._layers, '.extra-layers');
-                    layerGroups.each(function (layer) {
-                        layer.mount(this).data(selectionSet.mergedEnter.model);
-                    });
-                }
-            }
-        )
-                    .mapSideEffects({
-                        select: [{
-                            name: 'lineLayer',
-                            applyOnSource: false
-                        }]
-                    })
-                    .for(pieChart)
-                    .mapSideEffects({
-                        select: [{
-                            name: 'filter',
-                            applyOnSource: false // Filter should not apply on the same canvas where action happened
-                        }]
-                    });
+        .title('asd')
+        .mount('#chart');
 });

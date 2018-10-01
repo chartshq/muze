@@ -1,7 +1,7 @@
 import { makeElement, selectElement } from 'muze-utils';
 import { cellSpanMaker } from './span-maker';
 import {
-    VIEW_INDEX, TOP, LEFT, RIGHT, BOTTOM, CENTER, HEIGHT, WIDTH, ROW_SPAN, COL_SPAN
+     TOP, LEFT, RIGHT, BOTTOM, CENTER, WIDTH, ROW_SPAN, COL_SPAN
 } from '../enums/constants';
 import { BLANK_BORDERS } from './defaults';
 
@@ -87,10 +87,6 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
             viewMatrix,
             spans
         } = cellSpanMaker(matrix, type, index);
-        if (type !== CENTER) {
-            containerForMatrix.style(WIDTH, `${dimensions.viewWidth[index]}px`);
-            containerForMatrix.style(HEIGHT, `${dimensions.viewHeight[VIEW_INDEX[type]]}px`);
-        }
 
         // Rendering the table components
         const { cells } = renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
@@ -124,15 +120,6 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
 }
 
 /**
- *
- *
- * @param {*} matrix
- * @param {*} start
- * @param {*} end
- */
-const splitMatrices = (matrix, start, end) => matrix.map(arr => arr.slice(start, end));
-
-/**
  * Renders all the matrices of the layout
  *
  * @export
@@ -147,8 +134,6 @@ export function renderMatrices (context, matrices, layoutDimensions) {
         bottom
     } = matrices;
     const {
-        breakPage,
-        gutterSpace,
         classPrefix
     } = context.config();
     const {
@@ -156,37 +141,16 @@ export function renderMatrices (context, matrices, layoutDimensions) {
     } = context.measurement();
     const mount = context.mountPoint();
 
-    let newCenter = [];
-    let newBottom = [];
-    let newTop = [];
-
-    const gutter = layoutDimensions.viewHeight[1] * gutterSpace.rows[breakPage.rows[0] - 1];
-    const breakLength = breakPage.rows.length;
-
-    if (breakPage.rows.length > 0 && Math.max(center[0].length, center[2].length) <= breakPage.rows[breakLength - 1]) {
-        let prev = 0;
-        const topBreak = top[1].length / breakLength;
-        const bottomBreak = bottom[1].length / breakLength;
-        breakPage.rows.forEach((e, i) => {
-            newTop[i] = splitMatrices(top, i * topBreak, (i + 1) * topBreak);
-            newCenter[i] = splitMatrices(center, prev, e);
-            newBottom[i] = splitMatrices(bottom, i * bottomBreak, (i + 1) * bottomBreak);
-            prev = e;
-        });
-    } else {
-        newTop = [top];
-        newCenter = [center];
-        newBottom = [bottom];
-    }
-    // makeElement(mount, 'div', newCenter, `${classPrefix}-grid-layout`)
-    mount.each(function (d, i) {
-        renderMatrix(newTop[i], selectElement(this), TOP, layoutDimensions, classPrefix);
-        renderMatrix(newCenter[i], selectElement(this), CENTER, layoutDimensions, classPrefix);
-        renderMatrix(newBottom[i], selectElement(this), BOTTOM, layoutDimensions, classPrefix);
-    })
-                    .style(WIDTH, `${Math.ceil(width)}px`)
-                    .style('margin-bottom', (d, i) => {
-                        if (i !== newBottom.length - 1) { return `${Math.floor(gutter)}px`; }
-                        return 0;
-                    });
+    const data = [
+        { type: TOP, matrix: top },
+        { type: CENTER, matrix: center },
+        { type: BOTTOM, matrix: bottom }
+    ];
+    makeElement(mount, 'div', data, `${classPrefix}-grid-layout-row`)
+                    .each(function (d, i) {
+                        const row = selectElement(this);
+                        row.classed(`${classPrefix}-grid-layout-row-${i}`, true);
+                        renderMatrix(d.matrix, row, d.type, layoutDimensions, classPrefix);
+                    })
+                    .style(WIDTH, `${Math.ceil(width)}px`);
 }

@@ -1,5 +1,5 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType, ReservedFields } from 'muze-utils';
+import { FieldType } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
@@ -17,7 +17,11 @@ export default class Tooltip extends SpawnableSideEffect {
 
     static defaultConfig () {
         return {
-            padding: 5
+            padding: 5,
+            offset: {
+                x: 0,
+                y: 0
+            }
         };
     }
 
@@ -48,9 +52,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const fragmented = config.mode === FRAGMENTED;
         const sourceInf = context.getSourceInfo();
         const fields = sourceInf.fields;
-        const xField = `${fields.x[0]}`;
-        const fieldsConfig = dataModel.getFieldsConfig();
-        const xFieldDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
+        const xFieldDim = fields.x[0] ? fields.x[0].type() === FieldType.DIMENSION : false;
         const showVertically = !!xFieldDim;
         const tooltipPos = payload.position;
         const boxes = [];
@@ -63,7 +65,22 @@ export default class Tooltip extends SpawnableSideEffect {
         } else {
             dataModels.push(dataModel);
         }
-        const plotDimensions = context.getPlotPointsFromIdentifiers(payload.target || payload.criteria, {
+
+        let target = payload.target;
+        let targetFields = [];
+        if (target) {
+            targetFields = target[0] || [];
+            const sourceFields = payload.sourceFields;
+            const indices = [];
+            for (let i = 0, len = targetFields.length; i < len; i++) {
+                if (sourceFields.indexOf(targetFields[i]) !== -1) {
+                    indices.push(i);
+                }
+            }
+            target = target.map(d => d.filter((v, i) => indices.indexOf(i) !== -1));
+        }
+
+        const plotDimensions = context.getPlotPointsFromIdentifiers(target || payload.criteria, {
             getBBox: true
         });
 
@@ -71,12 +88,22 @@ export default class Tooltip extends SpawnableSideEffect {
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];
             if (fragmented) {
-                plotDim = context.getPlotPointsFromIdentifiers([[ReservedFields.ROW_ID],
-                    dataModels[i].getData().uids], { getBBox: true });
+                const dimensions = dataModels[i].getData().schema.filter(d => d.type === FieldType.DIMENSION)
+                    .map(d => d.name);
+                plotDim = context.getPlotPointsFromIdentifiers(dataModels[i].project(dimensions), { getBBox: true });
                 plotDim = plotDim && plotDim[0];
             }
 
-            const dt = dataModels[i];
+            let dt = dataModels[i];
+            if (config.fields) {
+                dt = dt.project(config.fields, {
+                    saveChild: false
+                });
+            }
+            if (config.dataTransform) {
+                dt = config.dataTransform(dt, i);
+            }
+
             enter[i] = true;
             const layoutContainer = drawingInf.parentContainer;
             const layoutBoundBox = layoutContainer.getBoundingClientRect();
@@ -87,6 +114,10 @@ export default class Tooltip extends SpawnableSideEffect {
             const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(layoutContainer,
                     drawingInf.svgContainer);
 
+            sourceInf.payload = payload;
+            sourceInf.firebolt = this.firebolt;
+            sourceInf.detailFields = context.detailFields();
+            sourceInf.timeDiffs = context.timeDiffsByField();
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
@@ -101,8 +132,8 @@ export default class Tooltip extends SpawnableSideEffect {
                                 height: layoutBoundBox.height
                             })
                             .offset({
-                                x: offsetLeft,
-                                y: offsetTop
+                                x: offsetLeft + (config.offset.x || 0),
+                                y: offsetTop + (config.offset.y || 0)
                             });
 
             if (showInPosition) {
@@ -140,6 +171,7 @@ export default class Tooltip extends SpawnableSideEffect {
                 });
             }
         }
+
         for (const key in tooltips) {
             if (!enter[key]) {
                 const tooltip = tooltips[key];

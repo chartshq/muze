@@ -195,8 +195,18 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
         uniqueField,
         sort: transform.sort || 'none',
         offset: transform.offset,
+        orderBy: transform.orderBy,
         value: yFieldType === FieldType.MEASURE ? yField : xField
     }, data.uids);
+};
+
+export const getIndividualClassName = (d, i, data, context) => {
+    const className = context.config().individualClassName;
+    let classNameStr = '';
+    if (className instanceof Function) {
+        classNameStr = className(d, i, data, context);
+    }
+    return classNameStr;
 };
 
 /*

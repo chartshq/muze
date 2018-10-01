@@ -67,6 +67,20 @@ export const getLayerFromDef = (context, definition, existingLayer) => {
     return layers;
 };
 
+export const resolveEncodingTransform = (layerInst, store) => {
+    const encodingTransform = layerInst.config().encodingTransform || {};
+    const resolvable = encodingTransform.resolvable;
+    let depArr = [];
+    if (resolvable) {
+        const resolved = resolvable(store);
+        depArr = resolved.depArr;
+        layerInst.encodingTransform(resolved.fn);
+    } else if (encodingTransform instanceof Function) {
+        layerInst.encodingTransform(encodingTransform);
+    }
+    return depArr;
+};
+
 export const createLayers = (context, layerDefinitions) => {
     const layersMap = context._layersMap;
     const markSet = {};
@@ -76,10 +90,16 @@ export const createLayers = (context, layerDefinitions) => {
             unit: context
         }
     };
-    let layers = layerDefinitions.reduce((layersArr, layerDef, i) => {
+    let layerIndex = 0;
+    let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef, i) => {
         const mark = layerDef.mark;
         const definition = layerDef.def;
         const markId = `${mark}-${i}`;
+        const defArr = toArray(definition);
+        defArr.forEach((def) => {
+            def.order = layerDef.order + layerIndex;
+        });
+        layerIndex += defArr.length;
         const instances = getLayerFromDef(context, definition, layersMap[markId]);
         store.layers = Object.assign(store.layers, instances);
         const instanceValues = Object.values(instances);
@@ -91,18 +111,8 @@ export const createLayers = (context, layerDefinitions) => {
     store.unit = context;
     const layerdeps = {};
     layers.forEach((layer) => {
-        const encodingTransform = layer.config().encodingTransform || {};
-        const resolvable = encodingTransform.resolvable;
-
-        layerdeps[layer.alias()] = [];
-        if (resolvable) {
-            const resolved = resolvable(store);
-            const depArr = resolved.depArr;
-            layerdeps[layer.alias()] = depArr;
-            layer.encodingTransform(resolved.fn);
-        } else if (encodingTransform instanceof Function) {
-            layer.encodingTransform(encodingTransform);
-        }
+        const depArr = resolveEncodingTransform(layer, store);
+        layerdeps[layer.alias()] = depArr;
     });
 
     const order = getDependencyOrder(layerdeps);

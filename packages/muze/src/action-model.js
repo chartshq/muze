@@ -60,6 +60,18 @@ class ActionModel {
         return this;
     }
 
+    registerPropagationBehaviourMap (map) {
+        const canvases = this._registrableComponents;
+
+        canvases.forEach((canvas) => {
+            canvas.once('canvas.updated').then((args) => {
+                const matrix = args.client.composition().visualGroup.matrixInstance().value;
+                matrix.each(cell => cell.valueOf().firebolt().registerPropagationBehaviourMap(map));
+            });
+        });
+        return this;
+    }
+
     mapSideEffects (map) {
         const canvases = this._registrableComponents;
 

@@ -90,7 +90,7 @@ export default class RetinalEncoder extends VisualEncoder {
                 if (field) {
                     axes[encType].forEach((axis) => {
                         const domain = domains[field];
-                        axis.updateDomain(domain);
+                        !enc[1].domain && axis.updateDomain(domain);
                     });
                 }
             }

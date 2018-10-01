@@ -1,3 +1,4 @@
+import { DateTimeFormatter } from 'muze-utils';
 import Variable from './variable';
 
 /**
@@ -65,10 +66,24 @@ export default class SimpleVariable extends Variable {
      * @memberof SimpleVariable
      */
     numberFormat () {
-        const uid = this.data().getFieldsConfig()[this.oneVar()].index;
-        const formatter = this.data().getFieldspace().fields[uid]._ref;
+        if (this.type() === 'measure') {
+            const formatter = this.data().getFieldspace().getMeasure()[this.oneVar()]._ref;
+            return formatter.numberFormat();
+        } return val => val;
+    }
 
-        return this.type() === 'measure' ? formatter.numberFormat() : val => val;
+    /**
+     *
+     *
+     * @memberof SimpleVariable
+     */
+    format (values) {
+        if (values && this.subtype() === 'temporal') {
+            const formatter = this.data().getFieldspace().getDimension()[this.oneVar()]._ref.schema.format;
+            const dtFormat = new DateTimeFormatter(formatter);
+            values = values.map(e => dtFormat.getNativeDate(e));
+        }
+        return values;
     }
 
     /**

@@ -18,6 +18,7 @@ export const WIDTH = 'width';
 export const HEIGHT = 'height';
 export const PADDING = 'padding';
 export const BORDER = 'border';
+export const MARGIN = 'margin';
 export const CONFIG = 'config';
 export const MOUNT = 'mount';
 export const CANVAS_UPDATED = 'canvasUpdated';

@@ -148,9 +148,13 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     getLabelSpaces () {
+        const {
+            item,
+            classPrefix
+        } = this.config();
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
-            `${this.config().classPrefix}-legend-item-info`));
-        return getItemMeasures(this.data(), VALUE, this._labelManager);
+            `${classPrefix}-legend-item-info`));
+        return getItemMeasures(this.data(), VALUE, this._labelManager, item.text.formatter);
     }
 
     /**

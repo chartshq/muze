@@ -165,6 +165,13 @@ export default class SimpleAxis {
         return scale;
     }
 
+    getTickFormatter (tickFormat, numberFormat) {
+        if (tickFormat) {
+            return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
+        }
+        return () => val => numberFormat(val);
+    }
+
     /**
      *
      *
@@ -180,15 +187,9 @@ export default class SimpleAxis {
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
-            let axis = axisClass(this.scale());
-            let formatter = {};
+            const axis = axisClass(this.scale());
+            this.formatter = this.getTickFormatter(tickFormat, numberFormat);
 
-            if (tickFormat) {
-                formatter = (val, ...params) => tickFormat(numberFormat(val), ...params);
-            } else {
-                formatter = val => numberFormat(val);
-            }
-            axis = axis.tickFormat(formatter);
             return axis;
         }
         return null;
@@ -348,11 +349,19 @@ export default class SimpleAxis {
             this.domain([]);
             this._domainLock = true;
         }
-        return this.updateDomainBounds(domain || []);
+        const cachedDomain = [];
+        domain && domain.forEach((d) => {
+            d !== undefined && d !== null && cachedDomain.push(d);
+        });
+        return this.updateDomainBounds(cachedDomain);
     }
 
     getMinTickDifference () {
         return this.domain();
+    }
+
+    getFormattedTickValues (tickValues) {
+        return tickValues;
     }
 
     /**

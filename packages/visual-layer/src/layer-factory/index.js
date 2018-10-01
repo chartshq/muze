@@ -76,6 +76,11 @@ const layerFactory = (() => {
         },
         composeLayers: (layerType, layerDefs) => {
             compositeLayers[layerType] = layerDefs;
+        },
+        sanitizeLayerConfig: (layerDef) => {
+            const newConf = mergeRecursive({}, layerDef);
+            sanitizeEncoding(newConf.encoding);
+            return newConf;
         }
     };
     return factoryObj;

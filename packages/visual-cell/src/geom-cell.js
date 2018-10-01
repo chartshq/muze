@@ -9,7 +9,8 @@ import SimpleCell from './simple-cell';
 import { GEOM } from './enums/cell-type';
 import { PROPS } from './props';
 import {
-    CLASSPREFIX, HEIGHT, WIDTH, DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, GEOM_CELL
+    CLASSPREFIX, HEIGHT, WIDTH, DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, GEOM_CELL,
+    DETAIL_FIELDS
 } from './enums/constants';
 import { DEFAULT_CONFIG } from './enums/defaults';
 
@@ -122,7 +123,7 @@ class GeomCell extends SimpleCell {
     updateModel () {
         const unit = this.source();
         unit.lockModel();
-        [DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG].forEach((prop) => {
+        [DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, DETAIL_FIELDS].forEach((prop) => {
             this[prop]() && unit[prop](this[prop]());
         });
         unit.unlockModel();

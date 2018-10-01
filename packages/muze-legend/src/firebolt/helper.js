@@ -49,14 +49,21 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         }
     }
 
-    metaData.addToPropNamespace(`legend-${sourceId}`, {
+    let propagateInterpolatedValues = false;
+
+    if (propagationData) {
+        const schema = propagationData.getSchema();
+        propagateInterpolatedValues = schema.every(d => d.type === fieldType.MEASURE);
+    }
+
+    const propConfig = {
+        sourceId: `legend-${sourceId}`,
         payload: propPayload,
         criteria: propPayload.criteria === null ? null : propagationData,
         isMutableAction,
-        actionName: propPayload.action
-    });
-    metaData.propagate(propagationData, propPayload, {
-        isMutableAction,
-        sourceId
-    });
+        propagateInterpolatedValues,
+        action: propPayload.action
+    };
+
+    metaData.propagate(propagationData, propConfig, true);
 };

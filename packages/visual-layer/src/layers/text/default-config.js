@@ -28,11 +28,10 @@ export const defaultConfig = {
     encoding: {
         color: {},
         text: {
-            value: ''
-        },
-        background: {
-            padding: 10,
-            enabled: false
+            value: '',
+            background: {
+                padding: 10
+            }
         }
     },
     states: {

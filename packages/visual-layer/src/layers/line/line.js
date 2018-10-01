@@ -11,7 +11,13 @@ import { drawLine } from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
-import { attachDataToVoronoi, animateGroup, getLayerColor, positionPoints } from '../../helpers';
+import {
+    attachDataToVoronoi,
+    animateGroup,
+    getLayerColor,
+    positionPoints,
+    getIndividualClassName
+} from '../../helpers';
 
 import './styles.scss';
 
@@ -88,7 +94,7 @@ export default class LineLayer extends BaseLayer {
         const transform = config.transform;
         const colorField = encoding.color && encoding.color.field;
 
-        if (colorField) {
+        if (colorField && !transform.groupBy) {
             transform.groupBy = colorField;
         }
         return config;
@@ -192,6 +198,7 @@ export default class LineLayer extends BaseLayer {
                 source: d._data,
                 meta
             };
+            point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
             return point;
         });
@@ -254,7 +261,11 @@ export default class LineLayer extends BaseLayer {
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 
                 if (!colorFieldMeasure) {
-                    style = points[0].style;
+                    const colorVal = points.find(d => d._data[colorFieldIndex] !== null &&
+                        d._data[colorFieldIndex] !== undefined);
+                    if (colorVal) {
+                        style = this.getPathStyle(axes.color.getColor(colorVal._data[colorFieldIndex]));
+                    }
                 }
                 this.getDrawFn()({
                     container: group.node(),
