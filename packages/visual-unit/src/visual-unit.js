@@ -26,7 +26,8 @@ import {
     attachAxisToLayers,
     getLayerAxisIndex,
     createSideEffectGroup,
-    getAdjustedDomain
+    getAdjustedDomain,
+    resolveEncodingTransform
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -181,6 +182,13 @@ export default class VisualUnit {
         return this;
     }
 
+    timeDiffsByField (...params) {
+        if (params.length) {
+            return this;
+        }
+        return this._timeDiffsByField;
+    }
+
     /**
      * Renders the visual unit. It creates the layout and renders the axes and layers.
      * @return {VisualUnit} Instance of visual unit.
@@ -295,7 +303,12 @@ export default class VisualUnit {
         const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
         this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
         attachAxisToLayers(this.axes(), instances, layerAxisIndex);
-        this.layers().forEach((lyr) => {
+        const store = { unit: this, layers: {} };
+        this.layers().forEach((inst) => {
+            store.layers[inst.alias()] = inst;
+        });
+        instances.forEach((lyr) => {
+            resolveEncodingTransform(lyr, store);
             lyr.measurement(measurement);
             lyr.dataProps({
                 timeDiffs: this.store().get(TIMEDIFFS)

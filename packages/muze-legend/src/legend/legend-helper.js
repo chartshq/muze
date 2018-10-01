@@ -92,12 +92,12 @@ export const getMaxMeasures = (data, prop, labelManager) => {
  * @param {*} labelManager
  * @return
  */
-export const getItemMeasures = (data, prop, labelManager) => {
+export const getItemMeasures = (data, prop, labelManager, formatter) => {
     const space = [];
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const { height, width } = labelManager.getOriSize(value);
+        const { height, width } = labelManager.getOriSize(formatter(value));
         space[index] = { height: height + 1, width: width + 1 };
     });
     return space;
@@ -171,7 +171,7 @@ export const computeItemSpaces = (config, measures, data) => {
             totalHeight = Math.max(totalHeight, itemSpace.height);
         } else {
             totalHeight += itemSpace.height;
-            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
+            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth) + effPadding;
         }
         maxItemSpaces = {
             width: Math.max(itemSpace.width, maxItemSpaces.width),
@@ -205,7 +205,7 @@ export const computeItemSpaces = (config, measures, data) => {
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
                 labelSpaces[i].width = maxItemSpaces.width - maxIconWidth;
-                totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
+                totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth) + effPadding;
             }
         }
     });

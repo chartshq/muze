@@ -23,6 +23,7 @@ export class LegendFireBolt extends Firebolt {
             payload
         });
     }
+
     getAddSetFromCriteria (criteria) {
         let values;
         let uniqueIds;

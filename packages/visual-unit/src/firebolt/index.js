@@ -30,6 +30,7 @@ export default class UnitFireBolt extends Firebolt {
         const propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
         const sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
         const sourceSideEffects = this._sourceSideEffects;
+        const sideEffectInstances = this.sideEffects();
         const actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
 
         const applicableSideEffects = payload.sideEffects ? [{
@@ -39,13 +40,18 @@ export default class UnitFireBolt extends Firebolt {
         applicableSideEffects.forEach((d) => {
             let mappedEffects = d.effects;
             mappedEffects = mappedEffects.filter((se) => {
+                const mutates = sideEffectInstances[se.name || se].constructor.mutates();
+                if (mutates && propagationInf.isMutableAction === false) {
+                    return false;
+                }
                 if (!actionOnSource && payload.criteria !== null) {
                     const sideEffectChecker = sourceSideEffects[se.name || se];
                     return sideEffectChecker ? sideEffectChecker(propagationInf.propPayload, context) : true;
                 }
-                if (propagationSourceCanvas === aliasName) {
+                if (propagationSourceCanvas === aliasName || actionOnSource) {
                     return se.applyOnSource !== false;
                 }
+
                 return true;
             });
             d.effects = mappedEffects;
@@ -58,14 +64,13 @@ export default class UnitFireBolt extends Firebolt {
     }
 
     onDataModelPropagation () {
-        return (propValue) => {
+        return (data, config) => {
             let isSourceFieldPresent = true;
             let isMutableAction = false;
-            const data = propValue.data;
-            const propPayload = propValue.payload;
-            const sourceIdentifiers = propValue.sourceIdentifiers;
-            const action = propPayload.action;
-            const unitId = this.context.id();
+            const propPayload = config.payload;
+            const sourceIdentifiers = config.sourceIdentifiers;
+            const enabledFn = config.enabled;
+            const action = config.action;
             const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
 
             if (sourceIdentifiers) {
@@ -77,10 +82,7 @@ export default class UnitFireBolt extends Firebolt {
                 }
             }
 
-            const sourceUnitId = propPayload.sourceUnit;
-            const actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
-            const payload = payloadFn(this.context, data, propValue);
-            const sideEffects = this._behaviourEffectMap[action];
+            const payload = payloadFn(this.context, data, config);
             const sourceBehaviours = this._sourceBehaviours;
             const filterFn = sourceBehaviours[action] || sourceBehaviours['*'];
             let enabled = true;
@@ -89,15 +91,15 @@ export default class UnitFireBolt extends Firebolt {
                 enabled = filterFn(propPayload || {}, this.context);
             }
 
+            if (enabledFn) {
+                enabled = enabledFn(config, this) && enabled !== false;
+            }
+
             if (enabled) {
-                const mutableEffect = sideEffects.find(sideEffect =>
-                    this._sideEffects[sideEffect.name || sideEffect].constructor.mutates(true));
-
-                isMutableAction = !!mutableEffect;
-
-                if (actionOnSource && mutableEffect && mutableEffect.applyOnSource === false) {
-                    isMutableAction = false;
-                }
+                const effects = this._behaviourEffectMap[action];
+                const sideEffectInstances = this.sideEffects();
+                isMutableAction = config.groupId ?
+                    effects.some(d => sideEffectInstances[d.name || d].constructor.mutates()) : config.isMutableAction;
 
                 const propagationInf = {
                     propagate: false,
@@ -106,8 +108,10 @@ export default class UnitFireBolt extends Firebolt {
                     sourceIdentifiers,
                     persistent: false,
                     isSourceFieldPresent,
-                    sourceId: propValue.sourceId
+                    sourceId: config.propagationSourceId,
+                    isMutableAction: config.isMutableAction
                 };
+
                 this._actionHistory[action] = {
                     payload,
                     propagationInf,

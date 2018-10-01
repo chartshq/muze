@@ -67,6 +67,20 @@ export const getLayerFromDef = (context, definition, existingLayer) => {
     return layers;
 };
 
+export const resolveEncodingTransform = (layerInst, store) => {
+    const encodingTransform = layerInst.config().encodingTransform || {};
+    const resolvable = encodingTransform.resolvable;
+    let depArr = [];
+    if (resolvable) {
+        const resolved = resolvable(store);
+        depArr = resolved.depArr;
+        layerInst.encodingTransform(resolved.fn);
+    } else if (encodingTransform instanceof Function) {
+        layerInst.encodingTransform(encodingTransform);
+    }
+    return depArr;
+};
+
 export const createLayers = (context, layerDefinitions) => {
     const layersMap = context._layersMap;
     const markSet = {};
@@ -91,18 +105,8 @@ export const createLayers = (context, layerDefinitions) => {
     store.unit = context;
     const layerdeps = {};
     layers.forEach((layer) => {
-        const encodingTransform = layer.config().encodingTransform || {};
-        const resolvable = encodingTransform.resolvable;
-
-        layerdeps[layer.alias()] = [];
-        if (resolvable) {
-            const resolved = resolvable(store);
-            const depArr = resolved.depArr;
-            layerdeps[layer.alias()] = depArr;
-            layer.encodingTransform(resolved.fn);
-        } else if (encodingTransform instanceof Function) {
-            layer.encodingTransform(encodingTransform);
-        }
+        const depArr = resolveEncodingTransform(layer, store);
+        layerdeps[layer.alias()] = depArr;
     });
 
     const order = getDependencyOrder(layerdeps);

@@ -5,7 +5,7 @@ import * as PROPS from '../../enums/props';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
-import { getAxesScales, getLayerColor, positionPoints } from '../../helpers';
+import { getAxesScales, getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
 export default class TickLayer extends PointLayer {
 
@@ -66,7 +66,6 @@ export default class TickLayer extends PointLayer {
                 yAxis
             } = getAxesScales(axes);
         const fieldsConfig = this.data().getFieldsConfig();
-        const individualClassName = this.config().individualClassName;
         const {
                 xField,
                 yField,
@@ -153,10 +152,7 @@ export default class TickLayer extends PointLayer {
                     rowId: d._id,
                     meta
                 };
-                if (individualClassName instanceof Function) {
-                    point.className = individualClassName(d, i);
-                }
-
+                point.className = getIndividualClassName(d, i, data, this);
                 points.push(point);
                 this.cachePoint(d[key], point);
             }

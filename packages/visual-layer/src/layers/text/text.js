@@ -7,7 +7,7 @@ import {
 import { BaseLayer } from '../../base-layer';
 import drawText from './renderer';
 import { defaultConfig } from './default-config';
-import { getLayerColor, positionPoints } from '../../helpers';
+import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
 
@@ -46,7 +46,7 @@ export default class TextLayer extends BaseLayer {
      * @return {Array.<Object>}  Array of points
      */
     translatePoints (data, encoding, axes) {
-        let points;
+        let points = [];
         const colorAxis = axes.color;
         const textEncoding = encoding.text;
         const { field: textField, value, formatter: textFormatter } = textEncoding;
@@ -55,12 +55,13 @@ export default class TextLayer extends BaseLayer {
         const fieldsConfig = this.data().getFieldsConfig();
         const backgroundField = encoding.background.field;
         const backgroundFieldIndex = backgroundField ? fieldsConfig[backgroundField].index : -1;
-        const colorFieldIndex = colorField ? fieldsConfig[colorField].index : -1;
+        const colorFieldIndex = fieldsConfig[colorField] ? fieldsConfig[colorField].index : -1;
         const textFieldIndex = textField ? fieldsConfig[textField] && fieldsConfig[textField].index : -1;
         const xEnc = ENCODING.X;
         const yEnc = ENCODING.Y;
 
-        points = data.map((d, i) => {
+        for (let i = 0, len = data.length; i < len; i++) {
+            const d = data[i];
             const row = d._data;
             const textValue = textField ? row[textFieldIndex] : value;
 
@@ -70,7 +71,7 @@ export default class TextLayer extends BaseLayer {
             const { color, rawColor } = getLayerColor({ datum: d, index: i },
                 { colorEncoding, colorAxis, colorFieldIndex });
 
-            return {
+            const point = {
                 enter: {},
                 update: {
                     x: xPx,
@@ -84,12 +85,20 @@ export default class TextLayer extends BaseLayer {
                     originalColor: rawColor,
                     colorTransform: {}
                 },
+                style: {},
                 _data: row,
                 _id: d._id,
                 source: d._data,
                 rowId: d._id
             };
-        });
+
+            if (d.x !== null && d.y !== null) {
+                points.push(point);
+            }
+
+            point.className = getIndividualClassName(d, i, data, this);
+        }
+
         points = positionPoints(this, points);
 
         return points;

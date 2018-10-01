@@ -1,3 +1,4 @@
+import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { adjustRange } from './helper';
 import { TIME } from '../enums/scale-type';
@@ -61,8 +62,8 @@ export default class TimeAxis extends SimpleAxis {
         const tickFormatter = tickFormat || scale.tickFormat();
 
         if (domain && domain.length) {
-            smartTicks = domain.map((d) => {
-                smartlabel = labelManager.getSmartText(tickFormatter(d), maxWidth, maxHeight);
+            smartTicks = domain.map((d, i) => {
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
@@ -83,13 +84,16 @@ export default class TimeAxis extends SimpleAxis {
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
-            let axis = axisClass(this.scale());
-
-            if (tickFormat) {
-                axis = axis.tickFormat(tickFormat);
-            }
-
+            const axis = axisClass(this.scale());
+            this.formatter = this.getTickFormatter(tickFormat);
             return axis;
+        }
+        return null;
+    }
+
+    getTickFormatter (tickFormat) {
+        if (tickFormat) {
+            return ticks => (val, i) => tickFormat(val, i, ticks);
         }
         return null;
     }
@@ -182,6 +186,10 @@ export default class TimeAxis extends SimpleAxis {
             this.logicalSpace(null);
             return this;
         } return this._domain;
+    }
+
+    getMinTickDifference () {
+        return getSmallestDiff(this.config().tickValues);
     }
 
     /**

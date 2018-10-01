@@ -7,6 +7,7 @@ import {
     ReservedFields,
     registerListeners,
     transactor,
+    DataModel,
     clone
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
@@ -441,8 +442,17 @@ export default class BaseLayer extends SimpleLayer {
         if (!this.data()) {
             return [];
         }
-        const fieldNames = identifiers[0];
-        const values = identifiers.slice(1, identifiers.length);
+        let fieldNames;
+        let values;
+        if (identifiers instanceof DataModel) {
+            const dataObj = identifiers.getData();
+            fieldNames = dataObj.schema.map(d => d.name);
+            values = dataObj.data;
+        } else {
+            fieldNames = identifiers[0];
+            values = identifiers.slice(1, identifiers.length);
+        }
+
         const points = this._points;
         const fieldsConfig = this.data().getFieldsConfig();
 
@@ -534,6 +544,7 @@ export default class BaseLayer extends SimpleLayer {
      * @memberof BaseLayer
      */
     getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(data => set.indexOf(data._id) !== -1);
+        return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
+            (data ? set.indexOf(data._id) !== -1 : false));
     }
 }
