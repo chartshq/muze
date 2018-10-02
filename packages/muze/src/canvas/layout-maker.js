@@ -1,78 +1,8 @@
-import { cellRegistry } from '@chartshq/visual-cell';
 import { mergeRecursive } from 'muze-utils';
 import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
-
-const BlankCell = cellRegistry().get().BlankCell;
-
-const createBlankCell = () => new BlankCell();
-
-/**
- *
- *
- * @param {*} canvases
- * @returns
- */
-const getMaxRows = (rows) => {
-    const maxRows = [0, 0];
-
-    maxRows[0] = Math.max(maxRows[0], rows[0].length ? rows[0][0].length : 0);
-    maxRows[1] = Math.max(maxRows[1], rows[1].length ? rows[1][0].length : 0);
-    return maxRows;
-};
-
-/**
- *
- *
- * @param {*} arr
- * @param {*} value
- */
-const fillArray = (arr, value) => arr.map(() => value());
-
-/**
- *
- *
- * @param {*} rows
- * @param {*} columns
- * @param {*} blankCellCreator
- * @returns
- */
-const blankMatrixCreator = (rows, columns, blankCellCreator) => {
-    const arr = [];
-
-    for (let i = 0; i < rows; i++) {
-        let array = new Array(columns).fill([]);
-        array = fillArray(array, blankCellCreator);
-        arr.push(array);
-    }
-    return arr;
-};
-
-/**
- *
- *
- * @param {*} rowMatrices
- * @param {*} maxRows
- */
-const blankCellCreator = (rowMatrices, maxRows) => rowMatrices.map((rowMatrix, rowMatrixIndex) => {
-    if (rowMatrix.length === 0 && maxRows[rowMatrixIndex] > 0) {
-        const numberOfRows = Math.max(rowMatrices[0].length, rowMatrices[1].length);
-        return blankMatrixCreator(numberOfRows, maxRows[rowMatrixIndex], createBlankCell);
-    }
-    if (rowMatrix.length > 0) {
-        if (rowMatrix[0] && rowMatrix[0].length <= maxRows[rowMatrixIndex]) {
-            return rowMatrix.map((row) => {
-                let arr = new Array(maxRows[rowMatrixIndex] - rowMatrix[0].length).fill(1);
-                arr = fillArray(arr, createBlankCell);
-                return [...arr, ...row];
-            });
-        }
-        return blankMatrixCreator(rowMatrix.length, maxRows[rowMatrixIndex], createBlankCell);
-    }
-    return rowMatrix;
-});
 
 /**
  *
@@ -81,20 +11,13 @@ const blankCellCreator = (rowMatrices, maxRows) => rowMatrices.map((rowMatrix, r
  * @returns
  */
 export const prepareLayout = (layout, components, config, measurement) => {
-    let topL;
-    let topR;
-    let bottomL;
-    let bottomR;
     const {
         rows,
         columns,
         values,
         cornerMatrices
     } = components;
-    const {
-        showHeaders
-    } = config;
-    const maxRows = getMaxRows(rows);
+
     const {
         topLeft,
         topRight,
@@ -102,21 +25,12 @@ export const prepareLayout = (layout, components, config, measurement) => {
         bottomRight
     } = cornerMatrices;
 
-    if (!showHeaders) {
-        const colLengths = [columns[0].length, columns[1].length];
-        // Create blank cells for corener matrices
-        [topL, topR] = blankCellCreator([new Array(colLengths[0]), new Array(colLengths[0])], maxRows);
-        [bottomL, bottomR] = blankCellCreator([new Array(colLengths[1]), new Array(colLengths[1])], maxRows);
-    } else {
-        [topL, topR, bottomL, bottomR] = [topLeft, topRight, bottomLeft, bottomRight];
-    }
-
     layout.measurement(measurement)
                     .config(config)
                     .matrices({
-                        top: [topL, columns[0], topR],
+                        top: [topLeft, columns[0], topRight],
                         center: [rows[0], values, rows[1]],
-                        bottom: [bottomL, columns[1], bottomR]
+                        bottom: [bottomLeft, columns[1], bottomRight]
                     })
                     .triggerReflow();
 };

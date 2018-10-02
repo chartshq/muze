@@ -8,13 +8,11 @@ $prefix: muze-;
     height: 100px;
     float: none !important;
     display: inline-block;
-    border: solid rgba(0, 0, 0, 0);
 
 }
 
 .#{$prefix}legend-title {
-    border-bottom: solid rgba(0,0,0,0);
-    display: block;
+    display: table;
     align-items: center;
     float: left;
     text-align: left;
@@ -22,6 +20,11 @@ $prefix: muze-;
     height: 30px;
     fill:#5F5F5F;
     font-weight:600;
+}
+
+.#{$prefix}legend-title-text {
+    display: table-cell;
+    vertical-align: middle;
 }
 .#{$prefix}legend-overflow {
     text-align: center
