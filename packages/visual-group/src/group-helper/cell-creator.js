@@ -123,13 +123,14 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
     }, '')).map((axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
-            const { orientation } = axisInst.config();
+            const { orientation, show } = axisInst.config();
 
             return new cells.AxisCell().source(axisInst).config({
-                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP
+                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP,
+                show
             });
         }
-        return new cells.BlankCell();
+        return new cells.BlankCell().config({ show: false });
     });
 
 /**

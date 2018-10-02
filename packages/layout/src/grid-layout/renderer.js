@@ -17,7 +17,7 @@ function renderTable (mount, className, rowData) {
     const table = makeElement(mount, 'table', ['layout'], `${className}-table`);
     const body = makeElement(table, 'tbody', ['layout'], `${className}-body`);
     const rows = makeElement(body, 'tr', rowData, `${className}-tr`);
-    const cells = makeElement(rows, 'td', (d, i) => d.filter(e => e !== null).map(e =>
+    const cells = makeElement(rows, 'td', (d, i) => d.filter(e => e !== null && e.config().show).map(e =>
                                 ({ placeholder: e, rowIndex: i })), `${className}-td`, {}, key => key.placeholder.id);
 
     return { table, body, rows, cells };

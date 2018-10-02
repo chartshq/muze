@@ -50,19 +50,22 @@ export const getInterpolatedData = (domain, steps) => {
  * @param {*} measurement
  * @param {*} classPrefix
  */
-export const titleCreator = (container, title, measurement, config) =>
-                makeElement(container, 'div', [1], `${config.classPrefix}-legend-title`)
-                                .style(WIDTH, '100%')
-                                .style(HEIGHT, `${measurement.height}px`)
-                                .style('padding-left', `${measurement.padding}px`)
-                                .style('padding-right', `${measurement.padding}px`)
-                                .style('border-bottom-width', `${measurement.border}px`)
-                                .style('text-align', title.orientation instanceof Function ?
-                                        title.orientation(config.position) : title.orientation)
-                                .text(title.text)
-                                .node();
+export const titleCreator = (container, title, measurement, config) => {
+    const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
+            .style(WIDTH, `${measurement.width}px`)
+            .style(HEIGHT, `${measurement.height}px`)
+            .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
+            .style('text-align', title.orientation instanceof Function ?
+                    title.orientation(config.position) : title.orientation);
+    return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
+                    .style(WIDTH, `${measurement.width}px`)
+                    .style(HEIGHT, '100%')
+                    .style('padding', `${measurement.padding}px`)
+                    .text(title.text)
+                    .node();
+};
 
-/**
+                                /**
  *
  *
  * @param {*} data
@@ -180,7 +183,6 @@ export const computeItemSpaces = (config, measures, data) => {
         itemSpaces.push(itemSpace);
         iconSpaces.push(iconSpace);
     });
-
     itemSpaces.forEach((itemSpace, i) => {
         if (align === 'horizontal') {
             itemSpace.height = totalHeight;
@@ -194,7 +196,7 @@ export const computeItemSpaces = (config, measures, data) => {
                 itemSpaces[i].width = maxIconWidth;
                 labelSpaces[i].width = maxIconWidth;
             }
-            totalWidth = Math.max(totalWidth + itemSpaces[i].width, titleWidth);
+            totalWidth = Math.max(totalWidth + itemSpaces[i].width);
         } else {
             itemSpace.width = Math.max(totalWidth, maxWidth);
             if (textOrientation === TOP || textOrientation === BOTTOM) {
@@ -205,10 +207,11 @@ export const computeItemSpaces = (config, measures, data) => {
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
                 labelSpaces[i].width = maxItemSpaces.width - maxIconWidth;
-                totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth) + effPadding;
+                totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
             }
         }
     });
+    totalWidth = Math.max(totalWidth, titleWidth);
     totalHeight += titleHeight + effPadding;
 
     return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };

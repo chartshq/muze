@@ -101,7 +101,7 @@ export const setupChangeListeners = (context) => {
             setMatrixInstances(context, placeholderInfo);
 
             // Prepare corner matrices
-            context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields));
+            context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config[1]));
 
              // Set placeholder information
             context.placeholderInfo(placeholderInfo);

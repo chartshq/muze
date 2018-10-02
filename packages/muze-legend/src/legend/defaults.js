@@ -31,7 +31,8 @@ export const LEGEND_TITLE = {
 
 export const DEFAULT_CONFIG = {
     classPrefix: 'muze',
-
+    borderStyle: 'solid',
+    borderColor: 'rgba(0,0,0,0)',
     formatter: {
         bounds: {
             lower: 'less than',
