@@ -130,7 +130,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
                 show
             });
         }
-        return new cells.BlankCell();
+        return new cells.BlankCell().config({ show: false });
     });
 
 /**

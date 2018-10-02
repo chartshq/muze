@@ -7,27 +7,27 @@ export const DEFAULT_CONFIG = {
         position: 'right',
         color: {
             show: true,
-            padding: 2,
-            margin: 2,
+            padding: 1,
+            margin: 3,
             border: 1,
-            height: 30,
-            width: 30
+            height: 20,
+            width: 20
         },
         shape: {
             show: true,
-            padding: 2,
-            margin: 2,
+            padding: 1,
+            margin: 3,
             border: 1,
-            height: 30,
-            width: 30
+            height: 20,
+            width: 20
         },
         size: {
             show: true,
-            padding: 2,
-            margin: 2,
+            padding: 1,
+            margin: 3,
             border: 1,
-            height: 30,
-            width: 30
+            height: 20,
+            width: 20
         }
     },
     showHeaders: false,

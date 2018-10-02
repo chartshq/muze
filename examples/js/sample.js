@@ -77,7 +77,7 @@ d3.json('../data/cars.json', (data) => {
     .rows(['Cylinders', 'Origin'])
     .columns(['Miles_per_Gallon', 'Horsepower'])
     .data(rootData)
-    .color('Origin')
+    .color('Acceleration')
     .width(600)
     .height(500)
     .config({
@@ -98,11 +98,16 @@ d3.json('../data/cars.json', (data) => {
 
     const lineChart = env
     .canvas()
-    .rows(['Miles_per_Gallon'])
+    .rows([['Miles_per_Gallon'], ['Acceleration', 'Horsepower', 'Horsepower']])
     .columns(['Year'])
     .data(rootData)
-    .width(400)
-    .height(300)
+    .width(450)
+    .height(700)
+    .color({
+        field: 'Acceleration',
+        step: true,
+        stops: 5
+    })
     .config({
         axes: {
             y: {
@@ -184,6 +189,11 @@ d3.json('../data/cars.json', (data) => {
                     return tooltipData;
                 }
             }
+        },
+        legend: {
+            color: {
+                position: 'bottom'
+            }
         }
     })
     .title('Change of Avg Mileage of Cars over 12 Years', {
@@ -203,21 +213,29 @@ d3.json('../data/cars.json', (data) => {
 
     const pieChart = env
     .canvas()
-    .rows([])
-    .columns([])
+    .rows(['Origin'])
+    .columns(['Acceleration'])
     .data(rootData)
-    .width(300)
-    .height(300)
-    .layers([
-        {
-            mark: 'arc',
-            encoding: {
-                angle: 'CountVehicle'
+    .width(600)
+    .height(600)
+    // .layers([
+    //     {
+    //         mark: 'arc',
+    //         encoding: {
+    //             angle: 'CountVehicle'
+    //         }
+    //     }
+    // ])
+    .config({ legend: {
+        position: 'bottom',
+        color: {
+            title: {
+                // text: 'Country of Origin of Cars'
             }
         }
-    ])
-    .config({ legend: { position: 'bottom' } })
+    } })
     .color('Origin')
+    .shape('Origin')
     .title('Count of Cars by Country', {
         align: 'center'
     })
