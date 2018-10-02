@@ -586,7 +586,7 @@ export default class MatrixResolver {
      * @return
      * @memberof MatrixResolver
      */
-    createHeaders (placeholders, fieldNames) {
+    createHeaders (placeholders, fieldNames, config) {
         let bottomLeft = [];
         let bottomRight = [];
         const {
@@ -602,15 +602,17 @@ export default class MatrixResolver {
         const [leftRows, rightRows] = rows;
         const [topCols, bottomCols] = columns;
         const rowHeaders = fieldNames.rows;
+        const blankCellCreator = cell => new BlankCell().config({ show: cell.config().show });
+
         // Headers and footers are created based on the rows. Thereafter, using the column information
         // they are tabularized into the current structure
         const headers = {
-            left: headerCreator(leftRows, rowHeaders[0], TextCell, labelManager),
-            right: headerCreator(rightRows, rowHeaders[1], TextCell, labelManager)
+            left: headerCreator(leftRows, rowHeaders[0], config.showHeaders ? TextCell : BlankCell, labelManager),
+            right: headerCreator(rightRows, rowHeaders[1], config.showHeaders ? TextCell : BlankCell, labelManager)
         };
         const footers = {
-            left: leftRows.length > 0 ? leftRows[0].map(() => new BlankCell()) : [],
-            right: rightRows.length > 0 ? rightRows[0].map(() => new BlankCell()) : []
+            left: leftRows.length > 0 ? leftRows[0].map(blankCellCreator) : [],
+            right: rightRows.length > 0 ? rightRows[0].map(blankCellCreator) : []
         };
         const [topLeft, topRight] = [LEFT, RIGHT].map(type => topCols.map((col, i) => {
             if (i === topCols.length - 1) {
@@ -628,8 +630,8 @@ export default class MatrixResolver {
                 return footers[type];
             }));
         } else {
-            bottomLeft = bottomCols.map(() => (leftRows.length > 0 ? leftRows[0].map(() => new BlankCell()) : []));
-            bottomRight = bottomCols.map(() => (rightRows.length > 0 ? rightRows[0].map(() => new BlankCell()) : []));
+            bottomLeft = bottomCols.map(() => (leftRows.length > 0 ? leftRows[0].map(blankCellCreator) : []));
+            bottomRight = bottomCols.map(() => (rightRows.length > 0 ? rightRows[0].map(blankCellCreator) : []));
         }
 
         lifeCycleManager.notify({

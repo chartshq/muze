@@ -132,8 +132,9 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @return
  */
 export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
-    const headers = fields.length > 0 ? fields[0].map((label, i) => new TextCell({ type: HEADER }, { labelManager })
-                    .source(getHeaderText(fieldHeaders, i, fields[0].length))) : [];
+    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({ type: HEADER }, { labelManager })
+                    .source(getHeaderText(fieldHeaders, i, fields[0].length))
+                    .config({ show: cell.config().show })) : [];
     return headers;
 };
 
