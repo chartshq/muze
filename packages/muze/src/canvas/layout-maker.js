@@ -7,7 +7,9 @@ import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
+import GridComponent from './components/grid-component';
 import MatrixComponent from './components/matrix-component';
+import { LayoutManager } from '../../../layout/src/tree-layout/src';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
@@ -226,40 +228,41 @@ export const getRenderDetails = (context, mount) => {
 export const prepareTreeLayout = (layoutConfig, components, grid, measurement) => {
     // generate component wrappers
 
-    // title
-    // let titleWrapper = null;
-    // if (components.headers && components.headers.titleCell) {
-    //     const title = components.headers.titleCell;
-    //     let titleConfig = layoutConfig.title;
-    //     titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix });
-    //     titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
-    // }
+    const target = { target: 'canvas' };
+    // title;
+    let titleWrapper = null;
+    if (components.headers && components.headers.titleCell) {
+        const title = components.headers.titleCell;
+        let titleConfig = layoutConfig.title;
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target });
+        titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
+    }
 
-    //  // subtitle
-    // let subtitleWrapper = null;
-    // if (components.headers && components.headers.subtitleCell) {
-    //     const subtitle = components.headers.subtitleCell;
-    //     let subtitleConfig = layoutConfig.subtitle;
+     // subtitle
+    let subtitleWrapper = null;
+    if (components.headers && components.headers.subtitleCell) {
+        const subtitle = components.headers.subtitleCell;
+        let subtitleConfig = layoutConfig.subtitle;
 
-    //     subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix });
-    //     subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
-    // }
+        subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix, ...target });
+        subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+    }
 
-    // // color legend
-    // let colorLegendWrapper = null;
-    // if (components.legends) {
-    //     const legendConfig = { ...layoutConfig.legend, measurement };
-    //     colorLegendWrapper = new LegendComponent({
-    //         name: 'legend',
-    //         component: components.legends,
-    //         config: legendConfig });
-    // }
+    // color legend
+    let colorLegendWrapper = null;
+    if (components.legends) {
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+        colorLegendWrapper = new LegendComponent({
+            name: 'legend',
+            component: components.legends,
+            config: legendConfig });
+    }
 
     // grid components
     const { viewMatricesInfo, layoutDimensions } = grid.getViewInformation();
-    const gridComponentWrapper = [];
+    const gridComponents = [];
     for (let i = 0; i < 3; i++) {
-        gridComponentWrapper[i] = [];
+        gridComponents[i] = [];
         for (let j = 0; j < 3; j++) {
             const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
             const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
@@ -276,13 +279,31 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
                 component: matrix,
                 config: matrixConfig
             });
-            gridComponentWrapper[i].push(matrixWrapper);
+            gridComponents[i].push(matrixWrapper);
         }
     }
 
-    gridComponentWrapper[1][0].draw(document.getElementById('chart'));
+    const gridWrapper = new GridComponent({
+        name: 'grid',
+        component: gridComponents,
+        config: { dimensions: { height: 0, width: 0 }, ...target }
+    });
+    // gridComponentWrapper[1][0].draw(document.getElementById('chart'));
 
     // instantiate treelayoutManager
+
+    const layoutManager = new LayoutManager({
+        renderAt: 'chart',
+        height: measurement.canvasHeight,
+        width: measurement.canvasWidth
+    });
+
+    layoutManager.registerComponents([
+        titleWrapper,
+        subtitleWrapper,
+        colorLegendWrapper,
+        gridWrapper
+    ]).compute();
     // registerComponents
     // call compute
 };

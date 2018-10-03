@@ -20,6 +20,8 @@ export default class HeaderComponent extends MuzeComponent {
         super(params.name, params.component.getLogicalSpace(), 0);
         this.component = params.component;
         this.params = params;
+        this.target = params.config.target;
+        this.position = params.config.position;
     }
 
     renderHeader (container) {
