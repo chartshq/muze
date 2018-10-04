@@ -49,30 +49,13 @@ export default class RowVisualMatrix extends VisualMatrix {
         return computeLogicalSpace(matrixTree, this.config(), this.maxMeasures());
     }
 
-    /**
-     * Redistributes the provied space to all cells
-     *
-     * @param {*} viewableMatrix current viewport matrix
-     * @param {*} width provied width
-     * @param {*} height provied height
-     * @return {Object} current viewports matrixes with measures
-     * @memberof VisualMatrix
-     */
-    redistribute (viewableMatrix, width, height) {
-        let maxHeights = [];
-        let maxWidths = [];
-
-        viewableMatrix.forEach((matrixInst) => {
-            const matrix = matrixInst.matrix;
-            const mWidth = 0;
-            const mHeight = 0;
-            const options = { mWidth, mHeight, matrix, width, height, maxHeights, maxWidths };
-            const maxMeasures = this.redistributeRowWise(options);
-            maxWidths = maxMeasures.maxWidths;
-            maxHeights = maxMeasures.maxHeights;
-        });
-
-        const measurements = viewableMatrix.map((matrixInst, i) => {
+    computeViewableSpaces (measures) {
+        const {
+            maxHeights,
+            maxWidths,
+            height
+        } = measures;
+        return this.viewableMatrix.map((matrixInst, i) => {
             const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i };
             const { widths, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
             const heightMeasures = [height, height];
@@ -97,8 +80,6 @@ export default class RowVisualMatrix extends VisualMatrix {
                 }
             };
         });
-
-        return measurements;
     }
 
     /**
@@ -134,7 +115,7 @@ export default class RowVisualMatrix extends VisualMatrix {
      * @param {Object} options Redistribution information
      * @memberof VisualMatrix
      */
-    redistributeRowWise (options) {
+    redistributeViewSpaces (options) {
         let cWidths = [];
         let rHeights = [];
         let mHeight = 0;

@@ -2,7 +2,9 @@ import { mergeRecursive } from 'muze-utils';
 import {
     extraCellsRemover,
     getDistributedWidth,
-    spaceTakenByRow
+    spaceTakenByRow,
+    createMatrixEachLevel,
+    computeLogicalSpace
   } from '../utils';
 import { COLUMN_ROOT } from '../enums/constants';
 import VisualMatrix from './visual-matrix';
@@ -34,44 +36,29 @@ export default class ColumnVisualMatrix extends VisualMatrix {
     }
 
     /**
-     * Redistributes the provied space to all cells
+     * Computes the logical space taken by the entire matrixTree
      *
-     * @param {*} viewableMatrix current viewport matrix
-     * @param {*} width provied width
-     * @param {*} height provied height
-     * @return {Object} current viewports matrixes with measures
+     * @return {Object} Logical space taken
      * @memberof VisualMatrix
      */
-    redistribute (viewableMatrix, width, height) {
-        let maxHeights = [];
-        let maxWidths = [];
+    setLogicalSpace () {
+        const matrixTree = this.tree();
+        createMatrixEachLevel(matrixTree, true);
+        return computeLogicalSpace(matrixTree, this.config(), this.maxMeasures());
+    }
+
+    computeViewableSpaces (measures) {
         const {
-            isTransposed
-        } = this.config();
-
-        viewableMatrix.forEach((matrixInst) => {
-            const matrix = matrixInst.matrix;
-            const mWidth = 0;
-            const mHeight = 0;
-            const options = { mWidth, mHeight, matrix, width, height, maxHeights, maxWidths };
-            const maxMeasures = this.redistributeColumnWise(options);
-            maxWidths = maxMeasures.maxWidths;
-            maxHeights = maxMeasures.maxHeights;
-        });
-
-        const measurements = viewableMatrix.map((matrixInst, i) => {
-            let heightMeasures;
-            let columnMeasures;
+            maxHeights,
+            maxWidths,
+            width
+        } = measures;
+        return this.viewableMatrix.map((matrixInst, i) => {
             const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i };
-            const { heights, widths, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
+            const { heights, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
+            const heightMeasures = heights;
+            const columnMeasures = [width, width];
 
-            if (!isTransposed) {
-                heightMeasures = [height, height];
-                columnMeasures = widths;
-            } else {
-                heightMeasures = heights;
-                columnMeasures = [width, width];
-            }
             return {
                 rowHeights: {
                     primary: rowHeights[0],
@@ -91,8 +78,6 @@ export default class ColumnVisualMatrix extends VisualMatrix {
                 }
             };
         });
-
-        return measurements;
     }
 
     /**
@@ -129,7 +114,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      * @param {Object} options Redistribution information
      * @memberof VisualMatrix
      */
-    redistributeColumnWise (options) {
+    redistributeViewSpaces (options) {
         let rHeights = [];
         const { matrix, width, height, maxHeights, maxWidths } = options;
         const borderWidth = this.config().unitMeasures.border;

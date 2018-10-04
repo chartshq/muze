@@ -1,4 +1,5 @@
-import VisualMatrix from '../visual-matrix/visual-matrix';
+import RowMatrix from '../visual-matrix/row-matrix';
+import ColumnMatrix from '../visual-matrix/column-matrix';
 
 /**
  * Generates the set of visual matrices for pagination and layouting algorithms
@@ -50,7 +51,7 @@ export const generateVisualMatrices = (context, matrices) => {
         bottomMatrix = bottomColumns.map((d, i) => [...bottomLeft[i], ...d, ...bottomRight[i]]);
     }
 
-    context.rowMatrix(new VisualMatrix([leftMatrix, rightMatrix], {
+    context.rowMatrix(new RowMatrix([leftMatrix, rightMatrix], {
         isDistributionEqual: isRowSizeEqual,
         distribution: distribution.rows,
         gutter: gutterSpace.rows,
@@ -76,7 +77,7 @@ export const generateVisualMatrices = (context, matrices) => {
         endColCells = bottomRight.length > 0 ? bottomRight[0].length : 0;
     }
 
-    context.columnMatrix(new VisualMatrix([topMatrix, bottomMatrix], {
+    context.columnMatrix(new ColumnMatrix([topMatrix, bottomMatrix], {
         isDistributionEqual: isColumnSizeEqual,
         distribution: distribution.columns,
         gutter: gutterSpace.columns,
