@@ -101,7 +101,9 @@ export default class BandAxis extends SimpleAxis {
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
+
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, 20);
+
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
@@ -146,6 +148,8 @@ export default class BandAxis extends SimpleAxis {
                     this.config({ labels: { rotation: -90 } });
                 }
             }
+        } else if (availSpace < axisTickLabels.length * (labelWidth + this._minTickDistance.width)) {
+            this.config({ labels: { smartTicks: true } });
         }
         return this;
     }

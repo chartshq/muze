@@ -21,7 +21,8 @@ export const generateVisualMatrices = (context, matrices) => {
         gutterSpace,
         distribution,
         border,
-        breakPage
+        breakPage,
+        priority
     } = context.config();
     const {
         minUnitHeight,
@@ -48,6 +49,7 @@ export const generateVisualMatrices = (context, matrices) => {
         // If no bottom matrix is present, context will be empty
         bottomMatrix = bottomColumns.map((d, i) => [...bottomLeft[i], ...d, ...bottomRight[i]]);
     }
+
     context.rowMatrix(new VisualMatrix([leftMatrix, rightMatrix], {
         isDistributionEqual: isRowSizeEqual,
         distribution: distribution.rows,
@@ -57,6 +59,7 @@ export const generateVisualMatrices = (context, matrices) => {
             height: minUnitHeight,
             border: border.width
         },
+        priority: priority.row,
         breakPage: breakPage.rows.map(e => e + Math.max(topLeft.length, topRight.length)),
         extraCellLengths: [topLeft.length, bottomLeft.length]
     }));
@@ -83,6 +86,7 @@ export const generateVisualMatrices = (context, matrices) => {
             height: minUnitHeight,
             border: border.width
         },
+        priority: priority.col,
         breakPage: breakPage.columns,
         extraCellLengths: [begColCells, endColCells]
     }));

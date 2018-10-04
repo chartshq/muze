@@ -356,8 +356,16 @@ export default class VisualMatrix {
             t += n;
             return t;
         });
+
+        // if (maxWidth > 0) {
+        //     const maxLastRowWidth = Math.min(maxMeasures[maxMeasures.length - 1], width / 2);
+        //     const remainingAvailWidth = width - maxLastRowWidth;
+        //     const remainingWidths = maxWidth - maxLastRowWidth;
+        //     cWidths = maxMeasures.map(space => remainingAvailWidth * (space / remainingWidths));
+        //     cWidths[cWidths.length - 1] = maxLastRowWidth;
+        // }
         if (maxWidth > 0) {
-            cWidths = maxMeasures.map(space => space + (width - maxWidth) * (space / maxWidth));
+            cWidths = maxMeasures.map(space => width * (space / maxWidth));
         } else {
             cWidths = maxMeasures.map(() => 0);
         }
@@ -384,8 +392,9 @@ export default class VisualMatrix {
      */
     redistributeColumnWise (options) {
         let rHeights = [];
-        const { matrix, width, maxHeights, maxWidths } = options;
+        const { matrix, width, height, maxHeights, maxWidths } = options;
         const borderWidth = this.config().unitMeasures.border;
+        const priority = this.config().priority;
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
         const cWidths = getDistributedWidth({
             row: matrix[this._lastLevelKey],

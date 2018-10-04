@@ -361,8 +361,13 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
     } = selectionObj;
     const [rowPrime, rowSec, colPrime, colSec] = [rowsPrimary, rowsSecondary, columnsPrimary, columnsSecondary]
         .map(d => (d ? d.getObjects() : []));
-    const [leftFacets, rightFacets] = [leftHeaders, rightHeaders].map(e => (e ? e.getObjects()
-                    .map(f => f.getObjects()) : []));
+    const [leftFacets, rightFacets] = [leftHeaders, rightHeaders]
+        .map(e => (e ? e.getObjects()
+                        .map(f => f.getObjects()) : []));
+    let rowPriority = rowSec.length ? 1 : -1;
+    rowPrime.length && rowPriority++;
+    let colPriority = colSec.length ? 1 : -1;
+    colPrime.length && colPriority++;
 
     // Compute left matrix using left headers and the axes on the rows
     let leftMatrix = leftFacets.length ? leftFacets.map((d, i) => {
@@ -422,7 +427,9 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
     return {
         rows: [leftMatrix, rightMatrix],
         columns: [topMatrix, bottomMatrix],
-        selectionObj
+        selectionObj,
+        colPriority,
+        rowPriority
     };
 };
 
@@ -542,7 +549,7 @@ export const computeMatrices = (context, config) => {
         axesMatrix: resolver.axes()
     };
     // Create all matrices
-    const { rows, columns, selectionObj } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
+    const { rows, columns, selectionObj, rowPriority, colPriority } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
 
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
@@ -553,6 +560,10 @@ export const computeMatrices = (context, config) => {
         values: resolver.valueMatrix(),
         isColumnSizeEqual,
         isRowSizeEqual,
+        priority: {
+            row: rowPriority,
+            col: colPriority
+        },
         selection: selectionObj,
         dataModels: {
             groupedModel,

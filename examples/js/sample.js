@@ -57,7 +57,7 @@ d3.json('../data/cars.json', (data) => {
     const dataModel = new DataModel(jsonData, schema);
 
   // Create a new variable which will keep count of cars per cylinder for a particular origin
-    const rootData = dataModel.calculateVariable(
+    let rootData = dataModel.calculateVariable(
         {
             name: 'CountVehicle',
             type: 'measure',
@@ -66,6 +66,7 @@ d3.json('../data/cars.json', (data) => {
         },
     ['Name', () => 1]
   );
+    rootData = rootData.select(e => e.Cylinders.value === '4');
 
     env = env
     .data(rootData)
@@ -74,240 +75,232 @@ d3.json('../data/cars.json', (data) => {
 
     const crosstab = env
     .canvas()
-    .rows(['Cylinders', 'Origin'])
-    .columns(['Miles_per_Gallon', 'Horsepower'])
+    .columns(['Cylinders', 'Origin'])
+    .rows(['Miles_per_Gallon'])
     .data(rootData)
-    .color('Acceleration')
-    .width(600)
-    .height(500)
+    // .color('Acceleration')
+    .width(190)
+    .height(190)
     .config({
         border: {
             color: '#f6f6f6'
         }
     })
-    .title('Avg Mileage of cars by Country faceted by Cylinders', {
-        align: 'center'
-    })
-    .subtitle(
-      'Click on the bars to see how the charts in right gets filtered',
-        {
-            align: 'center'
-        }
-    )
+
     .mount('#chart2');
 
-    const lineChart = env
-    .canvas()
-    .rows([['Miles_per_Gallon'], ['Acceleration', 'Horsepower', 'Horsepower']])
-    .columns(['Year'])
-    .data(rootData)
-    .width(450)
-    .height(700)
-    .color({
-        field: 'Acceleration',
-        step: true,
-        stops: 5
-    })
-    .config({
-        axes: {
-            y: {
-                domain: [10, 50]
-            }
-        },
-        border: {
-            color: '#f6f6f6'
-        },
-        interaction: {
-            tooltip: {
-                formatter: (dm) => {
-                    const valueMatrix = lineChart
-              .composition()
-              .visualGroup.composition()
-              .matrices.value.matrix();
-                    const selectedLineLayer = valueMatrix[0][0]
-              .valueOf()
-              .getLayerByName('lineLayer');
-                    const selectedLineLayerData = selectedLineLayer.data();
-                    const fullData = dm.getData().data;
-                    const fieldsConf = dm.getFieldsConfig();
-                    const yearIndex = fieldsConf.Year.index;
-                    let selectedData;
+    // const lineChart = env
+    // .canvas()
+    // .rows([['Miles_per_Gallon'], ['Acceleration', 'Horsepower', 'Horsepower']])
+    // .columns(['Year'])
+    // .data(rootData)
+    // .width(450)
+    // .height(700)
+    // .color({
+    //     field: 'Acceleration',
+    //     step: true,
+    //     stops: 5
+    // })
+    // .config({
+    //     axes: {
+    //         y: {
+    //             domain: [10, 50]
+    //         }
+    //     },
+    //     border: {
+    //         color: '#f6f6f6'
+    //     },
+    //     interaction: {
+    //         tooltip: {
+    //             formatter: (dm) => {
+    //                 const valueMatrix = lineChart
+    //           .composition()
+    //           .visualGroup.composition()
+    //           .matrices.value.matrix();
+    //                 const selectedLineLayer = valueMatrix[0][0]
+    //           .valueOf()
+    //           .getLayerByName('lineLayer');
+    //                 const selectedLineLayerData = selectedLineLayer.data();
+    //                 const fullData = dm.getData().data;
+    //                 const fieldsConf = dm.getFieldsConfig();
+    //                 const yearIndex = fieldsConf.Year.index;
+    //                 let selectedData;
 
-                    if (selectedLineLayerData) {
-                        selectedData = selectedLineLayerData.select(
-                fields =>
-                  fullData.findIndex(
-                    d => d[yearIndex] === fields.Year.value
-                  ) !== -1,
-                            {
-                                saveChild: false
-                            }
-              );
-                    }
-                    const { DateTimeFormatter } = muze.utils;
-                    const tooltipData = [
-                        [
-                            {
-                                value: 'Year',
-                                className: 'muze-tooltip-key'
-                            },
-                            {
-                                value: DateTimeFormatter.formatAs(
-                    fullData[0][yearIndex],
-                    '%Y'
-                  ),
-                                className: 'muze-tooltip-value'
-                            }
-                        ],
-                        [
-                            {
-                                value: 'Miles_per_Gallon',
-                                className: 'muze-tooltip-key'
-                            },
-                            {
-                                value: fullData[0][fieldsConf.Miles_per_Gallon.index].toFixed(2),
-                                className: 'muze-tooltip-value'
-                            }
-                        ]
-                    ];
+    //                 if (selectedLineLayerData) {
+    //                     selectedData = selectedLineLayerData.select(
+    //             fields =>
+    //               fullData.findIndex(
+    //                 d => d[yearIndex] === fields.Year.value
+    //               ) !== -1,
+    //                         {
+    //                             saveChild: false
+    //                         }
+    //           );
+    //                 }
+    //                 const { DateTimeFormatter } = muze.utils;
+    //                 const tooltipData = [
+    //                     [
+    //                         {
+    //                             value: 'Year',
+    //                             className: 'muze-tooltip-key'
+    //                         },
+    //                         {
+    //                             value: DateTimeFormatter.formatAs(
+    //                 fullData[0][yearIndex],
+    //                 '%Y'
+    //               ),
+    //                             className: 'muze-tooltip-value'
+    //                         }
+    //                     ],
+    //                     [
+    //                         {
+    //                             value: 'Miles_per_Gallon',
+    //                             className: 'muze-tooltip-key'
+    //                         },
+    //                         {
+    //                             value: fullData[0][fieldsConf.Miles_per_Gallon.index].toFixed(2),
+    //                             className: 'muze-tooltip-value'
+    //                         }
+    //                     ]
+    //                 ];
 
-                    if (selectedData && !selectedData.isEmpty()) {
-                        const mpgData = selectedData.getData().data;
-                        const mpgIndex = selectedData.getFieldsConfig().Miles_per_Gallon
-                .index;
-                        tooltipData.push([
-                            {
-                                value: 'Selected_Miles_per_Gallon',
-                                className: 'muze-tooltip-key'
-                            },
-                            {
-                                value: mpgData[0][mpgIndex].toFixed(2),
-                                className: 'muze-tooltip-value'
-                            }
-                        ]);
-                    }
-                    return tooltipData;
-                }
-            }
-        },
-        legend: {
-            color: {
-                position: 'bottom'
-            }
-        }
-    })
-    .title('Change of Avg Mileage of Cars over 12 Years', {
-        align: 'center'
-    })
-    .layers([
-        {
-            mark: 'line',
-            encoding: {
-                color: {
-                    value: () => '#9e9e9e'
-                }
-            }
-        }
-    ])
-    .mount('#chart');
-
-    const pieChart = env
-    .canvas()
-    .rows(['Origin'])
-    .columns(['Acceleration'])
-    .data(rootData)
-    .width(600)
-    .height(600)
+    //                 if (selectedData && !selectedData.isEmpty()) {
+    //                     const mpgData = selectedData.getData().data;
+    //                     const mpgIndex = selectedData.getFieldsConfig().Miles_per_Gallon
+    //             .index;
+    //                     tooltipData.push([
+    //                         {
+    //                             value: 'Selected_Miles_per_Gallon',
+    //                             className: 'muze-tooltip-key'
+    //                         },
+    //                         {
+    //                             value: mpgData[0][mpgIndex].toFixed(2),
+    //                             className: 'muze-tooltip-value'
+    //                         }
+    //                     ]);
+    //                 }
+    //                 return tooltipData;
+    //             }
+    //         }
+    //     },
+    //     legend: {
+    //         color: {
+    //             position: 'bottom'
+    //         }
+    //     }
+    // })
+    // .title('Change of Avg Mileage of Cars over 12 Years', {
+    //     align: 'center'
+    // })
     // .layers([
     //     {
-    //         mark: 'arc',
+    //         mark: 'line',
     //         encoding: {
-    //             angle: 'CountVehicle'
+    //             color: {
+    //                 value: () => '#9e9e9e'
+    //             }
     //         }
     //     }
     // ])
-    .config({ legend: {
-        position: 'bottom',
-        color: {
-            title: {
-                // text: 'Country of Origin of Cars'
-            }
-        }
-    } })
-    .color('Origin')
-    .shape('Origin')
-    .title('Count of Cars by Country', {
-        align: 'center'
-    })
-    .mount('#chart4');
+    // .mount('#chart');
 
-    muze.ActionModel.for(crosstab, lineChart, pieChart)
-                    .enableCrossInteractivity({
-                        behaviours: {
-        // Disable all behaviours if any propagation is initiated from pie chart.
-                            '*': (propagationPayload, context) => {
-                                const sourcePropagationCanvas = propagationPayload.sourceCanvas;
-                                const sourceCanvas = context.parentAlias();
-                                if (sourcePropagationCanvas) {
-                                    return sourceCanvas !== sourcePropagationCanvas
-              ? [lineChart.alias()].indexOf(sourcePropagationCanvas) === -1
-              : true;
-                                }
-                                return true;
-                            }
-                        },
-                        sideEffects: {
-        // Disable tooltip on propagation
-                            tooltip: () => false
-                        }
-                    })
-                    .for(crosstab, pieChart)
-                    .registerPropagationBehaviourMap({
-                        select: 'filter'
-                    })
+    // const pieChart = env
+    // .canvas()
+    // .rows(['Origin'])
+    // .columns(['Acceleration'])
+    // .data(rootData)
+    // .width(600)
+    // .height(600)
+    // // .layers([
+    // //     {
+    // //         mark: 'arc',
+    // //         encoding: {
+    // //             angle: 'CountVehicle'
+    // //         }
+    // //     }
+    // // ])
+    // .config({ legend: {
+    //     position: 'bottom',
+    //     color: {
+    //         title: {
+    //             // text: 'Country of Origin of Cars'
+    //         }
+    //     }
+    // } })
+    // .color('Origin')
+    // .shape('Origin')
+    // .title('Count of Cars by Country', {
+    //     align: 'center'
+    // })
+    // .mount('#chart4');
 
-                    .for(lineChart)
-                    .registerSideEffects(
-      class NewSideEffect extends SpawnableSideEffect {
-          constructor (...params) {
-              super(...params);
-              this._layers = this.firebolt.context.addLayer({
-                  name: 'lineLayer',
-                  mark: 'line',
-                  className: 'linelayer',
-                  encoding: {
-                      x: 'Year',
-                      y: 'Miles_per_Gallon',
-                      color: {
-                          value: () => '#414141'
-                      }
-                  },
-                  render: false
-              });
-          }
+    // muze.ActionModel.for(crosstab, lineChart, pieChart)
+    //                 .enableCrossInteractivity({
+    //                     behaviours: {
+    //     // Disable all behaviours if any propagation is initiated from pie chart.
+    //                         '*': (propagationPayload, context) => {
+    //                             const sourcePropagationCanvas = propagationPayload.sourceCanvas;
+    //                             const sourceCanvas = context.parentAlias();
+    //                             if (sourcePropagationCanvas) {
+    //                                 return sourceCanvas !== sourcePropagationCanvas
+    //           ? [lineChart.alias()].indexOf(sourcePropagationCanvas) === -1
+    //           : true;
+    //                             }
+    //                             return true;
+    //                         }
+    //                     },
+    //                     sideEffects: {
+    //     // Disable tooltip on propagation
+    //                         tooltip: () => false
+    //                     }
+    //                 })
+    //                 .for(crosstab, pieChart)
+    //                 .registerPropagationBehaviourMap({
+    //                     select: 'filter'
+    //                 })
 
-          static formalName () {
-              return 'lineLayer';
-          }
+    //                 .for(lineChart)
+    //                 .registerSideEffects(
+    //   class NewSideEffect extends SpawnableSideEffect {
+    //       constructor (...params) {
+    //           super(...params);
+    //           this._layers = this.firebolt.context.addLayer({
+    //               name: 'lineLayer',
+    //               mark: 'line',
+    //               className: 'linelayer',
+    //               encoding: {
+    //                   x: 'Year',
+    //                   y: 'Miles_per_Gallon',
+    //                   color: {
+    //                       value: () => '#414141'
+    //                   }
+    //               },
+    //               render: false
+    //           });
+    //       }
 
-          apply (selectionSet) {
-              const { sideEffectGroup } = this.drawingContext();
-              const layerGroups = this.createElement(
-            sideEffectGroup,
-            'g',
-            this._layers,
-            '.extra-layers'
-          );
-              layerGroups.each(function (layer) {
-                  layer.mount(this).data(selectionSet.mergedEnter.model);
-              });
-          }
-      }
-    )
-                    .mapSideEffects({
-                        filter: {
-                            effects: ['lineLayer'],
-                            preventDefaultActions: true
-                        }
-                    });
+    //       static formalName () {
+    //           return 'lineLayer';
+    //       }
+
+    //       apply (selectionSet) {
+    //           const { sideEffectGroup } = this.drawingContext();
+    //           const layerGroups = this.createElement(
+    //         sideEffectGroup,
+    //         'g',
+    //         this._layers,
+    //         '.extra-layers'
+    //       );
+    //           layerGroups.each(function (layer) {
+    //               layer.mount(this).data(selectionSet.mergedEnter.model);
+    //           });
+    //       }
+    //   }
+    // )
+    //                 .mapSideEffects({
+    //                     filter: {
+    //                         effects: ['lineLayer'],
+    //                         preventDefaultActions: true
+    //                     }
+    //                 });
 });
