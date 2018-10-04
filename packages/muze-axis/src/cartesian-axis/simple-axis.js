@@ -259,8 +259,8 @@ export default class SimpleAxis {
      * @return {Object} object with details about sizes of the axis.
      * @memberof SimpleAxis
      */
-    getAxisDimensions () {
-        this.axisDimensions(computeAxisDimensions(this));
+    getAxisDimensions (...params) {
+        this.axisDimensions(computeAxisDimensions(this, ...params));
         return this.axisDimensions();
     }
 

@@ -145,7 +145,7 @@ export default class ContinousAxis extends SimpleAxis {
             orientation,
             fixedBaseline
         } = this.config();
-        const { tickLabelDim } = this.getAxisDimensions();
+        const { tickLabelDim } = this.getAxisDimensions(width, height);
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {

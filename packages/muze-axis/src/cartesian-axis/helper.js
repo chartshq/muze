@@ -85,7 +85,7 @@ export const getTickLabelInfo = (context) => {
  * @returns
  * @memberof SimpleAxis
  */
-export const computeAxisDimensions = (context) => {
+export const computeAxisDimensions = (context, width, height) => {
     let tickLabelDim = {};
     const {
         name,
@@ -100,6 +100,8 @@ export const computeAxisDimensions = (context) => {
         smartTick
     } = getTickLabelInfo(context);
     const { height: labelHeight, width: labelWidth } = largestLabelDim;
+    labelManager.setStyle(context._axisNameStyle);
+    const axisLabelDim = labelManager.getOriSize(name);
     // get the domain of axis
     const domain = context.domain();
 
@@ -107,7 +109,7 @@ export const computeAxisDimensions = (context) => {
         return null;
     }
     if (context._rotationLock === false) {
-        context.setRotationConfig(tickValues || axisTickLabels, largestLabelDim.width);
+        context.setRotationConfig(tickValues || axisTickLabels, largestLabelDim.width, width, height, axisLabelDim);
         context._rotationLock = false;
     }
     if (labels.smartTicks) {
@@ -119,11 +121,10 @@ export const computeAxisDimensions = (context) => {
         };
     }
 
-    labelManager.setStyle(context._axisNameStyle);
     return {
         tickSize: context.getTickSize(),
         tickLabelDim,
-        axisLabelDim: labelManager.getOriSize(name),
+        axisLabelDim,
         largestLabelDim,
         axisTickLabels
     };

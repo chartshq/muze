@@ -214,7 +214,7 @@ export default class TimeAxis extends SimpleAxis {
             axisNamePadding
         } = this.config();
         const domain = this.domain();
-        const { axisLabelDim, tickLabelDim } = this.getAxisDimensions();
+        const { axisLabelDim, tickLabelDim } = this.getAxisDimensions(width, height);
         const { height: axisDimHeight } = axisLabelDim;
         const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
 

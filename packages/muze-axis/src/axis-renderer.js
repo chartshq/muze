@@ -115,9 +115,9 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
                         .duration(1000)
                         .attr('dy', (d, i) => {
                             if (orientation === BOTTOM || i !== 0) {
-                                return _smartTicks[i].oriTextHeight;
+                                return _smartTicks[0].oriTextHeight;
                             }
-                            return -_smartTicks[i].oriTextHeight * (_smartTicks[i].lines.length - 1) - tickSize;
+                            return -_smartTicks[0].oriTextHeight * (_smartTicks[0].lines.length - 1) - tickSize;
                         })
                         .style('opacity', 1)
                         .attr('x', 0)

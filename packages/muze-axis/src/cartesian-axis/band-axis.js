@@ -53,21 +53,22 @@ export default class BandAxis extends SimpleAxis {
             showAxisName,
             axisNamePadding
         } = this.config();
-        const { axisLabelDim } = this.getAxisDimensions();
-        const { height: axisDimHeight } = axisLabelDim;
+        // const { axisLabelDim } = this.getAxisDimensions(width, height);
+        // const { height: axisDimHeight } = axisLabelDim;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
             // Set x axis range
             this.range([0, width - left - right]);
-            const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
-                (axisDimHeight + axisNamePadding) : 0);
-            isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            // const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
+            //     (axisDimHeight + axisNamePadding) : 0);
+            isOffset && this.config({ yOffset: height });
+            this.smartTicks(this.setTickConfig(width, height));
         } else {
             // Set y axis range
             this.range([height - bottom, top]);
-            const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
-            isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
+            // const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
+            isOffset && this.config({ xOffset: width });
         }
         return this;
     }
@@ -88,10 +89,10 @@ export default class BandAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig () {
+    setTickConfig (width, height) {
         let smartTicks = '';
         let smartlabel;
-        const { maxWidth, maxHeight, tickFormat } = this.config();
+        const { maxHeight, tickFormat } = this.config();
         const { labelManager } = this._dependencies;
         const domain = this.axis().scale().domain();
 
@@ -101,8 +102,9 @@ export default class BandAxis extends SimpleAxis {
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
-
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, 20);
+                const maxWidth = (width / domain.length) - this._minTickDistance.width;
+                console.log(maxWidth);
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, height || 20);
 
                 return labelManager.constructor.textToLines(smartlabel);
             });
@@ -132,17 +134,23 @@ export default class BandAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
+    setRotationConfig (axisTickLabels, labelWidth, availableWidth, availableHeight, axisLabelDim) {
+        const { orientation, showAxisName, maxHeight } = this.config();
         const range = this.range();
         const availSpace = Math.abs(range[0] - range[1]);
 
         this.config({ labels: { rotation: 0, smartTicks: false } });
+
         if (orientation === TOP || orientation === BOTTOM) {
+            // const currMaxHeight = availableHeight ? availableHeight - (showAxisName ? axisLabelDim.height : 0) - this.getTickSize() : maxHeight;
+            // this.config({ maxHeight: currMaxHeight });
+            // console.log(currMaxHeight);
             const smartWidth = this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0);
+            console.log(smartWidth);
+            console.log(availSpace);
             // set multiline config
-            if (availSpace > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > availSpace) {
-                if (availSpace && smartWidth < availSpace) {
+            if (availSpace && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > availSpace) {
+                if (smartWidth < availSpace) {
                     this.config({ labels: { smartTicks: true } });
                 } else {
                     this.config({ labels: { rotation: -90 } });
