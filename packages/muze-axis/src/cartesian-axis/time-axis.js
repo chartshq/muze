@@ -240,7 +240,8 @@ export default class TimeAxis extends SimpleAxis {
                 domain, orientation));
             isOffset && this.config({ yOffset: height });
 
-            this.smartTicks(this.setTickConfig(((this.range()[1] - this.range()[0]) / this.getTickValues().length) - this._minTickDistance.width, height));
+            this.smartTicks(this.setTickConfig(((this.range()[1] - this.range()[0]) /
+                this.getTickValues().length) - this._minTickDistance.width, height));
 
             this.config({
                 labels: this.tickTextManager.manageTicks(this.config(), {

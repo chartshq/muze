@@ -59,7 +59,8 @@ export default class BandAxis extends SimpleAxis {
             this.range([0, width - left - right]);
             isOffset && this.config({ yOffset: height });
             // set smart ticks and rotation config
-            this.smartTicks(this.setTickConfig((width - left - right / this.domain().length) - this._minTickDistance.width, height));
+            this.smartTicks(this.setTickConfig((width - left - right / this.domain().length) -
+                this._minTickDistance.width, height));
 
             this.config({
                 labels: this.tickTextManager.manageTicks(this.config(), {

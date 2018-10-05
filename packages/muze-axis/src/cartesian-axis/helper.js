@@ -109,7 +109,13 @@ export const computeAxisDimensions = (context) => {
     let tickDimensions = {};
     const { labels } = context.config();
     const { smartTicks, rotation } = labels;
-    const { largestTickDimensions, axisTicks, smartTick, axisNameDimensions, allTickDimensions } = getAxisComponentDimensions(context);
+    const {
+        largestTickDimensions,
+        axisTicks,
+        smartTick,
+        axisNameDimensions,
+        allTickDimensions
+    } = getAxisComponentDimensions(context);
     const { height: labelHeight, width: labelWidth } = largestTickDimensions;
 
     // get the domain of axis
@@ -297,7 +303,6 @@ export const calculateContinousSpace = (context) => {
     const { width: axisNameWidth } = axisNameDimensions;
 
     if (orientation === TOP || orientation === BOTTOM) {
-        debugger;
         const { width, height } = getHorizontalAxisSpace(context, axisDimensions, config);
         const axisWidth = Math.max(width, axisNameWidth);
 

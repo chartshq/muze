@@ -7,7 +7,7 @@ import {
     getUniqueId
 } from 'muze-utils';
 import { createScale } from '../scale-creator';
-import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
+import { axisOrientationMap } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
 import { DOMAIN, BAND } from '../enums/constants';
@@ -15,7 +15,6 @@ import TickTextManager from './tick-text-manager';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
-    setOffset,
     registerChangeListeners,
     calculateContinousSpace
 } from './helper';
