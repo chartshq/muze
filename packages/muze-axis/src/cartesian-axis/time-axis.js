@@ -1,9 +1,32 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
-import { adjustRange } from './helper';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { DOMAIN } from '../enums/constants';
+
+const getAxisOffset = (timeDiff, range, domain) => {
+    const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
+    const width = (pvr * timeDiff);
+    const avWidth = (range[1] - range[0]);
+    const bars = avWidth / width;
+    const barWidth = avWidth / (bars + 1);
+    const diff = avWidth - barWidth * bars;
+
+    return diff / 2;
+};
+
+export const adjustRange = (minDiff, range, domain, orientation) => {
+    const diff = getAxisOffset(minDiff, range, domain);
+
+    if (orientation === TOP || orientation === BOTTOM) {
+        range[0] += diff;
+        range[1] -= diff;
+    } else {
+        range[0] -= diff;
+        range[1] += diff;
+    }
+    return range;
+};
 
 /**
  *
@@ -181,7 +204,7 @@ export default class TimeAxis extends SimpleAxis {
             this.scale().domain(domain);
             nice && this.scale().nice();
             this._domain = this.scale().domain();
-            this.smartTicks(this.setTickConfig());
+            this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;

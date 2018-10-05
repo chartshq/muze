@@ -549,7 +549,13 @@ export const computeMatrices = (context, config) => {
         axesMatrix: resolver.axes()
     };
     // Create all matrices
-    const { rows, columns, selectionObj, rowPriority, colPriority } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
+    const {
+        rows,
+        columns,
+        selectionObj,
+        rowPriority,
+        colPriority
+    } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
 
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);

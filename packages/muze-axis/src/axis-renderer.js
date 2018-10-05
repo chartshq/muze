@@ -100,9 +100,9 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     tickText.selectAll('tspan').remove();
 
    // rotate labels if not enough space is available
-    if (rotation !== 0 && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
+    if (rotation && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
         rotateAxis(axisInstance, tickText, labelManager, config);
-    } else if (rotation === 0 && isSmartTicks === false) {
+    } else if (!rotation && !isSmartTicks) {
         tickText.attr('transform', '');
     } else {
         tickText.attr('y', 0)

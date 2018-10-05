@@ -5,7 +5,6 @@ import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import { DOMAIN } from '../enums/constants';
 import {
-    getTickLabelInfo,
     getNumberOfTicks
 } from './helper';
 
@@ -120,6 +119,7 @@ export default class ContinousAxis extends SimpleAxis {
             this.scale().domain(domain);
             nice && this.scale().nice();
             this._domain = this.scale().domain();
+            this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
@@ -145,19 +145,22 @@ export default class ContinousAxis extends SimpleAxis {
             orientation,
             fixedBaseline
         } = this.config();
-        const { tickLabelDim } = this.getAxisDimensions(width, height);
+        const { tickDimensions } = this.getAxisDimensions(width, height);
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {
-            const labelSpace = tickLabelDim.width;
+            const labelSpace = tickDimensions.width;
             this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
-            const axisHeight = this.getLogicalSpace().height;
-            isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            // const axisHeight = this.getLogicalSpace().height;
+            isOffset && this.config({ yOffset: height });
+            // isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
         } else {
-            const labelSpace = tickLabelDim.height;
+            const labelSpace = tickDimensions.height;
+
             this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
-            const axisWidth = this.getLogicalSpace().width;
-            isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
+            // const axisWidth = this.getLogicalSpace().width;
+            isOffset && this.config({ xOffset: width });
+            // isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
         }
         return this;
     }
@@ -200,7 +203,7 @@ export default class ContinousAxis extends SimpleAxis {
 
         const availableSpace = Math.abs(range[0] - range[1]);
 
-        const labelProps = getTickLabelInfo(this).largestLabelDim;
+        const labelProps = this.axisComponentDimensions().largestTickDimensions;
 
         if (tickValues) {
             return axis.scale().ticks(tickValues);
@@ -231,7 +234,7 @@ export default class ContinousAxis extends SimpleAxis {
             rotation
         } = labels;
         const axis = this.axis();
-        const { width, height } = this._axisDimensions.largestLabelDim;
+        const { width, height } = this.axisComponentDimensions().largestTickDimensions;
         axis.tickTransform((d, i) => {
             if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
                 return `translate(0, -${(height) / 3}px)`;

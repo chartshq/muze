@@ -18,8 +18,8 @@ export const defaultConfig = {
     interpolator: 'linear',
     fixedBaseline: true,
     labels: {
-        rotation: 0,
-        smartTicks: false
+        rotation: null,
+        smartTicks: null
     },
     orientation: 'left',
     maxHeight: 50, // @todo: height and width wont be hardcoded

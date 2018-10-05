@@ -11,7 +11,9 @@ import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
 import { DOMAIN, BAND } from '../enums/constants';
+import TickTextManager from './tick-text-manager';
 import {
+    getAxisComponentDimensions,
     computeAxisDimensions,
     setOffset,
     registerChangeListeners,
@@ -46,6 +48,8 @@ export default class SimpleAxis {
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
         dependencies.labelManager.setStyle(this._tickLabelStyle);
         this._minTickDistance = dependencies.labelManager.getOriSize('ww');
+        this._minTickSpace = dependencies.labelManager.getOriSize('www');
+        this.tickTextManager = new TickTextManager();
 
         generateGetterSetters(this, PROPS);
         this.store(new Store({
@@ -121,12 +125,17 @@ export default class SimpleAxis {
         if (domain.length) {
             this.scale().domain(domain[0]);
             this._domain = this.scale().domain();
-            this.smartTicks(this.setTickConfig());
+            // this.smartTicks(this.setTickConfig());
+            this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
         }
         return this._domain;
+    }
+
+    setAxisComponentDimensions () {
+        this.axisComponentDimensions(getAxisComponentDimensions(this));
     }
 
     /**
@@ -170,6 +179,12 @@ export default class SimpleAxis {
             return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
         }
         return () => val => numberFormat(val);
+    }
+
+    getFormattedText (text, index) {
+        const formatter = this.formatter;
+        const scale = this.scale();
+        return formatter ? formatter(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
     }
 
     /**

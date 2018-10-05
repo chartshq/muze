@@ -80,7 +80,7 @@ d3.json('../data/cars.json', (data) => {
     .data(rootData)
     // .color('Acceleration')
     .width(190)
-    .height(190)
+    .height(400)
     .config({
         border: {
             color: '#f6f6f6'

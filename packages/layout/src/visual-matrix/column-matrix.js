@@ -116,9 +116,9 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      */
     redistributeViewSpaces (options) {
         let rHeights = [];
-        const { matrix, width, height, maxHeights, maxWidths } = options;
+        const { matrix, width, maxHeights, maxWidths } = options;
         const borderWidth = this.config().unitMeasures.border;
-        const priority = this.config().priority;
+        // const priority = this.config().priority;
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
         const cWidths = getDistributedWidth({
             row: matrix[this._lastLevelKey],

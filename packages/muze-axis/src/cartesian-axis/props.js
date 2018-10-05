@@ -3,6 +3,7 @@ import { mergeRecursive } from 'muze-utils';
 export const PROPS = {
     availableSpace: {},
     axisDimensions: {},
+    axisComponentDimensions: {},
     config: {
         sanitization: (context, value) => {
             if (value.labels && value.labels.rotation) {
