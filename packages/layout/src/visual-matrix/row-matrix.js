@@ -143,7 +143,7 @@ export default class RowVisualMatrix extends VisualMatrix {
         //     cWidths[cWidths.length - 1] = maxLastRowWidth;
         // }
         if (maxWidth > 0) {
-            cWidths = maxMeasures.map(space => width * (space / maxWidth));
+            cWidths = maxMeasures.map(space => Math.floor(width * (space / maxWidth)));
         } else {
             cWidths = maxMeasures.map(() => 0);
         }

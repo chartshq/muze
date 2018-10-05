@@ -37,7 +37,7 @@ export const defaultConfig = {
     type: 'linear',
     tickFormat: null,
     tickValues: null,
-    xOffset: undefined,
-    yOffset: undefined
+    xOffset: 0,
+    yOffset: 0
 };
 

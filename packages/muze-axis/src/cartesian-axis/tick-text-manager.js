@@ -16,12 +16,10 @@ export default class TickTextManager {
     multiLineTicks (labelDetails, isSmartTicks) {
         const {
             availSpace,
-            _minTickDistance,
-            smartTicks
+            totalTickWidth
         } = labelDetails;
-        const smartWidth = smartTicks.reduce((acc, n) => acc + n.width + _minTickDistance, 0);
 
-        if (availSpace && smartWidth < availSpace) {
+        if (availSpace && totalTickWidth < availSpace) {
             return true;
         } return isSmartTicks;
     }
@@ -29,12 +27,10 @@ export default class TickTextManager {
     rotatedTicks (labelDetails, rotation) {
         const {
             availSpace,
-            _minTickDistance,
-            smartTicks
+            totalTickWidth
         } = labelDetails;
-        const smartWidth = smartTicks.reduce((acc, n) => acc + n.width + _minTickDistance, 0);
 
-        if (availSpace && smartWidth > availSpace) {
+        if (availSpace && totalTickWidth > availSpace) {
             return -90;
         } return rotation;
     }
@@ -57,7 +53,6 @@ export default class TickTextManager {
             smartTicks
         } = labels;
         const labelConfig = {};
-
         labelConfig.smartTicks = this.shouldWrapTicks(rotation, smartTicks, orientation) ?
             this.multiLineTicks(labelDetails, smartTicks) : false;
 

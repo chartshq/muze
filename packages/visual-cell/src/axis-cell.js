@@ -192,8 +192,8 @@ class AxisCell extends SimpleCell {
         if (availHeight === 0 || !availHeight) {
             selection.attr(HEIGHT, `${0}px`);
         }
-        wrapperDiv.style(WIDTH, `${show ? availWidth : 0}px`)
-                        .style(HEIGHT, `${show ? availHeight : 0}px`)
+        wrapperDiv.style(WIDTH, `${show ? Math.floor(availWidth) : 0}px`)
+                        .style(HEIGHT, `${show ? Math.floor(availHeight) : 0}px`)
                         .style('margin-top', top)
                         .style('margin-bottom', bottom)
                         .style('margin-left', left)

@@ -51,31 +51,28 @@ export default class BandAxis extends SimpleAxis {
         const {
             orientation
         } = this.config();
+        const { axisNameDimensions } = this.axisComponentDimensions();
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
             // Set x axis range
             this.range([0, width - left - right]);
-            // const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
-            //     (axisDimHeight + axisNamePadding) : 0);
             isOffset && this.config({ yOffset: height });
             // set smart ticks and rotation config
-
-            this.smartTicks(this.setTickConfig(width / this.domain().length, height));
+            this.smartTicks(this.setTickConfig((width - left - right / this.domain().length) - this._minTickDistance.width, height));
 
             this.config({
                 labels: this.tickTextManager.manageTicks(this.config(), {
                     availSpace: width - left - right,
-                    _minTickDistance: this._minTickDistance.width,
-                    smartTicks: this.smartTicks()
+                    totalTickWidth: this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0)
                 })
             });
         } else {
             // Set y axis range
             this.range([height - bottom, top]);
-            // const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
             isOffset && this.config({ xOffset: width });
-            this.smartTicks(this.setTickConfig(width, height / this.domain().length, true));
+
+            this.smartTicks(this.setTickConfig(width - axisNameDimensions.height, height, true));
 
             this.config({ labels: {
                 rotation: 0,
@@ -114,6 +111,7 @@ export default class BandAxis extends SimpleAxis {
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
+
                 smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain),
                     Math.max(this._minTickSpace.width, width), height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
@@ -135,37 +133,6 @@ export default class BandAxis extends SimpleAxis {
             this.logicalSpace();
         }
         return this.logicalSpace();
-    }
-    /**
-     *
-     *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     * @returns
-     * @memberof BandAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-        const range = this.range();
-        const availSpace = Math.abs(range[0] - range[1]);
-
-        this.config({ labels: { rotation: 0, smartTicks: false } });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            const smartWidth = this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0);
-
-            // set multiline config
-            if (availSpace && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > availSpace) {
-                if (smartWidth < availSpace) {
-                    this.config({ labels: { smartTicks: true } });
-                } else {
-                    this.config({ labels: { rotation: -90 } });
-                }
-            }
-        } else if (availSpace < axisTickLabels.length * (labelWidth + this._minTickDistance.width)) {
-            this.config({ labels: { smartTicks: true } });
-        }
-        return this;
     }
 
     /**

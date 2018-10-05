@@ -105,23 +105,26 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     } else if (!rotation && !isSmartTicks) {
         tickText.attr('transform', '');
     } else {
-        tickText.attr('y', 0)
-                        .attr('x', 0)
-                        .text('');
+        tickText.text('');
         const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, 'smart-text');
-        tspan.attr('dy', '0')
-                        .style('opacity', '0')
-                        .transition()
-                        .duration(1000)
-                        .attr('dy', (d, i) => {
-                            if (orientation === BOTTOM || i !== 0) {
-                                return _smartTicks[0].oriTextHeight;
-                            }
-                            return -_smartTicks[0].oriTextHeight * (_smartTicks[0].lines.length - 1) - tickSize;
-                        })
-                        .style('opacity', 1)
-                        .attr('x', 0)
-                        .text(e => e);
+        if (orientation === TOP || orientation === BOTTOM) {
+            tickText.attr('y', 0)
+                            .attr('x', 0)
+                            .text('');
+            tspan.attr('dy', '0')
+                            .style('opacity', '0')
+                            .transition()
+                            .duration(1000)
+                            .attr('dy', (d, i) => {
+                                if (orientation === BOTTOM || i !== 0) {
+                                    return _smartTicks[0].oriTextHeight;
+                                }
+                                return -_smartTicks[0].oriTextHeight * (_smartTicks[0].lines.length - 1) - tickSize;
+                            })
+                            .style('opacity', 1)
+                            .attr('x', 0);
+        }
+        tspan.text(e => e);
     }
 
     return tickText;
@@ -236,7 +239,7 @@ export function renderAxis (axisInstance) {
     const availableSpace = Math.abs(range[0] - range[1]);
 
     // Get width and height taken by axis labels
-    const labelProps = axisInstance.axisDimensions().tickLabelDim;
+    const labelProps = axisInstance.axisComponentDimensions().largestTickDimensions;
 
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);

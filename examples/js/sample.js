@@ -49,15 +49,15 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension'
-      // subtype: 'temporal',
-      // format: '%Y-%m-%d'
+            type: 'dimension',
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
         }
     ];
     const dataModel = new DataModel(jsonData, schema);
 
   // Create a new variable which will keep count of cars per cylinder for a particular origin
-    let rootData = dataModel.calculateVariable(
+    const rootData = dataModel.calculateVariable(
         {
             name: 'CountVehicle',
             type: 'measure',
@@ -66,24 +66,29 @@ d3.json('../data/cars.json', (data) => {
         },
     ['Name', () => 1]
   );
-    rootData = rootData.select(e => e.Cylinders.value === '4');
+    // rootData = rootData.select(e => e.Cylinders.value === '4');
 
     env = env
     .data(rootData)
     .minUnitHeight(10)
     .minUnitWidth(10);
 
-    const crosstab = env
+    window.canvas = env
     .canvas()
-    .columns(['Cylinders', 'Origin'])
-    .rows(['Miles_per_Gallon'])
+    .rows(['Year'])
+    .columns(['Acceleration'])
     .data(rootData)
     // .color('Acceleration')
-    .width(180)
-    .height(1400)
+    .width(700)
+    .height(300)
     .config({
         border: {
             color: '#f6f6f6'
+        },
+        axes: {
+            y: {
+                showInnerTicks: true
+            }
         }
     })
 

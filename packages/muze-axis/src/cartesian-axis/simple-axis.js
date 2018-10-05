@@ -125,7 +125,6 @@ export default class SimpleAxis {
         if (domain.length) {
             this.scale().domain(domain[0]);
             this._domain = this.scale().domain();
-            // this.smartTicks(this.setTickConfig());
             this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
@@ -222,28 +221,6 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     * @returns
-     * @memberof SimpleAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            const range = this.range();
-            const length = Math.abs(range[0] - range[1]);
-            this.config({ labels: { rotation: 0 } });
-            if (length > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > length) {
-                this.config({ labels: { rotation: -90 } });
-            }
-        }
-        return this;
-    }
-
-    /**
-     *
-     *
      * @returns
      * @memberof SimpleAxis
      */
@@ -288,7 +265,6 @@ export default class SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateContinousSpace(this));
-            setOffset(this);
             this.logicalSpace();
         }
         return this.logicalSpace();

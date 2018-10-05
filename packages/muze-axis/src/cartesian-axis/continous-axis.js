@@ -145,23 +145,29 @@ export default class ContinousAxis extends SimpleAxis {
             orientation,
             fixedBaseline
         } = this.config();
-        const { tickDimensions } = this.getAxisDimensions(width, height);
+        const { tickDimensions, allTickDimensions } = this.getAxisDimensions(width, height);
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {
             const labelSpace = tickDimensions.width;
             this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
-            // const axisHeight = this.getLogicalSpace().height;
             isOffset && this.config({ yOffset: height });
-            // isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            const labelConfig = this.tickTextManager.manageTicks(this.config(), {
+                availSpace: this.range()[1] - this.range()[0],
+                totalTickWidth: allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width)
+            });
+            this.config({
+                labels: {
+                    rotation: labelConfig.rotation,
+                    smartTicks: false
+                }
+            });
         } else {
             const labelSpace = tickDimensions.height;
-
             this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
-            // const axisWidth = this.getLogicalSpace().width;
             isOffset && this.config({ xOffset: width });
-            // isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
         }
+        this.setTickValues();
         return this;
     }
 
@@ -230,17 +236,18 @@ export default class ContinousAxis extends SimpleAxis {
             orientation,
             labels
         } = this.config();
+
         const {
             rotation
         } = labels;
         const axis = this.axis();
-        const { width, height } = this.axisComponentDimensions().largestTickDimensions;
+        const { width, height } = this.axisComponentDimensions().allTickDimensions[0];
         axis.tickTransform((d, i) => {
             if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
                 return `translate(0, -${(height) / 3}px)`;
             }
-            if (i === 0 && (orientation === TOP || orientation === BOTTOM) && rotation === 0) {
-                return `translate(${width / 2}px,  ${0}px) rotate(${rotation}deg)`;
+            if (i === 0 && (orientation === TOP || orientation === BOTTOM) && !rotation) {
+                return `translate(${width / 2}px,  ${0}px) rotate(${rotation || 0}deg)`;
             } return '';
         });
         return tickText;

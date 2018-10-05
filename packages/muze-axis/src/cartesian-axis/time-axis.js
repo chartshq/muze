@@ -3,6 +3,7 @@ import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { DOMAIN } from '../enums/constants';
+import { calculateBandSpace } from './helper';
 
 const getAxisOffset = (timeDiff, range, domain) => {
     const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
@@ -73,10 +74,10 @@ export default class TimeAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig () {
+    setTickConfig (width, height, noWrap = false) {
         let smartTicks;
         let smartlabel;
-        const { maxWidth, maxHeight, tickFormat } = this.config();
+        const { tickFormat } = this.config();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
         const scale = this.scale();
@@ -86,8 +87,13 @@ export default class TimeAxis extends SimpleAxis {
 
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
+                labelManager.useEllipsesOnOverflow(true);
+
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain),
+                    Math.max(this._minTickSpace.width, width), height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
+                // smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
+                // return labelManager.constructor.textToLines(smartlabel);
             });
         }
         return smartTicks;
@@ -163,33 +169,6 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     * @returns
-     * @memberof BandAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-        const range = this.range();
-        const availSpace = Math.abs(range[0] - range[1]);
-
-        this.config({ labels: { rotation: 0, smartTicks: false } });
-        if (orientation === TOP || orientation === BOTTOM) {
-            const smartWidth = this.smartTicks().reduce((acc, n) => acc + n.width, 0);
-            // set multiline config
-            if (availSpace > 0 && axisTickLabels.length * labelWidth > availSpace) {
-                if (availSpace && smartWidth * 1.25 < availSpace) {
-                    this.config({ labels: { smartTicks: true } });
-                }
-                this.config({ labels: { rotation: -90 } });
-            }
-        }
-        return this;
-    }
-
-    /**
-     *
-     *
      * @param {*} d
      * @returns
      * @memberof SimpleAxis
@@ -211,6 +190,21 @@ export default class TimeAxis extends SimpleAxis {
         } return this._domain;
     }
 
+    /**
+     * Gets the space occupied by the axis
+     *
+     * @return {Object} object with details about size of the axis.
+     * @memberof SimpleAxis
+     */
+    getLogicalSpace () {
+        if (!this.logicalSpace()) {
+            this.logicalSpace(calculateBandSpace(this));
+            // setOffset(this);
+            this.logicalSpace();
+        }
+        return this.logicalSpace();
+    }
+
     getMinTickDifference () {
         return getSmallestDiff(this.config().tickValues);
     }
@@ -225,6 +219,7 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     setAvailableSpace (width, height, padding, isOffset) {
+        console.log(width);
         const {
             left,
             right,
@@ -232,31 +227,38 @@ export default class TimeAxis extends SimpleAxis {
             bottom
         } = padding;
         const {
-            orientation,
-            showAxisName,
-            axisNamePadding
+            orientation
         } = this.config();
         const domain = this.domain();
-        const { axisLabelDim, tickLabelDim } = this.getAxisDimensions(width, height);
-        const { height: axisDimHeight } = axisLabelDim;
-        const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
+        const { tickDimensions, axisNameDimensions } = this.getAxisDimensions(width, height);
+        const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
             const labelSpace = tickDimWidth;
             this.range(adjustRange(this._minDiff, [labelSpace / 2, width - left - right - labelSpace / 2],
                 domain, orientation));
-            const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
-                                            (axisDimHeight + axisNamePadding) : 0);
-            isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            isOffset && this.config({ yOffset: height });
+
+            this.smartTicks(this.setTickConfig(((this.range()[1] - this.range()[0]) / this.getTickValues().length) - this._minTickDistance.width, height));
+
+            this.config({
+                labels: this.tickTextManager.manageTicks(this.config(), {
+                    availSpace: this.range()[1] - this.range()[0],
+                    totalTickWidth: this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0)
+                })
+            });
         } else {
             const labelSpace = tickDimHeight;
             this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
                 domain, orientation));
-            const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
-            this.isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
+            isOffset && this.config({ xOffset: width });
+            this.smartTicks(this.setTickConfig(width - axisNameDimensions.height, height, true));
+            this.config({ labels: {
+                rotation: 0,
+                smartTicks: true
+            } });
         }
         return this;
     }
-
 }

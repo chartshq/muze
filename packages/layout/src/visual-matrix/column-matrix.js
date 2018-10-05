@@ -129,7 +129,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         matrix.forEach((row, rIdx) => row.forEach((col, cIdx) => {
             const oldLogicalSpace = col.getLogicalSpace().height;
             col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace);
-            rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, col.getLogicalSpace().height);
+            rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, Math.floor(col.getLogicalSpace().height));
         }));
 
         if (maxHeights.length > 0) {
