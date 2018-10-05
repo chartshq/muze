@@ -75,7 +75,7 @@ export const getAxisComponentDimensions = (context) => {
 
     // Get the tick labels
     axisTicks = axisTicks.map((originalLabel, i) => {
-        const label = context.getFormattedText(originalLabel, i);
+        const label = context.getFormattedText(originalLabel, i, axisTicks);
 
     // convert to string for quant values
         const tickDimensions = labelManager.getOriSize(label);

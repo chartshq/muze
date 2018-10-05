@@ -79,8 +79,8 @@ d3.json('../data/cars.json', (data) => {
     .rows(['Miles_per_Gallon'])
     .data(rootData)
     // .color('Acceleration')
-    .width(190)
-    .height(400)
+    .width(180)
+    .height(1400)
     .config({
         border: {
             color: '#f6f6f6'

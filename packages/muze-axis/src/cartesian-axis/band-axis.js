@@ -51,8 +51,6 @@ export default class BandAxis extends SimpleAxis {
         const {
             orientation
         } = this.config();
-        // const { axisLabelDim } = this.getAxisDimensions(width, height);
-        // const { height: axisDimHeight } = axisLabelDim;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
@@ -72,21 +70,17 @@ export default class BandAxis extends SimpleAxis {
                     smartTicks: this.smartTicks()
                 })
             });
-            console.log(this.smartTicks());
         } else {
             // Set y axis range
             this.range([height - bottom, top]);
             // const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
             isOffset && this.config({ xOffset: width });
-            this.smartTicks(this.setTickConfig(width, height / this.domain().length));
+            this.smartTicks(this.setTickConfig(width, height / this.domain().length, true));
 
-            this.config({
-                labels: this.tickTextManager.manageTicks(this.config(), {
-                    availSpace: height - bottom - top,
-                    _minTickDistance: this._minTickDistance().height,
-                    smartTicks: this.smartTicks()
-                })
-            });
+            this.config({ labels: {
+                rotation: 0,
+                smartTicks: true
+            } });
         }
         return this;
     }
@@ -107,7 +101,7 @@ export default class BandAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig (width, height) {
+    setTickConfig (width, height, noWrap = false) {
         let smartTicks = '';
         let smartlabel;
         const { tickFormat } = this.config();
@@ -121,7 +115,7 @@ export default class BandAxis extends SimpleAxis {
             smartTicks = domain.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
                 smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain),
-                    Math.max(this._minTickSpace.width, width), height);
+                    Math.max(this._minTickSpace.width, width), height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }

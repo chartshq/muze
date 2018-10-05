@@ -47,7 +47,7 @@ export default class SimpleAxis {
         this._tickLabelStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-ticks`);
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
         dependencies.labelManager.setStyle(this._tickLabelStyle);
-        this._minTickDistance = dependencies.labelManager.getOriSize('ww');
+        this._minTickDistance = dependencies.labelManager.getOriSize('wv');
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
         this.tickTextManager = new TickTextManager();
 
@@ -181,10 +181,10 @@ export default class SimpleAxis {
         return () => val => numberFormat(val);
     }
 
-    getFormattedText (text, index) {
+    getFormattedText (text, index, axisTicks) {
         const formatter = this.formatter;
         const scale = this.scale();
-        return formatter ? formatter(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
+        return formatter ? formatter(axisTicks)(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
     }
 
     /**
