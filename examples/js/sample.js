@@ -49,9 +49,9 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            type: 'dimension'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
     const dataModel = new DataModel(jsonData, schema);
@@ -75,11 +75,11 @@ d3.json('../data/cars.json', (data) => {
 
     window.canvas = env
     .canvas()
-    .rows(['Year'])
-    .columns(['Acceleration'])
+    .rows([['Origin', 'Cylinders'], ['Acceleration']])
+    .columns(['Year', 'Acceleration'])
     .data(rootData)
     // .color('Acceleration')
-    .width(700)
+    .width(200)
     .height(300)
     .config({
         border: {

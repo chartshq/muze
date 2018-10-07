@@ -26,9 +26,8 @@ d3.json('../data/movies.json', (data) => {
             type: 'measure'
         },
         {
-            name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'avg'
+            name: 'Distributor',
+            type: 'dimension'
         },
         {
             name: 'Weight_in_lbs',
@@ -54,7 +53,8 @@ d3.json('../data/movies.json', (data) => {
       // format: '%Y-%m-%d'
         }
     ];
-    const rootData = new DataModel(jsonData.slice(0, 10), schema);
+    let rootData = new DataModel(jsonData.slice(0, 25), schema);
+    rootData = rootData.select(e => e.Distributor.value !== null);
 
     env = env
     .data(rootData)
@@ -63,15 +63,15 @@ d3.json('../data/movies.json', (data) => {
 
     const crosstab = env
     .canvas()
-    .columns(['Title'])
-    .rows(['Title'])
+    .columns([['Distributor', 'Title'], ['US_Gross']])
+    .rows(['US_Gross'])
     .data(rootData)
     // .color('Acceleration')
-    .width(250)
-    .height(400)
+    .width(150)
+    .height(350)
     .config({
         border: {
-            color: '#f6f6f6'
+            // color: '#f6f6f6'
         }
     })
 

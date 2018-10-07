@@ -22,8 +22,6 @@ export const defaultConfig = {
         smartTicks: null
     },
     orientation: 'left',
-    maxHeight: 50, // @todo: height and width wont be hardcoded
-    maxWidth: 30,
     numberFormat: val => val,
     padding: 0.3,
     nice: true,

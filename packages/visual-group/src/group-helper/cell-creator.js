@@ -302,8 +302,10 @@ const generatePlaceholders = (context, cells, labelManager) => {
                 hContext.facetConfig = facetConfig.rows;
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             } else {
-                hContext.facetConfig = facetConfig.columns;
+                hContext.facetConfig = facetConfig.columns || {};
+                hContext.facetConfig.maxLines = 2;
                 hContext.keys = keys[0].map((key, i) => keys.map(e => e[i]));
+
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             }
             selectionObj[`${type}Headers`] = headers;
@@ -494,8 +496,8 @@ export const computeMatrices = (context, config) => {
     resolver.resetSimpleAxes();
 
     const {
-            entryCellMap
-        } = resolver.cacheMaps();
+        entryCellMap
+    } = resolver.cacheMaps();
     const newCacheMap = {
         exitCellMap: entryCellMap,
         entryCellMap: new Map()

@@ -109,6 +109,38 @@ export default class RowVisualMatrix extends VisualMatrix {
         };
     }
 
+    getPriorityDistribution (matrix, availableWidth, currentWidth, maxWidths) {
+        const priority = this.config().priority;
+        const primaryMatrixLength = this.primaryMatrix().length ? this.primaryMatrix()[0].length : 0;
+        const matrixLen = matrix[0].length;
+        const dist = [];
+        let remainaingAvailWidth = availableWidth;
+        let remainaingWidth = currentWidth;
+        let conditions = [];
+        let divider = 2;
+
+        if (priority === 2) {
+            conditions = [primaryMatrixLength - 1, primaryMatrixLength];
+            divider = Math.min(3, matrixLen);
+        } else {
+            conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
+            divider = Math.min(2, matrixLen);
+        }
+        matrix[0].forEach((e, i) => {
+            if (conditions.indexOf(i) > -1) {
+                dist[i] = Math.min(maxWidths[i], availableWidth / divider);
+                remainaingAvailWidth = availableWidth - dist[i];
+                remainaingWidth = currentWidth - dist[i];
+            }
+        });
+        matrix[0].forEach((e, i) => {
+            if (conditions.indexOf(i) === -1) {
+                dist[i] = remainaingAvailWidth * (maxWidths[i] / remainaingWidth);
+            }
+        });
+        return dist;
+    }
+
     /**
      * Distibutes the given space row wisely
      *
@@ -127,23 +159,14 @@ export default class RowVisualMatrix extends VisualMatrix {
             gutter
         } = this.config();
         const { matrix, width, height, maxHeights, maxWidths } = options;
-
         mHeight = spaceTakenByColumn(matrix, this._lastLevelKey).height;
-
         const maxWidth = maxMeasures.reduce((t, n) => {
             t += n;
             return t;
         });
 
-        // if (maxWidth > 0) {
-        //     const maxLastRowWidth = Math.min(maxMeasures[maxMeasures.length - 1], width / 2);
-        //     const remainingAvailWidth = width - maxLastRowWidth;
-        //     const remainingWidths = maxWidth - maxLastRowWidth;
-        //     cWidths = maxMeasures.map(space => remainingAvailWidth * (space / remainingWidths));
-        //     cWidths[cWidths.length - 1] = maxLastRowWidth;
-        // }
         if (maxWidth > 0) {
-            cWidths = maxMeasures.map(space => Math.floor(width * (space / maxWidth)));
+            cWidths = this.getPriorityDistribution(matrix, width, maxWidth, maxMeasures);
         } else {
             cWidths = maxMeasures.map(() => 0);
         }

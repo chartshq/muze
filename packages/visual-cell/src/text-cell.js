@@ -25,13 +25,18 @@ import './text-cell.scss';
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-    const space = labelManager.getOriSize(context.source());
+
     const {
        margin,
-        show
+       show,
+       maxLines
    } = context.config();
 
     labelManager.setStyle(context._computedStyle);
+    const space = labelManager.getSmartText(context.source(), context.availWidth(), context.availHeight());
+    if (!context.availHeight()) {
+        space.height *= maxLines;
+    }
     if (show) {
         return {
             width: space.width + margin.left + margin.right + context._minTickDiff.width,
@@ -64,7 +69,7 @@ class TextCell extends SimpleCell {
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
-        this._minTickDiff = this._dependencies.labelManager.getOriSize('WW');
+        this._minTickDiff = this._dependencies.labelManager.getOriSize('ww');
 
         generateGetterSetters(this, PROPS[TEXT]);
     }

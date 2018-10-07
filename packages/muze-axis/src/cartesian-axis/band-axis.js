@@ -121,7 +121,7 @@ export default class BandAxis extends SimpleAxis {
         return smartTicks;
     }
 
-/**
+    /**
      * Gets the space occupied by the axis
      *
      * @return {Object} object with details about size of the axis.

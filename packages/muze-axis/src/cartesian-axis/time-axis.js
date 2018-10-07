@@ -92,8 +92,6 @@ export default class TimeAxis extends SimpleAxis {
                 smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain),
                     Math.max(this._minTickSpace.width, width), height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
-                // smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
-                // return labelManager.constructor.textToLines(smartlabel);
             });
         }
         return smartTicks;

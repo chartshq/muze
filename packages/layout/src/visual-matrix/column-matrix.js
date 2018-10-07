@@ -108,6 +108,51 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         };
     }
 
+    getPriorityDistribution (matrix, height) {
+        const priority = this.config().priority;
+        const primaryMatrixLength = this.primaryMatrix().length;
+        const matrixLen = matrix.length;
+        const heightDist = [];
+        let remainaingHeight = height;
+
+        let conditions = [];
+        let divider = 2;
+
+        if (priority === 2) {
+            conditions = [primaryMatrixLength - 1, primaryMatrixLength];
+            divider = 2;
+        } else {
+            conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
+            divider = 1;
+        }
+        const maxHeights = [];
+        matrix.forEach((e, i) => {
+            if (conditions.indexOf(i) === -1) {
+                heightDist[i] = e[0].getLogicalSpace().height;
+                // * 2;
+                remainaingHeight -= heightDist[i];
+            }
+            e.forEach((col) => {
+                const oldLogicalSpace = col.getLogicalSpace();
+                maxHeights[i] = Math.max(maxHeights[i] || 0, oldLogicalSpace.height);
+            });
+        });
+
+        let leftOverHeight = 0;
+        conditions.forEach((e) => {
+            heightDist[e] = Math.max(maxHeights[e], (remainaingHeight) / divider);
+            leftOverHeight = (remainaingHeight) - heightDist[e];
+        });
+        if (leftOverHeight > 0) {
+            matrix.forEach((e, i) => {
+                if (conditions.indexOf(i) === -1) {
+                    heightDist[i] += leftOverHeight / (matrixLen - divider);
+                }
+            });
+        }
+        return heightDist;
+    }
+
     /**
      * Distibutes the given space column wisely
      *
@@ -116,9 +161,9 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      */
     redistributeViewSpaces (options) {
         let rHeights = [];
-        const { matrix, width, maxHeights, maxWidths } = options;
+        const { matrix, width, height, maxHeights, maxWidths } = options;
         const borderWidth = this.config().unitMeasures.border;
-        // const priority = this.config().priority;
+
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
         const cWidths = getDistributedWidth({
             row: matrix[this._lastLevelKey],
@@ -126,12 +171,15 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             availableWidth: width
         }, this.config());
 
+        const heightDistribution = this.getPriorityDistribution(matrix, height);
+        // console.log(maxHeights);
+
         matrix.forEach((row, rIdx) => row.forEach((col, cIdx) => {
             const oldLogicalSpace = col.getLogicalSpace().height;
-            col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace);
+            col.setAvailableSpace(cWidths[cIdx] - borderWidth, heightDistribution[rIdx]);
+            debugger;
             rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, Math.floor(col.getLogicalSpace().height));
         }));
-
         if (maxHeights.length > 0) {
             rHeights = rHeights.map((e, i) => Math.max(e, maxHeights[0][i]));
         }
