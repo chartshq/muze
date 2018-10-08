@@ -187,7 +187,7 @@ class ActionModel {
      *
      * To register what behaviour should be propagated on dispatch of any behavioural action,
      * ```
-     *  ActionModel.registerPropagationBehaviourMap({
+     *  ActionModel.for(canvas1, canvas2).registerPropagationBehaviourMap({
      *      select: 'filter',
      *      brush: 'filter'
      *  });
@@ -269,6 +269,7 @@ class ActionModel {
      * ```
      * @public
      * @param  {GenericSideEffect} sideEffects Definition of side effects.
+     *
      * @return {ActionModel} Instance of action model.
      */
     registerSideEffects (...sideEffects) {
@@ -320,7 +321,6 @@ class ActionModel {
      * ```
      *  muze.ActionModel.dissociateSideEffect(['crossline', 'highlight'], ['selectionBox', 'brush']);
      * ```
-     *
      * @public
      * @param  {Array} maps Array of side effects and behavioural actions.
      *
