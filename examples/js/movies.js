@@ -44,7 +44,7 @@ d3.json('../data/movies.json', (data) => {
       // format: '%Y-%m-%d'
         }
     ];
-    let rootData = new DataModel(jsonData.slice(0, 25), schema);
+    let rootData = new DataModel(jsonData.slice(0, 15), schema);
     rootData = rootData.select(e => e.Major_Genre.value !== null && e.Major_Genre.value !== '');
 
     env = env
@@ -54,24 +54,28 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .columns(['Major_Genre', 'Title'])
-    .rows(['US_Gross'])
+    .columns(['Major_Genre', 'US_Gross'])
+    .rows(['Title'])
     .data(rootData)
     .minUnitWidth(10)
     // .color('Acceleration')
-    .width(540)
-    .height(750)
+    .width(100)
+    .height(650)
     .config({
         border: {
             // color: '#f6f6f6'
         },
         facet: {
             columns: {
-                maxLines: 2,
-                verticalAlign: 'top'
+                maxLines: 2
+                // verticalAlign: 'top'
+            }
+        },
+        axes: {
+            x: {
+                // tickValues: ['Slam']
             }
         }
-
 
         // axes: { y: { tickValues: [0, 5000000] } }
     })

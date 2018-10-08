@@ -42,8 +42,8 @@ export default class BandAxis extends SimpleAxis {
      * @memberof BandAxis
      */
     setAvailableSpace (width, height, padding, isOffset) {
-        let tickInterval,
-            heightForTicks;
+        let tickInterval;
+        let heightForTicks;
         const {
             left,
             right,
@@ -80,20 +80,31 @@ export default class BandAxis extends SimpleAxis {
             if (tickInterval < this._minTickSpace.width && rotation !== 0) {
                 // set smart ticks and rotation config
                 labelConfig.rotation = labels.rotation === null ? -90 : rotation;
+                labelConfig.smartTicks = false;
+                // Remove ticks if not enough height
+                if (tickInterval < this._minTickSpace.height) {
+                    tickInterval = 0;
+                    heightForTicks = 0;
+                }
             }
-            this.smartTicks(this.setTickConfig(tickInterval, heightForTicks, rotation !== null));
+            this.maxTickSpaces({
+                width: tickInterval,
+                height: heightForTicks,
+                noWrap: rotation !== null
+            });
         } else {
             // Set y axis range
             this.range([height - bottom, top]);
             isOffset && this.config({ xOffset: width });
             const availWidth = width - axisNameDimensions.height - axisNamePadding;
 
-            if (availWidth <= this._minTickSpace.width) {
-                this.smartTicks(this.setTickConfig(0, height, true));
-            } else {
-                this.smartTicks(this.setTickConfig(availWidth, height, true));
-            }
+            this.maxTickSpaces({
+                width: availWidth <= this._minTickSpace.width ? 0 : availWidth,
+                height,
+                noWrap: true
+            });
         }
+        this.smartTicks(this.setTickConfig());
         this.config({
             labels: labelConfig
         });
@@ -116,14 +127,15 @@ export default class BandAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig (availWidth, availHeight, noWrap = false) {
+    setTickConfig () {
         let smartTicks = '';
         let smartlabel;
         const { tickFormat, labels } = this.config();
+        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
+
         const { labelManager } = this._dependencies;
         const domain = this.domain();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
-
         smartTicks = domain;
         const tickFormatter = tickFormat || (val => val);
 

@@ -27,6 +27,7 @@ const setLabelRotationForAxes = (context) => {
         xAxes.forEach((axes) => {
             axes.forEach((axis) => {
                 axis.config({ labels: { rotation, smartTicks: false } });
+                axis.smartTicks(axis.setTickConfig());
             });
         });
     }

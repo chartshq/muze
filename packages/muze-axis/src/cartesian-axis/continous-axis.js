@@ -152,7 +152,7 @@ export default class ContinousAxis extends SimpleAxis {
             tickDimensions,
             allTickDimensions,
             axisNameDimensions
-        } = this.getAxisDimensions(width, height);
+        } = this.getAxisDimensions();
         const labelConfig = { smartTicks: false, rotation: labels.rotation };
 
         this.availableSpace({ width, height });

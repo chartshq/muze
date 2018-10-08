@@ -138,7 +138,6 @@ export const computeAxisDimensions = (context) => {
     if (domain.length === 0) {
         return null;
     }
-
     if (smartTicks) {
         tickDimensions = smartTick;
     } else {
@@ -183,9 +182,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
             Math.max(...tickValues, ...domain)
         ];
 
-        width =
-      ((max - min) / Math.abs(minTickDiff)) *
-      (tickDimWidth + context._minTickDistance.width);
+        width = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + context._minTickDistance.width);
     }
     if (!width || width === 0) {
         height = Math.max(tickDimWidth, tickDimHeight);
@@ -193,6 +190,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
         height = tickDimHeight;
     }
     height += (showAxisName ? axisDimHeight + axisNamePadding : 0) + tickSize;
+
     return {
         width,
         height
@@ -244,16 +242,12 @@ export const calculateBandSpace = (context) => {
     const config = context.config();
     const { orientation, show } = config;
     const axisDimensions = context.getAxisDimensions();
+
     const { largestTickDimensions, axisTicks } = axisDimensions;
     const { height: largestDimHeight, width: largestDimWidth } = largestTickDimensions;
 
     if (orientation === TOP || orientation === BOTTOM) {
-        let { width, height } = getHorizontalAxisSpace(
-      context,
-      axisDimensions,
-      config,
-      range
-    );
+        let { width, height } = getHorizontalAxisSpace(context, axisDimensions, config, range);
         if (!width || width === 0) {
             width = axisTicks.length * Math.min(largestDimWidth + context._minTickDistance.width,
                 largestDimHeight + context._minTickDistance.width);
@@ -261,6 +255,7 @@ export const calculateBandSpace = (context) => {
         if (show === false) {
             height = 0;
         }
+
         return {
             width,
             height
@@ -282,6 +277,7 @@ export const calculateBandSpace = (context) => {
     if (show === false) {
         width = 0;
     }
+
     return {
         width,
         height

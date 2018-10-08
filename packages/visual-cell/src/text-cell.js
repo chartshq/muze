@@ -25,7 +25,7 @@ import './text-cell.scss';
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-    const { _minSpacing } = context;
+    const { _minSpacing, _minTextSpace } = context;
     const {
        margin,
        show,
@@ -49,7 +49,10 @@ const computeTextSpace = (context) => {
     const space = context.smartText();
 
     if (space.width > (availWidth || 0) && maxLines) {
-        space.height *= maxLines;
+        space.height = space.oriTextHeight * maxLines;
+    }
+    if (!availWidth) {
+        space.width = _minTextSpace.width;
     }
     if (show) {
         return {
@@ -84,7 +87,7 @@ class TextCell extends SimpleCell {
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
         this._minSpacing = this._dependencies.labelManager.getOriSize('wv');
-        this._minTextSpace = this._dependencies.labelManager.getOriSize('www');
+        this._minTextSpace = this._dependencies.labelManager.getOriSize('WWW');
 
         generateGetterSetters(this, PROPS[TEXT]);
     }

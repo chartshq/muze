@@ -74,10 +74,11 @@ export default class TimeAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig (availWidth, availHeight, noWrap = false) {
+    setTickConfig () {
         let smartTicks;
         let smartlabel;
         const { tickFormat, labels } = this.config();
+        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
         const scale = this.scale();
@@ -250,14 +251,25 @@ export default class TimeAxis extends SimpleAxis {
                 // set smart ticks and rotation config
                 labelConfig.rotation = labels.rotation === null ? -90 : rotation;
             }
-            this.smartTicks(this.setTickConfig(tickInterval, heightForTicks, rotation !== null));
+            this.maxTickSpaces({
+                width: tickInterval,
+                height: heightForTicks,
+                noWrap: rotation !== null
+            });
         } else {
             const labelSpace = tickDimHeight;
             this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
                 domain, orientation));
             isOffset && this.config({ xOffset: width });
-            this.smartTicks(this.setTickConfig(width - axisNameDimensions.height, height, true));
+            const availWidth = width - axisNameDimensions.height - axisNamePadding;
+
+            this.maxTickSpaces({
+                width: availWidth <= this._minTickSpace.width ? 0 : availWidth,
+                height,
+                noWrap: true
+            });
         }
+        this.smartTicks(this.setTickConfig());
         this.config({
             label: labelConfig
         });
