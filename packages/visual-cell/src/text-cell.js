@@ -37,20 +37,24 @@ const computeTextSpace = (context) => {
        top,
        bottom
     } = margin;
-    const availHeight = context.availHeight();
-    const availWidth = context.availWidth();
+    const paddedHeight = top + bottom + _minSpacing.height;
+    const paddedWidth = left + right + _minSpacing.width;
+    const availHeight = context.availHeight() - paddedWidth;
+    const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
 
     labelManager.setStyle(context._computedStyle);
-    context.smartText(labelManager.getSmartText(source, availWidth, availHeight, true));
+
+    context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
     const space = context.smartText();
-    if (!availHeight && space.width > availWidth || 0) {
+
+    if (space.width > (availWidth || 0) && maxLines) {
         space.height *= maxLines;
     }
     if (show) {
         return {
-            width: space.width + left + right + _minSpacing.width,
-            height: Math.min(space.height, space.maxHeight || space.height) + top + bottom + _minSpacing.height
+            width: space.width + paddedWidth,
+            height: space.height + paddedHeight
         };
     } return {
         width: 0,

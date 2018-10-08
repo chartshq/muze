@@ -57,20 +57,21 @@ d3.json('../data/movies.json', (data) => {
     .columns(['Major_Genre', 'Title'])
     .rows(['US_Gross'])
     .data(rootData)
+    .minUnitWidth(10)
     // .color('Acceleration')
-    .width(650)
-    .height(390)
+    .width(540)
+    .height(750)
     .config({
         border: {
             // color: '#f6f6f6'
         },
-        axes: {
-            x: {
-                labels: {
-                    // rotation: 0
-                }
+        facet: {
+            columns: {
+                maxLines: 2,
+                verticalAlign: 'top'
             }
         }
+
 
         // axes: { y: { tickValues: [0, 5000000] } }
     })

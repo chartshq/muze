@@ -203,13 +203,13 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
         axis,
         keys,
         type,
-        facetConfig
+        facet
     } = context;
     const counter = axis.length / keys.length;
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
     return createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys, (keySet, i) =>
         `${keySet.join(',')}-${i}`).map(keySet => createTextCells(null, keySet, cells, labelManager)
-                        .map((cell, k, i) => cell.source(keySet[i]).config(facetConfig)));
+                        .map((cell, k, i) => cell.source(keySet[i]).config(facet)));
 };
 
 /**
@@ -229,7 +229,7 @@ const generatePlaceholders = (context, cells, labelManager) => {
         fields,
         facetsAndProjections,
         selection,
-        facetConfig,
+        facet,
         encoders
     } = context;
     const {
@@ -299,10 +299,10 @@ const generatePlaceholders = (context, cells, labelManager) => {
             let headers = [];
             if (index < 2) {
                 hContext.keys = keys;
-                hContext.facetConfig = facetConfig.rows;
+                hContext.facet = facet.rows;
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             } else {
-                hContext.facetConfig = facetConfig.columns;
+                hContext.facet = facet.columns;
                 hContext.keys = keys[0].map((key, i) => keys.map(e => e[i]));
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             }
@@ -332,7 +332,7 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         normalizedColumns,
         selection,
         axisFrom,
-        facetConfig,
+        facet,
         encoders
      } = context;
     const placeholderContext = {
@@ -344,7 +344,7 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         facetsAndProjections,
         selection,
         axisFrom,
-        facetConfig,
+        facet,
         encoders
     };
     // Generate placeholders for all matrices
@@ -473,7 +473,7 @@ export const computeMatrices = (context, config) => {
         fieldMap,
         otherEncodings,
         encoders,
-        facetConfig: globalConfig.facetConfig || {},
+        facet: globalConfig.facet || {},
         axisFrom: globalConfig.axisFrom || {},
         selection
     };

@@ -33,12 +33,13 @@ export const DEFAULT_CONFIG = {
     showHeaders: false,
     minWidth: 100,
     minHeight: 100,
-    facetConfig: {
+    facet: {
         rows: {
 
         },
         columns: {
-            maxLines: 2
+            maxLines: 2,
+            verticalAlign: 'middle'
         }
     },
     border: {
