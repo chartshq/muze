@@ -11,7 +11,6 @@ import { axisOrientationMap } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
 import { DOMAIN, BAND } from '../enums/constants';
-import TickTextManager from './tick-text-manager';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
@@ -49,7 +48,6 @@ export default class SimpleAxis {
         dependencies.labelManager.setStyle(this._tickLabelStyle);
         this._minTickDistance = dependencies.labelManager.getOriSize('wv');
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
-        this.tickTextManager = new TickTextManager();
 
         generateGetterSetters(this, PROPS);
         this.store(new Store({

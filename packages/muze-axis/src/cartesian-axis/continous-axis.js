@@ -135,6 +135,7 @@ export default class ContinousAxis extends SimpleAxis {
      * @memberof AxisCell
      */
     setAvailableSpace (width = 0, height, padding, isOffset) {
+        let showTicks = true;
         const {
             left,
             right,
@@ -146,36 +147,57 @@ export default class ContinousAxis extends SimpleAxis {
             fixedBaseline,
             axisNamePadding
         } = this.config();
-        const { tickDimensions, allTickDimensions,
-        axisNameDimensions } = this.getAxisDimensions(width, height);
+        const {
+            tickDimensions,
+            allTickDimensions,
+            axisNameDimensions
+        } = this.getAxisDimensions(width, height);
+        const labelConfig = { smartTicks: false };
+
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {
             const labelSpace = tickDimensions.width;
+
+            // Set range
             this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
+
+            // Set offset
             isOffset && this.config({ yOffset: height });
 
-            const tickWidth = allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width);
+            // Get Tick widths
+            const totalTickWidth = allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width);
             const availableSpace = this.range()[1] - this.range()[0];
-            const labelConfig = { smartTicks: false };
-            if (availableSpace < tickWidth) {
+
+            // Rotate labels if not enough width
+            if (availableSpace < totalTickWidth) {
                 labelConfig.rotation = -90;
             }
+
+            // Remove ticks if not enough height
             if (height - axisNameDimensions.height + axisNamePadding < tickDimensions.height) {
-                this.config({ tickValues: [] });
+                showTicks = false;
             }
+
+            // Set config
             this.config({
                 labels: labelConfig
             });
         } else {
             const labelSpace = tickDimensions.height;
+
+            // Set range
             this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
+
+            // Set offset
             isOffset && this.config({ xOffset: width });
+
+            // Remove display of ticks if no space is lef
             if (width < tickDimensions.width + axisNameDimensions.height + axisNamePadding) {
-                this.config({ tickValues: [] });
+                showTicks = false;
             }
         }
-        this.setTickValues();
+        this.setTickValues(showTicks);
         return this;
     }
 
@@ -186,16 +208,22 @@ export default class ContinousAxis extends SimpleAxis {
      * @returns
      * @memberof SimpleAxis
      */
-    setTickValues () {
+    setTickValues (showTicks = true) {
         const {
             tickValues
         } = this.config();
         const axis = this.axis();
 
+        if (!showTicks) {
+            axis.tickValues([]);
+            return this;
+        }
+
         if (tickValues) {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
             return this;
         }
+
         axis.tickValues(this.getTickValues());
         return this;
     }

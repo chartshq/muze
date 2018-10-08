@@ -117,6 +117,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
         if (orientation === TOP || orientation === BOTTOM) {
             tickText.attr('y', 0)
                             .attr('x', 0)
+                            .attr('transform', '')
                             .text('');
             const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, `${classPrefix}-smart-text`);
 
@@ -222,7 +223,6 @@ export function renderAxis (axisInstance) {
         showAxisName,
         show,
         id,
-        interpolator,
         classPrefix
      } = config;
 
@@ -237,12 +237,6 @@ export function renderAxis (axisInstance) {
 
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
-
-    // @to-do: Need to write a configuration override using decorator pattern
-    if (interpolator === 'linear') {
-    // Set ticks for the axis
-        axisInstance.setTickValues();
-    }
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 

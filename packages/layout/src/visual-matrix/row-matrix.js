@@ -109,7 +109,7 @@ export default class RowVisualMatrix extends VisualMatrix {
         };
     }
 
-    getPriorityDistribution (matrix, availableWidth, currentWidth, maxWidths) {
+    getPriorityDistribution (matrix, availableWidth, maxWidths, currentWidth) {
         const priority = this.config().priority;
         const primaryMatrixLength = this.primaryMatrix().length ? this.primaryMatrix()[0].length : 0;
         const matrixLen = matrix[0].length;
@@ -164,7 +164,7 @@ export default class RowVisualMatrix extends VisualMatrix {
         });
 
         if (maxWidth > 0) {
-            cWidths = this.getPriorityDistribution(matrix, width, maxWidth, maxMeasures);
+            cWidths = this.getPriorityDistribution(matrix, width, maxMeasures, maxWidth);
         } else {
             cWidths = maxMeasures.map(() => 0);
         }

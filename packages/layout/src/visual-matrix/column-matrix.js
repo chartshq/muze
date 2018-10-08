@@ -134,16 +134,8 @@ export default class ColumnVisualMatrix extends VisualMatrix {
 
         conditions.forEach((e) => {
             heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
-            // leftOverHeight = (remainaingHeight) - heightDist[e];
         });
 
-        // if (leftOverHeight) {
-        //     maxHeights.forEach((e, i) => {
-        //         if (conditions.indexOf(i) === -1) {
-        //             heightDist[i] += leftOverHeight / (matrixLen - divider);
-        //         }
-        //     });
-        // }
         return heightDist;
     }
 
@@ -209,7 +201,6 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         matrix.forEach((row, rIdx) => {
             row.forEach((cell, cIdx) => {
                 const colHeight = heightDistribution[rIdx] || 0;
-                // const colHeight = maxHeights[matrixIndex][rIdx] || 0;
                 const colWidth = maxWidths[matrixIndex][cIdx];
 
                 cell.setAvailableSpace(colWidth - borderWidth, colHeight);

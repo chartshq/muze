@@ -52,18 +52,19 @@ d3.json('../data/movies.json', (data) => {
     .minUnitHeight(10)
     .minUnitWidth(10);
 
-    const crosstab = env
+    window.crosstab = env
     .canvas()
-    .rows(['Major_Genre', 'Title'])
-    .columns(['US_Gross'])
+    .columns(['Major_Genre', 'Title'])
+    .rows(['US_Gross'])
     .data(rootData)
     // .color('Acceleration')
-    .width(100)
-    .height(100)
+    .width(150)
+    .height(300)
     .config({
         border: {
             // color: '#f6f6f6'
         }
+        // axes: { y: { tickValues: [0, 5000000] } }
     })
 
     .mount('#chart2');

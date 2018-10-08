@@ -209,7 +209,7 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
     return createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys, (keySet, i) =>
         `${keySet.join(',')}-${i}`).map(keySet => createTextCells(null, keySet, cells, labelManager)
-                        .map((cell, k, i) => cell.source(keySet[i]).config(facetConfig || {})));
+                        .map((cell, k, i) => cell.source(keySet[i]).config(facetConfig)));
 };
 
 /**
@@ -302,10 +302,8 @@ const generatePlaceholders = (context, cells, labelManager) => {
                 hContext.facetConfig = facetConfig.rows;
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             } else {
-                hContext.facetConfig = facetConfig.columns || {};
-                hContext.facetConfig.maxLines = 2;
+                hContext.facetConfig = facetConfig.columns;
                 hContext.keys = keys[0].map((key, i) => keys.map(e => e[i]));
-
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             }
             selectionObj[`${type}Headers`] = headers;

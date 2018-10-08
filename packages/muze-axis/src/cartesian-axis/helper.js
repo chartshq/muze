@@ -48,7 +48,7 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) =
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
-    if (tickLength * (labelDim * 1.5) > availableSpace) {
+    if (tickLength * (labelDim + axisInstance._minTickDistance.width) > availableSpace) {
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
