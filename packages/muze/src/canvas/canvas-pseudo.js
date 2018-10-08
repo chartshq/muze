@@ -116,7 +116,7 @@ export default class {
      *
      * @return {Canvas} Instance of current canvas
      */
-    details () { /* pseudo definition */ }
+    detail () { /* pseudo definition */ }
 
     /**
      * Defines custom layers for a given settings of encoding.
