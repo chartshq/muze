@@ -63,7 +63,7 @@ export const getAxisComponentDimensions = (context) => {
     let axisTicks;
     const allTickDimensions = [];
     const scale = context.scale();
-    const { tickValues, name } = context.config();
+    const { tickValues, name, showAxisName } = context.config();
     const { labelManager } = context.dependencies();
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
@@ -93,7 +93,7 @@ export const getAxisComponentDimensions = (context) => {
     });
 
     labelManager.setStyle(context._axisNameStyle);
-    const axisNameDimensions = labelManager.getOriSize(name);
+    const axisNameDimensions = showAxisName ? labelManager.getOriSize(name) : { width: 0, height: 0 };
 
     return {
         axisNameDimensions,
@@ -101,7 +101,8 @@ export const getAxisComponentDimensions = (context) => {
         largestTickDimensions,
         allTickDimensions,
         axisTicks,
-        smartTick
+        smartTick,
+        tickSize: context.getTickSize()
     };
 };
 
@@ -114,7 +115,8 @@ export const computeAxisDimensions = (context) => {
         axisTicks,
         smartTick,
         axisNameDimensions,
-        allTickDimensions
+        allTickDimensions,
+        tickSize
     } = getAxisComponentDimensions(context);
     const { height: labelHeight, width: labelWidth } = largestTickDimensions;
 
@@ -127,7 +129,14 @@ export const computeAxisDimensions = (context) => {
     }
 
     if (smartTicks) {
-        tickDimensions = smartTick;
+        tickDimensions = {
+            width:
+        Math.abs(smartTick.height * Math.sin(angle)) +
+        Math.abs(smartTick.width * Math.cos(angle)),
+            height:
+        Math.abs(smartTick.width * Math.sin(angle)) +
+        Math.abs(smartTick.height * Math.cos(angle))
+        };
     } else {
         tickDimensions = {
             width:
@@ -141,7 +150,7 @@ export const computeAxisDimensions = (context) => {
 
     return {
         allTickDimensions,
-        tickSize: context.getTickSize(),
+        tickSize,
         tickDimensions,
         axisNameDimensions,
         largestTickDimensions,

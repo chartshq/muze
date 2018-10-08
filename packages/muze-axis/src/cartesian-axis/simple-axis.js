@@ -37,6 +37,7 @@ export default class SimpleAxis {
         this._rotationLock = false;
         this._axisDimensions = {};
         this._eventList = [];
+        this._smartTicks = [];
 
         const defCon = mergeRecursive({}, this.constructor.defaultConfig());
         const simpleConfig = mergeRecursive(defCon, config);

@@ -126,12 +126,10 @@ export default class RowVisualMatrix extends VisualMatrix {
             conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
             divider = Math.min(2, matrixLen);
         }
-        matrix[0].forEach((e, i) => {
-            if (conditions.indexOf(i) > -1) {
-                dist[i] = Math.min(maxWidths[i], availableWidth / divider);
-                remainaingAvailWidth = availableWidth - dist[i];
-                remainaingWidth = currentWidth - dist[i];
-            }
+        conditions.forEach((i) => {
+            dist[i] = Math.min(maxWidths[i], availableWidth / divider);
+            remainaingAvailWidth = availableWidth - dist[i];
+            remainaingWidth = currentWidth - dist[i];
         });
         matrix[0].forEach((e, i) => {
             if (conditions.indexOf(i) === -1) {

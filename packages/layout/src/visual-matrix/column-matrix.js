@@ -51,10 +51,11 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         const {
             maxHeights,
             maxWidths,
+            height,
             width
         } = measures;
         return this.viewableMatrix.map((matrixInst, i) => {
-            const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i };
+            const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i, height };
             const { heights, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
             const heightMeasures = heights;
             const columnMeasures = [width, width];
@@ -108,10 +109,9 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         };
     }
 
-    getPriorityDistribution (matrix, height) {
+    getPriorityDistribution (matrix, height, maxHeights = []) {
         const priority = this.config().priority;
         const primaryMatrixLength = this.primaryMatrix().length;
-        const matrixLen = matrix.length;
         const heightDist = [];
         let remainaingHeight = height;
 
@@ -125,31 +125,25 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
             divider = 1;
         }
-        const maxHeights = [];
-        matrix.forEach((e, i) => {
+        maxHeights.forEach((e, i) => {
             if (conditions.indexOf(i) === -1) {
-                heightDist[i] = e[0].getLogicalSpace().height;
-                // * 2;
-                remainaingHeight -= heightDist[i];
+                heightDist[i] = e;
+                remainaingHeight -= e;
             }
-            e.forEach((col) => {
-                const oldLogicalSpace = col.getLogicalSpace();
-                maxHeights[i] = Math.max(maxHeights[i] || 0, oldLogicalSpace.height);
-            });
         });
 
-        let leftOverHeight = 0;
         conditions.forEach((e) => {
-            heightDist[e] = Math.max(maxHeights[e], (remainaingHeight) / divider);
-            leftOverHeight = (remainaingHeight) - heightDist[e];
+            heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
+            // leftOverHeight = (remainaingHeight) - heightDist[e];
         });
-        if (leftOverHeight > 0) {
-            matrix.forEach((e, i) => {
-                if (conditions.indexOf(i) === -1) {
-                    heightDist[i] += leftOverHeight / (matrixLen - divider);
-                }
-            });
-        }
+
+        // if (leftOverHeight) {
+        //     maxHeights.forEach((e, i) => {
+        //         if (conditions.indexOf(i) === -1) {
+        //             heightDist[i] += leftOverHeight / (matrixLen - divider);
+        //         }
+        //     });
+        // }
         return heightDist;
     }
 
@@ -161,7 +155,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      */
     redistributeViewSpaces (options) {
         let rHeights = [];
-        const { matrix, width, height, maxHeights, maxWidths } = options;
+        const { matrix, width, maxHeights, maxWidths } = options;
         const borderWidth = this.config().unitMeasures.border;
 
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
@@ -171,19 +165,16 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             availableWidth: width
         }, this.config());
 
-        const heightDistribution = this.getPriorityDistribution(matrix, height);
-        // console.log(maxHeights);
-
         matrix.forEach((row, rIdx) => row.forEach((col, cIdx) => {
-            const oldLogicalSpace = col.getLogicalSpace().height;
-            col.setAvailableSpace(cWidths[cIdx] - borderWidth, heightDistribution[rIdx]);
-            debugger;
+            const oldLogicalSpace = col.getLogicalSpace();
+            col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace.height);
+
             rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, Math.floor(col.getLogicalSpace().height));
         }));
+
         if (maxHeights.length > 0) {
             rHeights = rHeights.map((e, i) => Math.max(e, maxHeights[0][i]));
         }
-
         maxHeights.push(rHeights);
 
         for (let x = 0; x < maxHeights.length; x++) {
@@ -205,7 +196,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             unitMeasures: measures
         } = this.config();
         const borderWidth = measures.border;
-        const { matrixInst, maxWidths, maxHeights, matrixIndex } = options;
+        const { matrixInst, height, maxWidths, maxHeights, matrixIndex } = options;
         const matrix = matrixInst.matrix;
         const rowHeights = [[0], [0]];
         const columnWidths = [[0], [0]];
@@ -213,9 +204,12 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         const widths = [0, 0];
         const breakPointer = this._breakPointer;
 
+        const heightDistribution = this.getPriorityDistribution(matrix, height, maxHeights[0]);
+
         matrix.forEach((row, rIdx) => {
             row.forEach((cell, cIdx) => {
-                const colHeight = maxHeights[matrixIndex][rIdx] || 0;
+                const colHeight = heightDistribution[rIdx] || 0;
+                // const colHeight = maxHeights[matrixIndex][rIdx] || 0;
                 const colWidth = maxWidths[matrixIndex][cIdx];
 
                 cell.setAvailableSpace(colWidth - borderWidth, colHeight);

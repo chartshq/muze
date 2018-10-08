@@ -16,6 +16,7 @@ import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
 const rotateAxis = (instance, tickText, labelManager, config) => {
     const axis = instance.axis();
     const scale = instance.scale();
+    const smartTicks = instance.smartTicks();
     const {
         orientation,
         labels,
@@ -26,15 +27,18 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
 
     const tickSize = instance.getTickSize();
 
-    tickText.each(function (datum, index) {
+    tickText.each(function (d, index) {
         let yShift;
         let xShift;
+        let datum = smartTicks[index] ? smartTicks[index].text : d;
+
         const tickFormatter = axis.tickFormat() ? axis.tickFormat : scale.tickFormat;
         const temp = tickFormatter ? tickFormatter()(datum) : datum;
 
         datum = temp.toString();
 
         const tickLabelDim = labelManager.getOriSize(datum);
+
         const width = tickLabelDim.width * 0.5;
         const height = tickLabelDim.height * 0.5;
 
@@ -67,10 +71,13 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
                                 ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
             xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
+
             selectElement(this)
                             .attr('transform', `translate(${xShift - tickSize} 
                                 ${yShift + tickSize}) rotate(${rotation})`);
         }
+        selectElement(this).transition()
+                        .duration(1000).text(datum);
     });
     return tickText;
 };
@@ -89,7 +96,8 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     const labelManager = axisInstance.dependencies().labelManager;
     const {
         labels,
-        orientation
+        orientation,
+        classPrefix
     } = config;
     const {
         rotation,
@@ -100,19 +108,21 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     tickText.selectAll('tspan').remove();
 
    // rotate labels if not enough space is available
-    if (rotation && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
+    if (rotation && (orientation === TOP || orientation === BOTTOM)) {
         rotateAxis(axisInstance, tickText, labelManager, config);
     } else if (!rotation && !isSmartTicks) {
         tickText.attr('transform', '');
     } else {
         tickText.text('');
-        const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, 'smart-text');
         if (orientation === TOP || orientation === BOTTOM) {
             tickText.attr('y', 0)
                             .attr('x', 0)
                             .text('');
+            const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, `${classPrefix}-smart-text`);
+
             tspan.attr('dy', '0')
                             .style('opacity', '0')
+
                             .transition()
                             .duration(1000)
                             .attr('dy', (d, i) => {
@@ -122,9 +132,12 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
                                 return -_smartTicks[0].oriTextHeight * (_smartTicks[0].lines.length - 1) - tickSize;
                             })
                             .style('opacity', 1)
+                            .text(e => e)
                             .attr('x', 0);
+        } else {
+            const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, `${classPrefix}-smart-text`);
+            tspan.text(e => e);
         }
-        tspan.text(e => e);
     }
 
     return tickText;

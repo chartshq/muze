@@ -49,31 +49,48 @@ export default class BandAxis extends SimpleAxis {
             bottom
         } = padding;
         const {
-            orientation
+            orientation,
+            axisNamePadding
         } = this.config();
-        const { axisNameDimensions } = this.axisComponentDimensions();
+        const { axisNameDimensions, tickSize } = this.axisComponentDimensions();
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
             // Set x axis range
             this.range([0, width - left - right]);
             isOffset && this.config({ yOffset: height });
-            // set smart ticks and rotation config
-            this.smartTicks(this.setTickConfig((width - left - right / this.domain().length) -
-                this._minTickDistance.width, height));
 
-            this.config({
-                labels: this.tickTextManager.manageTicks(this.config(), {
-                    availSpace: width - left - right,
-                    totalTickWidth: this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0)
-                })
-            });
+            const tickInterval = ((width - left - right) / this.domain().length) - this._minTickDistance.width;
+            const heightForTicks = height - axisNameDimensions.height - tickSize - axisNamePadding;
+
+            if (tickInterval < this._minTickSpace.width) {
+                // set smart ticks and rotation config
+                this.smartTicks(this.setTickConfig(heightForTicks, tickInterval, true));
+                this.config({
+                    labels: {
+                        rotation: -90,
+                        smartTicks: true
+                    }
+                });
+            } else {
+                this.smartTicks(this.setTickConfig(tickInterval, heightForTicks));
+                this.config({
+                    labels: {
+                        rotation: 0,
+                        smartTicks: true
+                    }
+                });
+            }
         } else {
             // Set y axis range
             this.range([height - bottom, top]);
             isOffset && this.config({ xOffset: width });
-
-            this.smartTicks(this.setTickConfig(width - axisNameDimensions.height, height, true));
+            const availWidth = width - axisNameDimensions.height - axisNamePadding;
+            if (width <= axisNameDimensions.height + axisNamePadding) {
+                this.config({ tickValues: [] });
+            } else {
+                this.smartTicks(this.setTickConfig(availWidth, height, true));
+            }
 
             this.config({ labels: {
                 rotation: 0,

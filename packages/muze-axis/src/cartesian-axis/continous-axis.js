@@ -143,29 +143,37 @@ export default class ContinousAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            fixedBaseline
+            fixedBaseline,
+            axisNamePadding
         } = this.config();
-        const { tickDimensions, allTickDimensions } = this.getAxisDimensions(width, height);
+        const { tickDimensions, allTickDimensions,
+        axisNameDimensions } = this.getAxisDimensions(width, height);
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {
             const labelSpace = tickDimensions.width;
             this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
             isOffset && this.config({ yOffset: height });
-            const labelConfig = this.tickTextManager.manageTicks(this.config(), {
-                availSpace: this.range()[1] - this.range()[0],
-                totalTickWidth: allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width)
-            });
+
+            const tickWidth = allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width);
+            const availableSpace = this.range()[1] - this.range()[0];
+            const labelConfig = { smartTicks: false };
+            if (availableSpace < tickWidth) {
+                labelConfig.rotation = -90;
+            }
+            if (height - axisNameDimensions.height + axisNamePadding < tickDimensions.height) {
+                this.config({ tickValues: [] });
+            }
             this.config({
-                labels: {
-                    rotation: labelConfig.rotation,
-                    smartTicks: false
-                }
+                labels: labelConfig
             });
         } else {
             const labelSpace = tickDimensions.height;
             this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
             isOffset && this.config({ xOffset: width });
+            if (width < tickDimensions.width + axisNameDimensions.height + axisNamePadding) {
+                this.config({ tickValues: [] });
+            }
         }
         this.setTickValues();
         return this;

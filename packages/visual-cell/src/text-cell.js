@@ -25,22 +25,32 @@ import './text-cell.scss';
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-
+    const { _minSpacing } = context;
     const {
        margin,
        show,
        maxLines
    } = context.config();
+    const {
+       left,
+       right,
+       top,
+       bottom
+    } = margin;
+    const availHeight = context.availHeight();
+    const availWidth = context.availWidth();
+    const source = context.source();
 
     labelManager.setStyle(context._computedStyle);
-    const space = labelManager.getSmartText(context.source(), context.availWidth(), context.availHeight());
-    if (!context.availHeight()) {
+    context.smartText(labelManager.getSmartText(source, availWidth, availHeight, true));
+    const space = context.smartText();
+    if (!availHeight && space.width > availWidth || 0) {
         space.height *= maxLines;
     }
     if (show) {
         return {
-            width: space.width + margin.left + margin.right + context._minTickDiff.width,
-            height: space.height + margin.top + margin.bottom + context._minTickDiff.height
+            width: space.width + left + right + _minSpacing.width,
+            height: Math.min(space.height, space.maxHeight || space.height) + top + bottom + _minSpacing.height
         };
     } return {
         width: 0,
@@ -69,7 +79,8 @@ class TextCell extends SimpleCell {
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
-        this._minTickDiff = this._dependencies.labelManager.getOriSize('ww');
+        this._minSpacing = this._dependencies.labelManager.getOriSize('wv');
+        this._minTextSpace = this._dependencies.labelManager.getOriSize('www');
 
         generateGetterSetters(this, PROPS[TEXT]);
     }
@@ -164,7 +175,7 @@ class TextCell extends SimpleCell {
     setAvailableSpace (width, height) {
         this.availWidth(width);
         this.availHeight(height);
-        this.logicalSpace(null);
+        this.logicalSpace(computeTextSpace(this));
         return this;
     }
 
@@ -199,8 +210,9 @@ class TextCell extends SimpleCell {
             });
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
+
             // set the text as the innerHTML
-            elem.html(this.source());
+            elem.html(this.smartText().text);
         }
         return this;
     }

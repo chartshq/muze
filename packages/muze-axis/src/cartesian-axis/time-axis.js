@@ -217,7 +217,6 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     setAvailableSpace (width, height, padding, isOffset) {
-        console.log(width);
         const {
             left,
             right,
@@ -225,10 +224,11 @@ export default class TimeAxis extends SimpleAxis {
             bottom
         } = padding;
         const {
-            orientation
+            orientation,
+            axisNamePadding
         } = this.config();
         const domain = this.domain();
-        const { tickDimensions, axisNameDimensions } = this.getAxisDimensions(width, height);
+        const { tickDimensions, axisNameDimensions, tickSize } = this.getAxisDimensions();
         const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
         this.availableSpace({ width, height });
@@ -238,15 +238,28 @@ export default class TimeAxis extends SimpleAxis {
                 domain, orientation));
             isOffset && this.config({ yOffset: height });
 
-            this.smartTicks(this.setTickConfig(((this.range()[1] - this.range()[0]) /
-                this.getTickValues().length) - this._minTickDistance.width, height));
+            const tickInterval = ((this.range()[1] - this.range()[0]) / this.getTickValues().length)
+                - this._minTickDistance.width;
+            const heightForTicks = height - axisNameDimensions.height - tickSize - axisNamePadding;
 
-            this.config({
-                labels: this.tickTextManager.manageTicks(this.config(), {
-                    availSpace: this.range()[1] - this.range()[0],
-                    totalTickWidth: this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0)
-                })
-            });
+            if (tickInterval < this._minTickSpace.width) {
+                // set smart ticks and rotation config
+                this.smartTicks(this.setTickConfig(heightForTicks, tickInterval, true));
+                this.config({
+                    labels: {
+                        rotation: -90,
+                        smartTicks: true
+                    }
+                });
+            } else {
+                this.smartTicks(this.setTickConfig(tickInterval, heightForTicks));
+                this.config({
+                    labels: {
+                        rotation: 0,
+                        smartTicks: true
+                    }
+                });
+            }
         } else {
             const labelSpace = tickDimHeight;
             this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],

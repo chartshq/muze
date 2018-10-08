@@ -30,16 +30,7 @@ d3.json('../data/movies.json', (data) => {
             type: 'dimension'
         },
         {
-            name: 'Weight_in_lbs',
-            type: 'measure'
-        },
-        {
-            name: 'Acceleration',
-            type: 'measure',
-            defAggFn: 'sum'
-        },
-        {
-            name: 'Origin',
+            name: 'Major_Genre',
             type: 'dimension'
         },
         {
@@ -54,7 +45,7 @@ d3.json('../data/movies.json', (data) => {
         }
     ];
     let rootData = new DataModel(jsonData.slice(0, 25), schema);
-    rootData = rootData.select(e => e.Distributor.value !== null);
+    rootData = rootData.select(e => e.Major_Genre.value !== null && e.Major_Genre.value !== '');
 
     env = env
     .data(rootData)
@@ -63,12 +54,12 @@ d3.json('../data/movies.json', (data) => {
 
     const crosstab = env
     .canvas()
-    .columns([['Distributor', 'Title'], ['US_Gross']])
-    .rows(['US_Gross'])
+    .rows(['Major_Genre', 'Title'])
+    .columns(['US_Gross'])
     .data(rootData)
     // .color('Acceleration')
-    .width(150)
-    .height(350)
+    .width(100)
+    .height(100)
     .config({
         border: {
             // color: '#f6f6f6'

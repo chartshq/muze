@@ -96,6 +96,7 @@ export const computeLayoutMeasurements = (layout) => {
 
     // Set width for column matrix
     const columnMatrixWidth = width - maxRowMatrixWidth - borderWidth;
+
     const maxColumnMatrixHeight = Math.min(columnMatrix.getLogicalSpace().height, height / 2);
 
     columnMatrix.setAvailableSpace(columnMatrixWidth, maxColumnMatrixHeight);

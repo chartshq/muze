@@ -79,8 +79,8 @@ d3.json('../data/cars.json', (data) => {
     .columns(['Year', 'Acceleration'])
     .data(rootData)
     // .color('Acceleration')
-    .width(200)
-    .height(300)
+    .width(400)
+    .height(500)
     .config({
         border: {
             color: '#f6f6f6'
