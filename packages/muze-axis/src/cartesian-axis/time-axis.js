@@ -3,7 +3,7 @@ import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { DOMAIN } from '../enums/constants';
-import { calculateBandSpace } from './helper';
+import { calculateBandSpace, getRotatedSpaces } from './helper';
 
 const getAxisOffset = (timeDiff, range, domain) => {
     const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
@@ -74,13 +74,15 @@ export default class TimeAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    setTickConfig (width, height, noWrap = false) {
+    setTickConfig (availWidth, availHeight, noWrap = false) {
         let smartTicks;
         let smartlabel;
-        const { tickFormat } = this.config();
+        const { tickFormat, labels } = this.config();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
         const scale = this.scale();
+
+        const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
 
         smartTicks = domain;
         const tickFormatter = tickFormat || scale.tickFormat();
@@ -89,8 +91,7 @@ export default class TimeAxis extends SimpleAxis {
             smartTicks = domain.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
 
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain),
-                    Math.max(this._minTickSpace.width, width), height, noWrap);
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), width, height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
@@ -225,11 +226,14 @@ export default class TimeAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            axisNamePadding
+            axisNamePadding,
+            labels
         } = this.config();
+        const { rotation } = labels;
         const domain = this.domain();
         const { tickDimensions, axisNameDimensions, tickSize } = this.getAxisDimensions();
         const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
+        const labelConfig = { smartTicks: true, rotation: labels.rotation };
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
@@ -242,35 +246,21 @@ export default class TimeAxis extends SimpleAxis {
                 - this._minTickDistance.width;
             const heightForTicks = height - axisNameDimensions.height - tickSize - axisNamePadding;
 
-            if (tickInterval < this._minTickSpace.width) {
+            if (tickInterval < this._minTickSpace.width && rotation !== 0) {
                 // set smart ticks and rotation config
-                this.smartTicks(this.setTickConfig(heightForTicks, tickInterval, true));
-                this.config({
-                    labels: {
-                        rotation: -90,
-                        smartTicks: true
-                    }
-                });
-            } else {
-                this.smartTicks(this.setTickConfig(tickInterval, heightForTicks));
-                this.config({
-                    labels: {
-                        rotation: 0,
-                        smartTicks: true
-                    }
-                });
+                labelConfig.rotation = labels.rotation === null ? -90 : rotation;
             }
+            this.smartTicks(this.setTickConfig(tickInterval, heightForTicks, rotation !== null));
         } else {
             const labelSpace = tickDimHeight;
             this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
                 domain, orientation));
             isOffset && this.config({ xOffset: width });
             this.smartTicks(this.setTickConfig(width - axisNameDimensions.height, height, true));
-            this.config({ labels: {
-                rotation: 0,
-                smartTicks: true
-            } });
         }
+        this.config({
+            label: labelConfig
+        });
         return this;
     }
 }

@@ -9,9 +9,13 @@ export const PROPS = {
             if (value.labels && value.labels.rotation) {
                 context._rotationLock = true;
             }
-            value = mergeRecursive(context._config || {}, value);
+            const oldConfig = Object.assign({}, context._config || {});
+
+            value = mergeRecursive(oldConfig, value);
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
-            context.axis(context.createAxis(value));
+            if (value.orientation !== oldConfig.orientation) {
+                context.axis(context.createAxis(value));
+            }
             context.store().commit('config', value);
             return value;
         }

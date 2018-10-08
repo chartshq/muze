@@ -58,12 +58,20 @@ d3.json('../data/movies.json', (data) => {
     .rows(['US_Gross'])
     .data(rootData)
     // .color('Acceleration')
-    .width(150)
-    .height(300)
+    .width(650)
+    .height(390)
     .config({
         border: {
             // color: '#f6f6f6'
+        },
+        axes: {
+            x: {
+                labels: {
+                    // rotation: 0
+                }
+            }
         }
+
         // axes: { y: { tickValues: [0, 5000000] } }
     })
 

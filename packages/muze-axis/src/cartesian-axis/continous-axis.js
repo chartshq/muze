@@ -145,32 +145,33 @@ export default class ContinousAxis extends SimpleAxis {
         const {
             orientation,
             fixedBaseline,
-            axisNamePadding
+            axisNamePadding,
+            labels
         } = this.config();
         const {
             tickDimensions,
             allTickDimensions,
             axisNameDimensions
         } = this.getAxisDimensions(width, height);
-        const labelConfig = { smartTicks: false };
+        const labelConfig = { smartTicks: false, rotation: labels.rotation };
 
         this.availableSpace({ width, height });
 
         if (orientation === TOP || orientation === BOTTOM) {
             const labelSpace = tickDimensions.width;
 
-            // Set range
+            // Set x-axis range
             this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
 
             // Set offset
             isOffset && this.config({ yOffset: height });
 
-            // Get Tick widths
+            // Get Tick widths and available space
             const totalTickWidth = allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width);
             const availableSpace = this.range()[1] - this.range()[0];
 
             // Rotate labels if not enough width
-            if (availableSpace < totalTickWidth) {
+            if (availableSpace < totalTickWidth && labels.rotation === null) {
                 labelConfig.rotation = -90;
             }
 
@@ -178,11 +179,6 @@ export default class ContinousAxis extends SimpleAxis {
             if (height - axisNameDimensions.height + axisNamePadding < tickDimensions.height) {
                 showTicks = false;
             }
-
-            // Set config
-            this.config({
-                labels: labelConfig
-            });
         } else {
             const labelSpace = tickDimensions.height;
 
@@ -197,7 +193,13 @@ export default class ContinousAxis extends SimpleAxis {
                 showTicks = false;
             }
         }
+
+        // Set config
+        this.config({
+            labels: labelConfig
+        });
         this.setTickValues(showTicks);
+
         return this;
     }
 
@@ -225,6 +227,7 @@ export default class ContinousAxis extends SimpleAxis {
         }
 
         axis.tickValues(this.getTickValues());
+
         return this;
     }
 

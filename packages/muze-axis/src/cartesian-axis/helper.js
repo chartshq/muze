@@ -1,5 +1,16 @@
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 
+export const getRotatedSpaces = (rotation = 0, width, height) => {
+    let rotatedHeight = height;
+    let rotatedWidth = width;
+    if (rotation) {
+        const angle = ((rotation || 0) * Math.PI) / 180;
+        rotatedWidth = Math.abs(height * Math.sin(angle)) + Math.abs(width * Math.cos(angle));
+        rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
+    }
+    return { width: rotatedWidth, height: rotatedHeight };
+};
+
 /**
  * Listener attached to the axis on change of parameters.
  *
@@ -48,7 +59,7 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) =
     const tickLength = ticks.length;
     let numberOfValues = tickLength;
 
-    if (tickLength * (labelDim + axisInstance._minTickDistance.width) > availableSpace) {
+    if (tickLength * (labelDim * 1.5) > availableSpace) {
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
@@ -122,31 +133,18 @@ export const computeAxisDimensions = (context) => {
 
     // get the domain of axis
     const domain = context.domain();
-    const angle = ((rotation || 0) * Math.PI) / 180;
+    // const angle = ((rotation || 0) * Math.PI) / 180;
 
     if (domain.length === 0) {
         return null;
     }
 
     if (smartTicks) {
-        tickDimensions = {
-            width:
-        Math.abs(smartTick.height * Math.sin(angle)) +
-        Math.abs(smartTick.width * Math.cos(angle)),
-            height:
-        Math.abs(smartTick.width * Math.sin(angle)) +
-        Math.abs(smartTick.height * Math.cos(angle))
-        };
+        tickDimensions = smartTick;
     } else {
-        tickDimensions = {
-            width:
-        Math.abs(labelHeight * Math.sin(angle)) +
-        Math.abs(labelWidth * Math.cos(angle)),
-            height:
-        Math.abs(labelWidth * Math.sin(angle)) +
-        Math.abs(labelHeight * Math.cos(angle))
-        };
+        tickDimensions = { width: labelWidth, height: labelHeight };
     }
+    tickDimensions = getRotatedSpaces(rotation, tickDimensions.width, tickDimensions.height);
 
     return {
         allTickDimensions,
