@@ -34,7 +34,7 @@ export default class {
     rows () { /* pseudo definition */ }
 
     /**
-     * Takes the variable using which the column facets are made. Columns facets are verticle facet. The variables in
+     * Takes the variable using which the column facets are made. Columns facets are vertical facet. The variables in
      * parameter of the method controls presentation of facets can have {@link http://www.layoutvariation.com |
      * different variations}.
      *
@@ -105,7 +105,7 @@ export default class {
     size () { /* pseudo definition */ }
 
     /**
-     * Takes a dimension which wont be assigned in any encoding channels but would be used to mantain granulaity of
+     * Takes a dimension which wont be assigned in any encoding channels but would be used to mantain granularity of
      * data.
      *
      * @public
@@ -119,10 +119,34 @@ export default class {
     detail () { /* pseudo definition */ }
 
     /**
-     * Defines custom layers for a given settings of encoding.
+     * Defines an array of layers for the canvas. Each object in the array contains the definition of each layer which
+     * will be shown in the canvas. Based on the rows and columns, and the x and y encoding fields given in the layer
+     * definition, it will be decided which layer will be shown on which unit in the canvas.
+     *
+     * To give a layer definition,
+     * ```
+     *    canvas
+     *      .rows(['Acceleration', 'Displacement'])
+     *      .columns(['Origin'])
+     *      .layers([
+     *          {
+     *              mark: 'bar',
+     *              encoding: {
+     *                  y: 'Acceleration'
+     *              }
+     *          },
+     *          {
+     *              mark: 'line',
+     *              encoding: {
+     *                  y: 'Displacement'
+     *              }
+     *          }
+     *      ]);
+     * ```
+     * This will create a two visual units on top of each other, and plot one bar layer for Acceleration measure and
+     * a line layer for Displacement measure.
      *
      * @public
-     *
      * @param {LayerConfig} def Layers definition
      *
      * @return {Canvas} Instance of current canvas
@@ -159,7 +183,7 @@ export default class {
     mount () { /* pseudo definition */ }
 
     /**
-     * Provides the title for a visulization
+     * Provides the title for a visualization.
      *
      * @public
      *
@@ -173,7 +197,7 @@ export default class {
     title () { /* pseudo definition */ }
 
     /**
-     * Provides the subtitle for a visulization
+     * Provides the subtitle for a visualization.
      *
      * @public
      *
@@ -213,4 +237,84 @@ export default class {
      *      ```
      */
     composition () { /* pseudo definition */ }
+
+    /**
+     * Returns the instance of firebolt associated with this canvas. The firebolt instance can be used to dispatch a
+     * behaviour dynamically on the canvas.
+     *
+     * @return {GroupFireBolt} Instance of canvas firebolt.
+     */
+    firebolt () { /* pseudo definition */ }
+
+    /**
+     * Returns a promise for various {@link LifecycleEvents} of the various components of canvas. The promise gets
+     * resolved once the particular event gets completed.
+     *
+     * @param {string} eventName Name of the lifecycle event.
+     *
+     * @return {Canvas} Instance of the canvas.
+     */
+    once () { /* pseudo definition */ }
+
+    /**
+     * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
+     *
+     * ```
+     *   // The first element in the sub array represents the top axis and the second element represents the bottom
+     *   // axis.
+     *   [
+     *      [X1, X2],
+     *      [X3, X4]
+     *   ]
+     * ```
+     * @public
+     * @return {Array.<Array>} Instances of x axis.
+     */
+    xAxes () { /* pseudo definition */ }
+
+    /**
+     * Returns the instances of y axis of the canvas. It returns the instances in a two dimensional array form.
+     *
+     * ```
+     *   // The first element in the sub array represents the left axis and the second element represents the right
+     *   // axis.
+     *   [
+     *      [Y1, Y2],
+     *      [Y3, Y4]
+     *   ]
+     * ```
+     * @public
+     * @return {Array.<Array>} Instances of y axis.
+     */
+    yAxes () { /* pseudo definition */ }
+
+    /**
+     * Returns all the retinal axis of the canvas. Color, shape and size axis are combinedly called retinal axis.
+     *
+     * @public
+     * @return {Object} Instances of retinal axis.
+     *          ```
+     *              {
+     *                  color: [ColorAxis], // Array of color axis.
+     *                  shape: [ShapeAxis], // Array of shape axis.
+     *                  size: [SizeAxis] // Array of size axis.
+     *              }
+     *          ```
+     */
+    getRetinalAxes () { /* pseudo definition */ }
+
+    /**
+     * Sets or gets the alias of the canvas. Alias is a name by which the canvas can be referred.
+     *
+     * @public
+     * When setter
+     * @param {string} alias Name of the alias.
+     *
+     * @return {Canvas} Instance of the canvas.
+     *
+     * When getter
+     *
+     * @return {string} Alias of canvas.
+     */
+    alias () { /* pseudo definition */ }
 }

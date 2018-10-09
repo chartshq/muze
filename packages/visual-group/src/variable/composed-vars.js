@@ -1,30 +1,27 @@
 import Variable from './variable';
 
 /**
+ * This is a wrapper on top of multiple variables which are of same type but they are shown in the same axis.This is
+ * required in case of range plots or ohlc plots where one plot is mapped to multiple measure fields. At that time,
+ * we need to create a composed variable from multiple variables. This class just wraps them into one variable instance
+ * and provides methods to get the type and other common functionalities which can be performed on a simple variable
+ * instance.
  *
- *
+ * @public
  * @class ComposeVars
- * @extends {Variable}
  */
 class ComposedVars extends Variable {
 
     /**
-     *Creates an instance of ComposeVars.
-     * @param {*} texts
-     * @memberof ComposeVars
+     * Creates an instance of ComposeVars.
+     *
+     * @param {Array} texts Array of field names
      */
     constructor (...texts) {
         super(...texts);
         this.vars(texts);
     }
 
-    /**
-     *
-     *
-     * @param {*} params
-     * @returns
-     * @memberof ComposeVars
-     */
     vars (...params) {
         if (params.length) {
             this._vars = params[0];
@@ -33,13 +30,6 @@ class ComposedVars extends Variable {
         return this._vars;
     }
 
-    /**
-     *
-     *
-     * @param {*} dm
-     * @returns
-     * @memberof ComposeVars
-     */
     data (...dm) {
         if (dm.length) {
             this.vars().forEach(d => d.data(dm[0]));
@@ -49,10 +39,10 @@ class ComposedVars extends Variable {
     }
 
     /**
+     * Get all the field names from composed variable instance.
      *
-     *
-     * @returns
-     * @memberof ComposeVars
+     * @public
+     * @return {Array} Array of field names.
      */
     getMembers () {
         const vars = this.vars();
@@ -60,60 +50,46 @@ class ComposedVars extends Variable {
     }
 
     /**
+     * Type of field associated with this composed variable.
      *
-     *
-     * @returns
-     * @memberof ComposeVars
+     * @return {string} Type of variable (Measure/Dimension).
      */
     type () {
         return this.vars()[0].type();
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof ComposeVars
-     */
     toString () {
         return this.vars().map(d => d.toString()).join(',');
     }
 
     /**
+     * Returns the number formatter function of the variable.
      *
-     *
-     * @returns
-     * @memberof ComposeVars
+     * @return {Function} Number formatter function of the variable.
      */
     numberFormat () {
         return this.vars()[0].numberFormat();
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof ComposeVars
-     */
     format (values) {
         return this.vars()[0].format(values);
     }
 
     /**
+     * Returns the subtype of the fields associated with this variable instance.
      *
-     *
-     * @returns
-     * @memberof ComposedVars
+     * @public
+     * @return {string} Subtype of the variable.
      */
     subtype () {
         return this.vars()[0].subtype();
     }
 
     /**
+     * Returns the consecutive minimum difference of the field values.
      *
-     *
-     * @returns
-     * @memberof ComposedVars
+     * @public
+     * @return {number} Minimum consecutive difference.
      */
     getMinDiff () {
         return this.vars()[0].getMinDiff();

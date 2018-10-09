@@ -59,9 +59,10 @@ const FORMAL_NAME = 'unit';
 export default class VisualUnit {
 
     /**
-     * Creates instance of visualization unit
-     * @param registry {Object} Component registry
-     * @param dependencies {Object} Dependencies required by visual unit.
+     * Creates instance of visualization unit.
+     *
+     * @param {Object} registry  Component registry
+     * @param {Object} dependencies  Dependencies required by visual unit.
      */
     constructor (registry, dependencies) {
         this._id = getUniqueId();
@@ -106,13 +107,6 @@ export default class VisualUnit {
         registerListeners(this, listenerMap);
     }
 
-    /**
-     *
-     *
-     * @static
-     * @returns
-     * @memberof VisualUnit
-     */
     static formalName () {
         return FORMAL_NAME;
     }
@@ -131,10 +125,12 @@ export default class VisualUnit {
     }
 
     /**
+     * Returns the instance of firebolt associated with this visual unit. Firebolt dispatches the behavioural actions
+     * when any physical action happens on the elements of visual unit.
      *
+     * @public
      *
-     * @readonly
-     * @memberof VisualUnit
+     * @return {Firebolt} Instance of firebolt.
      */
     firebolt (...firebolt) {
         if (firebolt.length) {
@@ -146,6 +142,7 @@ export default class VisualUnit {
 
     /**
      * Gets the domain for all axes of this visual unit.
+     *
      * @return {Object} Domains of each data field.
      */
     getDataDomain () {
@@ -153,30 +150,20 @@ export default class VisualUnit {
     }
 
     /**
-     * Retrieves the id created for this instance of visual unit
+     * Retrieves the id created for this instance of visual unit.
+     *
+     * @public
      * @return {string} id associated with the instance
      */
     id () {
         return this._id;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof VisualUnit
-     */
     lockModel () {
         this._store.model.lock();
         return this;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof VisualUnit
-     */
     unlockModel () {
         this._store.model.unlock();
         return this;
@@ -191,6 +178,7 @@ export default class VisualUnit {
 
     /**
      * Renders the visual unit. It creates the layout and renders the axes and layers.
+     *
      * @return {VisualUnit} Instance of visual unit.
      */
     render (container) {
@@ -222,23 +210,12 @@ export default class VisualUnit {
     done () {
         return this._renderedPromise;
     }
-    /**
-     *
-     *
-     * @returns
-     * @memberof VisualUnit
-     */
+
     enableCaching () {
         this._cache = true;
         return this;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof VisualUnit
-     */
     clearCaching () {
         this._cache = false;
         this.cachedData([this.cachedData()[0]]);
@@ -246,10 +223,24 @@ export default class VisualUnit {
     }
 
     /**
+     * Returns the drawing information from visual unit.Drawing context contains the dimensions of unit and the svg
+     * container of the visual unit.
      *
+     * @public
      *
-     * @returns
-     * @memberof VisualUnit
+     * @return {Object} Drawing information.
+     *      ```
+     *          {
+     *              htmlContainer: // Html container of svg container of the visual unit
+     *              svgContainer: // Root svg container
+     *              width: // Width of the visual unit
+     *              height: // Height of the visual unit
+     *              sideEffectGroup: // Svg group for drawing side effect elements.
+     *              parentContainer: // Parent html container of the visual unit.
+     *              xOffset: // x offset space from the starting x position of the container,
+     *              yOffset: // y offset space from the starting y position of the container
+     *          }
+     *      ```
      */
     getDrawingContext () {
         const rootSvg = this._rootSvg && this._rootSvg.node();
@@ -269,6 +260,7 @@ export default class VisualUnit {
 
     /**
      * Returns the serialized configuration of visual unit.
+     *
      * @return {Object} serialized configuration
      */
     serialize () {
