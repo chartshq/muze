@@ -1,5 +1,5 @@
 import { isEqual } from 'muze-utils';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL, DATA, CONFIG } from '../constants';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL, DATA, CONFIG, LAYERS } from '../constants';
 import { canvasOptions } from './local-options';
 
 /**
@@ -58,6 +58,7 @@ export const setupChangeListener = (context) => {
                 case ROWS:
                 case COLUMNS:
                 case DETAIL:
+                case LAYERS:
                     equalityChecker = isEqual('Array');
                     break;
 

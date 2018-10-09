@@ -505,6 +505,12 @@ export default class MatrixResolver {
         return this;
     }
 
+    resetFacetsAndProjections () {
+        this._facets = {};
+        this._projections = {};
+        return this;
+    }
+
     /**
      *
      *

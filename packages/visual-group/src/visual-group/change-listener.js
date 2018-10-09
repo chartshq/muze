@@ -83,7 +83,9 @@ export const setupChangeListeners = (context) => {
             // Setting layers for the code
             layers[1] && resolver.layerConfig(layers[1]);
             // Set the row and column axes
-            resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
+            resolver.resetFacetsAndProjections()
+                            .horizontalAxis(fields.rows, encoders)
+                            .verticalAxis(fields.columns, encoders);
             // Getting the placeholders
             const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
             context._groupedDataModel = placeholderInfo.dataModels.groupedModel;

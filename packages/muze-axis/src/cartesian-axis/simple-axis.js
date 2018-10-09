@@ -96,6 +96,11 @@ export default class SimpleAxis {
         return this._scale;
     }
 
+    resetDomain () {
+        this._domain = [];
+        return this;
+    }
+
     /**
      *
      *
