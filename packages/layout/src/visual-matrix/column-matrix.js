@@ -140,6 +140,24 @@ export default class ColumnVisualMatrix extends VisualMatrix {
     }
 
     /**
+     * Calculates the depth of the tree that can be viewed
+     *
+     * @param {Array} widthMeasures array of widths
+     * @param {Array} heightMeasures array of heights
+     * @return {number} depth of the tree
+     * @memberof VisualMatrix
+     */
+    calculateDepth (widthMeasures) {
+        let j;
+        const { width } = this.availableSpace();
+
+        for (j = 0; j < widthMeasures.length; j++) {
+            if (widthMeasures[j] <= width) break;
+        }
+        return Math.min(widthMeasures.length - 1, j);
+    }
+
+    /**
      * Distibutes the given space column wisely
      *
      * @param {Object} options Redistribution information

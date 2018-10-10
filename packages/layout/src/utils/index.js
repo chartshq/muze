@@ -207,7 +207,9 @@ export const getLogicalSpace = (item, measures, minMeasures, maxMeasure = []) =>
         let fMeasure = 0;
         let sMeasure = 0;
         valueArray.forEach((placeholder, colIndex) => {
-            placeholder.logicalSpace(null);
+            // placeholder.logicalSpace(null);
+            placeholder.setAvailableSpace(undefined, undefined);
+
             const space = placeholder.getLogicalSpace();
             sMeasure = Math.max(sMeasure, +space[secondMeasure], minMeasures[secondMeasure]);
             maxMeasure[colIndex] = Math.max(maxMeasure[colIndex] || 0, space[firstMeasure]);

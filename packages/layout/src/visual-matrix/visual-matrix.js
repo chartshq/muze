@@ -171,28 +171,6 @@ export default class VisualMatrix {
     }
 
     /**
-     * Calculates the depth of the tree that can be viewed
-     *
-     * @param {Array} widthMeasures array of widths
-     * @param {Array} heightMeasures array of heights
-     * @return {number} depth of the tree
-     * @memberof VisualMatrix
-     */
-    calculateDepth (widthMeasures, heightMeasures) {
-        let i;
-        let j;
-        const { height, width } = this.availableSpace();
-
-        for (i = 0; i < heightMeasures.length; i++) {
-            if (heightMeasures[i] <= height) break;
-        }
-        for (j = 0; j < widthMeasures.length; j++) {
-            if (widthMeasures[j] <= width) break;
-        }
-        return Math.min(widthMeasures.length - 1, Math.max(i, j));
-    }
-
-    /**
      * Redistributes the provied space to all cells
      *
      * @param {*} viewableMatrix current viewport matrix

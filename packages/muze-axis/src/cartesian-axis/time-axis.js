@@ -87,6 +87,8 @@ export default class TimeAxis extends SimpleAxis {
 
         smartTicks = domain;
         const tickFormatter = tickFormat || scale.tickFormat();
+         // set the style on the shared label manager instance
+        labelManager.setStyle(this._tickLabelStyle);
 
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {

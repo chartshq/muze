@@ -44,7 +44,7 @@ d3.json('../data/movies.json', (data) => {
       // format: '%Y-%m-%d'
         }
     ];
-    let rootData = new DataModel(jsonData.slice(0, 15), schema);
+    let rootData = new DataModel(jsonData.slice(0, 25), schema);
     rootData = rootData.select(e => e.Major_Genre.value !== null && e.Major_Genre.value !== '');
 
     env = env
@@ -54,12 +54,12 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .columns(['Major_Genre', 'US_Gross'])
-    .rows(['Title'])
+    .rows(['Major_Genre', 'Title'])
+    .columns([['US_Gross'], ['US_Gross']])
     .data(rootData)
     .minUnitWidth(10)
     // .color('Acceleration')
-    .width(100)
+    .width(450)
     .height(650)
     .config({
         border: {

@@ -109,7 +109,8 @@ export default class RowVisualMatrix extends VisualMatrix {
         };
     }
 
-    getPriorityDistribution (matrix, availableWidth, maxWidths, currentWidth) {
+    getPriorityDistribution (options) {
+        const { matrix, width: availableWidth, maxMeasures: maxWidths, maxWidth: currentWidth, height } = options;
         const priority = this.config().priority;
         const primaryMatrixLength = this.primaryMatrix().length ? this.primaryMatrix()[0].length : 0;
         const matrixLen = matrix[0].length;
@@ -117,17 +118,17 @@ export default class RowVisualMatrix extends VisualMatrix {
         let remainaingAvailWidth = availableWidth;
         let remainaingWidth = currentWidth;
         let conditions = [];
-        let divider = 2;
+        let divider = 1;
 
         if (priority === 2) {
             conditions = [primaryMatrixLength - 1, primaryMatrixLength];
-            divider = Math.min(3, matrixLen);
+            divider = Math.min(2, matrixLen);
         } else {
             conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
-            divider = Math.min(2, matrixLen);
+            divider = Math.min(1, matrixLen);
         }
         conditions.forEach((i) => {
-            dist[i] = Math.min(maxWidths[i], availableWidth / divider);
+            dist[i] = maxWidths[i];
             remainaingAvailWidth = availableWidth - dist[i];
             remainaingWidth = currentWidth - dist[i];
         });
@@ -136,7 +137,78 @@ export default class RowVisualMatrix extends VisualMatrix {
                 dist[i] = remainaingAvailWidth * (maxWidths[i] / remainaingWidth);
             }
         });
-        return dist;
+        debugger;
+        const cWidths = [];
+        matrix.forEach(row => row.forEach((col, cIdx) => {
+            if (conditions.indexOf(cIdx) === -1) {
+                col.setAvailableSpace(dist[cIdx], height);
+                cWidths[cIdx] = Math.max(cWidths[cIdx] || 0, Math.floor(col.getLogicalSpace().width));
+            } else {
+                cWidths[cIdx] = 0;
+            }
+        }));
+
+        const prioritySpace = availableWidth - cWidths.reduce((t, n) => t + n);
+        conditions.forEach((i) => {
+            cWidths[i] = Math.floor(prioritySpace / divider);
+        });
+        return cWidths;
+    }
+
+    /**
+     * Calculates the depth of the tree that can be viewed
+     *
+     * @param {Array} widthMeasures array of widths
+     * @param {Array} heightMeasures array of heights
+     * @return {number} depth of the tree
+     * @memberof VisualMatrix
+     */
+    calculateDepth (widthMeasures, heightMeasures) {
+        let i;
+        const { height } = this.availableSpace();
+
+        for (i = 0; i < heightMeasures.length; i++) {
+            if (heightMeasures[i] <= height) break;
+        }
+
+        return Math.min(widthMeasures.length - 1, i);
+    }
+
+    /**
+     * Redistributes the provied space to all cells
+     *
+     * @param {*} viewableMatrix current viewport matrix
+     * @param {*} width provied width
+     * @param {*} height provied height
+     * @return {Object} current viewports matrixes with measures
+     * @memberof VisualMatrix
+     */
+    redistributeSpaces (width, height) {
+        let maxHeights = [];
+        let maxWidths = [];
+        const maxMeasures = this.maxMeasures();
+
+        const maxWidth = maxMeasures.reduce((t, n) => {
+            t += n;
+            return t;
+        });
+        const logicalWidths = this.getPriorityDistribution({
+            matrix: this._layoutMatrix,
+            maxWidth,
+            maxMeasures,
+            width,
+            height
+        });
+        this.viewableMatrix.forEach((matrixInst) => {
+            const matrix = matrixInst.matrix;
+            const mWidth = 0;
+            const mHeight = 0;
+            const options = { mWidth, mHeight, matrix, width, height, maxHeights, maxWidths, logicalWidths };
+            const measures = this.redistributeViewSpaces(options);
+            maxWidths = measures.maxWidths;
+            maxHeights = measures.maxHeights;
+        });
+        return this.computeViewableSpaces({ height, width, maxHeights, maxWidths });
     }
 
     /**
@@ -150,21 +222,25 @@ export default class RowVisualMatrix extends VisualMatrix {
         let rHeights = [];
         let mHeight = 0;
         const maxMeasures = this.maxMeasures();
+
         const {
             isDistributionEqual,
             distribution,
             isTransposed,
             gutter
         } = this.config();
-        const { matrix, width, height, maxHeights, maxWidths } = options;
+        const { matrix, height, maxHeights, maxWidths, logicalWidths } = options;
         mHeight = spaceTakenByColumn(matrix, this._lastLevelKey).height;
+
         const maxWidth = maxMeasures.reduce((t, n) => {
             t += n;
             return t;
         });
-
+        options.maxMeasures = maxMeasures;
+        options.maxWidth = maxWidth;
         if (maxWidth > 0) {
-            cWidths = this.getPriorityDistribution(matrix, width, maxMeasures, maxWidth);
+            cWidths = logicalWidths;
+            // cWidths = this.getPriorityDistribution(options);
         } else {
             cWidths = maxMeasures.map(() => 0);
         }
@@ -178,7 +254,13 @@ export default class RowVisualMatrix extends VisualMatrix {
             isTransposed,
             gutter
         });
+        if (maxWidths.length > 0) {
+            cWidths = cWidths.map((e, i) => Math.max(e, maxWidths[0][i] || 0));
+        }
         maxWidths.push(cWidths);
+        for (let x = 0; x < maxWidths.length; x++) {
+            maxWidths[x] = cWidths;
+        }
         maxHeights.push(rHeights);
         return { maxWidths, maxHeights };
     }

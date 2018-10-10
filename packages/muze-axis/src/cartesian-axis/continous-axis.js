@@ -188,7 +188,7 @@ export default class ContinousAxis extends SimpleAxis {
             // Set offset
             isOffset && this.config({ xOffset: width });
 
-            // Remove display of ticks if no space is lef
+            // Remove display of ticks if no space is left
             if (width < tickDimensions.width + axisNameDimensions.height + axisNamePadding) {
                 showTicks = false;
             }

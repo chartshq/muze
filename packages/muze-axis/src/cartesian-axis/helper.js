@@ -63,7 +63,8 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) =
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
-    numberOfValues = Math.min(numberOfTicks, Math.max(1, numberOfValues));
+    numberOfValues = Math.min(numberOfTicks, Math.max(2, numberOfValues));
+
     return axis.scale().ticks(numberOfValues);
 };
 
@@ -166,11 +167,11 @@ export const computeAxisDimensions = (context) => {
 export const getHorizontalAxisSpace = (context, axisDimensions, config, range) => {
     let width;
     let height;
-    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
+    const { tickSize, largestTickDimensions, axisNameDimensions } = axisDimensions;
     const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
     const { height: axisDimHeight } = axisNameDimensions;
-    const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
+    const { height: tickDimHeight, width: tickDimWidth } = largestTickDimensions;
 
     width = range && range.length ? range[1] - range[0] : 0;
 
@@ -208,11 +209,11 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
 export const getVerticalAxisSpace = (context, axisDimensions, config) => {
     let height;
     let width;
-    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
+    const { tickSize, largestTickDimensions, axisNameDimensions } = axisDimensions;
     const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
     const { height: axisDimHeight } = axisNameDimensions;
-    const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
+    const { height: tickDimHeight, width: tickDimWidth } = largestTickDimensions;
 
     height = 0;
     width = tickDimWidth;
@@ -262,17 +263,10 @@ export const calculateBandSpace = (context) => {
         };
     }
 
-    let { width, height } = getVerticalAxisSpace(
-    context,
-    axisDimensions,
-    config,
-    range
-  );
+    let { width, height } = getVerticalAxisSpace(context, axisDimensions, config, range);
 
     if (!height || height === 0) {
-        height =
-        axisTicks.length * (largestDimHeight + largestDimHeight / 2) +
-      largestDimHeight;
+        height = axisTicks.length * (largestDimHeight + largestDimHeight / 2) + largestDimHeight;
     }
     if (show === false) {
         width = 0;

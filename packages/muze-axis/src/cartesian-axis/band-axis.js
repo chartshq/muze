@@ -104,10 +104,11 @@ export default class BandAxis extends SimpleAxis {
                 noWrap: true
             });
         }
-        this.smartTicks(this.setTickConfig());
         this.config({
             labels: labelConfig
         });
+        this.smartTicks(this.setTickConfig());
+
         return this;
     }
 
@@ -138,6 +139,8 @@ export default class BandAxis extends SimpleAxis {
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
         smartTicks = domain;
         const tickFormatter = tickFormat || (val => val);
+        // set the style on the shared label manager instance
+        labelManager.setStyle(this._tickLabelStyle);
 
         if (domain && domain.length) {
             smartTicks = domain.map((d, i) => {

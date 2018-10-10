@@ -25,11 +25,12 @@ import './text-cell.scss';
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-    const { _minSpacing, _minTextSpace } = context;
+    const { _minSpacing } = context;
     const {
        margin,
        show,
-       maxLines
+       maxLines,
+       minCharacters
    } = context.config();
     const {
        left,
@@ -42,7 +43,6 @@ const computeTextSpace = (context) => {
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
-
     labelManager.setStyle(context._computedStyle);
 
     context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
@@ -51,8 +51,16 @@ const computeTextSpace = (context) => {
     if (space.width > (availWidth || 0) && maxLines) {
         space.height = space.oriTextHeight * maxLines;
     }
-    if (!availWidth) {
-        space.width = _minTextSpace.width;
+    if (availWidth && availWidth < space.width && minCharacters) {
+        const minText = new Array(minCharacters).fill('W').join('');
+        const _minTextSpace = labelManager.getOriSize(minText);
+        if (availWidth < _minTextSpace.width) {
+            space.width = _minTextSpace.height;
+            context.smartText(labelManager.getSmartText(source, availHeight, space.width, false));
+            context.config({ rotation: true });
+        } else {
+            space.width = _minTextSpace.width;
+        }
     }
     if (show) {
         return {
@@ -87,7 +95,6 @@ class TextCell extends SimpleCell {
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
         this._minSpacing = this._dependencies.labelManager.getOriSize('wv');
-        this._minTextSpace = this._dependencies.labelManager.getOriSize('WWW');
 
         generateGetterSetters(this, PROPS[TEXT]);
     }
@@ -182,7 +189,10 @@ class TextCell extends SimpleCell {
     setAvailableSpace (width, height) {
         this.availWidth(width);
         this.availHeight(height);
-        this.logicalSpace(computeTextSpace(this));
+        this.config({ rotation: false });
+
+        this.logicalSpace(null);
+        // this.logicalSpace(computeTextSpace(this));
         return this;
     }
 
@@ -200,7 +210,8 @@ class TextCell extends SimpleCell {
             margin,
             show,
             verticalAlign,
-            textAlign
+            textAlign,
+            rotation
         } = this.config();
 
         this.mount(mount);
@@ -215,11 +226,17 @@ class TextCell extends SimpleCell {
             [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
                 elem.style(`padding-${type}`, `${margin[type]}px`);
             });
+
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
+            const {
+                width,
+                text
+            } = this.smartText();
+            elem.style('transform', rotation ? `translate(0, ${width / 2}px) rotate(90deg)` : '');
 
             // set the text as the innerHTML
-            elem.html(this.smartText().text);
+            elem.html(text);
         }
         return this;
     }
