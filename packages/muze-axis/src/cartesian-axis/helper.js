@@ -167,11 +167,11 @@ export const computeAxisDimensions = (context) => {
 export const getHorizontalAxisSpace = (context, axisDimensions, config, range) => {
     let width;
     let height;
-    const { tickSize, largestTickDimensions, axisNameDimensions } = axisDimensions;
+    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
     const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
     const { height: axisDimHeight } = axisNameDimensions;
-    const { height: tickDimHeight, width: tickDimWidth } = largestTickDimensions;
+    const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
     width = range && range.length ? range[1] - range[0] : 0;
 
@@ -209,11 +209,11 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
 export const getVerticalAxisSpace = (context, axisDimensions, config) => {
     let height;
     let width;
-    const { tickSize, largestTickDimensions, axisNameDimensions } = axisDimensions;
+    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
     const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
     const { height: axisDimHeight } = axisNameDimensions;
-    const { height: tickDimHeight, width: tickDimWidth } = largestTickDimensions;
+    const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
     height = 0;
     width = tickDimWidth;

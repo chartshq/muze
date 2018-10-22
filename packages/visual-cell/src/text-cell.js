@@ -44,10 +44,9 @@ const computeTextSpace = (context) => {
     const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
     labelManager.setStyle(context._computedStyle);
-
-    context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
+    context.setSmartText();
     const space = context.smartText();
-
+    context.config({ rotation: false });
     if (space.width > (availWidth || 0) && maxLines) {
         space.height = space.oriTextHeight * maxLines;
     }
@@ -56,7 +55,8 @@ const computeTextSpace = (context) => {
         const _minTextSpace = labelManager.getOriSize(minText);
         if (availWidth < _minTextSpace.width) {
             space.width = _minTextSpace.height;
-            context.smartText(labelManager.getSmartText(source, availHeight, space.width, false));
+            context.smartText(labelManager.getSmartText(source, availHeight, space.width, true));
+
             context.config({ rotation: true });
         } else {
             space.width = _minTextSpace.width;
@@ -64,8 +64,8 @@ const computeTextSpace = (context) => {
     }
     if (show) {
         return {
-            width: space.width + paddedWidth,
-            height: space.height + paddedHeight
+            width: Math.ceil(space.width) + paddedWidth,
+            height: Math.ceil(space.height) + paddedHeight
         };
     } return {
         width: 0,
@@ -178,6 +178,32 @@ class TextCell extends SimpleCell {
         return this.logicalSpace();
     }
 
+    setSmartText () {
+        const rotation = this.config().rotation;
+        const source = this.source();
+        const { _minSpacing } = this;
+        const {
+           margin
+       } = this.config();
+        const {
+            left,
+            right,
+            top,
+            bottom
+         } = margin;
+        const paddedHeight = top + bottom + _minSpacing.height;
+        const paddedWidth = left + right + _minSpacing.width;
+        const availHeight = this.availHeight() - paddedWidth;
+        const availWidth = this.availWidth() - paddedHeight;
+        const labelManager = this.dependencies().labelManager;
+
+        labelManager.setStyle(this._computedStyle);
+        !rotation && this.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
+        rotation && this.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
+
+        return this;
+    }
+
     /**
      * This method is used to set the available space.
      *
@@ -189,8 +215,8 @@ class TextCell extends SimpleCell {
     setAvailableSpace (width, height) {
         this.availWidth(width);
         this.availHeight(height);
-        this.config({ rotation: false });
-
+        // this.config({ rotation: false });
+        this.setSmartText();
         this.logicalSpace(null);
         // this.logicalSpace(computeTextSpace(this));
         return this;
@@ -218,24 +244,32 @@ class TextCell extends SimpleCell {
         if (show) {
             const container = selectElement(mount);
             const elem = makeElement(container, 'div', [this.id], `${CLASSPREFIX}-${TEXT_CELL}`);
+            const vAlign = verticalAlign || rotation ? 'middle' : 'top';
+            const {
+                width,
+                text
+            } = this.smartText();
+            const translation = {
+                top: width + this._minSpacing.height / 2,
+                middle: width / 2 + this._minSpacing.height,
+                bottom: this._minSpacing.height
+            };
 
-            container.style('vertical-align', verticalAlign);
+            container.style('vertical-align', vAlign);
+
+            // Set class name
             elem.classed(this._className, true);
-            // apply style on the returned element
+
+            // Apply styles
+            elem.style('text-align', textAlign);
+            elem.style('display', 'inline');
+            elem.style('transform', rotation ? `translate(0, ${translation[vAlign]}px) rotate(-90deg)` : '');
             elem.style(WIDTH, availWidth ? `${availWidth}px` : '100%');
             [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
                 elem.style(`padding-${type}`, `${margin[type]}px`);
             });
 
-            elem.style('text-align', textAlign);
-            elem.style('display', 'inline');
-            const {
-                width,
-                text
-            } = this.smartText();
-            elem.style('transform', rotation ? `translate(0, ${width / 2}px) rotate(90deg)` : '');
-
-            // set the text as the innerHTML
+            // Set the text as the innerHTML
             elem.html(text);
         }
         return this;

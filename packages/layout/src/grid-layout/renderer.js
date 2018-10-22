@@ -93,16 +93,20 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
 
         if (type === CENTER && spans) {
             cells.attr(ROW_SPAN, function (cell, colIndex) {
+                const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 selectElement(this).style('height', `${placeholder.availHeight() + dimensions.border.width}px`);
-                return spans[cell.rowIndex][colIndex];
+                if (span > 1) {
+                    placeholder.setAvailableSpace(placeholder.availWidth(), placeholder.availHeight() * span);
+                }
+                return span;
             });
         } else if ((type === TOP || type === BOTTOM) && index === 1) {
             cells.attr(COL_SPAN, function (cell, colIndex) {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.availHeight());
+                    placeholder.setAvailableSpace(placeholder.availWidth() * span, placeholder.availHeight());
                 }
                 selectElement(this).style('height', `${placeholder.availHeight()}px`);
                 return span;

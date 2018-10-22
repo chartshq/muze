@@ -54,13 +54,14 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .rows(['Major_Genre', 'Title'])
-    .columns([['US_Gross'], ['US_Gross']])
+    .columns(['Major_Genre', 'Distributor', 'Title'])
+    .rows([['US_Gross'], []])
     .data(rootData)
     .minUnitWidth(10)
+    // .title('Who let the dogs out')
     // .color('Acceleration')
-    .width(450)
-    .height(650)
+    .width(540)
+    .height(190)
     .config({
         border: {
             // color: '#f6f6f6'

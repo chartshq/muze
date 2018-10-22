@@ -165,7 +165,12 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      */
     redistributeViewSpaces (options) {
         let rHeights = [];
-        const { matrix, width, maxHeights, maxWidths } = options;
+        const {
+            matrix,
+            width,
+            maxHeights,
+            maxWidths
+        } = options;
         const borderWidth = this.config().unitMeasures.border;
 
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
@@ -177,8 +182,8 @@ export default class ColumnVisualMatrix extends VisualMatrix {
 
         matrix.forEach((row, rIdx) => row.forEach((col, cIdx) => {
             const oldLogicalSpace = col.getLogicalSpace();
-            col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace.height);
 
+            col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace.height);
             rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, Math.floor(col.getLogicalSpace().height));
         }));
         if (maxHeights.length > 0) {
@@ -221,6 +226,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
                 const colWidth = maxWidths[matrixIndex][cIdx];
 
                 cell.setAvailableSpace(colWidth - borderWidth, colHeight);
+
                 if (cIdx === 0 && rIdx < breakPointer) {
                     rowHeights[0][rIdx] = colHeight;
                     heights[0] = (heights[0] || 0) + colHeight;

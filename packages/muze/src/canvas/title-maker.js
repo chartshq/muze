@@ -27,7 +27,7 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
     const {
         content
     } = config;
-    const cell = prevCell || new TextCell({ type: cellType }, { labelManager });
+    const cell = prevCell || new TextCell({ type: cellType }, { labelManager }).config({ maxLines: 2 });
 
     cell.source(content);
 

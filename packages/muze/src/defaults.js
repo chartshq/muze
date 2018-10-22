@@ -35,7 +35,7 @@ export const DEFAULT_CONFIG = {
     minHeight: 100,
     facet: {
         rows: {
-            minCharacters: 2
+            minCharacters: 1
         },
         columns: {
             maxLines: 2,

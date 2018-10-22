@@ -153,6 +153,7 @@ export default class ContinousAxis extends SimpleAxis {
             allTickDimensions,
             axisNameDimensions
         } = this.getAxisDimensions();
+
         const labelConfig = { smartTicks: false, rotation: labels.rotation };
 
         this.availableSpace({ width, height });
@@ -176,7 +177,7 @@ export default class ContinousAxis extends SimpleAxis {
             }
 
             // Remove ticks if not enough height
-            if (height - axisNameDimensions.height + axisNamePadding < tickDimensions.height) {
+            if (height - axisNameDimensions.height - axisNamePadding < tickDimensions.height) {
                 showTicks = false;
             }
         } else {
@@ -225,8 +226,8 @@ export default class ContinousAxis extends SimpleAxis {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
             return this;
         }
-
-        axis.tickValues(this.getTickValues());
+        const tickV = this.getTickValues();
+        axis.tickValues(tickV);
 
         return this;
     }
