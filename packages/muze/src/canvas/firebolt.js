@@ -18,7 +18,6 @@ const defaultInteractionPolicy = (valueMatrix, firebolt) => {
     const colFacets = fieldInf.colFacets;
     valueMatrix.each((cell) => {
         const unitFireBolt = cell.valueOf().firebolt();
-
         if (!(xFields.every(isMeasure) && yFields.every(isMeasure))) {
             const facetFields = cell.valueOf().facetByFields()[0];
             const unitColFacets = facetFields.filter(d => colFacets.findIndex(v => v.equals(d)) !== -1);
@@ -61,24 +60,7 @@ export default class GroupFireBolt {
     constructor (context) {
         this.context = context;
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
-        this._crossInteractionPolicy = this.constructor.defaultCrossInteractionPolicy();
-        this.context.once('canvas.updated').then(() => {
-            applyInteractionPolicy([this._interactionPolicy], this);
-            const crossInteractionPolicy = this._crossInteractionPolicy;
-            const behaviours = crossInteractionPolicy.behaviours;
-            const sideEffects = crossInteractionPolicy.sideEffects;
-            const visualGroup = context.composition().visualGroup;
-            const valueMatrix = visualGroup.composition().matrices.value;
-            valueMatrix.each((cell) => {
-                const unitFireBolt = cell.valueOf().firebolt();
-                for (const key in behaviours) {
-                    unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
-                }
-                for (const key in sideEffects) {
-                    unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
-                }
-            });
-        });
+        this.crossInteractionPolicy(this.constructor.defaultCrossInteractionPolicy());
     }
 
     static defaultInteractionPolicy () {
@@ -101,6 +83,24 @@ export default class GroupFireBolt {
         if (policy.length) {
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
+            const context = this.context;
+            this.context.once('canvas.updated').then(() => {
+                applyInteractionPolicy([this._interactionPolicy], this);
+                const crossInteractionPolicy = this._crossInteractionPolicy;
+                const behaviours = crossInteractionPolicy.behaviours;
+                const sideEffects = crossInteractionPolicy.sideEffects;
+                const visualGroup = context.composition().visualGroup;
+                const valueMatrix = visualGroup.composition().matrices.value;
+                valueMatrix.each((cell) => {
+                    const unitFireBolt = cell.valueOf().firebolt();
+                    for (const key in behaviours) {
+                        unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+                    }
+                    for (const key in sideEffects) {
+                        unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+                    }
+                });
+            });
             return this;
         }
         return this._crossInteractionPolicy;
