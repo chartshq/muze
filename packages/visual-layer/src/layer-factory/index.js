@@ -35,7 +35,12 @@ const sanitizeEncoding = (encoding) => {
 /**
  * Layer Factory creates layers based on the layer type. All types of layers needs to register in
  * the layer factory. For getting a layer instance, getLayer method needs to invoked with the
- * layerType and other arguments.
+ * layerType and other arguments. It also registers the definition of composite layers.
+ *
+ * @public
+ *
+ * @module LayerFactory
+ * @namespace muze
  */
 const layerFactory = (() => {
     const compositeLayers = {};
@@ -74,6 +79,14 @@ const layerFactory = (() => {
             });
             return instances.length === 1 ? instances[0] : instances;
         },
+        /**
+         * Registers a new composite layer definition in the layer factory.
+         *
+         * @public
+         *
+         * @param {string} layerType Mark type of the new composite layer.
+         * @param {Array} layerDefs Layer definitions of the composite layer.
+         */
         composeLayers: (layerType, layerDefs) => {
             compositeLayers[layerType] = layerDefs;
         },

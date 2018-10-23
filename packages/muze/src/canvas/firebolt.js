@@ -156,9 +156,9 @@ export default class GroupFireBolt {
      * @public
      *
      * @param {string} behaviour Name of the behavioural action
-     * @param {object} payload Object which contains the interaction information.
-     * @param {object | Array.<Array>} payload.criteria Identifiers by which the selection happens.
-     * @param {Array.<string|object>} payload.sideEffects Side effects which needs to be shown.
+     * @param {Object} payload Object which contains the interaction information.
+     * @param {Object | Array.<Array>} payload.criteria Identifiers by which the selection happens.
+     * @param {Array.<string|Object>} payload.sideEffects Side effects which needs to be shown.
      *
      * @return {GroupFireBolt} Instance of firebolt.
      */

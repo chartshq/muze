@@ -37,8 +37,10 @@ import { defaultOptions } from './default-options';
  * visuals
  *
  * @public
+ * @module BaseLayer
  * @class
  * @namespace Muze
+ *
  */
 export default class BaseLayer extends SimpleLayer {
 
@@ -219,6 +221,8 @@ export default class BaseLayer extends SimpleLayer {
     /**
      * Returns the unique identifier of this layer. Id is auto generated during the creation proceess of a schema.
      *
+     * @public
+     *
      * @return {string} id of the layer
      */
     id () {
@@ -226,11 +230,10 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Gets the transform method from transform factory based on type of transform. It then calls the
+     * Returns the transformed data based on given transform type.
+     * It first gets the transform method from transform factory based on type of transform. It then calls the
      * transform method with the data and passes the configuration parameters of transform such as
      * groupBy, value field, etc.
-     *
-     * @public
      *
      * @param {DataModel} dataModel Instance of DataModel
      * @param {Object} config Configuration for transforming data
@@ -244,7 +247,7 @@ export default class BaseLayer extends SimpleLayer {
      * Calculates the domain from the data.
      * It checks the type of field and calculates the domain based on that. For example, if it
      * is a quantitative or temporal field, then it calculates the min and max from the data or
-     * if it is a nominal field then it gets all the values from the data of that field.
+     * if it is a categorical field then it gets all the values from the data of that field.
      * @param {Array} data DataArray
      * @param {Object} fieldsConfig Configuration of fields
      * @return {Array} Domain values array.
@@ -275,7 +278,7 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Returns the domain for the axis.
+     * Normalizes the transformed data and returns it.
      *
      * @param {string} encodingType type of encoding x, y, etc.
      * @return {Object} Axis domains
@@ -285,8 +288,24 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Abstract method for getting nearest point
-     * @return {BaseLayer} Instance of base layer
+     * Gets the nearest point closest to the given x and y coordinate. If no nearest point is found, then it returns
+     * null.
+     *
+     * @public
+     *
+     * @param {number} x X Coordinate.
+     * @param {number} y Y Coordinate.
+     *
+     * @return {Object} Information of the nearest point.
+     * ```
+     *      {
+     *          // id property contains the field names and their corresponding values in a 2d array. This is the data
+     *          // associated with the nearest point.
+     *          id: // Example data: [['Origin'], ['USA']],
+     *          dimensions: // Physical dimensions of the point.
+     *          layerId: // Id of the layer instance.
+     *      }
+     * ```
      */
     getNearestPoint () {
         return null;
@@ -337,7 +356,8 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Disposes the entire layer
+     * Disposes the entire layer.
+     *
      * @return {BaseLayer} Instance of layer.
      */
     remove () {
@@ -430,11 +450,25 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
+     * Returns the information of the marks corresponding to the supplied identifiers. Identifiers are a set of field
+     * names and their corresponding values in an array. It can also be an instance of datamodel.
      *
+     * For example,
+     * ```
+     *  const identifiers = [
+     *      ['Origin', 'Cylinders'],
+     *      ['USA', '8']
+     *  ];
+     *  const points = barLayer.getPointsFromIdentifiers(identifiers);
+     * ```
+     * @public
+     * @param {Array|DataModel} identifiers Identifiers of the marks.
+     * @param {Object} config Optional configuration which describes how to get the information.
+     * @param {boolean} config.getAllAttrs If true, then returns all the information of the points, else returns only
+     * the positions of the points.
+     * @param {boolean} config.getBBox If true, then returns the bounding box of all the marks.
      *
-     * @param {*} identifiers
-     * @returns
-     * @memberof BaseLayer
+     * @return {Array} Array of points contains
      */
     getPointsFromIdentifiers (identifiers, config = {}) {
         const getAllAttrs = config.getAllAttrs;
@@ -537,11 +571,14 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
+     * Returns the dom elements associated with the supplied set of row ids.
+     * Each element in the layer is mapped with a row of the datamodel. When given an array of row ids, it returns all
+     * the elements which is mapped with those row ids.
      *
+     * @public
+     * @param {Array} set Array of row ids
      *
-     * @param {*} set
-     * @returns
-     * @memberof BaseLayer
+     * @return {Selection} D3 Selection of dom elements.
      */
     getPlotElementsFromSet (set) {
         return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>

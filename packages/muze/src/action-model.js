@@ -22,7 +22,7 @@ const defaultPolicy = (registrableComponents) => {
  * ```
  *
  * @public
- *
+ * @module ActionModel
  * @namespace Muze
  */
 class ActionModel {

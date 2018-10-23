@@ -21,27 +21,10 @@ import {
 
 import './styles.scss';
 
-/**
- * Line Layer creates a line plot.
- * Example :-
- * const config = {
- *  encoding = {
- *      x: {
- *          field: 'date'
- *      },
- *      y: {
- *          field: 'sales'
- *      }
- *  }
- * };
- * const linelayer = layerFactory.getLayer('line', [dataModel, axes, config]);
- * linelayer.render(container);
- * @class
- */
 export default class LineLayer extends BaseLayer {
 
     /**
-     *Creates an instance of LineLayer.
+     * Creates an instance of LineLayer.
      * @param {*} args
      * @memberof LineLayer
      */
