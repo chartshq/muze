@@ -371,25 +371,6 @@ export default class SimpleAxis {
     }
 
     /**
-     *
-     *
-     * @param {*} tickValues
-     * @returns
-     * @memberof SimpleAxis
-     */
-    setTickValues () {
-        const {
-            tickValues
-        } = this.config();
-
-        if (tickValues) {
-            tickValues instanceof Array && this.axis().tickValues(tickValues);
-            return this;
-        }
-        return this;
-    }
-
-    /**
      * This method returns the width in pixels for one
      * unit along the axis. It is only applicable to band scale
      * and returns undefined for other scale type.

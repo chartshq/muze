@@ -131,7 +131,7 @@ export const renderGradient = (context, container) => {
         linearGradient,
         legendRect
     } = createLegendSkeleton(container, classPrefix, data);
-    const labelDim = context.axis().source().getAxisDimensions().tickLabelDim;
+    const labelDim = context.axis().source().getAxisDimensions().tickDimensions;
     const {
         padding,
         margin,

@@ -23,6 +23,7 @@ export const registerChangeListeners = (context) => {
     store.model.next(
     ['domain', 'range', 'mount', 'config'],
     (...params) => {
+        context.setTickConfig();
         context.render();
         context._domainLock = false;
         context._eventList.forEach((e) => {
@@ -147,6 +148,9 @@ export const computeAxisDimensions = (context) => {
     }
     tickDimensions = getRotatedSpaces(rotation, tickDimensions.width, tickDimensions.height);
 
+    if (tickSize === 0) {
+        tickDimensions = { width: 0, height: 0 };
+    }
     return {
         allTickDimensions,
         tickSize,

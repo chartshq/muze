@@ -135,7 +135,6 @@ export default class ContinousAxis extends SimpleAxis {
      * @memberof AxisCell
      */
     setAvailableSpace (width = 0, height, padding, isOffset) {
-        let showTicks = true;
         const {
             left,
             right,
@@ -145,14 +144,18 @@ export default class ContinousAxis extends SimpleAxis {
         const {
             orientation,
             fixedBaseline,
-            axisNamePadding,
-            labels
+            axisNamePadding
         } = this.config();
+        const {
+            showAxisName,
+            labels
+        } = this.renderConfig();
         const {
             tickDimensions,
             allTickDimensions,
             axisNameDimensions
         } = this.getAxisDimensions();
+        const namePadding = showAxisName ? axisNamePadding : 0;
 
         const labelConfig = { smartTicks: false, rotation: labels.rotation };
 
@@ -177,8 +180,7 @@ export default class ContinousAxis extends SimpleAxis {
             }
 
             // Remove ticks if not enough height
-            if (height - axisNameDimensions.height - axisNamePadding < tickDimensions.height) {
-                showTicks = false;
+            if (height - axisNameDimensions.height - namePadding < tickDimensions.height) {
                 this.renderConfig({ showInnerTicks: false });
                 if (height < axisNameDimensions.height) {
                     this.renderConfig({ show: false });
@@ -194,12 +196,11 @@ export default class ContinousAxis extends SimpleAxis {
             isOffset && this.config({ xOffset: width });
 
             // Remove display of ticks if no space is left
-            if (width < tickDimensions.width + axisNameDimensions.height + axisNamePadding) {
+            if (width < tickDimensions.width + axisNameDimensions.height + namePadding) {
                 this.renderConfig({ showInnerTicks: false });
                 if (width < axisNameDimensions.height) {
                     this.renderConfig({ show: false });
                 }
-                showTicks = false;
             }
         }
 
@@ -207,7 +208,7 @@ export default class ContinousAxis extends SimpleAxis {
         this.config({
             labels: labelConfig
         });
-        this.setTickValues(showTicks);
+        this.setTickConfig();
 
         return this;
     }
@@ -219,13 +220,16 @@ export default class ContinousAxis extends SimpleAxis {
      * @returns
      * @memberof SimpleAxis
      */
-    setTickValues (showTicks = true) {
+    setTickConfig () {
         const {
             tickValues
         } = this.config();
+        const {
+            showInnerTicks
+        } = this.renderConfig();
         const axis = this.axis();
 
-        if (!showTicks) {
+        if (!showInnerTicks) {
             axis.tickValues([]);
             return this;
         }

@@ -99,7 +99,8 @@ export default class TimeAxis extends SimpleAxis {
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
-        return smartTicks;
+        this.smartTicks(smartTicks);
+        return this;
     }
 
     /**
@@ -189,6 +190,7 @@ export default class TimeAxis extends SimpleAxis {
             this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
+            // this.smartTicks(this.setTickConfig());
             return this;
         } return this._domain;
     }
@@ -221,6 +223,8 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     setAvailableSpace (width, height, padding, isOffset) {
+        let tickInterval;
+        let heightForTicks;
         const domain = this.domain();
         const {
             left,
@@ -232,11 +236,12 @@ export default class TimeAxis extends SimpleAxis {
             orientation,
             axisNamePadding
         } = this.config();
-        const { labels } = this.renderConfig();
+        const { labels, showAxisName } = this.renderConfig();
         const { rotation } = labels;
         const { tickDimensions, axisNameDimensions, tickSize } = this.getAxisDimensions();
         const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
         const labelConfig = { smartTicks: true, rotation: labels.rotation };
+        const namePadding = showAxisName ? axisNamePadding : 0;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
@@ -245,14 +250,25 @@ export default class TimeAxis extends SimpleAxis {
                 domain, orientation));
             isOffset && this.config({ yOffset: height });
 
-            const tickInterval = ((this.range()[1] - this.range()[0]) / this.getTickValues().length)
+            tickInterval = ((this.range()[1] - this.range()[0]) / this.getTickValues().length)
                 - this._minTickDistance.width;
-            const heightForTicks = height - axisNameDimensions.height - tickSize - axisNamePadding;
+
+            heightForTicks = height - axisNameDimensions.height - tickSize - namePadding;
 
             if (tickInterval < this._minTickSpace.width && rotation !== 0) {
                 // set smart ticks and rotation config
                 labelConfig.rotation = labels.rotation === null ? -90 : rotation;
+                  // Remove ticks if not enough height
+                if (tickInterval < this._minTickSpace.height) {
+                    tickInterval = 0;
+                    heightForTicks = 0;
+                    this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
+                }
             }
+            if (height < axisNameDimensions.height) {
+                this.renderConfig({ show: false });
+            }
+
             this.maxTickSpaces({
                 width: tickInterval,
                 height: heightForTicks,
@@ -263,18 +279,27 @@ export default class TimeAxis extends SimpleAxis {
             this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
                 domain, orientation));
             isOffset && this.config({ xOffset: width });
-            const availWidth = width - axisNameDimensions.height - axisNamePadding;
+            const availWidth = width - axisNameDimensions.height - namePadding;
+            let widthForTicks = availWidth;
+            if (availWidth <= this._minTickDistance.width) {
+                widthForTicks = 0;
+                this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
+            }
 
             this.maxTickSpaces({
-                width: availWidth <= this._minTickSpace.width ? 0 : availWidth,
+                width: widthForTicks,
                 height,
                 noWrap: true
             });
+            if (width < axisNameDimensions.height) {
+                this.renderConfig({ show: false });
+            }
         }
-        this.smartTicks(this.setTickConfig());
         this.renderConfig({
-            label: labelConfig
+            labels: labelConfig
         });
+        this.setTickConfig();
+        this.getTickSize();
         return this;
     }
 }

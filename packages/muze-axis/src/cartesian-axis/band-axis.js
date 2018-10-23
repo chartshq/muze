@@ -52,14 +52,18 @@ export default class BandAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            axisNamePadding,
-            labels
+            axisNamePadding
         } = this.config();
+        const {
+            labels,
+            showAxisName
+        } = this.renderConfig();
         const {
             rotation
         } = labels;
         const { axisNameDimensions, tickSize } = this.axisComponentDimensions();
         const labelConfig = { smartTicks: true, rotation: labels.rotation };
+        const namePadding = showAxisName ? axisNamePadding : 0;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
@@ -75,7 +79,7 @@ export default class BandAxis extends SimpleAxis {
             tickInterval = (availableWidth / this.domain().length) - this._minTickDistance.width;
 
             // Get height available for ticks
-            heightForTicks = height - axisNameDimensions.height - tickSize - axisNamePadding;
+            heightForTicks = height - axisNameDimensions.height - tickSize - namePadding;
 
             if (tickInterval < this._minTickSpace.width && rotation !== 0) {
                 // set smart ticks and rotation config
@@ -85,10 +89,11 @@ export default class BandAxis extends SimpleAxis {
                 if (tickInterval < this._minTickSpace.height) {
                     tickInterval = 0;
                     heightForTicks = 0;
+                    this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                 }
             }
             if (height < axisNameDimensions.height) {
-                this.renderConfig({ show: false });
+                this.renderConfig({ show: false, showInnerTicks: false, showOuterTicks: false });
             }
 
             this.maxTickSpaces({
@@ -100,10 +105,15 @@ export default class BandAxis extends SimpleAxis {
             // Set y axis range
             this.range([height - bottom, top]);
             isOffset && this.config({ xOffset: width });
-            const availWidth = width - axisNameDimensions.height - axisNamePadding;
+            const availWidth = width - axisNameDimensions.height - namePadding;
+            let widthForTicks = availWidth;
+            if (availWidth <= this._minTickDistance.width) {
+                widthForTicks = 0;
+                this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
+            }
 
             this.maxTickSpaces({
-                width: availWidth <= this._minTickSpace.width ? 0 : availWidth,
+                width: widthForTicks,
                 height,
                 noWrap: true
             });
@@ -114,8 +124,8 @@ export default class BandAxis extends SimpleAxis {
         this.renderConfig({
             labels: labelConfig
         });
-        this.smartTicks(this.setTickConfig());
-
+        this.setTickConfig();
+        this.getTickSize();
         return this;
     }
 
@@ -140,7 +150,8 @@ export default class BandAxis extends SimpleAxis {
         let smartlabel;
         const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const { tickFormat, labels } = this.config();
+        const { tickFormat } = this.config();
+        const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
         const tickFormatter = tickFormat || (val => val);
@@ -157,7 +168,8 @@ export default class BandAxis extends SimpleAxis {
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
-        return smartTicks;
+        this.smartTicks(smartTicks);
+        return this;
     }
 
     /**

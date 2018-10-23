@@ -18,7 +18,6 @@ const rotateAxis = (instance, tickText, labelManager) => {
     const axis = instance.axis();
     const config = instance.config();
     const renderConfig = instance.renderConfig();
-    const scale = instance.scale();
     const smartTicks = instance.smartTicks();
     const {
         orientation,
@@ -32,14 +31,14 @@ const rotateAxis = (instance, tickText, labelManager) => {
     rotation = labels.rotation;
 
     const tickSize = instance.getTickSize();
-
     tickText.each(function (d, index) {
         let yShift;
         let xShift;
         let datum = smartTicks[index] ? smartTicks[index].text : d;
 
-        const tickFormatter = axis.tickFormat() ? axis.tickFormat : scale.tickFormat;
-        const temp = tickFormatter ? tickFormatter()(datum) : datum;
+        const tickFormatter = axis.tickFormat() ? axis.tickFormat : null;
+
+        const temp = tickSize ? (tickFormatter ? tickFormatter()(datum) : datum) : '';
 
         datum = temp.toString();
 
@@ -225,21 +224,18 @@ export function renderAxis (axisInstance) {
     const {
         orientation,
         name,
-        // labels,
         xOffset,
         yOffset,
         axisNamePadding,
         className,
-        // showAxisName,
-        // show,
         id,
         classPrefix
      } = config;
     const {
-         show,
-         showAxisName,
-         labels
-     } = renderConfig;
+        show,
+        showAxisName,
+        labels
+    } = renderConfig;
 
     if (!show) {
         return;
@@ -279,6 +275,7 @@ export function renderAxis (axisInstance) {
     const tickText = selectContainer.selectAll('.tick text');
     tickText.classed(`${classPrefix}-ticks`, true)
                     .classed(`${classPrefix}-ticks-${id}`, true);
+
     changeTickOrientation(selectContainer, axisInstance, tickSize);
 
     // Create axis name

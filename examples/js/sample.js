@@ -1,6 +1,6 @@
 /* global muze, d3 */
 
-let env = muze();
+const env = muze();
 const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
 const DataModel = muze.DataModel;
 
@@ -54,288 +54,57 @@ d3.json('../data/cars.json', (data) => {
             // format: '%Y-%m-%d'
         }
     ];
-    const dataModel = new DataModel(jsonData, schema);
 
-        // Create a new variable which will keep count of cars per cylinder for a particular origin
-    let rootData = dataModel.calculateVariable(
-        {
-            name: 'Revenue',
-            type: 'measure',
-            defAggFn: 'avg' // When ever aggregation happens, it counts the number of elements in the bin
-            // numberFormat: val => parseInt(val, 10)
-        },
-            ['Horsepower', d => d]
-        );
-    rootData = rootData.calculateVariable(
-        {
-            name: 'Sales',
-            type: 'measure',
-            defAggFn: 'avg' // When ever aggregation happens, it counts the number of elements in the bin
-            // numberFormat: val => parseInt(val, 10)
-        },
-            ['Miles_per_Gallon', d => d]
-        );
-    rootData = rootData.calculateVariable(
-        {
-            name: 'Countries',
-            type: 'dimension'
-            // defAggFn: 'avg' ./// When ever aggregation happens, it counts the number of elements in the bin
-            // numberFormat: val => parseInt(val, 10)
-        },
-            ['Origin', d => d]
-        );
-        // .select(f => f.Year.value < '1974-01-01');
+    const DataModel = muze.DataModel;
 
-    env = env
-    .data(rootData)
-    .minUnitHeight(10)
-    .minUnitWidth(10);
+        // Create a new DataModel instance with data and schema
+    const dm = new DataModel(data, schema);
 
-    const crosstab = env.canvas()
-                        .rows([['Sales'], []])
-                        .columns(['Revenue'])
-                        .data(rootData)
-                        .transform({
-                            dt: (dt) => {
-                                console.log(dt.getData());
-                                console.log(dt.groupBy(['']).getData());
-                                return dt.groupBy(['']);
+        // Create a global environment to share common configs across charts
+    const env = muze();
+        // Create a canvas from the global environment
+    const canvas = env.canvas();
+    canvas
+                    .data(dm)
+                    .rows(['Acceleration']) // Year goes in y-axis
+                    .columns(['Year']) // Acceleration goes in x-axis
+                    .color({
+                        field: 'Horsepower',
+                        stops: 5
+                    })
+                    .config({
+                        axes: { // Dont show the y axis as we are showing the labels on the bars itself
+                            y: {
+                                // tickSize: 150
+                                // show: false
                             }
-                        })
-                        // .layers([{
-                        //     mark: 'bar'
-                        // }, {
-                        //     mark: 'tick',
-                        //     source: 'dt',
-                        //     calculateDomain: false,
-                        //     encoding: { x: { field: null }, color: { value: () => 'red' }
-                        //     }
-                        // },
-                        // // }])
-                        // // .layers([{
-                        // //     mark: 'bar',
-                        // //     encoding: { y: 'Sales' }
-                        // // }, {
-
-                        // //     mark: 'line',
-                        // //     encoding: { y: 'Revenue', color: { value: () => 'red' } }
-
-                        // // },
-                        // {
-                        //     mark: 'text',
-                        //     source: 'dt',
-                        //     className: 'average-text',
-                        //     encoding: {
-                        //         y: 'Sales',
-                        //         text: { field: 'Sales', formatter: dt => `Average: ${dt}` },
-                        //         x: { field: null },
-                        //         color: { value: () => 'black' }
-
-                        //     },
-                        //     background: 'rgba(0,0,0,0.3)',
-                        //     encodingTransform: (points, layer, dependencies) => { /* Use this to change text position */
-                        //         const width = layer.measurement().width;
-                        //         const smartLabel = dependencies.smartLabel;
-                        //         for (let i = 0; i < points.length; i++) {
-                        //             const size = smartLabel.getOriSize(points[i].text);
-                        //             points[i].update.x = 160;
-                        //             points[i].textanchor = 'end';
-                        //             points[i].update.y -= size.height / 2;
-                        //         }
-                        //         return points;
-                        //     },
-                        //     calculateDomain: false /* No calculation of domain from this layer */
-                        // }
-                        // ])
-                        .width(600)
-                        .height(400)
-                        .detail(['Name'])
-                        .size({ field: 'Countries', range: [1, 100] })
-                        .color({ field: 'Countries' })
-                        .shape({ field: 'Countries' })
-                        .config({
-                            border: {
-                                // color: '#f6f6f6'
-                            },
-                            legend: {
-                                position: 'right',
-                                color: { title: { text: () => '' } },
-                                shape: { title: { text: () => '' } },
-                                size: { title: { text: () => '' } }
-                            },
-                            axes: {
-                                x: {
-                                    // name: 'Countries'
-                                }
+                        },
+                        border: { // Hide the layout borders for better visibility
+                            showValueBorders: {
+                                left: false,
+                                bottom: false
                             }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    })
+                    .layers([{
+                        mark: 'bar', // Use that custom mark to pass encoding values
+                        encoding: {
+                            axisText: {
+                                field: 'Year'
+                            },
+                            valueText: {
+                                field: 'Acceleration'
+                            }
+                        }
 
-                        })
-                        // .title('Avg Mileage of cars by Country faceted by Cylinders', {
-                        //     align: 'center'
-                        // })
-                        // .subtitle('Click on the bars to see how the charts in right gets filtered', {
-                        //     align: 'center'
-                        // })
-                        .mount('#chart2');
-
-    // const lineChart = env.canvas()
-    //                     .rows(['Miles_per_Gallon'])
-    //                     .columns(['Year'])
-    //                     .data(rootData)
-    //                     .width(400)
-    //                     .height(300)
-    //                     .config({
-    //                         axes: {
-    //                             y: {
-    //                                 domain: [10, 50]
-    //                             }
-    //                         },
-    //                         border: {
-    //                             color: '#f6f6f6'
-    //                         },
-    //                         interaction: {
-    //                             tooltip: {
-    //                                 formatter: (dm) => {
-    //                                     const valueMatrix = lineChart.composition()
-    //                                                     .visualGroup.composition().matrices.value.matrix();
-    //                                     const selectedLineLayer = valueMatrix[0][0].valueOf().getLayerByName('lineLayer');
-    //                                     const selectedLineLayerData = selectedLineLayer.data();
-    //                                     const fullData = dm.getData().data;
-    //                                     const fieldsConf = dm.getFieldsConfig();
-    //                                     const yearIndex = fieldsConf.Year.index;
-    //                                     let selectedData;
-
-    //                                     if (selectedLineLayerData) {
-    //                                         selectedData = selectedLineLayerData.select(fields =>
-    //                                             fullData.findIndex(d => d[yearIndex] === fields.Year.value) !== -1, {
-    //                                                 saveChild: false
-    //                                             });
-    //                                     }
-    //                                     const { DateTimeFormatter } = muze.utils;
-    //                                     const tooltipData = [
-    //                                         [{
-    //                                             value: 'Year',
-    //                                             className: 'muze-tooltip-key'
-    //                                         }, {
-    //                                             value: DateTimeFormatter.formatAs(fullData[0][yearIndex], '%Y'),
-    //                                             className: 'muze-tooltip-value'
-    //                                         }],
-    //                                         [{
-    //                                             value: 'Miles_per_Gallon',
-    //                                             className: 'muze-tooltip-key'
-    //                                         }, {
-    //                                             value: fullData[0][fieldsConf.Miles_per_Gallon.index].toFixed(2),
-    //                                             className: 'muze-tooltip-value'
-    //                                         }]
-    //                                     ];
-
-    //                                     if (selectedData && !selectedData.isEmpty()) {
-    //                                         const mpgData = selectedData.getData().data;
-    //                                         const mpgIndex = selectedData.getFieldsConfig().Miles_per_Gallon.index;
-    //                                         tooltipData.push([{
-    //                                             value: 'Selected_Miles_per_Gallon',
-    //                                             className: 'muze-tooltip-key'
-    //                                         }, {
-    //                                             value: mpgData[0][mpgIndex].toFixed(2),
-    //                                             className: 'muze-tooltip-value'
-    //                                         }]);
-    //                                     }
-    //                                     return tooltipData;
-    //                                 }
-    //                             }
-    //                         }
-    //                     })
-    //                     .title('Change of Avg Mileage of Cars over 12 Years', {
-    //                         align: 'center'
-    //                     })
-    //                     .layers([{
-    //                         mark: 'line',
-    //                         encoding: {
-    //                             color: {
-    //                                 value: () => '#9e9e9e'
-    //                             }
-    //                         }
-    //                     }])
-    //                     .mount('#chart');
-
-    // const pieChart = env.canvas()
-    //                     .rows([])
-    //                     .columns([])
-    //                     .data(rootData)
-    //                     .width(300)
-    //                     .height(300)
-    //                     .layers([{
-    //                         mark: 'arc',
-    //                         encoding: {
-    //                             angle: 'CountVehicle'
-    //                         }
-    //                     }])
-    //                     .config({ legend: { position: 'bottom' } })
-    //                     .color('Origin')
-    //                     .title('Count of Cars by Country', {
-    //                         align: 'center'
-    //                     })
-    //                     .mount('#chart4');
-
-    // muze.ActionModel.for(crosstab, lineChart, pieChart).enableCrossInteractivity({
-    //     behaviours: {
-    //         // Disable all behaviours if any propagation is initiated from pie chart.
-    //         '*': (propagationPayload, context) => {
-    //             const sourcePropagationCanvas = propagationPayload.sourceCanvas;
-    //             const sourceCanvas = context.parentAlias();
-    //             if (sourcePropagationCanvas) {
-    //                 return sourceCanvas !== sourcePropagationCanvas ?
-    //                         [lineChart.alias()]
-    //                                         .indexOf(sourcePropagationCanvas) === -1 :
-    //                         true;
-    //             }
-    //             return true;
-    //         }
-    //     },
-    //     sideEffects: {
-    //         // Disable tooltip on propagation
-    //         tooltip: () => false
-    //     }
-    // })
-    //                 .for(crosstab, pieChart)
-    //                 .registerPropagationBehaviourMap({
-    //                     select: 'filter'
-    //                  })
-
-    //                 .for(lineChart).registerSideEffects(class NewSideEffect extends SpawnableSideEffect {
-    //                     constructor (...params) {
-    //                         super(...params);
-    //                         this._layers = this.firebolt.context.addLayer({
-    //                             name: 'lineLayer',
-    //                             mark: 'line',
-    //                             className: 'linelayer',
-    //                             encoding: {
-    //                                 x: 'Year',
-    //                                 y: 'Miles_per_Gallon',
-    //                                 color: {
-    //                                     value: () => '#414141'
-    //                                 }
-    //                             },
-    //                             render: false
-    //                         });
-    //                     }
-
-    //                     static formalName () {
-    //                         return 'lineLayer';
-    //                     }
-
-    //                     apply (selectionSet) {
-    //                         const { sideEffectGroup } = this.drawingContext();
-    //                         const layerGroups = this.createElement(sideEffectGroup, 'g', this._layers, '.extra-layers');
-    //                         layerGroups.each(function (layer) {
-    //                             layer.mount(this).data(selectionSet.mergedEnter.model);
-    //                         });
-    //                     }
-    //                     })
-    //                 .mapSideEffects({
-    //                     filter: {
-    //                         effects: ['lineLayer'],
-    //                         preventDefaultActions: true
-    //                     }
-    //                 });
+                    }])
+                    .width(600)
+                    .height(500)
+                    .title('Bar chart with axis labels inside the plot area', { position: 'top', align: 'center' })
+                    .subtitle('Acceleration vs Year', { position: 'top', align: 'center' })
+                    .mount('#chart'); // Set the chart mount point
 });
+
