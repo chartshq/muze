@@ -50,7 +50,7 @@ export default class HeaderComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderHeader(container || this.renderAt);
+        this.renderHeader(container || document.getElementById(this.renderAt));
     }
 
 }

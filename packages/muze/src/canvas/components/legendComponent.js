@@ -77,7 +77,7 @@ export default class LegendComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderLegend(container || this.renderAt);
+        this.renderLegend(container || document.getElementById(this.renderAt));
     }
 
 }

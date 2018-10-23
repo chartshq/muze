@@ -111,6 +111,6 @@ export default class MatrixComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderMatrix(container || this.renderAt);
+        this.renderMatrix(container || document.getElementById(this.renderAt));
     }
 }

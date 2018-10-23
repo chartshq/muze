@@ -9,7 +9,7 @@ export class HTMLRenderer extends Renderer {
         super();
         this.data = data;
         this.coordinates = new HTMLDataAdapter(this.data).getCoordinates();
-        this.colorPalte = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FE4365', '#FC9D9A', '#F9CDAD', '#C8C8A9', '#83AF9B', '#ECD078', '#D95B43', '#C02942', '#542437', '#53777A'];
+        // this.colorPalte = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FE4365', '#FC9D9A', '#F9CDAD', '#C8C8A9', '#83AF9B', '#ECD078', '#D95B43', '#C02942', '#542437', '#53777A'];
     }
 
     createhtml (id) {
@@ -29,8 +29,8 @@ export class HTMLRenderer extends Renderer {
         div.style.top = `${node.top}px`;
         div.style.height = `${node.height}px`;
         div.style.width = `${node.width}px`;
-        div.style.backgroundColor = this.colorPalte[Math.floor(Math.random() * Math.floor(this.colorPalte.length - 1))];
-    // Utils.hoverHandler(div)
+        // div.style.backgroundColor = this.colorPalte[Math.floor(Math.random() * Math.floor(this.colorPalte.length - 1))];
+        // Utils.hoverHandler(div)
         div.id = node._id;
         return div;
     }
