@@ -25,11 +25,23 @@ const resolveTitleSubTitleContent = (rawContent) => {
  */
 const headerCreator = (config, cellType, labelManager, prevCell) => {
     const {
-        content
+        content,
+        maxLines,
+        width,
+        height,
+        classPrefix
     } = config;
-    const cell = prevCell || new TextCell({ type: cellType }, { labelManager }).config({ maxLines: 2 });
+    const cell = prevCell || new TextCell(
+        {
+            type: cellType === 'title' ? 'header' : 'text',
+            className: `${classPrefix}-${cellType}-cell`
+        }, {
+            labelManager
+        })
+     .config({ maxLines });
 
     cell.source(content);
+    cell.setAvailableSpace(width, height);
 
     return {
         height: cell.getLogicalSpace().height,
@@ -51,7 +63,7 @@ const createHeading = (config, type, labelManager, prevCell) => {
 
     return headerCreator(
         config,
-        type === 'title' ? 'header' : 'text',
+       type,
         labelManager,
         prevCell
     );
@@ -73,8 +85,9 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
             const config = headerOptions[1];
 
             config.width = context.width();
+            config.height = context.height();
+            config.classPrefix = context.config().classPrefix;
             config.content = content;
-
             const { height, cell } = createHeading(config, type, context.dependencies().smartlabel,
                 context[`${type}Cell`]);
 

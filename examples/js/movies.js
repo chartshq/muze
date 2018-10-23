@@ -54,14 +54,18 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .columns(['Major_Genre', 'Distributor', 'Title'])
-    .rows([['US_Gross'], []])
+    .rows(['Title'])
+    .columns(['US_Gross'])
     .data(rootData)
     .minUnitWidth(10)
-    // .title('Who let the dogs out')
-    // .color('Acceleration')
-    .width(400)
-    .height(390)
+    .title('Who let the dogs out when they came searching for the beast lurking')
+    // .title('s')
+    .subtitle('Who let the dogs out when they came searching for the beast lurking Who let the dogs out when they came searching for the beast lurking')
+    .color('Major_Genre')
+    // .subtitle('asd')
+    .width(700)
+    // .detail(['Major_'])
+    .height(500)
     .config({
         border: {
             // color: '#f6f6f6'
@@ -76,6 +80,9 @@ d3.json('../data/movies.json', (data) => {
             x: {
                 // tickValues: ['Slam']
             }
+        },
+        legend: {
+            position: 'left'
         }
 
         // axes: { y: { tickValues: [0, 5000000] } }

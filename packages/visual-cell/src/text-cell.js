@@ -16,6 +16,33 @@ import { DEFAULT_CONFIG } from './enums/defaults';
 import { CLASSPREFIX, TOP, BOTTOM, LEFT, RIGHT, HEADER, WIDTH, TEXT_CELL } from './enums/constants';
 import './text-cell.scss';
 
+const setSmartText = (context) => {
+    const source = context.source();
+    const { _minSpacing } = context;
+    const {
+       margin,
+       rotation
+   } = context.config();
+    const {
+        left,
+        right,
+        top,
+        bottom
+     } = margin;
+    const paddedHeight = top + bottom + _minSpacing.height;
+    const paddedWidth = left + right + _minSpacing.width;
+    const availHeight = context.availHeight() - paddedWidth;
+    const availWidth = context.availWidth() - paddedHeight;
+    const labelManager = context.dependencies().labelManager;
+
+    labelManager.setStyle(context._computedStyle);
+
+    !rotation && context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
+    rotation && context.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
+
+    return context;
+};
+
 /**
 * Computes the Logical Space for the text
 *
@@ -43,25 +70,22 @@ const computeTextSpace = (context) => {
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
-    labelManager.setStyle(context._computedStyle);
-    context.setSmartText();
     const space = context.smartText();
+    const minText = new Array(minCharacters).fill('W').join('');
+    const _minTextSpace = labelManager.getOriSize(minText);
+
     context.config({ rotation: false });
     if (space.width > (availWidth || 0) && maxLines) {
         space.height = space.oriTextHeight * maxLines;
     }
-
-    const minText = new Array(minCharacters).fill('W').join('');
-    const _minTextSpace = labelManager.getOriSize(minText);
-    if (availWidth && availWidth < space.width && minCharacters) {
+    if (availWidth && availWidth < space.width) {
         space.width = _minTextSpace.width;
     }
-    if (availWidth < _minTextSpace.width) {
-        space.width = _minTextSpace.height;
-        const smartSpace = labelManager.getSmartText(source, availHeight, space.width, true);
-        context.config({ rotation: true });
+    if (availWidth && availWidth < _minTextSpace.width) {
+        const smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
         space.width = smartSpace.height;
         space.height = smartSpace.width;
+        context.config({ rotation: true });
         context.smartText(smartSpace);
     }
 
@@ -96,10 +120,12 @@ class TextCell extends SimpleCell {
         this._className = this._config.className ||
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
+
         this._dependencies.labelManager.setStyle(this._computedStyle);
         this._minSpacing = this._dependencies.labelManager.getOriSize('wv');
 
         generateGetterSetters(this, PROPS[TEXT]);
+        setSmartText(this);
     }
 
     /**
@@ -181,32 +207,6 @@ class TextCell extends SimpleCell {
         return this.logicalSpace();
     }
 
-    setSmartText () {
-        const rotation = this.config().rotation;
-        const source = this.source();
-        const { _minSpacing } = this;
-        const {
-           margin
-       } = this.config();
-        const {
-            left,
-            right,
-            top,
-            bottom
-         } = margin;
-        const paddedHeight = top + bottom + _minSpacing.height;
-        const paddedWidth = left + right + _minSpacing.width;
-        const availHeight = this.availHeight() - paddedWidth;
-        const availWidth = this.availWidth() - paddedHeight;
-        const labelManager = this.dependencies().labelManager;
-
-        labelManager.setStyle(this._computedStyle);
-        !rotation && this.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
-        rotation && this.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
-
-        return this;
-    }
-
     /**
      * This method is used to set the available space.
      *
@@ -218,10 +218,8 @@ class TextCell extends SimpleCell {
     setAvailableSpace (width, height) {
         this.availWidth(width);
         this.availHeight(height);
-        // this.config({ rotation: false });
-        this.setSmartText();
+        setSmartText(this);
         this.logicalSpace(null);
-        // this.logicalSpace(computeTextSpace(this));
         return this;
     }
 
