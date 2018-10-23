@@ -1,4 +1,4 @@
-import LayoutComponent from './componentWrapper';
+import { LayoutComponent } from '../../../../layout/src/tree-layout/src';
 
 export default class MuzeComponent extends LayoutComponent {
     getLogicalSpace () {
@@ -11,7 +11,6 @@ export default class MuzeComponent extends LayoutComponent {
     setSpatialConfig (conf) {
         this.boundBox.top = conf.y;
         this.boundBox.left = conf.x;
-
         this.boundBox.newDimensions = {
             width: conf.width,
             height: conf.height

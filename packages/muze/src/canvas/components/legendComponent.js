@@ -11,7 +11,9 @@ export default class LegendComponent extends MuzeComponent {
         this.params = params;
         this.target = params.config.target;
         this.position = params.config.position;
-        this.className = params.config.className
+        this.className = params.config.className;
+        this.alignWith = params.config.alignWith;
+        this.alignment = params.config.alignment;
     }
 
     renderLegend (container) {

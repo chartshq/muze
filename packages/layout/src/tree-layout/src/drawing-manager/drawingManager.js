@@ -48,10 +48,10 @@ export class DrawingManager {
 
     _resolveAligment (componentData) {
         componentData.children.forEach((component) => {
-            if (component.model && component.model.host && component.model.host.alignWidth) {
+            if (component.model && component.model.host && component.model.host.alignWith) {
                 let childNode;
                 const node = this._findNode(component._id);
-                const refNode = this._findNode(this.componentMap.get(component.model.host.alignWidth).renderAt);
+                const refNode = this._findNode(this.componentMap.get(component.model.host.alignWith).renderAt);
                 switch (component.model.host.alignment) {
                 case 'left':
                     childNode = this._getChildNode(node.top,

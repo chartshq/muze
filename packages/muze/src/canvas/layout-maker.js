@@ -234,7 +234,7 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target });
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle',alignment:'left' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
