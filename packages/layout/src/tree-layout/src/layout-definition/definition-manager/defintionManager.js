@@ -66,7 +66,7 @@ export default class DefinitionManager {
             tempDefModel = first;
             for (let j = 0; j < rows; j++) {
                 const rowpreffred = j === (rows - 1);
-                tempDefModel = this._placeComponent(tempDefModel, gridComponents[i][j], rowpreffred).second;
+                tempDefModel = this._placeComponent(tempDefModel, gridComponents[j][i], rowpreffred, true).second;
             }
             tempDefModel = second;
         }
@@ -85,7 +85,7 @@ export default class DefinitionManager {
    * @param {DefinitionModel} definitionModel
    * @param {LayoutComponent} component
    */
-    _placeComponent (definitionModel, component, isPreferred = false) {
+    _placeComponent (definitionModel, component, isPreferred = false, isGridComponent = false) {
         if (!component) {
             return { first: definitionModel, second: definitionModel };
         }
@@ -113,10 +113,10 @@ export default class DefinitionManager {
     // update parentModel
         definitionModel.cut = cut;
 
-        const firstLane = new DefinitionModel(component.componentName, null, componentRatioWidth, isPreferred, []);
+        const firstLane = new DefinitionModel(component.componentName, null, componentRatioWidth, isGridComponent ? false : isPreferred, []);
         firstLane._remainingHeight = componentHeight;
         firstLane._remainingWidth = componentWidth;
-        const secondLane = new DefinitionModel(null, null, leftOvercomponentRationWidth, !isPreferred, []);
+        const secondLane = new DefinitionModel(null, null, leftOvercomponentRationWidth, isGridComponent ? false : !isPreferred, []);
         secondLane._remainingHeight = leftHeight;
         secondLane._remainingWidth = leftWidth;
         if (isPreferred) {
