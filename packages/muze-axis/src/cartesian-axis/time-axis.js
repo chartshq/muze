@@ -77,25 +77,27 @@ export default class TimeAxis extends SimpleAxis {
     setTickConfig () {
         let smartTicks;
         let smartlabel;
-        const { tickFormat } = this.config();
+        const { tickFormat, tickValues } = this.config();
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
         const scale = this.scale();
+        tickValues && this.axis().tickValues(tickValues);
 
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
 
-        smartTicks = domain;
+        smartTicks = tickValues || domain;
         const tickFormatter = tickFormat || scale.tickFormat();
          // set the style on the shared label manager instance
         labelManager.setStyle(this._tickLabelStyle);
 
         if (domain && domain.length) {
-            smartTicks = domain.map((d, i) => {
+            const values = tickValues || domain;
+            smartTicks = values.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
 
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), width, height, noWrap);
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }

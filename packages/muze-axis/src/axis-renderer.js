@@ -127,7 +127,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
                             .attr('x', 0)
                             .attr('transform', '')
                             .text('');
-            const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, `${classPrefix}-smart-text`);
+            const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i] ? _smartTicks[i].lines : [], `${classPrefix}-smart-text`);
 
             tspan.attr('dy', '0')
                             .style('opacity', '0')

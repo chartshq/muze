@@ -150,21 +150,23 @@ export default class BandAxis extends SimpleAxis {
         let smartlabel;
         const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const { tickFormat } = this.config();
+        const { tickValues, tickFormat } = this.config();
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
         const tickFormatter = tickFormat || (val => val);
+        tickValues && this.axis().tickValues(tickValues);
 
-        smartTicks = domain;
+        smartTicks = tickValues || domain;
         // set the style on the shared label manager instance
         labelManager.setStyle(this._tickLabelStyle);
 
         if (domain && domain.length) {
-            smartTicks = domain.map((d, i) => {
+            const values = tickValues || domain;
+            smartTicks = values.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
 
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), width, height, noWrap);
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }

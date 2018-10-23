@@ -75,8 +75,12 @@ d3.json('../data/cars.json', (data) => {
                     .config({
                         axes: { // Dont show the y axis as we are showing the labels on the bars itself
                             y: {
+                                tickValues: [0, 100]
                                 // tickSize: 150
                                 // show: false
+                            },
+                            x: {
+                                tickValues: ['1972-01-01']
                             }
                         },
                         border: { // Hide the layout borders for better visibility
