@@ -164,15 +164,15 @@
     float: left;
 }
 
-.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
+.#{$prefix}grid div{
     float: left;
     border-collapse: collapse;
 }
 
-.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
-    float: left;
+.#{$prefix}grid table{
     border-collapse: collapse;
 }
+
 .#{$titleContainer} .#{$prefix}header-cell{
     font-size: 24px;
     font-weight: bold;

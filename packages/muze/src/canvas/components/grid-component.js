@@ -7,5 +7,6 @@ export default class GridComponent extends MuzeComponent {
         this.component = params.component;
         this.params = params;
         this.target = params.config.target;
+        this.className = params.config.className
     }
 }

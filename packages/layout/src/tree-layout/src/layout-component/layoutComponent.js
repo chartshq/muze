@@ -13,6 +13,7 @@ export default class LayoutComponent {
         this.target = null;
         this.position = null;
         this.componentName = null;
+        this.className='';
     }
 
     getLogicalSpace () {

@@ -5,6 +5,7 @@ export class DrawingManager {
     constructor (data, renderer, container) {
         this.data = data.tree;
         this.componentMap = data.componentMap;
+        this.layoutClassName = data.layoutClassName
         this.renderer = renderer;
         global.__renderer = renderer; // TODO change global into diff place
         this.renderer_id = !Utils.isDOMElement(container) ? container : Utils.getID(container);
@@ -121,7 +122,7 @@ export class DrawingManager {
 
     renderHTML () {
         this.componentRenderer = new HTMLRenderer(this.data);
-        this.componentRenderer.createhtml(this.renderer_id);
+        this.componentRenderer.createhtml(this.renderer_id,this.layoutClassName);
     }
 
   // customiseNode (node, borderColor, borderWidth) {

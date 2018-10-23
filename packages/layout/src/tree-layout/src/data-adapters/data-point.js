@@ -6,5 +6,7 @@ export class DataPoint {
         this.height = node.boundBox.height;
         this._id = node._id;
         this.parent = node.parent;
+        this.hasHost = node.model.host !== null
+        this.className = node.model.host ? node.model.host.className : null
     }
 }

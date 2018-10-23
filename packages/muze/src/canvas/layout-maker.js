@@ -286,7 +286,9 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
     const gridWrapper = new GridComponent({
         name: 'grid',
         component: gridComponents,
-        config: { dimensions: { height: 0, width: 0 }, ...target }
+        config: { className:'muze-layout-grid-container',
+                  dimensions: { height: 0, width: 0 },
+                  ...target }
     });
     // gridComponentWrapper[1][0].draw(document.getElementById('chart'));
 
@@ -294,6 +296,7 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
 
     const layoutManager = new LayoutManager({
         renderAt: 'chart',
+        className:'muze-group-container',
         height: measurement.canvasHeight,
         width: measurement.canvasWidth
     });

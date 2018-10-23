@@ -1,7 +1,7 @@
 import { HTMLDataAdapter } from '../data-adapters/html-data';
 import { Utils } from '../utils/utils';
 import { Renderer } from './renderer';
-import { LAYOUT_NAME } from '../constants/defaults'
+import {LAYOUT_ID} from '../constants/defaults'
 ;
 
 export class HTMLRenderer extends Renderer {
@@ -12,12 +12,14 @@ export class HTMLRenderer extends Renderer {
         // this.colorPalte = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FE4365', '#FC9D9A', '#F9CDAD', '#C8C8A9', '#83AF9B', '#ECD078', '#D95B43', '#C02942', '#542437', '#53777A'];
     }
 
-    createhtml (id) {
+    createhtml (id,className) {
         const mainDiv = document.getElementById(id);
         super.initRenderer(mainDiv, this.data); // Initialise node with layout id
-        this.parentDiv = this.createAndCustomiseParent();
+        this.parentDiv = this.createAndCustomiseParent(className);
         this.coordinates.forEach((node) => {
-            this.parentDiv.appendChild(this.createAndPositionDiv(node));
+            if(node.hasHost){
+                this.parentDiv.appendChild(this.createAndPositionDiv(node));
+            }
         });
         mainDiv.appendChild(this.parentDiv);
     }
@@ -35,10 +37,11 @@ export class HTMLRenderer extends Renderer {
         return div;
     }
 
-    createAndCustomiseParent () {
+    createAndCustomiseParent (className) {
         const container = Utils.findContainer(this.coordinates);
         const parentDiv = this.createAndPositionDiv(container);
-        parentDiv.id = LAYOUT_NAME;
+        parentDiv.id = LAYOUT_ID;
+        parentDiv.className = className
         parentDiv.style.position = 'relative';
         return parentDiv;
     }

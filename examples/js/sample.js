@@ -77,11 +77,11 @@ d3.json('../data/cars.json', (data) => {
     //     .mount('#chart');
 
     const lineChart = env.canvas()
-        .rows(['CountVehicle'])
+        .rows(['CountVehicle','Origin'])
         .columns(['Year'])
         .data(rootData)
-        .width(400)
-        .height(400)
+        .width(1000)
+        .height(1000)
         .layers([{
             mark: 'line'
         }])

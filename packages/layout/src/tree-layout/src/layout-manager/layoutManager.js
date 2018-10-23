@@ -7,7 +7,6 @@ import DefinitionManager from '../layout-definition/definition-manager';
 import {
   DEFAULT_WIDTH,
   DEFAULT_HEIGHT,
-  LAYOUT_NAME
 } from '../constants/defaults';
 
 import { DrawingManager } from '../drawing-manager/drawingManager';
@@ -17,6 +16,7 @@ import { LayoutDef } from './layout-def';
 class LayoutManager {
     constructor (conf) {
         this.renderAt = conf.renderAt;
+        this.layoutClassName = conf.className
         this.width = conf.width || DEFAULT_WIDTH;
         this.height = conf.height || DEFAULT_HEIGHT;
         this.skeletonType = conf.skeletonType || 'html';
@@ -30,7 +30,6 @@ class LayoutManager {
     }
 
     compute () {
-        Utils.removeDiv(LAYOUT_NAME);
         this.layoutDefinition = this.calLayOutDef();
         this.layoutDef.layoutDefinition = this.layoutDefinition;
         this.layoutDefinition = this.layoutDef.getSanitizedDefinition();
@@ -38,12 +37,14 @@ class LayoutManager {
             width: this.width,
             height: this.height
         },
-    this.layoutDefinition
-    );
+            this.layoutDefinition);
         this.tree = this._layout.negotiate().tree();
         this._layout.broadcast();
-        this.manager = new DrawingManager({ tree: this.tree, componentMap: this.layoutDef.getComponentMap() },
-      this.skeletonType, this.renderAt);
+        this.manager = new DrawingManager({
+                            tree: this.tree,
+                            componentMap: this.layoutDef.getComponentMap(),
+                            layoutClassName : this.layoutClassName
+                        },this.skeletonType, this.renderAt);
 
     // this will draw all the components by calling their draw method
         this.manager.draw();
