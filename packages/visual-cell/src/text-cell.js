@@ -50,18 +50,21 @@ const computeTextSpace = (context) => {
     if (space.width > (availWidth || 0) && maxLines) {
         space.height = space.oriTextHeight * maxLines;
     }
-    if (availWidth && availWidth < space.width && minCharacters) {
-        const minText = new Array(minCharacters).fill('W').join('');
-        const _minTextSpace = labelManager.getOriSize(minText);
-        if (availWidth < _minTextSpace.width) {
-            space.width = _minTextSpace.height;
-            context.smartText(labelManager.getSmartText(source, availHeight, space.width, true));
 
-            context.config({ rotation: true });
-        } else {
-            space.width = _minTextSpace.width;
-        }
+    const minText = new Array(minCharacters).fill('W').join('');
+    const _minTextSpace = labelManager.getOriSize(minText);
+    if (availWidth && availWidth < space.width && minCharacters) {
+        space.width = _minTextSpace.width;
     }
+    if (availWidth < _minTextSpace.width) {
+        space.width = _minTextSpace.height;
+        const smartSpace = labelManager.getSmartText(source, availHeight, space.width, true);
+        context.config({ rotation: true });
+        space.width = smartSpace.height;
+        space.height = smartSpace.width;
+        context.smartText(smartSpace);
+    }
+
     if (show) {
         return {
             width: Math.ceil(space.width) + paddedWidth,

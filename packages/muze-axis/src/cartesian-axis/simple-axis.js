@@ -33,7 +33,6 @@ export default class SimpleAxis {
         this._range = [];
         this._domain = [];
         this._domainLock = false;
-        this._rotationLock = false;
         this._axisDimensions = {};
         this._eventList = [];
         this._smartTicks = [];
@@ -176,6 +175,24 @@ export default class SimpleAxis {
             return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
         }
         return () => val => numberFormat(val);
+    }
+
+    resetLogicalSpace () {
+        this.logicalSpace(null);
+        const {
+            labels,
+            show,
+            showInnerTicks,
+            showOuterTicks,
+            showAxisName
+        } = this.config();
+        this.renderConfig({
+            labels,
+            show,
+            showInnerTicks,
+            showOuterTicks,
+            showAxisName
+        });
     }
 
     getFormattedText (text, index, axisTicks) {

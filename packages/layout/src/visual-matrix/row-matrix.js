@@ -150,6 +150,7 @@ export default class RowVisualMatrix extends VisualMatrix {
         matrix.forEach(row => row.forEach((col, cIdx) => {
             if (conditions.indexOf(cIdx) === -1) {
                 col.setAvailableSpace(dist[cIdx], height);
+
                 cWidths[cIdx] = Math.max(cWidths[cIdx] || 0, Math.floor(col.getLogicalSpace().width));
             } else {
                 cWidths[cIdx] = 0;
@@ -207,6 +208,7 @@ export default class RowVisualMatrix extends VisualMatrix {
             width,
             height
         });
+
         this.viewableMatrix.forEach((matrixInst) => {
             const matrix = matrixInst.matrix;
             const mWidth = 0;

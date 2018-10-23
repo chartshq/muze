@@ -13,17 +13,23 @@ import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
  * @param {*} labelManager
  * @param {*} config
  */
-const rotateAxis = (instance, tickText, labelManager, config) => {
+const rotateAxis = (instance, tickText, labelManager) => {
+    let rotation;
     const axis = instance.axis();
+    const config = instance.config();
+    const renderConfig = instance.renderConfig();
     const scale = instance.scale();
     const smartTicks = instance.smartTicks();
     const {
         orientation,
-        labels,
         fixedBaseline,
         type
-     } = config;
-    let { rotation } = labels;
+    } = config;
+    const {
+        labels
+    } = renderConfig;
+
+    rotation = labels.rotation;
 
     const tickSize = instance.getTickSize();
 
@@ -93,12 +99,15 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
         _smartTicks
     } = axisInstance;
     const config = axisInstance.config();
+    const renderConfig = axisInstance.renderConfig();
     const labelManager = axisInstance.dependencies().labelManager;
     const {
-        labels,
         orientation,
         classPrefix
     } = config;
+    const {
+        labels
+    } = renderConfig;
     const {
         rotation,
         smartTicks: isSmartTicks
@@ -109,7 +118,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
    // rotate labels if not enough space is available
     if (rotation && (orientation === TOP || orientation === BOTTOM)) {
-        rotateAxis(axisInstance, tickText, labelManager, config);
+        rotateAxis(axisInstance, tickText, labelManager);
     } else if (!rotation && !isSmartTicks) {
         tickText.attr('transform', '');
     } else {
@@ -201,6 +210,7 @@ const setAxisNamePos = (textNode, orientation, measures) => {
  */
 export function renderAxis (axisInstance) {
     const config = axisInstance.config();
+    const renderConfig = axisInstance.renderConfig();
     const labelManager = axisInstance.dependencies().labelManager;
     const mount = axisInstance.mount();
     const range = axisInstance.range();
@@ -215,16 +225,21 @@ export function renderAxis (axisInstance) {
     const {
         orientation,
         name,
-        labels,
+        // labels,
         xOffset,
         yOffset,
         axisNamePadding,
         className,
-        showAxisName,
-        show,
+        // showAxisName,
+        // show,
         id,
         classPrefix
      } = config;
+    const {
+         show,
+         showAxisName,
+         labels
+     } = renderConfig;
 
     if (!show) {
         return;

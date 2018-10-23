@@ -60,8 +60,8 @@ d3.json('../data/movies.json', (data) => {
     .minUnitWidth(10)
     // .title('Who let the dogs out')
     // .color('Acceleration')
-    .width(540)
-    .height(190)
+    .width(400)
+    .height(390)
     .config({
         border: {
             // color: '#f6f6f6'

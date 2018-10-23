@@ -75,7 +75,8 @@ export const getAxisComponentDimensions = (context) => {
     let axisTicks;
     const allTickDimensions = [];
     const scale = context.scale();
-    const { tickValues, name, showAxisName } = context.config();
+    const { showAxisName } = context.renderConfig();
+    const { tickValues, name } = context.config();
     const { labelManager } = context.dependencies();
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
@@ -120,7 +121,7 @@ export const getAxisComponentDimensions = (context) => {
 
 export const computeAxisDimensions = (context) => {
     let tickDimensions = {};
-    const { labels } = context.config();
+    const { labels } = context.renderConfig();
     const { smartTicks, rotation } = labels;
     const {
         largestTickDimensions,
@@ -164,12 +165,13 @@ export const computeAxisDimensions = (context) => {
  * @param {*} range
  * @returns
  */
-export const getHorizontalAxisSpace = (context, axisDimensions, config, range) => {
+export const getHorizontalAxisSpace = (context, axisDimensions, range) => {
     let width;
     let height;
-    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
-    const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
+    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
+    const { axisNamePadding, tickValues } = context.config();
+    const { showAxisName } = context.renderConfig();
     const { height: axisDimHeight } = axisNameDimensions;
     const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
@@ -206,12 +208,13 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
  * @param {*} range
  * @returns
  */
-export const getVerticalAxisSpace = (context, axisDimensions, config) => {
+export const getVerticalAxisSpace = (context, axisDimensions) => {
     let height;
     let width;
-    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
-    const { axisNamePadding, showAxisName, tickValues } = config;
     const domain = context.domain();
+    const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
+    const { axisNamePadding, tickValues } = context.config();
+    const { showAxisName } = context.renderConfig();
     const { height: axisDimHeight } = axisNameDimensions;
     const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
@@ -240,15 +243,17 @@ export const getVerticalAxisSpace = (context, axisDimensions, config) => {
  */
 export const calculateBandSpace = (context) => {
     const range = context.range();
-    const config = context.config();
-    const { orientation, show } = config;
     const axisDimensions = context.getAxisDimensions();
-
+    const { orientation } = context.config();
+    const { show } = context.renderConfig();
     const { largestTickDimensions, axisTicks } = axisDimensions;
     const { height: largestDimHeight, width: largestDimWidth } = largestTickDimensions;
 
     if (orientation === TOP || orientation === BOTTOM) {
-        let { width, height } = getHorizontalAxisSpace(context, axisDimensions, config, range);
+        let {
+            width,
+            height
+        } = getHorizontalAxisSpace(context, axisDimensions, range);
         if (!width || width === 0) {
             width = axisTicks.length * Math.min(largestDimWidth + context._minTickDistance.width,
                 largestDimHeight + context._minTickDistance.width);
@@ -263,7 +268,10 @@ export const calculateBandSpace = (context) => {
         };
     }
 
-    let { width, height } = getVerticalAxisSpace(context, axisDimensions, config, range);
+    let {
+        width,
+        height
+    } = getVerticalAxisSpace(context, axisDimensions, range);
 
     if (!height || height === 0) {
         height = axisTicks.length * (largestDimHeight + largestDimHeight / 2) + largestDimHeight;
@@ -284,10 +292,9 @@ export const calculateBandSpace = (context) => {
  */
 export const calculateContinousSpace = (context) => {
     const range = context.range();
-    const config = context.config();
     const axisDimensions = context.getAxisDimensions();
-
-    const { orientation, show, showAxisName } = config;
+    const { orientation } = context.config();
+    const { show, showAxisName } = context.renderConfig();
     const { axisNameDimensions } = axisDimensions;
 
     if (show === false) {
@@ -300,7 +307,10 @@ export const calculateContinousSpace = (context) => {
     const { width: axisNameWidth } = axisNameDimensions;
 
     if (orientation === TOP || orientation === BOTTOM) {
-        const { width, height } = getHorizontalAxisSpace(context, axisDimensions, config, range);
+        const {
+            width,
+            height
+        } = getHorizontalAxisSpace(context, axisDimensions, range);
         const axisWidth = Math.max(width, axisNameWidth);
 
         return {
@@ -308,7 +318,10 @@ export const calculateContinousSpace = (context) => {
             height
         };
     }
-    const { width, height } = getVerticalAxisSpace(context, axisDimensions, config, range);
+    const {
+        width,
+        height
+    } = getVerticalAxisSpace(context, axisDimensions, range);
 
     const effHeight = Math.max(height, showAxisName ? axisNameWidth : 0);
 

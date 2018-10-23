@@ -37,6 +37,8 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
         field: field.toString(),
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
+        showAxisName: true,
+        show: true,
         type: dataTypeScaleMap[field.subtype()]
     };
     userAxisConfig.tickValues = field.format(userAxisConfig.tickValues);

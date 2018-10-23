@@ -77,7 +77,8 @@ export default class TimeAxis extends SimpleAxis {
     setTickConfig () {
         let smartTicks;
         let smartlabel;
-        const { tickFormat, labels } = this.config();
+        const { tickFormat } = this.config();
+        const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
@@ -139,7 +140,7 @@ export default class TimeAxis extends SimpleAxis {
         const {
             showInnerTicks,
             showOuterTicks
-        } = this.config();
+        } = this.renderConfig();
         const axis = this.axis();
         axis.tickSizeInner(showInnerTicks === false ? 0 : 6);
         axis.tickSizeOuter(showOuterTicks === false ? 0 : 6);
@@ -201,7 +202,6 @@ export default class TimeAxis extends SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateBandSpace(this));
-            // setOffset(this);
             this.logicalSpace();
         }
         return this.logicalSpace();
@@ -221,6 +221,7 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     setAvailableSpace (width, height, padding, isOffset) {
+        const domain = this.domain();
         const {
             left,
             right,
@@ -229,11 +230,10 @@ export default class TimeAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            axisNamePadding,
-            labels
+            axisNamePadding
         } = this.config();
+        const { labels } = this.renderConfig();
         const { rotation } = labels;
-        const domain = this.domain();
         const { tickDimensions, axisNameDimensions, tickSize } = this.getAxisDimensions();
         const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
         const labelConfig = { smartTicks: true, rotation: labels.rotation };
@@ -272,7 +272,7 @@ export default class TimeAxis extends SimpleAxis {
             });
         }
         this.smartTicks(this.setTickConfig());
-        this.config({
+        this.renderConfig({
             label: labelConfig
         });
         return this;

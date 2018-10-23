@@ -87,6 +87,10 @@ export default class BandAxis extends SimpleAxis {
                     heightForTicks = 0;
                 }
             }
+            if (height < axisNameDimensions.height) {
+                this.renderConfig({ show: false });
+            }
+
             this.maxTickSpaces({
                 width: tickInterval,
                 height: heightForTicks,
@@ -103,8 +107,11 @@ export default class BandAxis extends SimpleAxis {
                 height,
                 noWrap: true
             });
+            if (width < axisNameDimensions.height) {
+                this.renderConfig({ show: false });
+            }
         }
-        this.config({
+        this.renderConfig({
             labels: labelConfig
         });
         this.smartTicks(this.setTickConfig());
@@ -131,14 +138,14 @@ export default class BandAxis extends SimpleAxis {
     setTickConfig () {
         let smartTicks = '';
         let smartlabel;
+        const domain = this.domain();
+        const { labelManager } = this._dependencies;
         const { tickFormat, labels } = this.config();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
-
-        const { labelManager } = this._dependencies;
-        const domain = this.domain();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
-        smartTicks = domain;
         const tickFormatter = tickFormat || (val => val);
+
+        smartTicks = domain;
         // set the style on the shared label manager instance
         labelManager.setStyle(this._tickLabelStyle);
 
@@ -188,7 +195,7 @@ export default class BandAxis extends SimpleAxis {
         const {
             showInnerTicks,
             showOuterTicks
-        } = this.config();
+        } = this.renderConfig();
         const axis = this.axis();
 
         axis.tickSizeInner(showInnerTicks ? 6 : 0);

@@ -96,7 +96,7 @@ export default class ContinousAxis extends SimpleAxis {
         const {
             showInnerTicks,
             showOuterTicks
-        } = this.config();
+        } = this.renderConfig();
         const axis = this.axis();
         axis.tickSizeInner(showInnerTicks === false ? 0 : 6);
         axis.tickSizeOuter(showOuterTicks === false ? 0 : 6);
@@ -179,6 +179,10 @@ export default class ContinousAxis extends SimpleAxis {
             // Remove ticks if not enough height
             if (height - axisNameDimensions.height - axisNamePadding < tickDimensions.height) {
                 showTicks = false;
+                this.renderConfig({ showInnerTicks: false });
+                if (height < axisNameDimensions.height) {
+                    this.renderConfig({ show: false });
+                }
             }
         } else {
             const labelSpace = tickDimensions.height;
@@ -191,6 +195,10 @@ export default class ContinousAxis extends SimpleAxis {
 
             // Remove display of ticks if no space is left
             if (width < tickDimensions.width + axisNameDimensions.height + axisNamePadding) {
+                this.renderConfig({ showInnerTicks: false });
+                if (width < axisNameDimensions.height) {
+                    this.renderConfig({ show: false });
+                }
                 showTicks = false;
             }
         }
@@ -226,8 +234,7 @@ export default class ContinousAxis extends SimpleAxis {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
             return this;
         }
-        const tickV = this.getTickValues();
-        axis.tickValues(tickV);
+        axis.tickValues(this.getTickValues());
 
         return this;
     }

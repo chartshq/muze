@@ -6,17 +6,34 @@ export const PROPS = {
     axisComponentDimensions: {},
     config: {
         sanitization: (context, value) => {
-            if (value.labels && value.labels.rotation) {
-                context._rotationLock = true;
-            }
             const oldConfig = Object.assign({}, context._config || {});
-
             value = mergeRecursive(oldConfig, value);
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             if (value.orientation !== oldConfig.orientation) {
                 context.axis(context.createAxis(value));
             }
             context.store().commit('config', value);
+            const {
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            } = value;
+            context.renderConfig({
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            });
+            return value;
+        }
+    },
+    renderConfig: {
+        sanitization: (context, value) => {
+            const oldConfig = Object.assign({}, context._renderConfig || {});
+            value = mergeRecursive(oldConfig, value);
             return value;
         }
     },

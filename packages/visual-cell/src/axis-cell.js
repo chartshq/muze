@@ -152,7 +152,12 @@ class AxisCell extends SimpleCell {
         } = this.config();
         width && height && this.source().setAvailableSpace(width, height, margin, isOffset);
         this.logicalSpace(null);
-        this.source().logicalSpace(null);
+        if (width && height) {
+            this.source().logicalSpace(null);
+        } else {
+            this.source().resetLogicalSpace();
+        }
+
         return this;
     }
 
