@@ -215,7 +215,8 @@ export const getRenderDetails = (context, mount) => {
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,
-        isRowSizeEqual
+        isRowSizeEqual,
+        mount
     });
     return {
         layoutConfig,
@@ -225,7 +226,7 @@ export const getRenderDetails = (context, mount) => {
 };
 // const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
 
-export const prepareTreeLayout = (layoutConfig, components, grid, measurement) => {
+export const renderLayout = (layoutConfig, components, grid, measurement) => {
     // generate component wrappers
 
     const target = { target: 'canvas' };
@@ -234,7 +235,7 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle',alignment:'left' });
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle',alignment:'right' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
@@ -251,7 +252,7 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
     // color legend
     let colorLegendWrapper = null;
     if (components.legends) {
-        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement,alignWith:'center-middle',alignment:'v-center'  };
         colorLegendWrapper = new LegendComponent({
             name: 'legend',
             component: components.legends,
@@ -286,16 +287,13 @@ export const prepareTreeLayout = (layoutConfig, components, grid, measurement) =
     const gridWrapper = new GridComponent({
         name: 'grid',
         component: gridComponents,
-        config: { className:'muze-layout-grid-container',
-                  dimensions: { height: 0, width: 0 },
+        config: { dimensions: { height: 0, width: 0 },
                   ...target }
     });
-    // gridComponentWrapper[1][0].draw(document.getElementById('chart'));
-
     // instantiate treelayoutManager
 
     const layoutManager = new LayoutManager({
-        renderAt: 'chart',
+        renderAt: layoutConfig.mount,
         className:'muze-group-container',
         height: measurement.canvasHeight,
         width: measurement.canvasWidth

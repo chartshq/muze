@@ -20,7 +20,7 @@ export const ROW_MATRIX_INDEX = {
 export const COLUMN_MATRIX_INDEX = {
     0: 'left',
     1: 'middle',
-    2: 'center'
+    2: 'right'
 };
 
 /**
