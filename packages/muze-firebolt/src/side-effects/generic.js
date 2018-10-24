@@ -33,6 +33,16 @@ export default class GenericSideEffect {
         return {};
     }
 
+    /**
+     * Returns the formal name of a side effect. This method must be implemented by all side effects which changes
+     * or adds any element in the visualization.
+     *
+     * @return {string} Formal name of side effect.
+     */
+    static formalName () {
+        return 'generic';
+    }
+
     static target () {
         return 'all';
     }
@@ -41,6 +51,7 @@ export default class GenericSideEffect {
      * Returns true if the side effects mutates the data of chart.
      *
      * @public
+     *
      * @return {boolean} If the side effect mutates the data of chart.
      */
     static mutates () {

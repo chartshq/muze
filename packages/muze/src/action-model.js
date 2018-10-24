@@ -71,7 +71,7 @@ class ActionModel {
      *              });
      *          }
      *      });
-     *
+     * ```
      * @public
      *
      * @param {Object} action Names of physical actions and their definitions.

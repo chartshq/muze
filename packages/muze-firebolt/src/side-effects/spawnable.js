@@ -7,10 +7,24 @@ import GenericSideEffect from './generic';
  * the chart needs to inherit this class. This class has methods which returns the container where the dom elements
  * needs to be created.
  *
+ * To use this,
+ * ```
+ *      const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
+ *
+ *      class SelectionBox extends SpawnableSideEffect {
+ *          static formalName () {
+ *              return 'selectionBox';
+ *          }
+ *
+ *          // Implement the logic of applying the style here.
+ *          apply () {
+ *          }
+ *      }
+ * ```
  * @public
  * @class
  * @extends GenericSideEffect
- * @module SideEffects
+ * @module SpawnableSideEffect
  * @namespace muze
  */
 export default class SpawnableSideEffect extends GenericSideEffect {
