@@ -7,10 +7,11 @@ import {
     getUniqueId
 } from 'muze-utils';
 import { createScale } from '../scale-creator';
-import { axisOrientationMap } from '../enums/axis-orientation';
+import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
 import { DOMAIN, BAND } from '../enums/constants';
+import { spaceSetter } from './space-setter';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
@@ -45,7 +46,8 @@ export default class SimpleAxis {
         this._tickLabelStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-ticks`);
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
         dependencies.labelManager.setStyle(this._tickLabelStyle);
-        this._minTickDistance = dependencies.labelManager.getOriSize('wv');
+        const dist = dependencies.labelManager.getOriSize('wv');
+        this._minTickDistance = { width: dist.width / 2, height: dist.height / 2 };
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
 
         generateGetterSetters(this, PROPS);
@@ -226,21 +228,42 @@ export default class SimpleAxis {
     }
 
     /**
+     * This method is used to set the space availiable to render
+     * the SimpleCell.
      *
-     *
-     * @memberof SimpleAxis
+     * @param {number} width The width of SimpleCell.
+     * @param {number} height The height of SimpleCell.
+     * @memberof AxisCell
      */
-    setTickConfig () {
+    setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
+        const {
+           orientation
+       } = this.config();
+
+        this.availableSpace({ width, height, padding });
+
+        if (orientation === TOP || orientation === BOTTOM) {
+            labelConfig = spaceSetter(this, { isOffset }).continous.x();
+        } else {
+            labelConfig = spaceSetter(this, { isOffset }).continous.y();
+        }
+
+        // Set config
+        this.renderConfig({
+            labels: labelConfig
+        });
+        this.setTickConfig();
+        this.getTickSize();
         return this;
     }
 
     /**
      *
      *
-     * @returns
      * @memberof SimpleAxis
      */
-    adjustRange () {
+    setTickConfig () {
         return this;
     }
 

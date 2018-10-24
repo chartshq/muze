@@ -54,8 +54,8 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .columns(['Distributor'])
-    .rows(['Major_Genre', 'Distributor', 'Production_Budget'])
+    .rows(['Distributor', 'Production_Budget'])
+    .columns(['Title'])
     .data(rootData)
     .minUnitWidth(10)
     // .title('Who let the dogs out when they came searching for the beast lurking')
@@ -63,7 +63,7 @@ d3.json('../data/movies.json', (data) => {
     // .subtitle('Who let the dogs out when they came searching for the beast lurking Who let the dogs out when they came searching for the beast lurking')
     // .color('Major_Genre')
     // .subtitle('asd')
-    .width(290)
+    .width(420)
     // .detail(['Major_'])
     .height(150)
     .config({
@@ -78,6 +78,7 @@ d3.json('../data/movies.json', (data) => {
         },
         axes: {
             x: {
+                padding: 0
                 // tickValues: ['Slam']
                 // tickFormat: (v) => v/1000
             }

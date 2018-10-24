@@ -64,51 +64,28 @@ d3.json('../data/cars.json', (data) => {
     const env = muze();
         // Create a canvas from the global environment
     const canvas = env.canvas();
-    canvas
-                    .data(dm)
-                    .rows(['Acceleration']) // Year goes in y-axis
-                    .columns(['Year']) // Acceleration goes in x-axis
-                    .color({
-                        field: 'Horsepower',
-                        stops: 5
-                    })
-                    .config({
-                        axes: { // Dont show the y axis as we are showing the labels on the bars itself
-                            y: {
-                                tickValues: [0, 100]
-                                // tickSize: 150
-                                // show: false
-                            },
-                            x: {
-                                tickValues: ['1972-01-01']
-                            }
-                        },
-                        border: { // Hide the layout borders for better visibility
-                            showValueBorders: {
-                                left: false,
-                                bottom: false
-                            }
-                        },
-                        legend: {
-                            position: 'bottom'
-                        }
-                    })
-                    .layers([{
-                        mark: 'bar', // Use that custom mark to pass encoding values
-                        encoding: {
-                            axisText: {
-                                field: 'Year'
-                            },
-                            valueText: {
-                                field: 'Acceleration'
-                            }
-                        }
+   // DataModel instance is created from https://www.charts.com/static/cars.json data,
+// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
 
-                    }])
-                    .width(600)
-                    .height(500)
-                    .title('Bar chart with axis labels inside the plot area', { position: 'top', align: 'center' })
-                    .subtitle('Acceleration vs Year', { position: 'top', align: 'center' })
-                    .mount('#chart'); // Set the chart mount point
+    // DataModel instance is created from https://www.charts.com/static/cars.json data,
+// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
+
+// DataModel instance is created from https://www.charts.com/static/cars.json data,
+// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
+
+// DataModel instance is created from https://www.charts.com/static/cars.json data,
+// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
+
+
+
+    canvas
+  	.data(dm)
+  	.minUnitHeight(30)
+  	.minUnitWidth(10)
+  	.width(1200)
+  	.height(400)
+  	.rows(['Origin', 'Cylinders'])
+  	.columns(['Year', 'Horsepower']) /* Year is a temporal field */
+  	.mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
 

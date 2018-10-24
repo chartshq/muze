@@ -54,6 +54,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             height,
             width
         } = measures;
+
         return this.viewableMatrix.map((matrixInst, i) => {
             const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i, height };
             const { heights, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);

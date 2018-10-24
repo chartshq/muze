@@ -4,30 +4,7 @@ import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { DOMAIN } from '../enums/constants';
 import { calculateBandSpace, getRotatedSpaces } from './helper';
-
-const getAxisOffset = (timeDiff, range, domain) => {
-    const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
-    const width = (pvr * timeDiff);
-    const avWidth = (range[1] - range[0]);
-    const bars = avWidth / width;
-    const barWidth = avWidth / (bars + 1);
-    const diff = avWidth - barWidth * bars;
-
-    return diff / 2;
-};
-
-export const adjustRange = (minDiff, range, domain, orientation) => {
-    const diff = getAxisOffset(minDiff, range, domain);
-
-    if (orientation === TOP || orientation === BOTTOM) {
-        range[0] += diff;
-        range[1] -= diff;
-    } else {
-        range[0] -= diff;
-        range[1] += diff;
-    }
-    return range;
-};
+import { spaceSetter } from './space-setter';
 
 /**
  *
@@ -179,87 +156,28 @@ export default class TimeAxis extends SimpleAxis {
     }
 
     /**
+     * This method is used to set the space availiable to render
+     * the SimpleCell.
      *
-     *
-     * @param {*} width
-     * @param {*} height
-     * @param {*} padding
-     * @param {*} isOffset
-     * @memberof TimeAxis
+     * @param {number} width The width of SimpleCell.
+     * @param {number} height The height of SimpleCell.
+     * @memberof AxisCell
      */
-    setAvailableSpace (width, height, padding, isOffset) {
-        let tickInterval;
-        let heightForTicks;
-        const domain = this.domain();
+    setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
         const {
-            left,
-            right,
-            top,
-            bottom
-        } = padding;
-        const {
-            orientation,
-            axisNamePadding
-        } = this.config();
-        const { labels, showAxisName } = this.renderConfig();
-        const { rotation } = labels;
-        const { tickDimensions, axisNameDimensions, tickSize } = this.getAxisDimensions();
-        const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
-        const labelConfig = { smartTicks: true, rotation: labels.rotation };
-        const namePadding = showAxisName ? axisNamePadding : 0;
+           orientation
+       } = this.config();
 
-        this.availableSpace({ width, height });
+        this.availableSpace({ width, height, padding });
+
         if (orientation === TOP || orientation === BOTTOM) {
-            const labelSpace = tickDimWidth;
-            this.range(adjustRange(this._minDiff, [labelSpace / 2, width - left - right - labelSpace / 2],
-                domain, orientation));
-            isOffset && this.config({ yOffset: height });
-
-            tickInterval = ((this.range()[1] - this.range()[0]) / this.getTickValues().length)
-                - this._minTickDistance.width;
-
-            heightForTicks = height - axisNameDimensions.height - tickSize - namePadding;
-
-            if (tickInterval < this._minTickSpace.width && rotation !== 0) {
-                // set smart ticks and rotation config
-                labelConfig.rotation = labels.rotation === null ? -90 : rotation;
-                  // Remove ticks if not enough height
-                if (tickInterval < this._minTickSpace.height) {
-                    heightForTicks = height;
-                    tickInterval = this._minTickSpace.height;
-                    this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                }
-            }
-            if (height < axisNameDimensions.height) {
-                this.renderConfig({ show: false });
-            }
-
-            this.maxTickSpaces({
-                width: tickInterval,
-                height: heightForTicks,
-                noWrap: rotation !== null
-            });
+            labelConfig = spaceSetter(this, { isOffset }).time.x();
         } else {
-            const labelSpace = tickDimHeight;
-            this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
-                domain, orientation));
-            isOffset && this.config({ xOffset: width });
-            const availWidth = width - axisNameDimensions.height - namePadding;
-            let widthForTicks = availWidth;
-            if (availWidth <= this._minTickDistance.width) {
-                widthForTicks = 0;
-                this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-            }
-
-            this.maxTickSpaces({
-                width: widthForTicks,
-                height,
-                noWrap: true
-            });
-            if (width < axisNameDimensions.height) {
-                this.renderConfig({ show: false });
-            }
+            labelConfig = spaceSetter(this, { isOffset }).time.y();
         }
+
+        // Set config
         this.renderConfig({
             labels: labelConfig
         });

@@ -29,8 +29,8 @@ const setSmartText = (context) => {
         top,
         bottom
      } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height / 2;
-    const paddedWidth = left + right + _minSpacing.width / 2;
+    const paddedHeight = top + bottom + _minSpacing.height;
+    const paddedWidth = left + right + _minSpacing.width;
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const labelManager = context.dependencies().labelManager;
@@ -65,8 +65,8 @@ const computeTextSpace = (context) => {
        top,
        bottom
     } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height / 2;
-    const paddedWidth = left + right + _minSpacing.width / 2;
+    const paddedHeight = top + bottom + _minSpacing.height;
+    const paddedWidth = left + right + _minSpacing.width;
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
@@ -81,14 +81,13 @@ const computeTextSpace = (context) => {
     if (availWidth && availWidth < space.width) {
         space.width = _minTextSpace.width;
     }
-    if (availWidth && availWidth < _minTextSpace.width) {
+    if (availWidth && availWidth < Math.min(_minTextSpace.width, space.oriTextWidth)) {
         const smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
         space.width = smartSpace.height;
         space.height = smartSpace.width;
         context.config({ rotation: true });
         context.smartText(smartSpace);
     }
-
     if (show) {
         return {
             width: Math.ceil(space.width) + paddedWidth,
@@ -122,7 +121,8 @@ class TextCell extends SimpleCell {
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
 
         this._dependencies.labelManager.setStyle(this._computedStyle);
-        this._minSpacing = this._dependencies.labelManager.getOriSize('wv');
+        const space = this._dependencies.labelManager.getOriSize('wv');
+        this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
 
         generateGetterSetters(this, PROPS[TEXT]);
         setSmartText(this);

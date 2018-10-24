@@ -1,6 +1,7 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
+import { spaceSetter } from './space-setter';
 import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import { DOMAIN } from '../enums/constants';
@@ -136,73 +137,17 @@ export default class ContinousAxis extends SimpleAxis {
      * @memberof AxisCell
      */
     setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
         const {
-            left,
-            right,
-            top,
-            bottom
-        } = padding;
-        const {
-            orientation,
-            fixedBaseline,
-            axisNamePadding
-        } = this.config();
-        const {
-            showAxisName,
-            labels
-        } = this.renderConfig();
-        const {
-            tickDimensions,
-            allTickDimensions,
-            axisNameDimensions
-        } = this.getAxisDimensions();
-        const namePadding = showAxisName ? axisNamePadding : 0;
+           orientation
+       } = this.config();
 
-        const labelConfig = { smartTicks: false, rotation: labels.rotation };
-
-        this.availableSpace({ width, height });
+        this.availableSpace({ width, height, padding });
 
         if (orientation === TOP || orientation === BOTTOM) {
-            const labelSpace = tickDimensions.width;
-
-            // Set x-axis range
-            this.range([(fixedBaseline ? 0 : (labelSpace / 2)) + left, width - right - labelSpace / 2]);
-
-            // Set offset
-            isOffset && this.config({ yOffset: height });
-
-            // Get Tick widths and available space
-            const totalTickWidth = allTickDimensions.length * (tickDimensions.width + this._minTickDistance.width);
-            const availableSpace = this.range()[1] - this.range()[0];
-
-            // Rotate labels if not enough width
-            if (availableSpace < totalTickWidth && labels.rotation === null) {
-                labelConfig.rotation = -90;
-            }
-
-            // Remove ticks if not enough height
-            if (height - axisNameDimensions.height - namePadding < tickDimensions.height) {
-                this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                if (height < axisNameDimensions.height) {
-                    this.renderConfig({ show: false });
-                }
-            }
+            labelConfig = spaceSetter(this, { isOffset }).continous.x();
         } else {
-            const labelSpace = tickDimensions.height;
-
-            // Set range
-            this.range([height - bottom - (fixedBaseline ? 1 : (labelSpace / 2)), labelSpace / 2 + top]);
-
-            // Set offset
-            isOffset && this.config({ xOffset: width });
-
-            // Remove display of ticks if no space is left
-            if (width < tickDimensions.width + axisNameDimensions.height + namePadding) {
-                this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                if (width < axisNameDimensions.height) {
-                    this.renderConfig({ show: false });
-                }
-            }
+            labelConfig = spaceSetter(this, { isOffset }).continous.y();
         }
 
         // Set config
@@ -210,7 +155,7 @@ export default class ContinousAxis extends SimpleAxis {
             labels: labelConfig
         });
         this.setTickConfig();
-
+        this.getTickSize();
         return this;
     }
 
