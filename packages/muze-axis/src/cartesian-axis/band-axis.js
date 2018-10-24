@@ -44,6 +44,7 @@ export default class BandAxis extends SimpleAxis {
     setAvailableSpace (width, height, padding, isOffset) {
         let tickInterval;
         let heightForTicks;
+        const domain = this.domain();
         const {
             left,
             right,
@@ -52,7 +53,8 @@ export default class BandAxis extends SimpleAxis {
         } = padding;
         const {
             orientation,
-            axisNamePadding
+            axisNamePadding,
+            tickValues
         } = this.config();
         const {
             labels,
@@ -64,6 +66,8 @@ export default class BandAxis extends SimpleAxis {
         const { axisNameDimensions, tickSize } = this.axisComponentDimensions();
         const labelConfig = { smartTicks: true, rotation: labels.rotation };
         const namePadding = showAxisName ? axisNamePadding : 0;
+        const minTickDistance = this._minTickDistance;
+        const minTickSpace = this._minTickSpace;
 
         this.availableSpace({ width, height });
         if (orientation === TOP || orientation === BOTTOM) {
@@ -76,20 +80,26 @@ export default class BandAxis extends SimpleAxis {
             isOffset && this.config({ yOffset: height });
 
             // Get Tick Interval
-            tickInterval = (availableWidth / this.domain().length) - this._minTickDistance.width;
+            tickInterval = (availableWidth / (tickValues || domain).length) - minTickDistance.width;
 
             // Get height available for ticks
             heightForTicks = height - axisNameDimensions.height - tickSize - namePadding;
 
-            if (tickInterval < this._minTickSpace.width && rotation !== 0) {
+            if (tickInterval < minTickSpace.width && rotation !== 0) {
                 // set smart ticks and rotation config
-                labelConfig.rotation = labels.rotation === null ? -90 : rotation;
+                labelConfig.rotation = rotation === null ? -90 : rotation;
                 labelConfig.smartTicks = false;
-                // Remove ticks if not enough height
-                if (tickInterval < this._minTickSpace.height) {
-                    tickInterval = 0;
-                    heightForTicks = 0;
-                    this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
+
+                // Ticks with overlapping height
+                if (tickInterval < minTickSpace.height) {
+                    heightForTicks = height;
+                    tickInterval = minTickSpace.height;
+                    this.range([minTickSpace.height / 2, availableWidth - minTickSpace.height / 2]);
+                }
+            } else if (tickValues) {
+                const interval = (availableWidth / domain.length) - minTickDistance.width;
+                if (interval < minTickSpace.width) {
+                    this.range([minTickSpace.height / 2, availableWidth - minTickSpace.height / 2]);
                 }
             }
             if (height < axisNameDimensions.height) {
@@ -102,6 +112,7 @@ export default class BandAxis extends SimpleAxis {
                 noWrap: rotation !== null
             });
         } else {
+            // ORIENTATION LEFT AND RIGHT
             // Set y axis range
             this.range([height - bottom, top]);
             isOffset && this.config({ xOffset: width });
@@ -135,16 +146,6 @@ export default class BandAxis extends SimpleAxis {
      * @returns
      * @memberof BandAxis
      */
-    getUnitWidth () {
-        return this.scale().bandwidth();
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof BandAxis
-     */
     setTickConfig () {
         let smartTicks = '';
         let smartlabel;
@@ -170,6 +171,7 @@ export default class BandAxis extends SimpleAxis {
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
+        console.log(smartTicks);
         this.smartTicks(smartTicks);
         return this;
     }
@@ -197,6 +199,16 @@ export default class BandAxis extends SimpleAxis {
      */
     getTickValues () {
         return this.axis().scale().domain();
+    }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof BandAxis
+     */
+    getUnitWidth () {
+        return this.scale().bandwidth();
     }
 
     /**

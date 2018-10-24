@@ -250,17 +250,17 @@ export const calculateBandSpace = (context) => {
     const axisDimensions = context.getAxisDimensions();
     const { orientation } = context.config();
     const { show } = context.renderConfig();
-    const { largestTickDimensions, axisTicks } = axisDimensions;
-    const { height: largestDimHeight, width: largestDimWidth } = largestTickDimensions;
-
+    const { largestTickDimensions, axisTicks, allTickDimensions } = axisDimensions;
+    const { height: largestDimHeight } = largestTickDimensions;
+    const minTickWidth = context._minTickDistance.width;
     if (orientation === TOP || orientation === BOTTOM) {
         let {
             width,
             height
         } = getHorizontalAxisSpace(context, axisDimensions, range);
         if (!width || width === 0) {
-            width = axisTicks.length * Math.min(largestDimWidth + context._minTickDistance.width,
-                largestDimHeight + context._minTickDistance.width);
+            width = allTickDimensions.reduce((t, n) =>
+                t + Math.min(n.width, n.height) + minTickWidth, 0);
         }
         if (show === false) {
             height = 0;
@@ -278,7 +278,7 @@ export const calculateBandSpace = (context) => {
     } = getVerticalAxisSpace(context, axisDimensions, range);
 
     if (!height || height === 0) {
-        height = axisTicks.length * (largestDimHeight + largestDimHeight / 2) + largestDimHeight;
+        height = axisTicks.length * (largestDimHeight + context._minTickDistance.height) + largestDimHeight;
     }
     if (show === false) {
         width = 0;

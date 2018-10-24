@@ -72,43 +72,6 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @returns
-     * @memberof BandAxis
-     */
-    setTickConfig () {
-        let smartTicks;
-        let smartlabel;
-        const { tickFormat, tickValues } = this.config();
-        const { labels } = this.renderConfig();
-        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
-        const { labelManager } = this._dependencies;
-        const domain = this.getTickValues();
-        const scale = this.scale();
-        tickValues && this.axis().tickValues(tickValues);
-
-        const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
-
-        smartTicks = tickValues || domain;
-        const tickFormatter = tickFormat || scale.tickFormat();
-         // set the style on the shared label manager instance
-        labelManager.setStyle(this._tickLabelStyle);
-
-        if (domain && domain.length) {
-            const values = tickValues || domain;
-            smartTicks = values.map((d, i) => {
-                labelManager.useEllipsesOnOverflow(true);
-
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
-                return labelManager.constructor.textToLines(smartlabel);
-            });
-        }
-        this.smartTicks(smartTicks);
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @returns
      * @memberof SimpleAxis
      */
     createAxis (config) {
@@ -157,7 +120,7 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     getTickValues () {
-        return this.scale().ticks();
+        return this.config().tickValues || this.scale().ticks();
     }
 
     /**
@@ -262,8 +225,8 @@ export default class TimeAxis extends SimpleAxis {
                 labelConfig.rotation = labels.rotation === null ? -90 : rotation;
                   // Remove ticks if not enough height
                 if (tickInterval < this._minTickSpace.height) {
-                    tickInterval = 0;
-                    heightForTicks = 0;
+                    heightForTicks = height;
+                    tickInterval = this._minTickSpace.height;
                     this.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                 }
             }
@@ -302,6 +265,43 @@ export default class TimeAxis extends SimpleAxis {
         });
         this.setTickConfig();
         this.getTickSize();
+        return this;
+    }
+
+    /**
+     *
+     *
+     * @returns
+     * @memberof BandAxis
+     */
+    setTickConfig () {
+        let smartTicks;
+        let smartlabel;
+        const { tickFormat, tickValues } = this.config();
+        const { labels } = this.renderConfig();
+        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
+        const { labelManager } = this._dependencies;
+        const domain = this.getTickValues();
+        const scale = this.scale();
+        tickValues && this.axis().tickValues(tickValues);
+
+        const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
+
+        smartTicks = tickValues || domain;
+        const tickFormatter = tickFormat || scale.tickFormat();
+         // set the style on the shared label manager instance
+        labelManager.setStyle(this._tickLabelStyle);
+
+        if (domain && domain.length) {
+            const values = tickValues || domain;
+            smartTicks = values.map((d, i) => {
+                labelManager.useEllipsesOnOverflow(true);
+
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
+                return labelManager.constructor.textToLines(smartlabel);
+            });
+        }
+        this.smartTicks(smartTicks);
         return this;
     }
 }

@@ -179,6 +179,7 @@ export default class SimpleAxis {
 
     resetLogicalSpace () {
         this.logicalSpace(null);
+        this.range([]);
         const {
             labels,
             show,
