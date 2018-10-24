@@ -92,8 +92,8 @@ export default class BandAxis extends SimpleAxis {
 
                 // Ticks with overlapping height
                 if (tickInterval < minTickSpace.height) {
-                    heightForTicks = height;
-                    tickInterval = minTickSpace.height;
+                    heightForTicks = 0;
+                    tickInterval = 0;
                     this.range([minTickSpace.height / 2, availableWidth - minTickSpace.height / 2]);
                 }
             } else if (tickValues) {

@@ -110,13 +110,12 @@ export default class ColumnVisualMatrix extends VisualMatrix {
     }
 
     getPriorityDistribution (matrix, height, maxHeights = []) {
-        const priority = this.config().priority;
-        const primaryMatrixLength = this.primaryMatrix().length;
-        const heightDist = [];
         let remainaingHeight = height;
-
+        let heightDist = [];
         let conditions = [];
         let divider = 2;
+        const priority = this.config().priority;
+        const primaryMatrixLength = this.primaryMatrix().length;
 
         if (priority === 2) {
             conditions = [primaryMatrixLength - 1, primaryMatrixLength];
@@ -131,11 +130,13 @@ export default class ColumnVisualMatrix extends VisualMatrix {
                 remainaingHeight -= e;
             }
         });
-
-        conditions.forEach((e) => {
-            heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
-        });
-
+        if (remainaingHeight < 0) {
+            heightDist = heightDist.map(() => 0);
+        } else {
+            conditions.forEach((e) => {
+                heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
+            });
+        }
         return heightDist;
     }
 

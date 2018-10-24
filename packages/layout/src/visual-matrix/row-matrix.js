@@ -112,6 +112,7 @@ export default class RowVisualMatrix extends VisualMatrix {
     getPriorityDistribution (options) {
         let remainaingAvailWidth;
         let remainaingWidth;
+        let cWidths = [];
         let conditions = [];
         let divider = 1;
         const {
@@ -146,7 +147,6 @@ export default class RowVisualMatrix extends VisualMatrix {
                 dist[i] = remainaingAvailWidth * (maxWidths[i] / remainaingWidth);
             }
         });
-        const cWidths = [];
         matrix.forEach(row => row.forEach((col, cIdx) => {
             if (conditions.indexOf(cIdx) === -1) {
                 col.setAvailableSpace(dist[cIdx], height);
@@ -158,9 +158,13 @@ export default class RowVisualMatrix extends VisualMatrix {
         }));
 
         const prioritySpace = availableWidth - cWidths.reduce((t, n) => t + n);
-        conditions.forEach((i) => {
-            cWidths[i] = Math.floor(prioritySpace / divider);
-        });
+        if (prioritySpace < 0) {
+            cWidths = cWidths.map(() => 0);
+        } else {
+            conditions.forEach((i) => {
+                cWidths[i] = Math.floor(prioritySpace / divider);
+            });
+        }
         return cWidths;
     }
 
@@ -250,7 +254,6 @@ export default class RowVisualMatrix extends VisualMatrix {
         options.maxWidth = maxWidth;
         if (maxWidth > 0) {
             cWidths = logicalWidths;
-            // cWidths = this.getPriorityDistribution(options);
         } else {
             cWidths = maxMeasures.map(() => 0);
         }

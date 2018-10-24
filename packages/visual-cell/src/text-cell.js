@@ -29,8 +29,8 @@ const setSmartText = (context) => {
         top,
         bottom
      } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height;
-    const paddedWidth = left + right + _minSpacing.width;
+    const paddedHeight = top + bottom + _minSpacing.height / 2;
+    const paddedWidth = left + right + _minSpacing.width / 2;
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const labelManager = context.dependencies().labelManager;
@@ -65,8 +65,8 @@ const computeTextSpace = (context) => {
        top,
        bottom
     } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height;
-    const paddedWidth = left + right + _minSpacing.width;
+    const paddedHeight = top + bottom + _minSpacing.height / 2;
+    const paddedWidth = left + right + _minSpacing.width / 2;
     const availHeight = context.availHeight() - paddedWidth;
     const availWidth = context.availWidth() - paddedHeight;
     const source = context.source();
