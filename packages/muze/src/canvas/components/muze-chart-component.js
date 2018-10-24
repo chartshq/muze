@@ -1,4 +1,4 @@
-import { LayoutComponent } from '../../../../layout/src/tree-layout/src';
+import { LayoutComponent } from '../../../../layout/src/tree-layout';
 
 export default class MuzeComponent extends LayoutComponent {
     getLogicalSpace () {

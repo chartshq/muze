@@ -9,7 +9,7 @@ import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import GridComponent from './components/grid-component';
 import MatrixComponent from './components/matrix-component';
-import { LayoutManager } from '../../../layout/src/tree-layout/src';
+import { LayoutManager } from '../../../layout/src/tree-layout';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
