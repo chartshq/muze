@@ -10,6 +10,7 @@ import { mergeRecursive, getUniqueId } from 'muze-utils';
  * @public
  * @class
  * @module SideEffects
+ * @namespace muze
  */
 export default class GenericSideEffect {
     constructor (firebolt) {

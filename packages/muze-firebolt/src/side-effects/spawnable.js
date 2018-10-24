@@ -11,6 +11,7 @@ import GenericSideEffect from './generic';
  * @class
  * @extends GenericSideEffect
  * @module SideEffects
+ * @namespace muze
  */
 export default class SpawnableSideEffect extends GenericSideEffect {
     /**

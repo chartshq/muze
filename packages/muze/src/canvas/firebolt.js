@@ -66,7 +66,7 @@ const defaultCrossInteractionPolicy = {
  *  const firebolt = canvas.firebolt();
  * ```
  *
- * @class
+ * @class GroupFireBolt
  * @public
  * @namespace Muze
  */

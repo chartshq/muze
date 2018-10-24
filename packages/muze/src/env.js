@@ -79,8 +79,19 @@ export default class Env {
      *
      * @public
      *
-     * @param {Config} config Partial or full configuration of canvas.
-     * @param {}
+     * @param {Object} config Partial or full configuration of canvas.
+     * @param {Object} config.axes Axis configuration.
+     * @param {Object} config.axes.x X Axis configuration.
+     * @param {string} config.axes.x.name Name which will be displayed below or top of the x axis.
+     * @param {string} config.axes.x.interpolator Scale interpolator method. This decides the type of scale to be
+     * created. Supported values: - [pow, log].
+     * @param {number} config.axes.x.numberOfTicks Sets the number of ticks.
+     * Note:- This is just a hint. It may show more number of ticks than which is specified.
+     * @param {number} config.axes.x.nice Extends the domain so that it starts and ends on nice round values.
+     * @param {boolean} config.axes.x.show Whether to display the axis or not.
+     * @param {boolean} config.axes.x.showAxisName Whether to show the axis name or not.
+     * @param {Function} config.axes.x.tickFormat Function which returns formatted tick values.
+     *
      * @return {Env} Instance of the environment
      */
     config () { /* pseudo function */ }
