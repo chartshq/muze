@@ -14,6 +14,7 @@ import { TITLE_TEMPLATE_NOT_ALLOWED_TAGS } from './constants';
  *
  * @module Operators
  * @public
+ * @namespace muze
  * @param {Array} vars Variable names.
  *
  * @return {ComposedVars} Instance of composed variable
@@ -48,6 +49,8 @@ function treeShakeNode (node) {
  * ```
  *
  * @module Operators
+ * @namespace muze
+ *
  * @param {Array.<string>} strings - The string parts of the template.
  * @param {Array} exps - The list of evaluated expression values.
  *

@@ -5,6 +5,7 @@
  *
  * @class
  * @module AreaLayer
+ * @extends BaseLayer
  */
 // @warn Pseudo class of AreaLayer to generate docs. Real area layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible

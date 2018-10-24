@@ -5,6 +5,7 @@
  *
  * @class
  * @module TextLayer
+ * @extends BaseLayer
  */
 // @warn Pseudo class of TextLayer to generate docs. Real text layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible

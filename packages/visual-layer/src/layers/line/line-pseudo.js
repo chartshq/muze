@@ -5,6 +5,7 @@
  *
  * @class
  * @module LineLayer
+ * @extends BaseLayer
  */
 // @warn Pseudo class of LineLayer to generate docs. Real Line layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible

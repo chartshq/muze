@@ -1,5 +1,16 @@
 import { mergeRecursive, getUniqueId } from 'muze-utils';
 
+/**
+ * This is the base class of all side effects. It contains all common methods like setting configuration, disabling,
+ * enabling side effect, etc. Every new side effect has to inherit this class or {@link SpawnableSideEffect} or
+ * {@link SurrogateSideEffect} class. All side effects are initialized by firebolt. The instance of firebolt is
+ * passed on initialization. The firebolt instance contains ```context``` which is the instance of visual unit with
+ * which the firebolt is attached.
+ *
+ * @public
+ * @class
+ * @module SideEffects
+ */
 export default class GenericSideEffect {
     constructor (firebolt) {
         this.firebolt = firebolt;
@@ -11,6 +22,12 @@ export default class GenericSideEffect {
         this.config(this.constructor.defaultConfig());
     }
 
+    /**
+     * Returns the default configuration of the side effect.
+     *
+     * @public
+     * @return {Object} Default configuration of side effect.
+     */
     static defaultConfig () {
         return {};
     }
@@ -19,10 +36,26 @@ export default class GenericSideEffect {
         return 'all';
     }
 
+    /**
+     * Returns true if the side effects mutates the data of chart.
+     *
+     * @public
+     * @return {boolean} If the side effect mutates the data of chart.
+     */
     static mutates () {
         return false;
     }
 
+    /**
+     * Sets or gets the configuration of side effect.
+     *
+     * When setter,
+     * @param {Object} config Configuration of side effect.
+     * @return {GenericSideEffect} Side effect instance.
+     *
+     * When getter,
+     * @return {Object} Side effect configuration.
+     */
     config (...params) {
         if (params.length) {
             this._config = mergeRecursive(this._config, params[0]);
@@ -45,10 +78,39 @@ export default class GenericSideEffect {
         return this._enabled;
     }
 
+    /**
+     * Applies the interaction effect on the chart. This is where the implemntation of the side effect is defined.
+     *
+     * @param {Object} selectionSet Contains the entry and exit set of data which got affected during interaction.
+     * @param {Object} selectionSet.mergedEnter Combined previous entry and new entry set.
+     * @param {DataModel} selectionSet.mergedEnter.model Instance of data model containing all rows which got
+     * affected during interaction.
+     * @param {Array} selectionSet.mergedEnter.uids Ids of all rows which were affected during interaction.
+     * @param {Object} selectionSet.mergedExit Combined previous exit and new exit set.
+     * @param {DataModel} selectionSet.mergedExit.model Instance of data model containing rows which were not affected
+     * during interaction.
+     * @param {Array} selectionSet.mergedExit.uids Ids of all rows which were not affected during interaction.
+     * @param {Object} selectionSet.entrySet Entry set information.
+     * @param {Array} selectionSet.entrySet[0].uids All row ids which got affected during previous interaction.
+     * @param {Array} selectionSet.entrySet[1].uids All row ids which got affected during current interaction.
+     * @param {Array} selectionSet.exitSet[0].uids All row ids which were not affected during previous interaction.
+     * @param {Array} selectionSet.exitSet[1].uids All row ids which were not affected during current interaction.
+     * @param {Object} payload Payload information of the behavioural action on trigger of which this side effect
+     * is applied.
+     * @param {Object} options Optional information for side effect like strategy, etc.
+     */
     apply () {
         return this;
     }
 
+    /**
+     * Adds a new strategy method for this side effect. The strategy method is implemented by side effect class.
+     *
+     * @param {string} name Name of the strategy.
+     * @param {Function} fn Strategy method.
+     *
+     * @return {GenericSideEffect} Instance of side effect.
+     */
     addStrategy (name, fn) {
         this._strategies[name] = fn;
         return this;

@@ -5,6 +5,7 @@
  *
  * @class
  * @module BarLayer
+ * @extends BaseLayer
  */
 // @warn Pseudo class of BarLayer to generate docs. Real Bar layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible

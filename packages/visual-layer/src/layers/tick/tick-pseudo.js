@@ -5,6 +5,7 @@
  *
  * @class
  * @module TickLayer
+ * @extends BaseLayer
  */
 // @warn Pseudo class of TickLayer to generate docs. Real Tick layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible

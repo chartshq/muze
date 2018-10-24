@@ -80,9 +80,10 @@ export default class Env {
      * @public
      *
      * @param {Config} config Partial or full configuration of canvas.
+     * @param {}
      * @return {Env} Instance of the environment
      */
-    config () { /* pseudo funciton */ }
+    config () { /* pseudo function */ }
 
     /**
      *  Creates an instance of {@link Canvas}
