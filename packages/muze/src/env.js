@@ -80,18 +80,15 @@ export default class Env {
      * @public
      *
      * @param {Object} config Partial or full configuration of canvas.
-     * @param {Object} config.axes Axis configuration.
-     * @param {Object} config.axes.x X Axis configuration.
-     * @param {string} config.axes.x.name Name which will be displayed below or top of the x axis.
-     * @param {string} config.axes.x.interpolator Scale interpolator method. This decides the type of scale to be
-     * created. Supported values: - [pow, log].
-     * @param {number} config.axes.x.numberOfTicks Sets the number of ticks.
-     * Note:- This is just a hint. It may show more number of ticks than which is specified.
-     * @param {number} config.axes.x.nice Extends the domain so that it starts and ends on nice round values.
-     * @param {boolean} config.axes.x.show Whether to display the axis or not.
-     * @param {boolean} config.axes.x.showAxisName Whether to show the axis name or not.
-     * @param {Function} config.axes.x.tickFormat Function which returns formatted tick values.
-     *
+     * @param {AxisConfig} config.axes.x X Axis configuration {@link AxisConfig}.
+     * @param {AxisConfig} config.axes.y Y Axis configuration {@link AxisConfig}.
+     * @param {GridLineConfig} config.gridLines Grid line configuration {@link GridLineConfig}.
+     * @param {GridBandConfig} config.gridBands Grid band configuration {@link GridBandConfig}.
+     * @param {GlobalLegendConfig} config.legend Legend configuration {@link GlobalLegendConfig}.
+     * @param {InteractionConfig} config.interaction Interaction configuration {@link InteractionConfig}
+     * @param {Object} config.autoGroupBy Group by configuration.
+     * @param {boolean} config.autoGroupBy.disabled If true, then disables automatic group by of datamodel in the
+     * chart. By default, set to false.
      * @return {Env} Instance of the environment
      */
     config () { /* pseudo function */ }
