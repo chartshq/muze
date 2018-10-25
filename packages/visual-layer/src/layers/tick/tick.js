@@ -13,7 +13,7 @@ export default class TickLayer extends PointLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TickLayer
      */
     static defaultConfig () {
@@ -24,7 +24,7 @@ export default class TickLayer extends PointLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TickLayer
      */
     static formalName () {
@@ -35,7 +35,7 @@ export default class TickLayer extends PointLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TickLayer
      */
     static drawFn () {
@@ -45,7 +45,7 @@ export default class TickLayer extends PointLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof TickLayer
      */
     elemType () {

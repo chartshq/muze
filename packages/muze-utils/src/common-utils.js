@@ -393,11 +393,10 @@ const unique = arr => ([...new Set(arr)]);
 
 /**
  * DESCRIPTION TODO
- * @todo
  *
  * @export
  * @param {Object} graph graph whose dependency order has to be generated
- * @return {Object} @todo
+ * @return {Object}
  */
 const getDependencyOrder = (graph) => {
     const dependencyOrder = [];
@@ -405,11 +404,10 @@ const getDependencyOrder = (graph) => {
     const keys = Object.keys(graph);
     /**
      * DESCRIPTION TODO
-     * @todo
      *
      * @export
-     * @param {Object} name @todo
-     * @return {Object} @todo
+     * @param {Object} name
+     * @return {Object}
      */
     const visit = (name) => {
         if (dependencyOrder.length === keys.length) {
@@ -628,7 +626,7 @@ const intSanitizer = (val) => {
  * @param {Object} holder an empty object on which the getters and setters will be mounted
  * @param {Object} options options config based on which the getters and setters are determined.
  * @param {Hyperdis} model optional model to attach the property. If not sent new moel is created.
- * @return {Array} @todo
+ * @return {Array}
  */
 const transactor = (holder, options, model) => {
     let conf;
@@ -763,7 +761,7 @@ const getArraySum = (arr, prop) => arr.reduce((total, elem) => {
  *
  * @param {*} arr1
  * @param {*} arr2
- * @returns
+ *
  */
 const arraysEqual = (arr1, arr2) => {
     if (arr1.length !== arr2.length) { return false; }
@@ -1061,7 +1059,7 @@ const detectColor = (col) => {
  *
  * @param {*} model
  * @param {*} propModel
- * @returns
+ *
  */
 const filterPropagationModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
@@ -1125,7 +1123,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  *
  * @param {*} dataModel
  * @param {*} criteria
- * @returns
+ *
  */
 const getDataModelFromRange = (dataModel, criteria, mode) => {
     if (criteria === null) {
@@ -1152,7 +1150,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
  *
  * @param {*} dataModel
  * @param {*} identifiers
- * @returns
+ *
  */
 const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
@@ -1208,7 +1206,7 @@ const isValidValue = value => !isNaN(value) && value !== -Infinity && value !== 
  *
  * @param {*} obj
  * @param {*} fields
- * @returns
+ *
  */
 const getObjProp = (obj, ...fields) => {
     if (obj === undefined || obj === null) {
@@ -1228,7 +1226,7 @@ const getObjProp = (obj, ...fields) => {
  *
  *
  * @param {*} str
- * @returns
+ *
  */
 const escapeHTML = (str) => {
     const htmlEscapes = {

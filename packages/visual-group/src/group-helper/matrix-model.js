@@ -7,7 +7,7 @@ import { retriveDomainFromData } from './group-utils';
  *
  * @param {*} fields1
  * @param {*} [fields2=[]]
- * @return
+ *
  */
 const getFieldNames = (fields1, fields2 = []) => [fields1, fields2].map(fields => fields.reduce((acc, d) => {
     acc = [...acc, ...d.getMembers()];
@@ -30,7 +30,7 @@ const createSelectedDataModel = (datamodel, fieldNames, fieldValues) =>
  *
  * @param {*} facets
  * @param {*} keyArray
- * @return
+ *
  */
 const uniqueKeyGenerator = (keyArray, context, depth = 0, val = []) => {
     const {

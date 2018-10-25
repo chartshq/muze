@@ -37,7 +37,7 @@ export default class LineLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof LineLayer
      */
     static formalName () {
@@ -47,7 +47,7 @@ export default class LineLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof LineLayer
      */
     elemType () {
@@ -68,7 +68,7 @@ export default class LineLayer extends BaseLayer {
      * @static
      * @param {*} conf
      * @param {*} userConf
-     * @returns
+     *
      * @memberof LineLayer
      */
     static defaultPolicy (conf, userConf) {

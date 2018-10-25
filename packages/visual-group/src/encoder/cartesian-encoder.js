@@ -18,7 +18,7 @@ export default class CartesianEncoder extends VisualEncoder {
     /**
      *
      *
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     static type () {
@@ -30,7 +30,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} axesCreators
      * @param {*} fieldInfo
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     createAxis (axesCreators, fieldInfo) {
@@ -78,7 +78,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      *
      * @param {*} fields
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getFacetsAndProjections (fields, type) {
@@ -159,7 +159,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} datamodel
      * @param {*} config
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     fieldSanitizer (datamodel, config) {
@@ -170,7 +170,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      *
      * @param {*} datamodel
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getRetinalFieldsDomain (dataModels, encoding) {
@@ -211,7 +211,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} fields
      * @param {*} userLayerConfig
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getLayerConfig (fields, userLayerConfig) {

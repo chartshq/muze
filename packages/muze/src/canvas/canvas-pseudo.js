@@ -306,7 +306,6 @@ export default class {
     /**
      * Sets or gets the alias of the canvas. Alias is a name by which the canvas can be referred.
      *
-     * @public
      * When setter
      * @param {string} alias Name of the alias.
      *
@@ -315,6 +314,8 @@ export default class {
      * When getter
      *
      * @return {string} Alias of canvas.
+     *
+     * @public
      */
     alias () { /* pseudo definition */ }
 }

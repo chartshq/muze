@@ -114,7 +114,7 @@ export default class SimpleAxis {
      *
      *
      * @param {*} d
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     domain (...domain) {
@@ -132,7 +132,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     dependencies () {
@@ -142,7 +142,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     createScale (config) {
@@ -175,7 +175,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     createAxis (config) {
@@ -209,7 +209,7 @@ export default class SimpleAxis {
      *
      * @param {*} axisTickLabels
      * @param {*} labelWidth
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     setRotationConfig (axisTickLabels, labelWidth) {
@@ -229,7 +229,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     adjustRange () {
@@ -246,7 +246,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {
@@ -341,7 +341,7 @@ export default class SimpleAxis {
      *
      *
      * @param {*} domain
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     updateDomainCache (domain) {
@@ -368,7 +368,7 @@ export default class SimpleAxis {
      *
      *
      * @param {*} tickValues
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     setTickValues () {
@@ -451,7 +451,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     remove () {
@@ -473,7 +473,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     isReverse () {
@@ -484,7 +484,7 @@ export default class SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getPixelToValueRatio () {

@@ -90,7 +90,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @param {*} params
-     * @returns
+     *
      * @memberof Canvas
      */
     alias (...params) {
@@ -127,7 +127,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof Canvas
      */
     static formalName () {
@@ -186,7 +186,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @param {*} lifeCycles
-     * @returns
+     *
      * @memberof Canvas
      */
     lifeCycle (lifeCycles) {
@@ -215,7 +215,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @param {*} eventName
-     * @returns
+     *
      * @memberof Canvas
      */
     once (eventName) {
@@ -254,7 +254,7 @@ export default class Canvas extends TransactionSupport {
     /**
      *
      *
-     * @returns
+     *
      * @memberof Canvas
      */
     xAxes () {
@@ -264,7 +264,7 @@ export default class Canvas extends TransactionSupport {
     /**
      *
      *
-     * @returns
+     *
      * @memberof Canvas
      */
     yAxes () {
@@ -274,7 +274,7 @@ export default class Canvas extends TransactionSupport {
     /**
      *
      *
-     * @returns
+     *
      * @memberof Canvas
      */
     getRetinalAxes () {

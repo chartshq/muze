@@ -34,7 +34,7 @@ export const getTickFormatter = (tickFormat, numberFormat) => {
 /**
  *
  *
- * @returns
+ *
  * @memberof SimpleAxis
  */
 export const getTickLabelInfo = (context) => {
@@ -82,7 +82,7 @@ export const getTickLabelInfo = (context) => {
 /**
  *
  *
- * @returns
+ *
  * @memberof SimpleAxis
  */
 export const computeAxisDimensions = (context) => {
@@ -159,7 +159,7 @@ export const setOffset = (context) => {
  * @param {*} timeDiff
  * @param {*} range
  * @param {*} domain
- * @returns
+ *
  */
 const getAxisOffset = (timeDiff, range, domain) => {
     const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
@@ -210,7 +210,7 @@ export const registerChangeListeners = (context) => {
  * @param {*} axisDimensions
  * @param {*} config
  * @param {*} range
- * @returns
+ *
  */
 export const getHorizontalAxisSpace = (context, axisDimensions, config, range) => {
     let width;
@@ -256,7 +256,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, config, range) =
  * @param {*} axisDimensions
  * @param {*} config
  * @param {*} range
- * @returns
+ *
  */
 export const getVerticalAxisSpace = (context, axisDimensions, config) => {
     let height;

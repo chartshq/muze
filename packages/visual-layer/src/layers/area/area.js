@@ -40,7 +40,7 @@ export default class AreaLayer extends LineLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof AreaLayer
      */
     static formalName () {

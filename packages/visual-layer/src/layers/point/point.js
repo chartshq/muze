@@ -45,7 +45,7 @@ export default class PointLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof PointLayer
      */
     elemType () {
@@ -76,7 +76,7 @@ export default class PointLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof PointLayer
      */
     static formalName () {
@@ -87,7 +87,7 @@ export default class PointLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof PointLayer
      */
     static drawFn () {

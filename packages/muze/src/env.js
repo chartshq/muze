@@ -129,7 +129,6 @@ export default class Env {
      *      }
      * });
      * ```
-     * @public
      *
      * When called as a setter
      * @param {Object} override Key value pair where keys are the name of the cells user with to override. Allowed keys
@@ -154,6 +153,8 @@ export default class Env {
      *              BlankCell: BlankCell
      *          }
      *      ```
+     *
+     * @public
      */
     cellRegistry () { /* pseudo function */ }
 
@@ -200,8 +201,6 @@ export default class Env {
      *  }])
      * ```
      *
-     * @public
-     *
      * When called as a setter
      * @param {Object} override Key value pair where keys are the name of the cells user with to override. Allowed keys
      *      are
@@ -230,6 +229,8 @@ export default class Env {
      *              Tick: TickLayer
      *          }
      *      ```
+     *
+     * @public
      */
     layerRegistry () { /* pseudo function */ }
 }

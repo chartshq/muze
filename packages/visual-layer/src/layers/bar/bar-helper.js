@@ -10,7 +10,7 @@ import { getLayerColor, positionPoints, getIndividualClassName } from '../../hel
  * @param {*} fieldInfo
  * @param {*} config
  * @param {*} data
- * @returns
+ *
  */
 const resolveDimByField = (type, axesInfo, config, data) => {
     const spaceType = type === 'x' ? 'width' : 'height';
@@ -99,7 +99,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
  * @param {*} data
  * @param {*} config
  * @param {*} axes
- * @returns
+ *
  */
 const resolveDimensions = (data, config, axes) => {
     const axesInfo = {

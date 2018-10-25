@@ -37,7 +37,7 @@ const setLabelRotationForAxes = (context) => {
  *
  * @param {*} context
  * @param {*} mount
- * @returns
+ *
  */
 const getSkeletons = (mount, layoutConfig, measurement) => {
     const {
@@ -231,7 +231,7 @@ const shiftHeaders = (config, shifter, measurement, mount) => {
  * @param {*} mountPoint
  * @param {*} measurement
  * @param {*} classPrefix
- * @returns
+ *
  */
 const prepareGridContainer = (mountPoint, measurement, classPrefix, alias) => {
     if (!mountPoint) {

@@ -45,7 +45,7 @@ export default class ColorAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static defaultConfig () {
@@ -56,7 +56,7 @@ export default class ColorAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static type () {
@@ -67,7 +67,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} colorStrategy
-     * @returns
+     *
      * @memberof ColorAxis
      */
     createScale (colorStrategy) {
@@ -87,7 +87,7 @@ export default class ColorAxis {
      * @param {*} domainType
      * @param {*} rangeType
      * @param {*} schemeType
-     * @returns
+     *
      * @memberof ColorAxis
      */
     setColorStrategy (domainType, rangeType, schemeType) {
@@ -100,7 +100,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getHslString (hslColorArray) {
@@ -110,7 +110,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getColor (domainVal) {
@@ -120,7 +120,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
@@ -142,7 +142,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} [domain=[]]
-     * @returns
+     *
      * @memberof ColorAxis
      */
     updateDomain (domain = []) {

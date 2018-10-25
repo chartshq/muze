@@ -28,7 +28,7 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof DiscreteLegend
      */
     static type () {
@@ -39,7 +39,7 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      *
      * @param {*} scale
-     * @returns
+     *
      * @memberof DiscreteLegend
      */
     dataFromScale (scale) {

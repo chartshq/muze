@@ -15,8 +15,6 @@ export default class {
      * Sets the configuration of a layer.Configuration includes encoding and other configuration such as transform,
      * transition, className, etc.
      *
-     * @public
-     *
      * When used as setter,
      * @param {Object} config Layer configuration
      * @param {string} config.interpolate Interpolator which determines how to interpolate between two points.
@@ -52,6 +50,8 @@ export default class {
      *
      * When used as getter,
      * @return {Object} Layer configuration.
+     *
+     * @public
      */
     config () { }
 }

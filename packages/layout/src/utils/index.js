@@ -9,7 +9,7 @@ const nest = Symbols.nest;
  *
  *
  * @param {*} isTransposed
- * @returns
+ *
  */
 const getMeasureInfo = (isTransposed) => {
     if (isTransposed) {
@@ -29,7 +29,7 @@ const getMeasureInfo = (isTransposed) => {
  *
  * @param {*} i
  * @param {*} page
- * @returns
+ *
  */
 const findInPage = (i, page) => {
     let count = 0;

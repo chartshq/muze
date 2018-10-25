@@ -8,7 +8,7 @@ import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
  *
  *
  * @param {*} context
- * @returns
+ *
  */
 export const prepareLayout = (layout, components, config, measurement) => {
     const {
@@ -40,7 +40,7 @@ export const prepareLayout = (layout, components, config, measurement) => {
  *
  * @param {*} context
  * @param {*} mount
- * @returns
+ *
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());

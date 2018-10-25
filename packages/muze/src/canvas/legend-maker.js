@@ -8,7 +8,7 @@ import {
  *
  * @param {*} legendConfig
  * @param {*} canvases
- * @returns
+ *
  */
 export const legendCreator = (canvas) => {
     let LegendCls;
@@ -42,7 +42,7 @@ export const legendCreator = (canvas) => {
  * @param {*} canvases
  * @param {*} measurement
  * @param {*} prevLegends
- * @returns
+ *
  */
 export const legendInitializer = (legendConfig, canvas, measurement, prevLegends) => {
     const legends = [];
@@ -115,7 +115,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
  * @param {*} legendConfig
  * @param {*} availableHeight
  * @param {*} availableWidth
- * @returns
+ *
  */
 export const getLegendSpace = (legends, legendConfig, availableHeight, availableWidth) => {
     const legendMeasures = legends.map(legendInfo => legendInfo.legend.measurement());
@@ -154,7 +154,7 @@ export const getLegendSpace = (legends, legendConfig, availableHeight, available
  *
  * @param {*} context
  * @param {*} headerHeight
- * @returns
+ *
  */
 export const createLegend = (context, headerHeight, height, width) => {
     const measurement = {

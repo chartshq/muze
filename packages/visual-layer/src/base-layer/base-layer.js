@@ -37,10 +37,9 @@ import { defaultOptions } from './default-options';
  * visuals
  *
  * @public
- * @module BaseLayer
  * @class
+ * @module BaseLayer
  * @namespace Muze
- *
  */
 export default class BaseLayer extends SimpleLayer {
 
@@ -172,7 +171,6 @@ export default class BaseLayer extends SimpleLayer {
      * layers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set
      * as the alias name.
      *
-     * @public
      *
      * If used as setter
      * @param  {string} alias Name of the alias
@@ -180,6 +178,8 @@ export default class BaseLayer extends SimpleLayer {
      *
      * If used as getter
      * @return {string} Alias of the current layer
+     *
+     * @public
      */
     alias (...params) {
         if (params.length) {
@@ -326,7 +326,7 @@ export default class BaseLayer extends SimpleLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BaseLayer
      */
     transformType (...transformType) {
@@ -348,7 +348,7 @@ export default class BaseLayer extends SimpleLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BaseLayer
      */
     elemType () {
@@ -387,7 +387,7 @@ export default class BaseLayer extends SimpleLayer {
      *
      *
      * @param {*} dataProps
-     * @returns
+     *
      * @memberof BaseLayer
      */
     dataProps (...dataProps) {
@@ -403,7 +403,7 @@ export default class BaseLayer extends SimpleLayer {
      *
      * @param {*} data
      * @param {*} id
-     * @returns
+     *
      * @memberof BaseLayer
      */
     getIdentifiersFromData (data) {

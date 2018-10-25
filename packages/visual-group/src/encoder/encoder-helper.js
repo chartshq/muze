@@ -11,7 +11,7 @@ import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/const
  * @param {*} axisInfo
  * @param {*} field
  * @param {*} axesCreators
- * @return
+ *
  */
 const getAxisConfig = (axisInfo, field, axesCreators) => {
     let axisOrientation;
@@ -52,7 +52,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
  * @param {*} axisInfo
  * @param {*} field
  * @param {*} axesCreators
- * @return
+ *
  */
 const createSimpleAxis = (axisConfig, field, axesCreators) => {
     const { labelManager } = axesCreators;
@@ -68,7 +68,7 @@ const createSimpleAxis = (axisConfig, field, axesCreators) => {
  * @param {*} fieldInfo
  * @param {*} axesCreators
  * @param {*} groupAxes
- * @return
+ *
  */
 export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes) => {
     let axisKey;
@@ -160,7 +160,7 @@ export const getDefaultMark = (colFieldType, rowFieldType) => {
  *
  * @param {*} axesCreators
  * @param {*} [fieldInfo=[]]
- * @return
+ *
  */
 export const createRetinalAxis = (axesCreators, fieldProps = {}) => {
     const { axisType, fieldsConfig } = axesCreators;
@@ -178,7 +178,7 @@ export const createRetinalAxis = (axesCreators, fieldProps = {}) => {
  *
  * @param {*} arr
  * @param {*} val
- * @return
+ *
  */
 export const getIndex = (arr, val) => {
     let i = 0;
@@ -199,7 +199,7 @@ export const getIndex = (arr, val) => {
  * @param {*} colFields
  * @param {*} rowFields
  * @param {*} userLayerConfig
- * @return
+ *
  * @memberof CartesianEncoder
  */
 export const getLayerConfFromFields = (colFields, rowFields, userLayerConfig) => userLayerConfig.filter((conf) => {

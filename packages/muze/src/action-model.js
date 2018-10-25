@@ -166,7 +166,7 @@ class ActionModel {
      *   }
      * ```
      *
-     * @returns {ActionModel} Instance of action model.
+     * @return {ActionModel} Instance of action model.
      */
     registerPhysicalBehaviouralMap (map) {
         const canvases = this._registrableComponents;

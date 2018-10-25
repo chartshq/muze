@@ -106,7 +106,7 @@ export default class SimpleVariable extends Variable {
     /**
      * Returns the minimum consecutive difference between the data values of this variable.
      *
-     * @returns {number} Minimum consecutive difference.
+     * @return {number} Minimum consecutive difference.
      */
     getMinDiff () {
         const fieldSpace = this.data().getFieldspace();

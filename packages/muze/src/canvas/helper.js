@@ -8,7 +8,7 @@ import { canvasOptions } from './local-options';
  *  - Is it even required ?
  *  - Reactive to source (canvas) streaming ?
  * @param {*} context Canvas instance
- * @return {Object.fArray>} Arrays of Title, visualGroup, Legend
+ * @return {Object.<Array>} Arrays of Title, visualGroup, Legend
  */
 export const initCanvas = (context) => {
     const reg = context._registry.components;

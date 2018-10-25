@@ -9,7 +9,7 @@ export default class BandAxis extends SimpleAxis {
      *
      *
      * @param {*} range
-     * @returns
+     *
      * @memberof BandAxis
      */
     createScale (range) {
@@ -25,7 +25,7 @@ export default class BandAxis extends SimpleAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof BandAxis
      */
     static type () {
@@ -75,7 +75,7 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BandAxis
      */
     getUnitWidth () {
@@ -85,7 +85,7 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BandAxis
      */
     setTickConfig () {
@@ -127,7 +127,7 @@ export default class BandAxis extends SimpleAxis {
      *
      * @param {*} axisTickLabels
      * @param {*} labelWidth
-     * @returns
+     *
      * @memberof BandAxis
      */
     setRotationConfig (axisTickLabels, labelWidth) {
@@ -153,7 +153,7 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BandAxis
      */
     getTickValues () {
@@ -163,7 +163,7 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {

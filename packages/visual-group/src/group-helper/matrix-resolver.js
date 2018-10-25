@@ -250,7 +250,7 @@ export default class MatrixResolver {
      *
      *
      * @param {*} facets
-     * @return
+     *
      * @memberof MatrixResolver
      */
     facets (...facets) {
@@ -267,7 +267,7 @@ export default class MatrixResolver {
      *
      *
      * @param {*} projections
-     * @return
+     *
      * @memberof MatrixResolver
      */
     projections (...projections) {
@@ -285,7 +285,7 @@ export default class MatrixResolver {
      *
      * @param {*} config
      * @param {*} layerConfig
-     * @return
+     *
      * @memberof MatrixResolver
      */
     optionalProjections (config, layerConfig) {
@@ -402,7 +402,7 @@ export default class MatrixResolver {
     /**
      *
      *
-     * @return
+     *
      * @memberof MatrixResolver
      */
     getAllFields () {
@@ -508,7 +508,7 @@ export default class MatrixResolver {
     /**
      *
      *
-     * @return
+     *
      * @memberof MatrixResolver
      */
     getRetinalAxes () {
@@ -529,7 +529,7 @@ export default class MatrixResolver {
      *
      *
      * @param {*} type
-     * @return
+     *
      * @memberof MatrixResolver
      */
     getSimpleAxes (type) {
@@ -583,7 +583,7 @@ export default class MatrixResolver {
      *
      * @param {*} placeholders
      * @param {*} fieldNames
-     * @return
+     *
      * @memberof MatrixResolver
      */
     createHeaders (placeholders, fieldNames, config) {
@@ -650,7 +650,7 @@ export default class MatrixResolver {
      * @param {*} config
      * @param {*} componentRegistry
      * @param {*} encoders
-     * @return
+     *
      * @memberof MatrixResolver
      */
     getMatrices (datamodel, config, componentRegistry, encoders) {

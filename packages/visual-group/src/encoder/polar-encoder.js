@@ -16,7 +16,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @param {*} axesCreators
      * @param {*} fieldInfo
-     * @return
+     *
      * @memberof PolarEncoder
      */
     createAxis (axesCreators, fieldInfo) {
@@ -48,7 +48,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      *
      * @param {*} fields
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getFacetsAndProjections (fields) {
@@ -90,7 +90,7 @@ export default class PolarEncoder extends VisualEncoder {
     /**
      *
      *
-     * @return
+     *
      * @memberof PolarEncoder
      */
     setCommonDomain () {
@@ -101,7 +101,7 @@ export default class PolarEncoder extends VisualEncoder {
     /**
      *
      *
-     * @return
+     *
      * @memberof PolarEncoder
      */
     static type () {
@@ -195,7 +195,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @param {*} fields
      * @param {*} userLayerConfig
-     * @return
+     *
      * @memberof PolarEncoder
      */
     getLayerConfig (fields, userLayerConfig) {
@@ -231,7 +231,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      *
      * @param {*} layerArray
-     * @returns
+     *
      * @memberof PolarEncoder
      */
     serializeLayerConfig (layerArray) {

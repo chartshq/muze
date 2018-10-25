@@ -35,7 +35,7 @@ const updateCells = (resolver, facets, geomCell) => {
  * @param {*} datamodel
  * @param {*} fieldInfo
  * @param {*} facets
- * @return
+ *
  */
 export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     const {
@@ -196,7 +196,7 @@ const createTextCells = (selection, headers, cells, labelManager) => createSelec
  * @param {*} selectionObj
  * @param {*} cells
  * @param {*} labelManager
- * @return
+ *
  */
 const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const {

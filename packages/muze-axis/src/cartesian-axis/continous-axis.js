@@ -23,7 +23,7 @@ export default class ContinousAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     createScale (config) {
@@ -74,7 +74,7 @@ export default class ContinousAxis extends SimpleAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ContinousAxis
      */
     static type () {
@@ -90,7 +90,7 @@ export default class ContinousAxis extends SimpleAxis {
  /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {
@@ -108,7 +108,7 @@ export default class ContinousAxis extends SimpleAxis {
      *
      *
      * @param {*} d
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     domain (domain) {
@@ -166,7 +166,7 @@ export default class ContinousAxis extends SimpleAxis {
      *
      *
      * @param {*} tickValues
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     setTickValues () {
@@ -186,7 +186,7 @@ export default class ContinousAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickValues () {

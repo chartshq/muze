@@ -11,7 +11,7 @@ import {
  *
  *
  * @param {*} str
- * @returns
+ *
  */
 const checkPath = (str) => {
     if (/^[mzlhvcsqta]\s*[-+.0-9][^mlhvzcsqta]+/i.test(str) && /[\dz]$/i.test(str) && str.length > 4) {

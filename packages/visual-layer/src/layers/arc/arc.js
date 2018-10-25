@@ -68,7 +68,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ArcLayer
      */
     static formalName () {
@@ -78,7 +78,7 @@ export default class ArcLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof ArcLayer
      */
     elemType () {
@@ -203,7 +203,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @param {*} set
-     * @returns
+     *
      * @memberof ArcLayer
      */
     getPlotElementsFromSet (set) {
@@ -315,7 +315,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @param {*} identifiers
-     * @returns
+     *
      * @memberof BaseLayer
      */
     getPointsFromIdentifiers (identifiers) {

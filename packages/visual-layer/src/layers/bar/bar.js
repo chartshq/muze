@@ -51,7 +51,7 @@ export default class BarLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BarLayer
      */
     elemType () {
@@ -62,7 +62,7 @@ export default class BarLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof BarLayer
      */
     static formalName () {
@@ -83,7 +83,7 @@ export default class BarLayer extends BaseLayer {
      * @static
      * @param {*} conf
      * @param {*} userConf
-     * @returns
+     *
      * @memberof BarLayer
      */
     static defaultPolicy (conf, userConf) {
@@ -103,7 +103,7 @@ export default class BarLayer extends BaseLayer {
      *
      * @param {*} data
      * @param {*} fieldsConfig
-     * @returns
+     *
      * @memberof BarLayer
      */
     calculateDomainFromData (data, encodingFieldInf, fieldsConfig) {
@@ -188,7 +188,7 @@ export default class BarLayer extends BaseLayer {
      *
      * @param {*} normalizedData
      * @param {*} keys
-     * @returns
+     *
      * @memberof BarLayer
      */
     generateDataPoints (normalizedData, keys) {

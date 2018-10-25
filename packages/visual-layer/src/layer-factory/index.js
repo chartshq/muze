@@ -86,9 +86,12 @@ const layerFactory = (() => {
          *
          * @param {string} layerType Mark type of the new composite layer.
          * @param {Array} layerDefs Layer definitions of the composite layer.
+         *
+         * @return {LayerFactory} Instance of layerFactory
          */
         composeLayers: (layerType, layerDefs) => {
             compositeLayers[layerType] = layerDefs;
+            return layerFactory;
         },
         sanitizeLayerConfig: (layerDef) => {
             const newConf = mergeRecursive({}, layerDef);

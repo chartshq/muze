@@ -75,7 +75,7 @@ export default class SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof SimpleLegend
      */
     static defaultConfig () {
@@ -86,7 +86,7 @@ export default class SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof SimpleLegend
      */
     static defaultMeasurement () {
@@ -109,7 +109,7 @@ export default class SimpleLegend {
     /**
      *
      *
-     * @return
+     *
      * @memberof Legend
      */
     elemType () {
@@ -127,7 +127,7 @@ export default class SimpleLegend {
     /**
      *
      *
-     * @return
+     *
      * @memberof Legend
      */
     mount (...params) {
@@ -144,7 +144,7 @@ export default class SimpleLegend {
      *
      * @param {*} effPadding
      * @param {*} align
-     * @return
+     *
      * @memberof Legend
      */
     getLabelSpaces () {
@@ -287,7 +287,7 @@ export default class SimpleLegend {
      *
      *
      * @param {*} data
-     * @returns
+     *
      * @memberof StepLegend
      */
     getCriteriaFromData (data) {

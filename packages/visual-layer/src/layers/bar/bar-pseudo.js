@@ -14,8 +14,6 @@ export default class {
      * Sets the configuration of a layer.Configuration includes encoding and other configuration such as transform,
      * transition, className, etc.
      *
-     * @public
-     *
      * When used as setter,
      * @param {Object} config Layer configuration
      * @param {string} config.className Applies a class name to the bar elements.
@@ -41,6 +39,7 @@ export default class {
      *
      * When used as getter,
      * @return {Object} Layer configuration.
+     * @public
      */
     config () { }
 }

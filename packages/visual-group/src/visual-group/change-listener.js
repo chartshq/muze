@@ -40,7 +40,7 @@ const setMatrixInstances = (context, placeholder) => {
  *
  *
  * @param {*} context
- * @returns
+ *
  */
 export const setupChangeListeners = (context) => {
     context.store().registerImmediateListener([...Object.keys(localOptions), DATA_UPDATE_COUNTER], (...params) => {

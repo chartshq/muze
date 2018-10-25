@@ -25,7 +25,7 @@ export const share = (...vars) => new ComposedVars(...vars.map(variable => new S
  *
  *
  * @param {*} node
- * @returns
+ *
  */
 function treeShakeNode (node) {
     if (node.nodeType !== Node.ELEMENT_NODE) { return; }

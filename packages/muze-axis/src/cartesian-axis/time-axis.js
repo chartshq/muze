@@ -23,7 +23,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @param {*} range
-     * @returns
+     *
      * @memberof TimeAxis
      */
     createScale (range) {
@@ -37,7 +37,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TimeAxis
      */
     static type () {
@@ -47,7 +47,7 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BandAxis
      */
     setTickConfig () {
@@ -73,7 +73,7 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     createAxis (config) {
@@ -101,7 +101,7 @@ export default class TimeAxis extends SimpleAxis {
      /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {
@@ -118,7 +118,7 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof TimeAxis
      */
     getTickValues () {
@@ -129,7 +129,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @param {*} diff
-     * @returns
+     *
      * @memberof TimeAxis
      */
     minDiff (diff) {
@@ -142,7 +142,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      * @param {*} axisTickLabels
      * @param {*} labelWidth
-     * @returns
+     *
      * @memberof BandAxis
      */
     setRotationConfig (axisTickLabels, labelWidth) {
@@ -168,7 +168,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @param {*} d
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     domain (domain) {

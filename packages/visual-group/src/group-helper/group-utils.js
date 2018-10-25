@@ -84,7 +84,7 @@ export const getCellKey = (rowId, columnId) => `cell-${rowId}-${columnId}`;
  *
  *
  * @param {*} config
- * @return
+ *
  */
 export const extractUnitConfig = (config) => {
     const unitConfig = {};
@@ -104,7 +104,7 @@ export const extractUnitConfig = (config) => {
  * @param {*} headers
  * @param {*} index
  * @param {*} rowLength
- * @return
+ *
  * @memberof MatrixResolver
  */
 export const getHeaderText = (headers, index, rowLength) => {
@@ -129,7 +129,7 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @param {*} fieldHeaders
  * @param {*} TextCell
  * @param {*} labelManager
- * @return
+ *
  */
 export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
     const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({ type: HEADER }, { labelManager })
@@ -143,7 +143,7 @@ export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
  *
  * @param {*} variable
  * @param {*} allFields
- * @return
+ *
  */
 export const findInGroup = (variable, allFields) => {
     let channel = null;
@@ -205,7 +205,7 @@ export const getAxisType = (fieldsConfig, field) => {
  *
  * @param {*} datamodel
  * @param {*} fieldName
- * @return
+ *
  */
 export const retriveDomainFromData = (datamodel, fieldName) => {
     const field = datamodel.getFieldspace().fields.find(d => d._ref.name === fieldName.toString());
@@ -250,7 +250,7 @@ export const mutateAxesFromMap = (cacheMaps, axes) => {
  *
  *
  * @param {*} layers
- * @return
+ *
  */
 export const getEncoder = (layers) => {
     let encoder = new CartesianEncoder();
@@ -268,7 +268,7 @@ export const getEncoder = (layers) => {
  * @param {*} type
  * @param {*} fields
  * @param {*} userAxisFromConfig
- * @return
+ *
  */
 export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
     let axisFrom = userAxisFromConfig[type];
@@ -309,7 +309,7 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
  * @param {*} type
  * @param {*} fields
  * @param {*} layers
- * @return
+ *
  * @memberof MatrixResolver
  */
 export const setFacetsAndProjections = (context, fieldInfo, encoder) => {

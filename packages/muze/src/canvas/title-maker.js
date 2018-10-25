@@ -5,7 +5,7 @@ import { escapeHTML } from 'muze-utils';
  *
  *
  * @param {*} rawContent
- * @returns
+ *
  */
 const resolveTitleSubTitleContent = (rawContent) => {
     if (typeof rawContent === 'function' && !rawContent._sanitize) {
@@ -21,7 +21,7 @@ const resolveTitleSubTitleContent = (rawContent) => {
  * @param {*} cellType
  * @param {*} labelManager
  * @param {*} prevCell
- * @returns
+ *
  */
 const headerCreator = (config, cellType, labelManager, prevCell) => {
     const {
@@ -44,7 +44,7 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
  * @param {*} type
  * @param {*} labelManager
  * @param {*} cell
- * @returns
+ *
  */
 const createHeading = (config, type, labelManager, prevCell) => {
     if (!config) { return ''; }

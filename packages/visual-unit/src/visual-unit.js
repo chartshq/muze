@@ -48,7 +48,7 @@ const FORMAL_NAME = 'unit';
 
 /**
  * A hierarchical component of renderer which manages multiple layers. This logical
- * module is responsible for layouting layers, attach axis with them, resolving conflicts of layers.
+ * module is responsible fo\r layouting layers, attach axis with them, resolving conflicts of layers.
  *
  * Basic unit implementaiton
  * @class VisualUnit
@@ -273,7 +273,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} layerDef
-     * @returns
+     *
      * @memberof VisualUnit
      */
     addLayer (layerDef) {
@@ -310,7 +310,7 @@ export default class VisualUnit {
     /**
      *
      *
-     * @returns
+     *
      * @memberof VisualUnit
      */
     remove () {
@@ -331,7 +331,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} identifiers
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getDataModelFromIdentifiers (identifiers, mode, parentModel) {
@@ -345,7 +345,7 @@ export default class VisualUnit {
     /**
      *
      *
-     * @returns
+     *
      * @memberof VisualUnit
      */
     resetData () {
@@ -356,7 +356,7 @@ export default class VisualUnit {
     /**
      *
      *
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getSourceInfo () {
@@ -371,7 +371,7 @@ export default class VisualUnit {
     /**
      *
      *
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getDefaultTargetContainer () {
@@ -383,7 +383,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} type
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getLayersByType (type) {
@@ -395,7 +395,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} name
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getLayerByName (name) {
@@ -407,7 +407,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} domain
-     * @returns
+     *
      * @memberof VisualUnit
      */
     updateAxisDomain (domain) {
@@ -504,7 +504,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} identifiers
-     * @returns
+     *
      * @memberof VisualUnit
      */
     getPlotPointsFromIdentifiers (identifiers, config = {}) {
@@ -532,7 +532,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} name
-     * @returns
+     *
      * @memberof VisualUnit
      */
     removeLayerByName (name) {
@@ -544,7 +544,7 @@ export default class VisualUnit {
      *
      *
      * @param {*} type
-     * @returns
+     *
      * @memberof VisualUnit
      */
     removeLayersByType (type) {

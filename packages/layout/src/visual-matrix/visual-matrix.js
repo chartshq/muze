@@ -53,13 +53,7 @@ export default class VisualMatrix {
         this._logicalSpace = this.setLogicalSpace();
     }
 
-    /**
-     *
-     *
-     * @param {*} params
-     * @returns
-     * @memberof VisualMatrix
-     */
+
     primaryMatrix (...params) {
         if (params.length) {
             return this;
@@ -67,13 +61,7 @@ export default class VisualMatrix {
         return this._primaryMatrix;
     }
 
-    /**
-     *
-     *
-     * @param {*} params
-     * @returns
-     * @memberof VisualMatrix
-     */
+
     secondaryMatrix (...params) {
         if (params.length) {
             return this;
@@ -81,13 +69,7 @@ export default class VisualMatrix {
         return this._secondaryMatrix;
     }
 
-    /**
-     *
-     *
-     * @param {*} params
-     * @returns
-     * @memberof VisualMatrix
-     */
+
     tree (...params) {
         if (params.length) {
             return this;
@@ -95,23 +77,12 @@ export default class VisualMatrix {
         return this._tree;
     }
 
-    /**
-     *
-     *
-     * @static
-     * @return
-     * @memberof VisualMatrix
-     */
+
     static defaultConfig () {
         return defaultConfig;
     }
 
-    /**
-     *
-     *
-     * @return
-     * @memberof VisualMatrix
-     */
+
     createTree () {
         const { tree, lastLevelKey } = createTree(this);
         this._lastLevelKey = lastLevelKey;
