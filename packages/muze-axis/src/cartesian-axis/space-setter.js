@@ -150,14 +150,15 @@ export const spaceSetter = (context, spaceConfig) => {
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
 
                 if (tickInterval < minTickSpace.width && rotation !== 0) {
-                // set smart ticks and rotation config
+                    // set smart ticks and rotation config
                     labelConfig.rotation = rotation === null ? -90 : rotation;
                     labelConfig.smartTicks = false;
 
-                // Ticks with overlapping height
+                    // Ticks with overlapping height
                     if (tickInterval < minTickSpace.height) {
                         heightForTicks = 0;
                         tickInterval = 0;
+                        context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                         context.range([minTickSpace.height / 2, availWidth - minTickSpace.height / 2]);
                     }
                 } else if (tickValues) {

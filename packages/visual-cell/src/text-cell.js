@@ -119,12 +119,11 @@ class TextCell extends SimpleCell {
         this._className = this._config.className ||
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
-
         this._dependencies.labelManager.setStyle(this._computedStyle);
-        const space = this._dependencies.labelManager.getOriSize('wv');
+        generateGetterSetters(this, PROPS[TEXT]);
+        const space = this._dependencies.labelManager.getOriSize('W');
         this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
 
-        generateGetterSetters(this, PROPS[TEXT]);
         setSmartText(this);
     }
 
@@ -248,6 +247,7 @@ class TextCell extends SimpleCell {
             const vAlign = verticalAlign || rotation ? 'middle' : 'top';
             const {
                 width,
+                height,
                 text
             } = this.smartText();
             const translation = {
@@ -264,7 +264,8 @@ class TextCell extends SimpleCell {
             // Apply styles
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
-            elem.style('transform', rotation ? `translate(0, ${translation[vAlign]}px) rotate(-90deg)` : '');
+            elem.style('transform', rotation ? `translate(${height / 2}px, 
+                ${translation[vAlign]}px) rotate(-90deg)` : '');
             elem.style(WIDTH, availWidth ? `${availWidth}px` : '100%');
             [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
                 elem.style(`padding-${type}`, `${margin[type]}px`);

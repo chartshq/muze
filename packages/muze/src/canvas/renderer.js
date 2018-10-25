@@ -15,8 +15,8 @@ const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].config().labels.rotation !== 0) {
-                    rotation = xAxes[i][j].config().labels.rotation;
+                if (xAxes[i][j].renderConfig().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].renderConfig().labels.rotation;
                     return;
                 }
             }
@@ -26,7 +26,7 @@ const setLabelRotationForAxes = (context) => {
     if (rotation) {
         xAxes.forEach((axes) => {
             axes.forEach((axis) => {
-                axis.config({ labels: { rotation, smartTicks: false } });
+                axis.renderConfig({ labels: { rotation } });
                 axis.smartTicks(axis.setTickConfig());
             });
         });

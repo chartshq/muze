@@ -54,16 +54,17 @@ d3.json('../data/movies.json', (data) => {
 
     window.crosstab = env
     .canvas()
-    .rows(['Distributor', 'Production_Budget'])
-    .columns(['Title'])
+    .columns(['Major_Genre', 'Production_Budget'])
+    .rows(['US_Gross'])
     .data(rootData)
     .minUnitWidth(10)
     // .title('Who let the dogs out when they came searching for the beast lurking')
     // .title('s')
     // .subtitle('Who let the dogs out when they came searching for the beast lurking Who let the dogs out when they came searching for the beast lurking')
-    // .color('Major_Genre')
+    .color('Major_Genre')
     // .subtitle('asd')
-    .width(420)
+    .width(1000)
+    // .width(740)
     // .detail(['Major_'])
     .height(150)
     .config({
@@ -72,19 +73,17 @@ d3.json('../data/movies.json', (data) => {
         },
         facet: {
             row: {
-                maxLines: 2
-                // verticalAlign: 'middle'
+                maxLines: 4,
+                verticalAlign: 'middle'
             }
         },
         axes: {
             x: {
-                padding: 0
+                // padding: 0
+                showAxisName: false
                 // tickValues: ['Slam']
                 // tickFormat: (v) => v/1000
             }
-        },
-        legend: {
-            position: 'left'
         }
 
         // axes: { y: { tickValues: [0, 5000000] } }

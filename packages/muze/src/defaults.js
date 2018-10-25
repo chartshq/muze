@@ -35,12 +35,12 @@ export const DEFAULT_CONFIG = {
     minHeight: 100,
     facet: {
         rows: {
-            minCharacters: 1
+            minCharacters: 3
         },
         columns: {
             maxLines: 2,
             verticalAlign: 'middle',
-            minCharacters: 3
+            minCharacters: 1
         }
     },
     border: {

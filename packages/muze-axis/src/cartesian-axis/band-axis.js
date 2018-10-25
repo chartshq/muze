@@ -60,7 +60,6 @@ export default class BandAxis extends SimpleAxis {
             labels: labelConfig
         });
         this.setTickConfig();
-        this.getTickSize();
         return this;
     }
 

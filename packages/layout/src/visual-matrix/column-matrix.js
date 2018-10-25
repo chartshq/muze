@@ -57,7 +57,11 @@ export default class ColumnVisualMatrix extends VisualMatrix {
 
         return this.viewableMatrix.map((matrixInst, i) => {
             const cellDimOptions = { matrixInst, maxWidths, maxHeights, matrixIndex: i, height };
-            const { heights, rowHeights, columnWidths } = this.getCellDimensions(cellDimOptions);
+            const {
+                heights,
+                rowHeights,
+                columnWidths
+            } = this.getCellDimensions(cellDimOptions);
             const heightMeasures = heights;
             const columnMeasures = [width, width];
 
@@ -135,7 +139,11 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             heightDist = heightDist.map(() => 0);
         } else {
             conditions.forEach((e) => {
-                heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
+                if (remainaingHeight / divider < maxHeights[e]) {
+                    heightDist[e] = 0;
+                } else {
+                    heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
+                }
             });
         }
         return heightDist;
@@ -192,7 +200,6 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             rHeights = rHeights.map((e, i) => Math.max(e, maxHeights[0][i]));
         }
         maxHeights.push(rHeights);
-
         for (let x = 0; x < maxHeights.length; x++) {
             maxHeights[x] = rHeights;
         }
