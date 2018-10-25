@@ -31,8 +31,8 @@ const setSmartText = (context) => {
      } = margin;
     const paddedHeight = top + bottom + _minSpacing.height;
     const paddedWidth = left + right + _minSpacing.width;
-    const availHeight = context.availHeight() - paddedWidth;
-    const availWidth = context.availWidth() - paddedHeight;
+    const availHeight = context.availHeight() - paddedHeight;
+    const availWidth = context.availWidth() - paddedWidth;
     const labelManager = context.dependencies().labelManager;
 
     labelManager.setStyle(context._computedStyle);
@@ -67,8 +67,8 @@ const computeTextSpace = (context) => {
     } = margin;
     const paddedHeight = top + bottom + _minSpacing.height;
     const paddedWidth = left + right + _minSpacing.width;
-    const availHeight = context.availHeight() - paddedWidth;
-    const availWidth = context.availWidth() - paddedHeight;
+    const availHeight = context.availHeight() - paddedHeight;
+    const availWidth = context.availWidth() - paddedWidth;
     const source = context.source();
     const space = context.smartText();
     const minText = new Array(minCharacters).fill('W').join('');
@@ -88,6 +88,7 @@ const computeTextSpace = (context) => {
         context.config({ rotation: true });
         context.smartText(smartSpace);
     }
+
     if (show) {
         return {
             width: Math.ceil(space.width) + paddedWidth,
@@ -121,9 +122,8 @@ class TextCell extends SimpleCell {
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
         generateGetterSetters(this, PROPS[TEXT]);
-        const space = this._dependencies.labelManager.getOriSize('W');
+        const space = this._dependencies.labelManager.getOriSize('wv');
         this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
-
         setSmartText(this);
     }
 
