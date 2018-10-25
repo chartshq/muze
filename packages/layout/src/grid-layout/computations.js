@@ -31,13 +31,6 @@ export function setMatrixMeasurement (matrix, type, value) {
     }
 }
 
-/**
- *
- *
- * @param {*} matrix
- * @param {*} widths
- * @param {*} heights
- */
 const setAvailableSpace = (matrix, widths, heights) => {
     matrix.forEach((row, rIdx) => {
         row.forEach((placeholder, cIdx) => {
@@ -46,14 +39,6 @@ const setAvailableSpace = (matrix, widths, heights) => {
     });
 };
 
-/**
- *
- *
- * @param {*} layout
- * @param {*} matrix
- * @param {*} pointer
- * @returns
- */
 const setViewSpaces = (layout, pointerType, viewSpaces) => {
     let pointer = layout.config()[`${pointerType}Pointer`];
     if (viewSpaces.length - 1 < pointer) {

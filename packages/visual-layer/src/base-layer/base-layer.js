@@ -137,7 +137,7 @@ export default class BaseLayer extends SimpleLayer {
      * @static
      * @public
      *
-     * @returns {string} name of layer
+     * @return {string} name of layer
      */
     static formalName () {
         return 'base';

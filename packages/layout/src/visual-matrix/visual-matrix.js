@@ -288,12 +288,6 @@ export default class VisualMatrix {
         return this.viewableMatrix;
     }
 
-    /**
-     *
-     *
-     * @return
-     * @memberof VisualMatrix
-     */
     removeExtraCells () {
         const {
             isTransposed,

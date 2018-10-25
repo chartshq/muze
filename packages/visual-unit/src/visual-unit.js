@@ -47,14 +47,12 @@ import './styles.scss';
 const FORMAL_NAME = 'unit';
 
 /**
- * @module VisualUnit
  * A hierarchical component of renderer which manages multiple layers. This logical
  * module is responsible for layouting layers, attach axis with them, resolving conflicts of layers.
- */
-
-/**
+ *
  * Basic unit implementaiton
  * @class VisualUnit
+ * @module VisualUnit
  */
 export default class VisualUnit {
 

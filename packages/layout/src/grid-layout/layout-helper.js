@@ -1,12 +1,5 @@
 import VisualMatrix from '../visual-matrix/visual-matrix';
 
-/**
- * Generates the set of visual matrices for pagination and layouting algorithms
- *
- * @param {*} context
- * @param {*} matrices
- * @returns
- */
 export const generateVisualMatrices = (context, matrices) => {
     // Set of matrices for layout is generated starting with the left matrix
     let leftMatrix = [];

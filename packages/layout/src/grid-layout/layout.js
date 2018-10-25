@@ -26,14 +26,6 @@ export default class GridLayout extends GenericLayout {
      * @param {Object} measurement The dimensions of the layout
      * @param {Object} config external configurations.
      * @memberof GenericLayout
-     *
-     * measurement : {
-     *      width : number => width of the container
-     *      height : number => height of the container
-     *      unitHeight : number => height of unit of the cells
-     *      unitWidth : number => width of unit of the cells
-     * }
-     *
      */
     constructor (matrices, mountPoint, measurement, config) {
         super(mountPoint, measurement, config);
@@ -103,14 +95,6 @@ export default class GridLayout extends GenericLayout {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} type
-     * @param {*} pageNumber
-     * @returns
-     * @memberof GridLayout
-     */
     gotoPage (type, pageNumber) {
         const pageType = type.toLowerCase();
         const { viewMatricesInfo } = this.getViewInformation();
@@ -124,13 +108,6 @@ export default class GridLayout extends GenericLayout {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} type
-     * @returns
-     * @memberof GridLayout
-     */
     pages (type) {
         const { viewMatricesInfo } = this.getViewInformation();
         const pageType = type.toLowerCase();
@@ -140,12 +117,6 @@ export default class GridLayout extends GenericLayout {
         };
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof GridLayout
-     */
     setViewInformation () {
         const {
             rowPointer,
@@ -162,12 +133,6 @@ export default class GridLayout extends GenericLayout {
         return this;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof GridLayout
-     */
     getViewInformation () {
         return this.viewInfo;
     }

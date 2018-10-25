@@ -14,7 +14,6 @@ import {
 } from '../constants';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
 /**
- * @module
  * This is the local options semantics based on which setters getters are created and reactivity is initiated.
  * This local object is only valid for Canvas.
  * Canvas merges global and local object both to the model
@@ -30,6 +29,8 @@ import { TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
  *          sanitizaiton: // Need for sanitization before type is checked
  *      }
  *  }
+ *
+ * @module LocalOptions
  */
 
 export const localOptions = {
