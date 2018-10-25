@@ -48,6 +48,7 @@ function treeShakeNode (node) {
  *     canvas.title(html`<span style=font-size:20px;>TITLE</span>`);
  * ```
  *
+ * @public
  * @module Operators
  * @namespace muze
  *
