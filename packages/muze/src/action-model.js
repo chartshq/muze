@@ -46,7 +46,7 @@ class ActionModel {
      * Registers physical actions on the canvases. It takes an object with key as the name of action and value having
      * the definition of the action.
      *
-     * To register a physical action
+     * To register a {@link PhysicalAction},
      * ```
      *  const ActionModel = muze.ActionModel;
      *  ActionModel
