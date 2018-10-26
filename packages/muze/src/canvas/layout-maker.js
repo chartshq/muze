@@ -4,12 +4,9 @@ import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
-import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import GridComponent from './components/grid-component';
-import MatrixComponent from './components/matrix-component';
-import { LayoutManager } from '../../../layout/src/tree-layout';
 
 const BlankCell = cellRegistry().get().BlankCell;
 
@@ -86,11 +83,12 @@ const blankCellCreator = (rowMatrices, maxRows) => rowMatrices.map((rowMatrix, r
  * @param {*} context
  * @returns
  */
-export const prepareLayout = (layout, components, config, measurement) => {
+export const prepareLayout = (layout, renderDetails) => {
     let topL;
     let topR;
     let bottomL;
     let bottomR;
+    const {components, layoutConfig, measurement} = renderDetails;
     const {
         rows,
         columns,
@@ -99,7 +97,7 @@ export const prepareLayout = (layout, components, config, measurement) => {
     } = components;
     const {
         showHeaders
-    } = config;
+    } = layoutConfig;
     const maxRows = getMaxRows(rows);
     const {
         topLeft,
@@ -118,7 +116,7 @@ export const prepareLayout = (layout, components, config, measurement) => {
     }
 
     layout.measurement(measurement)
-                    .config(config)
+                    .config(layoutConfig)
                     .matrices({
                         top: [topL, columns[0], topR],
                         center: [rows[0], values, rows[1]],
@@ -226,16 +224,18 @@ export const getRenderDetails = (context, mount) => {
 };
 // const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
 
-export const renderLayout = (layoutConfig, components, grid, measurement) => {
+export const renderLayout = (layoutManager, grid,renderDetails) => {
     // generate component wrappers
 
+    const {components, layoutConfig, measurement} = renderDetails
     const target = { target: 'canvas' };
     // title;
     let titleWrapper = null;
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle',alignment:'right' });
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle'
+        ,alignment:'left' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
@@ -260,44 +260,14 @@ export const renderLayout = (layoutConfig, components, grid, measurement) => {
     }
 
     // grid components
-    const { viewMatricesInfo, layoutDimensions } = grid.getViewInformation();
-    const gridComponents = [];
-    for (let i = 0; i < 3; i++) {
-        gridComponents[i] = [];
-        for (let j = 0; j < 3; j++) {
-            const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
-            const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
-            const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
-            const matrixConfig = {
-                dimensions: matrixDim,
-                border: layoutDimensions.border,
-                classPrefix: layoutConfig.classPrefix,
-                row: ROW_MATRIX_INDEX[i],
-                column: j
-            };
-            const matrixWrapper = new MatrixComponent({
-                name: matrixName,
-                component: matrix,
-                config: matrixConfig
-            });
-            gridComponents[i].push(matrixWrapper);
-        }
-    }
-
     const gridWrapper = new GridComponent({
         name: 'grid',
-        component: gridComponents,
-        config: { dimensions: { height: 0, width: 0 },
-                  ...target }
+        component: grid,
+        config: { ...target, 
+                  classPrefix: layoutConfig.classPrefix,
+                  dimensions: { height: 0, width: 0 }}
     });
-    // instantiate treelayoutManager
 
-    const layoutManager = new LayoutManager({
-        renderAt: layoutConfig.mount,
-        className:'muze-group-container',
-        height: measurement.canvasHeight,
-        width: measurement.canvasWidth
-    });
 
     layoutManager.registerComponents([
         titleWrapper,
@@ -305,7 +275,5 @@ export const renderLayout = (layoutConfig, components, grid, measurement) => {
         colorLegendWrapper,
         gridWrapper
     ]).compute();
-    // registerComponents
-    // call compute
 };
 

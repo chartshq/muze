@@ -4,10 +4,10 @@ import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
-import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener } from './helper';
+import { initCanvas, setupChangeListener ,setLabelRotationForAxes } from './helper';
+import { LayoutManager } from '../../../layout/src/tree-layout';
 
 /**
  * This is the primary class which manages highlevel components like visualGroup, Titles, Legend, Extensions
@@ -39,6 +39,7 @@ export default class Canvas extends TransactionSupport {
         });
         this._composition.layout = new GridLayout();
         this._store = new Store({});
+        this._layoutManager = null;
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const [, store] = transactor(this, options, this._store.model);
@@ -233,26 +234,48 @@ export default class Canvas extends TransactionSupport {
         const visGroup = this.composition().visualGroup;
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
-        const { components, layoutConfig, measurement } = getRenderDetails(this, mount);
+        const renderDetails = getRenderDetails(this, mount);
+        const promises = [];
 
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
-        prepareLayout(this.layout(), components, layoutConfig, measurement);
+        prepareLayout(this.layout(),renderDetails);
 
-        renderLayout(layoutConfig, components, this.layout(), measurement);
+        // init layoutManager
+        this._layoutManager = this._createLayoutManager({
+            mount : renderDetails.layoutConfig.mount,
+            className : 'muze-group-container',
+            height : renderDetails.measurement.canvasHeight,
+            width : renderDetails.measurement.canvasWidth
+        })
+
         // Render each component
-        // renderComponents(this, components, layoutConfig, measurement);
+        renderLayout(this._layoutManager, this.layout(), renderDetails);
+
+        // setLabelRotation
+        setLabelRotationForAxes(this);
+
         // Update life cycle
         lifeCycleManager.notify({ client: this, action: 'drawn' });
-        const promises = [];
+
         visGroup.matrixInstance().value.each((el) => {
             promises.push(el.valueOf().done());
         });
+        
         Promise.all(promises).then(() => {
             this._renderedResolve();
         });
     }
 
+    _createLayoutManager(layoutManagerConfig){
+        const layoutManager = new LayoutManager({
+            renderAt: layoutManagerConfig.mount,
+            className:layoutManagerConfig.className,
+            height: layoutManagerConfig.height,
+            width: layoutManagerConfig.width
+        });
+        return layoutManager;
+    }
     /**
      *
      *

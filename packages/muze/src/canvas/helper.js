@@ -90,3 +90,34 @@ export const applyInteractionPolicy = (policies, firebolt) => {
     const valueMatrix = visualGroup.composition().matrices.value;
     policies.forEach(policy => policy(valueMatrix, firebolt));
 };
+
+/**
+ * Sets the rotation for all x axes if any axis has the rotation config set in the
+ * entire view
+ *
+ * @param {Array} columns Column cells that contain the axes cells
+ */
+export const setLabelRotationForAxes = (context) => {
+    let rotation = 0;
+
+    const xAxes = context.xAxes() || [];
+
+    (() => {
+        for (let i = 0; i < xAxes.length; i++) {
+            for (let j = 0; j < xAxes[i].length; j++) {
+                if (xAxes[i][j].config().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].config().labels.rotation;
+                    return;
+                }
+            }
+        }
+    })();
+
+    if (rotation) {
+        xAxes.forEach((axes) => {
+            axes.forEach((axis) => {
+                axis.config({ labels: { rotation, smartTicks: false } });
+            });
+        });
+    }
+};
