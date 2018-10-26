@@ -1,20 +1,3 @@
-/**
- * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
- * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
- * Canvas is intialized from environment with settings from environment and singleton dependencies.
- *
- * To create an instance of canvas
- * ```
- *  const env = Muze();
- *  const canvas = env.canvas()
- * ```
- *
- *
- * @class
- * @public
- * @namespace Muze
- */
-
 // @warn Pseudo class of Canvas to generate docs. Real Canvas attach method to instance dynamically hence property
 // jsdoc on all the mthod is not possible
 export default class {
@@ -24,12 +7,12 @@ export default class {
      * different variations}.
      *
      * @public
+     * @segment Canvas
      *
      * @param {Array.<string> | null} leftVars Variables using which the left facets are created
      * @param {Array.<string> | null} rightVars Variables using which the right facets are created
      *
      * @return {Canvas} instance of current canvas
-     * }
      */
     rows () { /* pseudo definition */ }
 
@@ -39,6 +22,8 @@ export default class {
      * different variations}.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {Array.<string> | null} bottomVars Variables using which the bottom facets are created
      * @param {Array.<string> | null} topVars Variables using which the top facets are created
@@ -54,6 +39,8 @@ export default class {
      * color scale is created.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string | object} encoding Name of the variable which is assigned to color encoding channel or an object
      *      containing scale information
@@ -78,6 +65,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {string | object} encoding Name of the dimension which is assigned to shape encoding channel or an object
      *      containing scale information.
      * @param {string} encoding.field Name of the dimension
@@ -94,6 +83,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {string | object} encoding Name of the variable which is assigned to size encoding channel or an object
      *      containing scale information.
      * @param {string} encoding.field Name of the variable
@@ -109,6 +100,8 @@ export default class {
      * data.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string | object} encoding Name of the variable which is assigned to size encoding channel or an object
      *      containing scale information.
@@ -147,6 +140,9 @@ export default class {
      * a line layer for Displacement measure.
      *
      * @public
+     *
+     * @segment Canvas
+     *
      * @param {LayerConfig} def Layers definition
      *
      * @return {Canvas} Instance of current canvas
@@ -164,6 +160,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {Object} def named definition of transformed data. This is a key value pair, where the key is name of the
      *      source and value being the transfromation function. The name is used to refer in layers to invoke and attach
      *      the data source to the layer instance.
@@ -178,6 +176,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {HTMLElement | string} el Reference of html element or css selectors on which the viz will house.
      */
     mount () { /* pseudo definition */ }
@@ -186,6 +186,8 @@ export default class {
      * Provides the title for a visualization.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string} text Title text. Text returned from `operator.html` is also supported.
      * @param {object} [config] Title configuration.
@@ -201,6 +203,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {string} text Subtitle text. Text returned from `operator.html` is also supported.
      * @param {object} [config] Subtitle configuration.
      * @param {string} [config.position = 'top'] Position of the subtitle text. Options are `'TOP'` or `'BOTTOM'`.
@@ -209,113 +213,4 @@ export default class {
      * @return {Canvas} Instance of current canvas
      */
     subtitle () { /* pseudo definition */ }
-
-    /**
-     * Retrieves an instance of layout which is responsible for layouting. Layout is responsible for creating faceted
-     * presentation using table layout.
-     *
-     * @public
-     *
-     * @return {GridLayout} Instance of layout attached to canvas.
-     */
-    layout () { /* pseudo definition */ }
-
-    /**
-     * Retrieves the composition for a canvas
-     *
-     * @public
-     *
-     * @return {object} Instances of the components which canvas requires to draw the full visualization.
-     *      ```
-     *          {
-     *              layout: // Instance of {@link GridLayout}
-     *              legend: // Instance of {@link Legend}
-     *              subtitle: // Instance of {@link TextCell} using which the title is rendered
-     *              title: // Instance of {@link TextCell} using which the title is rendered
-     *              visualGroup: // Instance of {@link visualGroup}
-     *          }
-     *      ```
-     */
-    composition () { /* pseudo definition */ }
-
-    /**
-     * Returns the instance of firebolt associated with this canvas. The firebolt instance can be used to dispatch a
-     * behaviour dynamically on the canvas.
-     *
-     * @return {GroupFireBolt} Instance of canvas firebolt.
-     */
-    firebolt () { /* pseudo definition */ }
-
-    /**
-     * Returns a promise for various {@link LifecycleEvents} of the various components of canvas. The promise gets
-     * resolved once the particular event gets completed.
-     *
-     * @param {string} eventName Name of the lifecycle event.
-     *
-     * @return {Canvas} Instance of the canvas.
-     */
-    once () { /* pseudo definition */ }
-
-    /**
-     * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
-     *
-     * ```
-     *   // The first element in the sub array represents the top axis and the second element represents the bottom
-     *   // axis.
-     *   [
-     *      [X1, X2],
-     *      [X3, X4]
-     *   ]
-     * ```
-     * @public
-     * @return {Array.<Array>} Instances of x axis.
-     */
-    xAxes () { /* pseudo definition */ }
-
-    /**
-     * Returns the instances of y axis of the canvas. It returns the instances in a two dimensional array form.
-     *
-     * ```
-     *   // The first element in the sub array represents the left axis and the second element represents the right
-     *   // axis.
-     *   [
-     *      [Y1, Y2],
-     *      [Y3, Y4]
-     *   ]
-     * ```
-     * @public
-     * @return {Array.<Array>} Instances of y axis.
-     */
-    yAxes () { /* pseudo definition */ }
-
-    /**
-     * Returns all the retinal axis of the canvas. Color, shape and size axis are combinedly called retinal axis.
-     *
-     * @public
-     * @return {Object} Instances of retinal axis.
-     *          ```
-     *              {
-     *                  color: [ColorAxis], // Array of color axis.
-     *                  shape: [ShapeAxis], // Array of shape axis.
-     *                  size: [SizeAxis] // Array of size axis.
-     *              }
-     *          ```
-     */
-    getRetinalAxes () { /* pseudo definition */ }
-
-    /**
-     * Sets or gets the alias of the canvas. Alias is a name by which the canvas can be referred.
-     *
-     * When setter
-     * @param {string} alias Name of the alias.
-     *
-     * @return {Canvas} Instance of the canvas.
-     *
-     * When getter
-     *
-     * @return {string} Alias of canvas.
-     *
-     * @public
-     */
-    alias () { /* pseudo definition */ }
 }

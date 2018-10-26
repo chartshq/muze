@@ -1,12 +1,3 @@
-/**
- * Point layer inherits all the methods of {@link BaseLayer} class.
- *
- * @public
- *
- * @class
- * @module PointLayer
- * @extends BaseLayer
- */
 // @warn Pseudo class of PointLayer to generate docs. Real Point layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible
 export default class {
@@ -42,6 +33,7 @@ export default class {
      * @return {Object} Layer configuration.
      *
      * @public
+     * @segment PointLayer
      */
     config () { }
 }

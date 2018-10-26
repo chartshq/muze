@@ -9,11 +9,12 @@
  * - `canvas.drawn`: Fired when the canvas has finished drawing.
  * - `unit.initialized`: Fired when all the visual units of the canvas gets initialized.
  * - `unit.updated`: Fired when all the visual units of the canvas gets updated.
- * - `unit.beforedraw': Fired before the units are being drawn.
- * - `unit.drawn': Fired when all of the units has been rendered.
- * - `layer.initialized': Fired when all the layers of a visual unit gets created.
- * - `layer.beforedraw': Fired before the layers are being drawn.
+ * - `unit.beforedraw`: Fired before the units are being drawn.
+ * - `unit.drawn`: Fired when all of the units has been rendered.
+ * - `layer.initialized`: Fired when all the layers of a visual unit gets created.
+ * - `layer.beforedraw`: Fired before the layers are being drawn.
  * - `layer.drawn`: Fired after the layers has been drawn.
  *
+ * @public
  * @module LifecycleEvents
  */

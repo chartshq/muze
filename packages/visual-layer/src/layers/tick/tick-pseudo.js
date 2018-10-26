@@ -1,12 +1,3 @@
-/**
- * Tick layer inherits all the methods of {@link BaseLayer} class.
- *
- * @public
- *
- * @class
- * @module TickLayer
- * @extends BaseLayer
- */
 // @warn Pseudo class of TickLayer to generate docs. Real Tick layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible
 export default class {
@@ -32,13 +23,14 @@ export default class {
      * @param {Object} config.transition Transition configuration
      * @param {boolean} config.transition.disabled If true, then disables the transition.
      * @param {Number} config.transition.duration Transition duration.
-     * @param {Number} config.nearestTickThreshold If specified, then only those ticks which are in the given
+     * @param {Number} config.nearestPointThreshold If specified, then only those ticks which are in the given
      * @return {TickLayer} Instance of Tick layer
      *
      * When used as getter,
      * @return {Object} Layer configuration.
      *
      * @public
+     * @segment TickLayer
      */
     config () { }
 }

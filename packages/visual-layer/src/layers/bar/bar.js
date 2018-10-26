@@ -20,15 +20,15 @@ const MEASURE = FieldType.MEASURE;
 const scaleBand = Scales.band;
 
 /**
- * Bar Layer creates a bar plot. It needs to be passed a data table, axes and configuration of the layer.
+ * Bar layer creates rectangle marks. The mark type of this layer is ```bar```. This layer can be used
+ * to create stacked or grouped bars, range bars, heatmap plots and also reference bands by using
+ * the encoding properties.
  *
- * @example
- * const BarLayer = layerFactory.getLayer('bar');
- * BarLayer.create()
- *  .config(config)
- *  .data(dt)
- *  .mountPoint(container);
+ * @public
+ *
  * @class
+ * @module BarLayer
+ * @extends BaseLayer
  */
 export default class BarLayer extends BaseLayer {
     /**

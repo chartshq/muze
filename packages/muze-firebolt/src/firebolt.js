@@ -25,8 +25,8 @@ import {
  * manage it's interaction.
  *
  * @public
- * @class
- * @namespace muze
+ * @class Firebolt
+ * @module Firebolt
  */
 export default class Firebolt {
     constructor (context, actions, sideEffects, behaviourEffectMap) {

@@ -22,12 +22,14 @@ import {
 import './styles.scss';
 
 /**
- * Point Layer creates point. Itt needs to be passed a data table, axes and configuration
- * of the layer.
- * Example :-
- * const pointLayer = layerFactory.getLayer('point', [data, axes, config]);
- * pointLayer.render(container);
+ * This layer is used to create various symbols for each data point. This is commonly used in
+ * scatterplot visualizations. The mark type of this layer is ```point```.
+ *
+ * @public
+ *
  * @class
+ * @module PointLayer
+ * @extends BaseLayer
  */
 export default class PointLayer extends BaseLayer {
 

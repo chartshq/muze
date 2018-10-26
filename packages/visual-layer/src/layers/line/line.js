@@ -21,6 +21,15 @@ import {
 
 import './styles.scss';
 
+/**
+ * This layer is used to render straight or smoothed line paths. The mark type of this layer is ```line```.
+ *
+ * @public
+ *
+ * @class
+ * @module LineLayer
+ * @extends BaseLayer
+ */
 export default class LineLayer extends BaseLayer {
 
     /**

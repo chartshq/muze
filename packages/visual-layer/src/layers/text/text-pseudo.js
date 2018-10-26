@@ -1,12 +1,3 @@
-/**
- * Text layer inherits all the methods of {@link BaseLayer} class.
- *
- * @public
- *
- * @class
- * @module TextLayer
- * @extends BaseLayer
- */
 // @warn Pseudo class of TextLayer to generate docs. Real text layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible
 export default class {
@@ -33,13 +24,14 @@ export default class {
      * @param {Object} config.transition Transition configuration
      * @param {boolean} config.transition.disabled If true, then disables the transition.
      * @param {Number} config.transition.duration Transition duration.
-     * @param {Number} config.nearesttextThreshold If specified, then only those texts which are in the given
+     * @param {Number} config.nearestPointThreshold If specified, then only those texts which are in the given
      * @return {TextLayer} Instance of text layer
      *
      * When used as getter,
      * @return {Object} Layer configuration.
      *
      * @public
+     * @segment TextLayer
      */
     config () { }
 }

@@ -4,7 +4,7 @@ import {
     mergeRecursive
 } from 'muze-utils';
 
-import { applyInteractionPolicy } from './helper';
+import { applyInteractionPolicy } from '../helper';
 
 const defaultInteractionPolicy = (valueMatrix, firebolt) => {
     const isMeasure = field => field.type() === FieldType.MEASURE;
@@ -59,7 +59,9 @@ const defaultCrossInteractionPolicy = {
 
 /**
  * This class is responsible for dispatching any behavioural action to all the visual units housed by the canvas.
- * It is created by {@link Canvas}.
+ * It is created by {@link Canvas}. This class does not handle any physical actions. Physical actions get triggered
+ * in {@link VisualUnit} which is managed by it's own firebolt instance. The firebolt instance of canvas only
+ * propagates the action to all the visual units in it's composition.
  *
  * To get the firebolt instance of {@link Canvas}
  * ```
@@ -68,7 +70,6 @@ const defaultCrossInteractionPolicy = {
  *
  * @class GroupFireBolt
  * @public
- * @namespace Muze
  */
 export default class GroupFireBolt {
     constructor (context) {

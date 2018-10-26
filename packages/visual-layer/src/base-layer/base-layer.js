@@ -22,8 +22,8 @@ import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
 
 /**
- * An abstract class which gives defination of common layer functionality like
- * - transfromation data for various {@link mode}
+ * An abstract class which gives definition of common layer functionality like
+ * - transforming data for various modes. Supported modes: identity, group and stack.
  * - calculating data domain
  * - linking dependent layers
  * - merging policy of configuration
@@ -39,7 +39,6 @@ import { defaultOptions } from './default-options';
  * @public
  * @class
  * @module BaseLayer
- * @namespace Muze
  */
 export default class BaseLayer extends SimpleLayer {
 
@@ -47,7 +46,7 @@ export default class BaseLayer extends SimpleLayer {
      * Creates a layer using a configuration and data.
      *
      * @public
-     *
+     * @constructor
      * @param {DataModel} data Instance of DataModel to be used. This DataModel instance serves as the data for a layer.
      * @param {Object} axes Axes instances to be used for rendering the layer. Axes are used for mapping data from
      *      value to px.
@@ -57,10 +56,10 @@ export default class BaseLayer extends SimpleLayer {
      *      TimeAxis, ContinuousAxis
      * @param {ColorAxis} axes.color Axis for coloring a layer using color interpolators
      * @param {ShapeAxis} axes.shape Axis for providing a shape
-     * @param {SizeAxis} axes.shape Axis for determining size of a mark using size interpolator
+     * @param {SizeAxis} axes.size Axis for determining size of a mark using size interpolator
      * @param {LayerConfig} config Configuration of the layer
      * @param {Object} dependencies Dependencies of the layer
-     * @param {SmartLabel} smartLabel Smartlabel singleton instance
+     * @param {SmartLabel} dependencies.smartLabel Smartlabel singleton instance
      */
     constructor (data, axes, config, dependencies) {
         super();

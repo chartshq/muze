@@ -1,5 +1,5 @@
 /**
- * Configuration properties for interaction.
+ * Configuration properties for tooltip.
  *
  * @public
  * @module TooltipFormatter

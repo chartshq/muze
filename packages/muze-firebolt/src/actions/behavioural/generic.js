@@ -5,7 +5,8 @@ import { getSetInfo, getMergedSet, getSourceFields } from '../../helper';
  * action needs to extend this class.
  *
  * @public
- * @class
+ * @class GenericBehaviour
+ * @module GenericBehaviour
  */
 export default class GenericBehaviour {
     constructor (firebolt) {

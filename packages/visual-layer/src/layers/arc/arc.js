@@ -20,31 +20,13 @@ const pie = Symbols.pie;
 const arc = Symbols.arc;
 
 /**
- * Arc Layer creates a plot with polar coordinates
- * Example :-
- * const config = {
- *  height: 100,
- *  width: 100,
- *  startAngle: 0,
- * endAngle: Math.PI,
- * cornerRadius: 10,
- * minOuterRadius: 10,
- * outerRadius: 10,
- * innerRadius: 5,
- * padAngle: 2,
- * padRadius: 2,
- * colors: []
- * padding: {top: 10, bottom: 10, left: 10, right: 10},
- *  encoding = {
- *      angle: {
- *          field: 'date' //Maps to angle of arc
- *      },
- *      radius: {
- *          field: 'sales' // Maps to radius of arc
- *      }
- *  }
- * };
+ * Arc Layer creates a plot with polar coordinates.
+ *
+ * @public
+ *
  * @class
+ * @module ArcLayer
+ * @extends BaseLayer
  */
 export default class ArcLayer extends BaseLayer {
 

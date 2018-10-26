@@ -10,10 +10,20 @@ import options from '../options';
 import { initCanvas, setupChangeListener } from './helper';
 
 /**
- * This is the primary class which manages highlevel components like visualGroup, Titles, Legend, Extensions
- * (in future). Global level Muze functionality is subset this. Every time user works with an instance of
- * canvas in dom which provides instance level settings.
+ * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
+ * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
+ * Canvas is intialized from environment with settings from environment and singleton dependencies.
  *
+ * To create an instance of canvas
+ * ```
+ *  const env = Muze();
+ *  const canvas = env.canvas()
+ * ```
+ *
+ *
+ * @class
+ * @public
+ * @module Canvas
  */
 export default class Canvas extends TransactionSupport {
 
@@ -57,10 +67,12 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Retrieves an instance of layout which is responsible for layouting. Layout is responsible for creating faceted
+     * presentation using table layout.
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {GridLayout} Instance of layout attached to canvas.
      */
     layout (...params) {
         if (params.length) {
@@ -70,10 +82,20 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Retrieves the composition for a canvas
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {object} Instances of the components which canvas requires to draw the full visualization.
+     *      ```
+     *          {
+     *              layout: // Instance of {@link GridLayout}
+     *              legend: // Instance of {@link Legend}
+     *              subtitle: // Instance of {@link TextCell} using which the title is rendered
+     *              title: // Instance of {@link TextCell} using which the title is rendered
+     *              visualGroup: // Instance of {@link visualGroup}
+     *          }
+     *      ```
      */
     composition (...params) {
         if (params.length) {
@@ -87,11 +109,18 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Sets or gets the alias of the canvas. Alias is a name by which the canvas can be referred.
      *
+     * When setter
+     * @param {string} alias Name of the alias.
      *
-     * @param {*} params
+     * @return {Canvas} Instance of the canvas.
      *
-     * @memberof Canvas
+     * When getter
+     *
+     * @return {string} Alias of canvas.
+     *
+     * @public
      */
     alias (...params) {
         if (params.length) {
@@ -135,10 +164,13 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Returns the instance of firebolt associated with this canvas. The firebolt instance can be used to dispatch a
+     * behaviour dynamically on the canvas. This firebolt does not handle any physical actions. It is just used to
+     * propagate the action to all the visual units in it's composition.
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {GroupFireBolt} Instance of firebolt associated with canvas.
      */
     firebolt (...firebolt) {
         if (firebolt.length) {
@@ -212,11 +244,20 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Returns a promise for various {@link LifecycleEvents} of the various components of canvas. The promise gets
+     * resolved once the particular event gets completed.
      *
+     * To use this,
+     * ```
+     *      canvas.once('layer.drawn').then(() => {
+     *          // Do any post drawing work here.
+     *      });
+     * ```
+     * @public
      *
-     * @param {*} eventName
+     * @param {string} eventName Name of the lifecycle event.
      *
-     * @memberof Canvas
+     * @return {Promise} A pending promise waiting for resolve to be called.
      */
     once (eventName) {
         const lifeCycleManager = this.dependencies().lifeCycleManager;
@@ -252,30 +293,54 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
      *
+     * ```
+     *   // The first element in the sub array represents the top axis and the second element represents the bottom
+     *   // axis.
+     *   [
+     *      [X1, X2],
+     *      [X3, X4]
+     *   ]
+     * ```
+     * @public
      *
-     *
-     * @memberof Canvas
+     * @return {Array.<Array>} Instances of x axis.
      */
     xAxes () {
         return this.composition().visualGroup.getAxes('x');
     }
 
     /**
+     * Returns the instances of y axis of the canvas. It returns the instances in a two dimensional array form.
      *
-     *
-     *
-     * @memberof Canvas
+     * ```
+     *   // The first element in the sub array represents the left axis and the second element represents the right
+     *   // axis.
+     *   [
+     *      [Y1, Y2],
+     *      [Y3, Y4]
+     *   ]
+     * ```
+     * @public
+     * @return {Array.<Array>} Instances of y axis.
      */
     yAxes () {
         return this.composition().visualGroup.getAxes('y');
     }
 
     /**
+     * Returns all the retinal axis of the canvas. Color, shape and size axis are combinedly called retinal axis.
      *
-     *
-     *
-     * @memberof Canvas
+     * @public
+     * @return {Object} Instances of retinal axis.
+     *          ```
+     *              {
+     *                  color: [ColorAxis], // Array of color axis.
+     *                  shape: [ShapeAxis], // Array of shape axis.
+     *                  size: [SizeAxis] // Array of size axis.
+     *              }
+     *          ```
      */
     getRetinalAxes () {
         const visualGroup = this.composition().visualGroup;

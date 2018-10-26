@@ -25,7 +25,6 @@ import GenericSideEffect from './generic';
  * @class
  * @extends GenericSideEffect
  * @module SpawnableSideEffect
- * @namespace muze
  */
 export default class SpawnableSideEffect extends GenericSideEffect {
     /**
@@ -46,6 +45,7 @@ export default class SpawnableSideEffect extends GenericSideEffect {
     /**
      * Returns the drawing information for side effect like svg container, dimensions of the visual unit.
      *
+     * @public
      * @return {Object} Drawing information for side effect.
      * ```
      *      sideEffectGroup: // svg container where the side effect needs to be appended.

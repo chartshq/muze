@@ -1,13 +1,3 @@
-/**
- * Line layer inherits all the methods of {@link BaseLayer} class.
- *
- * @public
- *
- * @class
- * @module LineLayer
- * @extends BaseLayer
- * @namespace muze
- */
 // @warn Pseudo class of LineLayer to generate docs. Real Line layer class attaches method to instance dynamically
 // hence property jsdoc on all the method is not possible
 export default class {
@@ -52,6 +42,7 @@ export default class {
      * @return {Object} Layer configuration.
      *
      * @public
+     * @segment LineLayer
      */
     config () { }
 }

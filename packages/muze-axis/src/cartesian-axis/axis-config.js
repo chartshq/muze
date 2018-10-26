@@ -16,4 +16,5 @@
  * @param {number} padding Controls padding between plots. Range is between 0 to 1.
  * @param {number} base Sets the base for log scale
  * @param {number} exponent Sets the exponent for pow scale.
+ * @param {LinearAxisConfig} lAxis Sets LinearAxisConfig
  */

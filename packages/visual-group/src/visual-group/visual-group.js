@@ -16,13 +16,17 @@ import {
 } from '../enums/constants';
 
 /**
- * This class is used to create an instance of a visual group.
- * It extends the SimpleGroup (which is an interface). The visual group takes in a datamodel,
- * and a set of rows and columns, alongwith optional paramters (like color, size, shape).
+ * VisualGroup is instantiated by canvas for creating {@link VisualUnit} and axes instances.It creates the
+ * the matrix of visual units and axes. It also creates the layout instance which manages the allocation
+ * of space of matrices.
+ *
+ * To get instance of visual group,
+ * ```
+ *      const visualGroup = canvas.composition().visualGroup;
+ * ```
+ * @public
  *
  * @class VisualGroup
- *
- * @namespace muze
  */
 class VisualGroup extends SimpleGroup {
 
@@ -95,11 +99,12 @@ class VisualGroup extends SimpleGroup {
      *
      * @public
      *
-     * @return {Object} Composition of visual group.
-     *      ```
+     * @return {Object} Composition of visual group. It contains instance of matrices {@link ValueMatrix}
+     * and instances of axis.
+     * ```
      *          {
      *              matrices: {
-     *                  value: // Instance of center value matrix
+     *                  value: // Instance of center value matrix.
      *                  left: // Instance of left value matrix
      *                  right: // Instance of right value matrix
      *                  bottom: // Instance of bottom value matrix
@@ -113,7 +118,7 @@ class VisualGroup extends SimpleGroup {
      *                  size: // Array of size axis.
      *              }
      *          }
-     *      ```
+     * ```
      */
     composition (...params) {
         if (params.length) {

@@ -23,7 +23,6 @@ const defaultPolicy = (registrableComponents) => {
  *
  * @public
  * @module ActionModel
- * @namespace Muze
  */
 class ActionModel {
     constructor () {
@@ -378,6 +377,7 @@ class ActionModel {
      *          }
      *      });
      * ```
+     * @public
      * @param {Object} policy Policy definition.
      *
      * @return {ActionModel} Instance of action model.

@@ -4,7 +4,6 @@
  *
  * @public
  * @class ValueMatrix
- * @namespace muze
  */
 class ValueMatrix {
 

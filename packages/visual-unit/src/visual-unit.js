@@ -47,12 +47,14 @@ import './styles.scss';
 const FORMAL_NAME = 'unit';
 
 /**
- * A hierarchical component of renderer which manages multiple layers. This logical
- * module is responsible fo\r layouting layers, attach axis with them, resolving conflicts of layers.
+ * Visual Unit is hierarchical component created by {@link VisualGroup}. This component accepts layer definitions
+ * and creates concrete layer instances from them, binds data and attaches axis to them. It also retreives the domain
+ * from the layers and unions them and sets them on corresponding axis instances. This also creates the parent svg
+ * groups for all the layers and delegates the rendering to all the layers.
  *
- * Basic unit implementaiton
- * @class VisualUnit
+ * @public
  * @module VisualUnit
+ * @class
  */
 export default class VisualUnit {
 
@@ -148,10 +150,10 @@ export default class VisualUnit {
     }
 
     /**
-     * Retrieves the id created for this instance of visual unit.
+     * Returns the unique id of this visual unit.
      *
      * @public
-     * @return {string} id associated with the instance
+     * @return {string} Unique identifier.
      */
     id () {
         return this._id;
@@ -209,11 +211,26 @@ export default class VisualUnit {
         return this._renderedPromise;
     }
 
+    /**
+     * Caches all the datamodels in an array from the next `data()` call on visual unit until `clearCaching()` or
+     * `resetData()` is called on it.
+     *
+     * @public
+     * @return {VisualUnit} Instance of visual unit.
+     */
+
     enableCaching () {
         this._cache = true;
         return this;
     }
 
+    /**
+     * Clears all the previous cached data.
+     *
+     * @public
+     * @segment VisualUnit
+     * @return {VisualUnit} Instance of visual unit.
+     */
     clearCaching () {
         this._cache = false;
         this.cachedData([this.cachedData()[0]]);
@@ -270,11 +287,26 @@ export default class VisualUnit {
     }
 
     /**
+     * Adds a new layer to the visual unit. It takes a layer definition and creates layer instances from them. It does
+     * not render the layers. It returns the layer instances in an array. If the layer definition is a composite layer,
+     * then multiple layer instances will be returned in the array.
      *
+     * To add a layer in the unit,
+     * ```
+     *      unit.addLayer({
+     *          name: 'bullet',
+     *          mark: 'bar',
+     *          encoding: {
+     *              x: 'Year',
+     *              y: 'Acceleration',
+     *              color: 'Origin'
+     *          }
+     *      });
+     * ```
+     * @public
+     * @param {Object} layerDef Definition of new layer.
      *
-     * @param {*} layerDef
-     *
-     * @memberof VisualUnit
+     * @return {Array} Array of layer instances.
      */
     addLayer (layerDef) {
         const layerName = layerDef.name;
@@ -343,10 +375,11 @@ export default class VisualUnit {
     }
 
     /**
+     * Resets the data of visual unit to original data model. It also clears the cached data.
      *
-     *
-     *
-     * @memberof VisualUnit
+     * @public
+     * @segment VisualUnit
+     * @return {VisualUnit} Instance of visual unit.
      */
     resetData () {
         this.data(this.cachedData()[0]);
@@ -380,11 +413,13 @@ export default class VisualUnit {
     }
 
     /**
+     * Returns an array of layer instances which matches the supplied mark type.
      *
+     * @public
      *
-     * @param {*} type
+     * @param {string} type Mark type of layer.
      *
-     * @memberof VisualUnit
+     * @return {Array} Array of layer instances.
      */
     getLayersByType (type) {
         const layers = getLayersBy(this.layers(), 'type', type);
@@ -392,11 +427,13 @@ export default class VisualUnit {
     }
 
     /**
+     * Returns the layer instance which matches the supplied layer name. If no layer is found, then it returns
+     * undefined.
      *
+     * @public
+     * @param {string} name Name of layer.
      *
-     * @param {*} name
-     *
-     * @memberof VisualUnit
+     * @return {VisualUnit} Layer instance.
      */
     getLayerByName (name) {
         const layers = getLayersBy(this.layers(), 'name', name);
@@ -453,12 +490,30 @@ export default class VisualUnit {
     }
 
     /**
-     * Finds the nearest point closest to the x and y position.
-     * @param {number} x x position.
-     * @param {number} y y position.
-     * @return {Object} Nearest point.
+     * Returns the point located nearest to the supplied x and y position. It returns the unique identifiers of the
+     * point. This function also accepts an additional configuration `getAllPoints` inside `config` object in the third
+     * argument which if set to true, then it returns the identifiers of all the points which falls on the nearest
+     * x value or y value if any one of the field is a dimension. Additionally, a target property is also returned
+     * which contains the identifier of the nearest point. If no nearest point is found, then it returns identifier
+     * as null.
+     *
+     * @public
+     *
+     * @param {number} x X Position of the point from where nearest point is to be found.
+     * @param {number} y Y Position of the point from where nearest point is to be found.
+     * @param {Object} config Additional configuration options.
+     * @param {boolean} config.getAllPoints If true, then returns all the points nearest to the x value or y value if
+     * it is dimension.
+     * @param {Object} config.data Data associated with the nearest point.
+     * @return {Object} Nearest point information
+     * ```
+     *      {
+     *          id: [['Origin'], ['USA'], ['Japan']], // Identifiers of all the points closest to the x value.
+     *          target: [['Origin'], ['Japan']] // Identifier of the nearest point.
+     *      }
+     * ```
      */
-    getNearestPoint (x, y, args) {
+    getNearestPoint (x, y, config) {
         let pointObj = {
             id: null
         };
@@ -467,14 +522,14 @@ export default class VisualUnit {
             y
         });
 
-        if (dimValue !== null && args.getAllPoints) {
+        if (dimValue !== null && config.getAllPoints) {
             pointObj.id = dimValue;
-            const pointInf = this.getMarkInfFromLayers(x, y, args);
+            const pointInf = this.getMarkInfFromLayers(x, y, config);
             pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
             return pointObj;
         }
 
-        const markInf = this.getMarkInfFromLayers(x, y, args) || { id: null };
+        const markInf = this.getMarkInfFromLayers(x, y, config) || { id: null };
         pointObj = Object.assign({}, markInf);
 
         pointObj.target = markInf.id;
@@ -501,11 +556,55 @@ export default class VisualUnit {
     }
 
     /**
+     * Get the information of all the marks such as x, y position and size from supplied identifiers. It
+     * returns an array of points whose data matches the given identifiers.
      *
+     * @public
      *
-     * @param {*} identifiers
+     * @param {Array|Object} identifiers Field names and their corresponding values.
+     * ```
+     * identifiers can be given in an array of array,
+     *      ['Origin', 'Name'], // Names of the fields supplied in first array
+     *      ['USA', 'ford'], // Data values of each field supplied in rest of the arrays.
+     *      ['Japan', 'ford']
+     * or in an object,
+     *      {
+     *          Origin: ['USA']
+     *      }
+     * ```
+     * @param {Object} config Optional configurations which decides which information of the mark will
+     * be retrieved.
+     * @param {boolean} [config.getAllAttrs = false] If true, then returns all the information of each mark.
+     * @param {boolean} [config.getBBox = false] If true, then returns the bounding box of each mark.
      *
-     * @memberof VisualUnit
+     * @return {Array} Array of objects containing the information of each point.
+     * ```
+     * By default, the method returns the array of points in this structure,
+     *      [
+     *          {
+     *              x: 20,
+     *              y: 100,
+     *              width: 200,
+     *              height: 100
+     *          }
+     *      ]
+     * If 'config.getAllAttrs' is true, then it returns all the information of each mark,
+     *      [
+     *      // Positions of mark on initial state of transition.
+     *          enter: {
+     *              x: 0,
+     *              y: 0
+     *          },
+     *          // Final positions of the mark
+     *          update: {
+     *              x: 20,
+     *              y: 10
+     *          },
+     *          style: // css styles of each mark
+     *          source: [200, 'USA'] // Row information of each mark
+     *          id: 20 // Row id of each mark
+     *      ]
+     * ```
      */
     getPlotPointsFromIdentifiers (identifiers, config = {}) {
         let points = [];
@@ -529,11 +628,12 @@ export default class VisualUnit {
     }
 
     /**
+     * Removes the layer instance which matches the supplied layer name.
      *
+     * @public
+     * @param {string} name Name of layer
      *
-     * @param {*} name
-     *
-     * @memberof VisualUnit
+     * @return {VisualUnit} Instance of visual unit.
      */
     removeLayerByName (name) {
         removeLayersBy('name', name);
@@ -541,11 +641,12 @@ export default class VisualUnit {
     }
 
     /**
+     * Removes all the layer instances which matches the supplied mark type.
      *
+     * @public
+     * @param {string} type Mark type of layer.
      *
-     * @param {*} type
-     *
-     * @memberof VisualUnit
+     * @return {VisualUnit} Instance of visual unit.
      */
     removeLayersByType (type) {
         removeLayersBy('type', type);

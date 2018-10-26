@@ -7,8 +7,6 @@ import Variable from './variable';
  *
  * @public
  * @class SimpleVariable
- * @namespace muze
- * @extends {Variable}
  */
 export default class SimpleVariable extends Variable {
 
