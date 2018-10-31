@@ -5,9 +5,9 @@ import * as PROPS from '../enums/props';
 export const listenerMap = context => [
     {
         props: [PROPS.TRANSFORMED_DATA],
-        listener: fetch => fetch(PROPS.DATA, PROPS.CONFIG, (dataModel, config) => {
+        listener: fetch => fetch(PROPS.DATA, (dataModel) => {
             const dataModelValue = dataModel.value;
-            const configValue = config.value;
+            const configValue = context.config();
             const encodingValue = configValue && configValue.encoding;
             if (dataModelValue && encodingValue) {
                 const fieldsConfig = dataModelValue.getFieldsConfig();

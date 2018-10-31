@@ -54,7 +54,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
@@ -69,7 +69,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
@@ -84,7 +84,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
