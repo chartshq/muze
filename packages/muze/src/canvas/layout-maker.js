@@ -52,6 +52,7 @@ export const getRenderDetails = (context, mount) => {
     const {
         isColumnSizeEqual,
         isRowSizeEqual,
+        priority,
         rows,
         columns,
         values
@@ -125,7 +126,8 @@ export const getRenderDetails = (context, mount) => {
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,
-        isRowSizeEqual
+        isRowSizeEqual,
+        priority
     });
     return {
         layoutConfig,

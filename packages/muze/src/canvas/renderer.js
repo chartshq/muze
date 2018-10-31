@@ -15,8 +15,8 @@ const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].config().labels.rotation !== 0) {
-                    rotation = xAxes[i][j].config().labels.rotation;
+                if (xAxes[i][j].renderConfig().labels.rotation !== 0) {
+                    rotation = xAxes[i][j].renderConfig().labels.rotation;
                     return;
                 }
             }
@@ -26,7 +26,8 @@ const setLabelRotationForAxes = (context) => {
     if (rotation) {
         xAxes.forEach((axes) => {
             axes.forEach((axis) => {
-                axis.config({ labels: { rotation, smartTicks: false } });
+                axis.renderConfig({ labels: { rotation } });
+                axis.smartTicks(axis.setTickConfig());
             });
         });
     }
@@ -173,25 +174,33 @@ const renderLegend = (legendConfig, container, legendComponents, measurement) =>
 const renderHeader = (layoutConfig, container, type, headers) => {
     const headerCell = headers[`${type}Cell`];
     const config = layoutConfig[`${type}`];
+    const { classPrefix, measurement } = layoutConfig;
+    const { padding: shifter, canvasWidth, canvasHeight } = measurement;
     const { position, align, padding } = config;
-    const sel = container
-        .selectAll(`.${layoutConfig.classPrefix}-inner-container`)
+    if (headerCell) {
+        const sel = container
+        .selectAll(`.${classPrefix}-inner-container`)
         .data([type]);
-    sel.exit().remove();
-    const selEnter = sel.enter().append('div');
+        sel.exit().remove();
+        const selEnter = sel.enter().append('div');
 
-    const cont = selEnter.merge(sel);
-    cont.classed(`${layoutConfig.classPrefix}-inner-container`, true);
+        const cont = selEnter.merge(sel);
+        cont.classed(`${layoutConfig.classPrefix}-inner-container`, true);
 
-    headerCell && headerCell.render(cont.node());
+        headerCell.setAvailableSpace(canvasWidth - shifter, canvasHeight * 0.2);
+        headerCell.render(cont.node());
 
-    cont.selectAll('div').classed(`${layoutConfig.classPrefix}-inner-content`, true);
-    cont.style('width', `${100}%`);
+        cont.style('width', align === LEFT ? `calc(100% - ${shifter}px` : '100%')
+                        .style('margin-left', align === LEFT ? `${shifter}px` : 0);
 
-    if (config && headerCell) {
-        cont.style('float', LEFT)
-                        .style('text-align', align)
-                        .style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
+        cont.selectAll('div').classed(`${layoutConfig.classPrefix}-inner-content`, true);
+        cont.style('width', `${100}%`);
+
+        if (config) {
+            cont.style('float', LEFT)
+                            .style('text-align', align)
+                            .style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
+        }
     }
 };
 
@@ -201,24 +210,16 @@ const renderHeader = (layoutConfig, container, type, headers) => {
  * @param {*} context
  * @param {*} shifter
  */
-const shiftHeaders = (config, shifter, measurement, mount) => {
-    const { classPrefix, title, subtitle, legend } = config;
-    const { legendSpace } = measurement;
-    const { position } = legend;
-
-    shifter += position === LEFT ? legendSpace.width : 0;
-    title && selectElement(mount).select(`.${classPrefix}-title-container`)
-                    .style('width', title.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
-                    .style('margin-left', title.align === LEFT ? `${shifter}px` : 0);
-    subtitle && selectElement(mount).select(`.${classPrefix}-subtitle-container`)
-                    .style('width', subtitle.align === LEFT ? `calc(100% - ${shifter}px` : '100%')
-                    .style('margin-left', subtitle.align === LEFT ? `${shifter}px` : 0);
-
+const shiftLegend = (config, measurement, mount) => {
+    const { classPrefix } = config;
+    const { legendSpace, padding: shifter } = measurement;
+    const { width } = legendSpace;
     selectElement(mount).select(`.${classPrefix}-legend-horizontal-section`)
                     .style('margin-left', `${shifter}px`)
-                    .style('width', `${legendSpace.width - shifter}px`)
+                    .style('width', `${width - shifter}px`)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
-                    .style('max-width', `${legendSpace.width - shifter}px`);
+                    .style('max-width', `${width - shifter}px`);
+
     selectElement(mount).select(`.${classPrefix}-legend-vertical-section`)
                     .style('margin-left', null)
                     .selectAll(`.${classPrefix}-legend-body, .${classPrefix}-legend-title`)
@@ -303,15 +304,19 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
     const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
     measurement.padding = padding;
+    const { position } = layoutConfig.legend;
+
+    measurement.padding += position === LEFT ? measurement.legendSpace.width : 0;
     setLabelRotationForAxes(context);
 
     // Render layout
     context.layout().renderGrid(mount);
     context.once('layer.drawn').then(() => {
+        layoutConfig.measurement = measurement;
         renderHeader(layoutConfig, title, 'title', headers);
         renderHeader(layoutConfig, subtitle, 'subtitle', headers);
         renderLegend(layoutConfig, legend, legends, measurement);
-        shiftHeaders(layoutConfig, padding, measurement, mountPoint);
+        shiftLegend(layoutConfig, measurement, mountPoint, headers);
     });
     context.composition().visualGroup.matrixInstance().value.each((el) => {
         el.valueOf().parentContainer(layout.node());

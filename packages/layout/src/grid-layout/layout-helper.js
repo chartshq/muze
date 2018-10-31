@@ -1,4 +1,5 @@
-import VisualMatrix from '../visual-matrix/visual-matrix';
+import RowMatrix from '../visual-matrix/row-matrix';
+import ColumnMatrix from '../visual-matrix/column-matrix';
 
 export const generateVisualMatrices = (context, matrices) => {
     // Set of matrices for layout is generated starting with the left matrix
@@ -14,7 +15,8 @@ export const generateVisualMatrices = (context, matrices) => {
         gutterSpace,
         distribution,
         border,
-        breakPage
+        breakPage,
+        priority
     } = context.config();
     const {
         minUnitHeight,
@@ -41,7 +43,8 @@ export const generateVisualMatrices = (context, matrices) => {
         // If no bottom matrix is present, context will be empty
         bottomMatrix = bottomColumns.map((d, i) => [...bottomLeft[i], ...d, ...bottomRight[i]]);
     }
-    context.rowMatrix(new VisualMatrix([leftMatrix, rightMatrix], {
+
+    context.rowMatrix(new RowMatrix([leftMatrix, rightMatrix], {
         isDistributionEqual: isRowSizeEqual,
         distribution: distribution.rows,
         gutter: gutterSpace.rows,
@@ -50,6 +53,7 @@ export const generateVisualMatrices = (context, matrices) => {
             height: minUnitHeight,
             border: border.width
         },
+        priority: priority.row,
         breakPage: breakPage.rows.map(e => e + Math.max(topLeft.length, topRight.length)),
         extraCellLengths: [topLeft.length, bottomLeft.length]
     }));
@@ -66,7 +70,7 @@ export const generateVisualMatrices = (context, matrices) => {
         endColCells = bottomRight.length > 0 ? bottomRight[0].length : 0;
     }
 
-    context.columnMatrix(new VisualMatrix([topMatrix, bottomMatrix], {
+    context.columnMatrix(new ColumnMatrix([topMatrix, bottomMatrix], {
         isDistributionEqual: isColumnSizeEqual,
         distribution: distribution.columns,
         gutter: gutterSpace.columns,
@@ -76,6 +80,7 @@ export const generateVisualMatrices = (context, matrices) => {
             height: minUnitHeight,
             border: border.width
         },
+        priority: priority.col,
         breakPage: breakPage.columns,
         extraCellLengths: [begColCells, endColCells]
     }));

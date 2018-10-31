@@ -11,9 +11,10 @@ import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
 import { DOMAIN, BAND } from '../enums/constants';
+import { spaceSetter } from './space-setter';
 import {
+    getAxisComponentDimensions,
     computeAxisDimensions,
-    setOffset,
     registerChangeListeners,
     calculateContinousSpace
 } from './helper';
@@ -33,9 +34,9 @@ export default class SimpleAxis {
         this._range = [];
         this._domain = [];
         this._domainLock = false;
-        this._rotationLock = false;
         this._axisDimensions = {};
         this._eventList = [];
+        this._smartTicks = [];
 
         const defCon = mergeRecursive({}, this.constructor.defaultConfig());
         const simpleConfig = mergeRecursive(defCon, config);
@@ -45,7 +46,9 @@ export default class SimpleAxis {
         this._tickLabelStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-ticks`);
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
         dependencies.labelManager.setStyle(this._tickLabelStyle);
-        this._minTickDistance = dependencies.labelManager.getOriSize('ww');
+        const dist = dependencies.labelManager.getOriSize('wv');
+        this._minTickDistance = { width: dist.width / 2, height: dist.height / 2 };
+        this._minTickSpace = dependencies.labelManager.getOriSize('www');
 
         generateGetterSetters(this, PROPS);
         this.store(new Store({
@@ -121,12 +124,16 @@ export default class SimpleAxis {
         if (domain.length) {
             this.scale().domain(domain[0]);
             this._domain = this.scale().domain();
-            this.smartTicks(this.setTickConfig());
+            this.setAxisComponentDimensions();
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
         }
         return this._domain;
+    }
+
+    setAxisComponentDimensions () {
+        this.axisComponentDimensions(getAxisComponentDimensions(this));
     }
 
     /**
@@ -172,6 +179,31 @@ export default class SimpleAxis {
         return () => val => numberFormat(val);
     }
 
+    resetLogicalSpace () {
+        this.logicalSpace(null);
+        this.range([]);
+        const {
+            labels,
+            show,
+            showInnerTicks,
+            showOuterTicks,
+            showAxisName
+        } = this.config();
+        this.renderConfig({
+            labels,
+            show,
+            showInnerTicks,
+            showOuterTicks,
+            showAxisName
+        });
+    }
+
+    getFormattedText (text, index, axisTicks) {
+        const formatter = this.formatter;
+        const scale = this.scale();
+        return formatter ? formatter(axisTicks)(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
+    }
+
     /**
      *
      *
@@ -196,43 +228,42 @@ export default class SimpleAxis {
     }
 
     /**
+     * This method is used to set the space availiable to render
+     * the SimpleCell.
+     *
+     * @param {number} width The width of SimpleCell.
+     * @param {number} height The height of SimpleCell.
+     * @memberof AxisCell
+     */
+    setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
+        const {
+           orientation
+       } = this.config();
+
+        this.availableSpace({ width, height, padding });
+
+        if (orientation === TOP || orientation === BOTTOM) {
+            labelConfig = spaceSetter(this, { isOffset }).continous.x();
+        } else {
+            labelConfig = spaceSetter(this, { isOffset }).continous.y();
+        }
+
+        // Set config
+        this.renderConfig({
+            labels: labelConfig
+        });
+        this.setTickConfig();
+        this.getTickSize();
+        return this;
+    }
+
+    /**
      *
      *
      * @memberof SimpleAxis
      */
     setTickConfig () {
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     *
-     * @memberof SimpleAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            const range = this.range();
-            const length = Math.abs(range[0] - range[1]);
-            this.config({ labels: { rotation: 0 } });
-            if (length > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > length) {
-                this.config({ labels: { rotation: -90 } });
-            }
-        }
-        return this;
-    }
-
-    /**
-     *
-     *
-     *
-     * @memberof SimpleAxis
-     */
-    adjustRange () {
         return this;
     }
 
@@ -259,8 +290,8 @@ export default class SimpleAxis {
      * @return {Object} object with details about sizes of the axis.
      * @memberof SimpleAxis
      */
-    getAxisDimensions () {
-        this.axisDimensions(computeAxisDimensions(this));
+    getAxisDimensions (...params) {
+        this.axisDimensions(computeAxisDimensions(this, ...params));
         return this.axisDimensions();
     }
 
@@ -273,7 +304,6 @@ export default class SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateContinousSpace(this));
-            setOffset(this);
             this.logicalSpace();
         }
         return this.logicalSpace();
@@ -362,25 +392,6 @@ export default class SimpleAxis {
 
     getFormattedTickValues (tickValues) {
         return tickValues;
-    }
-
-    /**
-     *
-     *
-     * @param {*} tickValues
-     *
-     * @memberof SimpleAxis
-     */
-    setTickValues () {
-        const {
-            tickValues
-        } = this.config();
-
-        if (tickValues) {
-            tickValues instanceof Array && this.axis().tickValues(tickValues);
-            return this;
-        }
-        return this;
     }
 
     /**

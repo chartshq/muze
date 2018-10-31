@@ -26,9 +26,12 @@ const geomProps = {
     detailFields: {}
 };
 
+const textProps = {
+    smartText: {}
+};
 export const PROPS = {
-    [TEXT]: DEFAULT_PROPS,
     [GEOM]: mergeRecursive(geomProps, DEFAULT_PROPS),
+    [TEXT]: mergeRecursive(textProps, DEFAULT_PROPS),
     [AXIS]: DEFAULT_PROPS,
     [BLANK]: DEFAULT_PROPS
 };
