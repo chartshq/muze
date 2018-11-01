@@ -56,7 +56,7 @@ d3.json('../data/cars.json', (data) => {
     ];
     const rootData = new DataModel([], schema);
     env = env
-    .data([])
+    .data(rootData)
     .minUnitHeight(10)
     .minUnitWidth(10);
 

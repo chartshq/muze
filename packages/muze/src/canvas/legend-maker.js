@@ -162,7 +162,7 @@ export const createLegend = (context, headerHeight, height, width) => {
         width,
         headerHeight
     };
-    if (!context.data() || context.data().isEmpty) {
+    if (!context.data() || context.data().isEmpty()) {
         return [];
     }
     const { legend } = context.config();
