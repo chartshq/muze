@@ -31,8 +31,8 @@ export default class MatrixResolver {
         this._rowMatrix = [];
         this._columnMatrix = [];
         this._valueMatrix = [];
-        this._facets = {};
-        this._projections = {};
+        this._facets = { rowFacets: [], colFacets: [] };
+        this._projections = { rowProjections: [], colProjections: [] };
         this._datamodelTransform = {};
         this._units = [];
         this._cacheMaps = {};

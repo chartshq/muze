@@ -40,6 +40,22 @@ export default class GridLayout extends GenericLayout {
         this.matrices(matrices);
         this.config(this.constructor.defaultConfig());
         this._layoutId = getUniqueId();
+        this._viewInfo = this.constructor.defaultViewInfo();
+    }
+
+    static defaultViewInfo () {
+        return Object.assign({}, {
+            layoutDimensions: {
+                border: this.defaultConfig().border,
+                viewHeight: [0, 0, 0],
+                viewWidth: [0, 0, 0]
+            },
+            viewMatricesInfo: {
+                columnPages: 0,
+                rowPages: 0,
+                matrices: { top: [], center: [], bottom: [] }
+            }
+        });
     }
 
     /**
@@ -113,7 +129,7 @@ export default class GridLayout extends GenericLayout {
      */
     gotoPage (type, pageNumber) {
         const pageType = type.toLowerCase();
-        const { viewMatricesInfo } = this.getViewInformation();
+        const { viewMatricesInfo } = this.viewInfo();
         const totalPages = viewMatricesInfo[`${pageType}Pages`];
         const pointer = Math.min(Math.max(1, pageNumber), totalPages);
         this.config({
@@ -132,12 +148,20 @@ export default class GridLayout extends GenericLayout {
      * @memberof GridLayout
      */
     pages (type) {
-        const { viewMatricesInfo } = this.getViewInformation();
+        const { viewMatricesInfo } = this.viewInfo();
         const pageType = type.toLowerCase();
         return {
             totalPages: viewMatricesInfo[`${pageType}Pages`],
             currentPage: this.config()[`${pageType}Pointer`] + 1
         };
+    }
+
+    viewInfo (...viewInfo) {
+        if (viewInfo.length) {
+            this._viewInfo = viewInfo[0];
+            return this;
+        }
+        return this._viewInfo;
     }
 
     /**
@@ -155,21 +179,11 @@ export default class GridLayout extends GenericLayout {
         const viewMatricesInfo = getViewMatrices(this, rowPointer, columnPointer);
         const layoutDimensions = getViewMeasurements(this);
         layoutDimensions.border = border;
-        this.viewInfo = {
+        this.viewInfo({
             viewMatricesInfo,
             layoutDimensions
-        };
+        });
         return this;
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof GridLayout
-     */
-    getViewInformation () {
-        return this.viewInfo;
     }
 
     /**
@@ -183,11 +197,12 @@ export default class GridLayout extends GenericLayout {
         if (!this.mountPoint()) {
             return this;
         }
+        const viewInfo = this.viewInfo();
         const {
-            viewMatricesInfo,
-            layoutDimensions
-        } = this.getViewInformation();
-        // Render matrices
+                viewMatricesInfo,
+                layoutDimensions
+            } = viewInfo;
+            // Render matrices
         renderMatrices(this, viewMatricesInfo.matrices, layoutDimensions);
         return this;
     }

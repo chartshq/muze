@@ -20,7 +20,7 @@ export const legendCreator = (canvas) => {
         const scaleType = axisInfo[0];
         const scaleProps = canvas[scaleType]();
 
-        if (scaleProps.field) {
+        if (scaleProps.field && scale) {
             const {
                 type,
                 step

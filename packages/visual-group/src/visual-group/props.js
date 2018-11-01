@@ -12,11 +12,24 @@ export const PROPS = {
             return value;
         }
     },
-    cornerMatrices: {},
+    cornerMatrices: {
+        defaultValue: {
+            topLeft: [],
+            topRight: [],
+            bottomLeft: [],
+            bottomRight: []
+        }
+    },
     groupType: {},
-    matrixInstance: {},
-    metaData: {},
-    placeholderInfo: {},
+
+    metaData: {
+        defaultValue: {
+            border: {}
+        }
+    },
+    placeholderInfo: {
+        defaultValue: {}
+    },
     resolver: {},
     registry: {
         sanitization: (context, value) => {

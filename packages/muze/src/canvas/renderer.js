@@ -301,15 +301,16 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     const {
         mount
     } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
-    const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
+    const padding = context.layout().viewInfo().layoutDimensions.viewWidth[0];
+
     measurement.padding = padding;
     setLabelRotationForAxes(context);
 
     // Render layout
     context.layout().renderGrid(mount);
+    renderHeader(layoutConfig, title, 'title', headers);
+    renderHeader(layoutConfig, subtitle, 'subtitle', headers);
     context.once('layer.drawn').then(() => {
-        renderHeader(layoutConfig, title, 'title', headers);
-        renderHeader(layoutConfig, subtitle, 'subtitle', headers);
         renderLegend(layoutConfig, legend, legends, measurement);
         shiftHeaders(layoutConfig, padding, measurement, mountPoint);
     });
