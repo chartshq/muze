@@ -26,14 +26,11 @@ const sanitizeRetinalConfig = (retinalConf) => {
  * @memberof VisualGroup
  */
 export const setMatrixInstances = (context, placeholder) => {
-    let {
+    const {
         values,
         rows,
         columns
     } = placeholder;
-    values = values || [];
-    rows = rows || [];
-    columns = columns || [];
     context._composition.matrices = {
         value: new ValueMatrix(values),
         left: new ValueMatrix(rows[0]),

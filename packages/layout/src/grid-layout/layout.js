@@ -44,7 +44,7 @@ export default class GridLayout extends GenericLayout {
     }
 
     static defaultViewInfo () {
-        return Object.assign({}, {
+        return {
             layoutDimensions: {
                 border: this.defaultConfig().border,
                 viewHeight: [0, 0, 0],
@@ -55,7 +55,7 @@ export default class GridLayout extends GenericLayout {
                 rowPages: 0,
                 matrices: { top: [], center: [], bottom: [] }
             }
-        });
+        };
     }
 
     /**
@@ -115,7 +115,7 @@ export default class GridLayout extends GenericLayout {
      */
     triggerReflow () {
         computeLayoutMeasurements(this);
-        this.setViewInformation();
+        this.computeViewInformation();
         return this;
     }
 
@@ -135,7 +135,7 @@ export default class GridLayout extends GenericLayout {
         this.config({
             [`${pageType}Pointer`]: pointer - 1
         });
-        this.setViewInformation();
+        this.computeViewInformation();
         this.renderGrid();
         return this;
     }
@@ -170,7 +170,7 @@ export default class GridLayout extends GenericLayout {
      * @returns
      * @memberof GridLayout
      */
-    setViewInformation () {
+    computeViewInformation () {
         const {
             rowPointer,
             columnPointer,

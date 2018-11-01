@@ -28,7 +28,11 @@ export const PROPS = {
         }
     },
     placeholderInfo: {
-        defaultValue: {}
+        defaultValue: {
+            rows: [],
+            columns: [],
+            values: []
+        }
     },
     resolver: {},
     registry: {

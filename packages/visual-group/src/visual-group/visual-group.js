@@ -57,7 +57,7 @@ class VisualGroup extends SimpleGroup {
         // Create instance of matrix resolver
         this.resolver(new MatrixResolver(this._dependencies));
         // matrix instance store each of the matrices
-        setMatrixInstances(this, {});
+        setMatrixInstances(this, this.placeholderInfo());
          // Getting indiviual registered items
         this.registry({
             layerRegistry: componentSubRegistry.layerRegistry.get(),
