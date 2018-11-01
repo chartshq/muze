@@ -13,28 +13,37 @@ import { LINEAR, HIDDEN, BOTTOM, TOP } from './enums/constants';
  * @param {*} labelManager
  * @param {*} config
  */
-const rotateAxis = (instance, tickText, labelManager, config) => {
+const rotateAxis = (instance, tickText, labelManager) => {
+    let rotation;
     const axis = instance.axis();
-    const scale = instance.scale();
+    const config = instance.config();
+    const renderConfig = instance.renderConfig();
+    const smartTicks = instance.smartTicks();
     const {
         orientation,
-        labels,
         fixedBaseline,
         type
-     } = config;
-    let { rotation } = labels;
+    } = config;
+    const {
+        labels
+    } = renderConfig;
+
+    rotation = labels.rotation;
 
     const tickSize = instance.getTickSize();
-
-    tickText.each(function (datum, index) {
+    tickText.each(function (d, index) {
         let yShift;
         let xShift;
-        const tickFormatter = axis.tickFormat() ? axis.tickFormat : scale.tickFormat;
-        const temp = tickFormatter ? tickFormatter()(datum) : datum;
+        let datum = smartTicks[index] ? smartTicks[index].text : d;
+
+        const tickFormatter = axis.tickFormat() ? axis.tickFormat : null;
+
+        const temp = tickSize ? (tickFormatter ? tickFormatter()(datum) : datum) : '';
 
         datum = temp.toString();
 
         const tickLabelDim = labelManager.getOriSize(datum);
+
         const width = tickLabelDim.width * 0.5;
         const height = tickLabelDim.height * 0.5;
 
@@ -67,10 +76,13 @@ const rotateAxis = (instance, tickText, labelManager, config) => {
                                 ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
             xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
+
             selectElement(this)
                             .attr('transform', `translate(${xShift - tickSize} 
                                 ${yShift + tickSize}) rotate(${rotation})`);
         }
+        selectElement(this).transition()
+                        .duration(1000).text(datum);
     });
     return tickText;
 };
@@ -86,11 +98,15 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
         _smartTicks
     } = axisInstance;
     const config = axisInstance.config();
+    const renderConfig = axisInstance.renderConfig();
     const labelManager = axisInstance.dependencies().labelManager;
     const {
-        labels,
-        orientation
+        orientation,
+        classPrefix
     } = config;
+    const {
+        labels
+    } = renderConfig;
     const {
         rotation,
         smartTicks: isSmartTicks
@@ -100,28 +116,41 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     tickText.selectAll('tspan').remove();
 
    // rotate labels if not enough space is available
-    if (rotation !== 0 && isSmartTicks === false && (orientation === TOP || orientation === BOTTOM)) {
-        rotateAxis(axisInstance, tickText, labelManager, config);
-    } else if (rotation === 0 && isSmartTicks === false) {
+    if (rotation && (orientation === TOP || orientation === BOTTOM)) {
+        rotateAxis(axisInstance, tickText, labelManager);
+    } else if (!rotation && !isSmartTicks) {
         tickText.attr('transform', '');
     } else {
-        tickText.attr('y', 0)
-                        .attr('x', 0)
-                        .text('');
-        const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, 'smart-text');
-        tspan.attr('dy', '0')
-                        .style('opacity', '0')
-                        .transition()
-                        .duration(1000)
-                        .attr('dy', (d, i) => {
-                            if (orientation === BOTTOM || i !== 0) {
-                                return _smartTicks[i].oriTextHeight;
-                            }
-                            return -_smartTicks[i].oriTextHeight * (_smartTicks[i].lines.length - 1) - tickSize;
-                        })
-                        .style('opacity', 1)
-                        .attr('x', 0)
-                        .text(e => e);
+        tickText.text('');
+        if (orientation === TOP || orientation === BOTTOM) {
+            tickText.attr('y', 0)
+                            .attr('x', 0)
+                            .attr('transform', '')
+                            .text('');
+            const tspan = makeElement(tickText, 'tspan', (d, i) => {
+                if (_smartTicks[i]) {
+                    return _smartTicks[i].lines;
+                } return [];
+            }, `${classPrefix}-smart-text`);
+
+            tspan.attr('dy', '0')
+                            .style('opacity', '0')
+
+                            .transition()
+                            .duration(1000)
+                            .attr('dy', (d, i) => {
+                                if (orientation === BOTTOM || i !== 0) {
+                                    return _smartTicks[0].oriTextHeight;
+                                }
+                                return -_smartTicks[0].oriTextHeight * (_smartTicks[0].lines.length - 1) - tickSize;
+                            })
+                            .style('opacity', 1)
+                            .text(e => e)
+                            .attr('x', 0);
+        } else {
+            const tspan = makeElement(tickText, 'tspan', (d, i) => _smartTicks[i].lines, `${classPrefix}-smart-text`);
+            tspan.text(e => e);
+        }
     }
 
     return tickText;
@@ -184,6 +213,7 @@ const setAxisNamePos = (textNode, orientation, measures) => {
  */
 export function renderAxis (axisInstance) {
     const config = axisInstance.config();
+    const renderConfig = axisInstance.renderConfig();
     const labelManager = axisInstance.dependencies().labelManager;
     const mount = axisInstance.mount();
     const range = axisInstance.range();
@@ -198,17 +228,18 @@ export function renderAxis (axisInstance) {
     const {
         orientation,
         name,
-        labels,
         xOffset,
         yOffset,
         axisNamePadding,
         className,
-        showAxisName,
-        show,
         id,
-        interpolator,
         classPrefix
      } = config;
+    const {
+        show,
+        showAxisName,
+        labels
+    } = renderConfig;
 
     if (!show) {
         return;
@@ -222,12 +253,6 @@ export function renderAxis (axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
-    // @to-do: Need to write a configuration override using decorator pattern
-    if (interpolator === 'linear') {
-    // Set ticks for the axis
-        axisInstance.setTickValues();
-    }
-
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
     formatter && axis.tickFormat(formatter(tickValues || axis.tickValues() || labelFunc()));
@@ -236,7 +261,7 @@ export function renderAxis (axisInstance) {
     const availableSpace = Math.abs(range[0] - range[1]);
 
     // Get width and height taken by axis labels
-    const labelProps = axisInstance.axisDimensions().tickLabelDim;
+    const labelProps = axisInstance.axisComponentDimensions().largestTickDimensions;
 
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
@@ -254,6 +279,7 @@ export function renderAxis (axisInstance) {
     const tickText = selectContainer.selectAll('.tick text');
     tickText.classed(`${classPrefix}-ticks`, true)
                     .classed(`${classPrefix}-ticks-${id}`, true);
+
     changeTickOrientation(selectContainer, axisInstance, tickSize);
 
     // Create axis name

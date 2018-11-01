@@ -3,15 +3,37 @@ import { mergeRecursive } from 'muze-utils';
 export const PROPS = {
     availableSpace: {},
     axisDimensions: {},
+    axisComponentDimensions: {},
     config: {
         sanitization: (context, value) => {
-            if (value.labels && value.labels.rotation) {
-                context._rotationLock = true;
-            }
-            value = mergeRecursive(context._config || {}, value);
+            const oldConfig = Object.assign({}, context._config || {});
+            value = mergeRecursive(oldConfig, value);
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
-            context.axis(context.createAxis(value));
+            if (value.orientation !== oldConfig.orientation) {
+                context.axis(context.createAxis(value));
+            }
             context.store().commit('config', value);
+            const {
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            } = value;
+            context.renderConfig({
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            });
+            return value;
+        }
+    },
+    renderConfig: {
+        sanitization: (context, value) => {
+            const oldConfig = Object.assign({}, context._renderConfig || {});
+            value = mergeRecursive(oldConfig, value);
             return value;
         }
     },
@@ -33,5 +55,6 @@ export const PROPS = {
 
     smartTicks: {},
     store: {},
-    tickSize: {}
+    tickSize: {},
+    maxTickSpaces: {}
 };

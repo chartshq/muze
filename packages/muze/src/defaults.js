@@ -33,6 +33,16 @@ export const DEFAULT_CONFIG = {
     showHeaders: false,
     minWidth: 100,
     minHeight: 100,
+    facet: {
+        rows: {
+            minCharacters: 3
+        },
+        columns: {
+            maxLines: 2,
+            verticalAlign: 'middle',
+            minCharacters: 1
+        }
+    },
     border: {
         style: 'solid',
         color: '#d6d6d6',

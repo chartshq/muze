@@ -150,9 +150,14 @@ class AxisCell extends SimpleCell {
             margin,
             isOffset
         } = this.config();
-        this.source().setAvailableSpace(width, height, margin, isOffset);
+
+        if (width || height) {
+            this.source().setAvailableSpace(width, height, margin, isOffset);
+            this.source().logicalSpace(null);
+        } else {
+            this.source().resetLogicalSpace();
+        }
         this.logicalSpace(null);
-        this.source().logicalSpace(null);
         return this;
     }
 
@@ -192,8 +197,8 @@ class AxisCell extends SimpleCell {
         if (availHeight === 0 || !availHeight) {
             selection.attr(HEIGHT, `${0}px`);
         }
-        wrapperDiv.style(WIDTH, `${show ? availWidth : 0}px`)
-                        .style(HEIGHT, `${show ? availHeight : 0}px`)
+        wrapperDiv.style(WIDTH, `${show ? Math.floor(availWidth) : 0}px`)
+                        .style(HEIGHT, `${show ? Math.floor(availHeight) : 0}px`)
                         .style('margin-top', top)
                         .style('margin-bottom', bottom)
                         .style('margin-left', left)

@@ -27,6 +27,9 @@ export const TRANSFORM = 'transform';
 export const LAYER_DEF = 'layerDef';
 export const CONFIG = 'config';
 export const DETAIL_FIELDS = 'detailFields';
+export const MAX_LINES = 'maxLines';
+export const MIN_CHARS = 'minCharacters';
+export const ROTATION = 'rotation';
 
 export const TEXT_CELL = 'text-cell';
 export const AXIS_CELL = 'axis-cell';
