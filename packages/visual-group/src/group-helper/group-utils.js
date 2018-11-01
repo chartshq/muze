@@ -70,7 +70,7 @@ export const initializeCacheMaps = () => ({
  * @param {*} axisName
  * @param {*} id
  */
-export const getAxisKey = (axisName, id, scaleType) => `${axisName}-axis-${id}-${scaleType}`;
+export const getAxisKey = (axisName, ...params) => `${axisName}-axis-${params.join('-')}`;
 
 /**
  *

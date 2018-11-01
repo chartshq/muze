@@ -78,31 +78,30 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
     const { cacheMaps } = axesCreators;
     const map = cacheMaps[`${axisType}AxesMap`];
 
+    const commonAxisKey = getAxisKey(axisType, index);
     fields.forEach((field, axisIndex) => {
-        axisKey = getAxisKey(axisType, index, dataTypeScaleMap[field.subtype()]);
+        axisKey = getAxisKey(axisType, index, axisIndex, dataTypeScaleMap[field.subtype()]);
         const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators);
 
+        let axis;
         if (!map.has(axisKey)) {
-            const xAxis = createSimpleAxis(axisConfig, field, axesCreators);
-            currentAxes.push(xAxis);
+            axis = createSimpleAxis(axisConfig, field, axesCreators);
         } else {
-            const axes = map.get(axisKey);
-            axes[axisIndex] = axes[axisIndex] ? axes[axisIndex] : createSimpleAxis(axisConfig, field, axesCreators);
-            axes[axisIndex]._rotationLock = false;
-            axes[axisIndex] && axes[axisIndex].config(axisConfig).domain(axisConfig.domain || []);
+            axis = map.get(axisKey);
+            axis._rotationLock = false;
+            axis.config(axisConfig);
+            axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
+        currentAxes.push(axis);
+        map.set(axisKey, axis);
     });
 
     if (currentAxes.length) {
-        map.set(axisKey, currentAxes);
+        map.set(commonAxisKey, currentAxes);
+        groupAxes.add(commonAxisKey);
     }
 
-    for (const [key] of map.entries()) {
-        if (key === axisKey) {
-            groupAxes.add(axisKey);
-        }
-    }
-    return map.get(axisKey);
+    return currentAxes;
 };
 
 /**
