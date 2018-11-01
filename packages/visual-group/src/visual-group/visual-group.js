@@ -6,7 +6,7 @@ import {
     initStore,
     findInGroup
 } from '../group-helper';
-import { setupChangeListeners } from './change-listener';
+import { setupChangeListeners, setMatrixInstances } from './change-listener';
 import { PROPS } from './props';
 import {
     CONFIG,
@@ -53,24 +53,18 @@ class VisualGroup extends SimpleGroup {
         generateGetterSetters(this, PROPS);
         // Populate the store with default values
         this.store(initStore());
-
         // initialize group compositions
         this._composition = {};
         // store reference to data
         this._data = [];
-        // matrix instance store each of the matrices
-        this._matrixInstance = {};
         // store reference to mountpoint
         this._mount = null;
         // selection object that takes care of updating of components
         this._selection = {};
-        // stores info about the placeholders generated after creation of matrices
-        this._placeholderInfo = {};
-        // corner matrices are the headers/footers for the application
-        this._cornerMatrices = {};
         // Create instance of matrix resolver
         this.resolver(new MatrixResolver(this._dependencies));
-
+        // matrix instance store each of the matrices
+        setMatrixInstances(this, {});
          // Getting indiviual registered items
         this.registry({
             layerRegistry: componentSubRegistry.layerRegistry.get(),
@@ -190,7 +184,6 @@ class VisualGroup extends SimpleGroup {
             rowProjections,
             colProjections
         } = this.resolver().getAllFields();
-
         return channel === Y ? rowProjections : colProjections;
     }
 

@@ -41,6 +41,50 @@ export const dispatchProps = (context) => {
     lifeCycleManager.notify({ client: context, action: 'updated' });
 };
 
+const equalityChecker = (props, params) => {
+    let checker = () => false;
+    return !props.every((option, i) => {
+        switch (option) {
+        case ROWS:
+        case COLUMNS:
+        case DETAIL:
+            checker = isEqual('Array');
+            break;
+
+        case SHAPE:
+        case SIZE:
+        case COLOR:
+        case DATA:
+        case CONFIG:
+            checker = isEqual('Object');
+            break;
+        default:
+            checker = () => true;
+            break;
+        }
+        const oldVal = params[i][0];
+        const newVal = params[i][1];
+
+        return checker(oldVal, newVal);
+    });
+};
+
+const updateChecker = (props, params) => props.every((option, i) => {
+    const val = params[i][1];
+    switch (option) {
+    case ROWS:
+    case COLUMNS:
+        return val !== null;
+
+    case DATA:
+        return val && !val.isEmpty();
+
+    default:
+        return true;
+
+    }
+});
+
 /**
  *
  *
@@ -51,35 +95,13 @@ export const setupChangeListener = (context) => {
     store.registerImmediateListener(MOUNT, () => {
         const allOptions = Object.keys(context._allOptions);
         const props = [...allOptions, ...Object.keys(canvasOptions)];
-        let equalityChecker = () => false;
+
         store.registerChangeListener(props, (...params) => {
-            const updateProps = props.every((option, i) => {
-                switch (option) {
-                case ROWS:
-                case COLUMNS:
-                case DETAIL:
-                case LAYERS:
-                    equalityChecker = isEqual('Array');
-                    break;
+            let updateProps = equalityChecker(props, params);
+            updateProps = updateChecker(props, params);
 
-                case SHAPE:
-                case SIZE:
-                case COLOR:
-                case DATA:
-                case CONFIG:
-                    equalityChecker = isEqual('Object');
-                    break;
-                default:
-                    equalityChecker = () => true;
-                    break;
-                }
-                const oldVal = params[i][0];
-                const newVal = params[i][1];
-
-                return equalityChecker(oldVal, newVal);
-            });
             // inform attached board to rerender
-            !updateProps && dispatchProps(context);
+            updateProps && dispatchProps(context);
             context.render();
         }, true);
     });

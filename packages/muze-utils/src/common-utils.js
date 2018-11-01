@@ -725,9 +725,13 @@ const generateGetterSetters = (context, props) => {
     Object.entries(props).forEach((propInfo) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
+        const defVal = propInfo[1].defaultValue;
         const sanitization = propInfo[1].sanitization;
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            if (defVal) {
+                context[`_${prop}`] = defVal;
+            }
             context[prop] = (...params) => {
                 if (params.length) {
                     let value = params[0];

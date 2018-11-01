@@ -25,13 +25,21 @@ const sanitizeRetinalConfig = (retinalConf) => {
  * @param {*} placeholder
  * @memberof VisualGroup
  */
-const setMatrixInstances = (context, placeholder) => {
+export const setMatrixInstances = (context, placeholder) => {
+    let {
+        values,
+        rows,
+        columns
+    } = placeholder;
+    values = values || [];
+    rows = rows || [];
+    columns = columns || [];
     context._composition.matrices = {
-        value: new ValueMatrix(placeholder.values),
-        left: new ValueMatrix(placeholder.rows[0]),
-        right: new ValueMatrix(placeholder.rows[1]),
-        top: new ValueMatrix(placeholder.columns[0]),
-        bottom: new ValueMatrix(placeholder.columns[1])
+        value: new ValueMatrix(values),
+        left: new ValueMatrix(rows[0]),
+        right: new ValueMatrix(rows[1]),
+        top: new ValueMatrix(columns[0]),
+        bottom: new ValueMatrix(columns[1])
     };
     return context;
 };
@@ -47,72 +55,69 @@ export const setupChangeListeners = (context) => {
         const datamodel = context.data();
         const [config, rows, columns, color, shape, size, detail, layers, transform] = params;
 
-        if (datamodel && rows[1] && columns[1]) {
-            // Get the resolver for the matrices
-            const resolver = context.resolver();
-            // Prepare configuration for matrix preparation
-            let matrixConfig = {
-                selection: context.selection(),
-                alias: context.alias(),
-                globalConfig: config[1] || {},
-                rows: rows[1],
-                columns: columns[1],
-                detail: detail[1],
-                layers: layers[1],
-                transform: transform[1]
-            };
+        // Get the resolver for the matrices
+        const resolver = context.resolver();
+        // Prepare configuration for matrix preparation
+        let matrixConfig = {
+            selection: context.selection(),
+            alias: context.alias(),
+            globalConfig: config[1] || {},
+            rows: rows[1],
+            columns: columns[1],
+            detail: detail[1],
+            layers: layers[1],
+            transform: transform[1]
+        };
 
-            const retinalConfig = sanitizeRetinalConfig({
-                color: color[1],
-                shape: shape[1],
-                size: size[1]
-            });
+        const retinalConfig = sanitizeRetinalConfig({
+            color: color[1],
+            shape: shape[1],
+            size: size[1]
+        });
 
-            matrixConfig = Object.assign(matrixConfig, retinalConfig);
-            // Create the encoders for the group
-            const encoders = {};
-            encoders.retinalEncoder = new RetinalEncoder();
-            encoders.simpleEncoder = getEncoder(layers[1]);
+        matrixConfig = Object.assign(matrixConfig, retinalConfig);
+        // Create the encoders for the group
+        const encoders = {};
+        encoders.retinalEncoder = new RetinalEncoder();
+        encoders.simpleEncoder = getEncoder(layers[1]);
 
-            // Set the group type
-            context.groupType(encoders.simpleEncoder.constructor.type());
+        // Set the group type
+        context.groupType(encoders.simpleEncoder.constructor.type());
 
-            // Get sanitized fields as instances of the Vars Class
-            const fields = encoders.simpleEncoder.fieldSanitizer(datamodel, matrixConfig);
-            encoders.simpleEncoder.setAxisAndHeaders(config[1] ? config[1].axisFrom : {}, fields);
-            // Setting layers for the code
-            layers[1] && resolver.layerConfig(layers[1]);
-            // Set the row and column axes
-            resolver.resetFacetsAndProjections()
-                            .horizontalAxis(fields.rows, encoders)
-                            .verticalAxis(fields.columns, encoders);
-            // Getting the placeholders
-            const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-            context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
-            // Set the selection object
-            context.selection(placeholderInfo.selection);
+        // Get sanitized fields as instances of the Vars Class
+        const fields = encoders.simpleEncoder.fieldSanitizer(datamodel, matrixConfig);
+        encoders.simpleEncoder.setAxisAndHeaders(config[1] ? config[1].axisFrom : {}, fields);
+        // Setting layers for the code
+        layers[1] && resolver.layerConfig(layers[1]);
+        // Set the row and column axes
+        resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
+        // Getting the placeholders
+        const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
+        context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
+        // Set the selection object
+        context.selection(placeholderInfo.selection);
 
-            // Create retinal axes
-            resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
+        // Create retinal axes
+        resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
                 encoders);
 
-            // Domains are evaluated for each of the axes for commonality
-            resolver.setDomains(matrixConfig, placeholderInfo.dataModels, encoders);
+        // Domains are evaluated for each of the axes for commonality
+        resolver.setDomains(matrixConfig, placeholderInfo.dataModels, encoders);
 
-            // Create matrix instances
-            setMatrixInstances(context, placeholderInfo);
+        // Create matrix instances
+        setMatrixInstances(context, placeholderInfo);
 
-            // Prepare corner matrices
-            context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config[1]));
+        // Prepare corner matrices
+        context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config[1]));
 
-             // Set placeholder information
-            context.placeholderInfo(placeholderInfo);
+        // Set placeholder information
+        context.placeholderInfo(placeholderInfo);
 
-            context._composition.axes = resolver.axes();
-            context.metaData({
-                border: getBorders(placeholderInfo, encoders.simpleEncoder)
-            });
-        }
+        context._composition.axes = resolver.axes();
+        context.metaData({
+            border: getBorders(placeholderInfo, encoders.simpleEncoder)
+        });
+
         return context;
     });
     return context;
