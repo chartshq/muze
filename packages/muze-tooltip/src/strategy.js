@@ -41,7 +41,7 @@ const getTabularData = (data, schema, fieldspace, timeDiffs) => {
         const row = [];
         schema.forEach((fieldObj, i) => {
             const interval = fieldObj.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[fieldObj.name] : 0;
-            const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i]._ref.numberFormat();
+            const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i].numberFormat();
             const formatterFn = defaultTooltipFormatters(fieldObj.subtype || fieldObj.type, numberFormat);
             const value = formatterFn(d[i], interval);
             row.push(value);
@@ -76,7 +76,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const values = [];
         const index = fieldsConfig[field].index;
         const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ?
-                fieldsObj[field].getMinDiff() : 0;
+                fieldsObj[field].minimumConsecutiveDifference() : 0;
         const formatterFn = (formatters && formatters[field]) || defaultTooltipFormatters(type, val => val);
 
         if (value !== null) {
@@ -113,7 +113,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
                             formattedValue = defaultTooltipFormatters('measure',
-                                fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
+                                fieldspace.fields[measureIndex].numberFormat())(value, interval);
                             values.push([{
                                 value: `${measure}${separator}`,
                                 style: {
@@ -129,7 +129,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         measureIndex = fieldsConfig[associatedMeasures[0]].index;
                         value = data[i][measureIndex];
                         formattedValue = defaultTooltipFormatters('measure',
-                            fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
+                            fieldspace.fields[measureIndex].numberFormat())(value, interval);
                         values.push([icon, {
                             value: `${key}${separator}`,
                             className: `${config.classPrefix}-tooltip-key`

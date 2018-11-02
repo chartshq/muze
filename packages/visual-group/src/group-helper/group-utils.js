@@ -208,7 +208,7 @@ export const getAxisType = (fieldsConfig, field) => {
  *
  */
 export const retriveDomainFromData = (datamodel, fieldName) => {
-    const field = datamodel.getFieldspace().fields.find(d => d._ref.name === fieldName.toString());
+    const field = datamodel.getFieldspace().fields.find(d => d.name() === fieldName.toString());
     return field.domain();
 };
 

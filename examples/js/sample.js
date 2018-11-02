@@ -50,8 +50,8 @@ d3.json('../data/cars.json', (data) => {
         {
             name: 'Year',
             type: 'dimension'
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
         }
     ];
 
