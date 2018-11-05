@@ -312,6 +312,7 @@ export const renderComponents = (context, components, layoutConfig, measurement)
 
     // Render layout
     context.layout().renderGrid(mount);
+    layoutConfig.measurement = measurement;
     renderHeader(layoutConfig, title, 'title', headers);
     renderHeader(layoutConfig, subtitle, 'subtitle', headers);
     context.once('layer.drawn').then(() => {
