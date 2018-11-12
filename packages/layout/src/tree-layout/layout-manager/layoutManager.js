@@ -89,17 +89,23 @@ class LayoutManager {
         this.prioritySequence = [];
 
         layoutComponents.forEach((component) => {
-            this.prioritySequence.push(component.name());
-            this.addComponent(component);
-            if (component.name() === 'grid') {
+            if(component){
+                this.prioritySequence.push(component.name());
+                this.addComponent(component);
+                if (component.name() === 'grid') {
                 component.component.forEach((componentArr) => {
                     componentArr.forEach((compo) => {
                         this.addComponent(compo);
                     });
                 });
+                }
             }
         });
         return this;
+    }
+
+    getComponentBoundBox(componentName){
+        return this.layoutDef.getComponentMap().get(componentName).boundBox;
     }
 }
 

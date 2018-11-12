@@ -13,29 +13,38 @@ export default class GridComponent extends MuzeComponent {
     }
 
     sanitizeGrid(){
-    const { viewMatricesInfo, layoutDimensions } = this.component.getViewInformation();
-    const gridComponents = [];
-    for (let i = 0; i < 3; i++) {
-            gridComponents[i] = [];
-            for (let j = 0; j < 3; j++) {
-                const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
-                const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
-                const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
-                const matrixConfig = {
-                    dimensions: matrixDim,
-                    border: layoutDimensions.border,
-                    classPrefix: this.params.config.classPrefix,
-                    row: ROW_MATRIX_INDEX[i],
-                    column: j
-                };
-                const matrixWrapper = new MatrixComponent({
-                    name: matrixName,
-                    component: matrix,
-                    config: matrixConfig
-                });
-                gridComponents[i].push(matrixWrapper);
+        let height = 0;
+        let width = 0
+        const { viewMatricesInfo, layoutDimensions } = this.component.getViewInformation();
+        const gridComponents = [];
+        for (let i = 0; i < 3; i++) {
+                gridComponents[i] = [];
+                for (let j = 0; j < 3; j++) {
+                    const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
+                    const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
+                    const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
+                    const matrixConfig = {
+                        dimensions: matrixDim,
+                        border: layoutDimensions.border,
+                        classPrefix: this.params.config.classPrefix,
+                        row: ROW_MATRIX_INDEX[i],
+                        column: j
+                    };
+                    const matrixWrapper = new MatrixComponent({
+                        name: matrixName,
+                        component: matrix,
+                        config: matrixConfig
+                    });
+                    gridComponents[i].push(matrixWrapper);
+                    if( i === 0){
+                        height += matrixDim.height
+                    }
+                    if( j === 0 ){
+                        width+=matrixDim.width
+                    }
+                }
             }
+            this.gridBox = { 'height' : height , 'width' : width}
+            this.component = gridComponents
         }
-    this.component = gridComponents
-    }
 }
