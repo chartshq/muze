@@ -13,7 +13,10 @@ import {
     isSimpleObject,
     transposeArray,
     FieldType,
-    CommonProps
+    CommonProps,
+    toArray,
+    getDependencyOrder,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -23,8 +26,8 @@ import {
     removeLayersBy,
     getLayersBy,
     getLayerFromDef,
-    attachAxisToLayers,
     getLayerAxisIndex,
+    sanitizeLayerDef,
     createSideEffectGroup,
     getAdjustedDomain,
     resolveEncodingTransform,
@@ -33,10 +36,10 @@ import {
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
-import { listenerMap } from './listener-map';
+import { listenerMap, calculateDomainListener } from './listener-map';
 import {
     DATADOMAIN,
-    TIMEDIFFS
+    DOMAIN
 } from './enums/reactive-props';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
@@ -84,6 +87,7 @@ export default class VisualUnit {
         this._layersMap = {};
         this._gridlines = [];
         this._gridbands = [];
+        this._layerNamespaces = {};
         this._layerAxisIndex = {};
         this._transformedDataModels = {};
         layerFactory.setLayerRegistry(registry.layerRegistry);
@@ -119,12 +123,12 @@ export default class VisualUnit {
             initializeGlobalState(this);
             createLayerState(this);
             transactor(this, localOptions, this.store().model, {
-                namespace: 'local.units',
+                namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
                 subNamespace: metaInf.namespace
             });
             registerListeners(this, listenerMap, {
-                local: 'local.units',
-                global: 'app.units'
+                local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+                global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
             }, {
                 rowIndex: metaInf.rowIndex,
                 colIndex: metaInf.colIndex,
@@ -339,35 +343,72 @@ export default class VisualUnit {
      *
      * @return {Array} Array of layer instances.
      */
-    addLayer (layerDef) {
-        const layerName = layerDef.name;
-        const layer = this.getLayerByName(layerName);
-        const measurement = {
-            width: this.width(),
-            height: this.height()
-        };
+    addLayer (layerDefinition) {
+        const layerDefinitions = sanitizeLayerDef(toArray(layerDefinition));
 
-        if (layer) {
-            return [layer];
-        }
-        const serializedDef = layerFactory.getSerializedConf(layerDef.mark, layerDef);
-        const instances = Object.values(getLayerFromDef(this, serializedDef));
-        this.layers().push(...instances);
-        const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
-        this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
-        attachAxisToLayers(this.axes(), instances, layerAxisIndex);
-        const store = { unit: this, layers: {} };
-        this.layers().forEach((inst) => {
-            store.layers[inst.alias()] = inst;
-        });
-        instances.forEach((lyr) => {
-            resolveEncodingTransform(lyr, store);
-            lyr.measurement(measurement);
-            lyr.dataProps({
-                timeDiffs: this.store().get(TIMEDIFFS)
+        const layersMap = this._layersMap;
+        const markSet = {};
+        const store = {
+            layers: {},
+            components: {
+                unit: this
+            }
+        };
+        let layerIndex = 0;
+        const currentLayers = this.layers() || [];
+        let startIndex = currentLayers.length;
+        const metaInf = this.metaInf();
+        const props = this._layerNamespaces;
+        let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
+            const definition = layerDef.def;
+            const markId = definition.name;
+            const defArr = toArray(definition);
+            const namespaces = [];
+            defArr.forEach((def) => {
+                def.order = layerDef.order + layerIndex;
+                const namespace = `${metaInf.namespace}${startIndex}`;
+                if (!layersMap[markId] && definition.calculateDomain !== false) {
+                    props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
+                }
+                namespaces.push(namespace);
+                startIndex++;
             });
+            layerIndex += defArr.length;
+            const instances = getLayerFromDef(this, definition, layersMap[markId], namespaces);
+            store.layers = Object.assign(store.layers, instances);
+            const instanceValues = Object.values(instances);
+            layersArr = layersArr.concat(...instanceValues);
+            layersMap[markId] = instanceValues;
+            markSet[markId] = markId;
+            return layersArr;
+        }, []);
+
+        store.unit = this;
+        const layerdeps = {};
+        layers.forEach((layer) => {
+            const depArr = resolveEncodingTransform(layer, store);
+            layerdeps[layer.alias()] = depArr;
         });
-        return instances;
+
+        const order = getDependencyOrder(layerdeps);
+        layers = order.map(name => store.layers[name]);
+
+        this._layerAxisIndex = Object.assign(this._layerAxisIndex, getLayerAxisIndex(layers, this.fields()));
+        const stateStore = this.store();
+
+        const layersArr = [].concat(...Object.values(this._layersMap));
+
+        stateStore.unsubscribe({
+            key: 'calculateDomainListener',
+            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
+        });
+        stateStore.registerImmediateListener(Object.keys(props), calculateDomainListener(this, metaInf.namespace),
+            false, {
+                key: 'calculateDomainListener',
+                namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
+            });
+        this.layers(layersArr);
+        return layers;
     }
 
     /**
@@ -380,7 +421,7 @@ export default class VisualUnit {
         const lifeCycleManager = this._dependencies.lifeCycleManager;
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
         this.store().unsubscribe({
-            namespace: `local.units.${this.metaInf().namespace}`
+            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
         });
         selectElement(this.mount()).remove();
         this.firebolt().remove();

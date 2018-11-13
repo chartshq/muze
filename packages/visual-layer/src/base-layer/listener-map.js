@@ -2,6 +2,14 @@ import { CommonProps } from 'muze-utils';
 import { getValidTransform, getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
+const renderLayer = (context) => {
+    const mount = context.mount();
+    if (mount) {
+        context.render(mount);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+    }
+};
+
 export const listenerMap = (context, ns, metaInf) => [
     {
         props: [`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`],
@@ -24,14 +32,30 @@ export const listenerMap = (context, ns, metaInf) => [
         type: 'registerImmediateListener'
     },
     {
+        props: [`${ns.local}.${PROPS.CONFIG}.${metaInf.subNamespace}`],
+        listener: ([, config]) => {
+            const calculateDomain = config.calculateDomain;
+            if (calculateDomain === false) {
+                const store = context.store();
+                const namespaceInf = {
+                    namespace: `local.layers.${context.metaInf().namespace}`,
+                    key: 'renderListener'
+                };
+
+                store.unsubscribe(namespaceInf);
+                store.registerChangeListener(`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`,
+                    () => {
+                        renderLayer(context);
+                    }, false, namespaceInf);
+            }
+        },
+        type: 'registerImmediateListener'
+    },
+    {
         props: [`app.group.domain.y.${metaInf.unitRowIndex}00`,
             `app.group.domain.x.0${metaInf.unitColIndex}0`, 'app.group.domain.radius'],
         listener: () => {
-            const mount = context.mount();
-            if (mount) {
-                context.render(mount);
-                context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
-            }
+            renderLayer(context);
         },
         type: 'registerChangeListener'
     }

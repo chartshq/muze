@@ -122,19 +122,6 @@ export default class UnitFireBolt extends Firebolt {
         };
     }
 
-    initializeSideEffects () {
-        super.initializeSideEffects();
-        const sideEffects = this.sideEffects();
-        for (const key in sideEffects) {
-            if ({}.hasOwnProperty.call(sideEffects, key)) {
-                sideEffects[key] instanceof SpawnableSideEffect && sideEffects[key].drawingContext(() => {
-                    const context = this.context;
-                    return context.getDrawingContext();
-                });
-            }
-        }
-    }
-
     prepareSelectionSets (behaviours) {
         const data = this.context.data();
         if (data) {

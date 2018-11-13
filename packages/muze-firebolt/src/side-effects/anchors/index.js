@@ -28,14 +28,15 @@ export default class AnchorEffect extends SpawnableSideEffect {
 
     addAnchorLayers (context) {
         const layers = [];
-        this.firebolt.context.layers().forEach((layer, idx) => {
+        this.firebolt.context.layers().forEach((layer) => {
             const shouldDrawAnchors = layer.shouldDrawAnchors();
             if (shouldDrawAnchors) {
                 const encodingFieldsInf = layer.encodingFieldsInf();
                 const layerObj = {
                     instances: context.addLayer({
-                        name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
+                        name: `${layer.alias()}-${this.constructor.formalName()}`,
                         mark: 'point',
+                        className: this.constructor.defaultConfig().className,
                         encoding: {
                             x: encodingFieldsInf.xField,
                             y: encodingFieldsInf.yField,

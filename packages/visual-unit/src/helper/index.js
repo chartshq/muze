@@ -2,6 +2,7 @@ import { FieldType, getDependencyOrder, getObjProp,
     defaultValue, objectIterator, unionDomain, makeElement,
     DimensionSubtype, getClosestIndexOf, toArray } from 'muze-utils';
 import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
+import { GLOBAL_NAMESPACE } from '../enums/constants';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -44,20 +45,19 @@ export const transformDataModels = (transform, dataModel) => {
     return dataModels;
 };
 
-export const getLayerFromDef = (context, definition, existingLayer, index) => {
+export const getLayerFromDef = (context, definition, existingLayer, namespaces) => {
     let instances = existingLayer;
     const dependencies = context._layerDeps;
     const metaInf = context.metaInf();
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
-        toArray(instances).forEach((inst) => {
+        toArray(instances).forEach((inst, i) => {
             inst.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${index}`
+                namespace: namespaces[i]
             });
             inst.store(context.store());
-            inst._facetByFields = context.facetByFields();
         });
     }
     const layers = {};
@@ -67,6 +67,9 @@ export const getLayerFromDef = (context, definition, existingLayer, index) => {
         const instance = instanceArr[idx];
         instance.config(def);
         instance.dependencies(dependencies);
+        instance.dataProps({
+            timeDiffs: context._timeDiffs
+        });
         if (def.name) {
             instance.alias(def.name);
         }
@@ -133,6 +136,30 @@ export const createLayers = (context, layerDefinitions) => {
         }
     }
     return layers;
+};
+
+export const sanitizeLayerDef = (layerDefs) => {
+    const sanitizedDefs = [];
+    layerDefs.forEach((layerDef, i) => {
+        const def = layerDef.def;
+        const mark = layerDef.mark;
+        if (!def) {
+            const sConf = layerFactory.getSerializedConf(layerDef.mark, layerDef);
+            if (!sConf.name) {
+                sConf.name = `${mark}-${i}`;
+            }
+            sanitizedDefs.push({
+                mark: layerDef.mark,
+                def: sConf
+            });
+        } else {
+            if (!def.name) {
+                def.name = `${mark}-${i}`;
+            }
+            sanitizedDefs.push(layerDef);
+        }
+    });
+    return sanitizedDefs;
 };
 
 export const attachDataToLayers = (layers, dm, transformedDataModels) => {
@@ -325,7 +352,7 @@ export const initializeGlobalState = (context) => {
     const globalState = context.constructor.getState()[0];
     const namespace = context.metaInf().namespace;
     for (const prop in globalState) {
-        store.append(`app.units.${prop}`, {
+        store.append(`${GLOBAL_NAMESPACE}.${prop}`, {
             [namespace]: null
         });
     }

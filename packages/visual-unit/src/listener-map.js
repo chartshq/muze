@@ -1,22 +1,37 @@
-import { DimensionSubtype } from 'muze-utils';
+import { DimensionSubtype, STATE_NAMESPACES } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
     getDimensionMeasureMap,
-    createLayers,
     attachDataToLayers,
     attachAxisToLayers,
-    unionDomainFromLayers,
-    getLayerAxisIndex
+    unionDomainFromLayers
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
+import { GLOBAL_NAMESPACE } from './enums/constants';
 
-const calculateDomainListener = (context, namespace, metaInf) => () => {
+const removeExitLayers = (layerDefs, context) => {
+    const layersMap = context._layersMap;
+    const markSet = {};
+    layerDefs.forEach((layerDef, i) => {
+        const id = `${layerDef.mark}-${i}`;
+        markSet[id] = true;
+    });
+
+    for (const key in layersMap) {
+        if (!(key in markSet)) {
+            layersMap[key].forEach(layer => layer.remove());
+            delete layersMap[key];
+        }
+    }
+};
+
+export const calculateDomainListener = (context, namespace) => () => {
     const domain = unionDomainFromLayers(context.layers(), context.fields(),
     context._layerAxisIndex, context.data().getFieldsConfig());
     context.updateAxisDomain(domain);
-    context.store().commit(`${namespace.global}.${PROPS.DOMAIN}.${metaInf.subNamespace}`, domain);
+    context.store().commit(`${GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
 };
 
 export const listenerMap = (context, namespace, metaInf) => ([
@@ -33,21 +48,9 @@ export const listenerMap = (context, namespace, metaInf) => ([
         listener: ([, layerDefs]) => {
             const fieldsVal = context.fields();
             if (layerDefs && fieldsVal) {
-                const layers = createLayers(context, layerDefs);
-                context._layerAxisIndex = getLayerAxisIndex(layers, fieldsVal);
-                context._lifeCycleManager.notify({ client: layers, action: 'initialized', formalName: 'layer' });
-                const props = new Array(layers.length).fill().map((d, i) =>
-                    `app.layers.domain.${metaInf.subNamespace}${i}`);
-                context._store.unsubscribe({
-                    key: 'calculateDomainListener',
-                    namespace: `${namespace.local}.${metaInf.subNamespace}`
-                });
-                context.store().registerImmediateListener(props, calculateDomainListener(context, namespace, metaInf),
-                    false, {
-                        key: 'calculateDomainListener',
-                        namespace: `${namespace.local}.${metaInf.subNamespace}`
-                    });
-                context.layers(layers);
+                removeExitLayers(layerDefs, context);
+                context.addLayer(layerDefs);
+                context._lifeCycleManager.notify({ client: context.layers(), action: 'initialized', formalName: 'layer' });
             }
         }
     },
@@ -96,11 +99,10 @@ export const listenerMap = (context, namespace, metaInf) => ([
     },
     {
         type: 'registerChangeListener',
-        props: [`app.group.${PROPS.DOMAIN}.x.0${metaInf.colIndex}0`,
-            `app.group.${PROPS.DOMAIN}.y.${metaInf.rowIndex}00`, 'app.group.domain.radius'],
+        props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.WIDTH}.${metaInf.subNamespace}`,
+            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.HEIGHT}.${metaInf.subNamespace}`],
         listener: () => {
             const container = context.mount();
-            console.log('unitRender');
             if (container) {
                 context.render(container);
             }
