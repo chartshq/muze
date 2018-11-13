@@ -1,7 +1,7 @@
 export const TITLE_CONFIG = {
     position: 'top',
     align: 'left',
-    padding: 8
+    padding: 3
 };
 
 export const SUB_TITLE_CONFIG = {

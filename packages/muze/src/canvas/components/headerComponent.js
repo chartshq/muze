@@ -48,7 +48,7 @@ export default class HeaderComponent extends MuzeComponent {
         if (layoutConfig && this.component) {
             cont.style('float', LEFT)
                             .style('text-align', align)
-                            .style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
+                            //.style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
         }
     }
 

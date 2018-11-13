@@ -30,7 +30,15 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
     const cell = prevCell || new TextCell({ type: cellType }, { labelManager });
 
     cell.source(content);
-
+    cell._minTickDiff = { height: 0, width: 0 }
+    let margin = {}
+    if(config.position === 'top'){
+        margin = {top:0,bottom: config.padding}
+    }
+    else{
+        margin = {top:config.padding,bottom: 0}
+    }
+    cell.config({margin: margin})
     return {
         height: cell.getLogicalSpace().height,
         cell

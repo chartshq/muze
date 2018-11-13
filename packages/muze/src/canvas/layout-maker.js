@@ -234,8 +234,10 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, ...target ,alignWith:'top-middle'
-        ,alignment:'left' });
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, 
+                                                        ...target ,
+                                                        alignWith:'top-middle',
+                                                        alignment:'left' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
@@ -245,14 +247,17 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
         const subtitle = components.headers.subtitleCell;
         let subtitleConfig = layoutConfig.subtitle;
 
-        subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix, ...target });
+        subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
+                                                             ...target,
+                                                             alignWith:'top-middle',
+                                                             alignment:'left' });
         subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
     }
 
     // color legend
     let colorLegendWrapper = null;
     if (components.legends) {
-        const legendConfig = { ...layoutConfig.legend, ...target, measurement,alignWith:'center-middle',alignment:'v-center'  };
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement};
         colorLegendWrapper = new LegendComponent({
             name: 'legend',
             component: components.legends,
