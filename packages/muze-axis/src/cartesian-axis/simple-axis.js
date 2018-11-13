@@ -1,5 +1,4 @@
 import {
-    Store,
     mergeRecursive,
     getSmartComputedStyle,
     selectElement,
@@ -10,12 +9,11 @@ import { createScale } from '../scale-creator';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
-import { DOMAIN, BAND } from '../enums/constants';
+import { BAND } from '../enums/constants';
 import { spaceSetter } from './space-setter';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
-    registerChangeListeners,
     calculateContinousSpace
 } from './helper';
 import { PROPS } from './props';
@@ -35,7 +33,6 @@ export default class SimpleAxis {
         this._domain = [];
         this._domainLock = false;
         this._axisDimensions = {};
-        this._eventList = [];
         this._smartTicks = [];
 
         const defCon = mergeRecursive({}, this.constructor.defaultConfig());
@@ -51,18 +48,10 @@ export default class SimpleAxis {
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
 
         generateGetterSetters(this, PROPS);
-        this.store(new Store({
-            domain: this.domain(),
-            range: this.range(),
-            config: simpleConfig,
-            mount: this.mount()
-        }));
         this.config(simpleConfig);
 
         this._scale = this.createScale(this._config);
         this._axis = this.createAxis(this._config);
-
-        registerChangeListeners(this);
     }
 
     /**
@@ -130,7 +119,6 @@ export default class SimpleAxis {
             this.scale().domain(domain[0]);
             this._domain = this.scale().domain();
             this.setAxisComponentDimensions();
-            this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
         }
@@ -435,21 +423,6 @@ export default class SimpleAxis {
         return this._id;
     }
 
-    registerEvent (event, fn) {
-        this._eventList.push({ name: event, action: fn });
-    }
-
-    /**
-     *
-     *
-     * @param {*} fn
-     * @memberof SimpleAxis
-     */
-    on (event, fn) {
-        event = event || 'update';
-        this.registerEvent(event, fn);
-    }
-
     /**
      * This method is used to render the axis inside
      * the supplied svg container.
@@ -459,6 +432,7 @@ export default class SimpleAxis {
      */
     /* istanbul ignore next */render () {
         if (this.mount()) {
+            this.setTickConfig();
             renderAxis(this);
         }
         return this;
@@ -471,7 +445,6 @@ export default class SimpleAxis {
      * @memberof SimpleAxis
      */
     remove () {
-        this.store().unsubscribeAll();
         selectElement(this.mount()).remove();
         return this;
     }
@@ -482,7 +455,6 @@ export default class SimpleAxis {
      * @memberof SimpleAxis
      */
     unsubscribe () {
-        this.store().unsubscribeAll();
         return this;
     }
 

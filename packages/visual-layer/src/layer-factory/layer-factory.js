@@ -69,12 +69,12 @@ const layerFactory = (() => {
 
             return serializedDefs;
         },
-        getLayerInstance: (layerDef) => {
+        getLayerInstance: (layerDef, ...params) => {
             const layerRegistry = factoryObj._layerRegistry;
             layerDef = !(layerDef instanceof Array) ? [layerDef] : layerDef;
             const instances = layerDef.map((layerObj) => {
                 const layerConstructor = layerRegistry[layerObj.mark];
-                return layerConstructor.create();
+                return layerConstructor.create(...params);
             });
             return instances.length === 1 ? instances[0] : instances;
         },

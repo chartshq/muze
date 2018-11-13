@@ -12,7 +12,6 @@
  * @return {PhysicalActionInitializer} Function which dispatches the behavioural action on event trigger.
  */
 
-
  /**
   * This function binds the dom event to the target element and dispatches the behaviours with a
   * payload which contains the criteria.

@@ -449,3 +449,14 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
         };
     });
 };
+
+export const initializeGlobalState = (context) => {
+    const store = context.store();
+    const globalState = context.constructor.getState()[0];
+    const namespace = context.metaInf().namespace;
+    for (const prop in globalState) {
+        store.append(`app.layers.${prop}`, {
+            [namespace]: null
+        });
+    }
+};

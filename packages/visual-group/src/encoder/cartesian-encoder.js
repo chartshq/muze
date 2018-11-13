@@ -74,6 +74,26 @@ export default class CartesianEncoder extends VisualEncoder {
         return geomCellAxes;
     }
 
+    updateDomains (store, axes) {
+        const xAxes = axes.x;
+        const yAxes = axes.y;
+        store.model.lock();
+        for (let i = 0; i < xAxes.length; i++) {
+            for (let j = 0; j < xAxes[i].length; j++) {
+                store.commit(`app.group.domain.x.${0}${i}0`, xAxes[i][j].domain());
+                xAxes[i][j]._domainLock = false;
+            }
+        }
+        for (let i = 0; i < yAxes.length; i++) {
+            for (let j = 0; j < yAxes[i].length; j++) {
+                store.commit(`app.group.domain.y.${i}${0}0`, yAxes[i][j].domain());
+                yAxes[i][j]._domainLock = false;
+            }
+        }
+
+        store.model.unlock();
+    }
+
     /**
      *
      *

@@ -27,3 +27,5 @@ export const BAR_LAYER = 'bar';
 export const TICK_LAYER = 'tick';
 export const SIMPLE_LAYER = 'simple';
 export const BASE_LAYER = 'base';
+
+export const GLOBAL_NAMESPACE = 'app.layers';

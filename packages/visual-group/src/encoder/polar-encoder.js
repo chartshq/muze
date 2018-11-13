@@ -87,6 +87,20 @@ export default class PolarEncoder extends VisualEncoder {
         };
     }
 
+    updateDomains (store, axes, domains) {
+        store.model.lock();
+        const domainProps = {
+            radius: [Infinity, -Infinity]
+        };
+        Object.values(domains).forEach((domainVal) => {
+            for (const key in domainVal) {
+                domainProps[key] = [Math.min(domainVal[key][0], domainProps[key][0]),
+                    Math.min(domainVal[key][1], domainProps[key][1])];
+            }
+        });
+        store.commit('app.group.domain.radius', domainProps.radius);
+        store.model.unlock();
+    }
     /**
      *
      *

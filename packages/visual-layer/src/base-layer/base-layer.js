@@ -1,22 +1,25 @@
 import {
     getUniqueId,
     mergeRecursive,
-    Store,
     FieldType,
     selectElement,
     ReservedFields,
     registerListeners,
     transactor,
     DataModel,
-    clone
+    clone,
+    generateGetterSetters
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
+import { GLOBAL_NAMESPACE } from '../enums/constants';
 import * as PROPS from '../enums/props';
+import { props } from './props';
 import {
     transformData,
     calculateDomainFromData,
     getNormalizedData,
-    applyInteractionStyle
+    applyInteractionStyle,
+    initializeGlobalState
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
@@ -61,13 +64,9 @@ export default class BaseLayer extends SimpleLayer {
      * @param {Object} dependencies Dependencies of the layer
      * @param {SmartLabel} dependencies.smartLabel Smartlabel singleton instance
      */
-    constructor (data, axes, config, dependencies) {
+    constructor (data, axes, config, dependencies = {}) {
         super();
-        this.store(new Store({
-            DATA: null,
-            [PROPS.DATA_UPDATED]: null
-        }));
-        transactor(this, defaultOptions, this.store().model);
+        generateGetterSetters(this, props);
         this.data(data);
         this.axes(axes);
         this.config(config);
@@ -77,7 +76,50 @@ export default class BaseLayer extends SimpleLayer {
         this._cachedData = [];
         this._id = getUniqueId();
         this._measurement = {};
-        registerListeners(this, listenerMap);
+    }
+
+    static getState () {
+        return [
+            {
+                domain: {}
+            },
+            {
+                config: {},
+                data: {}
+            }
+        ];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            const localNs = 'local.layers';
+            const metaInf = this.metaInf();
+            initializeGlobalState(this);
+            transactor(this, defaultOptions, this.store().model, {
+                namespace: localNs,
+                subNamespace: metaInf.namespace
+            });
+            registerListeners(this, listenerMap, {
+                local: localNs,
+                global: 'app.layers'
+            }, {
+                unitRowIndex: metaInf.unitRowIndex,
+                unitColIndex: metaInf.unitColIndex,
+                subNamespace: metaInf.namespace
+            });
+            return this;
+        }
+        return this._store;
+    }
+
+    domain (...dom) {
+        const prop = `${GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`;
+        if (dom.length) {
+            this.store().commit(prop, dom[0]);
+            return this;
+        }
+        return this.store().get(prop);
     }
 
     /**
@@ -126,7 +168,7 @@ export default class BaseLayer extends SimpleLayer {
     /**
      * Determines a name for a layer. This name of the layer is used in the input data to refer to this layer.
      * ```
-     *  .layer([
+     *  .layers([
      *      mark: 'bar',
      *      encoding: { ... }
      *  ])
@@ -139,14 +181,6 @@ export default class BaseLayer extends SimpleLayer {
      */
     static formalName () {
         return 'base';
-    }
-
-    store (...store) {
-        if (store.length) {
-            this._store = store[0];
-            return this;
-        }
-        return this._store;
     }
 
     encodingFieldsInf (...fieldsInf) {
@@ -272,7 +306,7 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Axis domains
      */
     getDataDomain (encodingType) {
-        const domains = this.store().get(PROPS.DOMAIN);
+        const domains = this.store().get(`app.layers.${PROPS.DOMAIN}.${this.metaInf().namespace}`);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
@@ -361,7 +395,9 @@ export default class BaseLayer extends SimpleLayer {
      * @return {BaseLayer} Instance of layer.
      */
     remove () {
-        this.store().unsubscribeAll();
+        this.store().unsubscribe({
+            namespace: `local.layers.${this.metaInf().namespace}`
+        });
         selectElement(this.mount()).remove();
         return this;
     }
@@ -527,7 +563,7 @@ export default class BaseLayer extends SimpleLayer {
 
     getTransformedDataFromIdentifiers (identifiers) {
         const { data: identifierData, schema: identifierSchema } = identifiers.getData();
-        const normalizedData = this.store().get(PROPS.NORMALIZED_DATA);
+        const normalizedData = this._normalizedData;
         const fieldsConfig = this.data().getFieldsConfig();
         const {
             yField,

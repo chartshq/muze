@@ -65,3 +65,4 @@ export const MEASURE = 'measure';
 export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
 
+export const CANVAS_LOCAL_NAMESPACE = 'local.canvas';

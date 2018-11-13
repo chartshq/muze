@@ -1,4 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
+import { generateGetterSetters } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -10,6 +11,8 @@ import {
      AXIS, UNIT, BEFORE_UPDATE, UPDATED, VALUE_MATRIX, FACET_HEADERS
 } from '../enums/constants';
 import { createValueCells, computeMatrices } from './cell-creator';
+import { RESOLVER_PROPS } from './resolver-props';
+
 /**
  * Resolves the matrices from configuration provided
  *
@@ -43,7 +46,7 @@ export default class MatrixResolver {
             size: [],
             shape: []
         };
-
+        generateGetterSetters(this, RESOLVER_PROPS);
         this.cacheMaps(initializeCacheMaps());
     }
 
@@ -71,81 +74,6 @@ export default class MatrixResolver {
      * @return {Object} either the layer or current instance
      * @memberof MatrixResolver
      */
-    dependencies (...dep) {
-        if (dep.length) {
-            this._dependencies = dep[0];
-            return this;
-        }
-        return this._dependencies;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    units (...unitArr) {
-        if (unitArr.length) {
-            this._units = unitArr[0];
-            return this;
-        }
-        return this._units;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} layer configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    layerConfig (...config) {
-        if (config.length) {
-            this._layerConfig = config[0];
-            return this;
-        }
-        return this._layerConfig;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    matrixLayers (...layers) {
-        if (layers.length) {
-            this._matrixLayers = layers[0];
-            return this;
-        }
-        return this._matrixLayers;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    datamodelTransform (...transform) {
-        if (transform.length) {
-            this._datamodelTransform = transform[0];
-            return this;
-        }
-        return this._datamodelTransform;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
     cacheMaps (...maps) {
         if (maps.length) {
             [CELL, X_AXES, Y_AXES, ENTRY_CELLS, EXIT_CELLS].forEach((e) => {
@@ -163,87 +91,12 @@ export default class MatrixResolver {
      * @return {Object} either the layer or current instance
      * @memberof MatrixResolver
      */
-    rowCells (...cells) {
-        if (cells.length) {
-            this._rowCells = cells[0];
-            return this;
-        }
-        return this._rowCells;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    colCells (...cells) {
-        if (cells.length) {
-            this._colCells = cells[0];
-            return this;
-        }
-        return this._colCells;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
     axes (...axes) {
         if (axes.length) {
             this._axes = Object.assign({}, this._axes, axes[0]);
             return this;
         }
         return this._axes;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    rowMatrix (...rowMat) {
-        if (rowMat.length) {
-            this._rowMatrix = rowMat[0];
-            return this;
-        }
-        return this._rowMatrix;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    columnMatrix (...colMat) {
-        if (colMat.length) {
-            this._columnMatrix = colMat[0];
-            return this;
-        }
-        return this._columnMatrix;
-    }
-
-    /**
-     * Used to set the layer config from outside or get current layer info
-     *
-     * @param {Object} type configuration of layer provided externally
-     * @return {Object} either the layer or current instance
-     * @memberof MatrixResolver
-     */
-    valueMatrix (...valMat) {
-        if (valMat.length) {
-            this._valueMatrix = valMat[0];
-            return this;
-        }
-        return this._valueMatrix;
     }
 
     /**
@@ -447,13 +300,26 @@ export default class MatrixResolver {
             lifeCycleManager
         } = this.dependencies();
         // Provide the source for the matrix
-        const units = [];
+        const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
 
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
+                const store = this.store();
+                const namespace = `${i}${j}`;
+
+                [0, 1].forEach((axis, axisIndex) => {
+                    store.append('app.group.domain.x', {
+                        [`${i}${j}${axisIndex}`]: null
+                    });
+                });
+                [0, 1].forEach((axis, axisIndex) => {
+                    store.append('app.group.domain.y', {
+                        [`${i}${j}${axisIndex}`]: null
+                    });
+                });
                 unit = VisualUnit.create({
                     layerRegistry,
                     sideEffectRegistry
@@ -461,8 +327,15 @@ export default class MatrixResolver {
                     smartLabel,
                     lifeCycleManager
                 });
+                unit.metaInf({
+                    rowIndex: i,
+                    colIndex: j,
+                    namespace
+                });
+                unit.store(store);
                 el.source(unit);
-                units.push(unit);
+                !units[i] && (units[i] = []);
+                units[i][j] = unit;
             }
             unit.parentAlias(alias);
             el.config(unitConfig);
@@ -668,5 +541,13 @@ export default class MatrixResolver {
         };
 
         return computeMatrices(context, config);
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            return this;
+        }
+        return this._store;
     }
 }

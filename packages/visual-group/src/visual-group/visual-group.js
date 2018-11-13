@@ -1,12 +1,12 @@
-import { transactor, generateGetterSetters } from 'muze-utils';
+import { generateGetterSetters } from 'muze-utils';
 import localOptions from './local-options';
 import { SimpleGroup } from '../simple-group';
 import {
     MatrixResolver,
-    initStore,
     findInGroup
 } from '../group-helper';
-import { setupChangeListeners, setMatrixInstances } from './change-listener';
+import { createUnitState, initializeGlobalState } from './helper';
+import { setMatrixInstances, createMatrices, setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
     CONFIG,
@@ -51,8 +51,8 @@ class VisualGroup extends SimpleGroup {
         // by passing paramaters for the same. Thus, one can chain setter
         // getter methods.
         generateGetterSetters(this, PROPS);
+        generateGetterSetters(this, localOptions);
         // Populate the store with default values
-        this.store(initStore());
         // initialize group compositions
         this._composition = {};
         // store reference to data
@@ -70,10 +70,30 @@ class VisualGroup extends SimpleGroup {
             layerRegistry: componentSubRegistry.layerRegistry.get(),
             cellRegistry: componentSubRegistry.cellRegistry.get()
         });
-        // Add local options to the store
-        transactor(this, localOptions, this.store().model);
-        // Register listeners
-        setupChangeListeners(this);
+    }
+
+    static getState () {
+        return [{
+            domain: {
+                x: {},
+                y: {},
+                angle: {},
+                radius: {},
+                size: {}
+            }
+        }, {}];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            initializeGlobalState(this);
+            createUnitState(this);
+            // Register listeners
+            setupChangeListeners(this);
+            return this;
+        }
+        return this._store;
     }
 
     /**
@@ -224,6 +244,10 @@ class VisualGroup extends SimpleGroup {
      */
     getGroupByData () {
         return this._groupedDataModel;
+    }
+
+    createMatrices () {
+        createMatrices(this);
     }
 }
 

@@ -69,11 +69,15 @@ const getDefaultVisibilty = (show, axis) => {
 };
 
 export const getGridLayerDefinitions = (context, config, type) => ['x', 'y'].map((axisType) => {
+    const axes = context.axes();
+    if (!axes[axisType]) {
+        return null;
+    }
     const show = defaultValue(config[axisType] && config[axisType].show,
-        getDefaultVisibilty(config.show, context.axes()[axisType][0]));
+        getDefaultVisibilty(config.show, axes[axisType][0]));
 
-    return show ? getLayerDefinition(context, context.axes(), type, axisType) : undefined;
-}).filter(d => d !== undefined);
+    return show ? getLayerDefinition(context, axes, type, axisType) : null;
+}).filter(d => d !== null);
 
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
     const gridData = {};
@@ -120,14 +124,9 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
     return gridData;
 };
 
-export const createGridLineLayer = (context, data) => {
+export const createGridLineLayer = (context) => {
     const vuConf = context.config();
-    const dependencies = context._layerDeps;
-    const measurement = {
-        width: context.width(),
-        height: context.height()
-    };
-
+    const metaInf = context.metaInf();
     ['band', 'line'].forEach((type) => {
         let mark;
         let config;
@@ -151,14 +150,19 @@ export const createGridLineLayer = (context, data) => {
             sConf.mark = mark;
             if (!instances[i]) {
                 layer = layerFactory.getLayerInstance(sConf);
-                layer.dependencies(dependencies);
+                layer.dependencies(context._layerDeps);
             } else {
                 layer = instances[i];
             }
 
-            layer.config(sConf)
-                            .measurement(measurement)
-                            .data(axesObj.y ? data.y : data.x)
+            layer
+                            .metaInf({
+                                unitRowIndex: metaInf.rowIndex,
+                                unitColIndex: metaInf.colIndex,
+                                namespace: `${metaInf.namespace}${type}${i}`
+                            })
+                            .store(context.store())
+                            .config(sConf)
                             .dataProps({
                                 timeDiffs: context.store().get(TIMEDIFFS)
                             })
@@ -168,14 +172,26 @@ export const createGridLineLayer = (context, data) => {
     });
 };
 
+export const attachDataToGridLineLayers = (context) => {
+    const axes = context.axes();
+    const measurement = {
+        width: context.width(),
+        height: context.height()
+    };
+
+    const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
+    [].concat(...context._gridbands, ...context._gridlines).forEach((inst) => {
+        inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y).measurement(measurement);
+    });
+};
+
 export const renderGridLineLayers = (context, container) => {
     const axes = context.axes();
     const config = context.config();
     const classPrefix = config.classPrefix;
 
     if (axes && ((axes.x && axes.x.length) || (axes.y && axes.y.length))) {
-        const gridBandData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
-        createGridLineLayer(context, gridBandData);
+        attachDataToGridLineLayers(context);
         [[context._gridlines, `${classPrefix}-${GRIDLINEPARENTGROUPCLASS}`],
             [context._gridbands, `${classPrefix}-${GRIDBANDPARENTGROUPCLASS}`]].forEach((entry) => {
                 const [instances, parentGroupClass] = entry;

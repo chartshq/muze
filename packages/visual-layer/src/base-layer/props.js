@@ -1,5 +1,8 @@
 export const props = {
-	axes: {},
-	mount: {},
-	measurement: {}
+    axes: {},
+    mount: {},
+    measurement: {},
+    metaInf: {},
+    data: {},
+    config: {}
 };

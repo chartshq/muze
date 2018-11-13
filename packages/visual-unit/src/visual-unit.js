@@ -1,19 +1,19 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import {
+    Store,
     setAttrs,
-    CommonProps,
     getUniqueId,
     getQualifiedClassName,
     selectElement,
     transactor,
-    Store,
     makeElement,
     registerListeners,
     generateGetterSetters,
     getDataModelFromIdentifiers,
     isSimpleObject,
     transposeArray,
-    FieldType
+    FieldType,
+    CommonProps
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -27,16 +27,14 @@ import {
     getLayerAxisIndex,
     createSideEffectGroup,
     getAdjustedDomain,
-    resolveEncodingTransform
+    resolveEncodingTransform,
+    createLayerState,
+    initializeGlobalState
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
 import { listenerMap } from './listener-map';
 import {
-    primaryYAxisUpdated,
-    primaryXAxisUpdated,
-    secondaryXAxisUpdated,
-    secondaryYAxisUpdated,
     DATADOMAIN,
     TIMEDIFFS
 } from './enums/reactive-props';
@@ -69,16 +67,16 @@ export default class VisualUnit {
         this._dependencies = dependencies;
         this._layerDeps = {
             throwback: new Store({
-                onlayerdraw: false
+                [CommonProps.ON_LAYER_DRAW]: false
             }),
-            smartLabel: dependencies.smartLabel
+            smartLabel: dependencies.smartLabel,
+            lifeCycleManager: dependencies.lifeCycleManager
         };
-        this._renderedResolve = null;
-        this._renderedPromise = new Promise((resolve) => {
-            this._renderedResolve = resolve;
-        });
+        // this._renderedResolve = null;
+        // this._renderedPromise = new Promise((resolve) => {
+        //     this._renderedResolve = resolve;
+        // });
         this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
-            this._renderedResolve();
             this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
         });
 
@@ -88,27 +86,58 @@ export default class VisualUnit {
         this._gridbands = [];
         this._layerAxisIndex = {};
         this._transformedDataModels = {};
-
         layerFactory.setLayerRegistry(registry.layerRegistry);
         generateGetterSetters(this, PROPS);
         this.cachedData([]);
-        this.store(new Store({
-            [primaryXAxisUpdated]: null,
-            [primaryYAxisUpdated]: null,
-            [secondaryXAxisUpdated]: null,
-            [secondaryYAxisUpdated]: null
-        }));
-        transactor(this, localOptions, this.store().model);
-        this.firebolt(new UnitFireBolt(this, {
-            physical: physicalActions,
-            behavioural: behaviouralActions,
-            physicalBehaviouralMap: actionBehaviourMap
-        }, sideEffects, behaviourEffectMap));
-        registerListeners(this, listenerMap);
     }
 
     static formalName () {
         return FORMAL_NAME;
+    }
+
+    static getState () {
+        return [
+            {
+                domain: {}
+            },
+            {
+                layerDef: {},
+                layers: {},
+                config: {},
+                data: {},
+                width: {},
+                height: {},
+                transform: {}
+            }
+        ];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            const metaInf = this.metaInf();
+            initializeGlobalState(this);
+            createLayerState(this);
+            transactor(this, localOptions, this.store().model, {
+                namespace: 'local.units',
+                subNamespace: metaInf.namespace
+            });
+            registerListeners(this, listenerMap, {
+                local: 'local.units',
+                global: 'app.units'
+            }, {
+                rowIndex: metaInf.rowIndex,
+                colIndex: metaInf.colIndex,
+                subNamespace: metaInf.namespace
+            });
+            this.firebolt(new UnitFireBolt(this, {
+                physical: physicalActions,
+                behavioural: behaviouralActions,
+                physicalBehaviouralMap: actionBehaviourMap
+            }, sideEffects, behaviourEffectMap));
+            return this;
+        }
+        return this._store;
     }
 
     /**
@@ -204,6 +233,8 @@ export default class VisualUnit {
             height
         });
         this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
+
+        this.firebolt().mapActionsAndBehaviour();
         return this;
     }
 
@@ -348,7 +379,9 @@ export default class VisualUnit {
     remove () {
         const lifeCycleManager = this._dependencies.lifeCycleManager;
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().unsubscribeAll();
+        this.store().unsubscribe({
+            namespace: `local.units.${this.metaInf().namespace}`
+        });
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers

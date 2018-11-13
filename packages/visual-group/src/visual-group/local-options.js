@@ -22,12 +22,12 @@ import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, CONFIG } 
 
 export default {
     [CONFIG]: {},
-    [ROWS]: [],
-    [COLUMNS]: [],
-    [COLOR]: '',
-    [SHAPE]: '',
-    [SIZE]: '',
-    [DETAIL]: '',
-    [LAYERS]: '',
-    [TRANSFORM]: []
+    [ROWS]: {},
+    [COLUMNS]: {},
+    [COLOR]: {},
+    [SHAPE]: {},
+    [SIZE]: {},
+    [DETAIL]: {},
+    [LAYERS]: {},
+    [TRANSFORM]: {}
 };

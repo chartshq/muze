@@ -1,5 +1,5 @@
 import { CommonProps } from 'muze-utils';
-import { DATA, MOUNT } from '../enums/reactive-props';
+import { DATA } from '../enums/reactive-props';
 
 export const clearActionHistory = (context) => {
     const actionHistory = context._actionHistory;
@@ -23,10 +23,10 @@ export const registerListeners = (firebolt) => {
     const context = firebolt.context;
     const store = context.store();
 
-    store.registerImmediateListener([DATA, MOUNT], (dataModel, mount) => {
+    store.registerImmediateListener([`local.units.${DATA}.${context.metaInf().namespace}`], (dataModel) => {
         const dm = dataModel[1];
 
-        if (dm && mount[1]) {
+        if (dm) {
             const originalData = firebolt.context.cachedData()[0];
             firebolt.createSelectionSet(firebolt.context.data().getData().uids);
             firebolt.attachPropagationListener(originalData);
@@ -37,8 +37,6 @@ export const registerListeners = (firebolt) => {
         ([, onlayerdraw]) => {
             if (onlayerdraw) {
                 firebolt.initializeSideEffects();
-                firebolt.config(context.config().interaction);
-                firebolt.mapActionsAndBehaviour();
                 dispatchQueuedSideEffects(firebolt);
                 clearActionHistory(firebolt);
             }

@@ -11,8 +11,8 @@
      * @param {DataModel} data Instance of new data model.
      *
      * @return {VisualUnit} Instance of visual unit.
-     */
-    data () { }
+    */
+     data () { }
 
     /**
      * Returns the facet field names and their values associated with this visual unit.
@@ -27,7 +27,7 @@
      *     ]
      * ```
     */
-    facetByFields () { }
+     facetByFields () { }
 
     /**
      * Returns the retinal fields like color, shape and size field associated with this visual unit.
@@ -36,7 +36,7 @@
      * @segment VisualUnit
      * @return {Array} Color, shape and size fields.
      */
-    retinalFields () { }
+     retinalFields () { }
 
     /**
      * Returns the alias of the visual group which houses this visual unit.
@@ -45,7 +45,7 @@
      * @segment VisualUnit
      * @return {string} Alias of the parent visual group.
      */
-    parentAlias () { }
+     parentAlias () { }
 
     /**
      * Returns the instances of the layers which is created by the visual unit.
@@ -54,7 +54,7 @@
      * @segment VisualUnit
      * @return {Array} Array of layer instances.
      */
-    layers () { }
+     layers () { }
 
     /**
      * Returns the axis instances attached to this visual unit.
@@ -74,7 +74,7 @@
      *     }
      * ```
      */
-    axes () { }
+     axes () { }
 
     /**
      * Returns the axis fields of the visual unit. It returns the variable instances of the primary and secondary axis
@@ -90,5 +90,5 @@
      *      }
      * ```
      */
-    fields () { }
+     fields () { }
 }

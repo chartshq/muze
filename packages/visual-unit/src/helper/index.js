@@ -1,8 +1,7 @@
 import { FieldType, getDependencyOrder, getObjProp,
     defaultValue, objectIterator, unionDomain, makeElement,
     DimensionSubtype, getClosestIndexOf, toArray } from 'muze-utils';
-import { layerFactory } from '@chartshq/visual-layer';
-import { TIMEDIFFS } from '../enums/reactive-props';
+import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -45,11 +44,21 @@ export const transformDataModels = (transform, dataModel) => {
     return dataModels;
 };
 
-export const getLayerFromDef = (context, definition, existingLayer) => {
+export const getLayerFromDef = (context, definition, existingLayer, index) => {
     let instances = existingLayer;
     const dependencies = context._layerDeps;
+    const metaInf = context.metaInf();
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
+        toArray(instances).forEach((inst) => {
+            inst.metaInf({
+                unitRowIndex: metaInf.rowIndex,
+                unitColIndex: metaInf.colIndex,
+                namespace: `${metaInf.namespace}${index}`
+            });
+            inst.store(context.store());
+            inst._facetByFields = context.facetByFields();
+        });
     }
     const layers = {};
     const instanceArr = toArray(instances);
@@ -100,7 +109,7 @@ export const createLayers = (context, layerDefinitions) => {
             def.order = layerDef.order + layerIndex;
         });
         layerIndex += defArr.length;
-        const instances = getLayerFromDef(context, definition, layersMap[markId]);
+        const instances = getLayerFromDef(context, definition, layersMap[markId], i);
         store.layers = Object.assign(store.layers, instances);
         const instanceValues = Object.values(instances);
         layersArr = layersArr.concat(...instanceValues);
@@ -194,7 +203,7 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
 
                     return fieldDomain;
                 }, domains);
-            } else { domains = domainValues; }
+            } else { domains = layerDomain; }
         }
     });
     return domains;
@@ -210,7 +219,7 @@ export const renderLayers = (context, container, layers, measurement) => {
         update: (group, layer) => {
             layer.measurement(measurement);
             layer.dataProps({
-                timeDiffs: context.store().get(TIMEDIFFS)
+                timeDiffs: context._timeDiffs
             });
             layer.config().render !== false && layer.mount(group.node());
         }
@@ -303,4 +312,21 @@ export const getAdjustedDomain = (max, min) => {
         max,
         min
     };
+};
+
+export const createLayerState = (context) => {
+    const [globalState, localState] = BaseLayer.getState();
+    context.store().append('app.layers', globalState)
+                    .append('local.layers', localState);
+};
+
+export const initializeGlobalState = (context) => {
+    const store = context.store();
+    const globalState = context.constructor.getState()[0];
+    const namespace = context.metaInf().namespace;
+    for (const prop in globalState) {
+        store.append(`app.units.${prop}`, {
+            [namespace]: null
+        });
+    }
 };

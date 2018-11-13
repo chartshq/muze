@@ -11,7 +11,6 @@ import {
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
-import * as PROPS from '../../enums/props';
 import { getPlotMeasurement } from '../../helpers';
 import './styles.scss';
 import { getTranslatedPoints } from './bar-helper';
@@ -137,9 +136,8 @@ export default class BarLayer extends BaseLayer {
     render (container) {
         const config = this.config();
         const transition = config.transition;
-        const store = this._store;
-        const normalizedDataArr = store.get(PROPS.NORMALIZED_DATA);
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const normalizedDataArr = this._normalizedData;
+        const transformedData = this._transformedData;
         const keys = transformedData.map(d => d.key);
         const fieldsConfig = this.data().getFieldsConfig();
         const axes = this.axes();
