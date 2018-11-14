@@ -258,6 +258,7 @@ export const calculateBandSpace = (context) => {
             width,
             height
         } = getHorizontalAxisSpace(context, axisDimensions, range);
+
         if (!width || width === 0) {
             width = allTickDimensions.reduce((t, n) =>
                 t + Math.min(n.width, n.height) + minTickWidth, 0);

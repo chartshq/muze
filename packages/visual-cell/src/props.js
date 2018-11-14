@@ -9,6 +9,7 @@ const DEFAULT_PROPS = {
         sanitization: (context, value) => mergeRecursive(context._config, value)
     },
     logicalSpace: {},
+    minSpacing: {},
     source: {}
 };
 

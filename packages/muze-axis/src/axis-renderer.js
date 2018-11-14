@@ -266,7 +266,7 @@ export function renderAxis (axisInstance) {
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
     setFixedBaseline(axisInstance);
-    if (labels.smartTicks === false) {
+    if (labels.smartTicks === false || tickSize === 0) {
         selectContainer.transition()
                         .duration(1000).call(axis);
     } else {

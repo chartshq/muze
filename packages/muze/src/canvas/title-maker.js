@@ -38,7 +38,7 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
         }, {
             labelManager
         })
-     .config({ maxLines });
+     .config({ maxLines }).minSpacing({ width: 0, height: 0 });
 
     cell.source(content);
     cell.setAvailableSpace(width, height);

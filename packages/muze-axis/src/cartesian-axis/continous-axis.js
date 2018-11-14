@@ -125,6 +125,9 @@ export default class ContinousAxis extends SimpleAxis {
             this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
+        } else if (domain) {
+            this._domain = [];
+            this.store().commit(DOMAIN, this._domain);
         } return this._domain;
     }
 
