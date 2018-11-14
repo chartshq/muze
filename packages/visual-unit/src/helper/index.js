@@ -1,8 +1,7 @@
 import { FieldType, getDependencyOrder, getObjProp,
     defaultValue, objectIterator, unionDomain, makeElement,
-    DimensionSubtype, getClosestIndexOf, toArray } from 'muze-utils';
+    DimensionSubtype, getClosestIndexOf, toArray, STATE_NAMESPACES } from 'muze-utils';
 import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
-import { GLOBAL_NAMESPACE } from '../enums/constants';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -352,7 +351,7 @@ export const initializeGlobalState = (context) => {
     const globalState = context.constructor.getState()[0];
     const namespace = context.metaInf().namespace;
     for (const prop in globalState) {
-        store.append(`${GLOBAL_NAMESPACE}.${prop}`, {
+        store.append(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${prop}`, {
             [namespace]: null
         });
     }

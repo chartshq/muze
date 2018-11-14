@@ -8,8 +8,7 @@ import './styles.scss';
 export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
-        const context = this.firebolt.context;
-        this._layers = this.addAnchorLayers(context);
+        this._layers = this.addAnchorLayers();
     }
 
     static target () {
@@ -26,9 +25,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 'anchors';
     }
 
-    addAnchorLayers (context) {
+    addAnchorLayers () {
         const layers = [];
-        this.firebolt.context.layers().forEach((layer) => {
+        const context = this.firebolt.context;
+        context.layers().forEach((layer) => {
             const shouldDrawAnchors = layer.shouldDrawAnchors();
             if (shouldDrawAnchors) {
                 const encodingFieldsInf = layer.encodingFieldsInf();

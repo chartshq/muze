@@ -1,5 +1,5 @@
 import { FieldType } from 'muze-utils';
-import { Firebolt, SpawnableSideEffect } from '@chartshq/muze-firebolt';
+import { Firebolt } from '@chartshq/muze-firebolt';
 import { registerListeners } from './helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';

@@ -1,3 +1,4 @@
+import { STATE_NAMESPACES } from 'muze-utils';
 import { RetinalEncoder } from '../encoder';
 import { getEncoder, getBorders } from '../group-helper';
 import ValueMatrix from './value-matrix';
@@ -130,18 +131,26 @@ export const createMatrices = (context) => {
 
 export const setupChangeListeners = (context) => {
     const store = context.store();
-    store.registerChangeListener(['app.units.domain'], ([, unitDomains]) => {
+    store.registerChangeListener([`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`], ([, unitDomains]) => {
         const resolver = context.resolver();
         const groupAxes = resolver.axes();
         resolver.encoder().updateDomains(store, groupAxes, unitDomains);
     });
 
-    store.registerImmediateListener(['app.group.domain.x'], () => {
+    store.registerImmediateListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`], ([, domains]) => {
         const groupAxes = context.resolver().axes();
-        groupAxes.x.forEach(axes => axes.forEach(axis => axis.render()));
+        groupAxes.x.forEach((axes, cIdx) => axes.forEach((axis, axisIdx) => {
+            const dom = domains[`0${cIdx}${axisIdx}`];
+            axis.domain(dom);
+            axis.render();
+        }));
     });
-    store.registerImmediateListener(['app.group.domain.y'], () => {
+    store.registerImmediateListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`], ([, domains]) => {
         const groupAxes = context.resolver().axes();
-        groupAxes.y.forEach(axes => axes.forEach(axis => axis.render()));
+        groupAxes.y.forEach((axes, rIdx) => axes.forEach((axis, axisIdx) => {
+            const dom = domains[`${rIdx}0${axisIdx}`];
+            axis.domain(dom);
+            axis.render();
+        }));
     });
 };

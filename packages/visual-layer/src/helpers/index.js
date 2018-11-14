@@ -4,7 +4,8 @@ import {
     setStyles,
     easeFns,
     selectElement,
-    DimensionSubtype
+    DimensionSubtype,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -455,7 +456,7 @@ export const initializeGlobalState = (context) => {
     const globalState = context.constructor.getState()[0];
     const namespace = context.metaInf().namespace;
     for (const prop in globalState) {
-        store.append(`app.layers.${prop}`, {
+        store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${prop}`, {
             [namespace]: null
         });
     }

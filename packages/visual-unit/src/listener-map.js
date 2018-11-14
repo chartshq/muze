@@ -9,7 +9,6 @@ import {
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
-import { GLOBAL_NAMESPACE } from './enums/constants';
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
@@ -31,7 +30,7 @@ export const calculateDomainListener = (context, namespace) => () => {
     const domain = unionDomainFromLayers(context.layers(), context.fields(),
     context._layerAxisIndex, context.data().getFieldsConfig());
     context.updateAxisDomain(domain);
-    context.store().commit(`${GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
+    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
 };
 
 export const listenerMap = (context, namespace, metaInf) => ([
@@ -50,7 +49,11 @@ export const listenerMap = (context, namespace, metaInf) => ([
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
                 context.addLayer(layerDefs);
-                context._lifeCycleManager.notify({ client: context.layers(), action: 'initialized', formalName: 'layer' });
+                context._lifeCycleManager.notify({
+                    client: context.layers(),
+                    action: 'initialized',
+                    formalName: 'layer'
+                });
             }
         }
     },

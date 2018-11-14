@@ -8,10 +8,10 @@ import {
     transactor,
     DataModel,
     clone,
-    generateGetterSetters
+    generateGetterSetters,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
-import { GLOBAL_NAMESPACE } from '../enums/constants';
 import * as PROPS from '../enums/props';
 import { props } from './props';
 import {
@@ -93,7 +93,7 @@ export default class BaseLayer extends SimpleLayer {
     store (...params) {
         if (params.length) {
             this._store = params[0];
-            const localNs = 'local.layers';
+            const localNs = STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE;
             const metaInf = this.metaInf();
             initializeGlobalState(this);
             transactor(this, defaultOptions, this.store().model, {
@@ -102,7 +102,7 @@ export default class BaseLayer extends SimpleLayer {
             });
             registerListeners(this, listenerMap, {
                 local: localNs,
-                global: 'app.layers'
+                global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
             }, {
                 unitRowIndex: metaInf.unitRowIndex,
                 unitColIndex: metaInf.unitColIndex,
@@ -114,7 +114,7 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     domain (...dom) {
-        const prop = `${GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`;
+        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`;
         if (dom.length) {
             this.store().commit(prop, dom[0]);
             return this;
@@ -306,7 +306,8 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Axis domains
      */
     getDataDomain (encodingType) {
-        const domains = this.store().get(`app.layers.${PROPS.DOMAIN}.${this.metaInf().namespace}`);
+        const domains = this.store()
+            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
@@ -396,7 +397,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     remove () {
         this.store().unsubscribe({
-            namespace: `local.layers.${this.metaInf().namespace}`
+            namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
         });
         selectElement(this.mount()).remove();
         return this;

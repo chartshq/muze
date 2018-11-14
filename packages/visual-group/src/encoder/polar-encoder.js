@@ -1,5 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
 import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR, COLOR } from '../enums/constants';
 /**
@@ -98,7 +98,7 @@ export default class PolarEncoder extends VisualEncoder {
                     Math.min(domainVal[key][1], domainProps[key][1])];
             }
         });
-        store.commit('app.group.domain.radius', domainProps.radius);
+        store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`, domainProps.radius);
         store.model.unlock();
     }
     /**

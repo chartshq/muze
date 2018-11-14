@@ -1,6 +1,6 @@
-import { isEqual } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, CANVAS_LOCAL_NAMESPACE }
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
     from '../constants';
 import { canvasOptions } from './local-options';
 
@@ -91,7 +91,7 @@ export const setupChangeListener = (context) => {
     const allOptions = Object.keys(context._allOptions);
     const props = [...allOptions, ...Object.keys(canvasOptions)];
     const nameSpaceProps = [...allOptions, ...Object.keys(canvasOptions)].map(prop =>
-        `${CANVAS_LOCAL_NAMESPACE}.${prop}`);
+        `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
     store.registerChangeListener(nameSpaceProps, (...params) => {
         let updateProps = equalityChecker(props, params);
         updateProps = updateChecker(props, params);

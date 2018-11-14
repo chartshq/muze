@@ -1,6 +1,6 @@
 import { GridLayout } from '@chartshq/layout';
-import { transactor, Store, getUniqueId, selectElement } from 'muze-utils';
-import { RETINAL, CANVAS_LOCAL_NAMESPACE } from '../constants';
+import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES } from 'muze-utils';
+import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
@@ -51,14 +51,15 @@ export default class Canvas extends TransactionSupport {
         this._composition.layout = new GridLayout();
         this._store = new Store(APP_INITIAL_STATE);
         // Setters and getters will be mounted on this. The object will be mutated.
+        const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
         const [, store] = transactor(this, options, this._store.model, {
-            namespace: CANVAS_LOCAL_NAMESPACE
+            namespace
         });
         transactor(this, localOptions, store, {
-            namespace: CANVAS_LOCAL_NAMESPACE
+            namespace
         });
         transactor(this, canvasOptions, store, {
-            namespace: CANVAS_LOCAL_NAMESPACE
+            namespace
         });
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
         this.firebolt(new GroupFireBolt(this));

@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -310,16 +310,12 @@ export default class MatrixResolver {
                 const store = this.store();
                 const namespace = `${i}${j}`;
 
-                [0, 1].forEach((axis, axisIndex) => {
-                    store.append('app.group.domain.x', {
-                        [`${i}${j}${axisIndex}`]: null
+                [['x', 0], ['x', 1], ['y', 0], ['y', 1]].forEach((axisInf) => {
+                    store.append(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${axisInf[0]}`, {
+                        [`${i}${j}${axisInf[1]}`]: null
                     });
                 });
-                [0, 1].forEach((axis, axisIndex) => {
-                    store.append('app.group.domain.y', {
-                        [`${i}${j}${axisIndex}`]: null
-                    });
-                });
+
                 unit = VisualUnit.create({
                     layerRegistry,
                     sideEffectRegistry

@@ -77,9 +77,7 @@ class VisualGroup extends SimpleGroup {
             domain: {
                 x: {},
                 y: {},
-                angle: {},
-                radius: {},
-                size: {}
+                radius: {}
             }
         }, {}];
     }

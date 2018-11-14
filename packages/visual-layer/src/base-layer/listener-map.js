@@ -1,4 +1,4 @@
-import { CommonProps } from 'muze-utils';
+import { CommonProps, STATE_NAMESPACES } from 'muze-utils';
 import { getValidTransform, getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
@@ -35,29 +35,25 @@ export const listenerMap = (context, ns, metaInf) => [
         props: [`${ns.local}.${PROPS.CONFIG}.${metaInf.subNamespace}`],
         listener: ([, config]) => {
             const calculateDomain = config.calculateDomain;
-            if (calculateDomain === false) {
-                const store = context.store();
-                const namespaceInf = {
-                    namespace: `local.layers.${context.metaInf().namespace}`,
-                    key: 'renderListener'
-                };
+            const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}00`,
+                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.0${metaInf.unitColIndex}0`,
+                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
 
-                store.unsubscribe(namespaceInf);
-                store.registerChangeListener(`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`,
-                    () => {
-                        renderLayer(context);
-                    }, false, namespaceInf);
+            const store = context.store();
+            const namespaceInf = {
+                namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,
+                key: 'renderListener'
+            };
+            store.unsubscribe(namespaceInf);
+            if (calculateDomain === false) {
+                props.push(`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`);
             }
+            store.registerChangeListener(props,
+                () => {
+                    renderLayer(context);
+                }, false, namespaceInf);
         },
         type: 'registerImmediateListener'
-    },
-    {
-        props: [`app.group.domain.y.${metaInf.unitRowIndex}00`,
-            `app.group.domain.x.0${metaInf.unitColIndex}0`, 'app.group.domain.radius'],
-        listener: () => {
-            renderLayer(context);
-        },
-        type: 'registerChangeListener'
     }
 ];
 

@@ -11,7 +11,8 @@ const initSideEffects = (sideEffects, firebolt) => {
             });
         }
     }
-}
+};
+
 export const clearActionHistory = (context) => {
     const actionHistory = context._actionHistory;
     for (const key in actionHistory) {
@@ -54,4 +55,3 @@ export const registerListeners = (firebolt) => {
             }
         });
 };
-

@@ -355,8 +355,7 @@ export default class VisualUnit {
             }
         };
         let layerIndex = 0;
-        const currentLayers = this.layers() || [];
-        let startIndex = currentLayers.length;
+        let startIndex = [].concat(...Object.values(this._layersMap)).length;
         const metaInf = this.metaInf();
         const props = this._layerNamespaces;
         let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
