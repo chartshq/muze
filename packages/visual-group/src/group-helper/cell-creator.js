@@ -55,7 +55,8 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         cell: GeomCell,
         resolver,
         config,
-        encoder
+        encoder,
+        detailFields
     } = context;
     const axes = resolver.axes();
     const cacheMaps = resolver.cacheMaps();
@@ -95,6 +96,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
                     .axes(groupAxes)
                     .fields(fields)
                     .transform(datamodelTransform)
+                    .detailFields(detailFields)
                     .facetByFields(allFacets);
     entryCellMap.set(geomCellKey, geomCell);
     exitCellMap.delete(geomCellKey);
@@ -121,13 +123,14 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
     }, '')).map((axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
-            const { orientation } = axisInst.config();
+            const { orientation, show } = axisInst.config();
 
             return new cells.AxisCell().source(axisInst).config({
-                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP
+                isOffset: orientation === AxisOrientation.LEFT || orientation === AxisOrientation.TOP,
+                show
             });
         }
-        return new cells.BlankCell();
+        return new cells.BlankCell().config({ show: false });
     });
 
 /**
@@ -499,7 +502,8 @@ export const computeMatrices = (context, config) => {
         resolver,
         cell: cells.GeomCell,
         encoder: encoders.simpleEncoder,
-        newCacheMap
+        newCacheMap,
+        detailFields: config.detail
     };
     const fieldsConfig = datamodel.getFieldsConfig();
     let groupedModel = datamodel;

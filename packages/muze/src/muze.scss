@@ -7,7 +7,7 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     line-height: 1.42857143;
     color: #333;
-    background-color: #fff;
+    background-color: transparent;
     margin: 0;
 
     * {
@@ -20,15 +20,7 @@
         box-sizing: border-box;
     }
 
-    table {
-        background-color: transparent;
-        border-spacing: 0;
-        table-layout: fixed;
-    }
-
-    td, th {
-        padding: 0;
-    }
+  
 
     .#{$prefix}table-arrow {
         margin: 5px;
@@ -132,7 +124,7 @@
     text-align: center;
     float: left;
 }
-.#{$prefix}grid-layout {
+.#{$prefix}grid-layout, .#{$prefix}grid-layout-row {
     float: left;
     position: relative;
 }
@@ -142,6 +134,15 @@
     float: left;
 
     // overflow: scroll;
+}
+.#{$prefix}grid-table {
+    background-color: transparent;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.#{$prefix}grid-td, .#{$prefix}grid-th {
+    padding: 0;
 }
 
 .#{$prefix}table-header {

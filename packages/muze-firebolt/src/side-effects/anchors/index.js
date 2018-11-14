@@ -52,7 +52,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
                         },
                         transition: this.getTransitionConfig(),
                         calculateDomain: false,
-                        source: dt => dt.select(() => false),
+                        source: dt => dt.select(() => false, {
+                            saveChild: false
+                        }),
                         interactive: false,
                         render: false
                     }),

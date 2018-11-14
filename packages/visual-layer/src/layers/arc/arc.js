@@ -12,6 +12,7 @@ import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
 import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
+import { getIndividualClassName } from '../../helpers';
 import { getRangeValue, getRadiusRange, tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint } from './arc-helper';
 import './styles.scss';
 
@@ -236,6 +237,7 @@ export default class ArcLayer extends BaseLayer {
        } = this.config();
         const sizeAxis = this.axes().size;
         const store = this._store;
+        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
         const chartHeight = height - padding.top - padding.bottom;
         const chartWidth = width - padding.left - padding.right;
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
@@ -263,7 +265,6 @@ export default class ArcLayer extends BaseLayer {
         const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
                 .attr('transform', `translate(${chartWidth / 2},${chartHeight / 2})`);
-
         const tween = (elem) => {
             makeElement(elem, 'path', (d, i) => [{
                 datum: d,
@@ -275,11 +276,15 @@ export default class ArcLayer extends BaseLayer {
                     colorTransform: {}
                 }
             }], `${qualClassName[0]}-path`)
-                            .attr('fill', d => colorAxis.getColor(d.datum.colorVal))
+                            .style('fill', d => colorAxis.getColor(d.datum.colorVal))
                             .transition()
                             .duration(transition.duration)
                             .attrTween('d', (...params) => tweenPie(path, rangeValueGetter, params))
-                            .attr('class', d => `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}`);
+                            .attr('class', (d, i) => {
+                                const individualClass = getIndividualClassName(d, i, transformedData, this);
+                                return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
+                                    ${individualClass}`;
+                            });
         };
         const consecutiveExits = [];
         let exitCounter = 0;
@@ -296,7 +301,7 @@ export default class ArcLayer extends BaseLayer {
             consecutiveExits[oldExitCounter] = exitArr;
         };
         // Creating groups for all the arcs present individually
-        makeElement(g, 'g', store.get(PROPS.TRANSFORMED_DATA), `${qualClassName[0]}`,
+        makeElement(g, 'g', transformedData, `${qualClassName[0]}`,
             {
                 update: tween,
                 exit: tweenExit

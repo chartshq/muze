@@ -92,7 +92,10 @@ export const computeLayoutMeasurements = (layout) => {
 
     // Set width for column matrix
 
-    const columnMatrixWidth = width - rowMatrixWidth;
+       // Border adjustment for each cell in the central matrix
+    const borderWidth = border.width;
+
+    const columnMatrixWidth = width - rowMatrixWidth - borderWidth;
     setMatrixMeasurement(columnMatrix, WIDTH, columnMatrixWidth);
     const columnViewPages = columnMatrix.getViewableSpaces();
     setViewSpaces(layout, COLUMN, columnViewPages);
@@ -121,8 +124,6 @@ export const computeLayoutMeasurements = (layout) => {
 
     const columnHeightsSecondary = [].concat(...columnViewableSpaces.map(e => e.rowHeights.secondary));
 
-    // Border adjustment for each cell in the central matrix
-    const borderWidth = border.width;
     // Setting the available space for each cell in the centre matrix
     centerMatrix.forEach((matrix, rIdx) => {
         matrix.forEach((placeholder, cIdx) => {

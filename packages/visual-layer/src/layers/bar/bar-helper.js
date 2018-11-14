@@ -1,7 +1,7 @@
 import { FieldType, DimensionSubtype } from 'muze-utils';
 import * as PROPS from '../../enums/props';
 import { STACK } from '../../enums/constants';
-import { getLayerColor, positionPoints } from '../../helpers';
+import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
 /**
  *
@@ -202,6 +202,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 rowId: d._id,
                 meta
             };
+            point.className = getIndividualClassName(d, i, data, context);
             points.push(point);
             // Store each point in a hashmap with key as the dimensional or temporal field value
             context.cachePoint(d[key], point);

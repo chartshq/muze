@@ -26,6 +26,7 @@ export const FIELDS = 'fields';
 export const TRANSFORM = 'transform';
 export const LAYER_DEF = 'layerDef';
 export const CONFIG = 'config';
+export const DETAIL_FIELDS = 'detailFields';
 
 export const TEXT_CELL = 'text-cell';
 export const AXIS_CELL = 'axis-cell';

@@ -11,7 +11,13 @@ import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import * as PROPS from '../../enums/props';
-import { attachDataToVoronoi, getLayerColor, positionPoints, getPlotMeasurement } from '../../helpers';
+import {
+    attachDataToVoronoi,
+    getLayerColor,
+    positionPoints,
+    getPlotMeasurement,
+    getIndividualClassName
+} from '../../helpers';
 
 import './styles.scss';
 
@@ -105,6 +111,7 @@ export default class PointLayer extends BaseLayer {
             y
         } = encoding;
         const sizeField = sizeEncoding.field;
+        const sizeValue = sizeEncoding.value;
         const shapeField = shapeEncoding.field;
         const xField = x.field;
         const yField = y.field;
@@ -124,7 +131,7 @@ export default class PointLayer extends BaseLayer {
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
             const row = d._data;
-            const size = sizeAxis.getSize(row[sizeFieldIndex]);
+            const size = sizeValue instanceof Function ? sizeValue(d, i) : sizeAxis.getSize(row[sizeFieldIndex]);
             const shape = shapeAxis.getShape(row[shapeFieldIndex]);
 
             let [xPx, yPx] = [ENCODING.X, ENCODING.Y].map((type) => {
@@ -167,6 +174,7 @@ export default class PointLayer extends BaseLayer {
                     source: d._data,
                     rowId: d._id
                 };
+                point.className = getIndividualClassName(d, i, data, this);
                 points.push(point);
                 this.cachePoint(d[key], point);
             }

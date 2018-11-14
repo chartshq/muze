@@ -4,7 +4,7 @@ import { LineLayer } from '../line';
 import drawArea from './renderer';
 import './styles.scss';
 import { STACK, ENCODING } from '../../enums/constants';
-import { getAxesScales, positionPoints, getLayerColor } from '../../helpers';
+import { getAxesScales, positionPoints, getLayerColor, getIndividualClassName } from '../../helpers';
 
 /**
  * Area Layer creates a area plot.
@@ -82,7 +82,8 @@ export default class AreaLayer extends LineLayer {
         let points = [];
         const transformType = this.transformType();
         const colorAxis = axes.color;
-        const encoding = this.config().encoding;
+        const config = this.config();
+        const encoding = config.encoding;
         const colorEncoding = encoding.color;
         const colorField = colorEncoding.field;
         const fieldsConfig = this.data().getFieldsConfig();
@@ -92,7 +93,7 @@ export default class AreaLayer extends LineLayer {
             xAxis,
             yAxis
        } = getAxesScales(axes);
-
+        const classNameFn = config.individualClassName;
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
@@ -124,9 +125,11 @@ export default class AreaLayer extends LineLayer {
                 _data: d._data,
                 source: d._data,
                 rowId: d._id,
+                className: classNameFn ? classNameFn(d, i, data, this) : '',
                 style,
                 meta
             };
+            point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
             return point;
         });

@@ -6,5 +6,6 @@ export const PROPS = {
     [PARENT_ALIAS]: {},
     [LAYERS]: {},
     [STORE]: {},
-    [CACHED_DATA]: {}
+    [CACHED_DATA]: {},
+    detailFields: {}
 };

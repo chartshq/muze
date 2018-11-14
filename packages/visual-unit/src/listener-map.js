@@ -64,13 +64,16 @@ export const listenerMap = context => ([
             const axesObj = axes.value;
             if (dataModel && axisFields && axesObj) {
                 const timeDiffs = {};
+                const timeDiffsByField = {};
                 ['x', 'y'].forEach((type) => {
                     const field = axisFields[type][0];
                     if (field && field.subtype() === DimensionSubtype.TEMPORAL) {
                         timeDiffs[type] = field.getMinDiff();
+                        timeDiffsByField[field] = timeDiffs[type];
                         axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
                     }
                 });
+                context._timeDiffsByField = timeDiffsByField;
                 return timeDiffs;
             }
             return null;

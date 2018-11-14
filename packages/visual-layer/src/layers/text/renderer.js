@@ -13,8 +13,6 @@ import {
  * @return {Selection} d3 selection of the elements.
  */
 const drawText = (container, data, config, smartLabel) => {
-    const { backgroundPadding } = config;
-
     const selection = selectElement(container).selectAll('g').data(data);
 
     const selectionMerge = selection.enter().append('g')
@@ -28,8 +26,11 @@ const drawText = (container, data, config, smartLabel) => {
     smartLabel.setStyle(style);
     selectionMerge.each(function (dataObj) {
         const element = selectElement(this);
-        const { update, background, text, color, textanchor } = dataObj;
-        if (config.backgroundEnabled) {
+        const { update, text, color, textanchor, style: textStyle } = dataObj;
+        const background = dataObj.background;
+        let backgroundVal;
+        if (backgroundVal = background.value) {
+            const backgroundPadding = background.padding;
             let diff;
             const { width, height } = smartLabel.getOriSize(dataObj.text);
             const backgroundEl = makeElement(element, 'rect', [1]);
@@ -49,14 +50,16 @@ const drawText = (container, data, config, smartLabel) => {
                 height: height + backgroundPadding
             });
             background && setStyles(backgroundEl, {
-                background
+                background: backgroundVal
             });
         }
         const textEl = makeElement(element, 'text', d => [d]).text(text);
         const textNode = textEl.node();
+        textStyle && setStyles(textNode, textStyle);
         color && setStyles(textNode, {
             fill: color
         });
+        dataObj.className && textEl.classed(dataObj.className, true);
         setAttrs(textNode, update);
         textEl.attr('text-anchor', textanchor);
     });

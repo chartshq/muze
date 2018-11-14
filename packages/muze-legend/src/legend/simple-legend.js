@@ -148,9 +148,13 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     getLabelSpaces () {
+        const {
+            item,
+            classPrefix
+        } = this.config();
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
-            `${this.config().classPrefix}-legend-item-info`));
-        return getItemMeasures(this.data(), VALUE, this._labelManager);
+            `${classPrefix}-legend-item-info`));
+        return getItemMeasures(this.data(), VALUE, this._labelManager, item.text.formatter);
     }
 
     /**
@@ -182,8 +186,8 @@ export default class SimpleLegend {
         this.data(this.dataFromScale(this.scale()));
         // Get space occupied by title
         const titleSpace = this.getTitleSpace();
-        const titleHeight = titleSpace.height > 0 ? titleSpace.height * 1.25 : 0;
-        const titleWidth = titleSpace.width;
+        const titleHeight = titleSpace.height > 0 ? titleSpace.height + effPadding : 0;
+        const titleWidth = titleSpace.width + effPadding;
 
         // Get space occupied by labels
         const labelSpaces = this.getLabelSpaces(effPadding, align);
@@ -229,11 +233,15 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     renderTitle (container) {
-        const { titleSpaces, border, padding } = this.measurement();
+        const { titleSpaces, border, padding, width } = this.measurement();
+        const { borderStyle, borderColor } = this.config();
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
+            width,
             border,
-            padding
+            padding,
+            borderStyle,
+            borderColor
         }, this.config());
     }
 
@@ -247,7 +255,9 @@ export default class SimpleLegend {
     render () {
         const firebolt = this.firebolt();
         const {
-            classPrefix
+            classPrefix,
+            borderStyle,
+            borderColor
         } = this.config();
         const {
            maxWidth,
@@ -265,7 +275,7 @@ export default class SimpleLegend {
         legendContainer.style('width', `${Math.min(maxWidth, width) - margin * 2}px`)
                         .style('height', `${Math.min(maxHeight, height) - margin * 2}px`)
                         .style('margin', `${margin}px`)
-                        .style('border-width', `${border}px`);
+                        .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 
         // create title

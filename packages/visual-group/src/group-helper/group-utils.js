@@ -132,8 +132,9 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @return
  */
 export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
-    const headers = fields.length > 0 ? fields[0].map((label, i) => new TextCell({ type: HEADER }, { labelManager })
-                    .source(getHeaderText(fieldHeaders, i, fields[0].length))) : [];
+    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({ type: HEADER }, { labelManager })
+                    .source(getHeaderText(fieldHeaders, i, fields[0].length))
+                    .config({ show: cell.config().show })) : [];
     return headers;
 };
 
@@ -440,12 +441,7 @@ export const getBorders = (matrices, encoder) => {
 
 export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
     let fields = [];
-    const encodingArr = suppliedLayerConfig.map((conf) => {
-        if (conf.def instanceof Array) {
-            return conf.def.map(def => def.encoding);
-        }
-        return conf.def.encoding || {};
-    });
+    const encodingArr = suppliedLayerConfig.map(conf => (conf.encoding || {}));
     fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
     fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
     return fields;
