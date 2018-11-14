@@ -6,7 +6,7 @@ import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener ,setLabelRotationForAxes } from './helper';
+import { initCanvas, setupChangeListener, setLabelRotationForAxes } from './helper';
 import { LayoutManager } from '../../../layout/src/tree-layout';
 
 /**
@@ -239,15 +239,15 @@ export default class Canvas extends TransactionSupport {
 
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
-        prepareLayout(this.layout(),renderDetails);
+        prepareLayout(this.layout(), renderDetails);
 
         // init layoutManager
         this._layoutManager = this._createLayoutManager({
-            mount : renderDetails.layoutConfig.mount,
-            className : 'muze-group-container',
-            height : renderDetails.measurement.canvasHeight,
-            width : renderDetails.measurement.canvasWidth
-        })
+            mount: renderDetails.layoutConfig.mount,
+            className: 'muze-group-container',
+            height: renderDetails.measurement.canvasHeight,
+            width: renderDetails.measurement.canvasWidth
+        });
 
         // Render each component
         renderLayout(this._layoutManager, this.layout(), renderDetails);
@@ -261,16 +261,16 @@ export default class Canvas extends TransactionSupport {
         visGroup.matrixInstance().value.each((el) => {
             promises.push(el.valueOf().done());
         });
-        
+
         Promise.all(promises).then(() => {
             this._renderedResolve();
         });
     }
 
-    _createLayoutManager(layoutManagerConfig){
+    _createLayoutManager (layoutManagerConfig) {
         const layoutManager = new LayoutManager({
             renderAt: layoutManagerConfig.mount,
-            className:layoutManagerConfig.className,
+            className: layoutManagerConfig.className,
             height: layoutManagerConfig.height,
             width: layoutManagerConfig.width
         });

@@ -1,11 +1,12 @@
 /* eslint no-useless-constructor: "off" */
-import { LAYOUT_ID } from '../constants/defaults'
+/* eslint no-empty-function: "off" */
+import { LAYOUT_ID } from '../constants/defaults';
 
 export class Renderer {
-  constructor () {}
+    constructor () {}
 
-  initRenderer (node, tree) {
-    node.className = LAYOUT_ID
-    node.__logicalTree = tree
-  }
+    initRenderer (node, tree) {
+        node.className = LAYOUT_ID;
+        node.__logicalTree = tree;
+    }
 }

@@ -1,6 +1,6 @@
 import { selectElement } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
-import { TOP, LEFT, BOTTOM } from '../../constants';
+import { LEFT } from '../../constants';
 
 export default class HeaderComponent extends MuzeComponent {
     /**
@@ -30,7 +30,7 @@ export default class HeaderComponent extends MuzeComponent {
     renderHeader (container) {
         const layoutConfig = this.params.config;
         container = selectElement(container);
-        const { position, align, padding } = layoutConfig;
+        const { align } = layoutConfig;
         const sel = container
           .selectAll(`.${layoutConfig.classPrefix}-inner-container`)
           .data([this.name]);
@@ -47,8 +47,8 @@ export default class HeaderComponent extends MuzeComponent {
 
         if (layoutConfig && this.component) {
             cont.style('float', LEFT)
-                            .style('text-align', align)
-                            //.style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
+                            .style('text-align', align);
+                            // .style(`padding-${position === TOP ? BOTTOM : TOP}`, `${padding}px`);
         }
     }
 

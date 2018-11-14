@@ -14,21 +14,13 @@ import GridComponent from './components/grid-component';
  * @returns
  */
 export const prepareLayout = (layout, renderDetails) => {
-    let topL;
-    let topR;
-    let bottomL;
-    let bottomR;
-    const {components, layoutConfig, measurement} = renderDetails;
+    const { components, layoutConfig, measurement } = renderDetails;
     const {
         rows,
         columns,
         values,
         cornerMatrices
     } = components;
-    const {
-        showHeaders
-    } = layoutConfig;
-    // const maxRows = getMaxRows(rows);
     const {
         topLeft,
         topRight,
@@ -147,20 +139,20 @@ export const getRenderDetails = (context, mount) => {
 };
 // const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
 
-export const renderLayout = (layoutManager, grid,renderDetails) => {
+export const renderLayout = (layoutManager, grid, renderDetails) => {
     // generate component wrappers
 
-    const {components, layoutConfig, measurement} = renderDetails
+    const { components, layoutConfig, measurement } = renderDetails;
     const target = { target: 'canvas' };
     // title;
     let titleWrapper = null;
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix, 
-                                                        ...target ,
-                                                        alignWith:'top-middle',
-                                                        alignment:'left' });
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix,
+            ...target,
+            alignWith: 'top-middle',
+            alignment: 'left' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
@@ -171,16 +163,16 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
         let subtitleConfig = layoutConfig.subtitle;
 
         subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
-                                                             ...target,
-                                                             alignWith:'top-middle',
-                                                             alignment:'left' });
+            ...target,
+            alignWith: 'top-middle',
+            alignment: 'left' });
         subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
     }
 
     // color legend
     let colorLegendWrapper = null;
     if (components.legends && components.legends.length) {
-        const legendConfig = { ...layoutConfig.legend, ...target, measurement};
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
         colorLegendWrapper = new LegendComponent({
             name: 'legend',
             component: components.legends,
@@ -191,11 +183,10 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
     const gridWrapper = new GridComponent({
         name: 'grid',
         component: grid,
-        config: { ...target, 
-                  classPrefix: layoutConfig.classPrefix,
-                  dimensions: { height: 0, width: 0 }}
+        config: { ...target,
+            classPrefix: layoutConfig.classPrefix,
+            dimensions: { height: 0, width: 0 } }
     });
-
 
     layoutManager.registerComponents([
         titleWrapper,
@@ -204,6 +195,6 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
         gridWrapper
     ]).compute();
 
-    console.log(gridWrapper.getBoundBox())
+    console.log(gridWrapper.getBoundBox());
 };
 

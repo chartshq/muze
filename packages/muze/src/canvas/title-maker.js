@@ -1,5 +1,6 @@
 import { TextCell } from '@chartshq/visual-cell';
 import { escapeHTML } from 'muze-utils';
+import { TOP } from '../constants';
 
 /**
  *
@@ -30,15 +31,14 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
     const cell = prevCell || new TextCell({ type: cellType }, { labelManager });
 
     cell.source(content);
-    cell._minTickDiff = { height: 0, width: 0 }
-    let margin = {}
-    if(config.position === 'top'){
-        margin = {top:0,bottom: config.padding}
+    cell._minTickDiff = { height: 0, width: 0 };
+    let margin = {};
+    if (config.position === TOP) {
+        margin = { top: 0, bottom: config.padding };
+    } else {
+        margin = { top: config.padding, bottom: 0 };
     }
-    else{
-        margin = {top:config.padding,bottom: 0}
-    }
-    cell.config({margin: margin})
+    cell.config({ margin });
     return {
         height: cell.getLogicalSpace().height,
         cell

@@ -3,7 +3,7 @@ import {
   getNodeId,
   yExtraSpace,
   xExtraSpace,
-  determineBoundBox,
+  determineBoundBox
 } from './utils';
 
 export {
@@ -11,5 +11,5 @@ export {
   getNodeId,
   yExtraSpace,
   xExtraSpace,
-  determineBoundBox,
+  determineBoundBox
 };

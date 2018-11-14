@@ -6,7 +6,7 @@ import DefinitionManager from '../layout-definition/definition-manager';
 
 import {
   DEFAULT_WIDTH,
-  DEFAULT_HEIGHT,
+  DEFAULT_HEIGHT
 } from '../constants/defaults';
 
 import { DrawingManager } from '../drawing-manager/drawingManager';
@@ -16,7 +16,7 @@ import { LayoutDef } from './layout-def';
 class LayoutManager {
     constructor (conf) {
         this.renderAt = conf.renderAt;
-        this.layoutClassName = conf.className
+        this.layoutClassName = conf.className;
         this.width = conf.width || DEFAULT_WIDTH;
         this.height = conf.height || DEFAULT_HEIGHT;
         this.skeletonType = conf.skeletonType || 'html';
@@ -41,10 +41,10 @@ class LayoutManager {
         this.tree = this._layout.negotiate().tree();
         this._layout.broadcast();
         this.manager = new DrawingManager({
-                            tree: this.tree,
-                            componentMap: this.layoutDef.getComponentMap(),
-                            layoutClassName : this.layoutClassName
-                        },this.skeletonType, this.renderAt);
+            tree: this.tree,
+            componentMap: this.layoutDef.getComponentMap(),
+            layoutClassName: this.layoutClassName
+        }, this.skeletonType, this.renderAt);
 
     // this will draw all the components by calling their draw method
         this.manager.draw();
@@ -89,22 +89,22 @@ class LayoutManager {
         this.prioritySequence = [];
 
         layoutComponents.forEach((component) => {
-            if(component){
+            if (component) {
                 this.prioritySequence.push(component.name());
                 this.addComponent(component);
                 if (component.name() === 'grid') {
-                component.component.forEach((componentArr) => {
-                    componentArr.forEach((compo) => {
-                        this.addComponent(compo);
+                    component.component.forEach((componentArr) => {
+                        componentArr.forEach((compo) => {
+                            this.addComponent(compo);
+                        });
                     });
-                });
                 }
             }
         });
         return this;
     }
 
-    getComponentBoundBox(componentName){
+    getComponentBoundBox (componentName) {
         return this.layoutDef.getComponentMap().get(componentName).boundBox;
     }
 }

@@ -18,7 +18,7 @@ export default class LayoutComponent {
         throw new Error('getLogicalSpace is not defined');
     }
 
-    setSpatialConfig (conf) {
+    setSpatialConfig () {
         throw new Error('setSpatialSpace is not defined');
     }
 

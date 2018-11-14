@@ -113,10 +113,18 @@ export default class DefinitionManager {
     // update parentModel
         definitionModel.cut = cut;
 
-        const firstLane = new DefinitionModel(component.componentName, null, componentRatioWidth, isGridComponent ? false : isPreferred, []);
+        const firstLane = new DefinitionModel(component.componentName,
+                                                null,
+                                                componentRatioWidth,
+                                                isGridComponent ? false : isPreferred,
+                                                []);
         firstLane._remainingHeight = componentHeight;
         firstLane._remainingWidth = componentWidth;
-        const secondLane = new DefinitionModel(null, null, leftOvercomponentRationWidth, isGridComponent ? false : !isPreferred, []);
+        const secondLane = new DefinitionModel(null,
+                                                null,
+                                                leftOvercomponentRationWidth,
+                                                isGridComponent ? false : !isPreferred,
+                                                []);
         secondLane._remainingHeight = leftHeight;
         secondLane._remainingWidth = leftWidth;
         if (isPreferred) {
