@@ -256,7 +256,7 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
 
     // color legend
     let colorLegendWrapper = null;
-    if (components.legends) {
+    if (components.legends && components.legends.length) {
         const legendConfig = { ...layoutConfig.legend, ...target, measurement};
         colorLegendWrapper = new LegendComponent({
             name: 'legend',

@@ -3,7 +3,7 @@
 (function () {
 	let env = muze.Muze();
 	let DataModel = muze.DataModel,
-		share = muze.operators.share,
+		share = muze.Operators.share,
 		Board = muze.Board;
 		window.board = new Board();
 
