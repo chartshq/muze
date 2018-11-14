@@ -17,4 +17,8 @@ export default class MuzeComponent extends LayoutComponent {
         };
         this.renderAt = conf.renderAt;
     }
+
+    getBoundBox(){
+        return this.boundBox;
+    }
 }

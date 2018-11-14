@@ -37,14 +37,28 @@ export default class GridComponent extends MuzeComponent {
                     });
                     gridComponents[i].push(matrixWrapper);
                     if( i === 0){
-                        height += matrixDim.height
+                        width += matrixDim.width
                     }
                     if( j === 0 ){
-                        width+=matrixDim.width
+                        height+=matrixDim.height
                     }
                 }
             }
-            this.gridBox = { 'height' : height , 'width' : width}
+            this.boundBox.height = height;
+            this.boundBox.width = width;
             this.component = gridComponents
         }
+
+        getBoundBox(){
+            const { top , left } = this.component[0][0].boundBox;
+            const { height , width } = this.boundBox;
+            return {
+                top,
+                left,
+                height,
+                width
+            } 
+        }
+
+        
 }

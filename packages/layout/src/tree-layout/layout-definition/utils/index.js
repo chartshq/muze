@@ -4,7 +4,6 @@ import {
   yExtraSpace,
   xExtraSpace,
   determineBoundBox,
-  getColor
 } from './utils';
 
 export {
@@ -13,5 +12,4 @@ export {
   yExtraSpace,
   xExtraSpace,
   determineBoundBox,
-  getColor
 };

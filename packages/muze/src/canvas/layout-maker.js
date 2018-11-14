@@ -203,5 +203,7 @@ export const renderLayout = (layoutManager, grid,renderDetails) => {
         colorLegendWrapper,
         gridWrapper
     ]).compute();
+
+    console.log(gridWrapper.getBoundBox())
 };
 
