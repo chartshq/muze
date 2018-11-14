@@ -86,7 +86,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     [tickShifter, availWidth - left - right - tickShifter], domain, orientation),
                         isOffset ? availHeight : null);
 
-                tickInterval = ((availWidth - left - right - tickShifter * 2) / context.getTickValues().length)
+                tickInterval = ((availWidth) / context.getTickValues().length)
                                      - minTickDistance.width;
 
                 heightForTicks = availHeight - axisNameDimensions.availHeight - tickSize - namePadding;
