@@ -206,22 +206,21 @@ export const getViewMeasurements = (layout) => {
     const rowMatrix = layout.rowMatrix();
     const columnMatrix = layout.columnMatrix();
     const {
-        width,
-        height
-    } = layout.measurement();
-    const {
         columnPointer,
         rowPointer
     } = layout.config();
 
-    const rowMatrixWidth = rowMatrix.getViewableSpaces()[rowPointer].width;
+    const rowSpaces = rowMatrix.getViewableSpaces()[rowPointer];
+    const rowMatrixWidth = rowSpaces.width;
     const { primary: leftWidth, secondary: rightWidth } = rowMatrixWidth;
 
-    const columnMatrixHeight = columnMatrix.getViewableSpaces()[columnPointer].height;
+    const colSpaces = columnMatrix.getViewableSpaces()[columnPointer];
+
+    const columnMatrixHeight = colSpaces.height;
     const { primary: topHeight, secondary: bottomHeight } = columnMatrixHeight;
 
-    const centerHeight = height - (topHeight + bottomHeight);
-    const centerWidth = width - (leftWidth + rightWidth);
+    const centerHeight = rowSpaces.rowHeights.primary.reduce((t, n) => t + n);
+    const centerWidth = colSpaces.columnWidths.primary.reduce((t, n) => t + n);
 
     return {
         viewWidth: [leftWidth, centerWidth, rightWidth],
