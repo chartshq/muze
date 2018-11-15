@@ -35,7 +35,7 @@ export class DrawingManager {
     // resolve alingment
     /**
      * alignwith :
-     * alignment : left | right | hCenter | vCenter |default
+     * alignment : left | right | h-center | v-center |default
      * logic if Alignment is need search the div ,
      * create a child div according to alignment,
      * set the measurements and append it as child,
@@ -124,17 +124,4 @@ export class DrawingManager {
         this.componentRenderer = new HTMLRenderer(this.data);
         this.componentRenderer.createhtml(this.mount, this.layoutClassName);
     }
-
-  // customiseNode (node, borderColor, borderWidth) {
-  //   if (Utils.isDOMElement(node)) {
-  //     Utils.highLightNode(node, borderColor, borderWidth)
-  //   } else {
-  //     Utils.highLightNode(document.getElementById(node), borderColor, borderWidth)
-  //   }
-  // }
-
-  // resetNode (container) {
-  //   Utils.unHighLightNode(Utils.isDOMElement(container) ? container
-  //     : document.getElementById(container))
-  // }
 }

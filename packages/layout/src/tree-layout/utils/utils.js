@@ -1,50 +1,6 @@
 /* eslint no-undef: "off" */
 /* eslint default-case: "off" */
-import { DEFAULT_BORDER_COLOR, DEFAULT_BORDER_WIDTH } from '../constants/defaults';
-
 export class Utils {
-    static onHover (event) {
-        this.highLightNode(event.target, DEFAULT_BORDER_COLOR, DEFAULT_BORDER_WIDTH);
-    }
-
-    static offHover (event) {
-        this.unHighLightNode(event.target);
-    }
-
-    static htmlHover (node, color, width) {
-        color = color !== undefined ? color : DEFAULT_BORDER_COLOR;
-        width = width !== undefined ? width : DEFAULT_BORDER_WIDTH;
-        node.style.outline = `${color} solid ${width}`;
-    }
-
-    static htmlUnHover (node) {
-        node.style.outline = '';
-    }
-
-    static highLightNode (node, color, width) {
-        const renderer = global.__renderer;
-
-        switch (renderer) {
-        case 'html' :
-            this.htmlHover(node, color, width);
-            break;
-        }
-    }
-
-    static unHighLightNode (node) {
-        const renderer = global.__renderer;
-        switch (renderer) {
-        case 'html' :
-            this.htmlUnHover(node);
-            break;
-        }
-    }
-
-    static hoverHandler (container) {
-        container.addEventListener('mouseover', this.onHover.bind(this));
-        container.addEventListener('mouseleave', this.offHover.bind(this));
-    }
-
     static isDOMElement (element) {
         return element instanceof Element;
     }

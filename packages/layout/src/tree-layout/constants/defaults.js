@@ -1,13 +1,9 @@
-const DEFAULT_BORDER_COLOR = 'cyan';
-const DEFAULT_BORDER_WIDTH = '2px';
 const DEFAULT_WIDTH = 600;
 const DEFAULT_HEIGHT = 400;
 const LAYOUT_ID = 'd2ad88af-7050-4c1c-b407-42745cfe3bd7';
 const LAYOUT_NAME = 'fusionBoardLayout';
 
 export {
-  DEFAULT_BORDER_COLOR,
-  DEFAULT_BORDER_WIDTH,
   DEFAULT_WIDTH,
   DEFAULT_HEIGHT,
   LAYOUT_ID,
