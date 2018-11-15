@@ -158,7 +158,7 @@ export default class PolarEncoder extends VisualEncoder {
         let colorField;
         const fields = [];
         const layers = this.layers();
-        const dataModel = dataModels.parentModel;
+        const dataModel = dataModels.groupedModel;
         const fieldsConfig = dataModel.getFieldsConfig();
         const domains = {};
         if (layers && layers[0]) {
