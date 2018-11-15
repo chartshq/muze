@@ -60,7 +60,6 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const separator = config.separator;
     const fieldsConfig = dataModel.getFieldsConfig();
     const fieldspace = dataModel.getFieldspace();
-    const fieldsObj = fieldspace.fieldsObj();
     const dimensionMeasureMap = context.dimensionMeasureMap;
     const axes = context.axes;
     const detailFields = context.detailFields || [];
@@ -68,6 +67,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
     // const containsRetinalField = schema.find(d => d.name in dimensionMeasureMap);
     const containsDetailField = schema.find(d => detailFields.indexOf(d.name) !== -1);
+    const timeDiffs = context.timeDiffs;
     const dataLen = data.length;
     const getRowContent = (field, type) => {
         let value;
@@ -76,7 +76,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const values = [];
         const index = fieldsConfig[field].index;
         const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ?
-                fieldsObj[field].getMinDiff() : 0;
+                timeDiffs[field] : 0;
         const formatterFn = (formatters && formatters[field]) || defaultTooltipFormatters(type, val => val);
 
         if (value !== null) {
@@ -157,7 +157,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     let displayFormat = 'keyValue';
 
     if (dataLen > 1 && containsDetailField) {
-        fieldValues = getTabularData(data, schema, fieldspace, context.timeDiffs);
+        fieldValues = getTabularData(data, schema, fieldspace, timeDiffs);
         displayFormat = 'table';
     } else {
         dimensions.forEach((item) => {

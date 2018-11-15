@@ -27,9 +27,8 @@ const removeExitLayers = (layerDefs, context) => {
 };
 
 export const calculateDomainListener = (context, namespace) => () => {
-    const domain = unionDomainFromLayers(context.layers(), context.fields(),
-    context._layerAxisIndex, context.data().getFieldsConfig());
-    context.updateAxisDomain(domain);
+    const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
+        context.data().getFieldsConfig());
     context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
 };
 
@@ -88,7 +87,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
             const layerAxisIndexVal = context._layerAxisIndex;
             const axesVal = context.axes();
             if (dataModel && layers && axesVal && layerAxisIndexVal) {
-                const dataModels = transformDataModels(transform.value, dataModel);
+                const dataModels = transformDataModels(transform, dataModel);
                 context._transformedDataModels = dataModels;
                 context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
                 attachDataToLayers(layers, dataModel, context._transformedDataModels);
@@ -99,16 +98,16 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
         }
-    },
-    {
-        type: 'registerChangeListener',
-        props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.WIDTH}.${metaInf.subNamespace}`,
-            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.HEIGHT}.${metaInf.subNamespace}`],
-        listener: () => {
-            const container = context.mount();
-            if (container) {
-                context.render(container);
-            }
-        }
     }
+    // {
+    //     type: 'registerImmediateListener',
+    //     props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.WIDTH}.${metaInf.subNamespace}`,
+    //         `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.HEIGHT}.${metaInf.subNamespace}`],
+    //     listener: () => {
+    //         const container = context.mount();
+    //         if (container) {
+    //             context.render(container);
+    //         }
+    //     }
+    // }
 ]);

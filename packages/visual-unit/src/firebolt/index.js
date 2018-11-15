@@ -130,6 +130,13 @@ export default class UnitFireBolt extends Firebolt {
         return this;
     }
 
+    initializeSideEffects () {
+        if (this.context.data()) {
+            super.initializeSideEffects();
+        }
+        return this;
+    }
+
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
         return this;

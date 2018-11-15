@@ -330,9 +330,9 @@ export default class MatrixResolver {
                 });
                 unit.store(store);
                 el.source(unit);
-                !units[i] && (units[i] = []);
-                units[i][j] = unit;
             }
+            !units[i] && (units[i] = []);
+            units[i][j] = unit;
             unit.parentAlias(alias);
             el.config(unitConfig);
         });

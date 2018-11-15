@@ -8,7 +8,7 @@ export const PROPS = {
     [CACHED_DATA]: {},
     detailFields: {},
     axes: {},
-    mount: {},
     fields: {},
-    metaInf: {}
+    metaInf: {},
+    registry: {}
 };

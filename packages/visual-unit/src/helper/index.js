@@ -216,20 +216,21 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
 
         if (layerDomain !== null && config.calculateDomain !== false) {
             domainValues = Object.entries(layerDomain);
-            if (layerDomain.x || layerDomain.y) {
-                domains = domainValues.reduce((fieldDomain, domain) => {
-                    const encodingType = domain[0];
-                    const field = encoding[encodingType].field;
-                    const axisIndex = layerAxisIndex[layerId][encodingType];
+            domains = domainValues.reduce((fieldDomain, domain) => {
+                const encodingType = domain[0];
+                const field = encoding[encodingType].field;
+                const axisIndex = layerAxisIndex[layerId][encodingType];
+                if (encodingType in axisFields) {
                     const fieldStr = `${axisFields[encodingType][axisIndex]}`;
                     fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
                     fieldDomain[fieldStr] = unionDomain(([fieldDomain[fieldStr], domain[1]]),
                         fieldsConfig[field].def.subtype ? fieldsConfig[field].def.subtype :
                                 fieldsConfig[field].def.type);
-
-                    return fieldDomain;
-                }, domains);
-            } else { domains = layerDomain; }
+                } else {
+                    fieldDomain[encodingType] = domain[1];
+                }
+                return fieldDomain;
+            }, domains);
         }
     });
     return domains;
@@ -241,14 +242,25 @@ export const renderLayers = (context, container, layers, measurement) => {
     const classPrefix = config.classPrefix;
     const orderedLayers = context.layers().sort((a, b) => a.config().order - b.config().order);
     const layerParentGroup = makeElement(container, 'g', [1], `${classPrefix}-layer-group`);
+    const layerDepOrder = getDependencyOrder(context._layerDepOrder);
+    const groups = {};
     makeElement(layerParentGroup, 'g', orderedLayers, null, {
         update: (group, layer) => {
-            layer.measurement(measurement);
-            layer.dataProps({
-                timeDiffs: context._timeDiffs
-            });
-            layer.config().render !== false && layer.mount(group.node());
+            groups[layer.alias()] = {
+                group,
+                layer
+            };
         }
+    });
+    const layerSeq = layerDepOrder.map(name => groups[name]);
+    layerSeq.forEach((o) => {
+        const layer = o.layer;
+        const group = o.group;
+        layer.measurement(measurement);
+        layer.dataProps({
+            timeDiffs: context._timeDiffs
+        });
+        layer.config().render !== false && layer.mount(group.node());
     });
     return this;
 };

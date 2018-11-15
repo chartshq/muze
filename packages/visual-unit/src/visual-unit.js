@@ -15,7 +15,6 @@ import {
     FieldType,
     CommonProps,
     toArray,
-    getDependencyOrder,
     STATE_NAMESPACES
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
@@ -92,6 +91,7 @@ export default class VisualUnit {
         this._transformedDataModels = {};
         layerFactory.setLayerRegistry(registry.layerRegistry);
         generateGetterSetters(this, PROPS);
+        this.registry(registry);
         this.cachedData([]);
     }
 
@@ -321,6 +321,15 @@ export default class VisualUnit {
         };
     }
 
+    mount (...mount) {
+        if (mount.length) {
+            this._mount = mount[0];
+            this.render(mount[0]);
+            return this;
+        }
+        return this._mount;
+    }
+
     /**
      * Adds a new layer to the visual unit. It takes a layer definition and creates layer instances from them. It does
      * not render the layers. It returns the layer instances in an array. If the layer definition is a composite layer,
@@ -358,7 +367,7 @@ export default class VisualUnit {
         let startIndex = [].concat(...Object.values(this._layersMap)).length;
         const metaInf = this.metaInf();
         const props = this._layerNamespaces;
-        let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
+        const layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
             const definition = layerDef.def;
             const markId = definition.name;
             const defArr = toArray(definition);
@@ -384,18 +393,21 @@ export default class VisualUnit {
 
         store.unit = this;
         const layerdeps = {};
+        const layersArr = [].concat(...Object.values(this._layersMap));
+
+        layersArr.forEach((layer) => {
+            const alias = layer.alias();
+            store.layers[alias] = layer;
+            layerdeps[alias] = [];
+        });
         layers.forEach((layer) => {
             const depArr = resolveEncodingTransform(layer, store);
             layerdeps[layer.alias()] = depArr;
         });
 
-        const order = getDependencyOrder(layerdeps);
-        layers = order.map(name => store.layers[name]);
-
+        this._layerDepOrder = layerdeps;
         this._layerAxisIndex = Object.assign(this._layerAxisIndex, getLayerAxisIndex(layers, this.fields()));
         const stateStore = this.store();
-
-        const layersArr = [].concat(...Object.values(this._layersMap));
 
         stateStore.unsubscribe({
             key: 'calculateDomainListener',

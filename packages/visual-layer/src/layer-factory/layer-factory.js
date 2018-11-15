@@ -78,6 +78,7 @@ const layerFactory = (() => {
             });
             return instances.length === 1 ? instances[0] : instances;
         },
+        getLayerClass: mark => factoryObj._layerRegistry[mark],
         /**
          * Registers a new composite layer definition in the layer factory.
          *

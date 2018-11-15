@@ -39,16 +39,16 @@ export const registerListeners = (firebolt) => {
         const dm = dataModel[1];
 
         if (dm) {
-            const originalData = firebolt.context.cachedData()[0];
             firebolt.createSelectionSet(firebolt.context.data().getData().uids);
-            firebolt.attachPropagationListener(originalData);
             firebolt.initializeSideEffects();
         }
-    }, true);
+    });
 
     context._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW],
         ([, onlayerdraw]) => {
             if (onlayerdraw) {
+                const originalData = firebolt.context.cachedData()[0];
+                firebolt.attachPropagationListener(originalData);
                 initSideEffects(firebolt.sideEffects(), firebolt);
                 dispatchQueuedSideEffects(firebolt);
                 clearActionHistory(firebolt);

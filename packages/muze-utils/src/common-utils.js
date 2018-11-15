@@ -190,7 +190,7 @@ const getDomainFromData = (data, fields, fieldType) => {
  */
 const unionDomain = (domains, fieldType) => {
     let domain;
-    domains = domains.filter(dom => dom.length);
+    domains = domains.filter(dom => dom && dom.length);
     if (fieldType === DimensionSubtype.CATEGORICAL) {
         domain = domain = [].concat(...domains);
     } else {
@@ -502,6 +502,27 @@ const addListenerToNamespace = (namespaceInf, fn, context) => {
 };
 
 /**
+ *
+ *
+ * @param {*} obj
+ * @param {*} fields
+ *
+ */
+const getObjProp = (obj, ...fields) => {
+    if (obj === undefined || obj === null) {
+        return obj;
+    }
+    let retObj = obj;
+    for (let i = 0, len = fields.length; i < len; i++) {
+        retObj = retObj[fields[i]];
+        if (retObj === undefined || retObj === null) {
+            break;
+        }
+    }
+    return retObj;
+};
+
+/**
  * Methods to handle changes to table configuration and reactivity are handled by this
  * class.
  */
@@ -617,7 +638,8 @@ class Store {
         const { namespace, key } = namespaceInf;
         const listeners = this._listeners[namespace];
         if (key) {
-            listeners[key] && listeners[key]();
+            const fn = getObjProp(listeners, key);
+            fn && fn();
         } else {
             Object.values(listeners).forEach(fn => fn());
             this._listeners[namespace] = [];
@@ -1265,27 +1287,6 @@ const registerListeners = (context, listenerMap, ...params) => {
 };
 
 const isValidValue = value => !isNaN(value) && value !== -Infinity && value !== Infinity;
-/**
- *
- *
- * @param {*} obj
- * @param {*} fields
- *
- */
-const getObjProp = (obj, ...fields) => {
-    if (obj === undefined || obj === null) {
-        return obj;
-    }
-    let retObj = obj;
-    for (let i = 0, len = fields.length; i < len; i++) {
-        retObj = retObj[fields[i]];
-        if (retObj === undefined || retObj === null) {
-            break;
-        }
-    }
-    return retObj;
-};
-
 /**
  *
  *

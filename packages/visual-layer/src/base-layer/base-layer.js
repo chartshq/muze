@@ -295,7 +295,7 @@ export default class BaseLayer extends SimpleLayer {
         return domains;
     }
 
-    shouldDrawAnchors () {
+    static shouldDrawAnchors () {
         return false;
     }
 

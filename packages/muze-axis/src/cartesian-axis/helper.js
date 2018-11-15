@@ -331,3 +331,16 @@ export const calculateContinousSpace = (context) => {
         height: effHeight
     };
 };
+
+export const setContinousAxisDomain = (context, domain) => {
+    const { nice, domain: userDom } = context.config();
+    if (userDom) {
+        domain = userDom;
+    }
+    if (domain.length && domain[0] === domain[1]) {
+        domain = [0, +domain[0] * 2];
+    }
+    context.scale().domain(domain);
+    nice && context.scale().nice();
+    context._domain = context.scale().domain();
+};

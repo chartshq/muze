@@ -1,6 +1,7 @@
 import { mergeRecursive } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { CONFIG, LAYERDEFS, WIDTH, HEIGHT, TRANSFORM, DATA, LAYERS } from './enums/reactive-props';
+import { sanitizeLayerDef } from './helper';
 
 export default {
     [CONFIG]: {
@@ -12,7 +13,10 @@ export default {
         }
     },
     [LAYERDEFS]: {
-        value: null
+        value: null,
+        meta: {
+            preset: layerDef => sanitizeLayerDef(layerDef)
+        }
     },
     [WIDTH]: {
         value: null
@@ -34,8 +38,8 @@ export default {
                     const cachedData = context.cachedData();
                     context.cachedData([...cachedData, data]);
                 } else {
-                    const oldData = context.data();
-                    oldData && oldData.unsubscribe('propagation');
+                    // const oldData = context.data();
+                    // oldData && oldData.unsubscribe('propagation');
                     context.cachedData([data]);
                 }
             }

@@ -99,7 +99,7 @@ export default class LineLayer extends BaseLayer {
         return drawLine;
     }
 
-    shouldDrawAnchors () {
+    static shouldDrawAnchors () {
         return true;
     }
 

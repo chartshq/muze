@@ -116,7 +116,12 @@ export default class SimpleAxis {
      */
     domain (...domain) {
         if (domain.length) {
-            this.scale().domain(domain[0]);
+            let dom = domain[0];
+            const userDom = this.config().domain;
+            if (userDom) {
+                dom = userDom;
+            }
+            this.scale().domain(dom);
             this._domain = this.scale().domain();
             this.setAxisComponentDimensions();
             this.logicalSpace(null);

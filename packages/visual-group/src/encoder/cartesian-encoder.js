@@ -1,5 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
 import { generateAxisFromMap, getDefaultMark, getIndex, getLayerConfFromFields } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
@@ -80,18 +80,59 @@ export default class CartesianEncoder extends VisualEncoder {
         store.model.lock();
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                store.commit(`app.group.domain.x.${0}${i}0`, xAxes[i][j].domain());
-                xAxes[i][j]._domainLock = false;
+                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${0}${i}0`, xAxes[i][j].domain());
             }
         }
         for (let i = 0; i < yAxes.length; i++) {
             for (let j = 0; j < yAxes[i].length; j++) {
-                store.commit(`app.group.domain.y.${i}${0}0`, yAxes[i][j].domain());
+                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${i}${0}0`, yAxes[i][j].domain());
                 yAxes[i][j]._domainLock = false;
             }
         }
 
         store.model.unlock();
+    }
+
+    unionUnitDomains (context) {
+        const store = context.store();
+        const unitDomains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
+        const resolver = context.resolver();
+        const units = resolver.units();
+        const domains = {
+            0: {},
+            1: {}
+        };
+
+        for (let rIdx = 0, len = units.length; rIdx < len; rIdx++) {
+            const unitsArr = units[rIdx];
+            for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
+                const unit = unitsArr[cIdx];
+                const axisFields = unit.fields();
+                [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
+                    fieldArr.forEach((field, axisIndex) => {
+                        const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
+                        const dom = unitDomains[`${rIdx}${cIdx}`];
+                        if (dom && Object.keys(dom).length !== 0) {
+                            domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
+                                dom[`${field}`]], field.subtype());
+                        }
+                    });
+                });
+            }
+        }
+
+        const { x: xAxes, y: yAxes } = resolver.axes();
+        [xAxes, yAxes].forEach((axesArr, axisType) => {
+            axesArr.forEach((axes, idx) => {
+                axes.forEach((axis, index) => {
+                    const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
+                    const domain = domains[axisType][key];
+                    axis.domain(domain);
+                    const type = !axisType ? 'x' : 'y';
+                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${key}`, domain);
+                });
+            });
+        });
     }
 
     /**

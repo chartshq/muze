@@ -63,14 +63,7 @@ export default class Firebolt {
 
     config (...config) {
         if (config.length) {
-            const conf = this._config = mergeRecursive(this._config, config[0]);
-            const sideEffects = this.sideEffects();
-            for (const key in sideEffects) {
-                if ({}.hasOwnProperty.call(sideEffects, key)) {
-                    const sideEffectConf = conf[key];
-                    sideEffectConf && sideEffects[key].config(sideEffectConf);
-                }
-            }
+            this._config = mergeRecursive(this._config, config[0]);
             return this;
         }
         return this._config;
@@ -112,6 +105,7 @@ export default class Firebolt {
         for (const key in sideEffects) {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
+        this.initializeSideEffects();
         return this;
     }
 

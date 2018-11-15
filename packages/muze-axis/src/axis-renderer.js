@@ -72,13 +72,13 @@ const rotateAxis = (instance, tickText, labelManager) => {
         if (orientation === AxisOrientation.TOP) {
             xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 2 : xShift;
             selectElement(this)
-                            .attr('transform', `translate(${-xShift + tickSize} 
+                            .attr('transform', `translate(${-xShift + tickSize}
                                 ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
             xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
 
             selectElement(this)
-                            .attr('transform', `translate(${xShift - tickSize} 
+                            .attr('transform', `translate(${xShift - tickSize}
                                 ${yShift + tickSize}) rotate(${rotation})`);
         }
         selectElement(this).transition()
@@ -219,6 +219,7 @@ export function renderAxis (axisInstance) {
     const range = axisInstance.range();
     const axis = axisInstance.axis();
     const scale = axisInstance.scale();
+    const domain = axisInstance.domain() || [];
     const {
         _axisNameStyle,
         _tickLabelStyle,
@@ -240,8 +241,7 @@ export function renderAxis (axisInstance) {
         showAxisName,
         labels
     } = renderConfig;
-
-    if (!show) {
+    if (!show || !domain.length) {
         return;
     }
 

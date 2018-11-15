@@ -199,7 +199,7 @@ export const renderGridLineLayers = (context, container) => {
                 const className = `${parentGroupClass}-group`;
                 makeElement(mountPoint, 'g', instances, `.${className}`, {
                     update: (group, instance) => {
-                        instance.mount(group.node());
+                        instance.dataProps({ timeDiffs: context._timeDiffs }).mount(group.node());
                     }
                 });
             });

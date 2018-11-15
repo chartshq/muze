@@ -87,8 +87,9 @@ export default class PolarEncoder extends VisualEncoder {
         };
     }
 
-    updateDomains (store, axes, domains) {
-        store.model.lock();
+    unionUnitDomains (context) {
+        const store = context.store();
+        const domains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
         const domainProps = {
             radius: [Infinity, -Infinity]
         };
@@ -99,8 +100,8 @@ export default class PolarEncoder extends VisualEncoder {
             }
         });
         store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`, domainProps.radius);
-        store.model.unlock();
     }
+
     /**
      *
      *

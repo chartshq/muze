@@ -126,30 +126,36 @@ export const createMatrices = (context) => {
         border: getBorders(placeholderInfo, encoders.simpleEncoder)
     });
 
+    resolver.encoder().unionUnitDomains(context);
+
+    const store = context.store();
+    store.unsubscribe({
+        namespace: 'group',
+        key: 'unionDomain'
+    });
+    store.registerChangeListener([`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`], () => {
+        resolver.encoder().unionUnitDomains(context);
+    }, false, {
+        namespace: 'group',
+        key: 'unionDomain'
+    });
+
     return context;
 };
 
 export const setupChangeListeners = (context) => {
     const store = context.store();
-    store.registerChangeListener([`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`], ([, unitDomains]) => {
-        const resolver = context.resolver();
-        const groupAxes = resolver.axes();
-        resolver.encoder().updateDomains(store, groupAxes, unitDomains);
-    });
 
-    store.registerImmediateListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`], ([, domains]) => {
+    store.registerChangeListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`], () => {
         const groupAxes = context.resolver().axes();
-        groupAxes.x.forEach((axes, cIdx) => axes.forEach((axis, axisIdx) => {
-            const dom = domains[`0${cIdx}${axisIdx}`];
-            axis.domain(dom);
+        groupAxes.x.forEach(axes => axes.forEach((axis) => {
             axis.render();
         }));
     });
-    store.registerImmediateListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`], ([, domains]) => {
+
+    store.registerChangeListener([`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`], () => {
         const groupAxes = context.resolver().axes();
-        groupAxes.y.forEach((axes, rIdx) => axes.forEach((axis, axisIdx) => {
-            const dom = domains[`${rIdx}0${axisIdx}`];
-            axis.domain(dom);
+        groupAxes.y.forEach(axes => axes.forEach((axis) => {
             axis.render();
         }));
     });
