@@ -1,3 +1,6 @@
+import { DEFAULT_CLASS_NAME } from '../constants/defaults'
+;
+
 export class DataPoint {
     constructor (node) {
         this.top = node.boundBox.top;
@@ -7,6 +10,7 @@ export class DataPoint {
         this._id = node._id;
         this.parent = node.parent;
         this.hasHost = node.model.host !== null;
-        this.className = node.model.host ? node.model.host.className : null;
+        this.className = node.model.host && node.model.host.className ?
+                            node.model.host.className : DEFAULT_CLASS_NAME;
     }
 }

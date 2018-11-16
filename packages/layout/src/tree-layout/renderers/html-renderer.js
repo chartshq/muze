@@ -1,8 +1,6 @@
 import { HTMLDataAdapter } from '../data-adapters/html-data';
 import { Utils } from '../utils/utils';
 import { Renderer } from './renderer';
-import { LAYOUT_ID } from '../constants/defaults'
-;
 
 export class HTMLRenderer extends Renderer {
     constructor (data) {
@@ -38,7 +36,6 @@ export class HTMLRenderer extends Renderer {
     createAndCustomiseParent (className) {
         const container = Utils.findContainer(this.coordinates);
         const parentDiv = this.createAndPositionDiv(container);
-        parentDiv.id = LAYOUT_ID;
         parentDiv.className = className;
         parentDiv.style.position = 'relative';
         return parentDiv;

@@ -1,3 +1,4 @@
+import { NODE_PREFIX } from '../../constants/defaults';
 /**
  * Compares two strings in lowercase
  *
@@ -15,7 +16,7 @@ function isEqual (value, compareTo) {
 
 const getNodeId = (() => {
     let _uid = 0;
-    return () => `node-${++_uid}`;
+    return () => `${NODE_PREFIX}-${++_uid}`;
 })();
 
 function yExtraSpace (node) {

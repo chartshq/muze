@@ -1,5 +1,6 @@
 import { HTMLRenderer } from '../renderers/html-renderer';
 import { Utils } from '../utils/utils';
+import { DEFAULT_CLASS_NAME } from '../constants/defaults';
 
 export class DrawingManager {
     constructor (data, renderer, container) {
@@ -113,6 +114,7 @@ export class DrawingManager {
         childNodeDim.height = height;
         childNodeDim.width = width;
         childNodeDim._id = `${_id}-holder`;
+        childNodeDim.className = DEFAULT_CLASS_NAME;
         return this.componentRenderer.createAndPositionDiv(childNodeDim);
     }
 
