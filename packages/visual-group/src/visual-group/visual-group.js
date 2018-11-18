@@ -5,8 +5,8 @@ import {
     MatrixResolver,
     findInGroup
 } from '../group-helper';
-import { createUnitState, initializeGlobalState } from './helper';
-import { setMatrixInstances, createMatrices, setupChangeListeners } from './change-listener';
+import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices } from './helper';
+import { setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
     CONFIG,

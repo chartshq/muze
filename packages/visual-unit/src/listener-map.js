@@ -8,7 +8,7 @@ import {
     unionDomainFromLayers
 } from './helper';
 
-import { createGridLineLayer } from './helper/grid-lines';
+import { createGridLineLayer, attachDataToGridLineLayers } from './helper/grid-lines';
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
@@ -98,16 +98,13 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
         }
+    },
+    {
+        type: 'registerChangeListener',
+        props: [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}00`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.0${metaInf.colIndex}0`],
+        listener: () => {
+            attachDataToGridLineLayers(context);
+        }
     }
-    // {
-    //     type: 'registerImmediateListener',
-    //     props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.WIDTH}.${metaInf.subNamespace}`,
-    //         `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.HEIGHT}.${metaInf.subNamespace}`],
-    //     listener: () => {
-    //         const container = context.mount();
-    //         if (container) {
-    //             context.render(container);
-    //         }
-    //     }
-    // }
 ]);

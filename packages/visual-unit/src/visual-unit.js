@@ -12,7 +12,6 @@ import {
     getDataModelFromIdentifiers,
     isSimpleObject,
     transposeArray,
-    FieldType,
     CommonProps,
     toArray,
     STATE_NAMESPACES
@@ -28,7 +27,6 @@ import {
     getLayerAxisIndex,
     sanitizeLayerDef,
     createSideEffectGroup,
-    getAdjustedDomain,
     resolveEncodingTransform,
     createLayerState,
     initializeGlobalState
@@ -37,7 +35,6 @@ import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
 import { listenerMap, calculateDomainListener } from './listener-map';
 import {
-    DATADOMAIN,
     DOMAIN
 } from './enums/reactive-props';
 import { PROPS } from './props';
@@ -74,11 +71,12 @@ export default class VisualUnit {
             smartLabel: dependencies.smartLabel,
             lifeCycleManager: dependencies.lifeCycleManager
         };
-        // this._renderedResolve = null;
-        // this._renderedPromise = new Promise((resolve) => {
-        //     this._renderedResolve = resolve;
-        // });
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise((resolve) => {
+            this._renderedResolve = resolve;
+        });
         this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
+            this._renderedResolve();
             this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
         });
 
@@ -171,15 +169,6 @@ export default class VisualUnit {
             return this;
         }
         return this._firebolt;
-    }
-
-    /**
-     * Gets the domain for all axes of this visual unit.
-     *
-     * @return {Object} Domains of each data field.
-     */
-    getDataDomain () {
-        return this.store().get(DATADOMAIN);
     }
 
     /**
@@ -523,55 +512,6 @@ export default class VisualUnit {
     getLayerByName (name) {
         const layers = getLayersBy(this.layers(), 'name', name);
         return layers[0];
-    }
-
-    /**
-     *
-     *
-     * @param {*} domain
-     *
-     * @memberof VisualUnit
-     */
-    updateAxisDomain (domain) {
-        ['x', 'y'].forEach((type) => {
-            const axes = this.axes()[type];
-            let min = [];
-            let max = [];
-            let dom;
-            axes && axes.forEach((axis, i) => {
-                const field = this.fields()[type][i];
-                dom = domain[`${this.fields()[type][i]}`];
-
-                if (field.type() !== FieldType.DIMENSION && dom) {
-                    min[i] = dom[0];
-                    max[i] = dom[1];
-                }
-            });
-            if (axes) {
-                if (axes.length > 1) {
-                    const axisConf = axes[0].config();
-                    if (axes[0].constructor.type() === 'linear') {
-                        if (axisConf.alignZeroLine) {
-                            axes.forEach(axis => axis.config({
-                                nice: false
-                            }));
-                            const adjustedDomain = getAdjustedDomain(max, min);
-                            min = adjustedDomain.min;
-                            max = adjustedDomain.max;
-                        }
-
-                        axes[0].updateDomainCache([min[0], max[0]]);
-                        axes[1].updateDomainCache([min[1], max[1]]);
-                    } else {
-                        axes[0].updateDomainCache(dom);
-                        axes[1].updateDomainCache(dom);
-                    }
-                } else {
-                    axes[0].updateDomainCache(dom);
-                }
-            }
-        });
-        return this;
     }
 
     /**

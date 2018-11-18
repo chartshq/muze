@@ -315,43 +315,6 @@ export const removeLayersBy = (layers, searchBy, value) => {
 
 export const createSideEffectGroup = (container, className) => makeElement(container, 'g', [1], className).node();
 
-export const getAdjustedDomain = (max, min) => {
-    const y1ratio = max[0] / (max[0] - min[0]);
-    const y2ratio = max[1] / (max[1] - min[1]);
-
-    // adjust min/max values for positive negative values zero line etc
-    let allSameSign = false;
-
-    // if all numbers are positive set floor to zero
-    if (min[0] > 0 && min[1] > 0 && min[1] > 0 && max[1] > 0) {
-        allSameSign = true;
-        min[0] = 0;
-        min[1] = 0;
-    }
-
-    // if all numbers are negative set ceiling to zero
-    if (min[0] < 0 && min[1] < 0 && min[1] < 0 && max[1] < 0) {
-        allSameSign = true;
-        max[0] = 0;
-        max[1] = 0;
-    }
-
-    // align zero line if necessary
-    if (!allSameSign && y1ratio !== y2ratio) {
-        if (y1ratio < y2ratio) {
-                    // adjust min[1]
-            min[1] = min[0] / max[0] * max[1];
-        } else {
-                    // adjust min[0]
-            min[0] = min[1] / max[1] * max[0];
-        }
-    }
-    return {
-        max,
-        min
-    };
-};
-
 export const createLayerState = (context) => {
     const [globalState, localState] = BaseLayer.getState();
     context.store().append('app.layers', globalState)

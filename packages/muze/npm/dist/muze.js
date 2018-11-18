@@ -12851,29 +12851,6 @@ var BandAxis = function (_SimpleAxis) {
         }
 
         /**
-         * This method is used to assign a domain to the axis.
-         *
-         * @param {Array} domain the domain of the scale
-         * @memberof SimpleAxis
-         */
-
-    }, {
-        key: 'updateDomainBounds',
-        value: function updateDomainBounds(domain) {
-            var currentDomain = this.domain();
-            if (this.config().domain) {
-                currentDomain = this.config().domain;
-            } else {
-                if (currentDomain.length === 0) {
-                    currentDomain = domain;
-                }
-                currentDomain = currentDomain.concat(domain);
-            }
-            this.domain(currentDomain);
-            return this;
-        }
-
-        /**
          * Returns the value from the domain when given a value from the range.
          * @param {number} value Value from the range.
          * @return {number} Value
@@ -12988,31 +12965,6 @@ var ContinousAxis = function (_SimpleAxis) {
 
             scale = scale.nice();
             return scale;
-        }
-
-        /**
-         * This method is used to assign a domain to the axis.
-         *
-         * @param {Array} domain the domain of the scale
-         * @memberof SimpleAxis
-         */
-
-    }, {
-        key: 'updateDomainBounds',
-        value: function updateDomainBounds(domain) {
-            var currentDomain = this.domain();
-            if (this.config().domain) {
-                currentDomain = this.config().domain;
-            } else {
-                if (currentDomain.length === 0) {
-                    currentDomain = domain;
-                }
-                if (domain.length) {
-                    currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
-                }
-            }
-
-            return this.domain(currentDomain);
         }
 
         /**
@@ -14417,53 +14369,6 @@ var SimpleAxis = function () {
                 return [p1, p2];
             }
             return [v1, v2];
-        }
-
-        /**
-         * This method is used to assign a domain to the axis.
-         *
-         * @param {Array} domain the domain of the scale
-         * @memberof SimpleAxis
-         */
-
-    }, {
-        key: 'updateDomainBounds',
-        value: function updateDomainBounds(domain) {
-            var currentDomain = this.domain();
-            if (this.config().domain) {
-                currentDomain = this.config().domain;
-            } else {
-                if (currentDomain.length === 0) {
-                    currentDomain = domain;
-                }
-                if (domain.length) {
-                    currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
-                }
-            }
-
-            return this.domain(currentDomain);
-        }
-
-        /**
-         *
-         *
-         * @param {*} domain
-         *
-         * @memberof SimpleAxis
-         */
-
-    }, {
-        key: 'updateDomainCache',
-        value: function updateDomainCache(domain) {
-            if (this._domainLock === false) {
-                this.domain([]);
-                this._domainLock = true;
-            }
-            var cachedDomain = [];
-            domain && domain.forEach(function (d) {
-                d !== undefined && d !== null && cachedDomain.push(d);
-            });
-            return this.updateDomainBounds(cachedDomain);
         }
     }, {
         key: 'getMinTickDifference',
@@ -18965,8 +18870,14 @@ var unionSets = function unionSets(context, behaviours) {
                 var existingModel = models[type];
                 if (!existingModel) {
                     existingModel = models[type] = model;
-                } else {
+                } else if ('' + model.getSchema().map(function (d) {
+                    return d.name;
+                }).sort() === '' + existingModel.getSchema().map(function (d) {
+                    return d.name;
+                }).sort()) {
                     existingModel = models[type] = model.union(existingModel);
+                } else {
+                    existingModel = model;
                 }
                 combinedSet[type].model = existingModel;
             });
@@ -19496,7 +19407,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var addLayer = function addLayer(layerDefs, layerRegistry, context, sideEffect) {
     var layers = [];
     if (layerDefs) {
-        layerDefs.forEach(function (layerDef) {
+        layerDefs.forEach(function (layerDef, i) {
             var mark = layerDef.mark;
             var layerCls = layerRegistry[mark];
             if (layerCls && layerCls.shouldDrawAnchors()) {
@@ -19510,7 +19421,7 @@ var addLayer = function addLayer(layerDefs, layerRegistry, context, sideEffect) 
                         value: sideEffect.defaultSizeValue()
                     }
                 };
-                var name = mark + '-' + sideEffect.constructor.formalName();
+                var name = layerDef.def.name + '-' + sideEffect.constructor.formalName();
                 var layerObj = {
                     instances: context.addLayer({
                         name: name,
@@ -56521,22 +56432,96 @@ var Variable = function () {
 /*!*******************************************************************!*\
   !*** ./packages/visual-group/src/visual-group/change-listener.js ***!
   \*******************************************************************/
-/*! exports provided: setMatrixInstances, createMatrices, setupChangeListeners */
+/*! exports provided: setupChangeListeners, registerDomainChangeListener */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setupChangeListeners", function() { return setupChangeListeners; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "registerDomainChangeListener", function() { return registerDomainChangeListener; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+
+var setupChangeListeners = function setupChangeListeners(context) {
+    var store = context.store();
+
+    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.x'], function () {
+        var groupAxes = context.resolver().axes();
+        groupAxes.x.forEach(function (axes) {
+            return axes.forEach(function (axis) {
+                axis.render();
+            });
+        });
+    });
+
+    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.y'], function () {
+        var groupAxes = context.resolver().axes();
+        groupAxes.y.forEach(function (axes) {
+            return axes.forEach(function (axis) {
+                axis.render();
+            });
+        });
+    });
+};
+
+var registerDomainChangeListener = function registerDomainChangeListener(context) {
+    var store = context.store();
+    store.unsubscribe({
+        namespace: 'group',
+        key: 'unionDomain'
+    });
+    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE + '.domain'], function () {
+        resolver.encoder().unionUnitDomains(context);
+    }, false, {
+        namespace: 'group',
+        key: 'unionDomain'
+    });
+};
+
+/***/ }),
+
+/***/ "./packages/visual-group/src/visual-group/helper.js":
+/*!**********************************************************!*\
+  !*** ./packages/visual-group/src/visual-group/helper.js ***!
+  \**********************************************************/
+/*! exports provided: createUnitState, initializeGlobalState, setMatrixInstances, createMatrices */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createUnitState", function() { return createUnitState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeGlobalState", function() { return initializeGlobalState; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setMatrixInstances", function() { return setMatrixInstances; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createMatrices", function() { return createMatrices; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setupChangeListeners", function() { return setupChangeListeners; });
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _encoder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../encoder */ "./packages/visual-group/src/encoder/index.js");
-/* harmony import */ var _group_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../group-helper */ "./packages/visual-group/src/group-helper/index.js");
-/* harmony import */ var _value_matrix__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./value-matrix */ "./packages/visual-group/src/visual-group/value-matrix.js");
+/* harmony import */ var _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/visual-unit */ "./packages/visual-unit/src/index.js");
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _encoder__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../encoder */ "./packages/visual-group/src/encoder/index.js");
+/* harmony import */ var _group_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../group-helper */ "./packages/visual-group/src/group-helper/index.js");
+/* harmony import */ var _change_listener__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./change-listener */ "./packages/visual-group/src/visual-group/change-listener.js");
+/* harmony import */ var _value_matrix__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./value-matrix */ "./packages/visual-group/src/visual-group/value-matrix.js");
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 
 
 
+
+
+
+
+var createUnitState = function createUnitState(context) {
+    var _VisualUnit$getState = _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_0__["VisualUnit"].getState(),
+        _VisualUnit$getState2 = _slicedToArray(_VisualUnit$getState, 2),
+        globalState = _VisualUnit$getState2[0],
+        localState = _VisualUnit$getState2[1];
+
+    var store = context.store();
+    store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE, globalState).append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE, localState);
+};
+
+var initializeGlobalState = function initializeGlobalState(context) {
+    var globalState = context.constructor.getState()[0];
+    var store = context.store();
+    store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, globalState);
+};
 
 var sanitizeRetinalConfig = function sanitizeRetinalConfig(retinalConf) {
     var conf = {};
@@ -56553,12 +56538,6 @@ var sanitizeRetinalConfig = function sanitizeRetinalConfig(retinalConf) {
     return conf;
 };
 
-/**
- *
- *
- * @param {*} placeholder
- * @memberof VisualGroup
- */
 var setMatrixInstances = function setMatrixInstances(context, placeholder) {
     var values = placeholder.values,
         rows = placeholder.rows,
@@ -56568,21 +56547,15 @@ var setMatrixInstances = function setMatrixInstances(context, placeholder) {
     rows = rows || [];
     columns = columns || [];
     context._composition.matrices = {
-        value: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](values),
-        left: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](rows[0]),
-        right: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](rows[1]),
-        top: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](columns[0]),
-        bottom: new _value_matrix__WEBPACK_IMPORTED_MODULE_3__["default"](columns[1])
+        value: new _value_matrix__WEBPACK_IMPORTED_MODULE_5__["default"](values),
+        left: new _value_matrix__WEBPACK_IMPORTED_MODULE_5__["default"](rows[0]),
+        right: new _value_matrix__WEBPACK_IMPORTED_MODULE_5__["default"](rows[1]),
+        top: new _value_matrix__WEBPACK_IMPORTED_MODULE_5__["default"](columns[0]),
+        bottom: new _value_matrix__WEBPACK_IMPORTED_MODULE_5__["default"](columns[1])
     };
     return context;
 };
 
-/**
- *
- *
- * @param {*} context
- *
- */
 var createMatrices = function createMatrices(context) {
     var rows = context.rows();
     var columns = context.columns();
@@ -56619,8 +56592,8 @@ var createMatrices = function createMatrices(context) {
     matrixConfig = Object.assign(matrixConfig, retinalConfig);
     // Create the encoders for the group
     var encoders = {};
-    encoders.retinalEncoder = new _encoder__WEBPACK_IMPORTED_MODULE_1__["RetinalEncoder"]();
-    encoders.simpleEncoder = Object(_group_helper__WEBPACK_IMPORTED_MODULE_2__["getEncoder"])(layers);
+    encoders.retinalEncoder = new _encoder__WEBPACK_IMPORTED_MODULE_2__["RetinalEncoder"]();
+    encoders.simpleEncoder = Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["getEncoder"])(layers);
     resolver.encoder(encoders.simpleEncoder);
 
     // Set the group type
@@ -56656,81 +56629,13 @@ var createMatrices = function createMatrices(context) {
 
     context._composition.axes = resolver.axes();
     context.metaData({
-        border: Object(_group_helper__WEBPACK_IMPORTED_MODULE_2__["getBorders"])(placeholderInfo, encoders.simpleEncoder)
+        border: Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["getBorders"])(placeholderInfo, encoders.simpleEncoder)
     });
 
     resolver.encoder().unionUnitDomains(context);
 
-    var store = context.store();
-    store.unsubscribe({
-        namespace: 'group',
-        key: 'unionDomain'
-    });
-    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE + '.domain'], function () {
-        resolver.encoder().unionUnitDomains(context);
-    }, false, {
-        namespace: 'group',
-        key: 'unionDomain'
-    });
-
+    Object(_change_listener__WEBPACK_IMPORTED_MODULE_4__["registerDomainChangeListener"])(context);
     return context;
-};
-
-var setupChangeListeners = function setupChangeListeners(context) {
-    var store = context.store();
-
-    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.x'], function () {
-        var groupAxes = context.resolver().axes();
-        groupAxes.x.forEach(function (axes) {
-            return axes.forEach(function (axis) {
-                axis.render();
-            });
-        });
-    });
-    store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.y'], function () {
-        var groupAxes = context.resolver().axes();
-        groupAxes.y.forEach(function (axes) {
-            return axes.forEach(function (axis) {
-                axis.render();
-            });
-        });
-    });
-};
-
-/***/ }),
-
-/***/ "./packages/visual-group/src/visual-group/helper.js":
-/*!**********************************************************!*\
-  !*** ./packages/visual-group/src/visual-group/helper.js ***!
-  \**********************************************************/
-/*! exports provided: createUnitState, initializeGlobalState */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createUnitState", function() { return createUnitState; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeGlobalState", function() { return initializeGlobalState; });
-/* harmony import */ var _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/visual-unit */ "./packages/visual-unit/src/index.js");
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-
-
-
-var createUnitState = function createUnitState(context) {
-    var _VisualUnit$getState = _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_0__["VisualUnit"].getState(),
-        _VisualUnit$getState2 = _slicedToArray(_VisualUnit$getState, 2),
-        globalState = _VisualUnit$getState2[0],
-        localState = _VisualUnit$getState2[1];
-
-    var store = context.store();
-    store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE, globalState).append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE, localState);
-};
-
-var initializeGlobalState = function initializeGlobalState(context) {
-    var globalState = context.constructor.getState()[0];
-    var store = context.store();
-    store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, globalState);
 };
 
 /***/ }),
@@ -57108,7 +57013,7 @@ var VisualGroup = function (_SimpleGroup) {
         // Create instance of matrix resolver
         _this.resolver(new _group_helper__WEBPACK_IMPORTED_MODULE_3__["MatrixResolver"](_this._dependencies));
         // matrix instance store each of the matrices
-        Object(_change_listener__WEBPACK_IMPORTED_MODULE_5__["setMatrixInstances"])(_this, {});
+        Object(_helper__WEBPACK_IMPORTED_MODULE_4__["setMatrixInstances"])(_this, {});
         // Getting indiviual registered items
         _this.registry({
             layerRegistry: componentSubRegistry.layerRegistry.get(),
@@ -57312,7 +57217,7 @@ var VisualGroup = function (_SimpleGroup) {
     }, {
         key: 'createMatrices',
         value: function createMatrices() {
-            Object(_change_listener__WEBPACK_IMPORTED_MODULE_5__["createMatrices"])(this);
+            Object(_helper__WEBPACK_IMPORTED_MODULE_4__["createMatrices"])(this);
         }
     }], [{
         key: 'getState',
@@ -64063,9 +63968,7 @@ var renderGridLineLayers = function renderGridLineLayers(context, container) {
             var className = parentGroupClass + '-group';
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'g', instances, '.' + className, {
                 update: function update(group, instance) {
-                    instance.dataProps({
-                        timeDiffs: context._timeDiffs
-                    }).mount(group.node());
+                    instance.dataProps({ timeDiffs: context._timeDiffs }).mount(group.node());
                 }
             });
         });
@@ -64652,17 +64555,6 @@ var listenerMap = function listenerMap(context, namespace, metaInf) {
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
         }
-        // {
-        //     type: 'registerImmediateListener',
-        //     props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.WIDTH}.${metaInf.subNamespace}`,
-        //         `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.HEIGHT}.${metaInf.subNamespace}`],
-        //     listener: () => {
-        //         const container = context.mount();
-        //         if (container) {
-        //             context.render(container);
-        //         }
-        //     }
-        // }
     }];
 };
 
@@ -64840,11 +64732,12 @@ var VisualUnit = function () {
             smartLabel: dependencies.smartLabel,
             lifeCycleManager: dependencies.lifeCycleManager
         };
-        // this._renderedResolve = null;
-        // this._renderedPromise = new Promise((resolve) => {
-        //     this._renderedResolve = resolve;
-        // });
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise(function (resolve) {
+            _this._renderedResolve = resolve;
+        });
         this._layerDeps.throwback.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].ON_LAYER_DRAW], function () {
+            _this._renderedResolve();
             _this._lifeCycleManager.notify({ client: _this.layers(), action: 'drawn', formalName: 'layer' });
         });
 
@@ -64919,18 +64812,6 @@ var VisualUnit = function () {
                 return this;
             }
             return this._firebolt;
-        }
-
-        /**
-         * Gets the domain for all axes of this visual unit.
-         *
-         * @return {Object} Domains of each data field.
-         */
-
-    }, {
-        key: 'getDataDomain',
-        value: function getDataDomain() {
-            return this.store().get(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_8__["DATADOMAIN"]);
         }
 
         /**

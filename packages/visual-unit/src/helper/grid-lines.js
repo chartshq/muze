@@ -191,7 +191,6 @@ export const renderGridLineLayers = (context, container) => {
     const classPrefix = config.classPrefix;
 
     if (axes && ((axes.x && axes.x.length) || (axes.y && axes.y.length))) {
-        attachDataToGridLineLayers(context);
         [[context._gridlines, `${classPrefix}-${GRIDLINEPARENTGROUPCLASS}`],
             [context._gridbands, `${classPrefix}-${GRIDBANDPARENTGROUPCLASS}`]].forEach((entry) => {
                 const [instances, parentGroupClass] = entry;

@@ -343,47 +343,6 @@ export default class SimpleAxis {
         return [v1, v2];
     }
 
-    /**
-     * This method is used to assign a domain to the axis.
-     *
-     * @param {Array} domain the domain of the scale
-     * @memberof SimpleAxis
-     */
-    updateDomainBounds (domain) {
-        let currentDomain = this.domain();
-        if (this.config().domain) {
-            currentDomain = this.config().domain;
-        } else {
-            if (currentDomain.length === 0) {
-                currentDomain = domain;
-            }
-            if (domain.length) {
-                currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
-            }
-        }
-
-        return this.domain(currentDomain);
-    }
-
-    /**
-     *
-     *
-     * @param {*} domain
-     *
-     * @memberof SimpleAxis
-     */
-    updateDomainCache (domain) {
-        if (this._domainLock === false) {
-            this.domain([]);
-            this._domainLock = true;
-        }
-        const cachedDomain = [];
-        domain && domain.forEach((d) => {
-            d !== undefined && d !== null && cachedDomain.push(d);
-        });
-        return this.updateDomainBounds(cachedDomain);
-    }
-
     getMinTickDifference () {
         return this.domain();
     }

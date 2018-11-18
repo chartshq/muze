@@ -136,8 +136,11 @@ export const unionSets = (context, behaviours) => {
                 let existingModel = models[type];
                 if (!existingModel) {
                     existingModel = models[type] = model;
-                } else {
+                } else if (`${model.getSchema().map(d => d.name).sort()}` ===
+                    `${existingModel.getSchema().map(d => d.name).sort()}`) {
                     existingModel = models[type] = model.union(existingModel);
+                } else {
+                    existingModel = model;
                 }
                 combinedSet[type].model = existingModel;
             });

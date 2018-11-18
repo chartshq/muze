@@ -1,6 +1,12 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
-import { generateAxisFromMap, getDefaultMark, getIndex, getLayerConfFromFields } from './encoder-helper';
+import {
+    generateAxisFromMap,
+    getDefaultMark,
+    getIndex,
+    getLayerConfFromFields,
+    getAdjustedDomain
+} from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
 import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
@@ -122,17 +128,82 @@ export default class CartesianEncoder extends VisualEncoder {
         }
 
         const { x: xAxes, y: yAxes } = resolver.axes();
+        store.model.lock();
         [xAxes, yAxes].forEach((axesArr, axisType) => {
             axesArr.forEach((axes, idx) => {
+                const min = [];
+                const max = [];
+                let domain = [];
+                let adjustedDomain = [];
+                if (axes.length > 1 && axes[0].constructor.type() === 'linear' && axes[0].config().alignZeroLine) {
+                    axes.forEach((axis, i) => {
+                        const key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
+                        domain = domains[axisType][key];
+                        min[i] = domain[0];
+                        max[i] = domain[1];
+                    });
+                    adjustedDomain = getAdjustedDomain(max, min);
+                }
+
                 axes.forEach((axis, index) => {
                     const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
-                    const domain = domains[axisType][key];
+                    domain = adjustedDomain[index] || domains[axisType][key];
                     axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
                     store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${key}`, domain);
                 });
             });
         });
+        store.model.unlock();
+    }
+
+    /**
+     *
+     *
+     * @param {*} domain
+     *
+     * @memberof VisualUnit
+     */
+    updateAxisDomain (domain) {
+        ['x', 'y'].forEach((type) => {
+            const axes = this.axes()[type];
+            let min = [];
+            let max = [];
+            let dom;
+            axes && axes.forEach((axis, i) => {
+                const field = this.fields()[type][i];
+                dom = domain[`${this.fields()[type][i]}`];
+
+                if (field.type() !== FieldType.DIMENSION && dom) {
+                    min[i] = dom[0];
+                    max[i] = dom[1];
+                }
+            });
+            if (axes) {
+                if (axes.length > 1) {
+                    const axisConf = axes[0].config();
+                    if (axes[0].constructor.type() === 'linear') {
+                        if (axisConf.alignZeroLine) {
+                            axes.forEach(axis => axis.config({
+                                nice: false
+                            }));
+                            const adjustedDomain = getAdjustedDomain(max, min);
+                            min = adjustedDomain.min;
+                            max = adjustedDomain.max;
+                        }
+
+                        axes[0].updateDomainCache([min[0], max[0]]);
+                        axes[1].updateDomainCache([min[1], max[1]]);
+                    } else {
+                        axes[0].updateDomainCache(dom);
+                        axes[1].updateDomainCache(dom);
+                    }
+                } else {
+                    axes[0].updateDomainCache(dom);
+                }
+            }
+        });
+        return this;
     }
 
     /**
@@ -331,4 +402,3 @@ export default class CartesianEncoder extends VisualEncoder {
         return layerConfig;
     }
 }
-

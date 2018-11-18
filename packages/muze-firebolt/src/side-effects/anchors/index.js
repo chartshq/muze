@@ -21,7 +21,7 @@ const addLayer = (layerDefs, layerRegistry, context, sideEffect) => {
                         value: sideEffect.defaultSizeValue()
                     }
                 };
-                const name = `${mark}-${sideEffect.constructor.formalName()}`;
+                const name = `${layerDef.def.name}-${sideEffect.constructor.formalName()}`;
                 const layerObj = {
                     instances: context.addLayer({
                         name,
