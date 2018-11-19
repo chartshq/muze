@@ -1,6 +1,17 @@
-import { FieldType, getDependencyOrder, getObjProp,
-    defaultValue, objectIterator, unionDomain, makeElement,
-    DimensionSubtype, getClosestIndexOf, toArray, STATE_NAMESPACES } from 'muze-utils';
+import {
+    FieldType,
+    getDependencyOrder,
+    getObjProp,
+    defaultValue,
+    objectIterator,
+    unionDomain,
+    makeElement,
+    DimensionSubtype,
+    getClosestIndexOf,
+    toArray,
+    STATE_NAMESPACES,
+    MeasureSubtype
+} from 'muze-utils';
 import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
@@ -275,15 +286,13 @@ export const getNearestDimensionalValue = (context, position) => {
     const fieldsConfig = data.getFieldsConfig();
     const xField = getObjProp(fields, 'x', 0).getMembers()[0];
     const yField = getObjProp(fields, 'y', 0).getMembers()[0];
-    const xFieldType = fieldsConfig[xField] && (fieldsConfig[xField].def.subtype ? fieldsConfig[xField].def.subtype :
-        fieldsConfig[xField].def.type);
-    const yFieldType = fieldsConfig[yField] && (fieldsConfig[yField].def.subtype ? fieldsConfig[yField].def.subtype :
-                fieldsConfig[yField].def.type);
+    const xFieldType = fieldsConfig[xField].def.subtype;
+    const yFieldType = fieldsConfig[yField].def.subtype;
 
     const entryVal = [['x', xFieldType, xField], ['y', yFieldType, yField]].find(entry =>
         entry[1] === DimensionSubtype.CATEGORICAL || entry[1] === DimensionSubtype.TEMPORAL);
 
-    if (!entryVal || (xFieldType !== FieldType.MEASURE && yFieldType !== FieldType.MEASURE)) {
+    if (!entryVal || (xFieldType !== MeasureSubtype.CONTINUOUS && yFieldType !== MeasureSubtype.CONTINUOUS)) {
         return null;
     }
     const field = entryVal[2];

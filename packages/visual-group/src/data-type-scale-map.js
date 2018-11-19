@@ -6,7 +6,7 @@ import { ScaleType } from '@chartshq/muze-axis';
 export const dataTypeScaleMap = {
     dimension: ScaleType.BAND,
     categorical: ScaleType.BAND,
+    temporal: ScaleType.TIME,
     measure: ScaleType.LINEAR,
-    temporal: ScaleType.TIME
+    continuous: ScaleType.LINEAR
 };
-

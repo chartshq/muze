@@ -499,7 +499,7 @@ return /******/ (function(modules) { // webpackBootstrap
             /*! exports provided: name, description, homepage, version, license, main, author, keywords, repository, contributors, dependencies, devDependencies, scripts, default */
             /***/function packageJson(module) {
 
-                module.exports = { "name": "datamodel", "description": "Relational algebra compliant in-memory tabular data store", "homepage": "https://github.com/chartshq/datamodel", "version": "2.0.1", "license": "MIT", "main": "dist/datamodel.js", "author": "Charts.com <support@charts.com>", "keywords": ["datamodel", "data", "relational", "algebra", "model", "muze", "fusioncharts", "table", "tabular", "operation"], "repository": { "type": "git", "url": "https://github.com/chartshq/datamodel.git" }, "contributors": [{ "name": "Akash Goswami", "email": "akash@charts.com" }, { "name": "Subhash Haldar", "email": "subhash@charts.com" }, { "name": "Rousan Ali", "email": "rousan@charts.com", "url": "https://rousan.io" }, { "name": "Ujjal Kumar Dutta", "email": "ujjal@charts.com" }], "dependencies": { "d3-dsv": "^1.0.8" }, "devDependencies": { "babel-cli": "6.26.0", "babel-core": "^6.26.3", "babel-eslint": "6.1.2", "babel-loader": "^7.1.4", "babel-plugin-transform-runtime": "^6.23.0", "babel-preset-env": "^1.7.0", "babel-preset-es2015": "^6.24.1", "babel-preset-flow": "^6.23.0", "chai": "3.5.0", "cross-env": "^5.0.5", "eslint": "3.19.0", "eslint-config-airbnb": "15.1.0", "eslint-plugin-import": "2.7.0", "eslint-plugin-jsx-a11y": "5.1.1", "eslint-plugin-react": "7.3.0", "istanbul-instrumenter-loader": "^3.0.0", "jsdoc": "3.5.5", "json2yaml": "^1.1.0", "karma": "1.7.1", "karma-chai": "0.1.0", "karma-chrome-launcher": "2.1.1", "karma-coverage-istanbul-reporter": "^1.3.0", "karma-mocha": "1.3.0", "karma-spec-reporter": "0.0.31", "karma-webpack": "2.0.3", "marked": "^0.5.0", "mocha": "3.4.2", "mocha-webpack": "0.7.0", "transform-runtime": "0.0.0", "webpack": "^4.12.0", "webpack-cli": "^3.0.7", "webpack-dev-server": "^3.1.4" }, "scripts": { "test": "npm run lint && npm run ut", "ut": "karma start karma.conf.js", "utd": "karma start --single-run false --browsers Chrome karma.conf.js ", "build": "webpack --mode production", "build:dev": "webpack --mode development", "start": "webpack-dev-server --config webpack.config.dev.js --mode development --open", "lint": "eslint ./src", "lint-errors": "eslint --quiet ./src", "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json" } };
+                module.exports = { "name": "datamodel", "description": "Relational algebra compliant in-memory tabular data store", "homepage": "https://github.com/chartshq/datamodel", "version": "2.0.2", "license": "MIT", "main": "dist/datamodel.js", "author": "Charts.com <support@charts.com>", "keywords": ["datamodel", "data", "relational", "algebra", "model", "muze", "fusioncharts", "table", "tabular", "operation"], "repository": { "type": "git", "url": "https://github.com/chartshq/datamodel.git" }, "contributors": [{ "name": "Akash Goswami", "email": "akash@charts.com" }, { "name": "Subhash Haldar", "email": "subhash@charts.com" }, { "name": "Rousan Ali", "email": "rousan@charts.com", "url": "https://rousan.io" }, { "name": "Ujjal Kumar Dutta", "email": "ujjal@charts.com" }], "dependencies": { "d3-dsv": "^1.0.8" }, "devDependencies": { "babel-cli": "6.26.0", "babel-core": "^6.26.3", "babel-eslint": "6.1.2", "babel-loader": "^7.1.4", "babel-plugin-transform-runtime": "^6.23.0", "babel-preset-env": "^1.7.0", "babel-preset-es2015": "^6.24.1", "babel-preset-flow": "^6.23.0", "chai": "3.5.0", "cross-env": "^5.0.5", "eslint": "3.19.0", "eslint-config-airbnb": "15.1.0", "eslint-plugin-import": "2.7.0", "eslint-plugin-jsx-a11y": "5.1.1", "eslint-plugin-react": "7.3.0", "istanbul-instrumenter-loader": "^3.0.0", "jsdoc": "3.5.5", "json2yaml": "^1.1.0", "karma": "1.7.1", "karma-chai": "0.1.0", "karma-chrome-launcher": "2.1.1", "karma-coverage-istanbul-reporter": "^1.3.0", "karma-mocha": "1.3.0", "karma-spec-reporter": "0.0.31", "karma-webpack": "2.0.3", "marked": "^0.5.0", "mocha": "3.4.2", "mocha-webpack": "0.7.0", "transform-runtime": "0.0.0", "webpack": "^4.12.0", "webpack-cli": "^3.0.7", "webpack-dev-server": "^3.1.4" }, "scripts": { "test": "npm run lint && npm run ut", "ut": "karma start karma.conf.js", "utd": "karma start --single-run false --browsers Chrome karma.conf.js ", "build": "webpack --mode production", "build:dev": "webpack --mode development", "start": "webpack-dev-server --config webpack.config.dev.js --mode development --open", "lint": "eslint ./src", "lint-errors": "eslint --quiet ./src", "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json" } };
 
                 /***/
             },
@@ -599,19 +599,14 @@ return /******/ (function(modules) { // webpackBootstrap
                  * @return {Array.<Object>} Returns an array of headers and column major data.
                  */
                 function Auto(data, options) {
-                    var converter = void 0;
+                    var converters = { FlatJSON: _flat_json__WEBPACK_IMPORTED_MODULE_0__["default"], DSVStr: _dsv_str__WEBPACK_IMPORTED_MODULE_2__["default"], DSVArr: _dsv_arr__WEBPACK_IMPORTED_MODULE_1__["default"] };
+                    var dataFormat = Object(_utils__WEBPACK_IMPORTED_MODULE_3__["detectDataFormat"])(data);
 
-                    if (Object(_utils__WEBPACK_IMPORTED_MODULE_3__["isString"])(data)) {
-                        converter = _dsv_str__WEBPACK_IMPORTED_MODULE_2__["default"];
-                    } else if (Object(_utils__WEBPACK_IMPORTED_MODULE_3__["isArray"])(data) && Object(_utils__WEBPACK_IMPORTED_MODULE_3__["isArray"])(data[0])) {
-                        converter = _dsv_arr__WEBPACK_IMPORTED_MODULE_1__["default"];
-                    } else if (Object(_utils__WEBPACK_IMPORTED_MODULE_3__["isArray"])(data) && (data.length === 0 || Object(_utils__WEBPACK_IMPORTED_MODULE_3__["isObject"])(data[0]))) {
-                        converter = _flat_json__WEBPACK_IMPORTED_MODULE_0__["default"];
-                    } else {
+                    if (!dataFormat) {
                         throw new Error('Couldn\'t detect the data format');
                     }
 
-                    return converter(data, options);
+                    return converters[dataFormat](data, options);
                 }
 
                 /* harmony default export */__webpack_exports__["default"] = Auto;
@@ -1046,7 +1041,7 @@ return /******/ (function(modules) { // webpackBootstrap
                             var fields = this.getPartialFieldspace().fields;
 
                             var dataGenerated = _operator__WEBPACK_IMPORTED_MODULE_3__["dataBuilder"].call(this, this.getPartialFieldspace().fields, this._rowDiffset, options.getAllFields ? fields.map(function (d) {
-                                return d.name;
+                                return d.name();
                             }).join() : this._colIdentifier, options.sort, {
                                 columnWise: options.order === 'column',
                                 addUid: !!options.withUid
@@ -1209,18 +1204,94 @@ return /******/ (function(modules) { // webpackBootstrap
                             sortedDm._sortingDetails = sortingDetails;
                             return sortedDm;
                         }
+
+                        /**
+                         * Performs the serialization operation on the current {@link DataModel} instance according to the specified data
+                         * type. When an {@link DataModel} instance is created, it de-serializes the input data into its internal format,
+                         * and during its serialization process, it converts its internal data format to the specified data type and returns
+                         * that data regardless what type of data is used during the {@link DataModel} initialization.
+                         *
+                         * @example
+                         * // here dm is the pre-declared DataModel instance.
+                         * const csvData = dm.serialize(DataModel.DataFormat.DSV_STR, { fieldSeparator: "," });
+                         * console.log(csvData); // The csv formatted data.
+                         *
+                         * const jsonData = dm.serialize(DataModel.DataFormat.FLAT_JSON);
+                         * console.log(jsonData); // The json data.
+                         *
+                         * @public
+                         *
+                         * @param {string} type - The data type name for serialization.
+                         * @param {Object} options - The optional option object.
+                         * @param {string} options.fieldSeparator - The field separator character for DSV data type.
+                         * @return {Array|string} Returns the serialized data.
+                         */
+
+                    }, {
+                        key: 'serialize',
+                        value: function serialize(type, options) {
+                            type = type || this._dataFormat;
+                            options = Object.assign({}, { fieldSeparator: ',' }, options);
+
+                            var fields = this.getFieldspace().fields;
+                            var colData = fields.map(function (f) {
+                                return f.formattedData();
+                            });
+                            var rowsCount = colData[0].length;
+                            var serializedData = void 0;
+                            var rowIdx = void 0;
+                            var colIdx = void 0;
+
+                            if (type === _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].FLAT_JSON) {
+                                serializedData = [];
+                                for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                                    var row = {};
+                                    for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                                        row[fields[colIdx].name()] = colData[colIdx][rowIdx];
+                                    }
+                                    serializedData.push(row);
+                                }
+                            } else if (type === _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].DSV_STR) {
+                                serializedData = [fields.map(function (f) {
+                                    return f.name();
+                                }).join(options.fieldSeparator)];
+                                for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                                    var _row = [];
+                                    for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                                        _row.push(colData[colIdx][rowIdx]);
+                                    }
+                                    serializedData.push(_row.join(options.fieldSeparator));
+                                }
+                                serializedData = serializedData.join('\n');
+                            } else if (type === _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].DSV_ARR) {
+                                serializedData = [fields.map(function (f) {
+                                    return f.name();
+                                })];
+                                for (rowIdx = 0; rowIdx < rowsCount; rowIdx++) {
+                                    var _row2 = [];
+                                    for (colIdx = 0; colIdx < fields.length; colIdx++) {
+                                        _row2.push(colData[colIdx][rowIdx]);
+                                    }
+                                    serializedData.push(_row2);
+                                }
+                            } else {
+                                throw new Error('Data type ' + type + ' is not supported');
+                            }
+
+                            return serializedData;
+                        }
                     }, {
                         key: 'addField',
                         value: function addField(field) {
-                            var fieldName = field.fieldName();
+                            var fieldName = field.name();
                             this._colIdentifier += ',' + fieldName;
                             var partialFieldspace = this._partialFieldspace;
 
-                            if (!partialFieldspace.fieldsObj()[field.fieldName()]) {
+                            if (!partialFieldspace.fieldsObj()[field.name()]) {
                                 partialFieldspace.fields.push(field);
                             } else {
                                 var fieldIndex = partialFieldspace.fields.findIndex(function (fieldinst) {
-                                    return fieldinst.name === fieldName;
+                                    return fieldinst.name() === fieldName;
                                 });
                                 fieldIndex >= 0 && (partialFieldspace.fields[fieldIndex] = field);
                             }
@@ -1230,21 +1301,21 @@ return /******/ (function(modules) { // webpackBootstrap
                         }
 
                         /**
-                        * Creates a new variable calculated from existing variable. This method expects the defination of the newly created
+                        * Creates a new variable calculated from existing variables. This method expects the definition of the newly created
                         * variable and a function which resolves the value of the new variable from existing variables.
                         *
-                        * Can create a new measure based on existing variables
+                        * Can create a new measure based on existing variables:
                         * @example
-                        *  // DataModel already prepared and assigned to dm vairable;
+                        *  // DataModel already prepared and assigned to dm variable;
                         *  const newDm = dataModel.calculateVariable({
                         *      name: 'powerToWeight',
                         *      type: 'measure'
                         *  }, ['horsepower', 'weight_in_lbs', (hp, weight) => hp / weight ]);
                         *
                         *
-                        * Can create a new dimension based on existing variables
+                        * Can create a new dimension based on existing variables:
                         * @example
-                        *  // DataModel already prepared and assigned to dm vairable;
+                        *  // DataModel already prepared and assigned to dm variable;
                         *  const child = dataModel.calculateVariable(
                         *     {
                         *       name: 'Efficiency',
@@ -1257,24 +1328,31 @@ return /******/ (function(modules) { // webpackBootstrap
                         *
                         * @public
                         *
-                        * @param {Schema} schema: Schema of newly defined variable
-                        * @param {VariableResolver} resolver: Resolver format to resolve the current variable
-                        *
-                        * @return {DataModel} Instance of DataModel with the new field
+                        * @param {Object} schema - The schema of newly defined variable.
+                        * @param {Array.<string|function>} dependency - An array containing the dependency variable names and a resolver
+                        * function as the last element.
+                        * @param {Object} config - An optional config object.
+                        * @param {boolean} [config.saveChild] - Whether the newly created DataModel will be a child.
+                        * @param {boolean} [config.replaceVar] - Whether the newly created variable will replace the existing variable.
+                        * @return {DataModel} Returns an instance of DataModel with the new field.
                         */
 
                     }, {
                         key: 'calculateVariable',
-                        value: function calculateVariable(schema, dependency) {
-                            var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { saveChild: true, replaceVar: false };
+                        value: function calculateVariable(schema, dependency, config) {
+                            var _this2 = this;
+
+                            schema = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["sanitizeUnitSchema"])(schema);
+                            config = Object.assign({}, { saveChild: true, replaceVar: false }, config);
 
                             var fieldsConfig = this.getFieldsConfig();
                             var depVars = dependency.slice(0, dependency.length - 1);
                             var retrieveFn = dependency[dependency.length - 1];
 
                             if (fieldsConfig[schema.name] && !config.replaceVar) {
-                                throw new Error(schema.name + ' field already exists in model.');
+                                throw new Error(schema.name + ' field already exists in datamodel');
                             }
+
                             var depFieldIndices = depVars.map(function (field) {
                                 var fieldSpec = fieldsConfig[field];
                                 if (!fieldSpec) {
@@ -1291,15 +1369,20 @@ return /******/ (function(modules) { // webpackBootstrap
                                 return fs[idx];
                             });
 
+                            var cachedStore = {};
+                            var cloneProvider = function cloneProvider() {
+                                return _this2.detachedRoot();
+                            };
+
                             var computedValues = [];
                             Object(_operator__WEBPACK_IMPORTED_MODULE_3__["rowDiffsetIterator"])(clone._rowDiffset, function (i) {
                                 var fieldsData = suppliedFields.map(function (field) {
-                                    return field.data[i];
+                                    return field.partialField.data[i];
                                 });
-                                computedValues[i] = retrieveFn.apply(undefined, _toConsumableArray(fieldsData).concat([i, fs]));
+                                computedValues[i] = retrieveFn.apply(undefined, _toConsumableArray(fieldsData).concat([i, cloneProvider, cachedStore]));
                             });
 
-                            var _createFields = Object(_field_creator__WEBPACK_IMPORTED_MODULE_7__["default"])([computedValues], [schema], [schema.name]),
+                            var _createFields = Object(_field_creator__WEBPACK_IMPORTED_MODULE_7__["createFields"])([computedValues], [schema], [schema.name]),
                                 _createFields2 = _slicedToArray(_createFields, 1),
                                 field = _createFields2[0];
 
@@ -1403,18 +1486,18 @@ return /******/ (function(modules) { // webpackBootstrap
                     }, {
                         key: 'handlePropagation',
                         value: function handlePropagation(propModel, payload) {
-                            var _this2 = this;
+                            var _this3 = this;
 
                             var propListeners = this._onPropagation;
                             propListeners.forEach(function (fn) {
-                                return fn.call(_this2, propModel, payload);
+                                return fn.call(_this3, propModel, payload);
                             });
                         }
 
                         /**
-                         * Perfoms binning on a measure field based on a binning configuration. This method does not aggregate the number of
-                         * rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer binning
-                         * {@link example_of_binning | example} to have a intuition of what binning is and the use case.
+                         * Performs binning on a measure field based on a binning configuration. This method does not aggregate the number
+                         * of rows present in DataModel instance after binning, it just adds a new field with the binned value. Refer
+                         * binning {@link example_of_binning | example} to have a intuition of what binning is and the use case.
                          *
                          * Binning can be configured by
                          * - providing custom bin configuration with non uniform buckets
@@ -1423,7 +1506,7 @@ return /******/ (function(modules) { // webpackBootstrap
                          *
                          * When custom buckets are provided as part of binning configuration
                          * @example
-                         *  // DataModel already prepared and assigned to dm vairable
+                         *  // DataModel already prepared and assigned to dm variable
                          *  const buckets = {
                          *      start: 30
                          *      stops: [80, 100, 110]
@@ -1434,14 +1517,14 @@ return /******/ (function(modules) { // webpackBootstrap
                          * @text
                          * When `binCount` is defined as part of binning configuration
                          * @example
-                         *  // DataModel already prepared and assigned to dm vairable
+                         *  // DataModel already prepared and assigned to dm variable
                          *  const config = { binCount: 5, name: 'binnedHP' }
                          *  const binDM = dataModel.bin('horsepower', config);
                          *
                          * @text
                          * When `binSize` is defined as part of binning configuration
                          * @example
-                         *  // DataModel already prepared and assigned to dm vairable
+                         *  // DataModel already prepared and assigned to dm variable
                          *  const config = { binSize: 200, name: 'binnedHorsepower' }
                          *  const binDM = dataModel.bin('horsepower', config);
                          *
@@ -1449,7 +1532,7 @@ return /******/ (function(modules) { // webpackBootstrap
                          *
                          * @param {String} name Name of measure which will be used to create bin
                          * @param {Object} config Config required for bin creation
-                         * @param {Array.<Number>} config.bucketObj.stops Defination of bucket ranges. Two subsequent number from arrays
+                         * @param {Array.<Number>} config.bucketObj.stops Definition of bucket ranges. Two subsequent number from arrays
                          *      are picked and a range is created. The first number from range is inclusive and the second number from range
                          *      is exclusive.
                          * @param {Number} [config.bucketObj.startAt] Force the start of the bin from a particular number.
@@ -1464,30 +1547,63 @@ return /******/ (function(modules) { // webpackBootstrap
 
                     }, {
                         key: 'bin',
-                        value: function bin(measureName) {
+                        value: function bin(dimensionName) {
                             var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
                             var clone = this.clone();
-                            var binFieldName = config.name || measureName + '_binned';
-                            if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[measureName]) {
-                                throw new Error('Field ' + measureName + ' already exists.');
+                            var binFieldName = config.name || dimensionName + '_binned';
+                            if (this.getFieldsConfig()[binFieldName] || !this.getFieldsConfig()[dimensionName]) {
+                                throw new Error('Field ' + dimensionName + ' already exists.');
                             }
                             var field = this._partialFieldspace.fields.find(function (currfield) {
-                                return currfield.name === measureName;
+                                return currfield.name() === dimensionName;
                             });
                             var dataSet = Object(_operator_bucket_creator__WEBPACK_IMPORTED_MODULE_4__["createBinnedFieldData"])(field, this._rowDiffset, config);
-                            var binField = Object(_field_creator__WEBPACK_IMPORTED_MODULE_7__["default"])([dataSet.data], [{
+                            var binField = Object(_field_creator__WEBPACK_IMPORTED_MODULE_7__["createFields"])([dataSet.data], [{
                                 name: binFieldName,
-                                type: _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE,
-                                subtype: 'discrete', // @todo : DimensionSubtype
+                                type: _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION,
+                                subtype: _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].BINNED,
                                 bins: {
                                     range: dataSet.range,
                                     mid: dataSet.mid
                                 }
                             }], [binFieldName])[0];
                             clone.addField(binField);
-                            Object(_helper__WEBPACK_IMPORTED_MODULE_1__["persistDerivation"])(clone, _constants__WEBPACK_IMPORTED_MODULE_2__["DM_DERIVATIVES"].BIN, { measureName: measureName, config: config, binFieldName: binFieldName }, null);
+                            Object(_helper__WEBPACK_IMPORTED_MODULE_1__["persistDerivation"])(clone, _constants__WEBPACK_IMPORTED_MODULE_2__["DM_DERIVATIVES"].BIN, { dimensionName: dimensionName, config: config, binFieldName: binFieldName }, null);
                             return clone;
+                        }
+
+                        /**
+                         * Creates a new {@link DataModel} instance with completely detached root from current {@link DataModel} instance,
+                         * the new {@link DataModel} instance has no parent-children relationship with the current one, but has same data as
+                         * the current one.
+                         * This API is useful when a completely different {@link DataModel} but with same data as the current instance is
+                         * needed.
+                         *
+                         * @example
+                         *  const dm = new DataModel(data, schema);
+                         *  const detachedDm = dm.detachedRoot();
+                         *
+                         * // has different namespace
+                         * console.log(dm.getPartialFieldspace().name);
+                         * console.log(detachedDm.getPartialFieldspace().name);
+                         *
+                         * // has same data
+                         * console.log(dm.getData());
+                         * console.log(detachedDm.getData());
+                         *
+                         * @public
+                         *
+                         * @return {DataModel} Returns a detached {@link DataModel} instance.
+                         */
+
+                    }, {
+                        key: 'detachedRoot',
+                        value: function detachedRoot() {
+                            var data = this.serialize(_enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].FLAT_JSON);
+                            var schema = this.getSchema();
+
+                            return new DataModel(data, schema);
                         }
                     }], [{
                         key: 'Reducers',
@@ -1571,7 +1687,8 @@ return /******/ (function(modules) { // webpackBootstrap
                 var DimensionSubtype = {
                     CATEGORICAL: 'categorical',
                     TEMPORAL: 'temporal',
-                    GEO: 'geo'
+                    GEO: 'geo',
+                    BINNED: 'binned'
                 };
 
                 /* harmony default export */__webpack_exports__["default"] = DimensionSubtype;
@@ -1691,13 +1808,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
                 __webpack_require__.r(__webpack_exports__);
                 /**
-                 * MeasureSubtype enum defines the sub types of the Dimensional Field.
+                 * MeasureSubtype enum defines the sub types of the Measure Field.
                  *
                  * @readonly
                  * @enum {string}
                  */
                 var MeasureSubtype = {
-                    DISCRETE: 'discrete'
+                    CONTINUOUS: 'continuous'
                 };
 
                 /* harmony default export */__webpack_exports__["default"] = MeasureSubtype;
@@ -1756,45 +1873,94 @@ return /******/ (function(modules) { // webpackBootstrap
             /*!******************************!*\
               !*** ./src/field-creator.js ***!
               \******************************/
-            /*! exports provided: default */
+            /*! exports provided: createUnitFieldFromPartial, createFields */
             /***/function srcFieldCreatorJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
+                /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "createUnitFieldFromPartial", function () {
+                    return createUnitFieldFromPartial;
+                });
+                /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "createFields", function () {
+                    return createFields;
+                });
                 /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./enums */"./src/enums/index.js");
                 /* harmony import */var _fields__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./fields */"./src/fields/index.js");
 
                 /**
                  * Creates a field instance according to the provided data and schema.
                  *
-                 * @todo Add logic for GEO dimension subtype.
-                 *
                  * @param {Array} data - The field data array.
                  * @param {Object} schema - The field schema object.
                  * @return {Field} Returns the newly created field instance.
                  */
                 function createUnitField(data, schema) {
+                    data = data || [];
+                    var partialField = void 0;
+
                     switch (schema.type) {
                         case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE:
                             switch (schema.subtype) {
-                                case 'discrete':
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["DiscreteMeasure"](schema.name, data, schema, schema.bins);
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS:
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["ContinuousParser"]());
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Continuous"](partialField, '0-' + (data.length - 1));
                                 default:
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Measure"](schema.name, data, schema);
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["ContinuousParser"]());
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Continuous"](partialField, '0-' + (data.length - 1));
                             }
                         case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION:
-                        default:
                             switch (schema.subtype) {
                                 case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL:
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](schema.name, data, schema);
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["CategoricalParser"]());
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, '0-' + (data.length - 1));
                                 case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL:
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["DateTime"](schema.name, data, schema);
-                                case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].GEO:
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](schema.name, data, schema);
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["TemporalParser"](schema));
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Temporal"](partialField, '0-' + (data.length - 1));
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].BINNED:
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["BinnedParser"]());
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Binned"](partialField, '0-' + (data.length - 1));
                                 default:
-                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](schema.name, data, schema);
+                                    partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["CategoricalParser"]());
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, '0-' + (data.length - 1));
                             }
+                        default:
+                            partialField = new _fields__WEBPACK_IMPORTED_MODULE_1__["PartialField"](schema.name, data, schema, new _fields__WEBPACK_IMPORTED_MODULE_1__["CategoricalParser"]());
+                            return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, '0-' + (data.length - 1));
+                    }
+                }
+
+                /**
+                 * Creates a field instance from partialField and rowDiffset.
+                 *
+                 * @param {PartialField} partialField - The corresponding partial field.
+                 * @param {string} rowDiffset - The data subset config.
+                 * @return {Field} Returns the newly created field instance.
+                 */
+                function createUnitFieldFromPartial(partialField, rowDiffset) {
+                    var schema = partialField.schema;
+
+                    switch (schema.type) {
+                        case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE:
+                            switch (schema.subtype) {
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Continuous"](partialField, rowDiffset);
+                                default:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Continuous"](partialField, rowDiffset);
+                            }
+                        case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION:
+                            switch (schema.subtype) {
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, rowDiffset);
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Temporal"](partialField, rowDiffset);
+                                case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].BINNED:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Binned"](partialField, rowDiffset);
+                                default:
+                                    return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, rowDiffset);
+                            }
+                        default:
+                            return new _fields__WEBPACK_IMPORTED_MODULE_1__["Categorical"](partialField, rowDiffset);
                     }
                 }
 
@@ -1824,8 +1990,6 @@ return /******/ (function(modules) { // webpackBootstrap
                     });
                 }
 
-                /* harmony default export */__webpack_exports__["default"] = createFields;
-
                 /***/
             },
 
@@ -1853,15 +2017,15 @@ return /******/ (function(modules) { // webpackBootstrap
                             fieldsObj: function fieldsObj() {
                                 var retObj = {};
                                 this.fields.forEach(function (field) {
-                                    retObj[field.name] = field;
+                                    retObj[field.name()] = field;
                                 });
                                 return retObj;
                             },
                             getMeasure: function getMeasure() {
                                 var retObj = {};
                                 this.fields.forEach(function (field) {
-                                    if (field.schema.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
-                                        retObj[field.name] = field;
+                                    if (field.schema().type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+                                        retObj[field.name()] = field;
                                     }
                                 });
                                 return retObj;
@@ -1869,8 +2033,8 @@ return /******/ (function(modules) { // webpackBootstrap
                             getDimension: function getDimension() {
                                 var retObj = {};
                                 this.fields.forEach(function (field) {
-                                    if (field.schema.type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
-                                        retObj[field.name] = field;
+                                    if (field.schema().type === _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
+                                        retObj[field.name()] = field;
                                     }
                                 });
                                 return retObj;
@@ -1885,18 +2049,112 @@ return /******/ (function(modules) { // webpackBootstrap
                 /***/
             },
 
-            /***/"./src/fields/categorical.js":
-            /*!***********************************!*\
-              !*** ./src/fields/categorical.js ***!
-              \***********************************/
+            /***/"./src/fields/binned/index.js":
+            /*!************************************!*\
+              !*** ./src/fields/binned/index.js ***!
+              \************************************/
             /*! exports provided: default */
-            /***/function srcFieldsCategoricalJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsBinnedIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../enums */"./src/enums/index.js");
-                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./dimension */"./src/fields/dimension.js");
+                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../dimension */"./src/fields/dimension/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * Represents binned field subtype.
+                 *
+                 * @public
+                 * @class
+                 * @extends Dimension
+                 */
+
+                var Binned = function (_Dimension) {
+                    _inherits(Binned, _Dimension);
+
+                    function Binned() {
+                        _classCallCheck(this, Binned);
+
+                        return _possibleConstructorReturn(this, (Binned.__proto__ || Object.getPrototypeOf(Binned)).apply(this, arguments));
+                    }
+
+                    _createClass(Binned, [{
+                        key: 'calculateDataDomain',
+
+                        /**
+                         * Calculates the corresponding field domain.
+                         *
+                         * @public
+                         * @override
+                         * @return {Array} Returns the last and first values of bins config array.
+                         */
+                        value: function calculateDataDomain() {
+                            var binsArr = this.partialField.schema.bins;
+                            return [binsArr[0], binsArr[binsArr.length - 1]];
+                        }
+
+                        /**
+                         * Returns the bins config provided while creating the field instance.
+                         *
+                         * @public
+                         * @return {Array} Returns the bins array config.
+                         */
+
+                    }, {
+                        key: 'bins',
+                        value: function bins() {
+                            return this.partialField.schema.bins;
+                        }
+                    }]);
+
+                    return Binned;
+                }(_dimension__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = Binned;
+
+                /***/
+            },
+
+            /***/"./src/fields/categorical/index.js":
+            /*!*****************************************!*\
+              !*** ./src/fields/categorical/index.js ***!
+              \*****************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsCategoricalIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                /* harmony import */var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../operator/row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
+                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../../enums */"./src/enums/index.js");
+                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../dimension */"./src/fields/dimension/index.js");
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -1928,62 +2186,83 @@ return /******/ (function(modules) { // webpackBootstrap
                 /**
                  * Represents categorical field subtype.
                  *
+                 * @public
+                 * @class
                  * @extends Dimension
                  */
 
                 var Categorical = function (_Dimension) {
                     _inherits(Categorical, _Dimension);
 
-                    /**
-                     * Creates new Categorical field instance.
-                     *
-                     * @param {string} name - The name of the field.
-                     * @param {Array} data - An array containing the field data.
-                     * @param {Object} schema - The schema for the field.
-                     */
-                    function Categorical(name, data, schema) {
+                    function Categorical() {
                         _classCallCheck(this, Categorical);
 
-                        var _this = _possibleConstructorReturn(this, (Categorical.__proto__ || Object.getPrototypeOf(Categorical)).call(this, name, data, schema));
-
-                        _this.subtype = _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
-                        return _this;
+                        return _possibleConstructorReturn(this, (Categorical.__proto__ || Object.getPrototypeOf(Categorical)).apply(this, arguments));
                     }
 
-                    /**
-                     * Getter for subType value of the field.
-                     *
-                    * @return {string} Returns subType of the field.
-                    */
-
                     _createClass(Categorical, [{
-                        key: 'subType',
-                        value: function subType() {
-                            return this.subtype;
+                        key: 'subtype',
+
+                        /**
+                         * Returns the subtype of the field.
+                         *
+                         * @public
+                         * @override
+                         * @return {string} Returns the subtype of the field.
+                         */
+                        value: function subtype() {
+                            return _enums__WEBPACK_IMPORTED_MODULE_1__["DimensionSubtype"].CATEGORICAL;
+                        }
+
+                        /**
+                         * Calculates the corresponding field domain.
+                         *
+                         * @public
+                         * @override
+                         * @return {Array} Returns the unique values.
+                         */
+
+                    }, {
+                        key: 'calculateDataDomain',
+                        value: function calculateDataDomain() {
+                            var _this2 = this;
+
+                            var hash = new Set();
+                            var domain = [];
+
+                            // here don't use this.data() as the iteration will be occurred two times on same data.
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                var datum = _this2.partialField.data[i];
+                                if (!hash.has(datum)) {
+                                    hash.add(datum);
+                                    domain.push(datum);
+                                }
+                            });
+                            return domain;
                         }
                     }]);
 
                     return Categorical;
-                }(_dimension__WEBPACK_IMPORTED_MODULE_1__["default"]);
+                }(_dimension__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
                 /* harmony default export */__webpack_exports__["default"] = Categorical;
 
                 /***/
             },
 
-            /***/"./src/fields/datetime.js":
-            /*!********************************!*\
-              !*** ./src/fields/datetime.js ***!
-              \********************************/
+            /***/"./src/fields/continuous/index.js":
+            /*!****************************************!*\
+              !*** ./src/fields/continuous/index.js ***!
+              \****************************************/
             /*! exports provided: default */
-            /***/function srcFieldsDatetimeJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsContinuousIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../enums */"./src/enums/index.js");
-                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./dimension */"./src/fields/dimension.js");
-                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../utils */"./src/utils/index.js");
+                /* harmony import */var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../operator/row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
+                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../../enums */"./src/enums/index.js");
+                /* harmony import */var _measure__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../measure */"./src/fields/measure/index.js");
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -2013,88 +2292,86 @@ return /******/ (function(modules) { // webpackBootstrap
                 }
 
                 /**
-                 * Represents datetime field subtype.
+                 * Represents continuous field subtype.
                  *
-                 * @extends Dimension
+                 * @public
+                 * @class
+                 * @extends Measure
                  */
 
-                var DateTime = function (_Dimension) {
-                    _inherits(DateTime, _Dimension);
+                var Continuous = function (_Measure) {
+                    _inherits(Continuous, _Measure);
 
-                    /**
-                     * Creates new DateTime field instance.
-                     *
-                     * @param {string} name - The name of the field.
-                     * @param {Array} data - An array containing the field data.
-                     * @param {Object} schema - The schema for the field.
-                     */
-                    function DateTime(name, data, schema) {
-                        _classCallCheck(this, DateTime);
+                    function Continuous() {
+                        _classCallCheck(this, Continuous);
 
-                        var _this = _possibleConstructorReturn(this, (DateTime.__proto__ || Object.getPrototypeOf(DateTime)).call(this, name, data, schema));
-
-                        _this.subtype = _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL;
-                        _this.minDiff = Object(_utils__WEBPACK_IMPORTED_MODULE_2__["getMinDiff"])(_this.data);
-                        return _this;
+                        return _possibleConstructorReturn(this, (Continuous.__proto__ || Object.getPrototypeOf(Continuous)).apply(this, arguments));
                     }
 
-                    /**
-                     * Getter for subType value of the field.
-                     *
-                    * @return {string} Returns subType of the field.
-                    */
+                    _createClass(Continuous, [{
+                        key: 'subtype',
 
-                    _createClass(DateTime, [{
-                        key: 'subType',
-                        value: function subType() {
-                            return this.subtype;
-                        }
-                    }, {
-                        key: 'getMinDiff',
-                        value: function getMinDiff() {
-                            return this.minDiff;
-                        }
                         /**
-                        * A hook which is called for every entry(cell) of the column.
-                        *
-                        * @param {*} val - The current entry present in the column while iteration.
-                        * @return {number} Returns the total timestamps in millisecond.
-                        */
+                         * Returns the subtype of the field.
+                         *
+                         * @public
+                         * @override
+                         * @return {string} Returns the subtype of the field.
+                         */
+                        value: function subtype() {
+                            return _enums__WEBPACK_IMPORTED_MODULE_1__["MeasureSubtype"].CONTINUOUS;
+                        }
+
+                        /**
+                         * Calculates the corresponding field domain.
+                         *
+                         * @public
+                         * @override
+                         * @return {Array} Returns the min and max values.
+                         */
 
                     }, {
-                        key: 'parse',
-                        value: function parse(val) {
-                            if (this.schema.format) {
-                                this._dtf = this._dtf || new _utils__WEBPACK_IMPORTED_MODULE_2__["DateTimeFormatter"](this.schema.format);
-                                return this._dtf.getNativeDate(val).getTime();
-                            }
+                        key: 'calculateDataDomain',
+                        value: function calculateDataDomain() {
+                            var _this2 = this;
 
-                            // If format is not present then it means the value is such that the it could be directly passed to date
-                            // constructor
-                            return +new Date(val);
+                            var min = Number.POSITIVE_INFINITY;
+                            var max = Number.NEGATIVE_INFINITY;
+
+                            // here don't use this.data() as the iteration will be occurred two times on same data.
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                var datum = _this2.partialField.data[i];
+                                if (datum < min) {
+                                    min = datum;
+                                }
+                                if (datum > max) {
+                                    max = datum;
+                                }
+                            });
+
+                            return [min, max];
                         }
                     }]);
 
-                    return DateTime;
-                }(_dimension__WEBPACK_IMPORTED_MODULE_1__["default"]);
+                    return Continuous;
+                }(_measure__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
-                /* harmony default export */__webpack_exports__["default"] = DateTime;
+                /* harmony default export */__webpack_exports__["default"] = Continuous;
 
                 /***/
             },
 
-            /***/"./src/fields/dimension.js":
-            /*!*********************************!*\
-              !*** ./src/fields/dimension.js ***!
-              \*********************************/
+            /***/"./src/fields/dimension/index.js":
+            /*!***************************************!*\
+              !*** ./src/fields/dimension/index.js ***!
+              \***************************************/
             /*! exports provided: default */
-            /***/function srcFieldsDimensionJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsDimensionIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _partial_field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./partial-field */"./src/fields/partial-field.js");
-                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../utils */"./src/utils/index.js");
+                /* harmony import */var _field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../field */"./src/fields/field/index.js");
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -2126,11 +2403,13 @@ return /******/ (function(modules) { // webpackBootstrap
                 /**
                  * Represents dimension field type.
                  *
-                 * @extends PartialField
+                 * @public
+                 * @class
+                 * @extends Field
                  */
 
-                var Dimension = function (_PartialField) {
-                    _inherits(Dimension, _PartialField);
+                var Dimension = function (_Field) {
+                    _inherits(Dimension, _Field);
 
                     function Dimension() {
                         _classCallCheck(this, Dimension);
@@ -2145,68 +2424,63 @@ return /******/ (function(modules) { // webpackBootstrap
                          * Returns the domain for the dimension field.
                          *
                          * @override
-                         * @return {Array} Returns the unique values from dimension values.
+                         * @public
+                         * @return {any} Returns the calculated domain.
                          */
                         value: function domain() {
-                            return Object(_utils__WEBPACK_IMPORTED_MODULE_1__["uniqueValues"])(this.data);
-                        }
-
-                        /**
-                         * A hook which is called for every entry(cell) of the column.
-                         *
-                         * @todo Fix the null data e.g. undefined or null etc.
-                         *
-                         * @param {*} val - The current entry present in the column while iteration.
-                         * @return {string} Returns the string representation of the value.
-                         */
-
-                    }, {
-                        key: 'parse',
-                        value: function parse(val) {
-                            val = val === undefined || val === null ? '' : val.toString();
-                            return val.trim();
-                        }
-
-                        /**
-                         * Saves the cardinality of the dimensional values after parsing the data.
-                         *
-                         * @param {string} val - The parsed value.
-                         * @return {string} Returns the input val.
-                         */
-
-                    }, {
-                        key: 'parsed',
-                        value: function parsed(val) {
-                            this._unique = this._unique || {};
-                            var unique = this._unique;
-                            if (val in unique) {
-                                unique[val]++;
-                            } else {
-                                unique[val] = 1;
+                            if (!this._cachedDomain) {
+                                this._cachedDomain = this.calculateDataDomain();
                             }
-                            return val;
+                            return this._cachedDomain;
+                        }
+
+                        /**
+                         * Calculates the corresponding field domain.
+                         *
+                         * @public
+                         * @abstract
+                         */
+
+                    }, {
+                        key: 'calculateDataDomain',
+                        value: function calculateDataDomain() {
+                            throw new Error('Not yet implemented');
+                        }
+
+                        /**
+                        * Returns the formatted version of the underlying field data.
+                        *
+                        * @public
+                        * @override
+                        * @return {Array} Returns the formatted data.
+                        */
+
+                    }, {
+                        key: 'formattedData',
+                        value: function formattedData() {
+                            return this.data();
                         }
                     }]);
 
                     return Dimension;
-                }(_partial_field__WEBPACK_IMPORTED_MODULE_0__["default"]);
+                }(_field__WEBPACK_IMPORTED_MODULE_0__["default"]);
 
                 /* harmony default export */__webpack_exports__["default"] = Dimension;
 
                 /***/
             },
 
-            /***/"./src/fields/discreteMeasure.js":
-            /*!***************************************!*\
-              !*** ./src/fields/discreteMeasure.js ***!
-              \***************************************/
+            /***/"./src/fields/field/index.js":
+            /*!***********************************!*\
+              !*** ./src/fields/field/index.js ***!
+              \***********************************/
             /*! exports provided: default */
-            /***/function srcFieldsDiscreteMeasureJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsFieldIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _measure__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./measure */"./src/fields/measure.js");
+                /* harmony import */var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../operator/row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -2216,110 +2490,6 @@ return /******/ (function(modules) { // webpackBootstrap
                         if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
                     };
                 }();
-
-                function _classCallCheck(instance, Constructor) {
-                    if (!(instance instanceof Constructor)) {
-                        throw new TypeError("Cannot call a class as a function");
-                    }
-                }
-
-                function _possibleConstructorReturn(self, call) {
-                    if (!self) {
-                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
-                }
-
-                function _inherits(subClass, superClass) {
-                    if (typeof superClass !== "function" && superClass !== null) {
-                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
-                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-                }
-
-                /**
-                 * Represents categorical field subtype.
-                 *
-                 * @extends Measure
-                 */
-
-                var DiscreteMeasure = function (_Measure) {
-                    _inherits(DiscreteMeasure, _Measure);
-
-                    function DiscreteMeasure(name, data, schema, bin) {
-                        _classCallCheck(this, DiscreteMeasure);
-
-                        var _this = _possibleConstructorReturn(this, (DiscreteMeasure.__proto__ || Object.getPrototypeOf(DiscreteMeasure)).call(this, name, data, schema));
-
-                        _this.bin = bin;
-                        _this.subtype = 'discrete';
-                        return _this;
-                    }
-
-                    /**
-                     * A hook which is called for every entry(cell) of the column.
-                     *
-                     * @todo Fix the null data e.g. undefined or null etc.
-                     *
-                     * @param {*} val - The current entry present in the column while iteration.
-                     * @return {string} Returns the string representation of the value.
-                     */
-
-                    _createClass(DiscreteMeasure, [{
-                        key: 'parse',
-                        value: function parse(val) {
-                            val = val === undefined || val === null ? '' : val.toString();
-                            return val.trim();
-                        }
-                    }, {
-                        key: 'bins',
-                        value: function bins() {
-                            return this.bin;
-                        }
-                    }, {
-                        key: 'subType',
-                        value: function subType() {
-                            return this.subtype;
-                        }
-                    }]);
-
-                    return DiscreteMeasure;
-                }(_measure__WEBPACK_IMPORTED_MODULE_0__["default"]);
-
-                /* harmony default export */__webpack_exports__["default"] = DiscreteMeasure;
-
-                /***/
-            },
-
-            /***/"./src/fields/field.js":
-            /*!*****************************!*\
-              !*** ./src/fields/field.js ***!
-              \*****************************/
-            /*! exports provided: default */
-            /***/function srcFieldsFieldJs(module, __webpack_exports__, __webpack_require__) {
-
-                "use strict";
-
-                __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../enums */"./src/enums/index.js");
-                /* harmony import */var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../operator/row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
-                var _createClass = function () {
-                    function defineProperties(target, props) {
-                        for (var i = 0; i < props.length; i++) {
-                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
-                        }
-                    }return function (Constructor, protoProps, staticProps) {
-                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
-                    };
-                }();
-
-                function _toConsumableArray(arr) {
-                    if (Array.isArray(arr)) {
-                        for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-                            arr2[i] = arr[i];
-                        }return arr2;
-                    } else {
-                        return Array.from(arr);
-                    }
-                }
 
                 function _classCallCheck(instance, Constructor) {
                     if (!(instance instanceof Constructor)) {
@@ -2348,155 +2518,141 @@ return /******/ (function(modules) { // webpackBootstrap
                  */
 
                 var Field = function () {
-                    function Field(partialFeild, rowDiff) {
+                    /**
+                     * Initialize a new instance.
+                     *
+                     * @public
+                     * @param {PartialField} partialField - The partialField instance which holds the whole data.
+                     * @param {string} rowDiffset - The data subset definition.
+                     */
+                    function Field(partialField, rowDiffset) {
                         _classCallCheck(this, Field);
 
-                        this._ref = partialFeild;
-                        this._rowDiff = rowDiff;
+                        this.partialField = partialField;
+                        this.rowDiffset = rowDiffset;
                     }
 
+                    /**
+                     * Generates the field type specific domain.
+                     *
+                     * @public
+                     * @abstract
+                     */
+
                     _createClass(Field, [{
-                        key: 'sanitize',
-                        value: function sanitize() {
-                            return this._ref.sanitize();
-                        }
-                    }, {
-                        key: 'parsed',
-                        value: function parsed(val) {
-                            return this._ref.parsed(val);
-                        }
-                    }, {
                         key: 'domain',
                         value: function domain() {
-                            var data = [];
-                            var domain = null;
-                            data = this.getData();
-                            if (this._ref.fieldType === 'dimension' && this._ref.subType() !== _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL) {
-                                domain = [].concat(_toConsumableArray(new Set(data)));
-                            } else {
-                                var minD = Math.min.apply(null, data);
-                                var maxD = Math.max.apply(null, data);
-                                domain = [minD, maxD];
-                            }
-
-                            return domain;
-                        }
-                    }, {
-                        key: 'parse',
-                        value: function parse(val) {
-                            return this._ref.parse(val);
-                        }
-                    }, {
-                        key: 'clone',
-                        value: function clone(datas) {
-                            return this._ref.clone(datas);
-                        }
-                    }, {
-                        key: 'fieldName',
-                        value: function fieldName() {
-                            return this._ref.fieldName();
-                        }
-                    }, {
-                        key: 'type',
-                        value: function type() {
-                            return this._ref.type();
-                        }
-                    }, {
-                        key: 'description',
-                        value: function description() {
-                            return this._ref.description();
-                        }
-                    }, {
-                        key: 'subType',
-
-                        // set data(schema) {
-                        //     throw new Error('Not yet implemented!');
-                        // }
-
-                        value: function subType() {
-                            return this._ref.subType();
-                        }
-                    }, {
-                        key: 'getMinDiff',
-                        value: function getMinDiff() {
-                            return this._ref.getMinDiff();
+                            throw new Error('Not yet implemented');
                         }
 
                         /**
-                         * Getter for unit value of the field.
+                         * Returns the the field schema.
                          *
-                         * @return {string} Returns unit of the field.
+                         * @public
+                         * @return {string} Returns the field schema.
                          */
-
-                    }, {
-                        key: 'unit',
-                        value: function unit() {
-                            return this._ref.unit();
-                        }
-
-                        /**
-                         * Getter for scale value of the field.
-                         *
-                         * @return {string} Returns scale of the field.
-                         */
-
-                    }, {
-                        key: 'scale',
-                        value: function scale() {
-                            return this._ref.scale();
-                        }
-
-                        /**
-                         * Getter for aggregation function of the field.
-                         *
-                         * @return {Function} Returns aggregation function of the field.
-                         */
-
-                    }, {
-                        key: 'defAggFn',
-                        value: function defAggFn() {
-                            return this._ref.defAggFn();
-                        }
-                    }, {
-                        key: 'getData',
-                        value: function getData() {
-                            var _this = this;
-
-                            var data = [];
-                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_1__["rowDiffsetIterator"])(this._rowDiff, function (i) {
-                                data.push(_this._ref.data[i]);
-                            });
-                            return data;
-                        }
-                    }, {
-                        key: 'bins',
-                        value: function bins() {
-                            return this._ref.bins();
-                        }
-                    }, {
-                        key: 'name',
-                        get: function get() {
-                            return this._ref.name;
-                        }
-
-                        // set name(name) {
-                        //     this._ref.name = name;
-                        // }
 
                     }, {
                         key: 'schema',
-                        get: function get() {
-                            return this._ref.schema;
+                        value: function schema() {
+                            return this.partialField.schema;
                         }
 
-                        // set schema(schema) {
-                        //     this._ref.schema = schema;
-                        // }
+                        /**
+                         * Returns the name of the field.
+                         *
+                         * @public
+                         * @return {string} Returns the name of the field.
+                         */
+
+                    }, {
+                        key: 'name',
+                        value: function name() {
+                            return this.partialField.name;
+                        }
+
+                        /**
+                         * Returns the type of the field.
+                         *
+                         * @public
+                         * @return {string} Returns the type of the field.
+                         */
+
+                    }, {
+                        key: 'type',
+                        value: function type() {
+                            return this.partialField.schema.type;
+                        }
+
+                        /**
+                         * Returns the subtype of the field.
+                         *
+                         * @public
+                         * @return {string} Returns the subtype of the field.
+                         */
+
+                    }, {
+                        key: 'subtype',
+                        value: function subtype() {
+                            return this.partialField.schema.subtype;
+                        }
+
+                        /**
+                         * Returns the description of the field.
+                         *
+                         * @public
+                         * @return {string} Returns the description of the field.
+                         */
+
+                    }, {
+                        key: 'description',
+                        value: function description() {
+                            return this.partialField.schema.description;
+                        }
+
+                        /**
+                         * Returns the display name of the field.
+                         *
+                         * @public
+                         * @return {string} Returns the display name of the field.
+                         */
+
+                    }, {
+                        key: 'displayName',
+                        value: function displayName() {
+                            return this.partialField.schema.displayName || this.partialField.schema.name;
+                        }
+
+                        /**
+                         * Returns the data associated with the field.
+                         *
+                         * @public
+                         * @return {Array} Returns the data.
+                         */
 
                     }, {
                         key: 'data',
-                        get: function get() {
-                            return this._ref.data;
+                        value: function data() {
+                            var _this = this;
+
+                            var data = [];
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                data.push(_this.partialField.data[i]);
+                            });
+                            return data;
+                        }
+
+                        /**
+                         * Returns the formatted version of the underlying field data.
+                         *
+                         * @public
+                         * @abstract
+                         */
+
+                    }, {
+                        key: 'formattedData',
+                        value: function formattedData() {
+                            throw new Error('Not yet implemented');
                         }
                     }]);
 
@@ -2512,53 +2668,93 @@ return /******/ (function(modules) { // webpackBootstrap
             /*!*****************************!*\
               !*** ./src/fields/index.js ***!
               \*****************************/
-            /*! exports provided: Measure, Dimension, Categorical, DateTime, DiscreteMeasure */
+            /*! exports provided: Field, Dimension, Categorical, Temporal, Binned, Measure, Continuous, FieldParser, CategoricalParser, TemporalParser, BinnedParser, ContinuousParser, PartialField */
             /***/function srcFieldsIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _measure__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./measure */"./src/fields/measure.js");
-                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Measure", function () {
-                    return _measure__WEBPACK_IMPORTED_MODULE_0__["default"];
+                /* harmony import */var _field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./field */"./src/fields/field/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Field", function () {
+                    return _field__WEBPACK_IMPORTED_MODULE_0__["default"];
                 });
 
-                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./dimension */"./src/fields/dimension.js");
+                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./dimension */"./src/fields/dimension/index.js");
                 /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Dimension", function () {
                     return _dimension__WEBPACK_IMPORTED_MODULE_1__["default"];
                 });
 
-                /* harmony import */var _categorical__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ./categorical */"./src/fields/categorical.js");
+                /* harmony import */var _categorical__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ./categorical */"./src/fields/categorical/index.js");
                 /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Categorical", function () {
                     return _categorical__WEBPACK_IMPORTED_MODULE_2__["default"];
                 });
 
-                /* harmony import */var _datetime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__( /*! ./datetime */"./src/fields/datetime.js");
-                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "DateTime", function () {
-                    return _datetime__WEBPACK_IMPORTED_MODULE_3__["default"];
+                /* harmony import */var _temporal__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__( /*! ./temporal */"./src/fields/temporal/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Temporal", function () {
+                    return _temporal__WEBPACK_IMPORTED_MODULE_3__["default"];
                 });
 
-                /* harmony import */var _discreteMeasure__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__( /*! ./discreteMeasure */"./src/fields/discreteMeasure.js");
-                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "DiscreteMeasure", function () {
-                    return _discreteMeasure__WEBPACK_IMPORTED_MODULE_4__["default"];
+                /* harmony import */var _binned__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__( /*! ./binned */"./src/fields/binned/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Binned", function () {
+                    return _binned__WEBPACK_IMPORTED_MODULE_4__["default"];
+                });
+
+                /* harmony import */var _measure__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__( /*! ./measure */"./src/fields/measure/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Measure", function () {
+                    return _measure__WEBPACK_IMPORTED_MODULE_5__["default"];
+                });
+
+                /* harmony import */var _continuous__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__( /*! ./continuous */"./src/fields/continuous/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "Continuous", function () {
+                    return _continuous__WEBPACK_IMPORTED_MODULE_6__["default"];
+                });
+
+                /* harmony import */var _parsers_field_parser__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__( /*! ./parsers/field-parser */"./src/fields/parsers/field-parser/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "FieldParser", function () {
+                    return _parsers_field_parser__WEBPACK_IMPORTED_MODULE_7__["default"];
+                });
+
+                /* harmony import */var _parsers_categorical_parser__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__( /*! ./parsers/categorical-parser */"./src/fields/parsers/categorical-parser/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "CategoricalParser", function () {
+                    return _parsers_categorical_parser__WEBPACK_IMPORTED_MODULE_8__["default"];
+                });
+
+                /* harmony import */var _parsers_temporal_parser__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__( /*! ./parsers/temporal-parser */"./src/fields/parsers/temporal-parser/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "TemporalParser", function () {
+                    return _parsers_temporal_parser__WEBPACK_IMPORTED_MODULE_9__["default"];
+                });
+
+                /* harmony import */var _parsers_binned_parser__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__( /*! ./parsers/binned-parser */"./src/fields/parsers/binned-parser/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "BinnedParser", function () {
+                    return _parsers_binned_parser__WEBPACK_IMPORTED_MODULE_10__["default"];
+                });
+
+                /* harmony import */var _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__( /*! ./parsers/continuous-parser */"./src/fields/parsers/continuous-parser/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "ContinuousParser", function () {
+                    return _parsers_continuous_parser__WEBPACK_IMPORTED_MODULE_11__["default"];
+                });
+
+                /* harmony import */var _partial_field__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__( /*! ./partial-field */"./src/fields/partial-field/index.js");
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "PartialField", function () {
+                    return _partial_field__WEBPACK_IMPORTED_MODULE_12__["default"];
                 });
 
                 /***/
             },
 
-            /***/"./src/fields/measure.js":
-            /*!*******************************!*\
-              !*** ./src/fields/measure.js ***!
-              \*******************************/
+            /***/"./src/fields/measure/index.js":
+            /*!*************************************!*\
+              !*** ./src/fields/measure/index.js ***!
+              \*************************************/
             /*! exports provided: default */
-            /***/function srcFieldsMeasureJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsMeasureIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _partial_field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./partial-field */"./src/fields/partial-field.js");
-                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../utils */"./src/utils/index.js");
-                /* harmony import */var _operator_group_by_function__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../operator/group-by-function */"./src/operator/group-by-function.js");
+                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../utils */"./src/utils/index.js");
+                /* harmony import */var _operator_group_by_function__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../../operator/group-by-function */"./src/operator/group-by-function.js");
+                /* harmony import */var _field__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../field */"./src/fields/field/index.js");
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -2590,131 +2786,374 @@ return /******/ (function(modules) { // webpackBootstrap
                 /**
                  * Represents measure field type.
                  *
-                 * @extends PartialField
+                 * @public
+                 * @class
+                 * @extends Field
                  */
 
-                var Measure = function (_PartialField) {
-                    _inherits(Measure, _PartialField);
+                var Measure = function (_Field) {
+                    _inherits(Measure, _Field);
 
-                    /**
-                     * Creates new Measure field instance.
-                     *
-                     * @param {string} name - The name of the field.
-                     * @param {Array} data - An array containing the field data.
-                     * @param {Object} schema - The schema for the field.
-                     */
-                    function Measure(name, data, schema) {
+                    function Measure() {
                         _classCallCheck(this, Measure);
 
-                        var _this = _possibleConstructorReturn(this, (Measure.__proto__ || Object.getPrototypeOf(Measure)).call(this, name, data, schema));
-
-                        _this.fieldUnit = schema.unit;
-                        _this.fieldScale = schema.scale;
-                        _this.fieldDefAggFn = schema.defAggFn || _operator_group_by_function__WEBPACK_IMPORTED_MODULE_2__["defaultReducerName"];
-                        _this.fieldNumberformat = schema.numberFormat instanceof Function ? schema.numberFormat : _utils__WEBPACK_IMPORTED_MODULE_1__["formatNumber"];
-                        return _this;
+                        return _possibleConstructorReturn(this, (Measure.__proto__ || Object.getPrototypeOf(Measure)).apply(this, arguments));
                     }
-
-                    /**
-                     * Returns the domain for the measure field.
-                     *
-                     * @override
-                     * @return {Array} Returns min and max values from measure values.
-                     */
 
                     _createClass(Measure, [{
                         key: 'domain',
-                        value: function domain() {
-                            return Object(_utils__WEBPACK_IMPORTED_MODULE_1__["generateMeasureDomain"])(this.data);
-                        }
 
                         /**
-                         * A hook which is called for every entry(cell) of the column.
+                         * Returns the domain for the measure field.
                          *
-                         * @todo Fix the null data e.g. NaN value.
-                         *
-                         * @param {*} val - The current entry present in the column while iteration.
-                         * @return {number | null} Returns the parsed number value of content of cell or null.
+                         * @override
+                         * @public
+                         * @return {any} Returns the calculated domain.
                          */
-
-                    }, {
-                        key: 'parse',
-                        value: function parse(val) {
-                            val = parseFloat(val, 10);
-                            return Number.isNaN(val) ? null : val;
+                        value: function domain() {
+                            if (!this._cachedDomain) {
+                                this._cachedDomain = this.calculateDataDomain();
+                            }
+                            return this._cachedDomain;
                         }
 
                         /**
-                         * Getter for unit value of the field.
+                         * Returns the unit of the measure field.
                          *
+                         * @public
                          * @return {string} Returns unit of the field.
                          */
 
                     }, {
                         key: 'unit',
                         value: function unit() {
-                            return this.fieldUnit;
+                            return this.partialField.schema.unit;
                         }
 
                         /**
-                         * Getter for scale value of the field.
+                         * Returns the aggregation function name of the measure field.
                          *
-                         * @return {string} Returns scale of the field.
-                         */
-
-                    }, {
-                        key: 'scale',
-                        value: function scale() {
-                            return this.fieldScale;
-                        }
-
-                        /**
-                         * Getter for number format value of the field.
-                         *
-                         * @return {string} Returns number format of the field.
-                         */
-
-                    }, {
-                        key: 'numberFormat',
-                        value: function numberFormat() {
-                            var formatter = this.fieldNumberformat;
-                            return function (val) {
-                                return formatter(val);
-                            };
-                        }
-
-                        /**
-                         * Getter for aggregation function of the field.
-                         *
-                         * @return {Function} Returns aggregation function of the field.
+                         * @public
+                         * @return {string} Returns aggregation function name of the field.
                          */
 
                     }, {
                         key: 'defAggFn',
                         value: function defAggFn() {
-                            return this.fieldDefAggFn;
+                            return this.partialField.schema.defAggFn || _operator_group_by_function__WEBPACK_IMPORTED_MODULE_1__["defaultReducerName"];
+                        }
+
+                        /**
+                         * Returns the number format of the measure field.
+                         *
+                         * @public
+                         * @return {Function} Returns number format of the field.
+                         */
+
+                    }, {
+                        key: 'numberFormat',
+                        value: function numberFormat() {
+                            var numberFormat = this.partialField.schema.numberFormat;
+
+                            return numberFormat instanceof Function ? numberFormat : _utils__WEBPACK_IMPORTED_MODULE_0__["formatNumber"];
+                        }
+
+                        /**
+                         * Calculates the corresponding field domain.
+                         *
+                         * @public
+                         * @abstract
+                         */
+
+                    }, {
+                        key: 'calculateDataDomain',
+                        value: function calculateDataDomain() {
+                            throw new Error('Not yet implemented');
+                        }
+
+                        /**
+                         * Returns the formatted version of the underlying field data.
+                         *
+                         * @public
+                         * @override
+                         * @return {Array} Returns the formatted data.
+                         */
+
+                    }, {
+                        key: 'formattedData',
+                        value: function formattedData() {
+                            return this.data();
                         }
                     }]);
 
                     return Measure;
-                }(_partial_field__WEBPACK_IMPORTED_MODULE_0__["default"]);
+                }(_field__WEBPACK_IMPORTED_MODULE_2__["default"]);
 
                 /* harmony default export */__webpack_exports__["default"] = Measure;
 
                 /***/
             },
 
-            /***/"./src/fields/partial-field.js":
-            /*!*************************************!*\
-              !*** ./src/fields/partial-field.js ***!
-              \*************************************/
+            /***/"./src/fields/parsers/binned-parser/index.js":
+            /*!***************************************************!*\
+              !*** ./src/fields/parsers/binned-parser/index.js ***!
+              \***************************************************/
             /*! exports provided: default */
-            /***/function srcFieldsPartialFieldJs(module, __webpack_exports__, __webpack_require__) {
+            /***/function srcFieldsParsersBinnedParserIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
 
                 __webpack_require__.r(__webpack_exports__);
-                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../utils */"./src/utils/index.js");
+                /* harmony import */var _field_parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../field-parser */"./src/fields/parsers/field-parser/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * A FieldParser which parses the binned values.
+                 *
+                 * @public
+                 * @class
+                 * @implements {FieldParser}
+                 */
+
+                var BinnedParser = function (_FieldParser) {
+                    _inherits(BinnedParser, _FieldParser);
+
+                    function BinnedParser() {
+                        _classCallCheck(this, BinnedParser);
+
+                        return _possibleConstructorReturn(this, (BinnedParser.__proto__ || Object.getPrototypeOf(BinnedParser)).apply(this, arguments));
+                    }
+
+                    _createClass(BinnedParser, [{
+                        key: 'parse',
+
+                        /**
+                         * Parses a single binned value of a field and returns the sanitized value.
+                         *
+                         * @public
+                         * @param {string} val - The value of the field.
+                         * @return {string} Returns the sanitized value.
+                         */
+                        value: function parse(val) {
+                            if (val === null || val === undefined) {
+                                return null;
+                            }
+
+                            var regex = /^\s*(\d+)\s*-\s*(\d+)\s*$/;
+                            val = String(val);
+
+                            var matched = val.match(regex);
+                            if (!matched) {
+                                return null;
+                            }
+
+                            return matched[1] + '-' + matched[2];
+                        }
+                    }]);
+
+                    return BinnedParser;
+                }(_field_parser__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = BinnedParser;
+
+                /***/
+            },
+
+            /***/"./src/fields/parsers/categorical-parser/index.js":
+            /*!********************************************************!*\
+              !*** ./src/fields/parsers/categorical-parser/index.js ***!
+              \********************************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsParsersCategoricalParserIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                /* harmony import */var _field_parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../field-parser */"./src/fields/parsers/field-parser/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * A FieldParser which parses the categorical values.
+                 *
+                 * @public
+                 * @class
+                 * @implements {FieldParser}
+                 */
+
+                var CategoricalParser = function (_FieldParser) {
+                    _inherits(CategoricalParser, _FieldParser);
+
+                    function CategoricalParser() {
+                        _classCallCheck(this, CategoricalParser);
+
+                        return _possibleConstructorReturn(this, (CategoricalParser.__proto__ || Object.getPrototypeOf(CategoricalParser)).apply(this, arguments));
+                    }
+
+                    _createClass(CategoricalParser, [{
+                        key: 'parse',
+
+                        /**
+                         * Parses a single value of a field and returns the stringified form.
+                         *
+                         * @public
+                         * @param {string|number} val - The value of the field.
+                         * @return {string} Returns the stringified value.
+                         */
+                        value: function parse(val) {
+                            return val === undefined || val === null ? null : String(val).trim();
+                        }
+                    }]);
+
+                    return CategoricalParser;
+                }(_field_parser__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = CategoricalParser;
+
+                /***/
+            },
+
+            /***/"./src/fields/parsers/continuous-parser/index.js":
+            /*!*******************************************************!*\
+              !*** ./src/fields/parsers/continuous-parser/index.js ***!
+              \*******************************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsParsersContinuousParserIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                /* harmony import */var _field_parser__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../field-parser */"./src/fields/parsers/field-parser/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * A FieldParser which parses the continuous values.
+                 *
+                 * @public
+                 * @class
+                 * @implements {FieldParser}
+                 */
+
+                var ContinuousParser = function (_FieldParser) {
+                    _inherits(ContinuousParser, _FieldParser);
+
+                    function ContinuousParser() {
+                        _classCallCheck(this, ContinuousParser);
+
+                        return _possibleConstructorReturn(this, (ContinuousParser.__proto__ || Object.getPrototypeOf(ContinuousParser)).apply(this, arguments));
+                    }
+
+                    _createClass(ContinuousParser, [{
+                        key: 'parse',
+
+                        /**
+                         * Parses a single value of a field and returns the number form.
+                         *
+                         * @public
+                         * @param {string|number} val - The value of the field.
+                         * @return {string} Returns the number value.
+                         */
+                        value: function parse(val) {
+                            val = parseFloat(val, 10);
+                            return Number.isNaN(val) ? null : val;
+                        }
+                    }]);
+
+                    return ContinuousParser;
+                }(_field_parser__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = ContinuousParser;
+
+                /***/
+            },
+
+            /***/"./src/fields/parsers/field-parser/index.js":
+            /*!**************************************************!*\
+              !*** ./src/fields/parsers/field-parser/index.js ***!
+              \**************************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsParsersFieldParserIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
                 var _createClass = function () {
                     function defineProperties(target, props) {
                         for (var i = 0; i < props.length; i++) {
@@ -2732,136 +3171,204 @@ return /******/ (function(modules) { // webpackBootstrap
                 }
 
                 /**
-                 * The base class for every field type.
-                 * It provides some common functionalities.
+                 * A interface to represent a parser which is responsible to parse the field.
+                 *
+                 * @public
+                 * @interface
+                 */
+                var FieldParser = function () {
+                    function FieldParser() {
+                        _classCallCheck(this, FieldParser);
+                    }
+
+                    _createClass(FieldParser, [{
+                        key: 'parse',
+
+                        /**
+                         * Parses a single value of a field and return the sanitized form.
+                         *
+                         * @public
+                         * @abstract
+                         */
+                        value: function parse() {
+                            throw new Error('Not yet implemented');
+                        }
+                    }]);
+
+                    return FieldParser;
+                }();
+
+                /* harmony default export */__webpack_exports__["default"] = FieldParser;
+
+                /***/
+            },
+
+            /***/"./src/fields/parsers/temporal-parser/index.js":
+            /*!*****************************************************!*\
+              !*** ./src/fields/parsers/temporal-parser/index.js ***!
+              \*****************************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsParsersTemporalParserIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../../utils */"./src/utils/index.js");
+                /* harmony import */var _field_parser__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../field-parser */"./src/fields/parsers/field-parser/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * A FieldParser which parses the temporal values.
+                 *
+                 * @public
+                 * @class
+                 * @implements {FieldParser}
                  */
 
-                var PartialField = function () {
+                var TemporalParser = function (_FieldParser) {
+                    _inherits(TemporalParser, _FieldParser);
 
                     /**
-                     * Sets basic setups to each Field instance.
+                     * Initialize a new instance.
                      *
-                     * @param {string} name - The name or identifier of the field.
-                     * @param {Array} data - The data array.
-                     * @param {Object} schema - The schema of the data type.
+                     * @public
+                     * @param {Object} schema - The schema object for the corresponding field.
                      */
-                    function PartialField(name, data, schema) {
+                    function TemporalParser(schema) {
+                        _classCallCheck(this, TemporalParser);
+
+                        var _this = _possibleConstructorReturn(this, (TemporalParser.__proto__ || Object.getPrototypeOf(TemporalParser)).call(this));
+
+                        _this.schema = schema;
+                        _this._dtf = null;
+                        return _this;
+                    }
+
+                    /**
+                     * Parses a single value of a field and returns the millisecond value.
+                     *
+                     * @public
+                     * @param {string|number} val - The value of the field.
+                     * @return {number} Returns the millisecond value.
+                     */
+
+                    _createClass(TemporalParser, [{
+                        key: 'parse',
+                        value: function parse(val) {
+                            if (this.schema.format) {
+                                this._dtf = this._dtf || new _utils__WEBPACK_IMPORTED_MODULE_0__["DateTimeFormatter"](this.schema.format);
+                                return this._dtf.getNativeDate(val).getTime();
+                            }
+
+                            // If format is not present which means the value is such that
+                            // it could be directly passed to Date constructor.
+                            return +new Date(val);
+                        }
+                    }]);
+
+                    return TemporalParser;
+                }(_field_parser__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = TemporalParser;
+
+                /***/
+            },
+
+            /***/"./src/fields/partial-field/index.js":
+            /*!*******************************************!*\
+              !*** ./src/fields/partial-field/index.js ***!
+              \*******************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsPartialFieldIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                /**
+                 * Stores the full data and the metadata of a field. It provides
+                 * a single source of data from which the future Field
+                 * instance can get a subset of it with a rowDiffset config.
+                 *
+                 * @class
+                 * @public
+                 */
+                var PartialField = function () {
+                    /**
+                     * Initialize a new instance.
+                     *
+                     * @public
+                     * @param {string} name - The name of the field.
+                     * @param {Array} data - The data array.
+                     * @param {Object} schema - The schema object of the corresponding field.
+                     * @param {FieldParser} parser - The parser instance corresponding to that field.
+                     */
+                    function PartialField(name, data, schema, parser) {
                         _classCallCheck(this, PartialField);
 
                         this.name = name;
-                        this.data = data || [];
                         this.schema = schema;
-                        this.fieldDescription = schema.description;
-                        this.fieldType = schema.type;
-                        this.sanitize();
+                        this.parser = parser;
+                        this.data = this._sanitize(data);
                     }
 
                     /**
                      * Sanitizes the field data.
                      *
-                     * @return {PartialField} - Returns the instance of the current context for chaining.
+                     * @private
+                     * @param {Array} data - The actual input data.
+                     * @return {Array} Returns the sanitized data.
                      */
 
                     _createClass(PartialField, [{
-                        key: 'sanitize',
-                        value: function sanitize() {
+                        key: "_sanitize",
+                        value: function _sanitize(data) {
                             var _this = this;
 
-                            this.data = this.data.map(function (d) {
-                                return _this.parsed(_this.parse(d));
+                            return data.map(function (datum) {
+                                return _this.parser.parse(datum);
                             });
-                            return this;
-                        }
-
-                        /**
-                         * The post parsing hook for field instance.
-                         *
-                         * @param {*} val - The value to be parsed.
-                         * @return {*} Returns the parsed value.
-                         */
-
-                    }, {
-                        key: 'parsed',
-                        value: function parsed(val) {
-                            return val;
-                        }
-
-                        /**
-                         * Generates and returns the domain for the field.
-                         *
-                         * @abstract
-                         */
-
-                    }, {
-                        key: 'domain',
-                        value: function domain() {
-                            throw new Error('Not yet implemented!');
-                        }
-                    }, {
-                        key: 'subType',
-                        value: function subType() {
-                            return null;
-                        }
-
-                        /**
-                         * Parse the input value before using.
-                         *
-                         * @abstract
-                         */
-
-                    }, {
-                        key: 'parse',
-                        value: function parse() {
-                            throw new Error('Not yet implemented!');
-                        }
-
-                        /**
-                         * Creates brand new copy of current field instance. To avoid optimization issue
-                         * pass the required data otherwise current data would be copied which might
-                         * be expensive.
-                         *
-                         * @param {Array} data - The input data, if provided current data will not be cloned.
-                         * @return {PartialField} Returns the cloned field instance.
-                         */
-
-                    }, {
-                        key: 'clone',
-                        value: function clone(data) {
-                            data = data || Object(_utils__WEBPACK_IMPORTED_MODULE_0__["extend2"])([], this.data);
-                            var schema = Object(_utils__WEBPACK_IMPORTED_MODULE_0__["extend2"])({}, this.schema);
-                            // Here call the constructor to create an instance of
-                            // the current field class type e.g. Measure, Dimension etc.
-                            return new this.constructor(this.name, data, schema);
-                        }
-
-                        /**
-                         * @return {string} Name of the field
-                         */
-
-                    }, {
-                        key: 'fieldName',
-                        value: function fieldName() {
-                            return this.name;
-                        }
-
-                        /**
-                        * @return {string} Type of the field
-                        */
-
-                    }, {
-                        key: 'type',
-                        value: function type() {
-                            return this.fieldType;
-                        }
-
-                        /**
-                         * @return {description} Name of the field
-                         */
-
-                    }, {
-                        key: 'description',
-                        value: function description() {
-                            return this.fieldDescription;
                         }
                     }]);
 
@@ -2873,11 +3380,182 @@ return /******/ (function(modules) { // webpackBootstrap
                 /***/
             },
 
+            /***/"./src/fields/temporal/index.js":
+            /*!**************************************!*\
+              !*** ./src/fields/temporal/index.js ***!
+              \**************************************/
+            /*! exports provided: default */
+            /***/function srcFieldsTemporalIndexJs(module, __webpack_exports__, __webpack_require__) {
+
+                "use strict";
+
+                __webpack_require__.r(__webpack_exports__);
+                /* harmony import */var _operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../../operator/row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
+                /* harmony import */var _dimension__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ../dimension */"./src/fields/dimension/index.js");
+                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../../utils */"./src/utils/index.js");
+                var _createClass = function () {
+                    function defineProperties(target, props) {
+                        for (var i = 0; i < props.length; i++) {
+                            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+                        }
+                    }return function (Constructor, protoProps, staticProps) {
+                        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+                    };
+                }();
+
+                function _classCallCheck(instance, Constructor) {
+                    if (!(instance instanceof Constructor)) {
+                        throw new TypeError("Cannot call a class as a function");
+                    }
+                }
+
+                function _possibleConstructorReturn(self, call) {
+                    if (!self) {
+                        throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                    }return call && ((typeof call === 'undefined' ? 'undefined' : _typeof2(call)) === "object" || typeof call === "function") ? call : self;
+                }
+
+                function _inherits(subClass, superClass) {
+                    if (typeof superClass !== "function" && superClass !== null) {
+                        throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === 'undefined' ? 'undefined' : _typeof2(superClass)));
+                    }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+                }
+
+                /**
+                 * Represents temporal field subtype.
+                 *
+                 * @public
+                 * @class
+                 * @extends Dimension
+                 */
+
+                var Temporal = function (_Dimension) {
+                    _inherits(Temporal, _Dimension);
+
+                    function Temporal() {
+                        _classCallCheck(this, Temporal);
+
+                        return _possibleConstructorReturn(this, (Temporal.__proto__ || Object.getPrototypeOf(Temporal)).apply(this, arguments));
+                    }
+
+                    _createClass(Temporal, [{
+                        key: 'calculateDataDomain',
+
+                        /**
+                        * Calculates the corresponding field domain.
+                        *
+                        * @public
+                        * @override
+                        * @return {Array} Returns the unique values.
+                        */
+                        value: function calculateDataDomain() {
+                            var _this2 = this;
+
+                            var hash = new Set();
+                            var domain = [];
+
+                            // here don't use this.data() as the iteration will be
+                            // occurred two times on same data.
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                var datum = _this2.partialField.data[i];
+                                if (!hash.has(datum)) {
+                                    hash.add(datum);
+                                    domain.push(datum);
+                                }
+                            });
+
+                            return domain;
+                        }
+
+                        /**
+                         * Calculates the minimum consecutive difference from the associated field data.
+                         *
+                         * @public
+                         * @return {number} Returns the minimum consecutive diff in milliseconds.
+                         */
+
+                    }, {
+                        key: 'minimumConsecutiveDifference',
+                        value: function minimumConsecutiveDifference() {
+                            var _this3 = this;
+
+                            var hash = new Set();
+                            var currIdx = 0;
+                            var prevDatum = void 0;
+                            var minDiff = Number.POSITIVE_INFINITY;
+
+                            // here don't use this.data() as the iteration will be occurred two times on same data.
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                var datum = _this3.partialField.data[i];
+
+                                if (hash.has(datum)) {
+                                    return;
+                                }
+                                hash.add(datum);
+
+                                if (!currIdx++) {
+                                    prevDatum = datum;
+                                    return;
+                                }
+
+                                minDiff = Math.min(minDiff, datum - prevDatum);
+                                prevDatum = datum;
+                            });
+
+                            if (currIdx <= 1) {
+                                return null;
+                            }
+
+                            return minDiff;
+                        }
+
+                        /**
+                         * Returns the format specified in the input schema while creating field.
+                         *
+                         * @public
+                         * @return {string} Returns the datetime format.
+                         */
+
+                    }, {
+                        key: 'format',
+                        value: function format() {
+                            return this.partialField.schema.format;
+                        }
+
+                        /**
+                         * Returns the formatted version of the underlying field data.
+                         *
+                         * @public
+                         * @override
+                         * @return {Array} Returns the formatted data.
+                         */
+
+                    }, {
+                        key: 'formattedData',
+                        value: function formattedData() {
+                            var _this4 = this;
+
+                            var data = [];
+                            Object(_operator_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(this.rowDiffset, function (i) {
+                                data.push(_utils__WEBPACK_IMPORTED_MODULE_2__["DateTimeFormatter"].formatAs(_this4.partialField.data[i], _this4.format()));
+                            });
+                            return data;
+                        }
+                    }]);
+
+                    return Temporal;
+                }(_dimension__WEBPACK_IMPORTED_MODULE_1__["default"]);
+
+                /* harmony default export */__webpack_exports__["default"] = Temporal;
+
+                /***/
+            },
+
             /***/"./src/helper.js":
             /*!***********************!*\
               !*** ./src/helper.js ***!
               \***********************/
-            /*! exports provided: prepareJoinData, updateFields, persistDerivation, selectHelper, filterPropagationModel, cloneWithSelect, cloneWithProject, updateData, fieldInSchema, getOperationArguments, getRootGroupByModel, getRootDataModel, getPathToRootModel, propagateToAllDataModels, propagateImmutableActions, addToPropNamespace */
+            /*! exports provided: prepareJoinData, updateFields, persistDerivation, selectHelper, filterPropagationModel, cloneWithSelect, cloneWithProject, sanitizeUnitSchema, sanitizeSchema, updateData, fieldInSchema, getOperationArguments, getRootGroupByModel, getRootDataModel, getPathToRootModel, propagateToAllDataModels, propagateImmutableActions, addToPropNamespace */
             /***/function srcHelperJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
@@ -2903,6 +3581,12 @@ return /******/ (function(modules) { // webpackBootstrap
                 });
                 /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "cloneWithProject", function () {
                     return cloneWithProject;
+                });
+                /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "sanitizeUnitSchema", function () {
+                    return sanitizeUnitSchema;
+                });
+                /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "sanitizeSchema", function () {
+                    return sanitizeSchema;
                 });
                 /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "updateData", function () {
                     return updateData;
@@ -2932,14 +3616,14 @@ return /******/ (function(modules) { // webpackBootstrap
                     return addToPropNamespace;
                 });
                 /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ./enums */"./src/enums/index.js");
-                /* harmony import */var _fields_field__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./fields/field */"./src/fields/field.js");
-                /* harmony import */var _field_store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ./field-store */"./src/field-store.js");
-                /* harmony import */var _value__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__( /*! ./value */"./src/value.js");
-                /* harmony import */var _operator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__( /*! ./operator */"./src/operator/index.js");
-                /* harmony import */var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__( /*! ./constants */"./src/constants/index.js");
-                /* harmony import */var _field_creator__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__( /*! ./field-creator */"./src/field-creator.js");
-                /* harmony import */var _default_config__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__( /*! ./default-config */"./src/default-config.js");
-                /* harmony import */var _converter__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__( /*! ./converter */"./src/converter/index.js");
+                /* harmony import */var _field_store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./field-store */"./src/field-store.js");
+                /* harmony import */var _value__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ./value */"./src/value.js");
+                /* harmony import */var _operator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__( /*! ./operator */"./src/operator/index.js");
+                /* harmony import */var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__( /*! ./constants */"./src/constants/index.js");
+                /* harmony import */var _field_creator__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__( /*! ./field-creator */"./src/field-creator.js");
+                /* harmony import */var _default_config__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__( /*! ./default-config */"./src/default-config.js");
+                /* harmony import */var _converter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__( /*! ./converter */"./src/converter/index.js");
+                /* harmony import */var _utils__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__( /*! ./utils */"./src/utils/index.js");
                 var _this = undefined;
 
                 var _slicedToArray = function () {
@@ -2991,7 +3675,7 @@ return /******/ (function(modules) { // webpackBootstrap
                         for (var _iterator = fields[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                             var field = _step.value;
 
-                            resp[field.name] = new _value__WEBPACK_IMPORTED_MODULE_3__["default"](field.data[i], field);
+                            resp[field.name()] = new _value__WEBPACK_IMPORTED_MODULE_2__["default"](field.partialField.data[i], field);
                         }
                     } catch (err) {
                         _didIteratorError = true;
@@ -3014,7 +3698,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 function prepareJoinData(fields) {
                     var resp = {};
                     Object.keys(fields).forEach(function (key) {
-                        resp[key] = new _value__WEBPACK_IMPORTED_MODULE_3__["default"](fields[key], key);
+                        resp[key] = new _value__WEBPACK_IMPORTED_MODULE_2__["default"](fields[key], key);
                     });
                     return resp;
                 }
@@ -3027,9 +3711,9 @@ return /******/ (function(modules) { // webpackBootstrap
                     var collID = colIdentifier.length ? colIdentifier.split(',') : [];
                     var partialFieldMap = partialFieldspace.fieldsObj();
                     var newFields = collID.map(function (coll) {
-                        return new _fields_field__WEBPACK_IMPORTED_MODULE_1__["default"](partialFieldMap[coll], rowDiffset);
+                        return Object(_field_creator__WEBPACK_IMPORTED_MODULE_5__["createUnitFieldFromPartial"])(partialFieldMap[coll].partialField, rowDiffset);
                     });
-                    return _field_store__WEBPACK_IMPORTED_MODULE_2__["default"].createNamespace(newFields, fieldStoreName);
+                    return _field_store__WEBPACK_IMPORTED_MODULE_1__["default"].createNamespace(newFields, fieldStoreName);
                 };
 
                 var persistDerivation = function persistDerivation(model, operation) {
@@ -3037,7 +3721,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     var criteriaFn = arguments[3];
 
                     var derivative = void 0;
-                    if (operation !== _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].COMPOSE) {
+                    if (operation !== _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].COMPOSE) {
                         derivative = {
                             op: operation,
                             meta: config,
@@ -3053,21 +3737,32 @@ return /******/ (function(modules) { // webpackBootstrap
                     }
                 };
 
-                var selectHelper = function selectHelper(rowDiffset, fields, selectFn, config) {
+                var selectHelper = function selectHelper(rowDiffset, fields, selectFn, config, sourceDm) {
                     var newRowDiffSet = [];
                     var lastInsertedValue = -1;
                     var mode = config.mode;
 
                     var li = void 0;
-                    var checker = function checker(index) {
-                        return selectFn(prepareSelectionData(fields, index), index);
+                    var cachedStore = {};
+                    var cloneProvider = function cloneProvider() {
+                        return sourceDm.detachedRoot();
                     };
+                    var selectorHelperFn = function selectorHelperFn(index) {
+                        return selectFn(prepareSelectionData(fields, index), index, cloneProvider, cachedStore);
+                    };
+
+                    var checker = void 0;
                     if (mode === _enums__WEBPACK_IMPORTED_MODULE_0__["FilteringMode"].INVERSE) {
                         checker = function checker(index) {
-                            return !selectFn(prepareSelectionData(fields, index));
+                            return !selectorHelperFn(index);
+                        };
+                    } else {
+                        checker = function checker(index) {
+                            return selectorHelperFn(index);
                         };
                     }
-                    Object(_operator__WEBPACK_IMPORTED_MODULE_4__["rowDiffsetIterator"])(rowDiffset, function (i) {
+
+                    Object(_operator__WEBPACK_IMPORTED_MODULE_3__["rowDiffsetIterator"])(rowDiffset, function (i) {
                         if (checker(i)) {
                             if (lastInsertedValue !== -1 && i === lastInsertedValue + 1) {
                                 li = newRowDiffSet.length - 1;
@@ -3084,7 +3779,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 var filterPropagationModel = function filterPropagationModel(model, propModels) {
                     var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-                    var operation = config.operation || _constants__WEBPACK_IMPORTED_MODULE_5__["LOGICAL_OPERATORS"].AND;
+                    var operation = config.operation || _constants__WEBPACK_IMPORTED_MODULE_4__["LOGICAL_OPERATORS"].AND;
                     var filterByMeasure = config.filterByMeasure || false;
                     var fns = [];
                     if (!propModels.length) {
@@ -3129,7 +3824,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     }
 
                     var filteredModel = void 0;
-                    if (operation === _constants__WEBPACK_IMPORTED_MODULE_5__["LOGICAL_OPERATORS"].AND) {
+                    if (operation === _constants__WEBPACK_IMPORTED_MODULE_4__["LOGICAL_OPERATORS"].AND) {
                         var clonedModel = model.clone(false, false);
                         filteredModel = clonedModel.select(function (fields) {
                             return fns.every(function (fn) {
@@ -3155,12 +3850,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
                 var cloneWithSelect = function cloneWithSelect(sourceDm, selectFn, selectConfig, cloneConfig) {
                     var cloned = sourceDm.clone(cloneConfig.saveChild);
-                    var rowDiffset = selectHelper(cloned._rowDiffset, cloned.getPartialFieldspace().fields, selectFn, selectConfig);
+                    var rowDiffset = selectHelper(cloned._rowDiffset, cloned.getPartialFieldspace().fields, selectFn, selectConfig, sourceDm);
                     cloned._rowDiffset = rowDiffset;
                     cloned.__calculateFieldspace().calculateFieldsConfig();
                     // Store reference to child model and selector function
                     if (cloneConfig.saveChild) {
-                        persistDerivation(cloned, _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].SELECT, { config: selectConfig }, selectFn);
+                        persistDerivation(cloned, _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].SELECT, { config: selectConfig }, selectFn);
                     }
 
                     return cloned;
@@ -3180,15 +3875,44 @@ return /******/ (function(modules) { // webpackBootstrap
                     cloned.__calculateFieldspace().calculateFieldsConfig();
                     // Store reference to child model and projection fields
                     if (config.saveChild) {
-                        persistDerivation(cloned, _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].PROJECT, { projField: projField, config: config, actualProjField: projectionSet }, null);
+                        persistDerivation(cloned, _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].PROJECT, { projField: projField, config: config, actualProjField: projectionSet }, null);
                     }
 
                     return cloned;
                 };
 
+                var sanitizeUnitSchema = function sanitizeUnitSchema(unitSchema) {
+                    // Do deep clone of the unit schema as the user might change it later.
+                    unitSchema = Object(_utils__WEBPACK_IMPORTED_MODULE_8__["extend2"])({}, unitSchema);
+                    if (!unitSchema.type) {
+                        unitSchema.type = _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+                    }
+
+                    if (!unitSchema.subtype) {
+                        switch (unitSchema.type) {
+                            case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE:
+                                unitSchema.subtype = _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS;
+                                break;
+                            default:
+                            case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION:
+                                unitSchema.subtype = _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
+                                break;
+                        }
+                    }
+
+                    return unitSchema;
+                };
+
+                var sanitizeSchema = function sanitizeSchema(schema) {
+                    return schema.map(function (unitSchema) {
+                        return sanitizeUnitSchema(unitSchema);
+                    });
+                };
+
                 var updateData = function updateData(relation, data, schema, options) {
-                    options = Object.assign(Object.assign({}, _default_config__WEBPACK_IMPORTED_MODULE_7__["default"]), options);
-                    var converterFn = _converter__WEBPACK_IMPORTED_MODULE_8__[options.dataFormat];
+                    schema = sanitizeSchema(schema);
+                    options = Object.assign(Object.assign({}, _default_config__WEBPACK_IMPORTED_MODULE_6__["default"]), options);
+                    var converterFn = _converter__WEBPACK_IMPORTED_MODULE_7__[options.dataFormat];
 
                     if (!(converterFn && typeof converterFn === 'function')) {
                         throw new Error('No converter function found for ' + options.dataFormat + ' format');
@@ -3199,16 +3923,17 @@ return /******/ (function(modules) { // webpackBootstrap
                         header = _converterFn2[0],
                         formattedData = _converterFn2[1];
 
-                    var fieldArr = Object(_field_creator__WEBPACK_IMPORTED_MODULE_6__["default"])(formattedData, schema, header);
+                    var fieldArr = Object(_field_creator__WEBPACK_IMPORTED_MODULE_5__["createFields"])(formattedData, schema, header);
 
                     // This will create a new fieldStore with the fields
-                    var nameSpace = _field_store__WEBPACK_IMPORTED_MODULE_2__["default"].createNamespace(fieldArr, options.name);
+                    var nameSpace = _field_store__WEBPACK_IMPORTED_MODULE_1__["default"].createNamespace(fieldArr, options.name);
                     relation._partialFieldspace = nameSpace;
                     // If data is provided create the default colIdentifier and rowDiffset
                     relation._rowDiffset = formattedData.length && formattedData[0].length ? '0-' + (formattedData[0].length - 1) : '';
                     relation._colIdentifier = schema.map(function (_) {
                         return _.name;
                     }).join();
+                    relation._dataFormat = options.dataFormat === _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].AUTO ? Object(_utils__WEBPACK_IMPORTED_MODULE_8__["detectDataFormat"])(data) : options.dataFormat;
                     return relation;
                 };
 
@@ -3233,13 +3958,13 @@ return /******/ (function(modules) { // webpackBootstrap
                     if (derivation && derivation.length === 1) {
                         operation = derivation[0].op;
                         switch (operation) {
-                            case _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].SELECT:
+                            case _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].SELECT:
                                 params = [derivation[0].criteria];
                                 break;
-                            case _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].PROJECT:
+                            case _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].PROJECT:
                                 params = [derivation[0].meta.actualProjField];
                                 break;
-                            case _constants__WEBPACK_IMPORTED_MODULE_5__["DM_DERIVATIVES"].GROUPBY:
+                            case _constants__WEBPACK_IMPORTED_MODULE_4__["DM_DERIVATIVES"].GROUPBY:
                                 operation = 'groupBy';
                                 params = [derivation[0].meta.groupByString.split(','), derivation[0].criteria];
                                 break;
@@ -3578,7 +4303,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     // create dataStore with index according to rowDiffSet
                     Object(_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_0__["rowDiffsetIterator"])(rowDiffset, function (i) {
                         dataStore.push({
-                            data: field.data[i],
+                            data: field.partialField.data[i],
                             index: i
                         });
                     });
@@ -4026,14 +4751,14 @@ return /******/ (function(modules) { // webpackBootstrap
                     }
                     // Here prepare the schema
                     dm1FieldStore.fields.forEach(function (field) {
-                        var tmpSchema = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema);
+                        var tmpSchema = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema());
                         if (commonSchemaList.indexOf(tmpSchema.name) !== -1 && !replaceCommonSchema) {
                             tmpSchema.name = dm1FieldStore.name + '.' + tmpSchema.name;
                         }
                         schema.push(tmpSchema);
                     });
                     dm2FieldStore.fields.forEach(function (field) {
-                        var tmpSchema = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema);
+                        var tmpSchema = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema());
                         if (commonSchemaList.indexOf(tmpSchema.name) !== -1) {
                             if (!replaceCommonSchema) {
                                 tmpSchema.name = dm2FieldStore.name + '.' + tmpSchema.name;
@@ -4054,18 +4779,27 @@ return /******/ (function(modules) { // webpackBootstrap
                             userArg[dm1FieldStoreName] = {};
                             userArg[dm2FieldStoreName] = {};
                             dm1FieldStore.fields.forEach(function (field) {
-                                tuple.push(field.data[i]);
-                                userArg[dm1FieldStoreName][field.name] = field.data[i];
+                                tuple.push(field.partialField.data[i]);
+                                userArg[dm1FieldStoreName][field.name()] = field.partialField.data[i];
                             });
                             dm2FieldStore.fields.forEach(function (field) {
-                                if (!(commonSchemaList.indexOf(field.schema.name) !== -1 && replaceCommonSchema)) {
-                                    tuple.push(field.data[ii]);
+                                if (!(commonSchemaList.indexOf(field.schema().name) !== -1 && replaceCommonSchema)) {
+                                    tuple.push(field.partialField.data[ii]);
                                 }
-                                userArg[dm2FieldStoreName][field.name] = field.data[ii];
+                                userArg[dm2FieldStoreName][field.name()] = field.partialField.data[ii];
                             });
+
+                            var cachedStore = {};
+                            var cloneProvider1 = function cloneProvider1() {
+                                return dm1.detachedRoot();
+                            };
+                            var cloneProvider2 = function cloneProvider2() {
+                                return dm2.detachedRoot();
+                            };
+
                             var dm1Fields = Object(_helper__WEBPACK_IMPORTED_MODULE_5__["prepareJoinData"])(userArg[dm1FieldStoreName]);
                             var dm2Fields = Object(_helper__WEBPACK_IMPORTED_MODULE_5__["prepareJoinData"])(userArg[dm2FieldStoreName]);
-                            if (applicableFilterFn(dm1Fields, dm2Fields)) {
+                            if (applicableFilterFn(dm1Fields, dm2Fields, cloneProvider1, cloneProvider2, cachedStore)) {
                                 var tupleObj = {};
                                 tuple.forEach(function (cellVal, iii) {
                                     tupleObj[schema[iii].name] = cellVal;
@@ -4140,7 +4874,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 function getSortFn(dataType, sortType, index) {
                     var retFunc = void 0;
                     switch (dataType) {
-                        case _enums__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE:
+                        case _enums__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS:
                         case _enums__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL:
                             if (sortType === 'desc') {
                                 retFunc = function retFunc(a, b) {
@@ -4315,7 +5049,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
                     colIArr.forEach(function (colName) {
                         for (var i = 0; i < fieldStore.length; i += 1) {
-                            if (fieldStore[i].name === colName) {
+                            if (fieldStore[i].name() === colName) {
                                 tmpDataArr.push(fieldStore[i]);
                                 break;
                             }
@@ -4325,7 +5059,7 @@ return /******/ (function(modules) { // webpackBootstrap
                     // Inserts the schema to the schema object
                     tmpDataArr.forEach(function (field) {
                         /** @todo Need to use extend2 here otherwise user can overwrite the schema. */
-                        retObj.schema.push(field.schema);
+                        retObj.schema.push(field.schema());
                     });
 
                     if (addUid) {
@@ -4340,7 +5074,7 @@ return /******/ (function(modules) { // webpackBootstrap
                         var insertInd = retObj.data.length - 1;
                         var start = 0;
                         tmpDataArr.forEach(function (field, ii) {
-                            retObj.data[insertInd][ii + start] = field.data[i];
+                            retObj.data[insertInd][ii + start] = field.partialField.data[i];
                         });
                         if (addUid) {
                             retObj.data[insertInd][tmpDataArr.length] = i;
@@ -4424,8 +5158,8 @@ return /******/ (function(modules) { // webpackBootstrap
                     // Prepare the schema
                     dm1._colIdentifier.split(',').forEach(function (fieldName) {
                         var field = dm1FieldStoreFieldObj[fieldName];
-                        schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema));
-                        schemaNameArr.push(field.schema.name);
+                        schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema()));
+                        schemaNameArr.push(field.schema().name);
                     });
 
                     /**
@@ -4440,7 +5174,7 @@ return /******/ (function(modules) { // webpackBootstrap
                             var tuple = {};
                             var hashData = '';
                             schemaNameArr.forEach(function (schemaName) {
-                                var value = fieldsObj[schemaName].data[i];
+                                var value = fieldsObj[schemaName].partialField.data[i];
                                 hashData += '-' + value;
                                 tuple[schemaName] = value;
                             });
@@ -4488,11 +5222,11 @@ return /******/ (function(modules) { // webpackBootstrap
                     var retArr = [];
                     var fs1Arr = [];
                     fs1.fields.forEach(function (field) {
-                        fs1Arr.push(field.schema.name);
+                        fs1Arr.push(field.schema().name);
                     });
                     fs2.fields.forEach(function (field) {
-                        if (fs1Arr.indexOf(field.schema.name) !== -1) {
-                            retArr.push(field.schema.name);
+                        if (fs1Arr.indexOf(field.schema().name) !== -1) {
+                            retArr.push(field.schema().name);
                         }
                     });
                     return retArr;
@@ -4707,6 +5441,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 /* harmony import */var _row_diffset_iterator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__( /*! ./row-diffset-iterator */"./src/operator/row-diffset-iterator.js");
                 /* harmony import */var _export__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__( /*! ../export */"./src/export.js");
                 /* harmony import */var _utils_reducer_store__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__( /*! ../utils/reducer-store */"./src/utils/reducer-store.js");
+                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__( /*! ../enums */"./src/enums/index.js");
                 var _slicedToArray = function () {
                     function sliceIterator(arr, i) {
                         var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
@@ -4742,9 +5477,8 @@ return /******/ (function(modules) { // webpackBootstrap
                  */
                 function getFieldArr(dataModel, fieldArr) {
                     var retArr = [];
-                    var fieldStore = dataModel.getPartialFieldspace();
+                    var fieldStore = dataModel.getFieldspace();
                     var dimensions = fieldStore.getDimension();
-                    var measures = fieldStore.getMeasure();
 
                     Object.entries(dimensions).forEach(function (_ref) {
                         var _ref2 = _slicedToArray(_ref, 1),
@@ -4759,20 +5493,6 @@ return /******/ (function(modules) { // webpackBootstrap
                         }
                     });
 
-                    Object.entries(measures).forEach(function (_ref3) {
-                        var _ref4 = _slicedToArray(_ref3, 1),
-                            key = _ref4[0];
-
-                        if (measures[key].subType() === 'discrete') {
-                            if (fieldArr && fieldArr.length) {
-                                if (fieldArr.indexOf(key) !== -1) {
-                                    retArr.push(key);
-                                }
-                            } else {
-                                retArr.push(key);
-                            }
-                        }
-                    });
                     return retArr;
                 }
 
@@ -4788,15 +5508,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
                     var retObj = {};
                     var pReducers = reducers;
-                    var fieldStore = dataModel.getPartialFieldspace();
+                    var fieldStore = dataModel.getFieldspace();
                     var measures = fieldStore.getMeasure();
                     var reducer = _utils_reducer_store__WEBPACK_IMPORTED_MODULE_3__["default"].defaultReducer();
                     if (typeof reducers === 'function') {
                         reducer = reducers;
                     }
-                    Object.entries(measures).forEach(function (_ref5) {
-                        var _ref6 = _slicedToArray(_ref5, 1),
-                            key = _ref6[0];
+                    Object.entries(measures).forEach(function (_ref3) {
+                        var _ref4 = _slicedToArray(_ref3, 1),
+                            key = _ref4[0];
 
                         if (typeof reducers[key] === 'string') {
                             pReducers[key] = _utils_reducer_store__WEBPACK_IMPORTED_MODULE_3__["default"].resolve(pReducers[key]) ? _utils_reducer_store__WEBPACK_IMPORTED_MODULE_3__["default"].resolve(pReducers[key]) : reducer;
@@ -4821,7 +5541,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 function groupBy(dataModel, fieldArr, reducers, existingDataModel) {
                     var sFieldArr = getFieldArr(dataModel, fieldArr);
                     var reducerObj = getReducerObj(dataModel, reducers);
-                    var fieldStore = dataModel.getPartialFieldspace();
+                    var fieldStore = dataModel.getFieldspace();
                     var fieldStoreObj = fieldStore.fieldsObj();
                     var dbName = fieldStore.name;
                     var dimensionArr = [];
@@ -4830,18 +5550,23 @@ return /******/ (function(modules) { // webpackBootstrap
                     var hashMap = {};
                     var data = [];
                     var newDataModel = void 0;
+
                     // Prepare the schema
-                    Object.entries(fieldStoreObj).forEach(function (_ref7) {
-                        var _ref8 = _slicedToArray(_ref7, 2),
-                            key = _ref8[0],
-                            value = _ref8[1];
+                    Object.entries(fieldStoreObj).forEach(function (_ref5) {
+                        var _ref6 = _slicedToArray(_ref5, 2),
+                            key = _ref6[0],
+                            value = _ref6[1];
 
                         if (sFieldArr.indexOf(key) !== -1 || reducerObj[key]) {
-                            schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_0__["extend2"])({}, value.schema));
-                            if (value.schema.type === 'measure' && value.schema.subtype !== 'discrete') {
-                                measureArr.push(key);
-                            } else if (value.schema.type === 'dimension' || value.schema.subtype === 'discrete') {
-                                dimensionArr.push(key);
+                            schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_0__["extend2"])({}, value.schema()));
+
+                            switch (value.schema().type) {
+                                case _enums__WEBPACK_IMPORTED_MODULE_4__["FieldType"].MEASURE:
+                                    measureArr.push(key);
+                                    break;
+                                default:
+                                case _enums__WEBPACK_IMPORTED_MODULE_4__["FieldType"].DIMENSION:
+                                    dimensionArr.push(key);
                             }
                         }
                     });
@@ -4850,29 +5575,34 @@ return /******/ (function(modules) { // webpackBootstrap
                     Object(_row_diffset_iterator__WEBPACK_IMPORTED_MODULE_1__["rowDiffsetIterator"])(dataModel._rowDiffset, function (i) {
                         var hash = '';
                         dimensionArr.forEach(function (_) {
-                            hash = hash + '-' + fieldStoreObj[_].data[i];
+                            hash = hash + '-' + fieldStoreObj[_].partialField.data[i];
                         });
                         if (hashMap[hash] === undefined) {
                             hashMap[hash] = rowCount;
                             data.push({});
                             dimensionArr.forEach(function (_) {
-                                data[rowCount][_] = fieldStoreObj[_].data[i];
+                                data[rowCount][_] = fieldStoreObj[_].partialField.data[i];
                             });
                             measureArr.forEach(function (_) {
-                                data[rowCount][_] = [fieldStoreObj[_].data[i]];
+                                data[rowCount][_] = [fieldStoreObj[_].partialField.data[i]];
                             });
                             rowCount += 1;
                         } else {
                             measureArr.forEach(function (_) {
-                                data[hashMap[hash]][_].push(fieldStoreObj[_].data[i]);
+                                data[hashMap[hash]][_].push(fieldStoreObj[_].partialField.data[i]);
                             });
                         }
                     });
+
                     // reduction
+                    var cachedStore = {};
+                    var cloneProvider = function cloneProvider() {
+                        return dataModel.detachedRoot();
+                    };
                     data.forEach(function (row) {
                         var tuple = row;
                         measureArr.forEach(function (_) {
-                            tuple[_] = reducerObj[_](row[_]);
+                            tuple[_] = reducerObj[_](row[_], cloneProvider, cachedStore);
                         });
                     });
                     if (existingDataModel) {
@@ -5371,8 +6101,8 @@ return /******/ (function(modules) { // webpackBootstrap
                     // Prepare the schema
                     dm1._colIdentifier.split(',').forEach(function (fieldName) {
                         var field = dm1FieldStoreFieldObj[fieldName];
-                        schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema));
-                        schemaNameArr.push(field.schema.name);
+                        schema.push(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["extend2"])({}, field.schema()));
+                        schemaNameArr.push(field.schema().name);
                     });
 
                     /**
@@ -5386,7 +6116,7 @@ return /******/ (function(modules) { // webpackBootstrap
                             var tuple = {};
                             var hashData = '';
                             schemaNameArr.forEach(function (schemaName) {
-                                var value = fieldsObj[schemaName].data[i];
+                                var value = fieldsObj[schemaName].partialField.data[i];
                                 hashData += '-' + value;
                                 tuple[schemaName] = value;
                             });
@@ -5489,6 +6219,7 @@ return /******/ (function(modules) { // webpackBootstrap
                             // parent datamodel was passed as part of source
                             this._colIdentifier = source._colIdentifier;
                             this._rowDiffset = source._rowDiffset;
+                            this._dataFormat = source._dataFormat;
                             this._parent = source;
                             this._partialFieldspace = this._parent._partialFieldspace;
                             this._fieldStoreName = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getUniqueId"])();
@@ -5529,7 +6260,7 @@ return /******/ (function(modules) { // webpackBootstrap
                         key: 'getSchema',
                         value: function getSchema() {
                             return this.getFieldspace().fields.map(function (d) {
-                                return d.schema;
+                                return d.schema();
                             });
                         }
 
@@ -5678,17 +6409,17 @@ return /******/ (function(modules) { // webpackBootstrap
                         }
 
                         /**
-                         * {@link link_to_selection | Selection} is a row filtering operation. It expects an predicate and an optional mode
+                         * {@link link_to_selection | Selection} is a row filtering operation. It expects a predicate and an optional mode
                          * which control which all rows should be included in the resultant DataModel instance.
                          *
-                         * {@link SelectionPredicate} is a function which returns a boolean value. For selection opearation the selection
+                         * {@link SelectionPredicate} is a function which returns a boolean value. For selection operation the selection
                          * function is called for each row of DataModel instance with the current row passed as argument.
                          *
                          * After executing {@link SelectionPredicate} the rows are labeled as either an entry of selection set or an entry
                          * of rejection set.
                          *
                          * {@link FilteringMode} operates on the selection and rejection set to determine which one would reflect in the
-                         * resulatant datamodel.
+                         * resultant datamodel.
                          *
                          * @warning
                          * Selection and rejection set is only a logical idea for concept explanation purpose.
@@ -5715,14 +6446,13 @@ return /******/ (function(modules) { // webpackBootstrap
                          *
                          * @public
                          *
-                         * @param {SelectionPredicate} selectFn - Predicate funciton which is called for each row with the current row
-                         *      ```
-                         *          function (row, i)  { ... }
-                         *      ```
-                         * @param {Object} [config] - The configuration object to control the inclusion exclusion of a row in resultant
-                         *      DataModel instance
-                         * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection
-                         *
+                         * @param {Function} selectFn - The predicate function which is called for each row with the current row.
+                         * ```
+                         *  function (row, i, cloneProvider, store)  { ... }
+                         * ```
+                         * @param {Object} config - The configuration object to control the inclusion exclusion of a row in resultant
+                         * DataModel instance.
+                         * @param {FilteringMode} [config.mode=FilteringMode.NORMAL] - The mode of the selection.
                          * @return {DataModel} Returns the new DataModel instance(s) after operation.
                          */
 
@@ -5912,9 +6642,9 @@ return /******/ (function(modules) { // webpackBootstrap
                         key: 'calculateFieldsConfig',
                         value: function calculateFieldsConfig() {
                             this._fieldConfig = this._fieldspace.fields.reduce(function (acc, fieldDef, i) {
-                                acc[fieldDef.name] = {
+                                acc[fieldDef.name()] = {
                                     index: i,
-                                    def: { name: fieldDef._ref.name, type: fieldDef._ref.fieldType, subtype: fieldDef._ref.subType() }
+                                    def: { name: fieldDef.name(), type: fieldDef.type(), subtype: fieldDef.subtype() }
                                 };
                                 return acc;
                             }, {});
@@ -7018,7 +7748,7 @@ return /******/ (function(modules) { // webpackBootstrap
             /*!*****************************!*\
               !*** ./src/utils/helper.js ***!
               \*****************************/
-            /*! exports provided: isArray, isObject, isString, isCallable, uniqueValues, getUniqueId, getMinDiff, isArrEqual, formatNumber */
+            /*! exports provided: isArray, isObject, isString, isCallable, uniqueValues, getUniqueId, getMinDiff, isArrEqual, formatNumber, detectDataFormat */
             /***/function srcUtilsHelperJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
@@ -7051,6 +7781,10 @@ return /******/ (function(modules) { // webpackBootstrap
                 /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "formatNumber", function () {
                     return formatNumber;
                 });
+                /* harmony export (binding) */__webpack_require__.d(__webpack_exports__, "detectDataFormat", function () {
+                    return detectDataFormat;
+                });
+                /* harmony import */var _enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__( /*! ../enums */"./src/enums/index.js");
                 function _toConsumableArray(arr) {
                     if (Array.isArray(arr)) {
                         for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
@@ -7183,6 +7917,23 @@ return /******/ (function(modules) { // webpackBootstrap
                     return val;
                 }
 
+                /**
+                 * Returns the detected data format.
+                 *
+                 * @param {any} data - The input data to be tested.
+                 * @return {string} Returns the data format name.
+                 */
+                var detectDataFormat = function detectDataFormat(data) {
+                    if (isString(data)) {
+                        return _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].DSV_STR;
+                    } else if (isArray(data) && isArray(data[0])) {
+                        return _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].DSV_ARR;
+                    } else if (isArray(data) && (data.length === 0 || isObject(data[0]))) {
+                        return _enums__WEBPACK_IMPORTED_MODULE_0__["DataFormat"].FLAT_JSON;
+                    }
+                    return null;
+                };
+
                 /***/
             },
 
@@ -7190,7 +7941,7 @@ return /******/ (function(modules) { // webpackBootstrap
             /*!****************************!*\
               !*** ./src/utils/index.js ***!
               \****************************/
-            /*! exports provided: DateTimeFormatter, columnMajor, generateMeasureDomain, extend2, isArray, isObject, isString, isCallable, uniqueValues, getUniqueId, getMinDiff, isArrEqual, formatNumber */
+            /*! exports provided: DateTimeFormatter, columnMajor, generateMeasureDomain, extend2, isArray, isObject, isString, isCallable, uniqueValues, getUniqueId, getMinDiff, isArrEqual, formatNumber, detectDataFormat */
             /***/function srcUtilsIndexJs(module, __webpack_exports__, __webpack_require__) {
 
                 "use strict";
@@ -7251,6 +8002,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
                 /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "formatNumber", function () {
                     return _helper__WEBPACK_IMPORTED_MODULE_4__["formatNumber"];
+                });
+
+                /* harmony reexport (safe) */__webpack_require__.d(__webpack_exports__, "detectDataFormat", function () {
+                    return _helper__WEBPACK_IMPORTED_MODULE_4__["detectDataFormat"];
                 });
 
                 /***/
@@ -12806,7 +13561,6 @@ var BandAxis = function (_SimpleAxis) {
         /**
          *
          *
-         * @returns
          * @memberof BandAxis
          */
 
@@ -14317,6 +15071,7 @@ var SimpleAxis = function () {
                 this.logicalSpace(Object(_helper__WEBPACK_IMPORTED_MODULE_7__["calculateContinousSpace"])(this));
                 this.logicalSpace();
             }
+
             return this.logicalSpace();
         }
 
@@ -15898,13 +16653,13 @@ var DATA_TYPES = {
     DIMENSION: 'dimension',
     CATEGORICAL: 'categorical',
     MEASURE: 'measure',
-    DATETIME: 'temporal'
+    TEMPORAL: 'temporal'
 };
 
 /**
  * Map of DataModel types to associated field types.
  */
-var dataTypeScaleMap = (_dataTypeScaleMap = {}, _defineProperty(_dataTypeScaleMap, DATA_TYPES.DIMENSION, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["BAND"]), _defineProperty(_dataTypeScaleMap, DATA_TYPES.MEASURE, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["LINEAR"]), _defineProperty(_dataTypeScaleMap, DATA_TYPES.DATETIME, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["TIME"]), _dataTypeScaleMap);
+var dataTypeScaleMap = (_dataTypeScaleMap = {}, _defineProperty(_dataTypeScaleMap, DATA_TYPES.DIMENSION, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["BAND"]), _defineProperty(_dataTypeScaleMap, DATA_TYPES.MEASURE, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["LINEAR"]), _defineProperty(_dataTypeScaleMap, DATA_TYPES.TEMPORAL, _enums_scale_type__WEBPACK_IMPORTED_MODULE_0__["TIME"]), _dataTypeScaleMap);
 
 /***/ }),
 
@@ -19407,7 +20162,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var addLayer = function addLayer(layerDefs, layerRegistry, context, sideEffect) {
     var layers = [];
     if (layerDefs) {
-        layerDefs.forEach(function (layerDef, i) {
+        layerDefs.forEach(function (layerDef) {
             var mark = layerDef.mark;
             var layerCls = layerRegistry[mark];
             if (layerCls && layerCls.shouldDrawAnchors()) {
@@ -24991,7 +25746,7 @@ var getTabularData = function getTabularData(data, schema, fieldspace, timeDiffs
         var row = [];
         schema.forEach(function (fieldObj, i) {
             var interval = fieldObj.subtype === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL ? timeDiffs[fieldObj.name] : 0;
-            var numberFormat = fieldObj.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE && fieldspace.fields[i]._ref.numberFormat();
+            var numberFormat = fieldObj.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE && fieldspace.fields[i].numberFormat();
             var formatterFn = defaultTooltipFormatters(fieldObj.subtype || fieldObj.type, numberFormat);
             var value = formatterFn(d[i], interval);
             row.push(value);
@@ -25076,7 +25831,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
                         associatedMeasures.forEach(function (measure) {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
-                            formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
+                            formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex].numberFormat())(value, interval);
                             values.push([{
                                 value: '' + measure + separator,
                                 style: {
@@ -25091,7 +25846,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
                     } else {
                         measureIndex = fieldsConfig[associatedMeasures[0]].index;
                         value = data[i][measureIndex];
-                        formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex]._ref.numberFormat())(value, interval);
+                        formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex].numberFormat())(value, interval);
                         values.push([icon, {
                             value: '' + key + separator,
                             className: config.classPrefix + '-tooltip-key'
@@ -51733,8 +52488,9 @@ __webpack_require__.r(__webpack_exports__);
 var dataTypeScaleMap = {
     dimension: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].BAND,
     categorical: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].BAND,
+    temporal: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].TIME,
     measure: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].LINEAR,
-    temporal: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].TIME
+    continuous: _chartshq_muze_axis__WEBPACK_IMPORTED_MODULE_0__["ScaleType"].LINEAR
 };
 
 /***/ }),
@@ -51900,17 +52656,89 @@ var CartesianEncoder = function (_VisualEncoder) {
                 xAxes = _resolver$axes.x,
                 yAxes = _resolver$axes.y;
 
+            store.model.lock();
             [xAxes, yAxes].forEach(function (axesArr, axisType) {
                 axesArr.forEach(function (axes, idx) {
+                    var min = [];
+                    var max = [];
+                    var domain = [];
+                    var adjustedDomain = [];
+                    if (axes.length > 1 && axes[0].constructor.type() === 'linear' && axes[0].config().alignZeroLine) {
+                        axes.forEach(function (axis, i) {
+                            var key = !axisType ? '0' + idx + i : idx + '0' + i;
+                            domain = domains[axisType][key];
+                            min[i] = domain[0];
+                            max[i] = domain[1];
+                        });
+                        adjustedDomain = Object(_encoder_helper__WEBPACK_IMPORTED_MODULE_2__["getAdjustedDomain"])(max, min);
+                    }
+
                     axes.forEach(function (axis, index) {
                         var key = !axisType ? '0' + idx + index : idx + '0' + index;
-                        var domain = domains[axisType][key];
+                        domain = adjustedDomain[index] || domains[axisType][key];
                         axis.domain(domain);
                         var type = !axisType ? 'x' : 'y';
                         store.commit(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.' + type + '.' + key, domain);
                     });
                 });
             });
+            store.model.unlock();
+        }
+
+        /**
+         *
+         *
+         * @param {*} domain
+         *
+         * @memberof VisualUnit
+         */
+
+    }, {
+        key: 'updateAxisDomain',
+        value: function updateAxisDomain(domain) {
+            var _this3 = this;
+
+            ['x', 'y'].forEach(function (type) {
+                var axes = _this3.axes()[type];
+                var min = [];
+                var max = [];
+                var dom = void 0;
+                axes && axes.forEach(function (axis, i) {
+                    var field = _this3.fields()[type][i];
+                    dom = domain['' + _this3.fields()[type][i]];
+
+                    if (field.type() !== muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION && dom) {
+                        min[i] = dom[0];
+                        max[i] = dom[1];
+                    }
+                });
+                if (axes) {
+                    if (axes.length > 1) {
+                        var axisConf = axes[0].config();
+                        if (axes[0].constructor.type() === 'linear') {
+                            if (axisConf.alignZeroLine) {
+                                axes.forEach(function (axis) {
+                                    return axis.config({
+                                        nice: false
+                                    });
+                                });
+                                var adjustedDomain = Object(_encoder_helper__WEBPACK_IMPORTED_MODULE_2__["getAdjustedDomain"])(max, min);
+                                min = adjustedDomain.min;
+                                max = adjustedDomain.max;
+                            }
+
+                            axes[0].updateDomainCache([min[0], max[0]]);
+                            axes[1].updateDomainCache([min[1], max[1]]);
+                        } else {
+                            axes[0].updateDomainCache(dom);
+                            axes[1].updateDomainCache(dom);
+                        }
+                    } else {
+                        axes[0].updateDomainCache(dom);
+                    }
+                }
+            });
+            return this;
         }
 
         /**
@@ -52150,11 +52978,12 @@ var CartesianEncoder = function (_VisualEncoder) {
 /*!*************************************************************!*\
   !*** ./packages/visual-group/src/encoder/encoder-helper.js ***!
   \*************************************************************/
-/*! exports provided: generateAxisFromMap, mutateAxesFromMap, getDefaultMark, createRetinalAxis, getIndex, getLayerConfFromFields */
+/*! exports provided: getAdjustedDomain, generateAxisFromMap, mutateAxesFromMap, getDefaultMark, createRetinalAxis, getIndex, getLayerConfFromFields */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAdjustedDomain", function() { return getAdjustedDomain; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateAxisFromMap", function() { return generateAxisFromMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mutateAxesFromMap", function() { return mutateAxesFromMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDefaultMark", function() { return getDefaultMark; });
@@ -52235,6 +53064,40 @@ var createSimpleAxis = function createSimpleAxis(axisConfig, field, axesCreators
     var Cls = _enums_scale_maps__WEBPACK_IMPORTED_MODULE_2__["scaleMaps"][_data_type_scale_map__WEBPACK_IMPORTED_MODULE_4__["dataTypeScaleMap"][field.subtype()]];
     var simpleAxis = new Cls(axisConfig, { labelManager: labelManager });
     return simpleAxis;
+};
+
+var getAdjustedDomain = function getAdjustedDomain(max, min) {
+    var y1ratio = max[0] / (max[0] - min[0]);
+    var y2ratio = max[1] / (max[1] - min[1]);
+
+    // adjust min/max values for positive negative values zero line etc
+    var allSameSign = false;
+
+    // if all numbers are positive set floor to zero
+    if (min[0] > 0 && min[1] > 0 && min[1] > 0 && max[1] > 0) {
+        allSameSign = true;
+        min[0] = 0;
+        min[1] = 0;
+    }
+
+    // if all numbers are negative set ceiling to zero
+    if (min[0] < 0 && min[1] < 0 && min[1] < 0 && max[1] < 0) {
+        allSameSign = true;
+        max[0] = 0;
+        max[1] = 0;
+    }
+
+    // align zero line if necessary
+    if (!allSameSign && y1ratio !== y2ratio) {
+        if (y1ratio < y2ratio) {
+            // adjust min[1]
+            min[1] = min[0] / max[0] * max[1];
+        } else {
+            // adjust min[0]
+            min[0] = min[1] / max[1] * max[0];
+        }
+    }
+    return [[min[0], max[0]], [min[1], max[1]]];
 };
 
 /**
@@ -54535,7 +55398,7 @@ var getAxisType = function getAxisType(fieldsConfig, field) {
  */
 var retriveDomainFromData = function retriveDomainFromData(datamodel, fieldName) {
     var field = datamodel.getFieldspace().fields.find(function (d) {
-        return d._ref.name === fieldName.toString();
+        return d.name() === fieldName.toString();
     });
     return field.domain();
 };
@@ -56273,7 +57136,7 @@ var SimpleVariable = function (_Variable) {
         key: 'numberFormat',
         value: function numberFormat() {
             if (this.type() === 'measure') {
-                var formatter = this.data().getFieldspace().getMeasure()[this.oneVar()]._ref;
+                var formatter = this.data().getFieldspace().getMeasure()[this.oneVar()];
                 return formatter.numberFormat();
             }return function (val) {
                 return val;
@@ -56283,7 +57146,7 @@ var SimpleVariable = function (_Variable) {
         key: 'format',
         value: function format(values) {
             if (values && this.subtype() === 'temporal') {
-                var formatter = this.data().getFieldspace().getDimension()[this.oneVar()]._ref.schema.format;
+                var formatter = this.data().getFieldspace().getDimension()[this.oneVar()].schema().format;
                 var dtFormat = new muze_utils__WEBPACK_IMPORTED_MODULE_0__["DateTimeFormatter"](formatter);
                 values = values.map(function (e) {
                     return dtFormat.getNativeDate(e);
@@ -56344,7 +57207,7 @@ var SimpleVariable = function (_Variable) {
         key: 'getMinDiff',
         value: function getMinDiff() {
             var fieldSpace = this.data().getFieldspace();
-            return fieldSpace.fieldsObj()[this.oneVar()].getMinDiff();
+            return fieldSpace.fieldsObj()[this.oneVar()].minimumConsecutiveDifference();
         }
 
         /**
@@ -56441,6 +57304,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "registerDomainChangeListener", function() { return registerDomainChangeListener; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 
+
 var setupChangeListeners = function setupChangeListeners(context) {
     var store = context.store();
 
@@ -56470,7 +57334,7 @@ var registerDomainChangeListener = function registerDomainChangeListener(context
         key: 'unionDomain'
     });
     store.registerChangeListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE + '.domain'], function () {
-        resolver.encoder().unionUnitDomains(context);
+        context.resolver().encoder().unionUnitDomains(context);
     }, false, {
         namespace: 'group',
         key: 'unionDomain'
@@ -63436,6 +64300,15 @@ var registerListeners = function registerListeners(firebolt) {
         if (dm) {
             firebolt.createSelectionSet(firebolt.context.data().getData().uids);
             firebolt.initializeSideEffects();
+            var originalData = firebolt.context.cachedData()[0];
+            firebolt.attachPropagationListener(originalData);
+        }
+    });
+
+    store.registerChangeListener(['local.units.' + _enums_reactive_props__WEBPACK_IMPORTED_MODULE_2__["DATA"] + '.' + context.metaInf().namespace], function () {
+        if (!firebolt.context.mount()) {
+            var originalData = firebolt.context.cachedData()[0];
+            originalData.unsubscribe('propagation');
         }
     });
 
@@ -63444,8 +64317,6 @@ var registerListeners = function registerListeners(firebolt) {
             onlayerdraw = _ref2[1];
 
         if (onlayerdraw) {
-            var originalData = firebolt.context.cachedData()[0];
-            firebolt.attachPropagationListener(originalData);
             initSideEffects(firebolt.sideEffects(), firebolt);
             dispatchQueuedSideEffects(firebolt);
             clearActionHistory(firebolt);
@@ -63958,7 +64829,6 @@ var renderGridLineLayers = function renderGridLineLayers(context, container) {
     var classPrefix = config.classPrefix;
 
     if (axes && (axes.x && axes.x.length || axes.y && axes.y.length)) {
-        attachDataToGridLineLayers(context);
         [[context._gridlines, classPrefix + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_3__["GRIDLINEPARENTGROUPCLASS"]], [context._gridbands, classPrefix + '-' + _enums_constants__WEBPACK_IMPORTED_MODULE_3__["GRIDBANDPARENTGROUPCLASS"]]].forEach(function (entry) {
             var _entry = _slicedToArray(entry, 2),
                 instances = _entry[0],
@@ -63981,7 +64851,7 @@ var renderGridLineLayers = function renderGridLineLayers(context, container) {
 /*!**************************************************!*\
   !*** ./packages/visual-unit/src/helper/index.js ***!
   \**************************************************/
-/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, createLayers, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup, getAdjustedDomain, createLayerState, initializeGlobalState */
+/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, createLayers, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup, createLayerState, initializeGlobalState */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -64001,7 +64871,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLayersBy", function() { return getLayersBy; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeLayersBy", function() { return removeLayersBy; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createSideEffectGroup", function() { return createSideEffectGroup; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAdjustedDomain", function() { return getAdjustedDomain; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createLayerState", function() { return createLayerState; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeGlobalState", function() { return initializeGlobalState; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
@@ -64354,43 +65223,6 @@ var createSideEffectGroup = function createSideEffectGroup(container, className)
     return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'g', [1], className).node();
 };
 
-var getAdjustedDomain = function getAdjustedDomain(max, min) {
-    var y1ratio = max[0] / (max[0] - min[0]);
-    var y2ratio = max[1] / (max[1] - min[1]);
-
-    // adjust min/max values for positive negative values zero line etc
-    var allSameSign = false;
-
-    // if all numbers are positive set floor to zero
-    if (min[0] > 0 && min[1] > 0 && min[1] > 0 && max[1] > 0) {
-        allSameSign = true;
-        min[0] = 0;
-        min[1] = 0;
-    }
-
-    // if all numbers are negative set ceiling to zero
-    if (min[0] < 0 && min[1] < 0 && min[1] < 0 && max[1] < 0) {
-        allSameSign = true;
-        max[0] = 0;
-        max[1] = 0;
-    }
-
-    // align zero line if necessary
-    if (!allSameSign && y1ratio !== y2ratio) {
-        if (y1ratio < y2ratio) {
-            // adjust min[1]
-            min[1] = min[0] / max[0] * max[1];
-        } else {
-            // adjust min[0]
-            min[0] = min[1] / max[1] * max[0];
-        }
-    }
-    return {
-        max: max,
-        min: min
-    };
-};
-
 var createLayerState = function createLayerState(context) {
     var _BaseLayer$getState = _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__["BaseLayer"].getState(),
         _BaseLayer$getState2 = _slicedToArray(_BaseLayer$getState, 2),
@@ -64555,6 +65387,12 @@ var listenerMap = function listenerMap(context, namespace, metaInf) {
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
         }
+    }, {
+        type: 'registerChangeListener',
+        props: [muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.y.' + metaInf.rowIndex + '00', muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE + '.domain.x.0' + metaInf.colIndex + '0'],
+        listener: function listener() {
+            Object(_helper_grid_lines__WEBPACK_IMPORTED_MODULE_3__["attachDataToGridLineLayers"])(context);
+        }
     }];
 };
 
@@ -64614,8 +65452,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 var cachedData = context.cachedData();
                 context.cachedData([].concat(_toConsumableArray(cachedData), [data]));
             } else {
-                // const oldData = context.data();
-                // oldData && oldData.unsubscribe('propagation');
+                var oldData = context.data();
+                oldData && oldData.unsubscribe('propagation');
                 context.cachedData([data]);
             }
         }
@@ -65047,11 +65885,13 @@ var VisualUnit = function () {
                 defArr.forEach(function (def) {
                     def.order = layerDef.order + layerIndex;
                     var namespace = '' + metaInf.namespace + startIndex;
-                    if (!layersMap[markId] && definition.calculateDomain !== false) {
-                        props[muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].LAYER_GLOBAL_NAMESPACE + '.' + _enums_reactive_props__WEBPACK_IMPORTED_MODULE_8__["DOMAIN"] + '.' + namespace] = true;
+                    if (!layersMap[markId]) {
+                        startIndex++;
+                        if (definition.calculateDomain !== false) {
+                            props[muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].LAYER_GLOBAL_NAMESPACE + '.' + _enums_reactive_props__WEBPACK_IMPORTED_MODULE_8__["DOMAIN"] + '.' + namespace] = true;
+                        }
                     }
                     namespaces.push(namespace);
-                    startIndex++;
                 });
                 layerIndex += defArr.length;
                 var instances = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getLayerFromDef"])(_this2, definition, layersMap[markId], namespaces);
@@ -65220,62 +66060,6 @@ var VisualUnit = function () {
         value: function getLayerByName(name) {
             var layers = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getLayersBy"])(this.layers(), 'name', name);
             return layers[0];
-        }
-
-        /**
-         *
-         *
-         * @param {*} domain
-         *
-         * @memberof VisualUnit
-         */
-
-    }, {
-        key: 'updateAxisDomain',
-        value: function updateAxisDomain(domain) {
-            var _this3 = this;
-
-            ['x', 'y'].forEach(function (type) {
-                var axes = _this3.axes()[type];
-                var min = [];
-                var max = [];
-                var dom = void 0;
-                axes && axes.forEach(function (axis, i) {
-                    var field = _this3.fields()[type][i];
-                    dom = domain['' + _this3.fields()[type][i]];
-
-                    if (field.type() !== muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION && dom) {
-                        min[i] = dom[0];
-                        max[i] = dom[1];
-                    }
-                });
-                if (axes) {
-                    if (axes.length > 1) {
-                        var axisConf = axes[0].config();
-                        if (axes[0].constructor.type() === 'linear') {
-                            if (axisConf.alignZeroLine) {
-                                axes.forEach(function (axis) {
-                                    return axis.config({
-                                        nice: false
-                                    });
-                                });
-                                var adjustedDomain = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getAdjustedDomain"])(max, min);
-                                min = adjustedDomain.min;
-                                max = adjustedDomain.max;
-                            }
-
-                            axes[0].updateDomainCache([min[0], max[0]]);
-                            axes[1].updateDomainCache([min[1], max[1]]);
-                        } else {
-                            axes[0].updateDomainCache(dom);
-                            axes[1].updateDomainCache(dom);
-                        }
-                    } else {
-                        axes[0].updateDomainCache(dom);
-                    }
-                }
-            });
-            return this;
         }
 
         /**

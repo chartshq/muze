@@ -6,6 +6,7 @@ import {
     clipElement,
     DimensionSubtype,
     FieldType,
+    MeasureSubtype,
     Scales
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
@@ -248,7 +249,7 @@ export default class BarLayer extends BaseLayer {
                 yFieldSubType
             } = this.encodingFieldsInf();
 
-        if (xFieldSubType === FieldType.MEASURE) {
+        if (xFieldSubType === MeasureSubtype.CONTINUOUS) {
             axis = axes.y;
             value = axis.invert(y);
             uniqueFieldIndex = fieldsConfig[yField].index;

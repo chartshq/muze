@@ -54,14 +54,14 @@ export default class SimpleVariable extends Variable {
      */
     numberFormat () {
         if (this.type() === 'measure') {
-            const formatter = this.data().getFieldspace().getMeasure()[this.oneVar()]._ref;
+            const formatter = this.data().getFieldspace().getMeasure()[this.oneVar()];
             return formatter.numberFormat();
         } return val => val;
     }
 
     format (values) {
         if (values && this.subtype() === 'temporal') {
-            const formatter = this.data().getFieldspace().getDimension()[this.oneVar()]._ref.schema.format;
+            const formatter = this.data().getFieldspace().getDimension()[this.oneVar()].schema().format;
             const dtFormat = new DateTimeFormatter(formatter);
             values = values.map(e => dtFormat.getNativeDate(e));
         }
@@ -108,7 +108,7 @@ export default class SimpleVariable extends Variable {
      */
     getMinDiff () {
         const fieldSpace = this.data().getFieldspace();
-        return fieldSpace.fieldsObj()[this.oneVar()].getMinDiff();
+        return fieldSpace.fieldsObj()[this.oneVar()].minimumConsecutiveDifference();
     }
 
     /**

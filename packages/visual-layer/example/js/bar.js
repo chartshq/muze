@@ -49,7 +49,7 @@ d3.json('../data/cars.json', (jsonData) => {
         subtype: 'temporal',
         format: '%Y-%m-%d'
     }
-    ];
+    ];   
     const rootData = new DataModel(jsonData, schema).groupBy(['Year'], {});
 
     const fieldsObj = rootData.getFieldspace().fieldsObj();
@@ -89,8 +89,8 @@ d3.json('../data/cars.json', (jsonData) => {
     });
     barLayer.setDataProps({
         timeDiffs: {
-            x: fieldsObj.Year.getMinDiff(),
-            y: fieldsObj.Year.getMinDiff()
+            x: fieldsObj.Year.minimumConsecutiveDifference(),
+            y: fieldsObj.Year.minimumConsecutiveDifference()
         }
     });
     barLayer.mount(d3.select('#chart').append('svg').attr('width', 500).attr('height', 500)

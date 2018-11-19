@@ -116,7 +116,6 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
      * @memberof BandAxis
      */
     getTickValues () {
