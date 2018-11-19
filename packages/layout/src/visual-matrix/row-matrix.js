@@ -115,6 +115,7 @@ export default class RowVisualMatrix extends VisualMatrix {
         let cWidths = [];
         let conditions = [];
         let divider = 1;
+        let maxPrioritySpace = 0;
         const {
             matrix,
             width: availableWidth,
@@ -139,8 +140,9 @@ export default class RowVisualMatrix extends VisualMatrix {
         }
         conditions.forEach((i) => {
             dist[i] = maxWidths[i];
-            remainaingAvailWidth = availableWidth - dist[i];
-            remainaingWidth = currentWidth - dist[i];
+            maxPrioritySpace += maxWidths[i];
+            remainaingAvailWidth -= dist[i];
+            remainaingWidth -= dist[i];
         });
         matrix[0].forEach((e, i) => {
             if (conditions.indexOf(i) === -1) {
@@ -162,7 +164,7 @@ export default class RowVisualMatrix extends VisualMatrix {
             cWidths = cWidths.map(() => 0);
         } else {
             conditions.forEach((i) => {
-                cWidths[i] = Math.floor(prioritySpace / divider);
+                cWidths[i] = Math.floor(prioritySpace * (dist[i] / maxPrioritySpace));
             });
         }
         return cWidths;
