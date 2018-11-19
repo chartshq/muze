@@ -1,4 +1,5 @@
 import { STATE_NAMESPACES } from 'muze-utils';
+
 export const setupChangeListeners = (context) => {
     const store = context.store();
 

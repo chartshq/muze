@@ -1,5 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES, unionDomain, FieldType } from 'muze-utils';
 import {
     generateAxisFromMap,
     getDefaultMark,

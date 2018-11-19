@@ -304,6 +304,7 @@ export default class SimpleAxis {
             this.logicalSpace(calculateContinousSpace(this));
             this.logicalSpace();
         }
+
         return this.logicalSpace();
     }
 

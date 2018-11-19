@@ -1,4 +1,4 @@
-import { CommonProps, STATE_NAMESPACES } from 'muze-utils';
+import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { DATA } from '../enums/reactive-props';
 

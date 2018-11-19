@@ -364,11 +364,13 @@ export default class VisualUnit {
             defArr.forEach((def) => {
                 def.order = layerDef.order + layerIndex;
                 const namespace = `${metaInf.namespace}${startIndex}`;
-                if (!layersMap[markId] && definition.calculateDomain !== false) {
-                    props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
+                if (!layersMap[markId]) {
+                    startIndex++;
+                    if (definition.calculateDomain !== false) {
+                        props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
+                    }
                 }
                 namespaces.push(namespace);
-                startIndex++;
             });
             layerIndex += defArr.length;
             const instances = getLayerFromDef(this, definition, layersMap[markId], namespaces);
