@@ -34,7 +34,7 @@ export default class RowVisualMatrix extends VisualMatrix {
             key: ROW_ROOT,
             values: this.createTree()
         };
-        this._logicalSpace = this.setLogicalSpace();
+        this._logicalSpace = this.computeLogicalSpace();
     }
 
     /**
@@ -43,7 +43,7 @@ export default class RowVisualMatrix extends VisualMatrix {
      * @return {Object} Logical space taken
      * @memberof VisualMatrix
      */
-    setLogicalSpace () {
+    computeLogicalSpace () {
         const matrixTree = this.tree();
         createMatrixEachLevel(matrixTree, false);
         return computeLogicalSpace(matrixTree, this.config(), this.maxMeasures());
@@ -109,12 +109,11 @@ export default class RowVisualMatrix extends VisualMatrix {
         };
     }
 
-    getPriorityDistribution (options) {
+    getPriorityDistribution (measures) {
         let remainaingAvailWidth;
         let remainaingWidth;
         let cWidths = [];
         let conditions = [];
-        let divider = 1;
         let maxPrioritySpace = 0;
         const {
             matrix,
@@ -122,10 +121,10 @@ export default class RowVisualMatrix extends VisualMatrix {
             maxMeasures: maxWidths,
             maxWidth: currentWidth,
             height
-        } = options;
+        } = measures;
         const priority = this.config().priority;
         const primaryMatrixLength = this.primaryMatrix().length ? this.primaryMatrix()[0].length : 0;
-        const matrixLen = matrix[0].length;
+
         const dist = [];
 
         remainaingAvailWidth = availableWidth;
@@ -133,10 +132,10 @@ export default class RowVisualMatrix extends VisualMatrix {
 
         if (priority === 2) {
             conditions = [primaryMatrixLength - 1, primaryMatrixLength];
-            divider = Math.min(2, matrixLen);
+            // divider = Math.min(2, matrixLen);
         } else {
             conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
-            divider = Math.min(1, matrixLen);
+            // divider = Math.min(1, matrixLen);
         }
         conditions.forEach((i) => {
             dist[i] = maxWidths[i];
@@ -230,10 +229,10 @@ export default class RowVisualMatrix extends VisualMatrix {
     /**
      * Distibutes the given space row wisely
      *
-     * @param {Object} options Redistribution information
+     * @param {Object} measures Redistribution information
      * @memberof VisualMatrix
      */
-    redistributeViewSpaces (options) {
+    redistributeViewSpaces (measures) {
         let cWidths = [];
         let rHeights = [];
         let mHeight = 0;
@@ -245,15 +244,15 @@ export default class RowVisualMatrix extends VisualMatrix {
             isTransposed,
             gutter
         } = this.config();
-        const { matrix, height, maxHeights, maxWidths, logicalWidths } = options;
+        const { matrix, height, maxHeights, maxWidths, logicalWidths } = measures;
         mHeight = spaceTakenByColumn(matrix, this._lastLevelKey).height;
 
         const maxWidth = maxMeasures.reduce((t, n) => {
             t += n;
             return t;
         });
-        options.maxMeasures = maxMeasures;
-        options.maxWidth = maxWidth;
+        measures.maxMeasures = maxMeasures;
+        measures.maxWidth = maxWidth;
         if (maxWidth > 0) {
             cWidths = logicalWidths;
         } else {
@@ -283,16 +282,16 @@ export default class RowVisualMatrix extends VisualMatrix {
     /**
      * Dispatch the calculated cell dimensions to all the cells
      *
-     * @param {Object} options cell dimension information
+     * @param {Object} measures cell dimension information
      * @return {Object} row and column heights / widths
      * @memberof VisualMatrix
      */
-    getCellDimensions (options) {
+    getCellDimensions (measures) {
         const {
-            unitMeasures: measures
+            unitMeasures
         } = this.config();
-        const borderWidth = measures.border;
-        const { matrixInst, maxWidths, maxHeights, matrixIndex } = options;
+        const borderWidth = unitMeasures.border;
+        const { matrixInst, maxWidths, maxHeights, matrixIndex } = measures;
         const matrix = matrixInst.matrix;
         const rowHeights = [[0], [0]];
         const columnWidths = [[0], [0]];
