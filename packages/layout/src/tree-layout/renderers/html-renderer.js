@@ -1,19 +1,19 @@
 import { HTMLDataAdapter } from '../data-adapters/html-data';
-import { Utils } from '../utils/utils';
+import { Utils } from '../utils';
 import { Renderer } from './renderer';
 
 export class HTMLRenderer extends Renderer {
     constructor (data) {
         super();
-        this.data = data;
-        this.coordinates = new HTMLDataAdapter(this.data).getCoordinates();
+        this._data = data;
+        this._coordinates = new HTMLDataAdapter(this._data).getCoordinates();
     }
 
     createhtml (mount, className) {
         const mainDiv = mount;
-        super.initRenderer(mainDiv, this.data); // Initialise node with layout id
+        super.initRenderer(mainDiv, this._data); // Initialise node with layout id
         this.parentDiv = this.createAndCustomiseParent(className);
-        this.coordinates.forEach((node) => {
+        this._coordinates.forEach((node) => {
             if (node.hasHost) {
                 this.parentDiv.appendChild(this.createAndPositionDiv(node));
             }
@@ -34,10 +34,14 @@ export class HTMLRenderer extends Renderer {
     }
 
     createAndCustomiseParent (className) {
-        const container = Utils.findContainer(this.coordinates);
+        const container = Utils.findContainer(this._coordinates);
         const parentDiv = this.createAndPositionDiv(container);
         parentDiv.className = className;
         parentDiv.style.position = 'relative';
         return parentDiv;
+    }
+
+    coordinates () {
+        return this._coordinates;
     }
 }

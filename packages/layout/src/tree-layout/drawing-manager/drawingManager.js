@@ -1,5 +1,5 @@
 import { HTMLRenderer } from '../renderers/html-renderer';
-import { Utils } from '../utils/utils';
+import { Utils } from '../utils';
 import { DEFAULT_CLASS_NAME } from '../constants/defaults';
 
 export class DrawingManager {
@@ -18,7 +18,7 @@ export class DrawingManager {
             this.renderHTML();
             break;
         default:
-            break;
+            this.renderHTML();
         }
     }
 
@@ -119,7 +119,7 @@ export class DrawingManager {
     }
 
     _findNode (nodeID) {
-        return this.componentRenderer.coordinates.find(node => node._id === nodeID);
+        return this.componentRenderer.coordinates().find(node => node._id === nodeID);
     }
 
     renderHTML () {

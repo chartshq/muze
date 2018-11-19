@@ -2,12 +2,12 @@ import { DataPoint } from './data-point';
 
 export class DataParser {
     constructor (data) {
-        this.data = data;
+        this._data = data;
     }
 
     defaultDataPointLogic () {
         const nodepoints = [];
-        this.getnodePoints(this.data, nodepoints);
+        this.getnodePoints(this._data, nodepoints);
         return nodepoints;
     }
 

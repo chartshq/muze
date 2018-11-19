@@ -1,7 +1,3 @@
-/* eslint-disable require-jsdoc */
-
-/* eslint no-undef: "off" */
-
 import LayoutComponent from './layoutComponent';
 
 class DummyComponent extends LayoutComponent {

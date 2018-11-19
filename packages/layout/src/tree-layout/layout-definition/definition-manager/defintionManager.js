@@ -1,4 +1,3 @@
-/* eslint no-unused-vars: "off" */
 import DefinitionModel from './definitionModel';
 import DummyComponent from '../../layout-component/dummy-component'
 ;
@@ -14,7 +13,7 @@ export default class DefinitionManager {
   // prepares the targetComponent Map for target Mapping ie. where a component should lie
     _prepareTargetComponentMap () {
         this.targetComponentMap = new Map();
-        this.componentMap.forEach((value, key) => {
+        this.componentMap.forEach((value) => {
             if (this.targetComponentMap.has(value.target)) {
                 this.targetComponentMap.get(value.target).push(value);
             } else {

@@ -10,22 +10,22 @@ import {
 } from '../constants/defaults';
 
 import { DrawingManager } from '../drawing-manager/drawingManager';
-import { Utils } from '../utils/utils';
+import { Utils } from '../utils';
 import { LayoutDef } from './layout-def';
 
 class LayoutManager {
     constructor (conf) {
-        this.renderAt = conf.renderAt;
+        this._renderAt = conf.renderAt;
         this.layoutClassName = conf.className;
         this.width = conf.width || DEFAULT_WIDTH;
         this.height = conf.height || DEFAULT_HEIGHT;
         this.skeletonType = conf.skeletonType || 'html';
         this.layoutDefinition = null;
         this.layoutDef = new LayoutDef();
-        if (Utils.isDOMElement(this.renderAt)) {
-            this.renderAt._layout = this;
+        if (Utils.isDOMElement(this._renderAt)) {
+            this._renderAt._layout = this;
         } else {
-            document.getElementById(this.renderAt)._layout = this;
+            document.getElementById(this._renderAt)._layout = this;
         }
     }
 
@@ -44,7 +44,7 @@ class LayoutManager {
             tree: this.tree,
             componentMap: this.layoutDef.getComponentMap(),
             layoutClassName: this.layoutClassName
-        }, this.skeletonType, this.renderAt);
+        }, this.skeletonType, this._renderAt);
 
     // this will draw all the components by calling their draw method
         this.manager.draw();
