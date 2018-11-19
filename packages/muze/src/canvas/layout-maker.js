@@ -24,15 +24,16 @@ export const prepareLayout = (layout, components, config, measurement) => {
         bottomLeft,
         bottomRight
     } = cornerMatrices;
-
-    layout.measurement(measurement)
-                    .config(config)
-                    .matrices({
-                        top: [topLeft, columns[0], topRight],
-                        center: [rows[0], values, rows[1]],
-                        bottom: [bottomLeft, columns[1], bottomRight]
-                    })
-                    .triggerReflow();
+    if (rows && columns) {
+        layout.measurement(measurement)
+                        .config(config)
+                        .matrices({
+                            top: [topLeft, columns[0], topRight],
+                            center: [rows[0], values, rows[1]],
+                            bottom: [bottomLeft, columns[1], bottomRight]
+                        })
+                        .triggerReflow();
+    }
 };
 
 /**

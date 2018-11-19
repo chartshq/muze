@@ -10,7 +10,6 @@ import {
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
-import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
 import { getIndividualClassName } from '../../helpers';
 import { getRangeValue, getRadiusRange, tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint } from './arc-helper';
@@ -85,7 +84,7 @@ export default class ArcLayer extends BaseLayer {
             sort,
             minOuterRadius
         } = config;
-        const prevData = this._store.get(PROPS.TRANSFORMED_DATA) || [];
+        const prevData = this._transformedData || [];
         const fieldsConfig = this.data().getFieldsConfig();
         const {
             angleIndex,
@@ -218,8 +217,7 @@ export default class ArcLayer extends BaseLayer {
             innerRadiusFixer
        } = this.config();
         const sizeAxis = this.axes().size;
-        const store = this._store;
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const transformedData = this._transformedData;
         const chartHeight = height - padding.top - padding.bottom;
         const chartWidth = width - padding.left - padding.right;
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
@@ -232,7 +230,7 @@ export default class ArcLayer extends BaseLayer {
         });
         const colorAxis = this.axes().color;
         const defaultRadius = outerRadius || Math.min(chartHeight, chartWidth) / 2;
-        const radiusDomain = store.get(PROPS.DOMAIN).radius;
+        const radiusDomain = this.domain().radius;
         const rangeValueGetter = d => getRangeValue(d, range, radiusDomain, defaultRadius, sizeAxis);
         // This returns a function that generates the arc path based on the datum provided
         const path = arc()

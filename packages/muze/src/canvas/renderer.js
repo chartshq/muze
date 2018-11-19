@@ -302,7 +302,8 @@ export const renderComponents = (context, components, layoutConfig, measurement)
     const {
         mount
     } = prepareGridContainer(layout.node(), measurement, classPrefix, context.alias());
-    const padding = context.layout().getViewInformation().layoutDimensions.viewWidth[0];
+    const padding = context.layout().viewInfo().layoutDimensions.viewWidth[0];
+
     measurement.padding = padding;
     const { position } = layoutConfig.legend;
 
@@ -311,10 +312,10 @@ export const renderComponents = (context, components, layoutConfig, measurement)
 
     // Render layout
     context.layout().renderGrid(mount);
+    layoutConfig.measurement = measurement;
+    renderHeader(layoutConfig, title, 'title', headers);
+    renderHeader(layoutConfig, subtitle, 'subtitle', headers);
     context.once('layer.drawn').then(() => {
-        layoutConfig.measurement = measurement;
-        renderHeader(layoutConfig, title, 'title', headers);
-        renderHeader(layoutConfig, subtitle, 'subtitle', headers);
         renderLegend(layoutConfig, legend, legends, measurement);
         shiftLegend(layoutConfig, measurement, mountPoint, headers);
     });

@@ -39,14 +39,12 @@ export default class VisualMatrix {
         this._layoutMatrix = combineMatrices([matrix[0] || [], matrix[1] || []], this.config());
     }
 
-
     primaryMatrix (...params) {
         if (params.length) {
             return this;
         }
         return this._primaryMatrix;
     }
-
 
     secondaryMatrix (...params) {
         if (params.length) {
@@ -55,7 +53,6 @@ export default class VisualMatrix {
         return this._secondaryMatrix;
     }
 
-
     tree (...params) {
         if (params.length) {
             return this;
@@ -63,11 +60,9 @@ export default class VisualMatrix {
         return this._tree;
     }
 
-
     static defaultConfig () {
         return defaultConfig;
     }
-
 
     createTree () {
         const { tree, lastLevelKey } = createTree(this);

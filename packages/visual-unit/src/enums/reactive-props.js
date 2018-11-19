@@ -15,4 +15,6 @@ export const LAYERSCREATED = 'layersCreated';
 export const FIELDS = 'fields';
 export const TIMEDIFFS = 'timeDiffs';
 export const LAYERAXISINDEX = 'layerAxisIndex';
+export const LAYERS = 'layers';
+export const DOMAIN = 'domain';
 

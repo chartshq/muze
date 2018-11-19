@@ -11,29 +11,26 @@ export const getRotatedSpaces = (rotation = 0, width, height) => {
     return { width: rotatedWidth, height: rotatedHeight };
 };
 
-/**
- * Listener attached to the axis on change of parameters.
- *
- * @param {Function} callback to be excuted on change of domain range etc
- * @memberof SimpleAxis
- */
-export const registerChangeListeners = (context) => {
-    const store = context.store();
+// /**
+//  * Listener attached to the axis on change of parameters.
+//  *
+//  * @param {Function} callback to be excuted on change of domain range etc
+//  * @memberof SimpleAxis
+//  */
+// export const registerChangeListeners = (context) => {
+//     const store = context.store();
 
-    store.model.next(
-    ['domain', 'range', 'mount', 'config'],
-    (...params) => {
-        context.setTickConfig();
-        context.render();
-        context._domainLock = false;
-        context._eventList.forEach((e) => {
-            e.action instanceof Function && e.action(...params);
-        });
-    },
-    true
-  );
-    return context;
-};
+//     store.model.next(
+//     ['domain', 'range', 'mount', 'config'],
+//     (...params) => {
+//         context.setTickConfig();
+//         context.render();
+//         context._domainLock = false;
+//     },
+//     true
+//   );
+//     return context;
+// };
 
 export const setOffset = (context) => {
     let x = 0;
@@ -333,4 +330,17 @@ export const calculateContinousSpace = (context) => {
         width,
         height: effHeight
     };
+};
+
+export const setContinousAxisDomain = (context, domain) => {
+    const { nice, domain: userDom } = context.config();
+    if (userDom) {
+        domain = userDom;
+    }
+    if (domain.length && domain[0] === domain[1]) {
+        domain = [0, +domain[0] * 2];
+    }
+    context.scale().domain(domain);
+    nice && context.scale().nice();
+    context._domain = context.scale().domain();
 };

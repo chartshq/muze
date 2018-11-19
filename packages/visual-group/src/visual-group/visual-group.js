@@ -1,11 +1,11 @@
-import { transactor, generateGetterSetters } from 'muze-utils';
+import { generateGetterSetters } from 'muze-utils';
 import localOptions from './local-options';
 import { SimpleGroup } from '../simple-group';
 import {
     MatrixResolver,
-    initStore,
     findInGroup
 } from '../group-helper';
+import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices } from './helper';
 import { setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
@@ -51,35 +51,47 @@ class VisualGroup extends SimpleGroup {
         // by passing paramaters for the same. Thus, one can chain setter
         // getter methods.
         generateGetterSetters(this, PROPS);
+        generateGetterSetters(this, localOptions);
         // Populate the store with default values
-        this.store(initStore());
-
         // initialize group compositions
         this._composition = {};
         // store reference to data
         this._data = [];
-        // matrix instance store each of the matrices
-        this._matrixInstance = {};
         // store reference to mountpoint
         this._mount = null;
         // selection object that takes care of updating of components
         this._selection = {};
-        // stores info about the placeholders generated after creation of matrices
-        this._placeholderInfo = {};
-        // corner matrices are the headers/footers for the application
-        this._cornerMatrices = {};
         // Create instance of matrix resolver
         this.resolver(new MatrixResolver(this._dependencies));
-
+        // matrix instance store each of the matrices
+        setMatrixInstances(this, {});
          // Getting indiviual registered items
         this.registry({
             layerRegistry: componentSubRegistry.layerRegistry.get(),
             cellRegistry: componentSubRegistry.cellRegistry.get()
         });
-        // Add local options to the store
-        transactor(this, localOptions, this.store().model);
-        // Register listeners
-        setupChangeListeners(this);
+    }
+
+    static getState () {
+        return [{
+            domain: {
+                x: {},
+                y: {},
+                radius: {}
+            }
+        }, {}];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            initializeGlobalState(this);
+            createUnitState(this);
+            // Register listeners
+            setupChangeListeners(this);
+            return this;
+        }
+        return this._store;
     }
 
     /**
@@ -190,7 +202,6 @@ class VisualGroup extends SimpleGroup {
             rowProjections,
             colProjections
         } = this.resolver().getAllFields();
-
         return channel === Y ? rowProjections : colProjections;
     }
 
@@ -231,6 +242,10 @@ class VisualGroup extends SimpleGroup {
      */
     getGroupByData () {
         return this._groupedDataModel;
+    }
+
+    createMatrices () {
+        createMatrices(this);
     }
 }
 

@@ -1,19 +1,20 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import {
+    Store,
     setAttrs,
-    CommonProps,
     getUniqueId,
     getQualifiedClassName,
     selectElement,
     transactor,
-    Store,
     makeElement,
     registerListeners,
     generateGetterSetters,
     getDataModelFromIdentifiers,
     isSimpleObject,
     transposeArray,
-    FieldType
+    CommonProps,
+    toArray,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -23,22 +24,18 @@ import {
     removeLayersBy,
     getLayersBy,
     getLayerFromDef,
-    attachAxisToLayers,
     getLayerAxisIndex,
+    sanitizeLayerDef,
     createSideEffectGroup,
-    getAdjustedDomain,
-    resolveEncodingTransform
+    resolveEncodingTransform,
+    createLayerState,
+    initializeGlobalState
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
-import { listenerMap } from './listener-map';
+import { listenerMap, calculateDomainListener } from './listener-map';
 import {
-    primaryYAxisUpdated,
-    primaryXAxisUpdated,
-    secondaryXAxisUpdated,
-    secondaryYAxisUpdated,
-    DATADOMAIN,
-    TIMEDIFFS
+    DOMAIN
 } from './enums/reactive-props';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
@@ -69,9 +66,10 @@ export default class VisualUnit {
         this._dependencies = dependencies;
         this._layerDeps = {
             throwback: new Store({
-                onlayerdraw: false
+                [CommonProps.ON_LAYER_DRAW]: false
             }),
-            smartLabel: dependencies.smartLabel
+            smartLabel: dependencies.smartLabel,
+            lifeCycleManager: dependencies.lifeCycleManager
         };
         this._renderedResolve = null;
         this._renderedPromise = new Promise((resolve) => {
@@ -86,29 +84,62 @@ export default class VisualUnit {
         this._layersMap = {};
         this._gridlines = [];
         this._gridbands = [];
+        this._layerNamespaces = {};
         this._layerAxisIndex = {};
         this._transformedDataModels = {};
-
         layerFactory.setLayerRegistry(registry.layerRegistry);
         generateGetterSetters(this, PROPS);
+        this.registry(registry);
         this.cachedData([]);
-        this.store(new Store({
-            [primaryXAxisUpdated]: null,
-            [primaryYAxisUpdated]: null,
-            [secondaryXAxisUpdated]: null,
-            [secondaryYAxisUpdated]: null
-        }));
-        transactor(this, localOptions, this.store().model);
-        this.firebolt(new UnitFireBolt(this, {
-            physical: physicalActions,
-            behavioural: behaviouralActions,
-            physicalBehaviouralMap: actionBehaviourMap
-        }, sideEffects, behaviourEffectMap));
-        registerListeners(this, listenerMap);
     }
 
     static formalName () {
         return FORMAL_NAME;
+    }
+
+    static getState () {
+        return [
+            {
+                domain: {}
+            },
+            {
+                layerDef: {},
+                layers: {},
+                config: {},
+                data: {},
+                width: {},
+                height: {},
+                transform: {}
+            }
+        ];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            const metaInf = this.metaInf();
+            initializeGlobalState(this);
+            createLayerState(this);
+            transactor(this, localOptions, this.store().model, {
+                namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+                subNamespace: metaInf.namespace
+            });
+            registerListeners(this, listenerMap, {
+                local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+                global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
+            }, {
+                rowIndex: metaInf.rowIndex,
+                colIndex: metaInf.colIndex,
+                subNamespace: metaInf.namespace
+            });
+            this.firebolt(new UnitFireBolt(this, {
+                physical: physicalActions,
+                behavioural: behaviouralActions,
+                physicalBehaviouralMap: actionBehaviourMap
+            }, sideEffects, behaviourEffectMap));
+            return this;
+        }
+        return this._store;
     }
 
     /**
@@ -138,15 +169,6 @@ export default class VisualUnit {
             return this;
         }
         return this._firebolt;
-    }
-
-    /**
-     * Gets the domain for all axes of this visual unit.
-     *
-     * @return {Object} Domains of each data field.
-     */
-    getDataDomain () {
-        return this.store().get(DATADOMAIN);
     }
 
     /**
@@ -204,6 +226,8 @@ export default class VisualUnit {
             height
         });
         this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
+
+        this.firebolt().mapActionsAndBehaviour();
         return this;
     }
 
@@ -286,6 +310,15 @@ export default class VisualUnit {
         };
     }
 
+    mount (...mount) {
+        if (mount.length) {
+            this._mount = mount[0];
+            this.render(mount[0]);
+            return this;
+        }
+        return this._mount;
+    }
+
     /**
      * Adds a new layer to the visual unit. It takes a layer definition and creates layer instances from them. It does
      * not render the layers. It returns the layer instances in an array. If the layer definition is a composite layer,
@@ -308,35 +341,76 @@ export default class VisualUnit {
      *
      * @return {Array} Array of layer instances.
      */
-    addLayer (layerDef) {
-        const layerName = layerDef.name;
-        const layer = this.getLayerByName(layerName);
-        const measurement = {
-            width: this.width(),
-            height: this.height()
-        };
+    addLayer (layerDefinition) {
+        const layerDefinitions = sanitizeLayerDef(toArray(layerDefinition));
 
-        if (layer) {
-            return [layer];
-        }
-        const serializedDef = layerFactory.getSerializedConf(layerDef.mark, layerDef);
-        const instances = Object.values(getLayerFromDef(this, serializedDef));
-        this.layers().push(...instances);
-        const layerAxisIndex = getLayerAxisIndex(instances, this.fields());
-        this._layerAxisIndex = Object.assign(this._layerAxisIndex, layerAxisIndex);
-        attachAxisToLayers(this.axes(), instances, layerAxisIndex);
-        const store = { unit: this, layers: {} };
-        this.layers().forEach((inst) => {
-            store.layers[inst.alias()] = inst;
-        });
-        instances.forEach((lyr) => {
-            resolveEncodingTransform(lyr, store);
-            lyr.measurement(measurement);
-            lyr.dataProps({
-                timeDiffs: this.store().get(TIMEDIFFS)
+        const layersMap = this._layersMap;
+        const markSet = {};
+        const store = {
+            layers: {},
+            components: {
+                unit: this
+            }
+        };
+        let layerIndex = 0;
+        let startIndex = [].concat(...Object.values(this._layersMap)).length;
+        const metaInf = this.metaInf();
+        const props = this._layerNamespaces;
+        const layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
+            const definition = layerDef.def;
+            const markId = definition.name;
+            const defArr = toArray(definition);
+            const namespaces = [];
+            defArr.forEach((def) => {
+                def.order = layerDef.order + layerIndex;
+                const namespace = `${metaInf.namespace}${startIndex}`;
+                if (!layersMap[markId]) {
+                    startIndex++;
+                    if (definition.calculateDomain !== false) {
+                        props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
+                    }
+                }
+                namespaces.push(namespace);
             });
+            layerIndex += defArr.length;
+            const instances = getLayerFromDef(this, definition, layersMap[markId], namespaces);
+            store.layers = Object.assign(store.layers, instances);
+            const instanceValues = Object.values(instances);
+            layersArr = layersArr.concat(...instanceValues);
+            layersMap[markId] = instanceValues;
+            markSet[markId] = markId;
+            return layersArr;
+        }, []);
+
+        store.unit = this;
+        const layerdeps = {};
+        const layersArr = [].concat(...Object.values(this._layersMap));
+
+        layersArr.forEach((layer) => {
+            const alias = layer.alias();
+            store.layers[alias] = layer;
+            layerdeps[alias] = [];
         });
-        return instances;
+        layers.forEach((layer) => {
+            const depArr = resolveEncodingTransform(layer, store);
+            layerdeps[layer.alias()] = depArr;
+        });
+
+        this._layerDepOrder = layerdeps;
+        this._layerAxisIndex = Object.assign(this._layerAxisIndex, getLayerAxisIndex(layers, this.fields()));
+        const stateStore = this.store();
+
+        stateStore.unsubscribe({
+            key: 'calculateDomainListener',
+            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
+        });
+        stateStore.registerImmediateListener(Object.keys(props), calculateDomainListener(this, metaInf.namespace),
+            false, {
+                key: 'calculateDomainListener',
+                namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
+            });
+        this.layers(layersArr);
+        return layers;
     }
 
     /**
@@ -348,7 +422,9 @@ export default class VisualUnit {
     remove () {
         const lifeCycleManager = this._dependencies.lifeCycleManager;
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().unsubscribeAll();
+        this.store().unsubscribe({
+            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
+        });
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers
@@ -438,55 +514,6 @@ export default class VisualUnit {
     getLayerByName (name) {
         const layers = getLayersBy(this.layers(), 'name', name);
         return layers[0];
-    }
-
-    /**
-     *
-     *
-     * @param {*} domain
-     *
-     * @memberof VisualUnit
-     */
-    updateAxisDomain (domain) {
-        ['x', 'y'].forEach((type) => {
-            const axes = this.axes()[type];
-            let min = [];
-            let max = [];
-            let dom;
-            axes && axes.forEach((axis, i) => {
-                const field = this.fields()[type][i];
-                dom = domain[`${this.fields()[type][i]}`];
-
-                if (field.type() !== FieldType.DIMENSION && dom) {
-                    min[i] = dom[0];
-                    max[i] = dom[1];
-                }
-            });
-            if (axes) {
-                if (axes.length > 1) {
-                    const axisConf = axes[0].config();
-                    if (axes[0].constructor.type() === 'linear') {
-                        if (axisConf.alignZeroLine) {
-                            axes.forEach(axis => axis.config({
-                                nice: false
-                            }));
-                            const adjustedDomain = getAdjustedDomain(max, min);
-                            min = adjustedDomain.min;
-                            max = adjustedDomain.max;
-                        }
-
-                        axes[0].updateDomainCache([min[0], max[0]]);
-                        axes[1].updateDomainCache([min[1], max[1]]);
-                    } else {
-                        axes[0].updateDomainCache(dom);
-                        axes[1].updateDomainCache(dom);
-                    }
-                } else {
-                    axes[0].updateDomainCache(dom);
-                }
-            }
-        });
-        return this;
     }
 
     /**

@@ -10,7 +10,6 @@ import { BaseLayer } from '../../base-layer';
 import { drawLine } from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
-import * as PROPS from '../../enums/props';
 import {
     attachDataToVoronoi,
     animateGroup,
@@ -100,43 +99,7 @@ export default class LineLayer extends BaseLayer {
         return drawLine;
     }
 
-    /**
-     * Applies selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    highlightPoint () {
-        return this;
-    }
-
-    /**
-     * Removes selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    dehighlightPoint () {
-        return this;
-    }
-
-    focusSelection () {
-        return this;
-    }
-
-    focusOutSelection () {
-        return this;
-    }
-
-    fadeOutSelection () {
-        return this;
-    }
-
-    unfadeSelection () {
-        return this;
-    }
-
-    shouldDrawAnchors () {
+    static shouldDrawAnchors () {
         return true;
     }
 
@@ -216,9 +179,8 @@ export default class LineLayer extends BaseLayer {
             defClassName,
             transition
         } = config;
-        const store = this._store;
-        const normalizedData = store.get(PROPS.NORMALIZED_DATA);
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const normalizedData = this._normalizedData;
+        const transformedData = this._transformedData;
         const fieldsConfig = this.data().getFieldsConfig();
         const axes = this.axes();
         const keys = transformedData.map(d => d.key);

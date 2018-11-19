@@ -1,5 +1,5 @@
 import { GridLayout } from '@chartshq/layout';
-import { transactor, Store, getUniqueId } from 'muze-utils';
+import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES } from 'muze-utils';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout } from './layout-maker';
@@ -7,7 +7,8 @@ import { localOptions, canvasOptions } from './local-options';
 import { renderComponents } from './renderer';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener } from './helper';
+import { APP_INITIAL_STATE } from './app-state';
+import { initCanvas, setupChangeListener, createGroupState } from './helper';
 
 /**
  * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
@@ -48,12 +49,18 @@ export default class Canvas extends TransactionSupport {
             this._renderedResolve = resolve;
         });
         this._composition.layout = new GridLayout();
-        this._store = new Store({});
-
+        this._store = new Store(APP_INITIAL_STATE);
         // Setters and getters will be mounted on this. The object will be mutated.
-        const [, store] = transactor(this, options, this._store.model);
-        transactor(this, localOptions, store);
-        transactor(this, canvasOptions, store);
+        const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
+        const [, store] = transactor(this, options, this._store.model, {
+            namespace
+        });
+        transactor(this, localOptions, store, {
+            namespace
+        });
+        transactor(this, canvasOptions, store, {
+            namespace
+        });
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
         this.firebolt(new GroupFireBolt(this));
         this.alias(`canvas-${getUniqueId()}`);
@@ -195,8 +202,8 @@ export default class Canvas extends TransactionSupport {
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
             this._composition.visualGroup = initedComponents[0];
-
-            this.composition().visualGroup.alias(this.alias());
+            createGroupState(this);
+            this.composition().visualGroup.alias(this.alias()).store(this._store);
             return this;
         }
         return this._registry;
@@ -345,5 +352,17 @@ export default class Canvas extends TransactionSupport {
     getRetinalAxes () {
         const visualGroup = this.composition().visualGroup;
         return visualGroup.getAxes(RETINAL);
+    }
+
+    mount (...params) {
+        if (params.length) {
+            let value = params[0];
+            if (typeof params[0] === 'string') {
+                value = selectElement(params[0]).node();
+            }
+            this._mount = value;
+            return this;
+        }
+        return this._mount;
     }
 }

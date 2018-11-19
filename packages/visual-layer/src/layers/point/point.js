@@ -10,7 +10,6 @@ import { BaseLayer } from '../../base-layer';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
-import * as PROPS from '../../enums/props';
 import {
     attachDataToVoronoi,
     getLayerColor,
@@ -124,7 +123,7 @@ export default class PointLayer extends BaseLayer {
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
         const colorField = colorEncoding && colorEncoding.field;
         const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
-        const measurement = this._store.get(PROPS.MEASUREMENT);
+        const measurement = this.measurement();
         const shapeFieldIndex = fieldsConfig[shapeField] && fieldsConfig[shapeField].index;
         const sizeFieldIndex = fieldsConfig[sizeField] && fieldsConfig[sizeField].index;
         const colorAxis = axes.color;
@@ -195,9 +194,9 @@ export default class PointLayer extends BaseLayer {
         let maxSize = 0;
         let seriesClassName;
         const config = this.config();
-        const keys = this._store.get(PROPS.TRANSFORMED_DATA).map(d => d.key);
+        const keys = this._transformedData.map(d => d.key);
         const { transition, className, defClassName, classPrefix } = config;
-        const normalizedData = this._store.get(PROPS.NORMALIZED_DATA);
+        const normalizedData = this._normalizedData;
         const containerSelection = selectElement(container);
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
         this._points = [];

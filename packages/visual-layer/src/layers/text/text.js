@@ -9,7 +9,6 @@ import drawText from './renderer';
 import { defaultConfig } from './default-config';
 import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
-import * as PROPS from '../../enums/props';
 
 import './styles.scss';
 
@@ -120,7 +119,7 @@ export default class TextLayer extends BaseLayer {
         let points;
         const config = this.config();
         const encoding = config.encoding;
-        const normalizedData = this._store.get(PROPS.NORMALIZED_DATA);
+        const normalizedData = this._normalizedData;
         const className = config.className;
         const qualifiedClassName = getQualifiedClassName(config.defClassName, this.id(), config.classPrefix);
         const axes = this.axes();

@@ -54,7 +54,7 @@ export default class AreaLayer extends LineLayer {
         const domains = super.calculateDomainFromData(data, fieldsConfig);
         [ENCODING.X, ENCODING.Y].forEach((type) => {
             const { [`${type}FieldType`]: fieldType } = encodingFieldsInf;
-            if (fieldType === FieldType.MEASURE) {
+            if (fieldType === FieldType.MEASURE && domains[type] !== undefined) {
                 domains[type][0] = Math.min(domains[type][0], 0);
             }
         });

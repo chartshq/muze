@@ -12,7 +12,6 @@ export const PROPS = {
             if (value.orientation !== oldConfig.orientation) {
                 context.axis(context.createAxis(value));
             }
-            context.store().commit('config', value);
             const {
                 labels,
                 show,
@@ -39,16 +38,11 @@ export const PROPS = {
     },
     logicalSpace: {},
     mount: {
-        sanitization: (context, value) => {
-            context.store().commit('mount', value);
-            return value;
-        }
     },
     range: {
         sanitization: (context, value) => {
             context.scale().range(value);
             context.logicalSpace(null);
-            context.store().commit('range', value);
             return value;
         }
     },

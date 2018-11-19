@@ -1,4 +1,4 @@
-import { mergeRecursive, selectElement } from 'muze-utils';
+import { mergeRecursive } from 'muze-utils';
 import {
     ROWS,
     COLUMNS,
@@ -8,7 +8,6 @@ import {
     DETAIL,
     LAYERS,
     TRANSFORM,
-    MOUNT,
     TITLE,
     SUB_TITLE
 } from '../constants';
@@ -113,17 +112,6 @@ export const localOptions = {
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Object'
-        }
-    },
-    [MOUNT]: {
-        value: null,
-        meta: {
-            sanitization: (value) => {
-                if (typeof value === 'string') {
-                    return selectElement(value).node();
-                }
-                return value;
-            }
         }
     }
 };

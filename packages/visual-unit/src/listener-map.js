@@ -1,67 +1,67 @@
-import { DimensionSubtype } from 'muze-utils';
+import { DimensionSubtype, STATE_NAMESPACES } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
     getDimensionMeasureMap,
-    createLayers,
     attachDataToLayers,
     attachAxisToLayers,
-    unionDomainFromLayers,
-    getLayerAxisIndex
+    unionDomainFromLayers
 } from './helper';
 
-const axisMap = {
-    0: 'primary',
-    1: 'secondary'
-};
-const axisProps = [PROPS.primaryXAxisUpdated, PROPS.secondaryXAxisUpdated, PROPS.primaryYAxisUpdated,
-    PROPS.secondaryYAxisUpdated];
+import { createGridLineLayer, attachDataToGridLineLayers } from './helper/grid-lines';
 
-export const listenerMap = context => ([
-    {
-        type: 'registerImmediateListener',
-        props: [PROPS.AXES],
-        listener: ([, axes]) => {
-            ['x', 'y'].forEach((type) => {
-                const axesArr = axes[type] || [];
-                axesArr.forEach((axis, i) => {
-                    axis.on('update', () => {
-                        context.store().commit(PROPS[`${axisMap[i]}${axis.isReverse() ? 'Y' : 'X'}AxisUpdated`], true);
-                    });
-                });
-            });
+const removeExitLayers = (layerDefs, context) => {
+    const layersMap = context._layersMap;
+    const markSet = {};
+    layerDefs.forEach((layerDef, i) => {
+        const id = `${layerDef.mark}-${i}`;
+        markSet[id] = true;
+    });
+
+    for (const key in layersMap) {
+        if (!(key in markSet)) {
+            layersMap[key].forEach(layer => layer.remove());
+            delete layersMap[key];
         }
-    },
+    }
+};
+
+export const calculateDomainListener = (context, namespace) => () => {
+    const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
+        context.data().getFieldsConfig());
+    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
+};
+
+export const listenerMap = (context, namespace, metaInf) => ([
     {
         type: 'registerImmediateListener',
-        props: [PROPS.CONFIG],
+        props: [`${namespace.local}.${PROPS.CONFIG}.${metaInf.subNamespace}`],
         listener: ([, config]) => {
             config && context.firebolt().config(config.interaction);
         }
     },
     {
-        type: 'computed',
-        props: [PROPS.LAYERSCREATED],
-        listener: fetch => fetch(PROPS.LAYERDEFS, PROPS.FIELDS, (layerDefs, fields) => {
-            const layerDefsValue = layerDefs.value;
-            const fieldsVal = fields.value;
-            if (layerDefsValue && fieldsVal) {
-                const layers = createLayers(context, layerDefs.value);
-                context.layers(layers);
-                context._layerAxisIndex = getLayerAxisIndex(context.layers(), fieldsVal);
-                context._lifeCycleManager.notify({ client: layers, action: 'initialized', formalName: 'layer' });
-                return true;
+        type: 'registerImmediateListener',
+        props: [`${namespace.local}.${PROPS.LAYERDEFS}.${metaInf.subNamespace}`],
+        listener: ([, layerDefs]) => {
+            const fieldsVal = context.fields();
+            if (layerDefs && fieldsVal) {
+                removeExitLayers(layerDefs, context);
+                context.addLayer(layerDefs);
+                context._lifeCycleManager.notify({
+                    client: context.layers(),
+                    action: 'initialized',
+                    formalName: 'layer'
+                });
             }
-            return null;
-        })
+        }
     },
     {
-        type: 'computed',
-        props: [PROPS.TIMEDIFFS],
-        listener: fetch => fetch(PROPS.DATA, PROPS.FIELDS, PROPS.AXES, (data, fields, axes) => {
-            const dataModel = data.value;
-            const axisFields = fields.value;
-            const axesObj = axes.value;
+        type: 'registerImmediateListener',
+        props: [`${namespace.local}.${PROPS.DATA}.${metaInf.subNamespace}`],
+        listener: ([, dataModel]) => {
+            const axisFields = context.fields();
+            const axesObj = context.axes();
             if (dataModel && axisFields && axesObj) {
                 const timeDiffs = {};
                 const timeDiffsByField = {};
@@ -74,50 +74,37 @@ export const listenerMap = context => ([
                     }
                 });
                 context._timeDiffsByField = timeDiffsByField;
-                return timeDiffs;
+                context._timeDiffs = timeDiffs;
             }
-            return null;
-        })
-    },
-    {
-        type: 'computed',
-        props: [PROPS.DATADOMAIN],
-        listener: fetch => fetch(PROPS.DATA, PROPS.LAYERSCREATED, PROPS.AXES, PROPS.TRANSFORM,
-            (dataModel, layersCreated, axes, transform) => {
-                const dataModelVal = dataModel.value;
-                const layerAxisIndexVal = context._layerAxisIndex;
-                const axesVal = axes.value;
-                if (dataModelVal && layersCreated.value && axesVal && layerAxisIndexVal) {
-                    const layers = context.layers();
-                    const dataModels = transformDataModels(transform.value, dataModelVal);
-                    context._transformedDataModels = dataModels;
-                    context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
-                    attachDataToLayers(layers, dataModelVal, context._transformedDataModels);
-                    context._dimensionMeasureMap = getDimensionMeasureMap(layers,
-                        dataModelVal.getFieldsConfig(), context.retinalFields());
-                    attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
-                    context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
-                    return unionDomainFromLayers(layers, context.fields(),
-                        layerAxisIndexVal, dataModelVal.getFieldsConfig());
-                }
-                return null;
-            })
+        }
     },
     {
         type: 'registerImmediateListener',
-        props: [PROPS.DATADOMAIN],
-        listener: ([, dataDomain]) => {
-            dataDomain !== null && context.updateAxisDomain(dataDomain);
+        props: [`${namespace.local}.${PROPS.DATA}.${metaInf.subNamespace}`,
+            `${namespace.local}.${PROPS.LAYERS}.${metaInf.subNamespace}`,
+            `${namespace.local}.${PROPS.TRANSFORM}.${metaInf.subNamespace}`],
+        listener: ([, dataModel], [, layers], [, transform]) => {
+            const layerAxisIndexVal = context._layerAxisIndex;
+            const axesVal = context.axes();
+            if (dataModel && layers && axesVal && layerAxisIndexVal) {
+                const dataModels = transformDataModels(transform, dataModel);
+                context._transformedDataModels = dataModels;
+                context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
+                attachDataToLayers(layers, dataModel, context._transformedDataModels);
+                context._dimensionMeasureMap = getDimensionMeasureMap(layers,
+                    dataModel.getFieldsConfig(), context.retinalFields());
+                attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
+                createGridLineLayer(context);
+                context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
+            }
         }
     },
     {
         type: 'registerChangeListener',
-        props: [PROPS.MOUNT, PROPS.DATA, ...axisProps],
-        listener: (mount, data) => {
-            const container = mount[1];
-            if (container && data[1]) {
-                context.render(container);
-            }
+        props: [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}00`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.0${metaInf.colIndex}0`],
+        listener: () => {
+            attachDataToGridLineLayers(context);
         }
     }
 ]);

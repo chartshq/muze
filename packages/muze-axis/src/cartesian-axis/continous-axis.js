@@ -4,9 +4,9 @@ import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
 import { spaceSetter } from './space-setter';
 import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
-import { DOMAIN } from '../enums/constants';
 import {
-    getNumberOfTicks
+    getNumberOfTicks,
+    setContinousAxisDomain
 } from './helper';
 
 export const interpolatorMap = {
@@ -46,28 +46,6 @@ export default class ContinousAxis extends SimpleAxis {
 
         scale = scale.nice();
         return scale;
-    }
-
-    /**
-     * This method is used to assign a domain to the axis.
-     *
-     * @param {Array} domain the domain of the scale
-     * @memberof SimpleAxis
-     */
-    updateDomainBounds (domain) {
-        let currentDomain = this.domain();
-        if (this.config().domain) {
-            currentDomain = this.config().domain;
-        } else {
-            if (currentDomain.length === 0) {
-                currentDomain = domain;
-            }
-            if (domain.length) {
-                currentDomain = [Math.min(currentDomain[0], domain[0]), Math.max(currentDomain[1], domain[1])];
-            }
-        }
-
-        return this.domain(currentDomain);
     }
 
     /**
@@ -114,15 +92,8 @@ export default class ContinousAxis extends SimpleAxis {
      */
     domain (domain) {
         if (domain && domain.length) {
-            const { nice } = this.config();
-            if (domain.length && domain[0] === domain[1]) {
-                domain = [0, +domain[0] * 2];
-            }
-            this.scale().domain(domain);
-            nice && this.scale().nice();
-            this._domain = this.scale().domain();
+            setContinousAxisDomain(this, domain);
             this.setAxisComponentDimensions();
-            this.store().commit(DOMAIN, this._domain);
             this.logicalSpace(null);
             return this;
         } return this._domain;

@@ -1,6 +1,7 @@
 import { mergeRecursive } from 'muze-utils';
 import { defaultConfig } from './default-config';
-import { CONFIG, LAYERDEFS, AXES, WIDTH, HEIGHT, MOUNT, TRANSFORM, FIELDS, DATA } from './enums/reactive-props';
+import { CONFIG, LAYERDEFS, WIDTH, HEIGHT, TRANSFORM, DATA, LAYERS } from './enums/reactive-props';
+import { sanitizeLayerDef } from './helper';
 
 export default {
     [CONFIG]: {
@@ -12,12 +13,9 @@ export default {
         }
     },
     [LAYERDEFS]: {
-        value: null
-    },
-    [AXES]: {
         value: null,
         meta: {
-            sanitization: (axes, prevAxes) => Object.assign(prevAxes || {}, axes)
+            preset: layerDef => sanitizeLayerDef(layerDef)
         }
     },
     [WIDTH]: {
@@ -26,13 +24,10 @@ export default {
     [HEIGHT]: {
         value: null
     },
-    [MOUNT]: {
-        value: null
-    },
     [TRANSFORM]: {
         value: null
     },
-    [FIELDS]: {
+    [LAYERS]: {
         value: null
     },
     [DATA]: {

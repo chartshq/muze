@@ -1,5 +1,7 @@
-import { isEqual } from 'muze-utils';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, MOUNT, DETAIL, DATA, CONFIG, LAYERS } from '../constants';
+import { isEqual, STATE_NAMESPACES } from 'muze-utils';
+import { VisualGroup } from '@chartshq/visual-group';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
+    from '../constants';
 import { canvasOptions } from './local-options';
 
 /**
@@ -26,7 +28,6 @@ export const dispatchProps = (context) => {
     lifeCycleManager.notify({ client: context, action: 'beforeupdate' });
     const visualGroup = context.composition().visualGroup;
 
-    visualGroup.lockModel();
     const allOptions = context._allOptions;
     for (const key in allOptions) {
         const value = context[key]();
@@ -34,55 +35,73 @@ export const dispatchProps = (context) => {
             visualGroup[key] && visualGroup[key](value);
         }
     }
-    visualGroup.unlockModel();
-
+    visualGroup.createMatrices();
     context._cachedProps = {};
     lifeCycleManager.notify({ client: context, action: 'initialized' });
     lifeCycleManager.notify({ client: context, action: 'updated' });
 };
 
-/**
- *
- *
- */
+const equalityChecker = (props, params) => {
+    let checker = () => false;
+    return !props.every((option, i) => {
+        switch (option) {
+        case ROWS:
+        case COLUMNS:
+        case DETAIL:
+            checker = isEqual('Array');
+            break;
+
+        case SHAPE:
+        case SIZE:
+        case COLOR:
+        case DATA:
+        case CONFIG:
+            checker = isEqual('Object');
+            break;
+        default:
+            checker = () => true;
+            break;
+        }
+        const oldVal = params[i][0];
+        const newVal = params[i][1];
+
+        return checker(oldVal, newVal);
+    });
+};
+
+const updateChecker = (props, params) => props.every((option, i) => {
+    const val = params[i][1];
+    switch (option) {
+    case ROWS:
+    case COLUMNS:
+        return val !== null;
+
+    case DATA:
+        return val && !val.isEmpty();
+
+    default:
+        return true;
+
+    }
+});
+
 export const setupChangeListener = (context) => {
     const store = context._store;
 
-    store.registerImmediateListener(MOUNT, () => {
-        const allOptions = Object.keys(context._allOptions);
-        const props = [...allOptions, ...Object.keys(canvasOptions)];
-        let equalityChecker = () => false;
-        store.registerChangeListener(props, (...params) => {
-            const updateProps = props.every((option, i) => {
-                switch (option) {
-                case ROWS:
-                case COLUMNS:
-                case DETAIL:
-                case LAYERS:
-                    equalityChecker = isEqual('Array');
-                    break;
+    const allOptions = Object.keys(context._allOptions);
+    const props = [...allOptions, ...Object.keys(canvasOptions)];
+    const nameSpaceProps = [...allOptions, ...Object.keys(canvasOptions)].map(prop =>
+        `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
+    store.registerChangeListener(nameSpaceProps, (...params) => {
+        let updateProps = equalityChecker(props, params);
+        updateProps = updateChecker(props, params);
 
-                case SHAPE:
-                case SIZE:
-                case COLOR:
-                case DATA:
-                case CONFIG:
-                    equalityChecker = isEqual('Object');
-                    break;
-                default:
-                    equalityChecker = () => true;
-                    break;
-                }
-                const oldVal = params[i][0];
-                const newVal = params[i][1];
-
-                return equalityChecker(oldVal, newVal);
-            });
-            // inform attached board to rerender
-            !updateProps && dispatchProps(context);
+        // inform attached board to rerender
+        if (updateProps && context.mount()) {
+            dispatchProps(context);
             context.render();
-        }, true);
-    });
+        }
+    }, true);
 };
 
 export const applyInteractionPolicy = (policies, firebolt) => {
@@ -90,4 +109,11 @@ export const applyInteractionPolicy = (policies, firebolt) => {
     const visualGroup = canvas.composition().visualGroup;
     const valueMatrix = visualGroup.composition().matrices.value;
     policies.forEach(policy => policy(valueMatrix, firebolt));
+};
+
+export const createGroupState = (context) => {
+    const [globalState, localState] = VisualGroup.getState();
+    const store = context._store;
+    store.append('app.group', globalState);
+    store.append('local.group', localState);
 };

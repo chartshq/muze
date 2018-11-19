@@ -15,7 +15,7 @@ class ValueMatrix {
     constructor (matrixArr) {
         const instancesById = {};
 
-        this.matrix(matrixArr);
+        this.matrix(matrixArr || []);
         this.filter(() => true);
 
         this.each((el, rIdx, cIdx) => {

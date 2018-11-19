@@ -4,7 +4,8 @@ import {
     setStyles,
     easeFns,
     selectElement,
-    DimensionSubtype
+    DimensionSubtype,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -448,4 +449,15 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
             padding
         };
     });
+};
+
+export const initializeGlobalState = (context) => {
+    const store = context.store();
+    const globalState = context.constructor.getState()[0];
+    const namespace = context.metaInf().namespace;
+    for (const prop in globalState) {
+        store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${prop}`, {
+            [namespace]: null
+        });
+    }
 };
