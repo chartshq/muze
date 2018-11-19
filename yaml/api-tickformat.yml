@@ -1,0 +1,13 @@
+---
+  title: "Tick Format"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nConfiguration properties for both x and y axis."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">i</td>\n                <td><p>Number</p> </td>\n                <td><p>tick index</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">ticks</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of tick values</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Number></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[number|string](api-number|string):&nbsp;</span>Formatted tick value."

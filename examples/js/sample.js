@@ -50,8 +50,8 @@ d3.json('../data/cars.json', (data) => {
         {
             name: 'Year',
             type: 'dimension'
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
 
@@ -76,16 +76,15 @@ d3.json('../data/cars.json', (data) => {
 // DataModel instance is created from https://www.charts.com/static/cars.json data,
 // https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
 
-
-
     canvas
   	.data(dm)
   	.minUnitHeight(30)
   	.minUnitWidth(10)
   	.width(1200)
   	.height(400)
-  	.rows(['Origin', 'Cylinders'])
-  	.columns(['Year', 'Horsepower']) /* Year is a temporal field */
+                    .rows(['Horsepower'])
+                    .color('Origin')
+  	.columns(['Year']) /* Year is a temporal field */
   	.mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
 

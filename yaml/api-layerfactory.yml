@@ -1,0 +1,13 @@
+---
+  title: "Layer Factory"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nLayer Factory creates layers based on the layer type. All types of layers needs to register in\nthe layer factory. For getting a layer instance, getLayer method needs to invoked with the\nlayerType and other arguments. It also registers the definition of composite layers."
+    - 
+      type: "markdown-section"
+      content: "## <a name=composeLayers></a> composeLayers\n\nRegisters a new composite layer definition in the layer factory."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">layerType</td>\n                <td><p>string</p> </td>\n                <td><p>Mark type of the new composite layer.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">layerDefs</td>\n                <td><p>Array</p> </td>\n                <td><p>Layer definitions of the composite layer.</p> </td>\n            </tr></table>"
