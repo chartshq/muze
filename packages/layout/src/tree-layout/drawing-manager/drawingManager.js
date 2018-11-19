@@ -4,21 +4,20 @@ import { DEFAULT_CLASS_NAME } from '../constants/defaults';
 
 export class DrawingManager {
     constructor (data, renderer, container) {
-        this.data = data.tree;
-        this.componentMap = data.componentMap;
-        this.layoutClassName = data.layoutClassName;
-        this.renderer = renderer;
-        global.__renderer = renderer; // TODO change global into diff place
-        this.mount = Utils.isDOMElement(container) ? container : Utils.getElement(container);
+        this._data = data.tree;
+        this._componentMap = data.componentMap;
+        this._layoutClassName = data.layoutClassName;
+        this._renderer = renderer;
+        this._mount = Utils.isDOMElement(container) ? container : Utils.getElement(container);
     }
 
     _drawLayout () {
-        switch (this.renderer) {
+        switch (this._renderer) {
         case 'html' :
-            this.renderHTML();
+            this._renderHTML();
             break;
         default:
-            this.renderHTML();
+            this._renderHTML();
         }
     }
 
@@ -43,8 +42,8 @@ export class DrawingManager {
      * (check if alignment possible)
      * replace node id of parent with child
      */
-        this._resolveAligment(this.data);
-        this._drawComponent(this.data);
+        this._resolveAligment(this._data);
+        this._drawComponent(this._data);
     }
 
     _resolveAligment (componentData) {
@@ -52,7 +51,7 @@ export class DrawingManager {
             if (component.model && component.model.host && component.model.host.alignWith) {
                 let childNode;
                 const node = this._findNode(component._id);
-                const refNode = this._findNode(this.componentMap.get(component.model.host.alignWith).renderAt);
+                const refNode = this._findNode(this._componentMap.get(component.model.host.alignWith).renderAt);
                 switch (component.model.host.alignment) {
                 case 'left':
                     childNode = this._getChildNode(node.top,
@@ -100,7 +99,7 @@ export class DrawingManager {
                     break;
                 }
         // check if model in parent component
-                this.componentMap.get(component.model.host.componentName).renderAt = `${component._id}-holder`;
+                this._componentMap.get(component.model.host.componentName).renderAt = `${component._id}-holder`;
                 this.componentRenderer.parentDiv.appendChild(childNode);
             }
             this._resolveAligment(component);
@@ -122,8 +121,8 @@ export class DrawingManager {
         return this.componentRenderer.coordinates().find(node => node._id === nodeID);
     }
 
-    renderHTML () {
-        this.componentRenderer = new HTMLRenderer(this.data);
-        this.componentRenderer.createhtml(this.mount, this.layoutClassName);
+    _renderHTML () {
+        this.componentRenderer = new HTMLRenderer(this._data);
+        this.componentRenderer.createhtml(this._mount, this._layoutClassName);
     }
 }

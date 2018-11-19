@@ -16,12 +16,12 @@ import { LayoutDef } from './layout-def';
 class LayoutManager {
     constructor (conf) {
         this._renderAt = conf.renderAt;
-        this.layoutClassName = conf.className;
-        this.width = conf.width || DEFAULT_WIDTH;
-        this.height = conf.height || DEFAULT_HEIGHT;
-        this.skeletonType = conf.skeletonType || 'html';
-        this.layoutDefinition = null;
-        this.layoutDef = new LayoutDef();
+        this._layoutClassName = conf.className;
+        this._width = conf.width || DEFAULT_WIDTH;
+        this._height = conf.height || DEFAULT_HEIGHT;
+        this._skeletonType = conf.skeletonType || 'html';
+        this._layoutDefinition = null;
+        this._layoutDef = new LayoutDef();
         if (Utils.isDOMElement(this._renderAt)) {
             this._renderAt._layout = this;
         } else {
@@ -30,39 +30,39 @@ class LayoutManager {
     }
 
     compute () {
-        this.layoutDefinition = this.calLayOutDef();
-        this.layoutDef.layoutDefinition = this.layoutDefinition;
-        this.layoutDefinition = this.layoutDef.getSanitizedDefinition();
+        this._layoutDefinition = this._calLayOutDef();
+        this._layoutDef.layoutDefinition(this._layoutDefinition);
+        this._layoutDefinition = this._layoutDef.sanitizedDefinition();
         this._layout = new LayoutModel({
-            width: this.width,
-            height: this.height
+            width: this._width,
+            height: this._height
         },
-            this.layoutDefinition);
+            this._layoutDefinition);
         this.tree = this._layout.negotiate().tree();
         this._layout.broadcast();
         this.manager = new DrawingManager({
             tree: this.tree,
-            componentMap: this.layoutDef.getComponentMap(),
-            layoutClassName: this.layoutClassName
-        }, this.skeletonType, this._renderAt);
+            componentMap: this._layoutDef.componentMap(),
+            layoutClassName: this._layoutClassName
+        }, this._skeletonType, this._renderAt);
 
     // this will draw all the components by calling their draw method
         this.manager.draw();
     }
 
   // this will auto generate the layout definition
-    calLayOutDef () {
-        const defManager = new DefinitionManager(this.layoutDef.getComponentMap(),
-                                                  this.prioritySequence, this.height, this.width);
+    _calLayOutDef () {
+        const defManager = new DefinitionManager(this._layoutDef.componentMap(),
+                                                  this.prioritySequence, this._height, this._width);
         const genLayoutdef = defManager.generateConfigModel();
         return genLayoutdef;
     }
     addComponent (component) {
-        this.layoutDef.addComponent(component);
+        this._layoutDef.addComponent(component);
     }
 
     addMultipleComponent (componentArray) {
-        this.layoutDef.addMultipleComponent(componentArray);
+        this._layoutDef.addMultipleComponent(componentArray);
     }
 
     resetNode (node) {
@@ -77,7 +77,7 @@ class LayoutManager {
    */
     updateNode (config) {
         this.tree.updateNode(config);
-        this.layoutDefinition = this.tree.model;
+        this._layoutDefinition = this.tree.model;
         this.compute();
     }
 
@@ -102,10 +102,6 @@ class LayoutManager {
             }
         });
         return this;
-    }
-
-    getComponentBoundBox (componentName) {
-        return this.layoutDef.getComponentMap().get(componentName).boundBox;
     }
 }
 
