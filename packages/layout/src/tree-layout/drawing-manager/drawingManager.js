@@ -50,50 +50,54 @@ export class DrawingManager {
         componentData.children().forEach((component) => {
             if (component.model() && component.model().host() && component.model().host().alignWith) {
                 let childNode;
-                const node = this._findNode(component.id());
-                const refNode = this._findNode(this._componentMap.get(component.model().host().alignWith).renderAt);
+                const point = this._findNode(component.id()).node();
+                const node = point.boundBox();
+                const nodeId = point.id();
+                const refNode = this._findNode(this._componentMap.get(component.model().host().alignWith).renderAt)
+                                    .node()
+                                    .boundBox();
                 switch (component.model().host().alignment) {
                 case 'left':
                     childNode = this._getChildNode(node.top,
-              refNode.left,
-              node.height,
-              Math.abs(node.width - Math.abs(refNode.left - node.left)),
-              node._id);
+                    refNode.left,
+                    node.height,
+                    Math.abs(node.width - Math.abs(refNode.left - node.left)),
+                    nodeId);
                     break;
                 case 'right':
                     childNode = this._getChildNode(node.top,
-              node.left,
-              node.height,
-              Math.abs(node.width - Math.abs(node.left + node.width - (refNode.left + refNode.width))),
-              node._id);
+                    node.left,
+                    node.height,
+                    Math.abs(node.width - Math.abs(node.left + node.width - (refNode.left + refNode.width))),
+                    nodeId);
                     break;
                 case 'top':
                     childNode = this._getChildNode(refNode.top,
-              node.left,
-              Math.abs(node.height - Math.abs(refNode.top - node.top)),
-              node.width,
-              node._id);
+                    node.left,
+                    Math.abs(node.height - Math.abs(refNode.top - node.top)),
+                    node.width,
+                    nodeId);
                     break;
                 case 'bottom':
                     childNode = this._getChildNode(node.top,
-              node.left,
-              Math.abs(node.top - refNode.top + refNode.height),
-              node.width,
-              node._id);
+                    node.left,
+                    Math.abs(node.top - refNode.top + refNode.height),
+                    node.width,
+                    nodeId);
                     break;
                 case 'h-center':
                     childNode = this._getChildNode(node.top,
-              refNode.left,
-              node.height,
-              refNode.width,
-              node._id);
+                    refNode.left,
+                    node.height,
+                    refNode.width,
+                    nodeId);
                     break;
                 case 'v-center':
                     childNode = this._getChildNode(refNode.top,
-              node.left,
-              refNode.height,
-              node.width,
-              node._id);
+                    node.left,
+                    refNode.height,
+                    node.width,
+                    nodeId);
                     break;
                 default:
                     break;
@@ -107,18 +111,18 @@ export class DrawingManager {
     }
 
     _getChildNode (top, left, height, width, _id) {
-        const childNodeDim = {};
-        childNodeDim.top = top;
-        childNodeDim.left = left;
-        childNodeDim.height = height;
-        childNodeDim.width = width;
-        childNodeDim._id = `${_id}-holder`;
-        childNodeDim.className = DEFAULT_CLASS_NAME;
-        return this.componentRenderer.createAndPositionDiv(childNodeDim);
+        return this.componentRenderer.createAndPositionDiv({
+            top,
+            left,
+            height,
+            width,
+            id: `${_id}-holder`,
+            className: DEFAULT_CLASS_NAME
+        });
     }
 
     _findNode (nodeID) {
-        return this.componentRenderer.coordinates().find(node => node._id === nodeID);
+        return this.componentRenderer.coordinates().find(point => point.node().id() === nodeID);
     }
 
     _renderHTML () {

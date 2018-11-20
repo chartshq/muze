@@ -14,28 +14,34 @@ export class HTMLRenderer extends Renderer {
         super.initRenderer(mainDiv, this._data); // Initialise node with layout id
         this.parentDiv = this.createAndCustomiseParent(className);
         this._coordinates.forEach((node) => {
-            if (node.hasHost) {
-                this.parentDiv.appendChild(this.createAndPositionDiv(node));
+            if (node.hasHost()) {
+                const host = node.node();
+                this.parentDiv.appendChild(this.createAndPositionDiv({ ...host.boundBox(),
+                    id: host.id(),
+                    className: node.className() }));
             }
         });
         mainDiv.appendChild(this.parentDiv);
     }
 
-    createAndPositionDiv (node) {
+    createAndPositionDiv (config) {
         const div = document.createElement('div');
         div.style.position = 'absolute';
-        div.style.left = `${node.left}px`;
-        div.style.top = `${node.top}px`;
-        div.style.height = `${node.height}px`;
-        div.style.width = `${node.width}px`;
-        div.id = node._id;
-        div.className = node.className;
+        div.style.left = `${config.left}px`;
+        div.style.top = `${config.top}px`;
+        div.style.height = `${config.height}px`;
+        div.style.width = `${config.width}px`;
+        div.id = config.id;
+        div.className = config.className;
         return div;
     }
 
     createAndCustomiseParent (className) {
         const container = Utils.findContainer(this._coordinates);
-        const parentDiv = this.createAndPositionDiv(container);
+        const host = container.node();
+        const parentDiv = this.createAndPositionDiv({ ...host.boundBox(),
+            id: host.id(),
+            className: container.className() });
         parentDiv.className = className;
         parentDiv.style.position = 'relative';
         return parentDiv;
