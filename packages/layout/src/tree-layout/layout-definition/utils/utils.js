@@ -24,12 +24,12 @@ function yExtraSpace (node) {
     if (node.getCutType() === 'v') {
         smallestHeight = smallestExtraHeightHorizontally(node); // eslint-disable-line no-use-before-define
     } else if (node.getCutType() === 'h') {
-        node.children.forEach((child) => {
+        node.children().forEach((child) => {
             smallestHeight += yExtraSpace(child);
         });
-    } else if (node.model.host && node.model.host.getLogicalSpace) {
-        const containerHeight = node.boundBox.height;
-        const hostHeight = node.model.host.getLogicalSpace().height;
+    } else if (node.model().host() && node.model().host().getLogicalSpace) {
+        const containerHeight = node.boundBox().height;
+        const hostHeight = node.model().host().getLogicalSpace().height;
 
         smallestHeight = containerHeight - hostHeight;
         if (smallestHeight < 0) {
@@ -43,7 +43,7 @@ function yExtraSpace (node) {
 
 function smallestExtraHeightHorizontally (node) {
     let smallestHeight = Number.MAX_SAFE_INTEGER;
-    node.children.forEach((child) => {
+    node.children().forEach((child) => {
         const h = yExtraSpace(child);
         if (h < smallestHeight) {
             smallestHeight = h;
@@ -57,12 +57,12 @@ function xExtraSpace (node) {
     if (node.getCutType() === 'h') {
         smallestWidth = smallestExtraWidthVertically(node); // eslint-disable-line no-use-before-define
     } else if (node.getCutType() === 'v') {
-        node.children.forEach((child) => {
+        node.children().forEach((child) => {
             smallestWidth += xExtraSpace(child);
         });
-    } else if (node.model.host && node.model.host.getLogicalSpace) {
-        const containerWidth = node.boundBox.width;
-        const hostWidth = node.model.host.getLogicalSpace().width;
+    } else if (node.model().host() && node.model().host().getLogicalSpace) {
+        const containerWidth = node.boundBox().width;
+        const hostWidth = node.model().host().getLogicalSpace().width;
         smallestWidth = containerWidth - hostWidth;
         if (smallestWidth < 0) {
             smallestWidth = 0;
@@ -75,7 +75,7 @@ function xExtraSpace (node) {
 
 function smallestExtraWidthVertically (node) {
     let smallestWidth = Number.MAX_SAFE_INTEGER;
-    node.children.forEach((child) => {
+    node.children().forEach((child) => {
         const w = xExtraSpace(child);
         if (w < smallestWidth) {
             smallestWidth = w;
@@ -92,19 +92,19 @@ function determineBoundBox (bb, i, arr, instance) {
             width: bb.width,
             height: bb.height,
 
-            top: instance._parentCut === 'h'
-        ? lastSibling.boundBox.top + lastSibling.boundBox.height : lastSibling.boundBox.top,
+            top: instance.parentCut() === 'h'
+        ? lastSibling.boundBox().top + lastSibling.boundBox().height : lastSibling.boundBox().top,
 
-            left: instance._parentCut === 'h'
-        ? lastSibling.boundBox.left : lastSibling.boundBox.left + lastSibling.boundBox.width
+            left: instance.parentCut() === 'h'
+        ? lastSibling.boundBox().left : lastSibling.boundBox().left + lastSibling.boundBox().width
         };
     }
   // if first sibling, take boundbox from parent
     return {
         width: bb.width,
         height: bb.height,
-        top: instance.parent.boundBox.top,
-        left: instance.parent.boundBox.left
+        top: instance.parent().boundBox().top,
+        left: instance.parent().boundBox().left
     };
 }
 

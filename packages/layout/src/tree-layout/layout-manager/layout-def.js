@@ -27,12 +27,12 @@ export class LayoutDef {
     }
 
     _sanitizeConfig (hostObj) {
-        if (hostObj.lanes && hostObj.lanes.length) {
-            hostObj.lanes.forEach(childHost => this._sanitizeConfig(childHost));
+        if (hostObj.lanes() && hostObj.lanes().length) {
+            hostObj.lanes().forEach(childHost => this._sanitizeConfig(childHost));
         }
-        if (hostObj.host != null && typeof (hostObj.host) === 'string') {
-            if (this._componentMap.get(hostObj.host) !== undefined) {
-                hostObj.host = this._componentMap.get(hostObj.host);
+        if (hostObj.host() != null && typeof (hostObj.host()) === 'string') {
+            if (this._componentMap.get(hostObj.host()) !== undefined) {
+                hostObj.host(this._componentMap.get(hostObj.host()));
             }
         }
     }

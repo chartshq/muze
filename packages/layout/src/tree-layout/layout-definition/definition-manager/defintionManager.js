@@ -4,22 +4,23 @@ import DummyComponent from '../../layout-component/dummy-component'
 
 export default class DefinitionManager {
     constructor (componentMap, sequence, totalHeight, totalWidth) {
-        this.componentMap = componentMap;
-        this.prioritySequence = sequence;
-        this.totalHeight = totalHeight;
-        this.totalWidth = totalWidth;
+        this._componentMap = componentMap;
+        this._prioritySequence = sequence;
+        this._totalHeight = totalHeight;
+        this._totalWidth = totalWidth;
+        this._targetComponentMap = null;
     }
 
   // prepares the targetComponent Map for target Mapping ie. where a component should lie
     _prepareTargetComponentMap () {
-        this.targetComponentMap = new Map();
-        this.componentMap.forEach((value) => {
-            if (this.targetComponentMap.has(value.target)) {
-                this.targetComponentMap.get(value.target).push(value);
+        this._targetComponentMap = new Map();
+        this._componentMap.forEach((value) => {
+            if (this._targetComponentMap.has(value.target)) {
+                this._targetComponentMap.get(value.target).push(value);
             } else {
                 const temp = [];
                 temp.push(value);
-                this.targetComponentMap.set(value.target, temp);
+                this._targetComponentMap.set(value.target, temp);
             }
         });
     }
@@ -27,15 +28,15 @@ export default class DefinitionManager {
   // create the config model
     generateConfigModel () {
         this._prepareTargetComponentMap();
-        const canvasComponent = this.targetComponentMap.get('canvas');
+        const canvasComponent = this._targetComponentMap.get('canvas');
         const definitionModel = new DefinitionModel();
         let tempDefModel = definitionModel;
-        definitionModel._remainingHeight = this.totalHeight;
-        definitionModel._remainingWidth = this.totalWidth;
+        definitionModel.remainingHeight(this._totalHeight);
+        definitionModel.remainingWidth(this._totalWidth);
 
         let componentRef = null;
 
-        this.prioritySequence.forEach((name) => {
+        this._prioritySequence.forEach((name) => {
             componentRef = this._getComponent(canvasComponent, name);
             if (name !== 'grid') {
                 tempDefModel = this._placeComponent(tempDefModel, componentRef).second;
@@ -104,34 +105,34 @@ export default class DefinitionManager {
         } else {
             cut = 'v';
             componentRatioWidth = componentWidth / definitionModel._remainingWidth;
-            leftWidth = definitionModel._remainingWidth - componentWidth;
-            leftHeight = definitionModel._remainingHeight;
+            leftWidth = definitionModel.remainingWidth() - componentWidth;
+            leftHeight = definitionModel.remainingHeight();
         }
         leftOvercomponentRationWidth = 1 - componentRatioWidth;
 
     // update parentModel
-        definitionModel.cut = cut;
+        definitionModel.cut(cut);
 
         const firstLane = new DefinitionModel(component.componentName,
                                                 null,
                                                 componentRatioWidth,
                                                 isGridComponent ? false : isPreferred,
                                                 []);
-        firstLane._remainingHeight = componentHeight;
-        firstLane._remainingWidth = componentWidth;
+        firstLane.remainingHeight(componentHeight);
+        firstLane.remainingWidth(componentWidth);
         const secondLane = new DefinitionModel(null,
                                                 null,
                                                 leftOvercomponentRationWidth,
                                                 isGridComponent ? false : !isPreferred,
                                                 []);
-        secondLane._remainingHeight = leftHeight;
-        secondLane._remainingWidth = leftWidth;
+        secondLane.remainingHeight(leftHeight);
+        secondLane.remainingWidth(leftWidth);
         if (isPreferred) {
-            definitionModel.lanes = [firstLane];
+            definitionModel.lanes([firstLane]);
         } else if (component.position === 'top' || component.position === 'left') {
-            definitionModel.lanes = [firstLane, secondLane];
+            definitionModel.lanes([firstLane, secondLane]);
         } else {
-            definitionModel.lanes = [secondLane, firstLane];
+            definitionModel.lanes([secondLane, firstLane]);
         }
         return { first: firstLane, second: secondLane };
     }

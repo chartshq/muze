@@ -16,12 +16,12 @@ class LayoutModel {
     createTree (config, parent) {
         const node = new Node(config);
         if (parent) {
-            node._parentCut = parent.getCutType();
+            node.parentCut(parent.getCutType());
             parent.addChildren([node]);
         } else {
             this.root = node;
         }
-        for (const lane of config.lanes) {
+        for (const lane of config.lanes()) {
             this.createTree(lane, node);
         }
 
@@ -29,36 +29,40 @@ class LayoutModel {
     }
 
     allocateBoundingBox (node) {
-        const totalWeight = node.children
-      .map(child => child.model.ratioWeight)
-      .reduce((carry, val) => carry + val, 0);
+        const totalWeight = node.children()
+                                .map(child => child.model().ratioWeight())
+                                .reduce((carry, val) => carry + val, 0);
 
-        node.children.forEach((child, i, children) => {
+        node.children().forEach((child, i, children) => {
             const lastSibling = children[i - 1];
-            const ratio = child.model.ratioWeight / totalWeight;
+            const ratio = child.model().ratioWeight() / totalWeight;
 
-            if (child._parentCut === 'h') {
-                child.boundBox.width = child.parent.boundBox.width;
-                child.boundBox.height = child.parent.boundBox.height * ratio;
-                child.boundBox.left = child.parent.boundBox.left;
-                child.boundBox.top = i ? lastSibling.boundBox.top + lastSibling.boundBox.height : 0;
+            if (child.parentCut() === 'h') {
+                child.boundBox({
+                    top: i ? lastSibling.boundBox().top + lastSibling.boundBox().height : 0,
+                    left: child.parent().boundBox().left,
+                    height: child.parent().boundBox().height * ratio,
+                    width: child.parent().boundBox().width
+                });
             } else {
-                child.boundBox.width = child.parent.boundBox.width * ratio;
-                child.boundBox.height = child.parent.boundBox.height;
-                child.boundBox.top = child.parent.boundBox.top;
-                child.boundBox.left = i ? lastSibling.boundBox.left + lastSibling.boundBox.width : 0;
+                child.boundBox({
+                    top: child.parent().boundBox().top,
+                    left: i ? lastSibling.boundBox().left + lastSibling.boundBox().width : 0,
+                    height: child.parent().boundBox().height,
+                    width: child.parent().boundBox().width * ratio
+                });
             }
             this.allocateBoundingBox(child);
         });
     }
 
     setBoundBox () {
-        this.root.boundBox = {
+        this.root.boundBox({
             top: 0,
             left: 0,
             width: this.measurements.width,
             height: this.measurements.height
-        };
+        });
         this.allocateBoundingBox(this.root);
     }
 
@@ -67,14 +71,14 @@ class LayoutModel {
         let cumultiveExtraSpaceAmt = 0;
         let alteredDim;
         let nonAlteredDim;
-        const childrenLength = node.children.length;
+        const childrenLength = node.children().length;
 
         for (let index = 0; index < childrenLength; index++) {
             let fn;
             let extraSpaceAmt;
-            const child = node.children[index];
+            const child = node.children()[index];
 
-            if (child._parentCut === 'h') {
+            if (child.parentCut() === 'h') {
                 fn = yExtraSpace;
                 alteredDim = 'height';
                 nonAlteredDim = 'width';
@@ -93,47 +97,47 @@ class LayoutModel {
             }
       // reduce own height and save it in a var
             cumultiveExtraSpaceAmt += (extraSpaceAmt = fn(child));
-            child.boundBox[alteredDim] -= extraSpaceAmt;
+            child.boundBox()[alteredDim] -= extraSpaceAmt;
       // update nonaltered dim from parent for any change which happened during negotiation
-            child.boundBox[nonAlteredDim] = child.parent.boundBox[nonAlteredDim];
+            child.boundBox()[nonAlteredDim] = child.parent().boundBox()[nonAlteredDim];
 
             this.negotiateDimension(child);
         }
 
         if (preferred) {
-            preferred.boundBox[alteredDim] += cumultiveExtraSpaceAmt;
-            preferred.boundBox[nonAlteredDim] = preferred.parent.boundBox[nonAlteredDim];
+            preferred.boundBox()[alteredDim] += cumultiveExtraSpaceAmt;
+            preferred.boundBox()[nonAlteredDim] = preferred.parent().boundBox()[nonAlteredDim];
             this.negotiateDimension(preferred);
         }
     }
 
     computePosition (node) {
-        node.children.forEach((child, i, children) => {
-            const boundBox = determineBoundBox(child.boundBox, i, children, child);
-            child.boundBox = boundBox;
+        node.children().forEach((child, i, children) => {
+            const boundBox = determineBoundBox(child.boundBox(), i, children, child);
+            child.boundBox(boundBox);
             this.computePosition(child);
         });
     }
 
     setHostPosition (node) {
-        node.children.forEach((child) => {
+        node.children().forEach((child) => {
             LayoutModel.setHostSpatialConfig(child);
             this.setHostPosition(child);
         });
     }
 
     static setHostSpatialConfig (node) {
-        const bb = node.boundBox;
-        if (node.model.host && node.model.host.setSpatialConfig) {
+        const bb = node.boundBox();
+        if (node.model().host() && node.model().host().setSpatialConfig) {
             const conf = {
                 x: bb.left,
                 y: bb.top,
                 width: bb.width,
                 height: bb.height,
-                renderAt: node._id
+                renderAt: node.id()
             };
 
-            node.model.host.setSpatialConfig(conf);
+            node.model().host().setSpatialConfig(conf);
         }
     }
 

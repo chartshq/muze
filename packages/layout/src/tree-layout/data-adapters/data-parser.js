@@ -14,7 +14,7 @@ export class DataParser {
     getnodePoints (node, nodepoints) {
         const datapoint = new DataPoint(node);
         nodepoints.push(datapoint);
-        node.children.forEach((child) => {
+        node.children().forEach((child) => {
             this.getnodePoints(child, nodepoints);
         });
     }

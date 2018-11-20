@@ -22,9 +22,9 @@ export class DrawingManager {
     }
 
     _drawComponent (componentData) {
-        componentData.children.forEach((node) => {
-            if (node.model && node.model.host) {
-                node.model.host.draw();
+        componentData.children().forEach((node) => {
+            if (node.model() && node.model().host()) {
+                node.model().host().draw();
             }
             this._drawComponent(node);
         });
@@ -47,12 +47,12 @@ export class DrawingManager {
     }
 
     _resolveAligment (componentData) {
-        componentData.children.forEach((component) => {
-            if (component.model && component.model.host && component.model.host.alignWith) {
+        componentData.children().forEach((component) => {
+            if (component.model() && component.model().host() && component.model().host().alignWith) {
                 let childNode;
-                const node = this._findNode(component._id);
-                const refNode = this._findNode(this._componentMap.get(component.model.host.alignWith).renderAt);
-                switch (component.model.host.alignment) {
+                const node = this._findNode(component.id());
+                const refNode = this._findNode(this._componentMap.get(component.model().host().alignWith).renderAt);
+                switch (component.model().host().alignment) {
                 case 'left':
                     childNode = this._getChildNode(node.top,
               refNode.left,
@@ -99,7 +99,7 @@ export class DrawingManager {
                     break;
                 }
         // check if model in parent component
-                this._componentMap.get(component.model.host.componentName).renderAt = `${component._id}-holder`;
+                this._componentMap.get(component.model().host().componentName).renderAt = `${component._id}-holder`;
                 this.componentRenderer.parentDiv.appendChild(childNode);
             }
             this._resolveAligment(component);
