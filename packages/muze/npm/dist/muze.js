@@ -61142,7 +61142,7 @@ var resolveDimByField = function resolveDimByField(type, axesInfo, config, data)
                     pos: undefined,
                     space: undefined
                 };
-            } else if (fieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE || fieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL) {
+            } else if (fieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS || fieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL) {
                 min = Math.min(minVal, maxVal);
                 max = Math.max(minVal, maxVal);
             } else {
