@@ -10529,8 +10529,8 @@ var getViewMatrices = function getViewMatrices(layout, rowPointer, columnPointer
     var columnMatrix = layout.columnMatrix();
     var centerMatrix = layout.centerMatrix();
     var matrices = layout.matrices();
-    var rowMatrices = rowMatrix.getViewableData();
-    var columnMatrices = columnMatrix.getViewableData();
+    var rowMatrices = rowMatrix.getViewableMatrices();
+    var columnMatrices = columnMatrix.getViewableMatrices();
     var centralMatrixPointer = {
         row: 0,
         column: 0
@@ -12078,7 +12078,7 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
             key: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["COLUMN_ROOT"],
             values: _this.createTree()
         };
-        _this._logicalSpace = _this.setLogicalSpace();
+        _this._logicalSpace = _this.computeLogicalSpace();
         return _this;
     }
 
@@ -12091,8 +12091,8 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
 
 
     _createClass(ColumnVisualMatrix, [{
-        key: 'setLogicalSpace',
-        value: function setLogicalSpace() {
+        key: 'computeLogicalSpace',
+        value: function computeLogicalSpace() {
             var matrixTree = this.tree();
             Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createMatrixEachLevel"])(matrixTree, true);
             return Object(_utils__WEBPACK_IMPORTED_MODULE_1__["computeLogicalSpace"])(matrixTree, this.config(), this.maxMeasures());
@@ -12175,8 +12175,9 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
         }
     }, {
         key: 'getPriorityDistribution',
-        value: function getPriorityDistribution(matrix, height) {
-            var maxHeights = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+        value: function getPriorityDistribution(measures) {
+            var height = measures.height,
+                maxHeights = measures.maxHeights;
 
             var remainaingHeight = height;
             var heightDist = [];
@@ -12238,20 +12239,51 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
         }
 
         /**
+        * Redistributes the provied space to all cells
+        *
+        * @param {*} viewableMatrix current viewport matrix
+        * @param {*} width provied width
+        * @param {*} height provied height
+        * @return {Object} current viewports matrixes with measures
+        * @memberof VisualMatrix
+        */
+
+    }, {
+        key: 'redistributeSpaces',
+        value: function redistributeSpaces(width, height) {
+            var _this3 = this;
+
+            var maxHeights = [];
+            var maxWidths = [];
+
+            this.viewableMatrix.forEach(function (matrixInst) {
+                var matrix = matrixInst.matrix;
+                var mWidth = 0;
+                var mHeight = 0;
+                var options = { mWidth: mWidth, mHeight: mHeight, matrix: matrix, width: width, height: height, maxHeights: maxHeights, maxWidths: maxWidths };
+                var maxMeasures = _this3.redistributeViewSpaces(options);
+                maxWidths = maxMeasures.maxWidths;
+                maxHeights = maxMeasures.maxHeights;
+            });
+
+            return this.computeViewableSpaces({ height: height, width: width, maxHeights: maxHeights, maxWidths: maxWidths });
+        }
+
+        /**
          * Distibutes the given space column wisely
          *
-         * @param {Object} options Redistribution information
+         * @param {Object} measures Redistribution information
          * @memberof VisualMatrix
          */
 
     }, {
         key: 'redistributeViewSpaces',
-        value: function redistributeViewSpaces(options) {
+        value: function redistributeViewSpaces(measures) {
             var rHeights = [];
-            var matrix = options.matrix,
-                width = options.width,
-                maxHeights = options.maxHeights,
-                maxWidths = options.maxWidths;
+            var matrix = measures.matrix,
+                width = measures.width,
+                maxHeights = measures.maxHeights,
+                maxWidths = measures.maxWidths;
 
             var borderWidth = this.config().unitMeasures.border;
 
@@ -12286,25 +12318,25 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
         /**
          * Dispatch the calculated cell dimensions to all the cells
          *
-         * @param {Object} options cell dimension information
+         * @param {Object} measures cell dimension information
          * @return {Object} row and column heights / widths
          * @memberof VisualMatrix
          */
 
     }, {
         key: 'getCellDimensions',
-        value: function getCellDimensions(options) {
-            var _this3 = this;
+        value: function getCellDimensions(measures) {
+            var _this4 = this;
 
             var _config2 = this.config(),
-                measures = _config2.unitMeasures;
+                unitMeasures = _config2.unitMeasures;
 
-            var borderWidth = measures.border;
-            var matrixInst = options.matrixInst,
-                height = options.height,
-                maxWidths = options.maxWidths,
-                maxHeights = options.maxHeights,
-                matrixIndex = options.matrixIndex;
+            var borderWidth = unitMeasures.border;
+            var matrixInst = measures.matrixInst,
+                height = measures.height,
+                maxWidths = measures.maxWidths,
+                maxHeights = measures.maxHeights,
+                matrixIndex = measures.matrixIndex;
 
             var matrix = matrixInst.matrix;
             var rowHeights = [[0], [0]];
@@ -12313,7 +12345,7 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
             var widths = [0, 0];
             var breakPointer = this._breakPointer;
 
-            var heightDistribution = this.getPriorityDistribution(matrix, height, maxHeights[0]);
+            var heightDistribution = this.getPriorityDistribution({ height: height, maxHeights: maxHeights[0] || [] });
 
             matrix.forEach(function (row, rIdx) {
                 row.forEach(function (cell, cIdx) {
@@ -12329,7 +12361,7 @@ var ColumnVisualMatrix = function (_VisualMatrix) {
                         rowHeights[1][rIdx - breakPointer] = colHeight;
                         heights[1] = (heights[1] || 0) + colHeight;
                     }
-                    if (rIdx === _this3._lastLevelKey) {
+                    if (rIdx === _this4._lastLevelKey) {
                         columnWidths[0][cIdx] = colWidth;
                         columnWidths[1][cIdx] = colWidth;
                     }
@@ -12465,7 +12497,7 @@ var RowVisualMatrix = function (_VisualMatrix) {
             key: _enums_constants__WEBPACK_IMPORTED_MODULE_2__["ROW_ROOT"],
             values: _this.createTree()
         };
-        _this._logicalSpace = _this.setLogicalSpace();
+        _this._logicalSpace = _this.computeLogicalSpace();
         return _this;
     }
 
@@ -12478,8 +12510,8 @@ var RowVisualMatrix = function (_VisualMatrix) {
 
 
     _createClass(RowVisualMatrix, [{
-        key: 'setLogicalSpace',
-        value: function setLogicalSpace() {
+        key: 'computeLogicalSpace',
+        value: function computeLogicalSpace() {
             var matrixTree = this.tree();
             Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createMatrixEachLevel"])(matrixTree, false);
             return Object(_utils__WEBPACK_IMPORTED_MODULE_1__["computeLogicalSpace"])(matrixTree, this.config(), this.maxMeasures());
@@ -12557,21 +12589,21 @@ var RowVisualMatrix = function (_VisualMatrix) {
         }
     }, {
         key: 'getPriorityDistribution',
-        value: function getPriorityDistribution(options) {
+        value: function getPriorityDistribution(measures) {
             var remainaingAvailWidth = void 0;
             var remainaingWidth = void 0;
             var cWidths = [];
             var conditions = [];
-            var divider = 1;
-            var matrix = options.matrix,
-                availableWidth = options.width,
-                maxWidths = options.maxMeasures,
-                currentWidth = options.maxWidth,
-                height = options.height;
+            var maxPrioritySpace = 0;
+            var matrix = measures.matrix,
+                availableWidth = measures.width,
+                maxWidths = measures.maxMeasures,
+                currentWidth = measures.maxWidth,
+                height = measures.height;
 
             var priority = this.config().priority;
             var primaryMatrixLength = this.primaryMatrix().length ? this.primaryMatrix()[0].length : 0;
-            var matrixLen = matrix[0].length;
+
             var dist = [];
 
             remainaingAvailWidth = availableWidth;
@@ -12579,15 +12611,16 @@ var RowVisualMatrix = function (_VisualMatrix) {
 
             if (priority === 2) {
                 conditions = [primaryMatrixLength - 1, primaryMatrixLength];
-                divider = Math.min(2, matrixLen);
+                // divider = Math.min(2, matrixLen);
             } else {
                 conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
-                divider = Math.min(1, matrixLen);
+                // divider = Math.min(1, matrixLen);
             }
             conditions.forEach(function (i) {
                 dist[i] = maxWidths[i];
-                remainaingAvailWidth = availableWidth - dist[i];
-                remainaingWidth = currentWidth - dist[i];
+                maxPrioritySpace += maxWidths[i];
+                remainaingAvailWidth -= dist[i];
+                remainaingWidth -= dist[i];
             });
             matrix[0].forEach(function (e, i) {
                 if (conditions.indexOf(i) === -1) {
@@ -12615,7 +12648,7 @@ var RowVisualMatrix = function (_VisualMatrix) {
                 });
             } else {
                 conditions.forEach(function (i) {
-                    cWidths[i] = Math.floor(prioritySpace / divider);
+                    cWidths[i] = Math.floor(prioritySpace * (dist[i] / maxPrioritySpace));
                 });
             }
             return cWidths;
@@ -12691,13 +12724,13 @@ var RowVisualMatrix = function (_VisualMatrix) {
         /**
          * Distibutes the given space row wisely
          *
-         * @param {Object} options Redistribution information
+         * @param {Object} measures Redistribution information
          * @memberof VisualMatrix
          */
 
     }, {
         key: 'redistributeViewSpaces',
-        value: function redistributeViewSpaces(options) {
+        value: function redistributeViewSpaces(measures) {
             var cWidths = [];
             var rHeights = [];
             var mHeight = 0;
@@ -12709,11 +12742,11 @@ var RowVisualMatrix = function (_VisualMatrix) {
                 isTransposed = _config2.isTransposed,
                 gutter = _config2.gutter;
 
-            var matrix = options.matrix,
-                height = options.height,
-                maxHeights = options.maxHeights,
-                maxWidths = options.maxWidths,
-                logicalWidths = options.logicalWidths;
+            var matrix = measures.matrix,
+                height = measures.height,
+                maxHeights = measures.maxHeights,
+                maxWidths = measures.maxWidths,
+                logicalWidths = measures.logicalWidths;
 
             mHeight = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["spaceTakenByColumn"])(matrix, this._lastLevelKey).height;
 
@@ -12721,8 +12754,8 @@ var RowVisualMatrix = function (_VisualMatrix) {
                 t += n;
                 return t;
             });
-            options.maxMeasures = maxMeasures;
-            options.maxWidth = maxWidth;
+            measures.maxMeasures = maxMeasures;
+            measures.maxWidth = maxWidth;
             if (maxWidth > 0) {
                 cWidths = logicalWidths;
             } else {
@@ -12756,24 +12789,24 @@ var RowVisualMatrix = function (_VisualMatrix) {
         /**
          * Dispatch the calculated cell dimensions to all the cells
          *
-         * @param {Object} options cell dimension information
+         * @param {Object} measures cell dimension information
          * @return {Object} row and column heights / widths
          * @memberof VisualMatrix
          */
 
     }, {
         key: 'getCellDimensions',
-        value: function getCellDimensions(options) {
+        value: function getCellDimensions(measures) {
             var _this4 = this;
 
             var _config3 = this.config(),
-                measures = _config3.unitMeasures;
+                unitMeasures = _config3.unitMeasures;
 
-            var borderWidth = measures.border;
-            var matrixInst = options.matrixInst,
-                maxWidths = options.maxWidths,
-                maxHeights = options.maxHeights,
-                matrixIndex = options.matrixIndex;
+            var borderWidth = unitMeasures.border;
+            var matrixInst = measures.matrixInst,
+                maxWidths = measures.maxWidths,
+                maxHeights = measures.maxHeights,
+                matrixIndex = measures.matrixIndex;
 
             var matrix = matrixInst.matrix;
             var rowHeights = [[0], [0]];
@@ -12876,7 +12909,110 @@ var VisualMatrix = function () {
         this._layoutMatrix = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["combineMatrices"])([matrix[0] || [], matrix[1] || []], this.config());
     }
 
+    /**
+    * Computes the logical space taken by the entire matrixTree
+    *
+    * @return {Object} Logical space taken
+    * @memberof VisualMatrix
+    */
+
+
     _createClass(VisualMatrix, [{
+        key: 'computeLogicalSpace',
+        value: function computeLogicalSpace() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+    }, {
+        key: 'computeViewableSpaces',
+        value: function computeViewableSpaces() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         *
+         *
+         * @return
+         * @memberof VisualMatrix
+         */
+
+    }, {
+        key: 'removeExtraCells',
+        value: function removeExtraCells() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+    }, {
+        key: 'getPriorityDistribution',
+        value: function getPriorityDistribution() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         * Calculates the depth of the tree that can be viewed
+         *
+         * @param {Array} widthMeasures array of widths
+         * @param {Array} heightMeasures array of heights
+         * @return {number} depth of the tree
+         * @memberof VisualMatrix
+         */
+
+    }, {
+        key: 'calculateDepth',
+        value: function calculateDepth() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         * Redistributes the provied space to all cells
+         *
+         * @param {*} viewableMatrix current viewport matrix
+         * @param {*} width provied width
+         * @param {*} height provied height
+         * @return {Object} current viewports matrixes with measures
+         * @memberof VisualMatrix
+         */
+
+    }, {
+        key: 'redistributeSpaces',
+        value: function redistributeSpaces() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         * Distibutes the given space row wisely
+         *
+         * @param {Object} measures Redistribution information
+         * @memberof VisualMatrix
+         */
+
+    }, {
+        key: 'redistributeViewSpaces',
+        value: function redistributeViewSpaces() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         * Dispatch the calculated cell dimensions to all the cells
+         *
+         * @param {Object} measures cell dimension information
+         * @return {Object} row and column heights / widths
+         * @memberof VisualMatrix
+         */
+
+    }, {
+        key: 'getCellDimensions',
+        value: function getCellDimensions() {
+            throw new Error(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ERROR_MSG"].INTERFACE_IMPL);
+        }
+
+        /**
+         *
+         *
+         * @param {*} params
+         * @returns
+         * @memberof VisualMatrix
+         */
+
+    }, {
         key: 'primaryMatrix',
         value: function primaryMatrix() {
             if (arguments.length) {
@@ -12909,24 +13045,6 @@ var VisualMatrix = function () {
 
             this._lastLevelKey = lastLevelKey;
             return tree;
-        }
-
-        /**
-         * Computes the logical space taken by the entire matrixTree
-         *
-         * @return {Object} Logical space taken
-         * @memberof VisualMatrix
-         */
-
-    }, {
-        key: 'setLogicalSpace',
-        value: function setLogicalSpace() {
-            var _config = this.config(),
-                isTransposed = _config.isTransposed;
-
-            var matrixTree = this.tree();
-            Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createMatrixEachLevel"])(matrixTree, isTransposed);
-            return Object(_utils__WEBPACK_IMPORTED_MODULE_1__["computeLogicalSpace"])(matrixTree, this.config(), this.maxMeasures());
         }
 
         /**
@@ -12995,37 +13113,6 @@ var VisualMatrix = function () {
         }
 
         /**
-         * Redistributes the provied space to all cells
-         *
-         * @param {*} viewableMatrix current viewport matrix
-         * @param {*} width provied width
-         * @param {*} height provied height
-         * @return {Object} current viewports matrixes with measures
-         * @memberof VisualMatrix
-         */
-
-    }, {
-        key: 'redistributeSpaces',
-        value: function redistributeSpaces(width, height) {
-            var _this2 = this;
-
-            var maxHeights = [];
-            var maxWidths = [];
-
-            this.viewableMatrix.forEach(function (matrixInst) {
-                var matrix = matrixInst.matrix;
-                var mWidth = 0;
-                var mHeight = 0;
-                var options = { mWidth: mWidth, mHeight: mHeight, matrix: matrix, width: width, height: height, maxHeights: maxHeights, maxWidths: maxWidths };
-                var maxMeasures = _this2.redistributeViewSpaces(options);
-                maxWidths = maxMeasures.maxWidths;
-                maxHeights = maxMeasures.maxHeights;
-            });
-
-            return this.computeViewableSpaces({ height: height, width: width, maxHeights: maxHeights, maxWidths: maxWidths });
-        }
-
-        /**
          * Gets the viewable measures for the current viewable matrix
          *
          * @return {Object} Set of viewable measures
@@ -13046,8 +13133,8 @@ var VisualMatrix = function () {
          */
 
     }, {
-        key: 'getViewableData',
-        value: function getViewableData() {
+        key: 'getViewableMatrices',
+        value: function getViewableMatrices() {
             return this.viewableMatrix;
         }
 
@@ -13114,6 +13201,7 @@ var rotateAxis = function rotateAxis(instance, tickText, labelManager) {
     var config = instance.config();
     var renderConfig = instance.renderConfig();
     var smartTicks = instance.smartTicks();
+    var ticks = axis.scale().ticks();
     var orientation = config.orientation,
         fixedBaseline = config.fixedBaseline,
         type = config.type;
@@ -13162,10 +13250,10 @@ var rotateAxis = function rotateAxis(instance, tickText, labelManager) {
         }
 
         if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_1__["TOP"]) {
-            xShift = index === 0 && fixedBaseline && type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LINEAR"] ? xShift + xShift / 2 : xShift;
+            xShift = ticks[0] === d && fixedBaseline && type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LINEAR"] ? xShift + xShift / 2 : xShift;
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).attr('transform', 'translate(' + (-xShift + tickSize) + '\n                                ' + (-yShift - tickSize) + ') rotate(' + rotation + ')');
         } else {
-            xShift = index === 0 && fixedBaseline && type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LINEAR"] ? xShift - xShift / 2 : xShift;
+            xShift = ticks[0] === d && fixedBaseline && type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LINEAR"] ? xShift - xShift / 2 : xShift;
 
             Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this).attr('transform', 'translate(' + (xShift - tickSize) + '\n                                ' + (yShift + tickSize) + ') rotate(' + rotation + ')');
         }
@@ -13333,7 +13421,7 @@ function renderAxis(axisInstance) {
     // Draw axis ticks
     selectContainer.attr('transform', 'translate(' + xOffset + ',' + yOffset + ')');
     setFixedBaseline(axisInstance);
-    if (labels.smartTicks === false) {
+    if (labels.smartTicks === false || tickSize === 0) {
         selectContainer.transition().duration(1000).call(axis);
     } else {
         selectContainer.call(axis);
@@ -13774,6 +13862,8 @@ var ContinousAxis = function (_SimpleAxis) {
                 this.setAxisComponentDimensions();
                 this.logicalSpace(null);
                 return this;
+            } else if (_domain) {
+                this._domain = [];
             }return this._domain;
         }
 
@@ -13898,22 +13988,27 @@ var ContinousAxis = function (_SimpleAxis) {
         key: 'setFixedBaseline',
         value: function setFixedBaseline(tickText) {
             var _config4 = this.config(),
-                orientation = _config4.orientation,
-                labels = _config4.labels;
+                orientation = _config4.orientation;
+
+            var _renderConfig3 = this.renderConfig(),
+                labels = _renderConfig3.labels;
 
             var rotation = labels.rotation;
 
             var axis = this.axis();
+            var ticks = axis.scale().ticks();
             var _axisComponentDimensi = this.axisComponentDimensions().allTickDimensions[0],
                 width = _axisComponentDimensi.width,
                 height = _axisComponentDimensi.height;
 
-            axis.tickTransform(function (d, i) {
-                if (i === 0 && (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["LEFT"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["RIGHT"])) {
-                    return 'translate(0, -' + height / 3 + 'px)';
-                }
-                if (i === 0 && (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["TOP"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]) && !rotation) {
-                    return 'translate(' + width / 2 + 'px,  ' + 0 + 'px) rotate(' + (rotation || 0) + 'deg)';
+            axis.tickTransform(function (d) {
+                if (d === ticks[0]) {
+                    if (orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["LEFT"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["RIGHT"]) {
+                        return 'translate(0, -' + height / 3 + 'px)';
+                    }
+                    if ((orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["TOP"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"]) && !rotation) {
+                        return 'translate(' + width / 2 + 'px,  ' + 0 + 'px)';
+                    }
                 }return '';
             });
             return tickText;
@@ -14752,9 +14847,11 @@ var SimpleAxis = function () {
         var classPrefix = simpleConfig.classPrefix;
         this._tickLabelStyle = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getSmartComputedStyle"])(bodyElem, classPrefix + '-ticks');
         this._axisNameStyle = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getSmartComputedStyle"])(bodyElem, classPrefix + '-axis-name');
+
         dependencies.labelManager.setStyle(this._tickLabelStyle);
-        var dist = dependencies.labelManager.getOriSize('wv');
-        this._minTickDistance = { width: dist.width / 2, height: dist.height / 2 };
+        var dist = dependencies.labelManager.getOriSize('w');
+
+        this._minTickDistance = { width: dist.width * 3 / 4, height: dist.height / 2 };
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
 
         Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["generateGetterSetters"])(this, _props__WEBPACK_IMPORTED_MODULE_8__["PROPS"]);
@@ -15365,9 +15462,7 @@ var spaceSetter = function spaceSetter(context, spaceConfig) {
 
                 setAxisRange(context, 'y', adjustRange(minDiff, [tickShifter, availWidth - left - right - tickShifter], domain, orientation), isOffset ? availHeight : null);
 
-                var range = context.range();
-
-                tickInterval = (range[1] - range[0]) / context.getTickValues().length - minTickDistance.width;
+                tickInterval = availWidth / context.getTickValues().length - minTickDistance.width;
 
                 heightForTicks = availHeight - axisNameDimensions.availHeight - tickSize - namePadding;
 
@@ -18315,8 +18410,8 @@ __webpack_require__.r(__webpack_exports__);
     var axisFields = sourceInfo.fields;
     var xField = axisFields.x[0].getMembers()[0];
     var yField = axisFields.y[0].getMembers()[0];
-    var xFieldType = fieldsConfig[xField].def.subtype ? fieldsConfig[xField].def.subtype : fieldsConfig[xField].def.type;
-    var yFieldType = fieldsConfig[yField].def.subtype ? fieldsConfig[yField].def.subtype : fieldsConfig[yField].def.type;
+    var xFieldType = fieldsConfig[xField].def.subtype;
+    var yFieldType = fieldsConfig[yField].def.subtype;
     var dimensions = {};
     var stPos = config.startPos;
     var endPos = config.endPos;
@@ -18327,7 +18422,7 @@ __webpack_require__.r(__webpack_exports__);
         };
     }
 
-    var dragDim = xFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE ? yFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE ? ['x', 'y'] : ['y'] : ['x'];
+    var dragDim = xFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS ? yFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS ? ['x', 'y'] : ['y'] : ['x'];
     var criteria = {};
     var isXDimension = xFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
     var isYDimension = yFieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
@@ -18967,7 +19062,6 @@ var Firebolt = function () {
         this._entryExitSet = {};
         this._actionHistory = {};
         this._queuedSideEffects = {};
-        this._mappedActions = {};
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -19319,7 +19413,6 @@ var Firebolt = function () {
         value: function mapActionsAndBehaviour() {
             var initedPhysicalActions = this._actions.physical;
             var map = this._actionBehaviourMap;
-            var mappedActions = this._mappedActions;
 
             for (var action in map) {
                 if (!{}.hasOwnProperty.call(action, map)) {
@@ -19331,9 +19424,7 @@ var Firebolt = function () {
                         target = this.context.getDefaultTargetContainer();
                     }
                     var bind = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["hasTouch"])() ? touch === true || touch === undefined : !touch;
-                    var keyName = action + '-' + mapObj.behaviours.join();
-                    bind && !mappedActions[keyName] && this.bindActionWithBehaviour(initedPhysicalActions[action], target, mapObj.behaviours);
-                    mappedActions[keyName] = true;
+                    bind && this.bindActionWithBehaviour(initedPhysicalActions[action], target, mapObj.behaviours);
                 }
             }
             return this;
@@ -23466,7 +23557,10 @@ var createAxis = function createAxis(context) {
         tickValues: data.map(function (d) {
             return d.value;
         }),
-        fixedBaseline: false
+        fixedBaseline: false,
+        labels: {
+            rotation: 0
+        }
     }, { labelManager: context._labelManager });
 
     newAxis.domain(getGradientDomain(data));
@@ -23515,6 +23609,7 @@ var renderAxis = function renderAxis(context, container, height, width) {
 
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
+    axis.source().render();
 };
 
 /**
@@ -25729,9 +25824,9 @@ var defaultTooltipFormatters = function defaultTooltipFormatters(type, formatter
     var formatters = (_formatters = {}, _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL, function (value, interval) {
         var nearestInterval = getNearestInterval(interval);
         return muze_utils__WEBPACK_IMPORTED_MODULE_0__["DateTimeFormatter"].formatAs(value, timeFormats[nearestInterval]);
-    }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE, function (value) {
+    }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, function (value) {
         return formatter(value ? value.toFixed(2) : value);
-    }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION, function (value) {
+    }), _defineProperty(_formatters, muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL, function (value) {
         return value;
     }), _formatters);
     return formatters[type];
@@ -25795,7 +25890,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
         });
 
         if (value !== null) {
-            var uniqueVals = type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE ? data.map(function (d) {
+            var uniqueVals = type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS ? data.map(function (d) {
                 return d[index];
             }) : [].concat(_toConsumableArray(new Set(data.map(function (d) {
                 return d[index];
@@ -25806,7 +25901,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
             var colorAxis = axes.color[0];
             var shapeAxis = axes.shape[0];
             var sizeAxis = axes.size[0];
-            var isRetinalField = (colorAxis || shapeAxis || sizeAxis) && dataLen > 1 && type !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+            var isRetinalField = (colorAxis || shapeAxis || sizeAxis) && dataLen > 1 && type !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS;
 
             uniqueVals.forEach(function (val, i) {
                 var key = void 0;
@@ -25831,7 +25926,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
                         associatedMeasures.forEach(function (measure) {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
-                            formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex].numberFormat())(value, interval);
+                            formattedValue = defaultTooltipFormatters(muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, fieldspace.fields[measureIndex].numberFormat())(value, interval);
                             values.push([{
                                 value: '' + measure + separator,
                                 style: {
@@ -25846,7 +25941,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
                     } else {
                         measureIndex = fieldsConfig[associatedMeasures[0]].index;
                         value = data[i][measureIndex];
-                        formattedValue = defaultTooltipFormatters('measure', fieldspace.fields[measureIndex].numberFormat())(value, interval);
+                        formattedValue = defaultTooltipFormatters(muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, fieldspace.fields[measureIndex].numberFormat())(value, interval);
                         values.push([icon, {
                             value: '' + key + separator,
                             className: config.classPrefix + '-tooltip-key'
@@ -49713,7 +49808,7 @@ var headerCreator = function headerCreator(config, cellType, labelManager, prevC
         className: classPrefix + '-' + cellType + '-cell'
     }, {
         labelManager: labelManager
-    }).config({ maxLines: maxLines });
+    }).config({ maxLines: maxLines }).minSpacing({ width: 0, height: 0 });
 
     cell.source(content);
     cell.setAvailableSpace(width, height);
@@ -51902,6 +51997,7 @@ var DEFAULT_PROPS = {
         }
     },
     logicalSpace: {},
+    minSpacing: {},
     source: {}
 };
 
@@ -52143,7 +52239,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var setSmartText = function setSmartText(context) {
     var source = context.source();
-    var _minSpacing = context._minSpacing;
+
+    var _context$minSpacing = context.minSpacing(),
+        minHeightSpace = _context$minSpacing.height,
+        minWidthSpace = _context$minSpacing.width;
 
     var _context$config = context.config(),
         margin = _context$config.margin,
@@ -52154,8 +52253,8 @@ var setSmartText = function setSmartText(context) {
         top = margin.top,
         bottom = margin.bottom;
 
-    var paddedHeight = top + bottom + _minSpacing.height;
-    var paddedWidth = left + right + _minSpacing.width;
+    var paddedHeight = top + bottom + minHeightSpace;
+    var paddedWidth = left + right + minWidthSpace;
     var availHeight = context.availHeight() - paddedHeight;
     var availWidth = context.availWidth() - paddedWidth;
     var labelManager = context.dependencies().labelManager;
@@ -52179,7 +52278,9 @@ var computeTextSpace = function computeTextSpace(context) {
     var _context$dependencies = context.dependencies(),
         labelManager = _context$dependencies.labelManager;
 
-    var _minSpacing = context._minSpacing;
+    var _context$minSpacing2 = context.minSpacing(),
+        minHeightSpace = _context$minSpacing2.height,
+        minWidthSpace = _context$minSpacing2.width;
 
     var _context$config2 = context.config(),
         margin = _context$config2.margin,
@@ -52192,8 +52293,8 @@ var computeTextSpace = function computeTextSpace(context) {
         top = margin.top,
         bottom = margin.bottom;
 
-    var paddedHeight = top + bottom + _minSpacing.height;
-    var paddedWidth = left + right + _minSpacing.width;
+    var paddedHeight = top + bottom + minHeightSpace;
+    var paddedWidth = left + right + minWidthSpace;
     var availHeight = context.availHeight() - paddedHeight;
     var availWidth = context.availWidth() - paddedWidth;
     var source = context.source();
@@ -52252,8 +52353,8 @@ var TextCell = function (_SimpleCell) {
         _this._computedStyle = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getSmartComputedStyle"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])('body'), _this._className);
         _this._dependencies.labelManager.setStyle(_this._computedStyle);
         Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["generateGetterSetters"])(_this, _props__WEBPACK_IMPORTED_MODULE_3__["PROPS"][_enums_cell_type__WEBPACK_IMPORTED_MODULE_2__["TEXT"]]);
-        var space = _this._dependencies.labelManager.getOriSize('wv');
-        _this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
+        var space = _this._dependencies.labelManager.getOriSize('w');
+        _this.minSpacing({ width: Math.floor(space.width * 3 / 4), height: Math.floor(space.height / 2) });
         setSmartText(_this);
         return _this;
     }
@@ -52395,10 +52496,13 @@ var TextCell = function (_SimpleCell) {
                     height = _smartText.height,
                     text = _smartText.text;
 
+                var _minSpacing = this.minSpacing(),
+                    minHeightSpace = _minSpacing.height;
+
                 var translation = {
-                    top: width + this._minSpacing.height / 2,
-                    middle: width / 2 + this._minSpacing.height,
-                    bottom: this._minSpacing.height
+                    top: width + minHeightSpace / 2,
+                    middle: width / 2 + minHeightSpace,
+                    bottom: minHeightSpace
                 };
 
                 container.style('vertical-align', vAlign);
@@ -54768,6 +54872,7 @@ var headerPlaceholderGn = function headerPlaceholderGn(context, selectionObj, ce
     var selectionKeys = keys.length ? axis.map(function (d, i) {
         return keys[Math.floor(i / counter)];
     }) : [];
+
     return Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["createSelection"])(selectionObj[type + 'Headers'], function (keySet) {
         return keySet;
     }, selectionKeys, function (keySet, i) {
@@ -54858,6 +54963,7 @@ var generatePlaceholders = function generatePlaceholders(context, cells, labelMa
                         return e[i];
                     });
                 });
+
                 headers = headerPlaceholderGn(hContext, selectionObj, cells, labelManager);
             }
             selectionObj[type + 'Headers'] = headers;
@@ -61503,7 +61609,7 @@ var BarLayer = function (_BaseLayer) {
                 xFieldSubType = _encodingFieldsInf.xFieldSubType,
                 yFieldSubType = _encodingFieldsInf.yFieldSubType;
 
-            if (xFieldSubType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+            if (xFieldSubType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS) {
                 axis = axes.y;
                 value = axis.invert(y);
                 uniqueFieldIndex = fieldsConfig[yField].index;
@@ -65178,14 +65284,14 @@ var getNearestDimensionalValue = function getNearestDimensionalValue(context, po
     var fieldsConfig = data.getFieldsConfig();
     var xField = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getObjProp"])(fields, 'x', 0).getMembers()[0];
     var yField = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getObjProp"])(fields, 'y', 0).getMembers()[0];
-    var xFieldType = fieldsConfig[xField] && (fieldsConfig[xField].def.subtype ? fieldsConfig[xField].def.subtype : fieldsConfig[xField].def.type);
-    var yFieldType = fieldsConfig[yField] && (fieldsConfig[yField].def.subtype ? fieldsConfig[yField].def.subtype : fieldsConfig[yField].def.type);
+    var xFieldType = fieldsConfig[xField].def.subtype;
+    var yFieldType = fieldsConfig[yField].def.subtype;
 
     var entryVal = [['x', xFieldType, xField], ['y', yFieldType, yField]].find(function (entry) {
         return entry[1] === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL || entry[1] === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL;
     });
 
-    if (!entryVal || xFieldType !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE && yFieldType !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+    if (!entryVal || xFieldType !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS && yFieldType !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS) {
         return null;
     }
     var field = entryVal[2];
@@ -65719,8 +65825,6 @@ var VisualUnit = function () {
                 height: height
             });
             this._sideEffectGroup = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["createSideEffectGroup"])(node, classPrefix + '-' + sideEffectClassName);
-
-            this.firebolt().mapActionsAndBehaviour();
             return this;
         }
     }, {
@@ -65813,7 +65917,7 @@ var VisualUnit = function () {
                     return layer.serialize();
                 }),
                 config: this.config(),
-                axes: this.store().get('axes').map(function (axis) {
+                axes: this.axes().map(function (axis) {
                     return axis.serialize();
                 })
             };
@@ -65824,6 +65928,7 @@ var VisualUnit = function () {
             if (arguments.length) {
                 this._mount = arguments.length <= 0 ? undefined : arguments[0];
                 this.render(arguments.length <= 0 ? undefined : arguments[0]);
+                this.firebolt().mapActionsAndBehaviour();
                 return this;
             }
             return this._mount;

@@ -1,4 +1,4 @@
-import { FieldType, DimensionSubtype } from 'muze-utils';
+import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import * as PROPS from '../../enums/props';
 import { STACK } from '../../enums/constants';
 import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
@@ -40,7 +40,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
                     pos: undefined,
                     space: undefined
                 };
-            } else if (fieldType === FieldType.MEASURE || fieldType === DimensionSubtype.TEMPORAL) {
+            } else if (fieldType === MeasureSubtype.CONTINUOUS || fieldType === DimensionSubtype.TEMPORAL) {
                 min = Math.min(minVal, maxVal);
                 max = Math.max(minVal, maxVal);
             } else {
