@@ -78,25 +78,42 @@ d3.json('../data/cars.json', (data) => {
 
     window.canvas = canvas
   	.data(dm)
-  	.width(1100)
-  	.height(800)
-                    .rows(['Miles_per_Gallon', 'Acceleration'])
+  	.width(200)
+  	.height(500)
+                    .rows(['Miles_per_Gallon'])
+                    .columns(['Acceleration'])
+                    .detail(['Name'])
       /* Year is a temporal field */
                     .title('asdsd')
                     .subtitle('asdasd')
                     .layers([{
                         mark: 'line'
                     }])
+                    .color({
+                        field: 'Acceleration',
+                        stops: 5
+                    })
                     .config({
+                        legend: {
+
+                            position: 'bottom'
+                        },
                         axes: {
                             y: {
-                                tickFormat: val => (val < 100 && val > 0) ? `${val}qweqwe` : val
+                                tickValues: [16, 20]
+                            },
+                            x: {
+                                domain: [-50, 220]
+                                // tickValues: [-40, -20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
                             }
+                            // y: {
+                            //     tickFormat: val => (val < 100 && val > 0) ? `${val}qweqwe` : val
+                            // }
                         }
                     })
                     // .detail(['Maker'])
 
-      .columns(['Year']) /* Attaching the canvas to DOM element */
+       /* Attaching the canvas to DOM element */
       .mount('#chart-container');
 
                     // setTimeout(() => {

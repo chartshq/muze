@@ -57,7 +57,10 @@ export const createAxis = (context) => {
         nice: false,
         showAxisName: false,
         tickValues: data.map(d => d.value),
-        fixedBaseline: false
+        fixedBaseline: false,
+        labels: {
+            rotation: 0
+        }
     }, { labelManager: context._labelManager });
 
     newAxis.domain(getGradientDomain(data));
