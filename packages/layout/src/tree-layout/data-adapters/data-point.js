@@ -1,7 +1,7 @@
 import { DEFAULT_CLASS_NAME } from '../constants/defaults'
 ;
 
-export class DataPoint {
+export default class DataPoint {
     constructor (node) {
         this._node = node;
         this._className = node.model().host() && node.model().host().className ?

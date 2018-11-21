@@ -1,4 +1,4 @@
-import { DataPoint } from './data-point';
+import { getnodePoints } from './helper';
 
 export class DataParser {
     constructor (data) {
@@ -7,15 +7,8 @@ export class DataParser {
 
     defaultDataPointLogic () {
         const nodepoints = [];
-        this.getnodePoints(this._data, nodepoints);
+        getnodePoints(this._data, nodepoints);
         return nodepoints;
     }
 
-    getnodePoints (node, nodepoints) {
-        const datapoint = new DataPoint(node);
-        nodepoints.push(datapoint);
-        node.children().forEach((child) => {
-            this.getnodePoints(child, nodepoints);
-        });
-    }
 }
