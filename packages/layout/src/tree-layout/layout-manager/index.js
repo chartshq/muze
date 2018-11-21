@@ -12,7 +12,7 @@ import { Utils } from '../utils';
 import { LayoutDef } from './layout-def';
 import { calLayOutDef } from './helper';
 
-class LayoutManager {
+export default class LayoutManager {
     constructor (conf) {
         this._renderAt = conf.renderAt;
         this._layoutClassName = conf.className;
@@ -55,27 +55,6 @@ class LayoutManager {
         return this._dimension;
     }
 
-    compute () {
-        this._layoutDefinition = calLayOutDef(this);
-        this._layoutDef.layoutDefinition(this._layoutDefinition);
-        this._layoutDefinition = this._layoutDef.sanitizedDefinition();
-        this._layout = new LayoutModel({
-            width: this._dimension.width,
-            height: this._dimension.height
-        },
-            this._layoutDefinition);
-        this.tree = this._layout.negotiate().tree();
-        this._layout.broadcast();
-        this._drawingManager = new DrawingManager({
-            tree: this.tree,
-            componentMap: this._layoutDef.componentMap(),
-            layoutClassName: this._layoutClassName
-        }, this._skeletonType, this._renderAt);
-
-    // this will draw all the components by calling their draw method
-        this._drawingManager.draw();
-    }
-
     addComponent (component) {
         this._layoutDef.addComponent(component);
     }
@@ -100,6 +79,27 @@ class LayoutManager {
         this.compute();
     }
 
+    compute () {
+        this._layoutDefinition = calLayOutDef(this);
+        this._layoutDef.layoutDefinition(this._layoutDefinition);
+        this._layoutDefinition = this._layoutDef.sanitizedDefinition();
+        this._layout = new LayoutModel({
+            width: this._dimension.width,
+            height: this._dimension.height
+        },
+            this._layoutDefinition);
+        this.tree = this._layout.negotiate().tree();
+        this._layout.broadcast();
+        this._drawingManager = new DrawingManager({
+            tree: this.tree,
+            componentMap: this._layoutDef.componentMap(),
+            layoutClassName: this._layoutClassName
+        }, this._skeletonType, this._renderAt);
+
+    // this will draw all the components by calling their draw method
+        this._drawingManager.draw();
+    }
+
   /**
   * This function takes the LayoutComponents and Register them in component store
   * @param {Array<LayoutComponent>} layoutComponents
@@ -121,5 +121,3 @@ class LayoutManager {
         return this;
     }
 }
-
-export default LayoutManager;
