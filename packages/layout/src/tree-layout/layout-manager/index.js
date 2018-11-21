@@ -9,7 +9,7 @@ import {
   DEFAULT_HEIGHT
 } from '../constants/defaults';
 
-import { DrawingManager } from '../drawing-manager/drawingManager';
+import { DrawingManager } from '../drawing-manager';
 import { Utils } from '../utils';
 import { LayoutDef } from './layout-def';
 
