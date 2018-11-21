@@ -49,9 +49,9 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            type: 'dimension'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
 
@@ -78,11 +78,11 @@ d3.json('../data/cars.json', (data) => {
 
     window.canvas = canvas
   	.data(dm)
-  	.width(200)
+  	.width(400)
   	.height(500)
                     .rows(['Miles_per_Gallon'])
-                    .columns(['Acceleration'])
-                    .detail(['Name'])
+                    .columns(['Year'])
+                    // .detail(['Name'])
       /* Year is a temporal field */
                     .title('asdsd')
                     .subtitle('asdasd')
@@ -96,16 +96,16 @@ d3.json('../data/cars.json', (data) => {
                     .config({
                         legend: {
 
-                            position: 'bottom'
+                            position: 'top'
                         },
                         axes: {
-                            y: {
-                                tickValues: [16, 20]
-                            },
-                            x: {
-                                domain: [-50, 220]
-                                // tickValues: [-40, -20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
-                            }
+                            // y: {
+                            //     tickValues: [16, 20]
+                            // },
+                            // x: {
+                            //     domain: [-50, 220]
+                            //     // tickValues: [-40, -20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+                            // }
                             // y: {
                             //     tickFormat: val => (val < 100 && val > 0) ? `${val}qweqwe` : val
                             // }
