@@ -114,24 +114,24 @@ export function determineBoundBox (bb, i, arr, instance) {
 export function prepareTargetComponentMap (context) {
     context.targetComponentMap(new Map());
     context.componentMap().forEach((value) => {
-        if (context.targetComponentMap().has(value.target)) {
-            context.targetComponentMap().get(value.target).push(value);
+        if (context.targetComponentMap().has(value.target())) {
+            context.targetComponentMap().get(value.target()).push(value);
         } else {
             const temp = [];
             temp.push(value);
-            context.targetComponentMap().set(value.target, temp);
+            context.targetComponentMap().set(value.target(), temp);
         }
     });
 }
 
 export function getComponent (canvasComponent, componentName) {
-    const comp = canvasComponent.find(component => component.componentName === componentName);
+    const comp = canvasComponent.find(component => component.name() === componentName);
     return (comp && comp !== -1) ? comp : null;
 }
 export function createPlaceHolderComponent (height, width, position) {
     const comp = new DummyComponent(0, { height, width });
-    comp.name = 'placeHolder';
-    comp.position = position;
+    comp.name('placeHolder');
+    comp.position(position);
     return comp;
 }
 
@@ -147,14 +147,14 @@ export function placeComponent (definitionModel, component, isPreferred = false,
     let leftOvercomponentRationWidth = 1;
     let leftHeight = 0;
     let leftWidth = 0;
-    if (component.position === 'top' || component.position === 'bottom') {
+    if (component.position() === 'top' || component.position() === 'bottom') {
         cut = 'h';
-        componentRatioWidth = componentHeight / definitionModel._remainingHeight;
-        leftHeight = definitionModel._remainingHeight - componentHeight;
-        leftWidth = definitionModel._remainingWidth;
+        componentRatioWidth = componentHeight / definitionModel.remainingHeight();
+        leftHeight = definitionModel.remainingHeight() - componentHeight;
+        leftWidth = definitionModel.remainingWidth();
     } else {
         cut = 'v';
-        componentRatioWidth = componentWidth / definitionModel._remainingWidth;
+        componentRatioWidth = componentWidth / definitionModel.remainingWidth();
         leftWidth = definitionModel.remainingWidth() - componentWidth;
         leftHeight = definitionModel.remainingHeight();
     }
@@ -163,7 +163,7 @@ export function placeComponent (definitionModel, component, isPreferred = false,
 // update parentModel
     definitionModel.cut(cut);
 
-    const firstLane = new DefinitionModel(component.componentName,
+    const firstLane = new DefinitionModel(component.name(),
                                             null,
                                             componentRatioWidth,
                                             isGridComponent ? false : isPreferred,
@@ -179,7 +179,7 @@ export function placeComponent (definitionModel, component, isPreferred = false,
     secondLane.remainingWidth(leftWidth);
     if (isPreferred) {
         definitionModel.lanes([firstLane]);
-    } else if (component.position === 'top' || component.position === 'left') {
+    } else if (component.position() === 'top' || component.position() === 'left') {
         definitionModel.lanes([firstLane, secondLane]);
     } else {
         definitionModel.lanes([secondLane, firstLane]);

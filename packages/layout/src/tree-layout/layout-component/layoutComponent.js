@@ -1,17 +1,19 @@
 export default class LayoutComponent {
     constructor (name, dimensions, seed) {
-        this.seed = seed;
-        this.boundBox = {};
-        this.boundBox.height = dimensions.height;
-        this.boundBox.width = dimensions.width;
-        this.boundBox.top = null;
-        this.boundBox.left = null;
-        this.renderAt = null;
-        this.alignWith = null;
-        this.alignment = null;
-        this.target = null;
-        this.position = null;
-        this.componentName = name;
+        this._seed = seed;
+        this._boundBox = {
+            height: dimensions.height,
+            width: dimensions.width,
+            top: null,
+            left: null
+        };
+        this._renderAt = null;
+        this._alignWith = null;
+        this._alignment = null;
+        this._target = null;
+        this._position = null;
+        this._componentName = name;
+        this._className = null;
     }
 
     getLogicalSpace () {
@@ -24,14 +26,62 @@ export default class LayoutComponent {
 
     name (param) {
         if (param) {
-            this.componentName = param;
-        } else {
-            return this.componentName;
+            this._componentName = param;
         }
-        return undefined;
+        return this._componentName;
+    }
+
+    target (param) {
+        if (param) {
+            this._target = param;
+        }
+        return this._target;
+    }
+
+    position (param) {
+        if (param) {
+            this._position = param;
+        }
+        return this._position;
+    }
+
+    alignment (param) {
+        if (param) {
+            this._alignment = param;
+        }
+        return this._alignment;
+    }
+
+    alignWith (param) {
+        if (param) {
+            this._alignWith = param;
+        }
+        return this._alignWith;
+    }
+
+    renderAt (param) {
+        if (param) {
+            this._renderAt = param;
+        }
+        return this._renderAt;
+    }
+
+    boundBox (param) {
+        if (param) {
+            Object.assign(this._boundBox, param);
+        }
+        return this._boundBox;
+    }
+
+    className (param) {
+        if (param) {
+            this._className = param;
+        }
+        return this._className;
     }
 
     draw () {
         throw new Error('draw is not defined');
     }
   }
+

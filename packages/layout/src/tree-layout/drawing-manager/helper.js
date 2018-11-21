@@ -1,5 +1,6 @@
 import { HTMLRenderer } from '../renderers/html-renderer';
 import { DEFAULT_CLASS_NAME } from '../constants/defaults';
+import { LayoutComponent } from '../layout-component';
 
 export const getChildNode = (context, top, left, height, width, id) => context.renderer().createAndPositionDiv({
     top,
@@ -30,8 +31,9 @@ export const drawLayout = (context) => {
 
 export const drawComponent = (componentData) => {
     componentData.children().forEach((node) => {
-        if (node.model() && node.model().host()) {
-            node.model().host().draw();
+        const host = node.model().host();
+        if (host instanceof LayoutComponent) {
+            host.draw();
         }
         drawComponent(node);
     });
@@ -39,15 +41,16 @@ export const drawComponent = (componentData) => {
 
 export const resolveAligment = (context, componentData) => {
     componentData.children().forEach((component) => {
-        if (component.model() && component.model().host() && component.model().host().alignWith) {
+        const host = component.model().host();
+        if (host instanceof LayoutComponent && host.alignWith()) {
             let childNode;
             const point = findNode(context, component.id()).node();
             const node = point.boundBox();
             const nodeId = point.id();
-            const refNode = findNode(context, context.componentMap().get(component.model().host().alignWith).renderAt)
+            const refNode = findNode(context, context.componentMap().get(host.alignWith()).renderAt())
                                 .node()
                                 .boundBox();
-            switch (component.model().host().alignment) {
+            switch (host.alignment()) {
             case 'left':
                 childNode = getChildNode(context, node.top,
                 refNode.left,
@@ -94,7 +97,7 @@ export const resolveAligment = (context, componentData) => {
                 break;
             }
     // check if model in parent component
-            context.componentMap().get(component.model().host().componentName).renderAt = `${component._id}-holder`;
+            context.componentMap().get(host.name()).renderAt(`${component.id()}-holder`);
             context.renderer().parentDiv.appendChild(childNode);
         }
         resolveAligment(context, component);

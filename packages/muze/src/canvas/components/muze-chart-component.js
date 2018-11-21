@@ -2,23 +2,20 @@ import { LayoutComponent } from '../../../../layout/src/tree-layout';
 
 export default class MuzeComponent extends LayoutComponent {
     getLogicalSpace () {
-        return {
-            width: this.boundBox.width,
-            height: this.boundBox.height
-        };
+        const { width, height } = this.boundBox();
+        return { width, height };
     }
 
     setSpatialConfig (conf) {
-        this.boundBox.top = conf.y;
-        this.boundBox.left = conf.x;
-        this.boundBox.newDimensions = {
+        this.boundBox({ top: conf.y, left: conf.x });
+        this.newDimensions = {
             width: conf.width,
             height: conf.height
         };
-        this.renderAt = conf.renderAt;
+        this.renderAt(conf.renderAt);
     }
 
     getBoundBox () {
-        return this.boundBox;
+        return this.boundBox();
     }
 }

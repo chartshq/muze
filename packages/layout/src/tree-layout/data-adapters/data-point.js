@@ -1,11 +1,11 @@
-import { DEFAULT_CLASS_NAME } from '../constants/defaults'
-;
+import { DEFAULT_CLASS_NAME } from '../constants/defaults';
+import { LayoutComponent } from '../layout-component';
 
 export default class DataPoint {
     constructor (node) {
         this._node = node;
-        this._className = node.model().host() && node.model().host().className ?
-                            node.model().host().className : DEFAULT_CLASS_NAME;
+        this._className = node.model().host() instanceof LayoutComponent ?
+                            node.model().host().className() : DEFAULT_CLASS_NAME;
     }
 
     node () {

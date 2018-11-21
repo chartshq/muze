@@ -20,11 +20,11 @@ export default class HeaderComponent extends MuzeComponent {
         super(params.name, params.component.getLogicalSpace(), 0);
         this.component = params.component;
         this.params = params;
-        this.target = params.config.target;
-        this.position = params.config.position;
-        this.className = params.config.className;
-        this.alignWith = params.config.alignWith;
-        this.alignment = params.config.alignment;
+        this.target(params.config.target);
+        this.position(params.config.position);
+        this.className(params.config.className);
+        this.alignWith(params.config.alignWith);
+        this.alignment(params.config.alignment);
     }
 
     renderHeader (container) {
@@ -53,7 +53,7 @@ export default class HeaderComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderHeader(container || document.getElementById(this.renderAt));
+        this.renderHeader(container || document.getElementById(this.renderAt()));
     }
 
 }

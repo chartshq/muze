@@ -12,9 +12,9 @@ export default class MatrixComponent extends MuzeComponent {
         super(params.name, params.config.dimensions, 0);
         this.component = params.component;
         this.params = params;
-        this.target = params.config.target;
-        this.position = 'top';
-        this.className = params.config.className;
+        this.target(params.config.target);
+        this.position(TOP);
+        this.className(params.config.className);
     }
 
     renderMatrix (mountPoint) {
@@ -112,6 +112,6 @@ export default class MatrixComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderMatrix(container || document.getElementById(this.renderAt));
+        this.renderMatrix(container || document.getElementById(this.renderAt()));
     }
 }

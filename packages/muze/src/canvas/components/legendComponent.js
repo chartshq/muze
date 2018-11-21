@@ -9,11 +9,11 @@ export default class LegendComponent extends MuzeComponent {
         super(params.name, params.config.measurement.legendSpace, 0);
         this.components = params.component;
         this.params = params;
-        this.target = params.config.target;
-        this.position = params.config.position;
-        this.className = params.config.className;
-        this.alignWith = params.config.alignWith;
-        this.alignment = params.config.alignment;
+        this.target(params.config.target);
+        this.position(params.config.position);
+        this.className(params.config.className);
+        this.alignWith(params.config.alignWith);
+        this.alignment(params.config.alignment);
     }
 
     renderLegend (container) {
@@ -80,7 +80,7 @@ export default class LegendComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderLegend(container || document.getElementById(this.renderAt));
+        this.renderLegend(container || document.getElementById(this.renderAt()));
     }
 
 }

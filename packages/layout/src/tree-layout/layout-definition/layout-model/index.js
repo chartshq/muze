@@ -47,7 +47,8 @@ export default class LayoutModel {
 
     static setHostSpatialConfig (node) {
         const bb = node.boundBox();
-        if (node.model().host() && node.model().host().setSpatialConfig) {
+        const host = node.model().host();
+        if (host && host.setSpatialConfig) {
             const conf = {
                 x: bb.left,
                 y: bb.top,
@@ -55,8 +56,7 @@ export default class LayoutModel {
                 height: bb.height,
                 renderAt: node.id()
             };
-
-            node.model().host().setSpatialConfig(conf);
+            host.setSpatialConfig(conf);
         }
     }
 

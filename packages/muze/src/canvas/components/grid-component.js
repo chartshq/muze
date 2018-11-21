@@ -8,8 +8,8 @@ export default class GridComponent extends MuzeComponent {
         super(params.name, params.config.dimensions, 0);
         this.component = params.component;
         this.params = params;
-        this.target = params.config.target;
-        this.className = params.config.className;
+        this.target(params.config.target);
+        this.className(params.config.className);
         this.sanitizeGrid();
     }
 
@@ -45,14 +45,13 @@ export default class GridComponent extends MuzeComponent {
                 }
             }
         }
-        this.boundBox.height = height;
-        this.boundBox.width = width;
+        this.boundBox({ height, width });
         this.component = gridComponents;
     }
 
     getBoundBox () {
-        const { top, left } = this.component[0][0].boundBox;
-        const { height, width } = this.boundBox;
+        const { top, left } = this.component[0][0].boundBox();
+        const { height, width } = this.boundBox();
         return {
             top,
             left,
