@@ -49,9 +49,9 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Year',
-            type: 'dimension'
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
+            type: 'dimension',
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
         }
     ];
 
@@ -59,7 +59,7 @@ d3.json('../data/cars.json', (data) => {
 
         // Create a new DataModel instance with data and schema
     const dm = new DataModel(data, schema);
-
+    window.rootData = dm;
         // Create a global environment to share common configs across charts
     const env = muze();
         // Create a canvas from the global environment
@@ -76,16 +76,60 @@ d3.json('../data/cars.json', (data) => {
 // DataModel instance is created from https://www.charts.com/static/cars.json data,
 // https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
 
-
-
-    canvas
+    window.canvas = canvas
   	.data(dm)
-  	.minUnitHeight(30)
-  	.minUnitWidth(10)
-  	.width(1200)
-  	.height(400)
-  	.rows(['Origin', 'Cylinders'])
-  	.columns(['Year', 'Horsepower']) /* Year is a temporal field */
-  	.mount('#chart-container'); /* Attaching the canvas to DOM element */
-});
+  	.width(200)
+  	.height(500)
+                    .rows(['Miles_per_Gallon'])
+                    .columns(['Acceleration'])
+                    .detail(['Name'])
+      /* Year is a temporal field */
+                    .title('asdsd')
+                    .subtitle('asdasd')
+                    .layers([{
+                        mark: 'line'
+                    }])
+                    .color({
+                        field: 'Acceleration',
+                        stops: 5
+                    })
+                    .config({
+                        legend: {
 
+                            position: 'bottom'
+                        },
+                        axes: {
+                            y: {
+                                tickValues: [16, 20]
+                            },
+                            x: {
+                                domain: [-50, 220]
+                                // tickValues: [-40, -20, 0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+                            }
+                            // y: {
+                            //     tickFormat: val => (val < 100 && val > 0) ? `${val}qweqwe` : val
+                            // }
+                        }
+                    })
+                    // .detail(['Maker'])
+
+       /* Attaching the canvas to DOM element */
+      .mount('#chart-container');
+
+                    // setTimeout(() => {
+                    //     canvas.layers([{
+                    //         mark: 'bar'
+                    //     }]);
+                    //     setTimeout(() => {
+                    //         canvas.layers([{
+                    //             mark: 'point',
+                    //             encoding: {
+                    //                 y: 'Horsepower',
+                    //                 color: {
+                    //                     value: '#000'
+                    //                 }
+                    //             }
+                    //         }]);
+                    //     }, 5000);
+                    // }, 5000);
+});

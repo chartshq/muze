@@ -1,9 +1,7 @@
-import { mergeRecursive, generateGetterSetters } from 'muze-utils';
+import { mergeRecursive, generateGetterSetters, ERROR_MSG } from 'muze-utils';
 import {
     createTree,
     combineMatrices,
-    computeLogicalSpace,
-    createMatrixEachLevel,
     createMatrixInstances
   } from '../utils';
 import { PROPS } from './props';
@@ -39,6 +37,87 @@ export default class VisualMatrix {
         this._layoutMatrix = combineMatrices([matrix[0] || [], matrix[1] || []], this.config());
     }
 
+     /**
+     * Computes the logical space taken by the entire matrixTree
+     *
+     * @return {Object} Logical space taken
+     * @memberof VisualMatrix
+     */
+    computeLogicalSpace () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    computeViewableSpaces () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     *
+     *
+     * @return
+     * @memberof VisualMatrix
+     */
+    removeExtraCells () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    getPriorityDistribution () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     * Calculates the depth of the tree that can be viewed
+     *
+     * @param {Array} widthMeasures array of widths
+     * @param {Array} heightMeasures array of heights
+     * @return {number} depth of the tree
+     * @memberof VisualMatrix
+     */
+    calculateDepth () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     * Redistributes the provied space to all cells
+     *
+     * @param {*} viewableMatrix current viewport matrix
+     * @param {*} width provied width
+     * @param {*} height provied height
+     * @return {Object} current viewports matrixes with measures
+     * @memberof VisualMatrix
+     */
+    redistributeSpaces () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     * Distibutes the given space row wisely
+     *
+     * @param {Object} measures Redistribution information
+     * @memberof VisualMatrix
+     */
+    redistributeViewSpaces () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     * Dispatch the calculated cell dimensions to all the cells
+     *
+     * @param {Object} measures cell dimension information
+     * @return {Object} row and column heights / widths
+     * @memberof VisualMatrix
+     */
+    getCellDimensions () {
+        throw new Error(ERROR_MSG.INTERFACE_IMPL);
+    }
+
+    /**
+     *
+     *
+     * @param {*} params
+     * @returns
+     * @memberof VisualMatrix
+     */
     primaryMatrix (...params) {
         if (params.length) {
             return this;
@@ -68,21 +147,6 @@ export default class VisualMatrix {
         const { tree, lastLevelKey } = createTree(this);
         this._lastLevelKey = lastLevelKey;
         return tree;
-    }
-
-    /**
-     * Computes the logical space taken by the entire matrixTree
-     *
-     * @return {Object} Logical space taken
-     * @memberof VisualMatrix
-     */
-    setLogicalSpace () {
-        const {
-            isTransposed
-        } = this.config();
-        const matrixTree = this.tree();
-        createMatrixEachLevel(matrixTree, isTransposed);
-        return computeLogicalSpace(matrixTree, this.config(), this.maxMeasures());
     }
 
     /**
@@ -137,32 +201,6 @@ export default class VisualMatrix {
     }
 
     /**
-     * Redistributes the provied space to all cells
-     *
-     * @param {*} viewableMatrix current viewport matrix
-     * @param {*} width provied width
-     * @param {*} height provied height
-     * @return {Object} current viewports matrixes with measures
-     * @memberof VisualMatrix
-     */
-    redistributeSpaces (width, height) {
-        let maxHeights = [];
-        let maxWidths = [];
-
-        this.viewableMatrix.forEach((matrixInst) => {
-            const matrix = matrixInst.matrix;
-            const mWidth = 0;
-            const mHeight = 0;
-            const options = { mWidth, mHeight, matrix, width, height, maxHeights, maxWidths };
-            const maxMeasures = this.redistributeViewSpaces(options);
-            maxWidths = maxMeasures.maxWidths;
-            maxHeights = maxMeasures.maxHeights;
-        });
-
-        return this.computeViewableSpaces({ height, width, maxHeights, maxWidths });
-    }
-
-    /**
      * Gets the viewable measures for the current viewable matrix
      *
      * @return {Object} Set of viewable measures
@@ -178,7 +216,7 @@ export default class VisualMatrix {
      * @return {Array} Set of matrices that can be viewed
      * @memberof VisualMatrix
      */
-    getViewableData () {
+    getViewableMatrices () {
         return this.viewableMatrix;
     }
 

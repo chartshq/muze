@@ -18,7 +18,10 @@ import './text-cell.scss';
 
 const setSmartText = (context) => {
     const source = context.source();
-    const { _minSpacing } = context;
+    const {
+        height: minHeightSpace,
+        width: minWidthSpace
+    } = context.minSpacing();
     const {
        margin,
        rotation
@@ -29,8 +32,8 @@ const setSmartText = (context) => {
         top,
         bottom
      } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height;
-    const paddedWidth = left + right + _minSpacing.width;
+    const paddedHeight = top + bottom + minHeightSpace;
+    const paddedWidth = left + right + minWidthSpace;
     const availHeight = context.availHeight() - paddedHeight;
     const availWidth = context.availWidth() - paddedWidth;
     const labelManager = context.dependencies().labelManager;
@@ -52,7 +55,10 @@ const setSmartText = (context) => {
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-    const { _minSpacing } = context;
+    const {
+        height: minHeightSpace,
+        width: minWidthSpace
+    } = context.minSpacing();
     const {
        margin,
        show,
@@ -65,8 +71,8 @@ const computeTextSpace = (context) => {
        top,
        bottom
     } = margin;
-    const paddedHeight = top + bottom + _minSpacing.height;
-    const paddedWidth = left + right + _minSpacing.width;
+    const paddedHeight = top + bottom + minHeightSpace;
+    const paddedWidth = left + right + minWidthSpace;
     const availHeight = context.availHeight() - paddedHeight;
     const availWidth = context.availWidth() - paddedWidth;
     const source = context.source();
@@ -122,8 +128,8 @@ class TextCell extends SimpleCell {
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
         generateGetterSetters(this, PROPS[TEXT]);
-        const space = this._dependencies.labelManager.getOriSize('wv');
-        this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
+        const space = this._dependencies.labelManager.getOriSize('w');
+        this.minSpacing({ width: Math.floor(space.width * 3 / 4), height: Math.floor(space.height / 2) });
         setSmartText(this);
     }
 
@@ -250,10 +256,13 @@ class TextCell extends SimpleCell {
                 height,
                 text
             } = this.smartText();
+            const {
+                height: minHeightSpace
+            } = this.minSpacing();
             const translation = {
-                top: width + this._minSpacing.height / 2,
-                middle: width / 2 + this._minSpacing.height,
-                bottom: this._minSpacing.height
+                top: width + minHeightSpace / 2,
+                middle: width / 2 + minHeightSpace,
+                bottom: minHeightSpace
             };
 
             container.style('vertical-align', vAlign);
