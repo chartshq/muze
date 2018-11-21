@@ -1,9 +1,9 @@
 import Node from '../tree';
 import {
-  xExtraSpace,
-  yExtraSpace,
-  determineBoundBox
-} from '../utils';
+    allocateBoundingBox,
+    negotiateDimension,
+    computePosition
+} from '../helper';
 
 export default class LayoutModel {
     constructor (measurements, config) {
@@ -28,34 +28,6 @@ export default class LayoutModel {
         return this.root;
     }
 
-    allocateBoundingBox (node) {
-        const totalWeight = node.children()
-                                .map(child => child.model().ratioWeight())
-                                .reduce((carry, val) => carry + val, 0);
-
-        node.children().forEach((child, i, children) => {
-            const lastSibling = children[i - 1];
-            const ratio = child.model().ratioWeight() / totalWeight;
-
-            if (child.parentCut() === 'h') {
-                child.boundBox({
-                    top: i ? lastSibling.boundBox().top + lastSibling.boundBox().height : 0,
-                    left: child.parent().boundBox().left,
-                    height: child.parent().boundBox().height * ratio,
-                    width: child.parent().boundBox().width
-                });
-            } else {
-                child.boundBox({
-                    top: child.parent().boundBox().top,
-                    left: i ? lastSibling.boundBox().left + lastSibling.boundBox().width : 0,
-                    height: child.parent().boundBox().height,
-                    width: child.parent().boundBox().width * ratio
-                });
-            }
-            this.allocateBoundingBox(child);
-        });
-    }
-
     setBoundBox () {
         this.root.boundBox({
             top: 0,
@@ -63,60 +35,7 @@ export default class LayoutModel {
             width: this.measurements.width,
             height: this.measurements.height
         });
-        this.allocateBoundingBox(this.root);
-    }
-
-    negotiateDimension (node) {
-        let preferred;
-        let cumultiveExtraSpaceAmt = 0;
-        let alteredDim;
-        let nonAlteredDim;
-        const childrenLength = node.children().length;
-
-        for (let index = 0; index < childrenLength; index++) {
-            let fn;
-            let extraSpaceAmt;
-            const child = node.children()[index];
-
-            if (child.parentCut() === 'h') {
-                fn = yExtraSpace;
-                alteredDim = 'height';
-                nonAlteredDim = 'width';
-            } else {
-                fn = xExtraSpace;
-                alteredDim = 'width';
-                nonAlteredDim = 'height';
-            }
-      // if vertical then get extra height from other node and push it to the preferred node.
-      // for horizontal cut the same thing is to be done with width
-            if (child.isPreferred()) {
-        // push extra space in sink. Execute it when all non preferred space are computed.
-                preferred = child;
-
-                continue; // eslint-disable-line no-continue
-            }
-      // reduce own height and save it in a var
-            cumultiveExtraSpaceAmt += (extraSpaceAmt = fn(child));
-            child.boundBox()[alteredDim] -= extraSpaceAmt;
-      // update nonaltered dim from parent for any change which happened during negotiation
-            child.boundBox()[nonAlteredDim] = child.parent().boundBox()[nonAlteredDim];
-
-            this.negotiateDimension(child);
-        }
-
-        if (preferred) {
-            preferred.boundBox()[alteredDim] += cumultiveExtraSpaceAmt;
-            preferred.boundBox()[nonAlteredDim] = preferred.parent().boundBox()[nonAlteredDim];
-            this.negotiateDimension(preferred);
-        }
-    }
-
-    computePosition (node) {
-        node.children().forEach((child, i, children) => {
-            const boundBox = determineBoundBox(child.boundBox(), i, children, child);
-            child.boundBox(boundBox);
-            this.computePosition(child);
-        });
+        allocateBoundingBox(this.root);
     }
 
     setHostPosition (node) {
@@ -142,8 +61,8 @@ export default class LayoutModel {
     }
 
     negotiate () {
-        this.negotiateDimension(this.root);
-        this.computePosition(this.root);
+        negotiateDimension(this.root);
+        computePosition(this.root);
         return this;
     }
 
