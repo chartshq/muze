@@ -1,3 +1,5 @@
+import { sanitizeConfig } from './helper';
+
 export class LayoutDef {
     constructor () {
         this._componentMap = new Map();
@@ -22,19 +24,8 @@ export class LayoutDef {
     }
 
     sanitizedDefinition () {
-        this._sanitizeConfig(this._layoutDefinition);
+        sanitizeConfig(this, this._layoutDefinition);
         return this.layoutDefinition();
-    }
-
-    _sanitizeConfig (hostObj) {
-        if (hostObj.lanes() && hostObj.lanes().length) {
-            hostObj.lanes().forEach(childHost => this._sanitizeConfig(childHost));
-        }
-        if (hostObj.host() != null && typeof (hostObj.host()) === 'string') {
-            if (this._componentMap.get(hostObj.host()) !== undefined) {
-                hostObj.host(this._componentMap.get(hostObj.host()));
-            }
-        }
     }
 
     componentMap () {
