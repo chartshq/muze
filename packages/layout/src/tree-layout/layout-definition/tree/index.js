@@ -102,12 +102,12 @@ class Node {
 
   // Recursive function to search a node
     searchNode (node, nodeconfig) {
-        node.children().forEach((node1) => {
-            if (node1.id() === nodeconfig._id) {
-                node1.model().cut(nodeconfig.cut);
-                node1.model().ratioWeight(nodeconfig.ratioWeight);
+        node.children().forEach((childNode) => {
+            if (childNode.id() === nodeconfig._id) {
+                childNode.model().cut(nodeconfig.cut);
+                childNode.model().ratioWeight(nodeconfig.ratioWeight);
             } else {
-                this.searchNode(node1, nodeconfig);
+                this.searchNode(childNode, nodeconfig);
             }
         });
     }
@@ -128,12 +128,12 @@ class Node {
 
   // Recursive function to search a node
     deleteSearchNode (node, nodeId) {
-        node.children().forEach((node1) => {
-            if (node1.id() === nodeId) {
-                const index = node.children().indexOf(node1);
+        node.children().forEach((childNode) => {
+            if (childNode.id() === nodeId) {
+                const index = node.children().indexOf(childNode);
                 node.model().lanes().splice(index, 1);
             } else {
-                this.deleteSearchNode(node1, nodeId);
+                this.deleteSearchNode(childNode, nodeId);
             }
         });
     }

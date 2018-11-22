@@ -26,13 +26,14 @@ export class HTMLRenderer extends Renderer {
 
     createAndPositionDiv (config) {
         const div = document.createElement('div');
+        const { top, left, height, width, className, id } = config;
         div.style.position = 'absolute';
-        div.style.left = `${config.left}px`;
-        div.style.top = `${config.top}px`;
-        div.style.height = `${config.height}px`;
-        div.style.width = `${config.width}px`;
-        div.id = config.id;
-        div.className = config.className;
+        div.style.left = `${left}px`;
+        div.style.top = `${top}px`;
+        div.style.height = `${height}px`;
+        div.style.width = `${width}px`;
+        div.id = id;
+        div.className = className;
         return div;
     }
 

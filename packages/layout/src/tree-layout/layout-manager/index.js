@@ -105,12 +105,12 @@ export default class LayoutManager {
   * @param {Array<LayoutComponent>} layoutComponents
   */
     registerComponents (layoutComponents) {
-        layoutComponents.forEach((component) => {
-            if (component) {
-                this._prioritySequence.push(component.name());
-                this.addComponent(component);
-                if (component.name() === 'grid') {
-                    component.component.forEach((componentArr) => {
+        layoutComponents.forEach((container) => {
+            if (container) {
+                this._prioritySequence.push(container.name());
+                this.addComponent(container);
+                if (container.name() === 'grid') {
+                    container.component.forEach((componentArr) => {
                         componentArr.forEach((compo) => {
                             this.addComponent(compo);
                         });
