@@ -233,10 +233,16 @@ export default class Firebolt {
 
     dissociateBehaviour (behaviour, physicalAction) {
         const actionBehaviourMap = this._actionBehaviourMap;
+        const initedPhysicalActions = this._actions.physical;
         for (const key in actionBehaviourMap) {
             if (key === physicalAction) {
                 const behaviourMap = actionBehaviourMap[key];
                 behaviourMap.behaviours = behaviourMap.behaviours.filter(d => d !== behaviour);
+                let target = behaviourMap.target;
+                if (!target) {
+                    target = this.context.getDefaultTargetContainer();
+                }
+                this.bindActionWithBehaviour(initedPhysicalActions[key], target, []);
             }
         }
 
@@ -367,7 +373,7 @@ export default class Firebolt {
     }
 
     registerPhysicalBehaviouralMap (map) {
-        Object.assign(this._actionBehaviourMap, map);
+        this._actionBehaviourMap = mergeRecursive(this._actionBehaviourMap, map);
         return this;
     }
 
@@ -386,7 +392,7 @@ export default class Firebolt {
         targets.forEach((target) => {
             const mount = this.context.mount();
             const nodes = target.node instanceof Function ? target : selectElement(mount).selectAll(target);
-            if (behaviourList.length && !nodes.empty()) {
+            if (!nodes.empty()) {
                 if (nodes instanceof Array) {
                     nodes.forEach((node) => {
                         action(selectElement(node), behaviourList);
