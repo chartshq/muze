@@ -1,15 +1,8 @@
 import { HTMLRenderer } from '../renderers/html-renderer';
-import { DEFAULT_CLASS_NAME } from '../constants/defaults';
 import { LayoutComponent } from '../layout-component';
 
-export const getChildNode = (context, top, left, height, width, id) => context.renderer().createAndPositionDiv({
-    top,
-    left,
-    height,
-    width,
-    id: `${id}-holder`,
-    className: DEFAULT_CLASS_NAME
-});
+export const getChildNode = (context, config) =>
+                        context.renderer().createAndPositionDiv(config);
 
 export const findNode = (context, nodeID) =>
                         context.renderer().coordinates().find(point => point.node().id() === nodeID);
@@ -39,64 +32,81 @@ export const drawComponent = (componentData) => {
     });
 };
 
+export const removeElement = (elemID) => {
+    document.removeElement(document.getElementById(elemID));
+};
+
 export const resolveAligment = (context, componentData) => {
     componentData.children().forEach((component) => {
         const host = component.model().host();
         if (host instanceof LayoutComponent && host.alignWith()) {
-            let childNode;
+            let newNodeConfig = {};
+            let childNode = {};
             const point = findNode(context, component.id()).node();
             const node = point.boundBox();
-            const nodeId = point.id();
             const refNode = findNode(context, context.componentMap().get(host.alignWith()).renderAt())
                                 .node()
                                 .boundBox();
             switch (host.alignment()) {
             case 'left':
-                childNode = getChildNode(context, node.top,
-                refNode.left,
-                node.height,
-                Math.abs(node.width - Math.abs(refNode.left - node.left)),
-                nodeId);
+                newNodeConfig = {
+                    top: node.top,
+                    left: refNode.left,
+                    height: node.height,
+                    width: Math.abs(node.width - Math.abs(refNode.left - node.left))
+                };
                 break;
+
             case 'right':
-                childNode = getChildNode(context, node.top,
-                node.left,
-                node.height,
-                Math.abs(node.width - Math.abs(node.left + node.width - (refNode.left + refNode.width))),
-                nodeId);
+                newNodeConfig = {
+                    top: node.top,
+                    left: node.left,
+                    height: node.height,
+                    width: Math.abs(node.width - Math.abs(node.left + node.width - (refNode.left + refNode.width)))
+                };
                 break;
+
             case 'top':
-                childNode = getChildNode(context, refNode.top,
-                node.left,
-                Math.abs(node.height - Math.abs(refNode.top - node.top)),
-                node.width,
-                nodeId);
+                newNodeConfig = {
+                    top: refNode.top,
+                    left: node.left,
+                    height: Math.abs(node.height - Math.abs(refNode.top - node.top)),
+                    width: node.width
+                };
                 break;
+
             case 'bottom':
-                childNode = getChildNode(context, node.top,
-                node.left,
-                Math.abs(node.top - refNode.top + refNode.height),
-                node.width,
-                nodeId);
+                newNodeConfig = {
+                    top: node.top,
+                    left: node.left,
+                    height: Math.abs(node.top - refNode.top + refNode.height),
+                    width: node.width
+                };
                 break;
+
             case 'h-center':
-                childNode = getChildNode(context, node.top,
-                refNode.left,
-                node.height,
-                refNode.width,
-                nodeId);
+                newNodeConfig = {
+                    top: node.top,
+                    left: refNode.left,
+                    height: node.height,
+                    width: refNode.width
+                };
                 break;
+
             case 'v-center':
-                childNode = getChildNode(context, refNode.top,
-                node.left,
-                refNode.height,
-                node.width,
-                nodeId);
+                newNodeConfig = {
+                    top: refNode.top,
+                    left: node.left,
+                    height: refNode.height,
+                    width: node.width
+                };
                 break;
             default:
                 break;
             }
     // check if model in parent component
+            Object.assign(newNodeConfig, { id: `${point.id()}-holder`, className: host.className() });
+            childNode = getChildNode(context, newNodeConfig);
             context.componentMap().get(host.name()).renderAt(`${component.id()}-holder`);
             context.renderer().parentDiv.appendChild(childNode);
         }
