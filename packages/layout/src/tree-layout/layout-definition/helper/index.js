@@ -90,23 +90,25 @@ export function determineBoundBox (bb, i, arr, instance) {
     if (i) {
     // if not first sibling, take boundbox from previous sibling
         const lastSibling = arr[i - 1];
+        const { top: _top, left: _left, height: _height, width: _width } = lastSibling.boundBox();
         return {
             width: bb.width,
             height: bb.height,
 
             top: instance.parentCut() === 'h'
-        ? lastSibling.boundBox().top + lastSibling.boundBox().height : lastSibling.boundBox().top,
+        ? _top + _height : _top,
 
             left: instance.parentCut() === 'h'
-        ? lastSibling.boundBox().left : lastSibling.boundBox().left + lastSibling.boundBox().width
+        ? _left : _left + _width
         };
     }
   // if first sibling, take boundbox from parent
+    const { top: _top, left: _left } = instance.parent().boundBox();
     return {
         width: bb.width,
         height: bb.height,
-        top: instance.parent().boundBox().top,
-        left: instance.parent().boundBox().left
+        top: _top,
+        left: _left
     };
 }
 
@@ -136,18 +138,19 @@ export function createPlaceHolderComponent (height, width, position) {
 }
 
 export function placeComponent (definitionModel, component, isPreferred = false, isGridComponent = false) {
-    if (!component) {
-        return { first: definitionModel, second: definitionModel };
-    }
-    const componentDimension = component.getLogicalSpace();
-    const componentHeight = componentDimension.height;
-    const componentWidth = componentDimension.width;
     let cut = '';
     let componentRatioWidth = 1;
     let leftOvercomponentRationWidth = 1;
     let leftHeight = 0;
     let leftWidth = 0;
-    if (component.position() === 'top' || component.position() === 'bottom') {
+
+    if (!component) {
+        return { first: definitionModel, second: definitionModel };
+    }
+
+    const { height: componentHeight, width: componentWidth } = component.getLogicalSpace();
+    const position = component.position();
+    if (position === 'top' || position === 'bottom') {
         cut = 'h';
         componentRatioWidth = componentHeight / definitionModel.remainingHeight();
         leftHeight = definitionModel.remainingHeight() - componentHeight;
@@ -162,24 +165,30 @@ export function placeComponent (definitionModel, component, isPreferred = false,
 
 // update parentModel
     definitionModel.cut(cut);
-
-    const firstLane = new DefinitionModel(component.name(),
-                                            null,
-                                            componentRatioWidth,
-                                            isGridComponent ? false : isPreferred,
-                                            []);
+    const firstLaneConfig = {
+        host: component.name(),
+        cut: null,
+        ratioWeight: componentRatioWidth,
+        preferred: isGridComponent ? false : isPreferred,
+        lanes: []
+    };
+    const firstLane = new DefinitionModel(firstLaneConfig);
     firstLane.remainingHeight(componentHeight);
     firstLane.remainingWidth(componentWidth);
-    const secondLane = new DefinitionModel(null,
-                                            null,
-                                            leftOvercomponentRationWidth,
-                                            isGridComponent ? false : !isPreferred,
-                                            []);
+
+    const secondLaneConfig = {
+        host: null,
+        cut: null,
+        ratioWeight: leftOvercomponentRationWidth,
+        preferred: isGridComponent ? false : !isPreferred,
+        lanes: []
+    };
+    const secondLane = new DefinitionModel(secondLaneConfig);
     secondLane.remainingHeight(leftHeight);
     secondLane.remainingWidth(leftWidth);
     if (isPreferred) {
         definitionModel.lanes([firstLane]);
-    } else if (component.position() === 'top' || component.position() === 'left') {
+    } else if (position === 'top' || position === 'left') {
         definitionModel.lanes([firstLane, secondLane]);
     } else {
         definitionModel.lanes([secondLane, firstLane]);
@@ -188,11 +197,11 @@ export function placeComponent (definitionModel, component, isPreferred = false,
 }
 
 export function placeGridComponent (definitionModel, gridComponents) {
+    let tempDefModel = definitionModel;
     const rows = gridComponents.length;
     const column = rows ? gridComponents[0].length : 0;
-
     const height = gridComponents.reduce((acc, val) => (acc + val[0].getLogicalSpace().height), 0);
-    let tempDefModel = definitionModel;
+
     for (let i = 0; i < column; i++) {
         const iscolumnPreffered = i === column - 1;
         const columnPlaceHolderComponent = createPlaceHolderComponent(height,
@@ -212,6 +221,7 @@ export function negotiateDimension (node) {
     let cumultiveExtraSpaceAmt = 0;
     let alteredDim;
     let nonAlteredDim;
+
     const childrenLength = node.children().length;
 
     for (let index = 0; index < childrenLength; index++) {

@@ -7,9 +7,9 @@ import {
 
 export default class LayoutModel {
     constructor (measurements, config) {
-        this.measurements = measurements;
-        this.config = config;
-        this.root = this.createTree(this.config, null);
+        this._measurements = measurements;
+        this._config = config;
+        this._root = this.createTree(this._config, null);
         this.setBoundBox();
     }
 
@@ -19,23 +19,23 @@ export default class LayoutModel {
             node.parentCut(parent.getCutType());
             parent.addChildren([node]);
         } else {
-            this.root = node;
+            this._root = node;
         }
         for (const lane of config.lanes()) {
             this.createTree(lane, node);
         }
 
-        return this.root;
+        return this._root;
     }
 
     setBoundBox () {
-        this.root.boundBox({
+        this._root.boundBox({
             top: 0,
             left: 0,
-            width: this.measurements.width,
-            height: this.measurements.height
+            width: this._measurements.width,
+            height: this._measurements.height
         });
-        allocateBoundingBox(this.root);
+        allocateBoundingBox(this._root);
     }
 
     setHostPosition (node) {
@@ -61,17 +61,17 @@ export default class LayoutModel {
     }
 
     negotiate () {
-        negotiateDimension(this.root);
-        computePosition(this.root);
+        negotiateDimension(this._root);
+        computePosition(this._root);
         return this;
     }
 
     broadcast () {
-        this.setHostPosition(this.root);
+        this.setHostPosition(this._root);
         return this;
     }
 
     tree () {
-        return this.root;
+        return this._root;
     }
 }

@@ -15,22 +15,7 @@ class DummyComponent extends LayoutComponent {
             height: conf.height
         };
         this.renderAt(conf.renderAt);
-    }
-
-    set componentName (name) {
-        this._componentName = name;
-    }
-
-    get componentName () {
-        return this._componentName;
-    }
-
-    set chartComponent (componentObj) {
-        this._component = componentObj;
-    }
-
-    get chartComponent () {
-        return this._chartComponent;
+        return this;
     }
 
     draw () {
@@ -38,6 +23,7 @@ class DummyComponent extends LayoutComponent {
             throw new Error(`Component not set for ${this.componentName}`);
         }
         this.component.mount(document.getElementById(this.renderAt)); // Change the draw method to component draw
+        return this;
     }
 }
 

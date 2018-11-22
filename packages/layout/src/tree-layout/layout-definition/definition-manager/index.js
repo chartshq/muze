@@ -14,7 +14,7 @@ export default class DefinitionManager {
     generateConfigModel () {
         prepareTargetComponentMap(this);
         const canvasComponent = this._targetComponentMap.get('canvas');
-        const definitionModel = new DefinitionModel();
+        const definitionModel = new DefinitionModel({});
         let tempDefModel = definitionModel;
         definitionModel.remainingHeight(this._totalHeight);
         definitionModel.remainingWidth(this._totalWidth);

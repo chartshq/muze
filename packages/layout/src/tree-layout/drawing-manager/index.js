@@ -14,6 +14,7 @@ export class DrawingManager {
         drawLayout(this);
         resolveAligment(this, this._data);
         drawComponent(this._data);
+        return this;
     }
 
     data (data) {

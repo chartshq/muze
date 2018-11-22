@@ -1,10 +1,10 @@
 export default class DefinitionModel {
-    constructor (host, cut, ratioWeight, preferred, lanes) {
-        this._host = host || null;
-        this._cut = cut || null;
-        this._ratioWeight = ratioWeight === 0 ? 0 : ratioWeight || 1;
-        this._preferred = preferred || false;
-        this._lanes = lanes || [];
+    constructor (config) {
+        this._host = config.host || null;
+        this._cut = config.cut || null;
+        this._ratioWeight = config.ratioWeight === 0 ? 0 : config.ratioWeight || 1;
+        this._preferred = config.preferred || false;
+        this._lanes = config.lanes || [];
         this._remainingHeight = 0;
         this._remainingWidth = 0;
     }
