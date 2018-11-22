@@ -152,7 +152,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
         titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: 'top-middle',
-            alignment: 'left' });
+            alignment: 'left',
+            className: 'muze-title-container' });
         titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
     }
 
@@ -165,7 +166,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
         subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: 'top-middle',
-            alignment: 'left' });
+            alignment: 'left',
+            className: 'muze-subtitle-container' });
         subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
     }
 

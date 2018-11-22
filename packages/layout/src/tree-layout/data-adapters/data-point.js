@@ -13,10 +13,10 @@ export default class DataPoint {
     }
 
     hasHost () {
-        return this._node.model().host() !== null;
+        return this._node.model().host() instanceof LayoutComponent;
     }
 
     className () {
-        return this._className;
+        return this._className || DEFAULT_CLASS_NAME;
     }
 }
