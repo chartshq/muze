@@ -40,6 +40,8 @@ export default class HeaderComponent extends MuzeComponent {
         const cont = selEnter.merge(sel);
         cont.classed(`${layoutConfig.classPrefix}-inner-container`, true);
 
+        this.component.setAvailableSpace(cont.node().getBoundingClientRect().width, this.boundBox().height);
+
         this.component && this.component.render(cont.node());
 
         cont.selectAll('div').classed(`${layoutConfig.classPrefix}-inner-content`, true);

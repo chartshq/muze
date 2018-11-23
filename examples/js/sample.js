@@ -84,7 +84,8 @@ d3.json('../data/cars.json', (data) => {
         border: {
         }
     })
-    .title('Avg Mileage of cars by Country faceted by Cylinders')
+    .title('Avg Mileage of cars by Country faceted by Cylinders taken from the womb of their mothers')
+    .subtitle('Avg Mileage of cars by Country faceted by Cylinders')
     .mount('#chart2');
 
 //     const lineChart = env

@@ -62,7 +62,9 @@ class TextCell extends SimpleCell {
         this._dependencies = dependencies;
         this._className = this._config.className ||
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
+
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
+
         this._dependencies.labelManager.setStyle(this._computedStyle);
         this._minTickDiff = this._dependencies.labelManager.getOriSize('WW');
 
@@ -173,6 +175,7 @@ class TextCell extends SimpleCell {
      */
     render (mount) {
         const availWidth = this.availWidth();
+        const availHeight = this.availHeight();
         const {
             margin,
             show,
@@ -195,7 +198,8 @@ class TextCell extends SimpleCell {
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
             // set the text as the innerHTML
-            elem.html(this.source());
+            this._dependencies.labelManager.setStyle(this._computedStyle);
+            elem.html(this._dependencies.labelManager.getSmartText(this.source(), availWidth, availHeight, true).text);
         }
         return this;
     }

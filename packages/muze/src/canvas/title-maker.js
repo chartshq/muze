@@ -24,11 +24,15 @@ const resolveTitleSubTitleContent = (rawContent) => {
  * @param {*} prevCell
  * @returns
  */
-const headerCreator = (config, cellType, labelManager, prevCell) => {
+const headerCreator = (config, type, labelManager, prevCell) => {
     const {
-        content
+        content,
+        classPrefix
     } = config;
-    const cell = prevCell || new TextCell({ type: cellType }, { labelManager });
+    const cell = prevCell || new TextCell({
+        type: type === 'title' ? 'header' : 'text',
+        className: `${classPrefix}-${type}-cell`
+    }, { labelManager });
 
     cell.source(content);
     cell._minTickDiff = { height: 0, width: 0 };
@@ -59,7 +63,7 @@ const createHeading = (config, type, labelManager, prevCell) => {
 
     return headerCreator(
         config,
-        type === 'title' ? 'header' : 'text',
+        type,
         labelManager,
         prevCell
     );
@@ -82,6 +86,7 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
 
             config.width = context.width();
             config.content = content;
+            config.classPrefix = context.config().classPrefix;
 
             const { height, cell } = createHeading(config, type, context.dependencies().smartlabel,
                 context[`${type}Cell`]);
