@@ -108,9 +108,10 @@ export const resolveAligment = (context, componentData) => {
             Object.assign(newNodeConfig, { id: `${point.id()}-holder`, className: host.className() });
             childNode = getChildNode(context, newNodeConfig);
             context.componentMap().get(host.name()).renderAt(`${component.id()}-holder`);
+            context.componentMap().get(host.name()).boundBox({ height: newNodeConfig.height,
+                width: newNodeConfig.width });
             context.renderer().parentDiv.appendChild(childNode);
         }
         resolveAligment(context, component);
     });
 };
-
