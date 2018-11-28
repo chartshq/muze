@@ -53,7 +53,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
 
     if (propagationData) {
         const schema = propagationData.getSchema();
-        propagateInterpolatedValues = schema.every(d => d.type === fieldType.MEASURE);
+        propagateInterpolatedValues = schema.every(d => d.type === MEASURE);
     }
 
     const propConfig = {
