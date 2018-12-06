@@ -86,6 +86,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         y: rowFields,
         x: columnFields
     };
+
     const allFacets = [
         [...facets.rowFacets[0], ...facets.colFacets[0]],
         [...facets.rowFacets[1], ...facets.colFacets[1]]
