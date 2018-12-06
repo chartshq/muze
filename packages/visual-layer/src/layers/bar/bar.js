@@ -170,6 +170,7 @@ export default class BarLayer extends BaseLayer {
                 const seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
                 group.style('display', 'block');
                 drawRects({
+                    layer: this,
                     container: group.node(),
                     points,
                     className: seriesClassName,

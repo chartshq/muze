@@ -226,6 +226,7 @@ export default class LineLayer extends BaseLayer {
 
                 style = this.getPathStyle(color);
                 this.getDrawFn()({
+                    layer: this,
                     container: group.node(),
                     interpolate,
                     points,

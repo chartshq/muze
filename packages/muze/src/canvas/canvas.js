@@ -277,8 +277,8 @@ export default class Canvas extends TransactionSupport {
      * @internal
      */
     render () {
-        const mount = this.mount();
         const visGroup = this.composition().visualGroup;
+        const mount = this.mount();
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const { components, layoutConfig, measurement } = getRenderDetails(this, mount);
@@ -296,6 +296,20 @@ export default class Canvas extends TransactionSupport {
         });
         Promise.all(promises).then(() => {
             this._renderedResolve();
+        });
+
+        this.done().then(() => {
+            const animDonePromises = [];
+            visGroup.resolver().units().forEach((unitsRow) => {
+                unitsRow.forEach((unit) => {
+                    unit.layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
+                });
+            });
+            Promise.all(animDonePromises).then(() => {
+                lifeCycleManager.notify({ client: this, action: 'animationend' });
+            });
         });
     }
 

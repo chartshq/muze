@@ -211,6 +211,7 @@ export default class PointLayer extends BaseLayer {
                 maxSize = Math.max(maxSize, ...points.map(d => d.size));
                 seriesClassName = `${qualifiedClassName[0]}`;
                 this.constructor.drawFn()({
+                    layer: this,
                     container: group.node(),
                     points,
                     className: seriesClassName,

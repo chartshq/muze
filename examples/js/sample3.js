@@ -50,21 +50,25 @@ d3.json('../data/cars.json', (data) => {
             format: '%Y-%m-%d'
         }
     ];
-
     const DataModel = muze.DataModel;
     const dm = new DataModel(data, schema);
-    
+
     const env = muze();
     const canvas = env.canvas();
 
     canvas
-        .data(dm)
-        .minUnitHeight(30)
-        .minUnitWidth(10)
-        .width(600)
-        .height(400)
-        .rows(['Horsepower'])
-        .columns(['Year'])
-        .mount('#chart');
+                    .data(dm)
+                    .minUnitHeight(30)
+                    .minUnitWidth(10)
+                    .width(600)
+                    .height(400)
+                    .rows(['Origin', 'Horsepower'])
+                    .columns(['Year'])
+                    .layers([{ mark: 'bar' }])
+                    .mount('#chart');
+
+    canvas.once('canvas.animationend').then((client) => {
+        console.log(client); // Canvas instance
+    });
 });
 
