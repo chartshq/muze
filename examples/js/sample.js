@@ -80,11 +80,11 @@ d3.json('../data/cars.json', (data) => {
   	.data(dm)
   	.minUnitHeight(30)
   	.minUnitWidth(10)
-  	.width(1200)
+  	.width(2200)
   	.height(400)
-                    .rows(['Cylinders', 'Acceleration', 'Horsepower'])
+                    .columns(['Origin', 'Cylinders', 'Acceleration'])
                     .color('Origin')
-  	.columns(['Origin', 'Displacement']) /* Year is a temporal field */
+  	.rows(['Origin', 'Acceleration', 'Horsepower']) /* Year is a temporal field */
   	.mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
 
