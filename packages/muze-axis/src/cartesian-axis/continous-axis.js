@@ -96,6 +96,9 @@ export default class ContinousAxis extends SimpleAxis {
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;
+        } else if (domain) {
+            this._domain = [];
+            this.store().commit(DOMAIN, this._domain);
         } return this._domain;
     }
 
@@ -201,21 +204,26 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setFixedBaseline (tickText) {
         const {
-            orientation,
-            labels
+            orientation
         } = this.config();
+        const {
+            labels
+        } = this.renderConfig();
 
         const {
             rotation
         } = labels;
         const axis = this.axis();
+        const ticks = axis.scale().ticks();
         const { width, height } = this.axisComponentDimensions().allTickDimensions[0];
-        axis.tickTransform((d, i) => {
-            if (i === 0 && (orientation === LEFT || orientation === RIGHT)) {
-                return `translate(0, -${(height) / 3}px)`;
-            }
-            if (i === 0 && (orientation === TOP || orientation === BOTTOM) && !rotation) {
-                return `translate(${width / 2}px,  ${0}px) rotate(${rotation || 0}deg)`;
+        axis.tickTransform((d) => {
+            if (d === ticks[0]) {
+                if ((orientation === LEFT || orientation === RIGHT)) {
+                    return `translate(0, -${(height) / 3}px)`;
+                }
+                if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
+                    return `translate(${width / 2}px,  ${0}px)`;
+                }
             } return '';
         });
         return tickText;

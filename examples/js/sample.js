@@ -59,7 +59,7 @@ d3.json('../data/cars.json', (data) => {
 
         // Create a new DataModel instance with data and schema
     const dm = new DataModel(data, schema);
-
+    window.rootData = dm;
         // Create a global environment to share common configs across charts
     const env = muze();
         // Create a canvas from the global environment
@@ -95,4 +95,21 @@ d3.json('../data/cars.json', (data) => {
   	.columns(['Origin', 'Acceleration']) /* Year is a temporal field */
   	.mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
+
+                    // setTimeout(() => {
+                    //     canvas.layers([{
+                    //         mark: 'bar'
+                    //     }]);
+                    //     setTimeout(() => {
+                    //         canvas.layers([{
+                    //             mark: 'point',
+                    //             encoding: {
+                    //                 y: 'Horsepower',
+                    //                 color: {
+                    //                     value: '#000'
+                    //                 }
+                    //             }
+                    //         }]);
+                    //     }, 5000);
+                    // }, 5000);
 

@@ -144,8 +144,8 @@ export const getViewMatrices = (layout, rowPointer, columnPointer) => {
     const columnMatrix = layout.columnMatrix();
     const centerMatrix = layout.centerMatrix();
     const matrices = layout.matrices();
-    const rowMatrices = rowMatrix.getViewableData();
-    const columnMatrices = columnMatrix.getViewableData();
+    const rowMatrices = rowMatrix.getViewableMatrices();
+    const columnMatrices = columnMatrix.getViewableMatrices();
     const centralMatrixPointer = {
         row: 0,
         column: 0

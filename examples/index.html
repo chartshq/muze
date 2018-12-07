@@ -16,14 +16,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.16.0/polyfill.min.js"></script>
 </head>
 <style>
-    body, html{
-        font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
+    body,
+    html {
+        font-family: 'Source Sans Pro', "Helvetica Neue", Helvetica, Arial, sans-serif;
+        /* background: black; */
     }
-    .chart-div{
-    float: left;
-    padding: 15px;
-}
-    .chart{
+    .muze-ticks line{
+        /* stroke: black */
+    }
+
+    .chart-div {
+        float: left;
+        padding: 15px;
+    }
+
+    .chart {
         margin-left: 20px;
         /* width: 700px; */
         /* height: 700px; */
@@ -31,15 +38,43 @@
         /* width: 100%;
         height: 550px; */
     }
-    .muze-layer-bar rect{
+
+    .muze-layer-bar rect {
         /* fill: #757575; */
     }
-    .muze-grid-lines path{
-        /* opacity: 0; */
+    /* .muze-text-cell, text{
+        color: white !important;
+        fill: white !important;
+    } */
+
+    .selectionContainer {
+        width: 200px;
+        float: left;
+        height: 600px;
+        overflow: scroll;
     }
+
+    .selectors {
+        background: black;
+        padding: 5px;
+        box-shadow: 1px 1px 1px 1px white;
+        margin: 5px;
+        color: white;
+        /* float: left; */
+        cursor: pointer;
+        font-size: 12px;
+
+    }
+
+    .selectors.selected {
+        background: white;
+        color: black;
+    }
+
     .anchors path {
-        fill:steelblue;
+        fill: steelblue;
     }
+
     #chart2 {
         float: left;
     }
@@ -47,28 +82,33 @@
     #chart4 {
         float: left;
     }
+
     #chart {
         float: left;
         /* height: 210px;  */
         /* overflow: auto; */
         /* border: 1px solid black; */
     }
+
     #parentdiv {
         display: inline-block;
         width: 1700px;
         height: 900px;
     }
+
     .info-box {
         display: flex;
         flex-direction: column;
         padding: 5px 0px 5px 0px;
     }
+
     .muze-layer-point {
-    /* fill-opacity: 1 !important; */
-    /* stroke-opacity: 1 !important; */
-    /* fill: #086bb6; */
-    /* stroke: #086bb6; */
-}
+        /* fill-opacity: 1 !important; */
+        /* stroke-opacity: 1 !important; */
+        /* fill: #086bb6; */
+        /* stroke: #086bb6; */
+    }
+
     .info-section {
         display: flex;
         align-items: center;
@@ -85,12 +125,16 @@
     }
 
     .linelayer path {
-        stroke-dasharray: 2,4;
+        stroke-dasharray: 2, 4;
     }
 
+    .muze-layer-point {
+        fill-opacity: 0.7 !important;
+    }
 </style>
+
 <body>
-    <div id = 'parentdiv'>
+    <div id='parentdiv'>
         <div id="chart-container"></div>
         <div id="chart"></div>
         <div id="chart1"></div>
@@ -110,22 +154,27 @@
     <script src="./js/sample.js"></script>
 </body>
 <link rel='stylesheet' href="./muze.css">
-    <style>
-        .twitter-link{
-            text-decoration: none;
-            color: #3182bd;
-            font-weight: 700;
-            font-family: Roboto Condensed,sans-serif;
-        }
-        .referenceZone rect {
-            fill: #fff1f1;
-            fill-opacity: 0.5
-        }
-        .dotted-line {
-            stroke-dasharray: 2,4;
-        }
+<style>
+    .twitter-link {
+        text-decoration: none;
+        color: #3182bd;
+        font-weight: 700;
+        font-family: Roboto Condensed, sans-serif;
+    }
 
-         /* .muze-tooltip-content-container {
+    .referenceZone rect {
+        fill: #fff1f1;
+        fill-opacity: 0.5
+    }
+
+    .dotted-line {
+        stroke-dasharray: 2, 4;
+    }
+    .muze-viz{
+        float: left;
+    }
+   
+    /* .muze-tooltip-content-container {
             padding-left: 0px;
             padding-right: 0px;
             padding-bottom: 0px;
@@ -149,7 +198,6 @@
         border-color: rgba(0, 0, 0, 0) !important;
         box-shadow: none !important;
     } */
+</style>
 
-
-    </style>
 </html>
