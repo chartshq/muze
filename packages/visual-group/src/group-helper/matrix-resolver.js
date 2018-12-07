@@ -472,6 +472,10 @@ export default class MatrixResolver {
             smartlabel: labelManager,
             lifeCycleManager
         } = this.dependencies();
+        const {
+            showHeaders,
+            classPrefix
+        } = config;
         const TextCell = this.getCellDef(this.registry().TextCell);
         const BlankCell = this.getCellDef(this.registry().BlankCell);
         const [leftRows, rightRows] = rows;
@@ -482,8 +486,10 @@ export default class MatrixResolver {
         // Headers and footers are created based on the rows. Thereafter, using the column information
         // they are tabularized into the current structure
         const headers = {
-            left: headerCreator(leftRows, rowHeaders[0], config.showHeaders ? TextCell : BlankCell, labelManager),
-            right: headerCreator(rightRows, rowHeaders[1], config.showHeaders ? TextCell : BlankCell, labelManager)
+            left: headerCreator(leftRows, rowHeaders[0], showHeaders ? TextCell : BlankCell,
+                { classPrefix, labelManager }),
+            right: headerCreator(rightRows, rowHeaders[1], showHeaders ? TextCell : BlankCell,
+                { classPrefix, labelManager })
         };
         const footers = {
             left: leftRows.length > 0 ? leftRows[0].map(blankCellCreator) : [],

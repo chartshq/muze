@@ -131,9 +131,13 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @param {*} labelManager
  *
  */
-export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
-    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({ type: HEADER }, { labelManager })
-                    .source(getHeaderText(fieldHeaders, i, fields[0].length))
+export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, labelManager }) => {
+    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({
+        type: HEADER,
+        className: `${classPrefix}-grid-headers`
+    }, {
+        labelManager
+    }).source(getHeaderText(fieldHeaders, i, fields[0].length))
                     .config({ show: cell.config().show })) : [];
     return headers;
 };

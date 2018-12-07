@@ -80,11 +80,19 @@ d3.json('../data/cars.json', (data) => {
   	.data(dm)
   	.minUnitHeight(30)
   	.minUnitWidth(10)
-  	.width(2200)
-  	.height(400)
-                    .columns(['Origin', 'Cylinders', 'Acceleration'])
+  	.width(1000)
+      .height(2400)
+      .config({
+          facet: {
+              rows: {
+                  verticalAlign: 'middle'
+              }
+          }
+        //   showHeaders: true
+      })
+                    .rows([['Origin', 'Cylinders', 'Acceleration', 'Horsepower']])
                     .color('Origin')
-  	.rows(['Origin', 'Acceleration', 'Horsepower']) /* Year is a temporal field */
+  	.columns(['Origin', 'Acceleration']) /* Year is a temporal field */
   	.mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
 

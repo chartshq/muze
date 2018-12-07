@@ -1,5 +1,7 @@
 import { TOP, BOTTOM, CENTER, ROW, COLUMN } from '../enums/constants';
 
+const orderMaker = arr => Array.from(Array(arr.length).keys());
+
 const nestByStack = (stack, updateArr, optionalParams = {}) => {
     let {
         order,
@@ -63,62 +65,31 @@ const nestByStack = (stack, updateArr, optionalParams = {}) => {
     return { prevStack, currStack, arr: returnArr };
 };
 
-/**
- * This callback is used to calculate the rowspan
- * by checking for repeating entries in subsequent rows
- * at the specified column.
- *
- * @param {Placeholder} colData Instance of placeholder.
- * @param {number} colIdx The index of the placeholder in the array.
- * @param {Array} matrix The 2d array for which filtering is to be done
- * @param {number} rIdx The index of the row of the placeholder in array.
- * @return {number} The row span.
- */
-const calcRowSpan = (colData, colIdx, matrix, rIdx) => {
-    let count = 1;
+const spanCalculator = (colData, colIdx, matrix, rIdx) => {
     // if data is not header cell then rowspan
     // has to be 1
     if (!colData) {
-        return 1;
+        return () => 1;
     }
-    let isNull = false;
-    while (!isNull) {
-        if (matrix[rIdx + count] && matrix[rIdx + count][colIdx] === null) {
-            count += 1;
-        } else {
-            isNull = true;
-        }
-    }
-    return count;
-};
 
-/**
- * This callback is used to calculate the rowspan
- * by checking for repeating entries in subsequent rows
- * at the specified column.
- *
- * @param {Placeholder} colData Instance of placeholder.
- * @param {number} colIdx The index of the placeholder in the array.
- * @param {Array} matrix The 2d array for which filtering is to be done
- * @param {number} rIdx The index of the row of the placeholder in array.
- * @return {number} The row span.
- */
-const calcColSpan = (colData, colIdx, matrix, rIdx) => {
-    let count = 1;
-    // if data is not header cell then rowspan
-    // has to be 1
-    if (!colData) {
-        return 1;
-    }
-    let isNull = false;
-    while (!isNull) {
-        if (matrix[rIdx][colIdx + count] === null) {
-            count += 1;
-        } else {
-            isNull = true;
+    const conditions = {
+        row: count => matrix[rIdx + count] && matrix[rIdx + count][colIdx],
+        column: count => matrix[rIdx][colIdx + count]
+    };
+
+    return (type) => {
+        let count = 1;
+        let isNull = false;
+
+        while (!isNull) {
+            if (conditions[type](count) === null) {
+                count += 1;
+            } else {
+                isNull = true;
+            }
         }
-    }
-    return count;
+        return count;
+    };
 };
 
 const maskCreator = (matrix, order) => ({
@@ -164,18 +135,16 @@ const spanGenerator = viewMatrix => ({
             spans[ridx] = spans[ridx] || [];
             row.forEach((col, i) => {
                 if (viewMatrix[ridx][i]) {
-                    const currSpan = calcRowSpan(col, i, viewMatrix, ridx);
+                    const currSpan = spanCalculator(col, i, viewMatrix, ridx)('row');
                     currSpan && spans[ridx].push(currSpan);
                 }
             });
         });
         return spans;
     },
-    column: () => viewMatrix.map((row, ridx) => row.map((col, i) => calcColSpan(col, i, viewMatrix, ridx))
+    column: () => viewMatrix.map((row, ridx) => row.map((col, i) => spanCalculator(col, i, viewMatrix, ridx)('column'))
                     .filter(col => col !== 1))
 });
-
-const orderMaker = arr => Array.from(Array(arr.length).keys());
 
 const getOrder = isReverse => ({
     row: (matrix) => {
@@ -245,11 +214,11 @@ export function cellSpanMaker (matrix, type, index) {
         viewMatrixMaker,
         spanMaker
     } = matrixSpanGenerator(`${type}-${index}`);
+
     if (matrix.length) {
         const order = orderGetter(matrix);
         viewMatrix = viewMatrixMaker(matrix, order)();
         spans = spanMaker(viewMatrix)();
     }
-
     return { viewMatrix, spans };
 }
