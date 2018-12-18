@@ -19,6 +19,9 @@ const rotateAxis = (instance, tickText, labelManager) => {
     const config = instance.config();
     const renderConfig = instance.renderConfig();
     const smartTicks = instance.smartTicks();
+    const scale = axis.scale();
+    const labelFunc = scale.ticks || scale.quantile || scale.domain;
+    const ticks = labelFunc();
     const {
         orientation,
         fixedBaseline,
@@ -70,12 +73,12 @@ const rotateAxis = (instance, tickText, labelManager) => {
         }
 
         if (orientation === AxisOrientation.TOP) {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift + xShift / 2 : xShift;
+            xShift = (fixedBaseline && ticks[0] === d && type === LINEAR) ? xShift + xShift / 2 : xShift;
             selectElement(this)
                             .attr('transform', `translate(${-xShift + tickSize}
                                 ${-yShift - tickSize}) rotate(${rotation})`);
         } else {
-            xShift = (index === 0 && fixedBaseline && type === LINEAR) ? xShift - xShift / 2 : xShift;
+            xShift = (fixedBaseline && ticks[0] === d && type === LINEAR) ? xShift - xShift / 2 : xShift;
 
             selectElement(this)
                             .attr('transform', `translate(${xShift - tickSize}
@@ -266,7 +269,7 @@ export function renderAxis (axisInstance) {
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
     setFixedBaseline(axisInstance);
-    if (labels.smartTicks === false) {
+    if (labels.smartTicks === false || tickSize === 0) {
         selectContainer.transition()
                         .duration(1000).call(axis);
     } else {

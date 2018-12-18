@@ -32,7 +32,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             key: COLUMN_ROOT,
             values: this.createTree()
         };
-        this._logicalSpace = this.setLogicalSpace();
+        this._logicalSpace = this.computeLogicalSpace();
     }
 
     /**
@@ -41,7 +41,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
      * @return {Object} Logical space taken
      * @memberof VisualMatrix
      */
-    setLogicalSpace () {
+    computeLogicalSpace () {
         const matrixTree = this.tree();
         createMatrixEachLevel(matrixTree, true);
         return computeLogicalSpace(matrixTree, this.config(), this.maxMeasures());
@@ -114,7 +114,11 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         };
     }
 
-    getPriorityDistribution (matrix, height, maxHeights = []) {
+    getPriorityDistribution (measures) {
+        const {
+            height,
+            maxHeights
+        } = measures;
         let remainaingHeight = height;
         let heightDist = [];
         let conditions = [];
@@ -167,20 +171,46 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         return Math.min(widthMeasures.length - 1, j);
     }
 
+     /**
+     * Redistributes the provied space to all cells
+     *
+     * @param {*} viewableMatrix current viewport matrix
+     * @param {*} width provied width
+     * @param {*} height provied height
+     * @return {Object} current viewports matrixes with measures
+     * @memberof VisualMatrix
+     */
+    redistributeSpaces (width, height) {
+        let maxHeights = [];
+        let maxWidths = [];
+
+        this.viewableMatrix.forEach((matrixInst) => {
+            const matrix = matrixInst.matrix;
+            const mWidth = 0;
+            const mHeight = 0;
+            const options = { mWidth, mHeight, matrix, width, height, maxHeights, maxWidths };
+            const maxMeasures = this.redistributeViewSpaces(options);
+            maxWidths = maxMeasures.maxWidths;
+            maxHeights = maxMeasures.maxHeights;
+        });
+
+        return this.computeViewableSpaces({ height, width, maxHeights, maxWidths });
+    }
+
     /**
      * Distibutes the given space column wisely
      *
-     * @param {Object} options Redistribution information
+     * @param {Object} measures Redistribution information
      * @memberof VisualMatrix
      */
-    redistributeViewSpaces (options) {
+    redistributeViewSpaces (measures) {
         let rHeights = [];
         const {
             matrix,
             width,
             maxHeights,
             maxWidths
-        } = options;
+        } = measures;
         const borderWidth = this.config().unitMeasures.border;
 
         const mWidth = spaceTakenByRow(matrix[this._lastLevelKey]).width;
@@ -210,16 +240,16 @@ export default class ColumnVisualMatrix extends VisualMatrix {
     /**
      * Dispatch the calculated cell dimensions to all the cells
      *
-     * @param {Object} options cell dimension information
+     * @param {Object} measures cell dimension information
      * @return {Object} row and column heights / widths
      * @memberof VisualMatrix
      */
-    getCellDimensions (options) {
+    getCellDimensions (measures) {
         const {
-            unitMeasures: measures
+            unitMeasures
         } = this.config();
-        const borderWidth = measures.border;
-        const { matrixInst, height, maxWidths, maxHeights, matrixIndex } = options;
+        const borderWidth = unitMeasures.border;
+        const { matrixInst, height, maxWidths, maxHeights, matrixIndex } = measures;
         const matrix = matrixInst.matrix;
         const rowHeights = [[0], [0]];
         const columnWidths = [[0], [0]];
@@ -227,7 +257,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         const widths = [0, 0];
         const breakPointer = this._breakPointer;
 
-        const heightDistribution = this.getPriorityDistribution(matrix, height, maxHeights[0]);
+        const heightDistribution = this.getPriorityDistribution({ height, maxHeights: maxHeights[0] || [] });
 
         matrix.forEach((row, rIdx) => {
             row.forEach((cell, cIdx) => {

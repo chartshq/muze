@@ -42,9 +42,11 @@ export default class SimpleAxis {
         const classPrefix = simpleConfig.classPrefix;
         this._tickLabelStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-ticks`);
         this._axisNameStyle = getSmartComputedStyle(bodyElem, `${classPrefix}-axis-name`);
+
         dependencies.labelManager.setStyle(this._tickLabelStyle);
-        const dist = dependencies.labelManager.getOriSize('wv');
-        this._minTickDistance = { width: dist.width / 2, height: dist.height / 2 };
+        const dist = dependencies.labelManager.getOriSize('w');
+
+        this._minTickDistance = { width: dist.width * 3 / 4, height: dist.height / 2 };
         this._minTickSpace = dependencies.labelManager.getOriSize('www');
 
         generateGetterSetters(this, PROPS);

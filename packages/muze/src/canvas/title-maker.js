@@ -24,15 +24,20 @@ const resolveTitleSubTitleContent = (rawContent) => {
  * @param {*} prevCell
  *
  */
-const headerCreator = (config, type, labelManager, prevCell) => {
+const headerCreator = (config, cellType, labelManager, prevCell) => {
     const {
         content,
-        classPrefix
+        classPrefix,
+        maxLines
     } = config;
-    const cell = prevCell || new TextCell({
-        type: type === 'title' ? 'header' : 'text',
-        className: `${classPrefix}-${type}-cell`
-    }, { labelManager });
+    const cell = prevCell || new TextCell(
+        {
+            type: cellType === 'title' ? 'header' : 'text',
+            className: `${classPrefix}-${cellType}-cell`
+        }, {
+            labelManager
+        })
+     .config({ maxLines }).minSpacing({ width: 0, height: 0 });
 
     cell.source(content);
     cell._minTickDiff = { height: 0, width: 0 };

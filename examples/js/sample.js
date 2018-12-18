@@ -85,3 +85,19 @@ d3.json('../data/cars.json', (data) => {
                     .mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
 
+                    // setTimeout(() => {
+                    //     canvas.layers([{
+                    //         mark: 'bar'
+                    //     }]);
+                    //     setTimeout(() => {
+                    //         canvas.layers([{
+                    //             mark: 'point',
+                    //             encoding: {
+                    //                 y: 'Horsepower',
+                    //                 color: {
+                    //                     value: '#000'
+                    //                 }
+                    //             }
+                    //         }]);
+                    //     }, 5000);
+                    // }, 5000);
