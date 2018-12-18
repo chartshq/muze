@@ -119,13 +119,11 @@ class TextCell extends SimpleCell {
         this._dependencies = dependencies;
         this._className = this._config.className ||
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
-
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
-
         this._dependencies.labelManager.setStyle(this._computedStyle);
         generateGetterSetters(this, PROPS[TEXT]);
-        const space = this._dependencies.labelManager.getOriSize('wv');
-        this._minSpacing = { width: Math.floor(space.width / 2), height: Math.floor(space.height / 2) };
+        const space = this._dependencies.labelManager.getOriSize('w');
+        this.minSpacing({ width: Math.floor(space.width * 3 / 4), height: Math.floor(space.height / 2) });
         setSmartText(this);
     }
 

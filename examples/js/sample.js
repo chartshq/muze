@@ -79,6 +79,8 @@ d3.json('../data/cars.json', (data) => {
                     .height(400)
                     .rows(['Horsepower'])
                     .color('Origin')
+                    .title('Chart is very good')
+                    .subtitle('JJHfhhdfdhhkjk')
                     .columns(['Year']) /* Year is a temporal field */
                     .mount('#chart-container'); /* Attaching the canvas to DOM element */
 });
