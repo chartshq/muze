@@ -1,19 +1,29 @@
 import { GridLayout } from '@chartshq/layout';
-import { transactor, Store, getUniqueId } from 'muze-utils';
+import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES } from 'muze-utils';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener, setLabelRotationForAxes } from './helper';
+import { initCanvas, setupChangeListener, setLabelRotationForAxes, createGroupState } from './helper';
 import { LayoutManager } from '../../../layout/src/tree-layout';
-
+import { APP_INITIAL_STATE } from './app-state';
 /**
- * This is the primary class which manages highlevel components like visualGroup, Titles, Legend, Extensions
- * (in future). Global level Muze functionality is subset this. Every time user works with an instance of
- * canvas in dom which provides instance level settings.
+ * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
+ * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
+ * Canvas is intialized from environment with settings from environment and singleton dependencies.
  *
+ * To create an instance of canvas
+ * ```
+ *  const env = Muze();
+ *  const canvas = env.canvas()
+ * ```
+ *
+ *
+ * @class
+ * @public
+ * @module Canvas
  */
 export default class Canvas extends TransactionSupport {
 
@@ -38,13 +48,20 @@ export default class Canvas extends TransactionSupport {
             this._renderedResolve = resolve;
         });
         this._composition.layout = new GridLayout();
-        this._store = new Store({});
+        this._store = new Store(APP_INITIAL_STATE);
         this._layoutManager = null;
 
         // Setters and getters will be mounted on this. The object will be mutated.
-        const [, store] = transactor(this, options, this._store.model);
-        transactor(this, localOptions, store);
-        transactor(this, canvasOptions, store);
+        const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
+        const [, store] = transactor(this, options, this._store.model, {
+            namespace
+        });
+        transactor(this, localOptions, store, {
+            namespace
+        });
+        transactor(this, canvasOptions, store, {
+            namespace
+        });
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
         this.firebolt(new GroupFireBolt(this));
         this.alias(`canvas-${getUniqueId()}`);
@@ -58,10 +75,12 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Retrieves an instance of layout which is responsible for layouting. Layout is responsible for creating faceted
+     * presentation using table layout.
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {GridLayout} Instance of layout attached to canvas.
      */
     layout (...params) {
         if (params.length) {
@@ -71,10 +90,20 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Retrieves the composition for a canvas
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {object} Instances of the components which canvas requires to draw the full visualization.
+     *      ```
+     *          {
+     *              layout: // Instance of {@link GridLayout}
+     *              legend: // Instance of {@link Legend}
+     *              subtitle: // Instance of {@link TextCell} using which the title is rendered
+     *              title: // Instance of {@link TextCell} using which the title is rendered
+     *              visualGroup: // Instance of {@link visualGroup}
+     *          }
+     *      ```
      */
     composition (...params) {
         if (params.length) {
@@ -88,11 +117,18 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Sets or gets the alias of the canvas. Alias is a name by which the canvas can be referred.
      *
+     * When setter
+     * @param {string} alias Name of the alias.
      *
-     * @param {*} params
-     * @returns
-     * @memberof Canvas
+     * @return {Canvas} Instance of the canvas.
+     *
+     * When getter
+     *
+     * @return {string} Alias of canvas.
+     *
+     * @public
      */
     alias (...params) {
         if (params.length) {
@@ -128,7 +164,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof Canvas
      */
     static formalName () {
@@ -136,10 +172,13 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Returns the instance of firebolt associated with this canvas. The firebolt instance can be used to dispatch a
+     * behaviour dynamically on the canvas. This firebolt does not handle any physical actions. It is just used to
+     * propagate the action to all the visual units in it's composition.
      *
+     * @public
      *
-     * @readonly
-     * @memberof Canvas
+     * @return {GroupFireBolt} Instance of firebolt associated with canvas.
      */
     firebolt (...firebolt) {
         if (firebolt.length) {
@@ -164,8 +203,8 @@ export default class Canvas extends TransactionSupport {
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
             this._composition.visualGroup = initedComponents[0];
-
-            this.composition().visualGroup.alias(this.alias());
+            createGroupState(this);
+            this.composition().visualGroup.alias(this.alias()).store(this._store);
             return this;
         }
         return this._registry;
@@ -187,7 +226,7 @@ export default class Canvas extends TransactionSupport {
      *
      *
      * @param {*} lifeCycles
-     * @returns
+     *
      * @memberof Canvas
      */
     lifeCycle (lifeCycles) {
@@ -213,11 +252,20 @@ export default class Canvas extends TransactionSupport {
     }
 
     /**
+     * Returns a promise for various {@link LifecycleEvents} of the various components of canvas. The promise gets
+     * resolved once the particular event gets completed.
      *
+     * To use this,
+     * ```
+     *      canvas.once('layer.drawn').then(() => {
+     *          // Do any post drawing work here.
+     *      });
+     * ```
+     * @public
      *
-     * @param {*} eventName
-     * @returns
-     * @memberof Canvas
+     * @param {string} eventName Name of the lifecycle event.
+     *
+     * @return {Promise} A pending promise waiting for resolve to be called.
      */
     once (eventName) {
         const lifeCycleManager = this.dependencies().lifeCycleManager;
@@ -230,8 +278,8 @@ export default class Canvas extends TransactionSupport {
      * @internal
      */
     render () {
-        const mount = this.mount();
         const visGroup = this.composition().visualGroup;
+        const mount = this.mount();
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
@@ -265,6 +313,20 @@ export default class Canvas extends TransactionSupport {
         Promise.all(promises).then(() => {
             this._renderedResolve();
         });
+
+        this.done().then(() => {
+            const animDonePromises = [];
+            visGroup.resolver().units().forEach((unitsRow) => {
+                unitsRow.forEach((unit) => {
+                    unit.layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
+                });
+            });
+            Promise.all(animDonePromises).then(() => {
+                lifeCycleManager.notify({ client: this, action: 'animationend' });
+            });
+        });
     }
 
     _createLayoutManager (layoutManagerConfig) {
@@ -277,33 +339,69 @@ export default class Canvas extends TransactionSupport {
         return layoutManager;
     }
     /**
+     * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
      *
+     * ```
+     *   // The first element in the sub array represents the top axis and the second element represents the bottom
+     *   // axis.
+     *   [
+     *      [X1, X2],
+     *      [X3, X4]
+     *   ]
+     * ```
+     * @public
      *
-     * @returns
-     * @memberof Canvas
+     * @return {Array.<Array>} Instances of x axis.
      */
     xAxes () {
         return this.composition().visualGroup.getAxes('x');
     }
 
     /**
+     * Returns the instances of y axis of the canvas. It returns the instances in a two dimensional array form.
      *
-     *
-     * @returns
-     * @memberof Canvas
+     * ```
+     *   // The first element in the sub array represents the left axis and the second element represents the right
+     *   // axis.
+     *   [
+     *      [Y1, Y2],
+     *      [Y3, Y4]
+     *   ]
+     * ```
+     * @public
+     * @return {Array.<Array>} Instances of y axis.
      */
     yAxes () {
         return this.composition().visualGroup.getAxes('y');
     }
 
     /**
+     * Returns all the retinal axis of the canvas. Color, shape and size axis are combinedly called retinal axis.
      *
-     *
-     * @returns
-     * @memberof Canvas
+     * @public
+     * @return {Object} Instances of retinal axis.
+     *          ```
+     *              {
+     *                  color: [ColorAxis], // Array of color axis.
+     *                  shape: [ShapeAxis], // Array of shape axis.
+     *                  size: [SizeAxis] // Array of size axis.
+     *              }
+     *          ```
      */
     getRetinalAxes () {
         const visualGroup = this.composition().visualGroup;
         return visualGroup.getAxes(RETINAL);
+    }
+
+    mount (...params) {
+        if (params.length) {
+            let value = params[0];
+            if (typeof params[0] === 'string') {
+                value = selectElement(params[0]).node();
+            }
+            this._mount = value;
+            return this;
+        }
+        return this._mount;
     }
 }

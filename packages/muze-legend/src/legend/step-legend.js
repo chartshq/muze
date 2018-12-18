@@ -37,7 +37,7 @@ export default class StepLegend extends SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof StepLegend
      */
     static type () {
@@ -48,7 +48,7 @@ export default class StepLegend extends SimpleLegend {
      *
      *
      * @param {*} scale
-     * @returns
+     *
      * @memberof StepLegend
      */
     dataFromScale (scale) {
@@ -104,7 +104,7 @@ export default class StepLegend extends SimpleLegend {
      *
      * @param {*} effPadding
      * @param {*} align
-     * @return
+     *
      * @memberof Legend
      */
     getLabelSpaces (effPadding, align) {
@@ -121,7 +121,7 @@ export default class StepLegend extends SimpleLegend {
     /**
      *
      *
-     * @return
+     *
      * @memberof Legend
      */
     elemType () {
@@ -157,7 +157,7 @@ export default class StepLegend extends SimpleLegend {
      *
      *
      * @param {*} data
-     * @returns
+     *
      * @memberof StepLegend
      */
     getCriteriaFromData (data) {

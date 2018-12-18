@@ -1,10 +1,5 @@
 export const DATA = 'data';
 export const CONFIG = 'config';
 export const MEASUREMENT = 'measurement';
-export const AXES = 'axes';
-export const NORMALIZED_DATA = 'normalizedData';
-export const TRANSFORMED_DATA = 'transformedData';
 export const DOMAIN = 'domain';
 export const MOUNT = 'mount';
-export const FIELDMAP = 'fieldMap';
-export const DATA_UPDATED = 'dataUpdated';

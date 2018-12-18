@@ -20,7 +20,8 @@
     "eslint-plugin-react": "7.3.0",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "istanbul-instrumenter-loader": "^3.0.0",
-    "jsdoc": "3.4.3",
+    "jsdoc": "^3.5.5",
+    "json2yaml": "^1.1.0",
     "karma": "1.7.1",
     "karma-chai": "0.1.0",
     "karma-chrome-launcher": "2.1.1",
@@ -44,7 +45,8 @@
     "webpack": "^4.12.0",
     "webpack-bundle-analyzer": "^2.13.1",
     "webpack-cli": "^3.0.7",
-    "webpack-dev-server": "^3.1.4"
+    "webpack-dev-server": "^3.1.4",
+    "yamljs": "^0.3.0"
   },
   "scripts": {
     "test": "npm run lint && karma start karma.conf.js",
@@ -61,7 +63,7 @@
     "start": "npm run start:dev",
     "lint": "eslint ./packages",
     "lint-errors": "eslint --quiet ./packages",
-    "docs": "jsdoc -c ./jsdoc.conf.json",
+    "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json",
     "postinstall": "lerna bootstrap"
   },
   "dependencies": {

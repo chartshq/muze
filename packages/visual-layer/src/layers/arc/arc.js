@@ -10,7 +10,6 @@ import {
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
-import * as PROPS from '../../enums/props';
 import { ASCENDING, OUTER_RADIUS_VALUE } from '../../enums/constants';
 import { getIndividualClassName } from '../../helpers';
 import { getRangeValue, getRadiusRange, tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint } from './arc-helper';
@@ -20,31 +19,13 @@ const pie = Symbols.pie;
 const arc = Symbols.arc;
 
 /**
- * Arc Layer creates a plot with polar coordinates
- * Example :-
- * const config = {
- *  height: 100,
- *  width: 100,
- *  startAngle: 0,
- * endAngle: Math.PI,
- * cornerRadius: 10,
- * minOuterRadius: 10,
- * outerRadius: 10,
- * innerRadius: 5,
- * padAngle: 2,
- * padRadius: 2,
- * colors: []
- * padding: {top: 10, bottom: 10, left: 10, right: 10},
- *  encoding = {
- *      angle: {
- *          field: 'date' //Maps to angle of arc
- *      },
- *      radius: {
- *          field: 'sales' // Maps to radius of arc
- *      }
- *  }
- * };
+ * Arc Layer creates a plot with polar coordinates.
+ *
+ * @public
+ *
  * @class
+ * @module ArcLayer
+ * @extends BaseLayer
  */
 export default class ArcLayer extends BaseLayer {
 
@@ -68,7 +49,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ArcLayer
      */
     static formalName () {
@@ -78,7 +59,7 @@ export default class ArcLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof ArcLayer
      */
     elemType () {
@@ -103,7 +84,7 @@ export default class ArcLayer extends BaseLayer {
             sort,
             minOuterRadius
         } = config;
-        const prevData = this._store.get(PROPS.TRANSFORMED_DATA) || [];
+        const prevData = this._transformedData || [];
         const fieldsConfig = this.data().getFieldsConfig();
         const {
             angleIndex,
@@ -203,7 +184,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @param {*} set
-     * @returns
+     *
      * @memberof ArcLayer
      */
     getPlotElementsFromSet (set) {
@@ -236,8 +217,7 @@ export default class ArcLayer extends BaseLayer {
             innerRadiusFixer
        } = this.config();
         const sizeAxis = this.axes().size;
-        const store = this._store;
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const transformedData = this._transformedData;
         const chartHeight = height - padding.top - padding.bottom;
         const chartWidth = width - padding.left - padding.right;
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
@@ -250,7 +230,7 @@ export default class ArcLayer extends BaseLayer {
         });
         const colorAxis = this.axes().color;
         const defaultRadius = outerRadius || Math.min(chartHeight, chartWidth) / 2;
-        const radiusDomain = store.get(PROPS.DOMAIN).radius;
+        const radiusDomain = this.domain().radius;
         const rangeValueGetter = d => getRangeValue(d, range, radiusDomain, defaultRadius, sizeAxis);
         // This returns a function that generates the arc path based on the datum provided
         const path = arc()
@@ -284,7 +264,8 @@ export default class ArcLayer extends BaseLayer {
                                 const individualClass = getIndividualClassName(d, i, transformedData, this);
                                 return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
                                     ${individualClass}`;
-                            });
+                            })
+                            .on('end', this._registerAnimationDoneHook());
         };
         const consecutiveExits = [];
         let exitCounter = 0;
@@ -315,7 +296,7 @@ export default class ArcLayer extends BaseLayer {
      *
      *
      * @param {*} identifiers
-     * @returns
+     *
      * @memberof BaseLayer
      */
     getPointsFromIdentifiers (identifiers) {

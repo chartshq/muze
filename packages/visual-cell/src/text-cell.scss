@@ -5,7 +5,10 @@
     text-align: center;
     color: #5f5f5f;
     font-weight: 400;
-    font-family: inherit;
+    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+    transform-origin: 0 0;
 }
 
 .#{$prefix}header-cell {
@@ -13,7 +16,9 @@
     text-align: center;
     color: #858585;
     font-weight: 800;
-    font-family: inherit;
+    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .#{$prefix}subheader-cell {
@@ -21,5 +26,7 @@
     text-align: center;
     color: #858585;
     font-weight: 800;
-    font-family: inherit;
+    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
 }

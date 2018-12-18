@@ -8,7 +8,7 @@ import '../styles.scss';
  *
  *
  * @param {*} data
- * @returns
+ *
  */
 export const getGradientDomain = (data) => {
     if (typeof data[0].value === 'number') {
@@ -25,7 +25,7 @@ export const getGradientDomain = (data) => {
  * @param {*} container
  * @param {*} data
  * @param {*} domain
- * @returns
+ *
  */
 export const makeLinearGradient = (container, data, domain) => {
     const defs = makeElement(container, 'defs', [1]);
@@ -73,7 +73,7 @@ export const createAxis = (context) => {
  * @param {*} container
  * @param {*} data
  * @param {*} classPrefix
- * @returns
+ *
  * @memberof GradientLegend
  */
 const createLegendSkeleton = (container, classPrefix, data) => {
@@ -131,7 +131,7 @@ export const renderGradient = (context, container) => {
         linearGradient,
         legendRect
     } = createLegendSkeleton(container, classPrefix, data);
-    const labelDim = context.axis().source().getAxisDimensions().tickLabelDim;
+    const labelDim = context.axis().source().getAxisDimensions().tickDimensions;
     const {
         padding,
         margin,

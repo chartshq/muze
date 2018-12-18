@@ -16,7 +16,7 @@ export default class GridComponent extends MuzeComponent {
     sanitizeGrid () {
         let height = 0;
         let width = 0;
-        const { viewMatricesInfo, layoutDimensions } = this.component.getViewInformation();
+        const { viewMatricesInfo, layoutDimensions } = this.component.viewInfo();
         const gridComponents = [];
         for (let i = 0; i < 3; i++) {
             gridComponents[i] = [];

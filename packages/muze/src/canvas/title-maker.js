@@ -6,7 +6,7 @@ import { TOP } from '../constants';
  *
  *
  * @param {*} rawContent
- * @returns
+ *
  */
 const resolveTitleSubTitleContent = (rawContent) => {
     if (typeof rawContent === 'function' && !rawContent._sanitize) {
@@ -22,7 +22,7 @@ const resolveTitleSubTitleContent = (rawContent) => {
  * @param {*} cellType
  * @param {*} labelManager
  * @param {*} prevCell
- * @returns
+ *
  */
 const headerCreator = (config, type, labelManager, prevCell) => {
     const {
@@ -56,7 +56,7 @@ const headerCreator = (config, type, labelManager, prevCell) => {
  * @param {*} type
  * @param {*} labelManager
  * @param {*} cell
- * @returns
+ *
  */
 const createHeading = (config, type, labelManager, prevCell) => {
     if (!config) { return ''; }
@@ -85,6 +85,8 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
             const config = headerOptions[1];
 
             config.width = context.width();
+            config.height = context.height();
+            config.classPrefix = context.config().classPrefix;
             config.content = content;
             config.classPrefix = context.config().classPrefix;
 

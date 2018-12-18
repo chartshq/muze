@@ -190,7 +190,7 @@ const getDomainFromData = (data, fields, fieldType) => {
  */
 const unionDomain = (domains, fieldType) => {
     let domain;
-    domains = domains.filter(dom => dom.length);
+    domains = domains.filter(dom => dom && dom.length);
     if (fieldType === DimensionSubtype.CATEGORICAL) {
         domain = domain = [].concat(...domains);
     } else {
@@ -393,11 +393,10 @@ const unique = arr => ([...new Set(arr)]);
 
 /**
  * DESCRIPTION TODO
- * @todo
  *
  * @export
  * @param {Object} graph graph whose dependency order has to be generated
- * @return {Object} @todo
+ * @return {Object}
  */
 const getDependencyOrder = (graph) => {
     const dependencyOrder = [];
@@ -405,11 +404,10 @@ const getDependencyOrder = (graph) => {
     const keys = Object.keys(graph);
     /**
      * DESCRIPTION TODO
-     * @todo
      *
      * @export
-     * @param {Object} name @todo
-     * @return {Object} @todo
+     * @param {Object} name
+     * @return {Object}
      */
     const visit = (name) => {
         if (dependencyOrder.length === keys.length) {
@@ -488,6 +486,42 @@ const objectIterator = (obj, fn) => {
     }
 }
 
+const addListenerToNamespace = (namespaceInf, fn, context) => {
+    let key = namespaceInf.key;
+    const namespace = namespaceInf.namespace;
+    if (namespace) {
+        !context._listeners[namespace] && (context._listeners[namespace] = []);
+        if (!key) {
+            key = Object.keys(context._listeners[namespace]).length;
+        }
+        context._listeners[namespace][key] = fn;
+    } else {
+        key = Object.keys(context._listeners).length;
+        context._listeners[key] = fn;
+    }
+};
+
+/**
+ *
+ *
+ * @param {*} obj
+ * @param {*} fields
+ *
+ */
+const getObjProp = (obj, ...fields) => {
+    if (obj === undefined || obj === null) {
+        return obj;
+    }
+    let retObj = obj;
+    for (let i = 0, len = fields.length; i < len; i++) {
+        retObj = retObj[fields[i]];
+        if (retObj === undefined || retObj === null) {
+            break;
+        }
+    }
+    return retObj;
+};
+
 /**
  * Methods to handle changes to table configuration and reactivity are handled by this
  * class.
@@ -506,7 +540,7 @@ class Store {
     constructor (config) {
         // create reactive model
         this.model = Model.create(config);
-        this._listeners = [];
+        this._listeners = {};
     }
 
     /**
@@ -540,13 +574,13 @@ class Store {
      * @param {Function} callBack The callback to execute.
      * @memberof Store
      */
-    /* istanbul ignore next */registerChangeListener (propNames, callBack, instantCall) {
+    /* istanbul ignore next */registerChangeListener (propNames, callBack, instantCall, namespaceInf = {}) {
         let props = propNames;
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
         const fn = this.model.next(props, callBack, instantCall);
-        this._listeners.push(fn);
+        addListenerToNamespace(namespaceInf, fn, this);
         return this;
     }
     /**
@@ -557,13 +591,13 @@ class Store {
      * @param {Function} callBack The callback to execute.
      * @memberof Store
      */
-    /* istanbul ignore next */ registerImmediateListener (propNames, callBack, instantCall) {
+    /* istanbul ignore next */ registerImmediateListener (propNames, callBack, instantCall, namespaceInf = {}) {
         let props = propNames;
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
         const fn = this.model.on(props, callBack, instantCall);
-        this._listeners.push(fn);
+        addListenerToNamespace(namespaceInf, fn, this);
         return this;
     }
     /**
@@ -590,8 +624,27 @@ class Store {
         return this.model.calculatedProp(propName, callBack);
     }
 
+    append (propName, value) {
+        this.model.append(propName, value);
+        return this;
+    }
+
     unsubscribeAll () {
-        this._listeners.forEach(fn => fn());
+        Object.values(this._listeners).forEach(fn => fn());
+        return this;
+    }
+
+    unsubscribe (namespaceInf = {}) {
+        const { namespace, key } = namespaceInf;
+        const listeners = this._listeners[namespace];
+        if (key) {
+            const fn = getObjProp(listeners, key);
+            fn && fn();
+        } else {
+            Object.values(listeners).forEach(fn => fn());
+            this._listeners[namespace] = [];
+        }
+        return this;
     }
 }
 
@@ -628,23 +681,42 @@ const intSanitizer = (val) => {
  * @param {Object} holder an empty object on which the getters and setters will be mounted
  * @param {Object} options options config based on which the getters and setters are determined.
  * @param {Hyperdis} model optional model to attach the property. If not sent new moel is created.
- * @return {Array} @todo
+ * @return {Array}
  */
-const transactor = (holder, options, model) => {
+const transactor = (holder, options, model, namespaceInf = {}) => {
     let conf;
     const store = model && model instanceof Model ? model : Model.create({});
 
     for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
             conf = options[prop];
-            if (!store.prop(prop)) {
-                store.append({ [prop]: conf.value });
+            let nameSpaceProp;
+            let namespace = namespaceInf.namespace;
+            const subNamespace = namespaceInf.subNamespace !== undefined ? namespaceInf.subNamespace : prop;
+            if (namespace) {
+                if (namespaceInf.subNamespace !== undefined) {
+                    namespace = `${namespace}.${prop}`;
+                    nameSpaceProp = `${namespace}.${subNamespace}`;
+                } else {
+                    nameSpaceProp = `${namespace}.${prop}`;
+                }
+            } else {
+                nameSpaceProp = prop;
             }
-            holder[prop] = ((context, key, meta) => (...params) => {
+            if (!store.prop(`${nameSpaceProp}`)) {
+                if (namespace) {
+                    store.append(namespace, {
+                        [subNamespace]: conf.value
+                    });
+                } else {
+                    store.append({ [nameSpaceProp]: conf.value });
+                }
+            }
+            holder[prop] = ((context, meta, nsProp) => (...params) => {
                 let val;
                 let compareTo;
                 const paramsLen = params.length;
-                const prevVal = store.prop(prop);
+                const prevVal = store.prop(nsProp);
                 if (paramsLen) {
                     // If parameters are passed then it's a setter
                     const spreadParams = meta && meta.spreadParams;
@@ -693,7 +765,7 @@ const transactor = (holder, options, model) => {
                             }
                         }
                         const preset = meta.preset;
-                        const oldValues = context.prop(key);
+                        const oldValues = context.prop(nsProp);
                         preset && preset(values[0], holder);
                         if (spreadParams) {
                             oldValues.forEach((value, i) => {
@@ -702,15 +774,15 @@ const transactor = (holder, options, model) => {
                                 }
                             });
                         }
-                        values.length && context.prop(key, spreadParams ? values : values[0]);
+                        values.length && context.prop(nsProp, spreadParams ? values : values[0]);
                     } else {
-                        context.prop(key, spreadParams ? val : val[0]);
+                        context.prop(nsProp, spreadParams ? val : val[0]);
                     }
                     return holder;
                 }
             // No parameters are passed hence its a getter
-                return context.prop(key);
-            })(store, prop, conf.meta);
+                return context.prop(nsProp);
+            })(store, conf.meta, nameSpaceProp);
         }
     }
 
@@ -727,9 +799,13 @@ const generateGetterSetters = (context, props) => {
     Object.entries(props).forEach((propInfo) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
+        const defVal = propInfo[1].defaultValue;
         const sanitization = propInfo[1].sanitization;
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            if (defVal) {
+                context[`_${prop}`] = defVal;
+            }
             context[prop] = (...params) => {
                 if (params.length) {
                     let value = params[0];
@@ -763,7 +839,7 @@ const getArraySum = (arr, prop) => arr.reduce((total, elem) => {
  *
  * @param {*} arr1
  * @param {*} arr2
- * @returns
+ *
  */
 const arraysEqual = (arr1, arr2) => {
     if (arr1.length !== arr2.length) { return false; }
@@ -1061,7 +1137,7 @@ const detectColor = (col) => {
  *
  * @param {*} model
  * @param {*} propModel
- * @returns
+ *
  */
 const filterPropagationModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
@@ -1125,7 +1201,7 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  *
  * @param {*} dataModel
  * @param {*} criteria
- * @returns
+ *
  */
 const getDataModelFromRange = (dataModel, criteria, mode) => {
     if (criteria === null) {
@@ -1152,7 +1228,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
  *
  * @param {*} dataModel
  * @param {*} identifiers
- * @returns
+ *
  */
 const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
     let filteredDataModel;
@@ -1189,15 +1265,23 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
  * @param {*} context
  * @param {*} listenerMap
  */
-const registerListeners = (context, listenerMap) => {
-    const propListenerMap = listenerMap(context);
+const registerListeners = (context, listenerMap, ...params) => {
+    const propListenerMap = listenerMap(context, ...params);
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
+            const namespace = params[0];
+            const subNamespaceInf = params[1];
+            let ns = null;
+            if (namespace && subNamespaceInf) {
+                ns = `${namespace.local}.${subNamespaceInf.subNamespace}`;
+            }
             const mapObj = propListenerMap[key];
             const propType = mapObj.type;
             const props = mapObj.props;
             const listenerFn = mapObj.listener;
-            context.store()[propType](props, listenerFn);
+            context.store()[propType](props, listenerFn, false, {
+                namespace: ns
+            });
         }
     }
 };
@@ -1206,29 +1290,8 @@ const isValidValue = value => !isNaN(value) && value !== -Infinity && value !== 
 /**
  *
  *
- * @param {*} obj
- * @param {*} fields
- * @returns
- */
-const getObjProp = (obj, ...fields) => {
-    if (obj === undefined || obj === null) {
-        return obj;
-    }
-    let retObj = obj;
-    for (let i = 0, len = fields.length; i < len; i++) {
-        retObj = retObj[fields[i]];
-        if (retObj === undefined || retObj === null) {
-            break;
-        }
-    }
-    return retObj;
-};
-
-/**
- *
- *
  * @param {*} str
- * @returns
+ *
  */
 const escapeHTML = (str) => {
     const htmlEscapes = {

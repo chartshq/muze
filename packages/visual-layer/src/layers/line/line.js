@@ -10,7 +10,6 @@ import { BaseLayer } from '../../base-layer';
 import { drawLine } from './renderer';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
-import * as PROPS from '../../enums/props';
 import {
     attachDataToVoronoi,
     animateGroup,
@@ -22,26 +21,18 @@ import {
 import './styles.scss';
 
 /**
- * Line Layer creates a line plot.
- * Example :-
- * const config = {
- *  encoding = {
- *      x: {
- *          field: 'date'
- *      },
- *      y: {
- *          field: 'sales'
- *      }
- *  }
- * };
- * const linelayer = layerFactory.getLayer('line', [dataModel, axes, config]);
- * linelayer.render(container);
+ * This layer is used to render straight or smoothed line paths. The mark type of this layer is ```line```.
+ *
+ * @public
+ *
  * @class
+ * @module LineLayer
+ * @extends BaseLayer
  */
 export default class LineLayer extends BaseLayer {
 
     /**
-     *Creates an instance of LineLayer.
+     * Creates an instance of LineLayer.
      * @param {*} args
      * @memberof LineLayer
      */
@@ -54,7 +45,7 @@ export default class LineLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof LineLayer
      */
     static formalName () {
@@ -64,7 +55,7 @@ export default class LineLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof LineLayer
      */
     elemType () {
@@ -85,7 +76,7 @@ export default class LineLayer extends BaseLayer {
      * @static
      * @param {*} conf
      * @param {*} userConf
-     * @returns
+     *
      * @memberof LineLayer
      */
     static defaultPolicy (conf, userConf) {
@@ -108,43 +99,7 @@ export default class LineLayer extends BaseLayer {
         return drawLine;
     }
 
-    /**
-     * Applies selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    highlightPoint () {
-        return this;
-    }
-
-    /**
-     * Removes selection styles to the elements that fall within the selection set.
-     * @param {Array} selectionSet Array of tuple ids.
-     * @param {Object} config Configuration for selection.
-     * @return {BarLayer} Instance of bar layer.
-     */
-    dehighlightPoint () {
-        return this;
-    }
-
-    focusSelection () {
-        return this;
-    }
-
-    focusOutSelection () {
-        return this;
-    }
-
-    fadeOutSelection () {
-        return this;
-    }
-
-    unfadeSelection () {
-        return this;
-    }
-
-    shouldDrawAnchors () {
+    static shouldDrawAnchors () {
         return true;
     }
 
@@ -224,9 +179,8 @@ export default class LineLayer extends BaseLayer {
             defClassName,
             transition
         } = config;
-        const store = this._store;
-        const normalizedData = store.get(PROPS.NORMALIZED_DATA);
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const normalizedData = this._normalizedData;
+        const transformedData = this._transformedData;
         const fieldsConfig = this.data().getFieldsConfig();
         const axes = this.axes();
         const keys = transformedData.map(d => d.key);
@@ -272,6 +226,7 @@ export default class LineLayer extends BaseLayer {
 
                 style = this.getPathStyle(color);
                 this.getDrawFn()({
+                    layer: this,
                     container: group.node(),
                     interpolate,
                     points,

@@ -11,7 +11,7 @@ import GridComponent from './components/grid-component';
  *
  *
  * @param {*} context
- * @returns
+ *
  */
 export const prepareLayout = (layout, renderDetails) => {
     const { components, layoutConfig, measurement } = renderDetails;
@@ -27,15 +27,16 @@ export const prepareLayout = (layout, renderDetails) => {
         bottomLeft,
         bottomRight
     } = cornerMatrices;
-
-    layout.measurement(measurement)
-                    .config(layoutConfig)
-                    .matrices({
-                        top: [topLeft, columns[0], topRight],
-                        center: [rows[0], values, rows[1]],
-                        bottom: [bottomLeft, columns[1], bottomRight]
-                    })
-                    .triggerReflow();
+    if (rows && columns) {
+        layout.measurement(measurement)
+                        .config(layoutConfig)
+                        .matrices({
+                            top: [topLeft, columns[0], topRight],
+                            center: [rows[0], values, rows[1]],
+                            bottom: [bottomLeft, columns[1], bottomRight]
+                        })
+                        .triggerReflow();
+    }
 };
 
 /**
@@ -43,7 +44,7 @@ export const prepareLayout = (layout, renderDetails) => {
  *
  * @param {*} context
  * @param {*} mount
- * @returns
+ *
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
@@ -55,6 +56,7 @@ export const getRenderDetails = (context, mount) => {
     const {
         isColumnSizeEqual,
         isRowSizeEqual,
+        priority,
         rows,
         columns,
         values
@@ -129,7 +131,8 @@ export const getRenderDetails = (context, mount) => {
         subtitle: subtitleConfig,
         isColumnSizeEqual,
         isRowSizeEqual,
-        mount
+        mount,
+        priority
     });
     return {
         layoutConfig,

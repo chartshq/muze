@@ -1,5 +1,4 @@
 /**
- * @module
  * This is the global options semantics based on which setters getters are created and reactivity is initiated.
  * Format
  *  PROPERTRY_NAME: {
@@ -12,6 +11,7 @@
  *          sanitizaiton: // Need for sanitization before type is checked
  *      }
  *  }
+ * @module GlobalOptions
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';

@@ -1,3 +1,5 @@
+import { getEvent } from 'muze-utils';
+
 /**
  * Adds mouse interactions to target element.
  * @param {Firebolt} Firebolt instance of firebolt.
@@ -6,6 +8,7 @@
  */
 /* istanbul ignore next */ const hover = firebolt => (targetEl, behaviours) => {
     const dispatchBehaviour = function (args) {
+        const event = getEvent();
         const payload = {
             criteria: firebolt.context.getCriteriaFromData(args)
         };
@@ -16,6 +19,7 @@
     targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
+                        const event = getEvent();
                         behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
                             criteria: null
                         }));

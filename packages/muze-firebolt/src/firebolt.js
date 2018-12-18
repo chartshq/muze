@@ -18,8 +18,15 @@ import {
 } from './helper';
 
 /**
- * Relient firebolt is responsible for dispatching behaviours. It has only behaviours which can be
- * dispatched without any physical action being triggered.
+ * This class is responsible for dispatching behavioural actions and side effects. It also keeps the information of
+ * registered physical actions, behavioural actions and side effects. Also, it keeps the map of physical and behavioural
+ * actions and behavioural actions and side effects. Whenever any behavioural action is dispatched, it also propagates
+ * the rows which got affected to the other datamodels. This class is initialized by {@link VisualUnit} and legend to
+ * manage it's interaction.
+ *
+ * @public
+ * @class Firebolt
+ * @module Firebolt
  */
 export default class Firebolt {
     constructor (context, actions, sideEffects, behaviourEffectMap) {
@@ -56,14 +63,7 @@ export default class Firebolt {
 
     config (...config) {
         if (config.length) {
-            const conf = this._config = mergeRecursive(this._config, config[0]);
-            const sideEffects = this.sideEffects();
-            for (const key in sideEffects) {
-                if ({}.hasOwnProperty.call(sideEffects, key)) {
-                    const sideEffectConf = conf[key];
-                    sideEffectConf && sideEffects[key].config(sideEffectConf);
-                }
-            }
+            this._config = mergeRecursive(this._config, config[0]);
             return this;
         }
         return this._config;
@@ -105,6 +105,7 @@ export default class Firebolt {
         for (const key in sideEffects) {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
+        this.initializeSideEffects();
         return this;
     }
 
@@ -306,6 +307,20 @@ export default class Firebolt {
         return this;
     }
 
+    /**
+     * Allows to propagate the datamodel with only the supplied fields. When propagation is done, then the fields
+     * which are supplied for the specified behavioural action is propagated.
+     *
+     * @public
+     *
+     * @param {string} action Name of behavioural action. If '*' is specified, then for all behavioural actions it is
+     * applied.
+     * @param {Array} fields Array of field names which will be propagated.
+     * @param {boolean} append If true, then it is appended to the existing propagation data model fields else only
+     * those fields are projected from propagation data model and propagated.
+     *
+     * @return {Firebolt} Instance of firebolt
+     */
     propagateWith (action, fields, append = false) {
         const behaviouralActions = this._actions.behavioural;
         if (fields.length) {
@@ -430,6 +445,15 @@ export default class Firebolt {
         return this._resetted;
     }
 
+    /**
+     * Returns the entry and exit set information of the specified behavioural action.
+     *
+     * @public
+     *
+     * @param {string} behaviour Name of behavioural action.
+     *
+     * @return {Object} Entry exit set information.
+     */
     getEntryExitSet (behaviour) {
         return this._entryExitSet[behaviour];
     }

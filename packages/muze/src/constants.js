@@ -64,4 +64,3 @@ export const DIMENSION = 'dimension';
 export const MEASURE = 'measure';
 export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
-

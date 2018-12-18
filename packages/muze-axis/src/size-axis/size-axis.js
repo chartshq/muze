@@ -43,7 +43,7 @@ export default class SizeAxis {
      * @param {*} domainType
      * @param {*} rangeType
      * @param {*} schemeType
-     * @returns
+     *
      * @memberof ColorAxis
      */
     setStrategy (domainType, rangeType) {
@@ -53,7 +53,7 @@ export default class SizeAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof SizeAxis
      */
     createScale (strategy) {
@@ -70,7 +70,7 @@ export default class SizeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static defaultConfig () {
@@ -81,7 +81,7 @@ export default class SizeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static type () {
@@ -92,7 +92,7 @@ export default class SizeAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof SizeAxis
      */
     getSize (domainVal = 0) {

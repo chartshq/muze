@@ -1,0 +1,151 @@
+---
+  title: "VisualUnit"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=VisualUnit></a> <span style=\"font-family: Source Code Pro; font-weight: 500;color: #eb5757;\">VisualUnit</span>\n\nVisual Unit is hierarchical component created by [VisualGroup](VisualGroup). This component accepts layer definitions\nand creates concrete layer instances from them, binds data and attaches axis to them. It also retreives the domain\nfrom the layers and unions them and sets them on corresponding axis instances. This also creates the parent svg\ngroups for all the layers and delegates the rendering to all the layers."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=firebolt></a> firebolt </span></h2>\n\nReturns the instance of firebolt associated with this visual unit. Firebolt dispatches the behavioural actions\nwhen any physical action happens on the elements of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Firebolt></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[firebolt](api-firebolt):&nbsp;</span>Instance of firebolt."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=id></a> id </span></h2>\n\nReturns the unique id of this visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Unique identifier."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=enableCaching></a> enableCaching </span></h2>\n\nCaches all the datamodels in an array from the next `data()` call on visual unit until `clearCaching()` or\n`resetData()` is called on it."
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getDrawingContext></a> getDrawingContext </span></h2>\n\nReturns the drawing information from visual unit.Drawing context contains the dimensions of unit and the svg\ncontainer of the visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Drawing information.\n     <pre><code>         {\n             htmlContainer: // Html container of svg container of the visual unit\n             svgContainer: // Root svg container\n             width: // Width of the visual unit\n             height: // Height of the visual unit\n             sideEffectGroup: // Svg group for drawing side effect elements.\n             parentContainer: // Parent html container of the visual unit.\n             xOffset: // x offset space from the starting x position of the container,\n             yOffset: // y offset space from the starting y position of the container\n         }\n</code></pre></p>\n"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=addLayer></a> addLayer </span></h2>\n\nAdds a new layer to the visual unit. It takes a layer definition and creates layer instances from them. It does\nnot render the layers. It returns the layer instances in an array. If the layer definition is a composite layer,\nthen multiple layer instances will be returned in the array.\n\nTo add a layer in the unit,\n```\n     unit.addLayer({\n         name: 'bullet',\n         mark: 'bar',\n         encoding: {\n             x: 'Year',\n             y: 'Acceleration',\n             color: 'Origin'\n         }\n     });\n```"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">layerDef</td>\n                <td><p>Object</p> </td>\n                <td><p>Definition of new layer.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of layer instances."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getLayersByType></a> getLayersByType </span></h2>\n\nReturns an array of layer instances which matches the supplied mark type."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<tr>\n                \n                <td><p>Mark type of layer.</p> </td>\n                <td></td>\n            </tr>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of layer instances."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getLayerByName></a> getLayerByName </span></h2>\n\nReturns the layer instance which matches the supplied layer name. If no layer is found, then it returns\nundefined."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">name</td>\n                <td><p>string</p> </td>\n                <td><p>Name of layer.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Layer instance."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getNearestPoint></a> getNearestPoint </span></h2>\n\nReturns the point located nearest to the supplied x and y position. It returns the unique identifiers of the\npoint. This function also accepts an additional configuration `getAllPoints` inside `config` object in the third\nargument which if set to true, then it returns the identifiers of all the points which falls on the nearest\nx value or y value if any one of the field is a dimension. Additionally, a target property is also returned\nwhich contains the identifier of the nearest point. If no nearest point is found, then it returns identifier\nas null."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">x</td>\n                <td><p>number</p> </td>\n                <td><p>X Position of the point from where nearest point is to be found.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">y</td>\n                <td><p>number</p> </td>\n                <td><p>Y Position of the point from where nearest point is to be found.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Additional configuration options.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">getAllPoints</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then returns all the points nearest to the x value or y value if it is dimension.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">data</td>                 <td><p>Object</p> </td>                 <td><p>Data associated with the nearest point.</p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Nearest point information</p>\n<pre><code>     {\n         id: [[&#39;Origin&#39;], [&#39;USA&#39;], [&#39;Japan&#39;]], // Identifiers of all the points closest to the x value.\n         target: [[&#39;Origin&#39;], [&#39;Japan&#39;]] // Identifier of the nearest point.\n     }\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getPlotPointsFromIdentifiers></a> getPlotPointsFromIdentifiers </span></h2>\n\nGet the information of all the marks such as x, y position and size from supplied identifiers. It\nreturns an array of points whose data matches the given identifiers."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">identifiers</td>\n                <td><p>Array</p> <p>Object</p> </td>\n                <td><p>Field names and their corresponding values. <p><code>identifiers can be given in an array of array,      [&#39;Origin&#39;, &#39;Name&#39;], // Names of the fields supplied in first array      [&#39;USA&#39;, &#39;ford&#39;], // Data values of each field supplied in rest of the arrays.      [&#39;Japan&#39;, &#39;ford&#39;] or in an object,      {          Origin: [&#39;USA&#39;]      }</code></p></p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Optional configurations which decides which information of the mark will be retrieved.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">getAllAttrs</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then returns all the information of each mark.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">getBBox</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then returns the bounding box of each mark.</p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span><p>Array of objects containing the information of each point.</p>\n<pre><code>By default, the method returns the array of points in this structure,\n     [\n         {\n             x: 20,\n             y: 100,\n             width: 200,\n             height: 100\n         }\n     ]\nIf &#39;config.getAllAttrs&#39; is true, then it returns all the information of each mark,\n     [\n     // Positions of mark on initial state of transition.\n         enter: {\n             x: 0,\n             y: 0\n         },\n         // Final positions of the mark\n         update: {\n             x: 20,\n             y: 10\n         },\n         style: // css styles of each mark\n         source: [200, &#39;USA&#39;] // Row information of each mark\n         id: 20 // Row id of each mark\n     ]\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=removeLayerByName></a> removeLayerByName </span></h2>\n\nRemoves the layer instance which matches the supplied layer name."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">name</td>\n                <td><p>string</p> </td>\n                <td><p>Name of layer</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=removeLayersByType></a> removeLayersByType </span></h2>\n\nRemoves all the layer instances which matches the supplied mark type."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<tr>\n                \n                <td><p>Mark type of layer.</p> </td>\n                <td></td>\n            </tr>"
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=data></a> data </span></h2>\n\nUpdates the visual unit with new data model. This also internally updates the datamodel of all the layers and\nrerenders them."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">data</td>\n                <td><p>DataModel</p> </td>\n                <td><p>Instance of new data model.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=facetByFields></a> facetByFields </span></h2>\n\nReturns the facet field names and their values associated with this visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span><p>Facet field information.\n <pre><code>    [\n     [&#39;Cylinders&#39;, &#39;Origin&#39;], // First array defines the name of the facet fields.\n     [&#39;8&#39;, &#39;USA&#39;] // Second array defines the values of the corresponding facet fields.\n    ]\n</code></pre></p>\n"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=retinalFields></a> retinalFields </span></h2>\n\nReturns the retinal fields like color, shape and size field associated with this visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Color, shape and size fields."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=parentAlias></a> parentAlias </span></h2>\n\nReturns the alias of the visual group which houses this visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Alias of the parent visual group."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=layers></a> layers </span></h2>\n\nReturns the instances of the layers which is created by the visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of layer instances."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=axes></a> axes </span></h2>\n\nReturns the axis instances attached to this visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Axis instances.</p>\n<pre><code>    {\n        x: [PrimaryAxis, SecondaryAxis], // First element in array is primary x axis and the second element\n     is the secondary x axis.\n        y: [PrimaryAxis, SecondaryAxis], // First element in array is primary y axis and the second element\n     is the secondary y axis.\n        color: [ColorAxis],\n        shape: [ShapeAxis],\n        size: [SizeAxis]\n    }\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=fields></a> fields </span></h2>\n\nReturns the axis fields of the visual unit. It returns the variable instances of the primary and secondary axis\nfields attached with the visual unit."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>X and Y Axis fields.</p>\n<pre><code>     {\n         x: [[SimpleVariable](SimpleVariable)/[ComposedVar](ComposedVar), [SimpleVariable](SimpleVariable)/[ComposedVar](ComposedVar)],\n         y: [[SimpleVariable](SimpleVariable)/[ComposedVar](ComposedVar),[SimpleVariable](SimpleVariable)/[ComposedVar](ComposedVar)]\n     }\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=clearCaching></a> clearCaching </span></h2>\n\nClears all the previous cached data."
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=resetData></a> resetData </span></h2>\n\nResets the data of visual unit to original data model. It also clears the cached data."
+    - 
+      type: "markdown-section"
+      content: "<a name=VisualUnit></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[visualunit](api-visualunit):&nbsp;</span>Instance of visual unit."

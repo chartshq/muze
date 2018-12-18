@@ -13,7 +13,7 @@ const area = Symbols.area;
  */
 const /* istanbul ignore next */ drawArea = (params) => {
     let filteredPoints;
-    const { container, points, style, transition, className, connectNullData, interpolate } = params;
+    const { layer, container, points, style, transition, className, connectNullData, interpolate } = params;
 
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
@@ -40,7 +40,8 @@ const /* istanbul ignore next */ drawArea = (params) => {
 
                         element.classed(d[0].className, true);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
-                    });
+                    })
+                    .on('end', layer._registerAnimationDoneHook());
 };
 
 export default drawArea;

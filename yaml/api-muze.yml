@@ -1,0 +1,10 @@
+---
+  title: "Muze"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=Muze></a> <span style=\"font-family: Source Code Pro; font-weight: 500;color: #eb5757;\">Muze</span>\n\nEntry point to renderer. Initializes an environment with settings and registries for canvas. This is a simple wrapper\nover [Canvas](Canvas) which enables common configuration passing to multiple such canvases.\n\nEverytime `muze()` is called it creates an environment. These environment supports subset of APIs of Canvas. If\ncommon configuration is used to render multiple canvases then it can be set directly in the env. Like if data is\ncommon across all the visulization then its better to set the data in env. When a canvas is created it receives all\nthose configuration from env.\n\n```\n // Creates an environment\n const env = muze()\n // Set data property in environment, so that all the canvas created from the same environment gets this data\n // automatically\n env.data(dm);\n // Creates canvas, by default env pushes data to canvas instance\n const canvas = env.canvas();\n```\n\nIf a property is set on both environment and canvas instance, property set on canvas instance gets more priority."
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of an environment"

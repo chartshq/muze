@@ -72,7 +72,7 @@
         visibility: hidden;
         border-top: none;
     }
-
+    
     svg {
         display: block;
         width: inherit;
@@ -132,8 +132,6 @@
 .#{$prefix}grid-layout-container {
     position: relative;
     float: left;
-
-    // overflow: scroll;
 }
 .#{$prefix}grid-table {
     background-color: transparent;
@@ -173,14 +171,13 @@
 .#{$prefix}grid table{
     border-collapse: collapse;
 }
-
- .#{$prefix}title-cell{
+.#{$prefix}title-cell{
     font-size: 24px;
     font-weight: bold;
     color: #5f5f5f;
   }
 
- .#{$prefix}subtitle-cell {
+  .#{$prefix}subtitle-cell {
     font-size: 16px;
     font-weight: normal;
     color:#b1b1b1;

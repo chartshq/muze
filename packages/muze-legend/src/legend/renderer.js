@@ -18,7 +18,7 @@ import {
  * @param {*} data
  * @param {*} legendInstance
  * @param {*} align
- * @return
+ *
  */
 export const getItemContainers = (container, data, legendInstance) => {
     const measurement = legendInstance.measurement();
@@ -52,7 +52,7 @@ export const getItemContainers = (container, data, legendInstance) => {
  * @param {*} container
  * @param {*} classPrefix
  * @param {*} data
- * @returns
+ *
  * @memberof DiscreteLegend
  */
 export const createLegendSkeleton = (context, container, classPrefix, data) => {
@@ -146,7 +146,7 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
  *
  *
  * @param {*} str
- * @returns
+ *
  */
 const checkPath = (str) => {
     if (/^[mzlhvcsqta]\s*[-+.0-9][^mlhvzcsqta]+/i.test(str) && /[\dz]$/i.test(str) && str.length > 4) {

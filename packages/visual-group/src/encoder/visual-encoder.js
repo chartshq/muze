@@ -51,7 +51,7 @@ export default class VisualEncoder {
      *
      * @param {*} datamodel
      * @param {*} config
-     * @return
+     *
      * @memberof VisualEncoder
      */
     fieldSanitizer (datamodel, config) {
@@ -63,7 +63,7 @@ export default class VisualEncoder {
      *
      *
      * @param {*} params
-     * @return
+     *
      * @memberof VisualEncoder
      */
     axisFrom (...params) {
@@ -78,7 +78,7 @@ export default class VisualEncoder {
      *
      *
      * @param {*} params
-     * @return
+     *
      * @memberof VisualEncoder
      */
     headerFrom (...params) {
@@ -93,7 +93,7 @@ export default class VisualEncoder {
      *
      *
      * @param {*} axisFrom
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     setAxisAndHeaders (axisFrom = {}, fields) {

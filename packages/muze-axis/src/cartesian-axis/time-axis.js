@@ -1,9 +1,9 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
-import { adjustRange } from './helper';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { DOMAIN } from '../enums/constants';
+import { calculateBandSpace, getRotatedSpaces, setContinousAxisDomain } from './helper';
+import { spaceSetter } from './space-setter';
 
 /**
  *
@@ -23,7 +23,7 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @param {*} range
-     * @returns
+     *
      * @memberof TimeAxis
      */
     createScale (range) {
@@ -37,37 +37,11 @@ export default class TimeAxis extends SimpleAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TimeAxis
      */
     static type () {
         return TIME;
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof BandAxis
-     */
-    setTickConfig () {
-        let smartTicks;
-        let smartlabel;
-        const { maxWidth, maxHeight, tickFormat } = this.config();
-        const { labelManager } = this._dependencies;
-        const domain = this.getTickValues();
-        const scale = this.scale();
-
-        smartTicks = domain;
-        const tickFormatter = tickFormat || scale.tickFormat();
-
-        if (domain && domain.length) {
-            smartTicks = domain.map((d, i) => {
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
-                return labelManager.constructor.textToLines(smartlabel);
-            });
-        }
-        return smartTicks;
     }
 
     /**
@@ -101,14 +75,14 @@ export default class TimeAxis extends SimpleAxis {
      /**
      *
      *
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {
         const {
             showInnerTicks,
             showOuterTicks
-        } = this.config();
+        } = this.renderConfig();
         const axis = this.axis();
         axis.tickSizeInner(showInnerTicks === false ? 0 : 6);
         axis.tickSizeOuter(showOuterTicks === false ? 0 : 6);
@@ -118,18 +92,18 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @returns
+     *
      * @memberof TimeAxis
      */
     getTickValues () {
-        return this.scale().ticks();
+        return this.config().tickValues || this.scale().ticks();
     }
 
     /**
      *
      *
      * @param {*} diff
-     * @returns
+     *
      * @memberof TimeAxis
      */
     minDiff (diff) {
@@ -140,52 +114,31 @@ export default class TimeAxis extends SimpleAxis {
     /**
      *
      *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     * @returns
-     * @memberof BandAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-        const range = this.range();
-        const availSpace = Math.abs(range[0] - range[1]);
-
-        this.config({ labels: { rotation: 0, smartTicks: false } });
-        if (orientation === TOP || orientation === BOTTOM) {
-            const smartWidth = this.smartTicks().reduce((acc, n) => acc + n.width, 0);
-            // set multiline config
-            if (availSpace > 0 && axisTickLabels.length * labelWidth > availSpace) {
-                if (availSpace && smartWidth * 1.25 < availSpace) {
-                    this.config({ labels: { smartTicks: true } });
-                }
-                this.config({ labels: { rotation: -90 } });
-            }
-        }
-        return this;
-    }
-
-    /**
-     *
-     *
      * @param {*} d
-     * @returns
+     *
      * @memberof SimpleAxis
      */
     domain (domain) {
         if (domain) {
-            const { nice } = this.config();
-
-            if (domain.length && domain[0] === domain[1]) {
-                domain = [0, +domain[0] * 2];
-            }
-            this.scale().domain(domain);
-            nice && this.scale().nice();
-            this._domain = this.scale().domain();
-            this.smartTicks(this.setTickConfig());
-            this.store().commit(DOMAIN, this._domain);
+            setContinousAxisDomain(this, domain);
+            this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;
         } return this._domain;
+    }
+
+    /**
+     * Gets the space occupied by the axis
+     *
+     * @return {Object} object with details about size of the axis.
+     * @memberof SimpleAxis
+     */
+    getLogicalSpace () {
+        if (!this.logicalSpace()) {
+            this.logicalSpace(calculateBandSpace(this));
+            this.logicalSpace();
+        }
+        return this.logicalSpace();
     }
 
     getMinTickDifference () {
@@ -193,47 +146,70 @@ export default class TimeAxis extends SimpleAxis {
     }
 
     /**
+     * This method is used to set the space availiable to render
+     * the SimpleCell.
      *
-     *
-     * @param {*} width
-     * @param {*} height
-     * @param {*} padding
-     * @param {*} isOffset
-     * @memberof TimeAxis
+     * @param {number} width The width of SimpleCell.
+     * @param {number} height The height of SimpleCell.
+     * @memberof AxisCell
      */
-    setAvailableSpace (width, height, padding, isOffset) {
+    setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
         const {
-            left,
-            right,
-            top,
-            bottom
-        } = padding;
-        const {
-            orientation,
-            showAxisName,
-            axisNamePadding
-        } = this.config();
-        const domain = this.domain();
-        const { axisLabelDim, tickLabelDim } = this.getAxisDimensions();
-        const { height: axisDimHeight } = axisLabelDim;
-        const { height: tickDimHeight, width: tickDimWidth } = tickLabelDim;
+           orientation
+       } = this.config();
 
-        this.availableSpace({ width, height });
+        this.availableSpace({ width, height, padding });
+
         if (orientation === TOP || orientation === BOTTOM) {
-            const labelSpace = tickDimWidth;
-            this.range(adjustRange(this._minDiff, [labelSpace / 2, width - left - right - labelSpace / 2],
-                domain, orientation));
-            const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
-                                            (axisDimHeight + axisNamePadding) : 0);
-            isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            labelConfig = spaceSetter(this, { isOffset }).time.x();
         } else {
-            const labelSpace = tickDimHeight;
-            this.range(adjustRange(this._minDiff, [height - top - bottom - labelSpace / 2, labelSpace / 2],
-                domain, orientation));
-            const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
-            this.isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
+            labelConfig = spaceSetter(this, { isOffset }).time.y();
         }
+
+        // Set config
+        this.renderConfig({
+            labels: labelConfig
+        });
+        this.setTickConfig();
+        this.getTickSize();
         return this;
     }
 
+    /**
+     *
+     *
+     * @returns
+     * @memberof BandAxis
+     */
+    setTickConfig () {
+        let smartTicks;
+        let smartlabel;
+        const { tickFormat, tickValues } = this.config();
+        const { labels } = this.renderConfig();
+        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
+        const { labelManager } = this._dependencies;
+        const domain = this.getTickValues();
+        const scale = this.scale();
+        tickValues && this.axis().tickValues(tickValues);
+
+        const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
+
+        smartTicks = tickValues || domain;
+        const tickFormatter = tickFormat || scale.tickFormat();
+         // set the style on the shared label manager instance
+        labelManager.setStyle(this._tickLabelStyle);
+
+        if (domain && domain.length) {
+            const values = tickValues || domain;
+            smartTicks = values.map((d, i) => {
+                labelManager.useEllipsesOnOverflow(true);
+
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
+                return labelManager.constructor.textToLines(smartlabel);
+            });
+        }
+        this.smartTicks(smartTicks);
+        return this;
+    }
 }
