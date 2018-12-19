@@ -83,6 +83,7 @@ d3.json('../data/cars.json', (data) => {
                     .subtitle('JJHfhhdfdhhkjk')
                     .columns(['Year']) /* Year is a temporal field */
                     .mount('#chart-container'); /* Attaching the canvas to DOM element */
+    window.canvas = canvas;
 });
 
                     // setTimeout(() => {

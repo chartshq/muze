@@ -147,3 +147,9 @@ export const createGroupState = (context) => {
     store.append('app.group', globalState);
     store.append('local.group', localState);
 };
+
+export const removeChild = (mount) => {
+    while (mount.firstChild) {
+        mount.removeChild(mount.firstChild);
+    }
+};

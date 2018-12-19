@@ -6,7 +6,7 @@ import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener, setLabelRotationForAxes, createGroupState } from './helper';
+import { initCanvas, setupChangeListener, setLabelRotationForAxes, createGroupState, removeChild } from './helper';
 import { LayoutManager } from '../../../layout/src/tree-layout';
 import { APP_INITIAL_STATE } from './app-state';
 /**
@@ -280,6 +280,7 @@ export default class Canvas extends TransactionSupport {
     render () {
         const visGroup = this.composition().visualGroup;
         const mount = this.mount();
+        removeChild(mount);
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
