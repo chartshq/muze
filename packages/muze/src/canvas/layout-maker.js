@@ -211,7 +211,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     let gridWrapper = null;
 
     if (layoutManager.getComponent('grid')) {
-        colorLegendWrapper = layoutManager
+        gridWrapper = layoutManager
                             .getComponent('grid')
                             .updateWrapper({
                                 name: 'grid',

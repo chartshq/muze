@@ -61,7 +61,10 @@ class Node {
         return this._parentCut;
     }
 
-    id () {
+    id (id) {
+        if (id) {
+            this._id = id;
+        }
         return this._id;
     }
 

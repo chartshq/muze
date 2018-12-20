@@ -27,6 +27,7 @@ export default class LayoutManager {
         this._drawingManager = null;
         this._prioritySequence = [];
         this.tree = null;
+        this._rootNodeID = null;
     }
 
     layoutDef (param) {
@@ -98,6 +99,11 @@ export default class LayoutManager {
             layoutClassName: this._layoutClassName
         }, this._skeletonType, this._renderAt);
 
+        if (this._rootNodeID) {
+            this.tree.id(this._rootNodeID);
+        } else {
+            this._rootNodeID = this.tree.id();
+        }
     // this will draw all the components by calling their draw method
         this._drawingManager.draw();
     }

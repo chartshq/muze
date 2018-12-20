@@ -123,5 +123,6 @@ export default class MatrixComponent extends MuzeComponent {
         this.target(params.config.target);
         this.position(TOP);
         this.className(params.config.className);
+        return this;
     }
 }

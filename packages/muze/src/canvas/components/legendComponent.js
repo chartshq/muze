@@ -93,6 +93,7 @@ export default class LegendComponent extends MuzeComponent {
         this.className(params.config.className);
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
+        return this;
     }
 
 }

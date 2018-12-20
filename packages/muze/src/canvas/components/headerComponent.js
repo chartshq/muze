@@ -68,5 +68,6 @@ export default class HeaderComponent extends MuzeComponent {
         this.className(params.config.className);
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
+        return this;
     }
 }

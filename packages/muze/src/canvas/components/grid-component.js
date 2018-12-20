@@ -79,5 +79,6 @@ export default class GridComponent extends MuzeComponent {
         this.target(params.config.target);
         this.className(params.config.className);
         this.sanitizeGrid();
+        return this;
     }
 }

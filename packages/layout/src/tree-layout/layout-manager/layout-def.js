@@ -32,6 +32,6 @@ export class LayoutDef {
         return this._componentMap;
     }
     resetComponentMap () {
-        this._componentMap = new Map();
+        this._componentMap.clear();
     }
 }
