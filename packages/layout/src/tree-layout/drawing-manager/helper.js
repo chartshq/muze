@@ -41,7 +41,6 @@ export const resolveAligment = (context, componentData) => {
         const host = component.model().host();
         if (host instanceof LayoutComponent && host.alignWith()) {
             let newNodeConfig = {};
-            let childNode = {};
             const point = findNode(context, component.id()).node();
             const node = point.boundBox();
             const refNode = findNode(context, context.componentMap().get(host.alignWith()).renderAt())
@@ -105,12 +104,14 @@ export const resolveAligment = (context, componentData) => {
                 break;
             }
     // check if model in parent component
-            Object.assign(newNodeConfig, { id: `${point.id()}-holder`, className: host.className() });
-            childNode = getChildNode(context, newNodeConfig);
-            context.componentMap().get(host.name()).renderAt(`${component.id()}-holder`);
-            context.componentMap().get(host.name()).boundBox({ height: newNodeConfig.height,
-                width: newNodeConfig.width });
-            context.renderer().parentDiv.appendChild(childNode);
+            Object.assign(newNodeConfig, { id: point.id(), className: host.className() });
+            context.renderer().createAndPositionDiv(newNodeConfig);
+            context.componentMap().get(host.name()).renderAt(component.id());
+            context.componentMap().get(host.name()).boundBox({
+                height: newNodeConfig.height,
+                width: newNodeConfig.width
+            });
+            // context.renderer().parentDiv.appendChild(childNode);
         }
         resolveAligment(context, component);
     });
