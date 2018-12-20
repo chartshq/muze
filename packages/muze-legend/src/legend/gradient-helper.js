@@ -109,6 +109,7 @@ export const renderAxis = (context, container, height, width) => {
 
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
+    axis.source().render();
 };
 
 /**

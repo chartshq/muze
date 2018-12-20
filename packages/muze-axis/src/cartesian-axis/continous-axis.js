@@ -98,7 +98,6 @@ export default class ContinousAxis extends SimpleAxis {
             return this;
         } else if (domain) {
             this._domain = [];
-            this.store().commit(DOMAIN, this._domain);
         } return this._domain;
     }
 

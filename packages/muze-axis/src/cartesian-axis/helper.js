@@ -11,27 +11,6 @@ export const getRotatedSpaces = (rotation = 0, width, height) => {
     return { width: rotatedWidth, height: rotatedHeight };
 };
 
-// /**
-//  * Listener attached to the axis on change of parameters.
-//  *
-//  * @param {Function} callback to be excuted on change of domain range etc
-//  * @memberof SimpleAxis
-//  */
-// export const registerChangeListeners = (context) => {
-//     const store = context.store();
-
-//     store.model.next(
-//     ['domain', 'range', 'mount', 'config'],
-//     (...params) => {
-//         context.setTickConfig();
-//         context.render();
-//         context._domainLock = false;
-//     },
-//     true
-//   );
-//     return context;
-// };
-
 export const setOffset = (context) => {
     let x = 0;
     let y = 0;

@@ -48,7 +48,6 @@ export const PROPS = {
     },
 
     smartTicks: {},
-    store: {},
     tickSize: {},
     maxTickSpaces: {}
 };

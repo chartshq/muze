@@ -285,13 +285,15 @@ export default class VisualUnit {
         const rootSvg = this._rootSvg && this._rootSvg.node();
         const width = this.width();
         const height = this.height();
+        const { el, dimensions } = this.parentContainerInf();
         return {
             htmlContainer: this.mount(),
             svgContainer: rootSvg,
             width,
             height,
             sideEffectGroup: this._sideEffectGroup,
-            parentContainer: this.parentContainer(),
+            parentContainer: el,
+            parentContainerDimensions: dimensions,
             xOffset: 0,
             yOffset: 0
         };
@@ -678,14 +680,5 @@ export default class VisualUnit {
     removeLayersByType (type) {
         removeLayersBy('type', type);
         return this;
-    }
-
-    parentContainer (...container) {
-        if (container.length) {
-            this._parentContainer = container[0];
-
-            return this;
-        }
-        return this._parentContainer;
     }
 }

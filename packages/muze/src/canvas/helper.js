@@ -1,4 +1,4 @@
-import { isEqual, STATE_NAMESPACES } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
     from '../constants';
@@ -17,6 +17,19 @@ export const initCanvas = (context) => {
     const reg = context._registry.components;
 
     return [new reg.VisualGroup(context._registry, context.dependencies())];
+};
+
+export const setLayoutInfForUnits = (context) => {
+    const layoutManager = context._layoutManager;
+    const boundBox = layoutManager.getComponent('grid').getBoundBox();
+    const valueMatrix = context.composition().visualGroup.matrixInstance().value;
+    const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
+    valueMatrix.each((cell) => {
+        cell.valueOf().parentContainerInf({
+            el: parentContainer,
+            dimensions: boundBox
+        });
+    });
 };
 
 /**

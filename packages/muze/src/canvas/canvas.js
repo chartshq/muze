@@ -11,7 +11,8 @@ import { initCanvas,
         setupChangeListener,
         setLabelRotationForAxes,
         createGroupState,
-        createLayoutManager } from './helper';
+        createLayoutManager,
+        setLayoutInfForUnits } from './helper';
 /**
  * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
  * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
@@ -303,6 +304,8 @@ export default class Canvas extends TransactionSupport {
 
         // Render each component
         renderLayout(this._layoutManager, this.layout(), renderDetails);
+
+        setLayoutInfForUnits(this);
 
         // setLabelRotation
         setLabelRotationForAxes(this);

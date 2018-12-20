@@ -108,6 +108,10 @@ export default class LayoutManager {
         this._drawingManager.draw();
     }
 
+    getRootNodeId () {
+        return this._rootNodeID;
+    }
+
   /**
   * This function takes the LayoutComponents and Register them in component store
   * @param {Array<LayoutComponent>} layoutComponents

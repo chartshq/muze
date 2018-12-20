@@ -10,5 +10,6 @@ export const PROPS = {
     axes: {},
     fields: {},
     metaInf: {},
-    registry: {}
+    registry: {},
+    parentContainerInf: {}
 };
