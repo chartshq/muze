@@ -10,6 +10,7 @@ export default class GridComponent extends MuzeComponent {
         this.params = params;
         this.target(params.config.target);
         this.className(params.config.className);
+        this.gridComponents = [];
         this.sanitizeGrid();
     }
 
@@ -17,9 +18,11 @@ export default class GridComponent extends MuzeComponent {
         let height = 0;
         let width = 0;
         const { viewMatricesInfo, layoutDimensions } = this.component.viewInfo();
-        const gridComponents = [];
+
         for (let i = 0; i < 3; i++) {
-            gridComponents[i] = [];
+            if (!(this.gridComponents.length && this.gridComponents[i] instanceof Array)) {
+                this.gridComponents[i] = [];
+            }
             for (let j = 0; j < 3; j++) {
                 const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
                 const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
@@ -31,12 +34,20 @@ export default class GridComponent extends MuzeComponent {
                     row: ROW_MATRIX_INDEX[i],
                     column: j
                 };
-                const matrixWrapper = new MatrixComponent({
-                    name: matrixName,
-                    component: matrix,
-                    config: matrixConfig
-                });
-                gridComponents[i].push(matrixWrapper);
+                if (this.gridComponents[i][j] instanceof MuzeComponent) {
+                    this.gridComponents[i][j].updateWrapper({
+                        name: matrixName,
+                        component: matrix,
+                        config: matrixConfig
+                    });
+                } else {
+                    const matrixWrapper = new MatrixComponent({
+                        name: matrixName,
+                        component: matrix,
+                        config: matrixConfig
+                    });
+                    this.gridComponents[i].push(matrixWrapper);
+                }
                 if (i === 0) {
                     width += matrixDim.width;
                 }
@@ -46,7 +57,7 @@ export default class GridComponent extends MuzeComponent {
             }
         }
         this.boundBox({ height, width });
-        this.component = gridComponents;
+        this.component = this.gridComponents;
     }
 
     getBoundBox () {
@@ -60,4 +71,13 @@ export default class GridComponent extends MuzeComponent {
         };
     }
 
+    updateWrapper (params) {
+        this.component = params.component;
+        this.params = params;
+        this.name(params.name);
+        this.boundBox(params.config.dimensions);
+        this.target(params.config.target);
+        this.className(params.config.className);
+        this.sanitizeGrid();
+    }
 }

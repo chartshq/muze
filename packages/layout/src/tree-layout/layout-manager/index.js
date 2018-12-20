@@ -27,11 +27,6 @@ export default class LayoutManager {
         this._drawingManager = null;
         this._prioritySequence = [];
         this.tree = null;
-        if (Utils.isDOMElement(this._renderAt)) {
-            this._renderAt._layout = this;
-        } else {
-            document.getElementById(this._renderAt)._layout = this;
-        }
     }
 
     layoutDef (param) {
@@ -80,6 +75,13 @@ export default class LayoutManager {
     }
 
     compute () {
+        //----
+        if (Utils.isDOMElement(this._renderAt)) {
+            this._renderAt._layout = this;
+        } else {
+            document.getElementById(this._renderAt)._layout = this;
+        }
+        //-----
         this._layoutDefinition = calLayOutDef(this);
         this._layoutDef.layoutDefinition(this._layoutDefinition);
         this._layoutDefinition = this._layoutDef.sanitizedDefinition();
@@ -105,6 +107,8 @@ export default class LayoutManager {
   * @param {Array<LayoutComponent>} layoutComponents
   */
     registerComponents (layoutComponents) {
+        this._prioritySequence.length = 0;
+        this._layoutDef.resetComponentMap();
         layoutComponents.forEach((container) => {
             if (container) {
                 this._prioritySequence.push(container.name());
@@ -119,5 +123,16 @@ export default class LayoutManager {
             }
         });
         return this;
+    }
+
+    getComponent (componentName) {
+        return this._layoutDef.componentMap().get(componentName);
+    }
+
+    renderAt (mount) {
+        if (mount) {
+            this._renderAt = mount;
+        }
+        return this._renderAt;
     }
 }

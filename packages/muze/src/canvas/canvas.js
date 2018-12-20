@@ -6,9 +6,12 @@ import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
 import { localOptions, canvasOptions } from './local-options';
 import GroupFireBolt from './firebolt';
 import options from '../options';
-import { initCanvas, setupChangeListener, setLabelRotationForAxes, createGroupState, removeChild } from './helper';
-import { LayoutManager } from '../../../layout/src/tree-layout';
 import { APP_INITIAL_STATE } from './app-state';
+import { initCanvas,
+        setupChangeListener,
+        setLabelRotationForAxes,
+        createGroupState,
+        createLayoutManager } from './helper';
 /**
  * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
  * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
@@ -49,7 +52,6 @@ export default class Canvas extends TransactionSupport {
         });
         this._composition.layout = new GridLayout();
         this._store = new Store(APP_INITIAL_STATE);
-        this._layoutManager = null;
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
@@ -72,6 +74,8 @@ export default class Canvas extends TransactionSupport {
         this.shape({});
         this.size({});
         setupChangeListener(this);
+         // init layoutManager
+        this._layoutManager = createLayoutManager();
     }
 
     /**
@@ -280,7 +284,7 @@ export default class Canvas extends TransactionSupport {
     render () {
         const visGroup = this.composition().visualGroup;
         const mount = this.mount();
-        removeChild(mount);
+        // removeChild(mount);
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
@@ -290,13 +294,12 @@ export default class Canvas extends TransactionSupport {
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), renderDetails);
 
-        // init layoutManager
-        this._layoutManager = this._createLayoutManager({
-            mount: renderDetails.layoutConfig.mount,
-            className: 'muze-group-container',
+        this._layoutManager.dimension({
             height: renderDetails.measurement.canvasHeight,
             width: renderDetails.measurement.canvasWidth
         });
+
+        this._layoutManager.renderAt(mount);
 
         // Render each component
         renderLayout(this._layoutManager, this.layout(), renderDetails);
@@ -330,15 +333,6 @@ export default class Canvas extends TransactionSupport {
         });
     }
 
-    _createLayoutManager (layoutManagerConfig) {
-        const layoutManager = new LayoutManager({
-            renderAt: layoutManagerConfig.mount,
-            className: layoutManagerConfig.className,
-            height: layoutManagerConfig.height,
-            width: layoutManagerConfig.width
-        });
-        return layoutManager;
-    }
     /**
      * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
      *

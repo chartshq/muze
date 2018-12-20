@@ -31,4 +31,7 @@ export class LayoutDef {
     componentMap () {
         return this._componentMap;
     }
+    resetComponentMap () {
+        this._componentMap = new Map();
+    }
 }

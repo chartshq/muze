@@ -157,7 +157,13 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
             alignWith: 'top-middle',
             alignment: 'left',
             className: 'muze-title-container' });
-        titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
+        if (layoutManager.getComponent('title')) {
+            titleWrapper = layoutManager
+                            .getComponent('title')
+                            .updateWrapper({ name: 'title', component: title, config: titleConfig });
+        } else {
+            titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
+        }
     }
 
      // subtitle
@@ -171,27 +177,58 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
             alignWith: 'top-middle',
             alignment: 'left',
             className: 'muze-subtitle-container' });
-        subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+        if (layoutManager.getComponent('subtitle')) {
+            subtitleWrapper = layoutManager
+                                .getComponent('subtitle')
+                                .updateWrapper({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+        } else {
+            subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+        }
     }
 
     // color legend
     let colorLegendWrapper = null;
     if (components.legends && components.legends.length) {
         const legendConfig = { ...layoutConfig.legend, ...target, measurement };
-        colorLegendWrapper = new LegendComponent({
-            name: 'legend',
-            component: components.legends,
-            config: legendConfig });
+
+        if (layoutManager.getComponent('legend')) {
+            colorLegendWrapper = layoutManager
+                                .getComponent('legend')
+                                .updateWrapper({
+                                    name: 'legend',
+                                    component: components.legends,
+                                    config: legendConfig });
+        } else {
+            colorLegendWrapper = new LegendComponent({
+                name: 'legend',
+                component: components.legends,
+                config: legendConfig });
+        }
     }
 
     // grid components
-    const gridWrapper = new GridComponent({
-        name: 'grid',
-        component: grid,
-        config: { ...target,
-            classPrefix: layoutConfig.classPrefix,
-            dimensions: { height: 0, width: 0 } }
-    });
+
+    let gridWrapper = null;
+
+    if (layoutManager.getComponent('grid')) {
+        colorLegendWrapper = layoutManager
+                            .getComponent('grid')
+                            .updateWrapper({
+                                name: 'grid',
+                                component: grid,
+                                config: { ...target,
+                                    classPrefix: layoutConfig.classPrefix,
+                                    dimensions: { height: 0, width: 0 } }
+                            });
+    } else {
+        gridWrapper = new GridComponent({
+            name: 'grid',
+            component: grid,
+            config: { ...target,
+                classPrefix: layoutConfig.classPrefix,
+                dimensions: { height: 0, width: 0 } }
+        });
+    }
 
     layoutManager.registerComponents([
         titleWrapper,

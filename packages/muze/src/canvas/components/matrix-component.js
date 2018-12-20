@@ -114,4 +114,14 @@ export default class MatrixComponent extends MuzeComponent {
     draw (container) {
         this.renderMatrix(container || document.getElementById(this.renderAt()));
     }
+
+    updateWrapper (params) {
+        this.name(name);
+        this.boundBox(params.config.dimensions);
+        this.component = params.component;
+        this.params = params;
+        this.target(params.config.target);
+        this.position(TOP);
+        this.className(params.config.className);
+    }
 }

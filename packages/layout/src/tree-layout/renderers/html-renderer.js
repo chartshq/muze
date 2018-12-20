@@ -25,8 +25,9 @@ export class HTMLRenderer extends Renderer {
     }
 
     createAndPositionDiv (config) {
-        const div = document.createElement('div');
         const { top, left, height, width, className, id } = config;
+        const existingDiv = document.getElementById(id);
+        const div = existingDiv || document.createElement('div');
         div.style.position = 'absolute';
         div.style.left = `${left}px`;
         div.style.top = `${top}px`;

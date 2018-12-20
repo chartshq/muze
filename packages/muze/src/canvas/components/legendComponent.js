@@ -83,4 +83,16 @@ export default class LegendComponent extends MuzeComponent {
         this.renderLegend(container || document.getElementById(this.renderAt()));
     }
 
+    updateWrapper (params) {
+        this.components = params.component;
+        this.params = params;
+        this.name(params.name);
+        this.boundBox(params.config.measurement.legendSpace);
+        this.target(params.config.target);
+        this.position(params.config.position);
+        this.className(params.config.className);
+        this.alignWith(params.config.alignWith);
+        this.alignment(params.config.alignment);
+    }
+
 }

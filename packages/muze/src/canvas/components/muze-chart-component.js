@@ -18,4 +18,8 @@ export default class MuzeComponent extends LayoutComponent {
     getBoundBox () {
         return this.boundBox();
     }
+
+    updateWrapper () {
+        throw Error('Update is not implemented');
+    }
 }

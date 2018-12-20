@@ -1,4 +1,5 @@
 import { getNodeId } from '../helper';
+import { LayoutComponent } from '../../layout-component';
 
 class Node {
     constructor (data) {
@@ -13,7 +14,9 @@ class Node {
             width: null
         };
 
-        this._id = getNodeId();
+        this._id = this._model.host() instanceof LayoutComponent && this._model.host().renderAt() ?
+                    this._model.host().renderAt() :
+                    getNodeId();
     }
 
     addChildren (entries) {

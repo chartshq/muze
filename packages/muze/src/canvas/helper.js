@@ -3,6 +3,7 @@ import { VisualGroup } from '@chartshq/visual-group';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
     from '../constants';
 import { canvasOptions } from './local-options';
+import { LayoutManager } from '../../../layout/src/tree-layout';
 
 /**
  * Instantiate high level components. Canvas knows what all high level component it has.
@@ -152,4 +153,11 @@ export const removeChild = (mount) => {
     while (mount.firstChild) {
         mount.removeChild(mount.firstChild);
     }
+};
+
+export const createLayoutManager = () => {
+    const layoutManager = new LayoutManager({
+        className: 'muze-group-container'
+    });
+    return layoutManager;
 };
