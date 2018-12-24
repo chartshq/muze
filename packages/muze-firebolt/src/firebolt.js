@@ -368,7 +368,7 @@ export default class Firebolt {
     }
 
     registerPhysicalBehaviouralMap (map) {
-        Object.assign(this._actionBehaviourMap, map);
+        this._actionBehaviourMap = mergeRecursive(this._actionBehaviourMap, map);
         return this;
     }
 
