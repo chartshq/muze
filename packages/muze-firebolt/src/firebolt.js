@@ -237,6 +237,7 @@ export default class Firebolt {
             if (key === physicalAction) {
                 const behaviourMap = actionBehaviourMap[key];
                 behaviourMap.behaviours = behaviourMap.behaviours.filter(d => d !== behaviour);
+                this.mapActionsAndBehaviour(key);
             }
         }
 
@@ -345,12 +346,12 @@ export default class Firebolt {
      * Map actions and behaviours
      * @return {Firebolt} Firebolt instance
      */
-    mapActionsAndBehaviour () {
+    mapActionsAndBehaviour (phyAction) {
         const initedPhysicalActions = this._actions.physical;
         const map = this._actionBehaviourMap;
 
         for (const action in map) {
-            if (!({}).hasOwnProperty.call(action, map)) {
+            if (!({}).hasOwnProperty.call(action, map) && action === (phyAction || action)) {
                 let target;
                 const mapObj = map[action];
                 target = mapObj.target;
@@ -386,7 +387,7 @@ export default class Firebolt {
         targets.forEach((target) => {
             const mount = this.context.mount();
             const nodes = target.node instanceof Function ? target : selectElement(mount).selectAll(target);
-            if (behaviourList.length && !nodes.empty()) {
+            if (!nodes.empty()) {
                 if (nodes instanceof Array) {
                     nodes.forEach((node) => {
                         action(selectElement(node), behaviourList);
