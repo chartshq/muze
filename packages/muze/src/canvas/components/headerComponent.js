@@ -3,28 +3,9 @@ import MuzeComponent from './muze-chart-component';
 import { LEFT } from '../../constants';
 
 export default class HeaderComponent extends MuzeComponent {
-    /**
-     *
-     * @param {*} params
-     * {
-     * name : 'title'
-     * component: title | null
-     * config : {
-     *  height :
-     *  width :
-     *  .....
-     *  }
-     * }
-     */
     constructor (params) {
         super(params.name, params.component.getLogicalSpace(), 0);
-        this.component = params.component;
-        this.params = params;
-        this.target(params.config.target);
-        this.position(params.config.position);
-        this.className(params.config.className);
-        this.alignWith(params.config.alignWith);
-        this.alignment(params.config.alignment);
+        this.setParams(params);
     }
 
     renderHeader (container) {
@@ -59,15 +40,18 @@ export default class HeaderComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
-        this.component = params.component;
-        this.params = params;
         this.name(params.name);
         this.boundBox(params.component.getLogicalSpace());
+        return this;
+    }
+
+    setParams (params) {
+        this.component = params.component;
+        this.params = params;
         this.target(params.config.target);
         this.position(params.config.position);
         this.className(params.config.className);
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
-        return this;
     }
 }

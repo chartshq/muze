@@ -7,13 +7,7 @@ import {
 export default class LegendComponent extends MuzeComponent {
     constructor (params) {
         super(params.name, params.config.measurement.legendSpace, 0);
-        this.components = params.component;
-        this.params = params;
-        this.target(params.config.target);
-        this.position(params.config.position);
-        this.className(params.config.className);
-        this.alignWith(params.config.alignWith);
-        this.alignment(params.config.alignment);
+        this.setParams(params);
     }
 
     renderLegend (container) {
@@ -84,16 +78,20 @@ export default class LegendComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
-        this.components = params.component;
-        this.params = params;
         this.name(params.name);
         this.boundBox(params.config.measurement.legendSpace);
+        this.setParams(params);
+        return this;
+    }
+
+    setParams (params) {
+        this.components = params.component;
+        this.params = params;
         this.target(params.config.target);
         this.position(params.config.position);
         this.className(params.config.className);
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
-        return this;
     }
 
 }
