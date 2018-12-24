@@ -57,6 +57,7 @@ d3.json('../data/cars.json', (data) => {
 
         // Create a new DataModel instance with data and schema
     const dm = new DataModel(data, schema);
+    window.dm = dm;
     // Create a canvas from the global environment
     const canvas = env.canvas();
    // DataModel instance is created from https://www.charts.com/static/cars.json data,
@@ -82,7 +83,7 @@ d3.json('../data/cars.json', (data) => {
                     .title('Chart is very good')
                     .subtitle('JJHfhhdfdhhkjk')
                     .columns(['Year']) /* Year is a temporal field */
-                    .mount('#chart-container'); /* Attaching the canvas to DOM element */
+                    .mount('#chart'); /* Attaching the canvas to DOM element */
     window.canvas = canvas;
 });
 

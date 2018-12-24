@@ -23,7 +23,11 @@ module.exports = {
             {
                 test: /\.js$/,
                 use: {
-                    loader: 'babel-loader'
+                    loader: 'babel-loader',
+                    options: {
+                        babelrc: true,
+                        extends: path.join(process.cwd(), './.babelrc')
+                    }
                 }
             },
             {
@@ -41,6 +45,7 @@ module.exports = {
         minimizer: [
             new UglifyJSPlugin({
                 uglifyOptions: {
+                    mangle: false,
                     keep_classnames: true,
                     keep_fnames: true
                 },
