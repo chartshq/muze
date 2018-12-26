@@ -163,7 +163,7 @@ export default class RowVisualMatrix extends VisualMatrix {
             cWidths = cWidths.map(() => 0);
         } else {
             conditions.forEach((i) => {
-                cWidths[i] = Math.floor(prioritySpace * (dist[i] / maxPrioritySpace));
+                cWidths[i] = Math.floor(prioritySpace * (dist[i] / maxPrioritySpace || 1));
             });
         }
         return cWidths;

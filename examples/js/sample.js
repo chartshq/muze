@@ -4,92 +4,125 @@ const env = muze();
 const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
 const DataModel = muze.DataModel;
 
-d3.json('../data/cars.json', (data) => {
-    const jsonData = data;
+d3.json('../data/by-election.json', (data) => {
     const schema = [
         {
-            name: 'Name',
-            type: 'dimension'
-        },
-        {
-            name: 'Maker',
-            type: 'dimension'
-        },
-        {
-            name: 'Miles_per_Gallon',
+            name: 'No.',
             type: 'measure',
-            defAggFn: 'avg'
+            defAggFn: 'count'
         },
+        {
+            name: 'Date',
+            type: 'dimension',
+            subtype: 'temporal',
+            format: '%d.%m.%Y'
+        },
+        {
+            name: 'Reason for Vacancy',
+            type: 'dimension'
+        }
+    ];
+    const env = muze();
+    const DataModel = muze.DataModel;
 
+    let rootData = new DataModel(data, schema);
+
+    rootData = rootData.calculateVariable(
         {
-            name: 'Displacement',
-            type: 'measure'
+            name: 'Binned_Year',
+            type: 'dimension'
         },
+        ['Date', (date) => {
+            const years = new Date(date).getFullYear();
+            const start = Math.ceil(+years / 10) * 10;
+            return `${start - 9}-${start}`;
+        }]
+    );
+    rootData = rootData.calculateVariable(
         {
-            name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'avg'
+            name: 'Binned_Year_axis',
+            type: 'dimension'
         },
+        ['Binned_Year', () => 1]
+    );
+    rootData = rootData.calculateVariable(
         {
-            name: 'Weight_in_lbs',
-            type: 'measure'
-        },
-        {
-            name: 'Acceleration',
+            name: 'counter',
             type: 'measure',
             defAggFn: 'sum'
         },
-        {
-            name: 'Origin',
-            type: 'dimension'
-        },
-        {
-            name: 'Cylinders',
-            type: 'dimension'
-        },
-        {
-            name: 'Year',
-            type: 'dimension'
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
-        }
-    ];
+        ['No.', no => no ? 1 : null]
+    );
+    env.canvas()
+                    .rows(['Binned_Year', 'Binned_Year_axis'])
+                    .columns(['Reason for Vacancy', 'counter'])
+                    .data(rootData.sort([
+            ['Binned_Year'],
+            ['Reason for Vacancy']
+                    ]))
+                    .width(700)
+                    .layers([{
+                        mark: 'bar'
+                    }, {
+                        mark: 'text',
+                        encoding: {
+                            text: 'counter',
+                            color: { value: () => 'white' }
+                        },
+                        encodingTransform: (points, layer, dependencies) => {
+                            for (let i = 0; i < points.length; i++) {
+                                const updateAttrs = points[i].update;
+                                const textSize = dependencies.smartLabel.getOriSize(points[i].text);
+                                const barWidth = layer.axes().x.getScaleValue(points[i].text);
 
-        // Create a new DataModel instance with data and schema
-    const dm = new DataModel(data, schema);
-    // Create a canvas from the global environment
-    const canvas = env.canvas();
-   // DataModel instance is created from https://www.charts.com/static/cars.json data,
-// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
-
-    // DataModel instance is created from https://www.charts.com/static/cars.json data,
-// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
-
-// DataModel instance is created from https://www.charts.com/static/cars.json data,
-// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
-
-// DataModel instance is created from https://www.charts.com/static/cars.json data,
-// https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
-
-    canvas
-                    .data(dm)
-                    .minUnitHeight(30)
+                                if (barWidth > textSize.width * 2 + 5) {
+                                    updateAttrs.x = textSize.width / 2 + 5;
+                                } else {
+                                    updateAttrs.x += textSize.width / 2 + 5;
+                                    points[i].color = 'black';
+                                }
+                                if (points[i].source[2] === 'Resigned') {
+                                    points[i].color = 'black';
+                                }
+                            }
+                            return points;
+                        }
+                    }])
                     .minUnitWidth(10)
-                    .width(1200)
-                    .height(400)
-                    .rows(['Horsepower'])
-                    .color('Origin')
-                    .title('Chart is very good')
-                    .subtitle('JJHfhhdfdhhkjk')
-                    .columns(['Year']) /* Year is a temporal field */
-                    .mount('#chart-container'); /* Attaching the canvas to DOM element */
-    window.canvas = canvas;
+                    .minUnitHeight(10)
+                    .height(550)
+                    .color({
+                        field: 'Reason for Vacancy',
+                        domain: ['Died', 'Election voided', 'Expelled', 'Presumed dead', 'Resigned'],
+                        range: ['rgb(92, 123, 142)', 'rgb(144, 175, 196)', 'rgb(199, 231, 253)',
+                            'rgb(55, 86, 104)', 'rgb(185, 217, 238)']
 
-    setTimeout(() => {
-        canvas.rows([['Horsepower'], ['Acceleration']])
-                        .layers([{ mark: 'bar', encoding: { y: 'Horsepower' } },
-                     { mark: 'line', encoding: { y: 'Acceleration' } }]);
-    }, 3000);
+                    })
+                    .config({
+                        border: {
+                            width: 3,
+                            color: 'white',
+                            showValueBorders: {
+                                top: true,
+                                bottom: true,
+                                left: true,
+                                right: true
+                            }
+                        },
+                        facetConfig: {
+                            rows: { verticalAlign: 'middle' }
+                        },
+                        axes: {
+                            y: { show: false, padding: 0.1 },
+                            x: { show: false, domain: [0, 17] }
+                        },
+                        legend: {
+                            color: { show: false }
+                        }
+                    })
+                    .title('Politicians used to die in office — now they just resign')
+                    .subtitle('Uses data operators with layout variations to achieve tabular view')
+                    .mount('#chart-container');
 });
 
                     // setTimeout(() => {
