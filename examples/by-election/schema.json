@@ -1,0 +1,17 @@
+[
+    {
+        "name": "No.",
+        "type": "measure",
+        "defAggFn": "count"
+    },
+    {
+        "name": "Date",
+        "type": "dimension",
+        "subtype": "temporal",
+        "format": "%d.%m.%Y"
+    },
+    {
+        "name": "Reason for Vacancy",
+        "type": "dimension"
+    }
+]
