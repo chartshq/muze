@@ -1,4 +1,4 @@
-import { DimensionSubtype, FieldType } from 'muze-utils';
+import { DimensionSubtype, MeasureSubtype } from 'muze-utils';
 /**
  * Gets the drag action configuration
  * @param {VisualUnit} instance instance of visual unit
@@ -18,10 +18,8 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
     const axisFields = sourceInfo.fields;
     const xField = axisFields.x[0].getMembers()[0];
     const yField = axisFields.y[0].getMembers()[0];
-    const xFieldType = fieldsConfig[xField].def.subtype ? fieldsConfig[xField].def.subtype :
-        fieldsConfig[xField].def.type;
-    const yFieldType = fieldsConfig[yField].def.subtype ? fieldsConfig[yField].def.subtype :
-            fieldsConfig[yField].def.type;
+    const xFieldType = fieldsConfig[xField].def.subtype;
+    const yFieldType = fieldsConfig[yField].def.subtype;
     const dimensions = {};
     const stPos = config.startPos;
     const endPos = config.endPos;
@@ -32,7 +30,8 @@ import { DimensionSubtype, FieldType } from 'muze-utils';
         };
     }
 
-    const dragDim = xFieldType === FieldType.MEASURE ? (yFieldType === FieldType.MEASURE ? ['x', 'y'] : ['y']) : ['x'];
+    const dragDim = xFieldType === MeasureSubtype.CONTINUOUS ? (yFieldType === MeasureSubtype.CONTINUOUS ?
+        ['x', 'y'] : ['y']) : ['x'];
     const criteria = {};
     const isXDimension = xFieldType === DimensionSubtype.CATEGORICAL;
     const isYDimension = yFieldType === DimensionSubtype.CATEGORICAL;

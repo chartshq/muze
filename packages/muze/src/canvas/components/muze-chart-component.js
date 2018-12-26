@@ -22,4 +22,8 @@ export default class MuzeComponent extends LayoutComponent {
     updateWrapper () {
         throw Error('Update is not implemented');
     }
+
+    setParams () {
+        throw Error('set params is not implemented');
+    }
 }

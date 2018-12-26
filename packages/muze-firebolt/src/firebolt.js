@@ -52,7 +52,6 @@ export default class Firebolt {
         this._entryExitSet = {};
         this._actionHistory = {};
         this._queuedSideEffects = {};
-        this._mappedActions = {};
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -238,6 +237,7 @@ export default class Firebolt {
             if (key === physicalAction) {
                 const behaviourMap = actionBehaviourMap[key];
                 behaviourMap.behaviours = behaviourMap.behaviours.filter(d => d !== behaviour);
+                this.mapActionsAndBehaviour(key);
             }
         }
 
@@ -346,13 +346,12 @@ export default class Firebolt {
      * Map actions and behaviours
      * @return {Firebolt} Firebolt instance
      */
-    mapActionsAndBehaviour () {
+    mapActionsAndBehaviour (phyAction) {
         const initedPhysicalActions = this._actions.physical;
         const map = this._actionBehaviourMap;
-        const mappedActions = this._mappedActions;
 
         for (const action in map) {
-            if (!({}).hasOwnProperty.call(action, map)) {
+            if (!({}).hasOwnProperty.call(action, map) && action === (phyAction || action)) {
                 let target;
                 const mapObj = map[action];
                 target = mapObj.target;
@@ -361,17 +360,15 @@ export default class Firebolt {
                     target = this.context.getDefaultTargetContainer();
                 }
                 const bind = hasTouch() ? touch === true || touch === undefined : !touch;
-                const keyName = `${action}-${mapObj.behaviours.join()}`;
-                bind && !mappedActions[keyName] && this.bindActionWithBehaviour(initedPhysicalActions[action],
+                bind && this.bindActionWithBehaviour(initedPhysicalActions[action],
                     target, mapObj.behaviours);
-                mappedActions[keyName] = true;
             }
         }
         return this;
     }
 
     registerPhysicalBehaviouralMap (map) {
-        Object.assign(this._actionBehaviourMap, map);
+        this._actionBehaviourMap = mergeRecursive(this._actionBehaviourMap, map);
         return this;
     }
 
@@ -390,7 +387,7 @@ export default class Firebolt {
         targets.forEach((target) => {
             const mount = this.context.mount();
             const nodes = target.node instanceof Function ? target : selectElement(mount).selectAll(target);
-            if (behaviourList.length && !nodes.empty()) {
+            if (!nodes.empty()) {
                 if (nodes instanceof Array) {
                     nodes.forEach((node) => {
                         action(selectElement(node), behaviourList);

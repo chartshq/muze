@@ -85,6 +85,12 @@ d3.json('../data/cars.json', (data) => {
                     .columns(['Year']) /* Year is a temporal field */
                     .mount('#chart'); /* Attaching the canvas to DOM element */
     window.canvas = canvas;
+
+    setTimeout(() => {
+        canvas.rows([['Horsepower'], ['Acceleration']])
+                        .layers([{ mark: 'bar', encoding: { y: 'Horsepower' } },
+                     { mark: 'line', encoding: { y: 'Acceleration' } }]);
+    }, 3000);
 });
 
                     // setTimeout(() => {

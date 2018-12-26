@@ -6,12 +6,8 @@ export default class GridComponent extends MuzeComponent {
 
     constructor (params) {
         super(params.name, params.config.dimensions, 0);
-        this.component = params.component;
-        this.params = params;
-        this.target(params.config.target);
-        this.className(params.config.className);
         this.gridComponents = [];
-        this.sanitizeGrid();
+        this.setParams(params);
     }
 
     sanitizeGrid () {
@@ -72,13 +68,17 @@ export default class GridComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
-        this.component = params.component;
-        this.params = params;
         this.name(params.name);
         this.boundBox(params.config.dimensions);
+        this.setParams(params);
+        return this;
+    }
+
+    setParams (params) {
+        this.component = params.component;
+        this.params = params;
         this.target(params.config.target);
         this.className(params.config.className);
         this.sanitizeGrid();
-        return this;
     }
 }

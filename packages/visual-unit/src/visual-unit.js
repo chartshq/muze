@@ -226,8 +226,6 @@ export default class VisualUnit {
             height
         });
         this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
-
-        this.firebolt().mapActionsAndBehaviour();
         return this;
     }
 
@@ -308,7 +306,7 @@ export default class VisualUnit {
         return {
             layers: this.layers().map(layer => layer.serialize()),
             config: this.config(),
-            axes: this.store().get('axes').map(axis => axis.serialize())
+            axes: this.axes().map(axis => axis.serialize())
         };
     }
 
@@ -316,6 +314,7 @@ export default class VisualUnit {
         if (mount.length) {
             this._mount = mount[0];
             this.render(mount[0]);
+            this.firebolt().mapActionsAndBehaviour();
             return this;
         }
         return this._mount;

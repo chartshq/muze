@@ -10,10 +10,7 @@ export default class MatrixComponent extends MuzeComponent {
 
     constructor (params) {
         super(params.name, params.config.dimensions, 0);
-        this.component = params.component;
-        this.params = params;
-        this.target(params.config.target);
-        this.position(TOP);
+        this.setParams(params);
         this.className(params.config.className);
     }
 
@@ -116,13 +113,17 @@ export default class MatrixComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
-        this.name(name);
+        this.name(params.name);
         this.boundBox(params.config.dimensions);
+        this.setParams(params);
+        return this;
+    }
+
+    setParams (params) {
         this.component = params.component;
         this.params = params;
         this.target(params.config.target);
         this.position(TOP);
         this.className(params.config.className);
-        return this;
     }
 }
