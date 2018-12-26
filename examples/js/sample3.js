@@ -1,74 +1,56 @@
-const DataModel = muze.DataModel;
+/* eslint-disable */
 
-d3.json('../data/cars.json', (data) => {
-    const jsonData = data;
-    const schema = [
-        {
-            name: 'Name',
-            type: 'dimension'
-        },
-        {
-            name: 'Maker',
-            type: 'dimension'
-        },
-        {
-            name: 'Miles_per_Gallon',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
+(function () {
+    let env = window.muze();
+    const DataModel = window.muze.DataModel;
 
-        {
-            name: 'Displacement',
-            type: 'measure'
-        },
-        {
-            name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
-        {
-            name: 'Weight_in_lbs',
-            type: 'measure'
-        },
-        {
-            name: 'Acceleration',
-            type: 'measure',
-            defAggFn: 'sum'
-        },
-        {
-            name: 'Origin',
-            type: 'dimension'
-        },
-        {
-            name: 'Cylinders',
-            type: 'dimension'
-        },
-        {
-            name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
-        }
-    ];
-    const DataModel = muze.DataModel;
-    const dm = new DataModel(data, schema);
+    d3.json('/data/cars.json', (data) => {
+        let jsonData = data,
+		    schema = [{
+        name: 'Name',
+        type: 'dimension'
+    }, {
+        name: 'Maker',
+        type: 'dimension'
+    }, {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    }, {
+        name: 'Displacement',
+        type: 'measure'
+    }, {
+        name: 'Horsepower',
+        type: 'measure'
+    }, {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    }, {
+        name: 'Acceleration',
+        type: 'measure'
+    }, {
+        name: 'Origin',
+        type: 'dimension'
+    }, {
+        name: 'Cylinders',
+        type: 'dimension'
+    }, {
+        name: 'Year',
+        type: 'dimension'
+			// subtype: 'temporal',
+			// format: '%Y-%m-%d'
+    }];
+        const rootData = new DataModel(jsonData, schema);
 
-    const env = muze();
-    const canvas = env.canvas();
+        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+        const mountPoint = document.getElementById('chart');
+        window.canvas = env.canvas();
+        canvas = canvas.rows(['Acceleration', 'Horsepower', 'Weight_in_lbs']).columns(['Cylinders']).data(rootData).height(900).width(900).mount(mountPoint);
 
-    canvas
-                    .data(dm)
-                    .minUnitHeight(30)
-                    .minUnitWidth(10)
-                    .width(600)
-                    .height(400)
-                    .rows(['Origin', 'Horsepower'])
-                    .columns(['Year'])
-                    .layers([{ mark: 'bar' }])
-                    .mount('#chart');
-
-    canvas.once('canvas.animationend').then((client) => {
-        console.log(client); // Canvas instance
+        canvas.once('canvas.animationend').then((client) => {
+            console.log(client);
+            const element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
     });
-});
+}());
 
