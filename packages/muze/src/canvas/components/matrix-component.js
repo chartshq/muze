@@ -46,7 +46,7 @@ export default class MatrixComponent extends MuzeComponent {
                 const span = spans[cell.rowIndex][colIndex];
                 const placeholder = cell.placeholder;
                 if (span > 1) {
-                    placeholder.setAvailableSpace(0, placeholder.availHeight());
+                    placeholder.setAvailableSpace(placeholder.availWidth() * spans, placeholder.availHeight());
                 }
                 selectElement(this).style('height', `${placeholder.availHeight()}px`);
                 return span;
