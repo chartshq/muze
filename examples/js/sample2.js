@@ -48,5 +48,5 @@ canvas
         { mark: 'point' }
                 ])
                 .title('Shifts of teenagers in social media usage')
-                .mount('#chart');
+                .mount('#chart-container');
 

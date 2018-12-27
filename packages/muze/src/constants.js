@@ -33,6 +33,7 @@ export const STEP_COLOR = 'step-color';
 export const GRADIENT = 'gradient';
 export const LINEAR = 'linear';
 export const ORDINAL = 'ordinal';
+export const MUZE_PREFIX = 'muze';
 
 export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'script',

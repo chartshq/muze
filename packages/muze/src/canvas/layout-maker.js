@@ -2,10 +2,12 @@ import { mergeRecursive } from 'muze-utils';
 import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
-import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { TOP, BOTTOM, LEFT, RIGHT, TITLE, SUB_TITLE, LEGEND } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import GridComponent from './components/grid-component';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
 
 /**
  *
@@ -146,7 +148,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     // generate component wrappers
 
     const { components, layoutConfig, measurement } = renderDetails;
-    const target = { target: 'canvas' };
+    const target = { target: CANVAS };
     // title;
     let titleWrapper = null;
     if (components.headers && components.headers.titleCell) {
@@ -154,15 +156,15 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
         let titleConfig = layoutConfig.title;
         titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix,
             ...target,
-            alignWith: 'top-middle',
-            alignment: 'left',
-            className: 'muze-title-container' });
-        if (layoutManager.getComponent('title')) {
+            alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
+            alignment: LAYOUT_ALIGN.LEFT,
+            className: TITLE_CONFIG.className });
+        if (layoutManager.getComponent(TITLE)) {
             titleWrapper = layoutManager
-                            .getComponent('title')
-                            .updateWrapper({ name: 'title', component: title, config: titleConfig });
+                            .getComponent(TITLE)
+                            .updateWrapper({ name: TITLE, component: title, config: titleConfig });
         } else {
-            titleWrapper = new HeaderComponent({ name: 'title', component: title, config: titleConfig });
+            titleWrapper = new HeaderComponent({ name: TITLE, component: title, config: titleConfig });
         }
     }
 
@@ -174,15 +176,15 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
 
         subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
             ...target,
-            alignWith: 'top-middle',
-            alignment: 'left',
-            className: 'muze-subtitle-container' });
-        if (layoutManager.getComponent('subtitle')) {
+            alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
+            alignment: LAYOUT_ALIGN.LEFT,
+            className: SUB_TITLE_CONFIG.className });
+        if (layoutManager.getComponent(SUB_TITLE)) {
             subtitleWrapper = layoutManager
-                                .getComponent('subtitle')
-                                .updateWrapper({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+                                .getComponent(SUB_TITLE)
+                                .updateWrapper({ name: SUB_TITLE, component: subtitle, config: subtitleConfig });
         } else {
-            subtitleWrapper = new HeaderComponent({ name: 'subtitle', component: subtitle, config: subtitleConfig });
+            subtitleWrapper = new HeaderComponent({ name: SUB_TITLE, component: subtitle, config: subtitleConfig });
         }
     }
 
@@ -191,16 +193,16 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     if (components.legends && components.legends.length) {
         const legendConfig = { ...layoutConfig.legend, ...target, measurement };
 
-        if (layoutManager.getComponent('legend')) {
+        if (layoutManager.getComponent(LEGEND)) {
             colorLegendWrapper = layoutManager
-                                .getComponent('legend')
+                                .getComponent(LEGEND)
                                 .updateWrapper({
-                                    name: 'legend',
+                                    name: LEGEND,
                                     component: components.legends,
                                     config: legendConfig });
         } else {
             colorLegendWrapper = new LegendComponent({
-                name: 'legend',
+                name: LEGEND,
                 component: components.legends,
                 config: legendConfig });
         }
@@ -210,11 +212,11 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
 
     let gridWrapper = null;
 
-    if (layoutManager.getComponent('grid')) {
+    if (layoutManager.getComponent(GRID)) {
         gridWrapper = layoutManager
-                            .getComponent('grid')
+                            .getComponent(GRID)
                             .updateWrapper({
-                                name: 'grid',
+                                name: GRID,
                                 component: grid,
                                 config: { ...target,
                                     classPrefix: layoutConfig.classPrefix,
@@ -222,7 +224,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
                             });
     } else {
         gridWrapper = new GridComponent({
-            name: 'grid',
+            name: GRID,
             component: grid,
             config: { ...target,
                 classPrefix: layoutConfig.classPrefix,
@@ -236,7 +238,5 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
         colorLegendWrapper,
         gridWrapper
     ]).compute();
-
-    console.log(gridWrapper.getBoundBox());
 };
 
