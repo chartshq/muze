@@ -95,20 +95,23 @@ export default class BaseLayer extends SimpleLayer {
     store (...params) {
         if (params.length) {
             this._store = params[0];
-            const localNs = STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE;
             const metaInf = this.metaInf();
+            const localNs = `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${metaInf.namespace}`;
             initializeGlobalState(this);
-            transactor(this, defaultOptions, this.store().model, {
-                namespace: localNs,
-                subNamespace: metaInf.namespace
+            const store = this.store();
+            store.append(`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}`, {
+                [metaInf.namespace]: null
+            });
+
+            transactor(this, defaultOptions, store.model, {
+                namespace: localNs
             });
             registerListeners(this, listenerMap, {
                 local: localNs,
                 global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
             }, {
                 unitRowIndex: metaInf.unitRowIndex,
-                unitColIndex: metaInf.unitColIndex,
-                subNamespace: metaInf.namespace
+                unitColIndex: metaInf.unitColIndex
             });
             return this;
         }
@@ -360,6 +363,15 @@ export default class BaseLayer extends SimpleLayer {
         }
     }
 
+    disableUpdate () {
+        this._updateLock = true;
+        return this;
+    }
+
+    enableUpdate () {
+        this._updateLock = false;
+        return this;
+    }
     /**
      *
      *

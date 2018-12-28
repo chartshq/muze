@@ -75,7 +75,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const layerRegistry = context.registry().layerRegistry;
         const layerDefsVal = context.layerDef();
         context.store().registerImmediateListener(
-            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.layerDef.${metaInf.namespace}`, ([, layerDefs]) => {
+            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}.layerDef`, ([, layerDefs]) => {
                 this._layers = addLayer(layerDefs, layerRegistry, context, this);
             });
         this._layers = addLayer(layerDefsVal, layerRegistry, context, this);

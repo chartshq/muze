@@ -1,5 +1,5 @@
 import { AxisOrientation } from '@chartshq/muze-axis';
-import { getObjProp, FieldType } from 'muze-utils';
+import { getObjProp, FieldType, STATE_NAMESPACES } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
     getCellKey,
@@ -538,7 +538,6 @@ export const computeMatrices = (context, config) => {
     });
     resolver.cacheMaps().exitCellMap.clear();
     resolver.valueMatrix(valueMatrixInfo.matrix);
-    resolver.createUnits(componentRegistry, config);
 
     const { xAxes, yAxes } = mutateAxesFromMap(resolver.cacheMaps(), resolver.axes());
 
@@ -546,6 +545,19 @@ export const computeMatrices = (context, config) => {
         x: xAxes,
         y: yAxes
     });
+    const store = resolver.store();
+
+    [xAxes, yAxes].forEach((axesArr, type) => {
+        const stateProps = {};
+
+        axesArr.forEach((axes, idx) => {
+            axes.forEach((axis, axisIndex) => {
+                stateProps[`${idx}${axisIndex}`] = null;
+            });
+        });
+        store.append(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type ? 'y' : 'x'}`, stateProps);
+    });
+    resolver.createUnits(componentRegistry, config);
 
     const matrices = {
         valuesMatrix: valueMatrixInfo,

@@ -5,7 +5,7 @@ import {
     MatrixResolver,
     findInGroup
 } from '../group-helper';
-import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices } from './helper';
+import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices, createLayerState } from './helper';
 import { setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
@@ -87,6 +87,7 @@ class VisualGroup extends SimpleGroup {
             this._store = params[0];
             initializeGlobalState(this);
             createUnitState(this);
+            createLayerState(this);
             // Register listeners
             setupChangeListeners(this);
             return this;

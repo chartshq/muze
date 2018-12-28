@@ -11,5 +11,7 @@ export const PROPS = {
     fields: {},
     metaInf: {},
     registry: {},
+    width: {},
+    height: {},
     parentContainerInf: {}
 };

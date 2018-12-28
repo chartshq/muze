@@ -35,7 +35,7 @@ export const registerListeners = (firebolt) => {
     const context = firebolt.context;
     const store = context.store();
 
-    store.registerImmediateListener([`local.units.${DATA}.${context.metaInf().namespace}`], (dataModel) => {
+    store.registerImmediateListener([`local.units.${context.metaInf().namespace}.${DATA}`], (dataModel) => {
         const dm = dataModel[1];
 
         if (dm) {
@@ -46,7 +46,7 @@ export const registerListeners = (firebolt) => {
         }
     });
 
-    store.registerChangeListener([`local.units.${DATA}.${context.metaInf().namespace}`], () => {
+    store.registerChangeListener([`local.units.${context.metaInf().namespace}.${DATA}`], () => {
         if (!firebolt.context.mount()) {
             const originalData = firebolt.context.cachedData()[0];
             originalData.unsubscribe('propagation');

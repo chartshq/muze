@@ -35,14 +35,14 @@ export const calculateDomainListener = (context, namespace) => () => {
 export const listenerMap = (context, namespace, metaInf) => ([
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.CONFIG}.${metaInf.subNamespace}`],
+        props: [`${namespace.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
             config && context.firebolt().config(config.interaction);
         }
     },
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.LAYERDEFS}.${metaInf.subNamespace}`],
+        props: [`${namespace.local}.${PROPS.LAYERDEFS}`],
         listener: ([, layerDefs]) => {
             const fieldsVal = context.fields();
             if (layerDefs && fieldsVal) {
@@ -58,7 +58,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
     },
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.DATA}.${metaInf.subNamespace}`],
+        props: [`${namespace.local}.${PROPS.DATA}`],
         listener: ([, dataModel]) => {
             const axisFields = context.fields();
             const axesObj = context.axes();
@@ -80,29 +80,51 @@ export const listenerMap = (context, namespace, metaInf) => ([
     },
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.DATA}.${metaInf.subNamespace}`,
-            `${namespace.local}.${PROPS.LAYERS}.${metaInf.subNamespace}`,
-            `${namespace.local}.${PROPS.TRANSFORM}.${metaInf.subNamespace}`],
-        listener: ([, dataModel], [, layers], [, transform]) => {
+        props: [`${namespace.local}.${PROPS.CONFIG}`],
+        listener: () => {
+            createGridLineLayer(context);
+        }
+    },
+    {
+        type: 'registerImmediateListener',
+        props: [`${namespace.local}.${PROPS.DATA}`,
+            `${namespace.local}.${PROPS.TRANSFORM}`],
+        listener: ([, dataModel], [, transform]) => {
+            if (dataModel) {
+                const dataModels = transformDataModels(transform, dataModel);
+                context.store().commit(`${namespace.local}.${PROPS.TRANSFORMEDDATA}`, dataModels);
+            }
+        }
+    },
+    {
+        type: 'registerImmediateListener',
+        props: [`${namespace.local}.${PROPS.TRANSFORMEDDATA}`,
+            `${namespace.local}.${PROPS.LAYERS}`],
+        listener: ([, transformedData], [, layers]) => {
             const layerAxisIndexVal = context._layerAxisIndex;
             const axesVal = context.axes();
-            if (dataModel && layers && axesVal && layerAxisIndexVal) {
-                const dataModels = transformDataModels(transform, dataModel);
-                context._transformedDataModels = dataModels;
+            const dataModel = context.data();
+            if (transformedData && layers && axesVal && layerAxisIndexVal) {
                 context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
-                attachDataToLayers(layers, dataModel, context._transformedDataModels);
+                const model = context.store().model;
+                layers.forEach(lyr => lyr.disableUpdate());
+                attachDataToLayers(layers, dataModel, transformedData);
+                model.lock();
+                layers.forEach((lyr) => {
+                    lyr.enableUpdate().domain(lyr._domain);
+                });
+                model.unlock();
                 context._dimensionMeasureMap = getDimensionMeasureMap(layers,
                     dataModel.getFieldsConfig(), context.retinalFields());
                 attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
-                createGridLineLayer(context);
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
         }
     },
     {
         type: 'registerChangeListener',
-        props: [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}00`,
-            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.0${metaInf.colIndex}0`],
+        props: [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}0`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.colIndex}0`],
         listener: () => {
             attachDataToGridLineLayers(context);
         }

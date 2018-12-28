@@ -686,104 +686,103 @@ const intSanitizer = (val) => {
 const transactor = (holder, options, model, namespaceInf = {}) => {
     let conf;
     const store = model && model instanceof Model ? model : Model.create({});
-
+    const stateProps = {};
     for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
             conf = options[prop];
+            const addAsMethod = conf.meta ? conf.meta.addAsMethod : true;
             let nameSpaceProp;
-            let namespace = namespaceInf.namespace;
-            const subNamespace = namespaceInf.subNamespace !== undefined ? namespaceInf.subNamespace : prop;
+            const namespace = namespaceInf.namespace;
             if (namespace) {
-                if (namespaceInf.subNamespace !== undefined) {
-                    namespace = `${namespace}.${prop}`;
-                    nameSpaceProp = `${namespace}.${subNamespace}`;
-                } else {
-                    nameSpaceProp = `${namespace}.${prop}`;
-                }
+                nameSpaceProp = `${namespace}.${prop}`;
             } else {
                 nameSpaceProp = prop;
             }
             if (!store.prop(`${nameSpaceProp}`)) {
-                if (namespace) {
-                    store.append(namespace, {
-                        [subNamespace]: conf.value
-                    });
-                } else {
-                    store.append({ [nameSpaceProp]: conf.value });
-                }
+                stateProps[prop] = conf.value;
             }
-            holder[prop] = ((context, meta, nsProp) => (...params) => {
-                let val;
-                let compareTo;
-                const paramsLen = params.length;
-                const prevVal = store.prop(nsProp);
-                if (paramsLen) {
-                    // If parameters are passed then it's a setter
-                    const spreadParams = meta && meta.spreadParams;
-                    val = params;
-                    const values = [];
-                    if (meta) {
-                        for (let i = 0; i < paramsLen; i++) {
-                            val = params[i];
-                            const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
-                                meta.sanitization);
-                            const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
-                            if (sanitization && typeof sanitization === 'function') {
-                                // Sanitize if required
-                                val = sanitization(val, prevVal, holder);
-                            }
+            if (addAsMethod !== false) {
+                holder[prop] = ((context, meta, nsProp) => (...params) => {
+                    let val;
+                    let compareTo;
+                    const paramsLen = params.length;
+                    const prevVal = store.prop(nsProp);
+                    if (paramsLen) {
+                        // If parameters are passed then it's a setter
+                        const spreadParams = meta && meta.spreadParams;
+                        val = params;
+                        const values = [];
+                        if (meta) {
+                            for (let i = 0; i < paramsLen; i++) {
+                                val = params[i];
+                                const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
+                                    meta.sanitization);
+                                const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
+                                if (sanitization && typeof sanitization === 'function') {
+                                    // Sanitize if required
+                                    val = sanitization(val, prevVal, holder);
+                                }
 
-                            if (typeCheck) {
-                                // Checking if a setter is valid
-                                if (typeof typeCheck === 'function') {
-                                    let typeExpected = meta.typeExpected;
-                                    if (typeExpected && spreadParams) {
-                                        typeExpected = typeExpected[i];
-                                    }
-                                    if (typeExpected) {
-                                        compareTo = typeExpected;
-                                    } else {
-                                        compareTo = true;
-                                    }
+                                if (typeCheck) {
+                                    // Checking if a setter is valid
+                                    if (typeof typeCheck === 'function') {
+                                        let typeExpected = meta.typeExpected;
+                                        if (typeExpected && spreadParams) {
+                                            typeExpected = typeExpected[i];
+                                        }
+                                        if (typeExpected) {
+                                            compareTo = typeExpected;
+                                        } else {
+                                            compareTo = true;
+                                        }
 
-                                    if (typeCheck(val) === compareTo) {
-                                        values.push(val);
-                                    }
-                                } else if (typeof typeCheck === 'string') {
-                                    if (typeCheck === 'constructor') {
-                                        const typeExpected = spreadParams ? meta.typeExpected[i] : meta.typeExpected;
-                                        if (val && (val.constructor.name === typeExpected)) {
+                                        if (typeCheck(val) === compareTo) {
                                             values.push(val);
                                         }
+                                    } else if (typeof typeCheck === 'string') {
+                                        if (typeCheck === 'constructor') {
+                                            const typeExpected = spreadParams ? meta.typeExpected[i] :
+                                                meta.typeExpected;
+                                            if (val && (val.constructor.name === typeExpected)) {
+                                                values.push(val);
+                                            }
+                                        }
+                                    } else {
+                                        // context.prop(key, val);
+                                        values.push(val);
                                     }
                                 } else {
-                                    // context.prop(key, val);
                                     values.push(val);
                                 }
-                            } else {
-                                values.push(val);
                             }
+                            const preset = meta.preset;
+                            const oldValues = context.prop(nsProp);
+                            preset && preset(values[0], holder);
+                            if (spreadParams) {
+                                oldValues.forEach((value, i) => {
+                                    if (values[i] === undefined) {
+                                        values[i] = value;
+                                    }
+                                });
+                            }
+                            values.length && context.prop(nsProp, spreadParams ? values : values[0]);
+                        } else {
+                            context.prop(nsProp, spreadParams ? val : val[0]);
                         }
-                        const preset = meta.preset;
-                        const oldValues = context.prop(nsProp);
-                        preset && preset(values[0], holder);
-                        if (spreadParams) {
-                            oldValues.forEach((value, i) => {
-                                if (values[i] === undefined) {
-                                    values[i] = value;
-                                }
-                            });
-                        }
-                        values.length && context.prop(nsProp, spreadParams ? values : values[0]);
-                    } else {
-                        context.prop(nsProp, spreadParams ? val : val[0]);
+                        return holder;
                     }
-                    return holder;
-                }
-            // No parameters are passed hence its a getter
-                return context.prop(nsProp);
-            })(store, conf.meta, nameSpaceProp);
+                // No parameters are passed hence its a getter
+                    return context.prop(nsProp);
+                })(store, conf.meta, nameSpaceProp);
+            }
         }
+    }
+
+    if (namespaceInf.namespace === undefined) {
+        store.append(stateProps);
+    } else {
+        const namespace = namespaceInf.namespace;
+        store.append(namespace, stateProps);
     }
 
     return [holder, store];
@@ -1270,10 +1269,9 @@ const registerListeners = (context, listenerMap, ...params) => {
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
             const namespace = params[0];
-            const subNamespaceInf = params[1];
             let ns = null;
-            if (namespace && subNamespaceInf) {
-                ns = `${namespace.local}.${subNamespaceInf.subNamespace}`;
+            if (namespace) {
+                ns = namespace.local;
             }
             const mapObj = propListenerMap[key];
             const propType = mapObj.type;

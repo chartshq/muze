@@ -303,18 +303,13 @@ export default class MatrixResolver {
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
-
+        const globalState = VisualUnit.getState()[0];
+        const globalStates = {};
+        const store = this.store();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
-                const store = this.store();
                 const namespace = `${i}${j}`;
-
-                [['x', 0], ['x', 1], ['y', 0], ['y', 1]].forEach((axisInf) => {
-                    store.append(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${axisInf[0]}`, {
-                        [`${i}${j}${axisInf[1]}`]: null
-                    });
-                });
 
                 unit = VisualUnit.create({
                     layerRegistry,
@@ -323,6 +318,7 @@ export default class MatrixResolver {
                     smartLabel,
                     lifeCycleManager
                 });
+                globalStates[namespace] = null;
                 unit.metaInf({
                     rowIndex: i,
                     colIndex: j,
@@ -336,6 +332,10 @@ export default class MatrixResolver {
             unit.parentAlias(alias);
             el.config(unitConfig);
         });
+
+        for (const key in globalState) {
+            store.append(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${key}`, globalStates);
+        }
 
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
