@@ -47,6 +47,21 @@ export const listenerMap = (context, namespace, metaInf) => ([
             const fieldsVal = context.fields();
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
+                const axes = context.axes();
+                if (axes.x || axes.y) {
+                    const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}0`,
+                        `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.colIndex}0`];
+                    const store = context.store();
+                    const listenerInf = {
+                        namespace: namespace.local,
+                        key: 'gridLineListener'
+                    };
+                    store.unsubscribe(listenerInf);
+                    store.registerChangeListener(props, () => {
+                        attachDataToGridLineLayers(context);
+                    }, false, listenerInf);
+                }
+
                 context.addLayer(layerDefs);
                 context._lifeCycleManager.notify({
                     client: context.layers(),
@@ -119,14 +134,6 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
                 context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
             }
-        }
-    },
-    {
-        type: 'registerChangeListener',
-        props: [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}0`,
-            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.colIndex}0`],
-        listener: () => {
-            attachDataToGridLineLayers(context);
         }
     }
 ]);

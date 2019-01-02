@@ -9,10 +9,9 @@ import {
     DimensionSubtype,
     getClosestIndexOf,
     toArray,
-    STATE_NAMESPACES,
     MeasureSubtype
 } from 'muze-utils';
-import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
+import { layerFactory } from '@chartshq/visual-layer';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};

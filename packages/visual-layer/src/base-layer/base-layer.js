@@ -657,4 +657,10 @@ export default class BaseLayer extends SimpleLayer {
             resolveFn();
         };
     }
+
+    getRenderProps () {
+        const metaInf = this.metaInf();
+        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}0`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.unitColIndex}0`];
+    }
 }

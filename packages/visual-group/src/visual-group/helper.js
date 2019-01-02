@@ -7,7 +7,7 @@ import { registerDomainChangeListener } from './change-listener';
 import ValueMatrix from './value-matrix';
 
 export const createUnitState = (context) => {
-    const [globalState, localState] = VisualUnit.getState();
+    const [globalState] = VisualUnit.getState();
     const store = context.store();
     store.append(STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, globalState);
 };

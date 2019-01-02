@@ -549,7 +549,7 @@ export const computeMatrices = (context, config) => {
 
     [xAxes, yAxes].forEach((axesArr, type) => {
         const stateProps = {};
-
+        axesArr = axesArr || [];
         axesArr.forEach((axes, idx) => {
             axes.forEach((axis, axisIndex) => {
                 stateProps[`${idx}${axisIndex}`] = null;

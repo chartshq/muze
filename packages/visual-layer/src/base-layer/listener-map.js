@@ -10,7 +10,7 @@ const renderLayer = (context) => {
     }
 };
 
-export const listenerMap = (context, ns, metaInf) => [
+export const listenerMap = (context, ns) => [
     {
         props: [`${ns.local}.${PROPS.DATA}`],
         listener: ([, data]) => {
@@ -36,10 +36,7 @@ export const listenerMap = (context, ns, metaInf) => [
         props: [`${ns.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
             const calculateDomain = config.calculateDomain;
-            const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}0`,
-                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.unitColIndex}0`,
-                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
-
+            const props = context.getRenderProps();
             const store = context.store();
             const namespaceInf = {
                 namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,

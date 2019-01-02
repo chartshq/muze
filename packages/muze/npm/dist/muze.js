@@ -45178,11 +45178,10 @@ var registerListeners = function registerListeners(context, listenerMap) {
   for (var key in propListenerMap) {
     if ({}.hasOwnProperty.call(propListenerMap, key)) {
       var namespace = params[0];
-      var subNamespaceInf = params[1];
       var ns = null;
 
-      if (namespace && subNamespaceInf) {
-        ns = "".concat(namespace.local, ".").concat(subNamespaceInf.subNamespace);
+      if (namespace) {
+        ns = namespace.local;
       }
 
       var mapObj = propListenerMap[key];
@@ -55230,6 +55229,7 @@ var computeMatrices = function computeMatrices(context, config) {
   var store = resolver.store();
   [xAxes, yAxes].forEach(function (axesArr, type) {
     var stateProps = {};
+    axesArr = axesArr || [];
     axesArr.forEach(function (axes, idx) {
       axes.forEach(function (axis, axisIndex) {
         stateProps["".concat(idx).concat(axisIndex)] = null;
@@ -57630,12 +57630,11 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var createUnitState = function createUnitState(context) {
   var _VisualUnit$getState = _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_0__["VisualUnit"].getState(),
-      _VisualUnit$getState2 = _slicedToArray(_VisualUnit$getState, 2),
-      globalState = _VisualUnit$getState2[0],
-      localState = _VisualUnit$getState2[1];
+      _VisualUnit$getState2 = _slicedToArray(_VisualUnit$getState, 1),
+      globalState = _VisualUnit$getState2[0];
 
   var store = context.store();
-  store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE, globalState).append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE, localState);
+  store.append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE, globalState);
 };
 var initializeGlobalState = function initializeGlobalState(context) {
   var globalState = context.constructor.getState()[0];
@@ -57644,11 +57643,10 @@ var initializeGlobalState = function initializeGlobalState(context) {
 };
 var createLayerState = function createLayerState(context) {
   var _BaseLayer$getState = _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_2__["BaseLayer"].getState(),
-      _BaseLayer$getState2 = _slicedToArray(_BaseLayer$getState, 2),
-      globalState = _BaseLayer$getState2[0],
-      localState = _BaseLayer$getState2[1];
+      _BaseLayer$getState2 = _slicedToArray(_BaseLayer$getState, 1),
+      globalState = _BaseLayer$getState2[0];
 
-  context.store().append('app.layers', globalState).append('local.layers', localState);
+  context.store().append(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].LAYER_GLOBAL_NAMESPACE, globalState);
 };
 
 var sanitizeRetinalConfig = function sanitizeRetinalConfig(retinalConf) {
@@ -59100,6 +59098,12 @@ function (_SimpleLayer) {
         resolveFn();
       };
     }
+  }, {
+    key: "getRenderProps",
+    value: function getRenderProps() {
+      var metaInf = this.metaInf();
+      return ["".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.y.").concat(metaInf.unitRowIndex, "0"), "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.x.").concat(metaInf.unitColIndex, "0")];
+    }
   }], [{
     key: "getState",
     value: function getState() {
@@ -59293,7 +59297,7 @@ var renderLayer = function renderLayer(context) {
   }
 };
 
-var listenerMap = function listenerMap(context, ns, metaInf) {
+var listenerMap = function listenerMap(context, ns) {
   return [{
     props: ["".concat(ns.local, ".").concat(_enums_props__WEBPACK_IMPORTED_MODULE_2__["DATA"])],
     listener: function listener(_ref) {
@@ -59323,7 +59327,7 @@ var listenerMap = function listenerMap(context, ns, metaInf) {
           config = _ref4[1];
 
       var calculateDomain = config.calculateDomain;
-      var props = ["".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.y.").concat(metaInf.unitRowIndex, "0"), "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.x.").concat(metaInf.unitColIndex, "0"), "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.radius")];
+      var props = context.getRenderProps();
       var store = context.store();
       var namespaceInf = {
         namespace: "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].LAYER_LOCAL_NAMESPACE, ".").concat(context.metaInf().namespace),
@@ -60859,6 +60863,11 @@ function (_BaseLayer) {
       }
 
       return [];
+    }
+  }, {
+    key: "getRenderProps",
+    value: function getRenderProps() {
+      return ["".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.radius")];
     }
   }], [{
     key: "defaultConfig",
@@ -65419,7 +65428,7 @@ var renderGridLineLayers = function renderGridLineLayers(context, container) {
 /*!**************************************************!*\
   !*** ./packages/visual-unit/src/helper/index.js ***!
   \**************************************************/
-/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, createLayers, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup, createLayerState, initializeGlobalState */
+/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, createLayers, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -65439,21 +65448,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLayersBy", function() { return getLayersBy; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "removeLayersBy", function() { return removeLayersBy; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createSideEffectGroup", function() { return createSideEffectGroup; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createLayerState", function() { return createLayerState; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeGlobalState", function() { return initializeGlobalState; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/visual-layer */ "./packages/visual-layer/src/index.js");
 var _this = undefined;
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -65818,23 +65815,6 @@ var removeLayersBy = function removeLayersBy(layers, searchBy, value) {
 var createSideEffectGroup = function createSideEffectGroup(container, className) {
   return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'g', [1], className).node();
 };
-var createLayerState = function createLayerState(context) {
-  var _BaseLayer$getState = _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__["BaseLayer"].getState(),
-      _BaseLayer$getState2 = _slicedToArray(_BaseLayer$getState, 2),
-      globalState = _BaseLayer$getState2[0],
-      localState = _BaseLayer$getState2[1];
-
-  context.store().append('app.layers', globalState).append('local.layers', localState);
-};
-var initializeGlobalState = function initializeGlobalState(context) {
-  var store = context.store();
-  var globalState = context.constructor.getState()[0];
-  var namespace = context.metaInf().namespace;
-
-  for (var prop in globalState) {
-    store.append("".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_GLOBAL_NAMESPACE, ".").concat(prop), _defineProperty({}, namespace, null));
-  }
-};
 
 /***/ }),
 
@@ -65927,6 +65907,21 @@ var listenerMap = function listenerMap(context, namespace, metaInf) {
 
       if (layerDefs && fieldsVal) {
         removeExitLayers(layerDefs, context);
+        var axes = context.axes();
+
+        if (axes.x || axes.y) {
+          var props = ["".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.y.").concat(metaInf.rowIndex, "0"), "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.x.").concat(metaInf.colIndex, "0")];
+          var store = context.store();
+          var listenerInf = {
+            namespace: namespace.local,
+            key: 'gridLineListener'
+          };
+          store.unsubscribe(listenerInf);
+          store.registerChangeListener(props, function () {
+            Object(_helper_grid_lines__WEBPACK_IMPORTED_MODULE_3__["attachDataToGridLineLayers"])(context);
+          }, false, listenerInf);
+        }
+
         context.addLayer(layerDefs);
 
         context._lifeCycleManager.notify({
@@ -66025,12 +66020,6 @@ var listenerMap = function listenerMap(context, namespace, metaInf) {
           formalName: 'layer'
         });
       }
-    }
-  }, {
-    type: 'registerChangeListener',
-    props: ["".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.y.").concat(metaInf.rowIndex, "0"), "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.x.").concat(metaInf.colIndex, "0")],
-    listener: function listener() {
-      Object(_helper_grid_lines__WEBPACK_IMPORTED_MODULE_3__["attachDataToGridLineLayers"])(context);
     }
   }];
 };
