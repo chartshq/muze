@@ -77,6 +77,7 @@ export default class BaseLayer extends SimpleLayer {
         this._cachedData = [];
         this._id = getUniqueId();
         this._measurement = {};
+        this._animationDonePromises = [];
         registerListeners(this, listenerMap);
     }
 
@@ -546,5 +547,27 @@ export default class BaseLayer extends SimpleLayer {
     getPlotElementsFromSet (set) {
         return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
             (data ? set.indexOf(data._id) !== -1 : false));
+    }
+
+    /**
+     * Notifies when all animations/transitions of the layer are completed.
+     *
+     * @public
+     * @return {Promise} Returns a promise to notify the animation completion.
+     */
+    animationDone () {
+        return Promise.all(this._animationDonePromises);
+    }
+
+    registerAnimationDoneHook () {
+        let resolveFn;
+        const promise = new Promise((resolve) => {
+            resolveFn = resolve;
+        });
+        this._animationDonePromises.push(promise);
+
+        return () => {
+            resolveFn();
+        };
     }
 }

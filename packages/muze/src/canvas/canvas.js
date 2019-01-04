@@ -229,8 +229,8 @@ export default class Canvas extends TransactionSupport {
      * @internal
      */
     render () {
-        const mount = this.mount();
         const visGroup = this.composition().visualGroup;
+        const mount = this.mount();
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const { components, layoutConfig, measurement } = getRenderDetails(this, mount);
@@ -242,12 +242,48 @@ export default class Canvas extends TransactionSupport {
         renderComponents(this, components, layoutConfig, measurement);
         // Update life cycle
         lifeCycleManager.notify({ client: this, action: 'drawn' });
+
         const promises = [];
-        visGroup.matrixInstance().value.each((el) => {
-            promises.push(el.valueOf().done());
+        this.composition().layout.viewInfo.viewMatricesInfo.matrices.center[1].forEach((cellsRow) => {
+            cellsRow.forEach((cell) => {
+                promises.push(cell.valueOf().done());
+            });
         });
+
         Promise.all(promises).then(() => {
             this._renderedResolve();
+        });
+
+        this.done().then(() => {
+            const animDonePromises = [];
+            this.composition().layout.viewInfo.viewMatricesInfo.matrices.center[1].forEach((cellsRow) => {
+                cellsRow.forEach((cell) => {
+                    const unit = cell.valueOf();
+                    unit.layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
+                });
+            });
+
+            this.xAxes().forEach((axis) => {
+                axis.forEach((unitAxis) => {
+                    if (unitAxis.animationDone) {
+                        animDonePromises.push(unitAxis.animationDone());
+                    }
+                });
+            });
+
+            this.yAxes().forEach((axis) => {
+                axis.forEach((unitAxis) => {
+                    if (unitAxis.animationDone) {
+                        animDonePromises.push(unitAxis.animationDone());
+                    }
+                });
+            });
+
+            Promise.all(animDonePromises).then(() => {
+                lifeCycleManager.notify({ client: this, action: 'animationend' });
+            });
         });
     }
 

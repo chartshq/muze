@@ -279,6 +279,7 @@ export default class ArcLayer extends BaseLayer {
                             .style('fill', d => colorAxis.getColor(d.datum.colorVal))
                             .transition()
                             .duration(transition.duration)
+                            .on('end', this.registerAnimationDoneHook())
                             .attrTween('d', (...params) => tweenPie(path, rangeValueGetter, params))
                             .attr('class', (d, i) => {
                                 const individualClass = getIndividualClassName(d, i, transformedData, this);
