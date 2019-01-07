@@ -6,7 +6,8 @@ import {
     getDomainFromData,
     Symbols,
     FieldType,
-    ReservedFields
+    ReservedFields,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
@@ -332,5 +333,8 @@ export default class ArcLayer extends BaseLayer {
         }
         return [];
     }
-}
 
+    getRenderProps () {
+        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
+    }
+}

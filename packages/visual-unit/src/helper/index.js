@@ -9,10 +9,9 @@ import {
     DimensionSubtype,
     getClosestIndexOf,
     toArray,
-    STATE_NAMESPACES,
     MeasureSubtype
 } from 'muze-utils';
-import { layerFactory, BaseLayer } from '@chartshq/visual-layer';
+import { layerFactory } from '@chartshq/visual-layer';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -175,8 +174,11 @@ export const sanitizeLayerDef = (layerDefs) => {
 export const attachDataToLayers = (layers, dm, transformedDataModels) => {
     layers.forEach((layer) => {
         const dataSource = layer.config().source;
-        const dataModel = dataSource instanceof Function ? dataSource(dm) : (transformedDataModels[dataSource] || dm);
-        layer.data(dataModel);
+        const dataModel = dataSource instanceof Function ? dataSource(dm) :
+            (transformedDataModels[dataSource] || dm);
+        if (layer.data() !== dataModel) {
+            layer.data(dataModel);
+        }
     });
 };
 
@@ -323,20 +325,3 @@ export const removeLayersBy = (layers, searchBy, value) => {
 };
 
 export const createSideEffectGroup = (container, className) => makeElement(container, 'g', [1], className).node();
-
-export const createLayerState = (context) => {
-    const [globalState, localState] = BaseLayer.getState();
-    context.store().append('app.layers', globalState)
-                    .append('local.layers', localState);
-};
-
-export const initializeGlobalState = (context) => {
-    const store = context.store();
-    const globalState = context.constructor.getState()[0];
-    const namespace = context.metaInf().namespace;
-    for (const prop in globalState) {
-        store.append(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${prop}`, {
-            [namespace]: null
-        });
-    }
-};

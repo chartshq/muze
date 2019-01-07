@@ -27,9 +27,7 @@ import {
     getLayerAxisIndex,
     sanitizeLayerDef,
     createSideEffectGroup,
-    resolveEncodingTransform,
-    createLayerState,
-    initializeGlobalState
+    resolveEncodingTransform
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -102,15 +100,7 @@ export default class VisualUnit {
             {
                 domain: {}
             },
-            {
-                layerDef: {},
-                layers: {},
-                config: {},
-                data: {},
-                width: {},
-                height: {},
-                transform: {}
-            }
+            localOptions
         ];
     }
 
@@ -118,19 +108,19 @@ export default class VisualUnit {
         if (params.length) {
             this._store = params[0];
             const metaInf = this.metaInf();
-            initializeGlobalState(this);
-            createLayerState(this);
+            this.store().append(`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`, {
+                [`${metaInf.namespace}`]: null
+            });
+            const localNs = `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`;
             transactor(this, localOptions, this.store().model, {
-                namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
-                subNamespace: metaInf.namespace
+                namespace: localNs
             });
             registerListeners(this, listenerMap, {
-                local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+                local: localNs,
                 global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
             }, {
                 rowIndex: metaInf.rowIndex,
-                colIndex: metaInf.colIndex,
-                subNamespace: metaInf.namespace
+                colIndex: metaInf.colIndex
             });
             this.firebolt(new UnitFireBolt(this, {
                 physical: physicalActions,

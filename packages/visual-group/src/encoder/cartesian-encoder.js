@@ -150,7 +150,7 @@ export default class CartesianEncoder extends VisualEncoder {
                     domain = adjustedDomain[index] || domains[axisType][key];
                     axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
-                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${key}`, domain);
+                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
                 });
             });
         });

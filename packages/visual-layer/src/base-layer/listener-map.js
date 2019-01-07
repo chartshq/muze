@@ -10,9 +10,9 @@ const renderLayer = (context) => {
     }
 };
 
-export const listenerMap = (context, ns, metaInf) => [
+export const listenerMap = (context, ns) => [
     {
-        props: [`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`],
+        props: [`${ns.local}.${PROPS.DATA}`],
         listener: ([, data]) => {
             const config = context.config();
             const encodingValue = config.encoding;
@@ -26,19 +26,17 @@ export const listenerMap = (context, ns, metaInf) => [
                 context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
                 const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
                     context.data().getFieldsConfig());
-                context.domain(domain);
+                context._domain = domain;
+                !context._updateLock && context.domain(domain);
             }
         },
         type: 'registerImmediateListener'
     },
     {
-        props: [`${ns.local}.${PROPS.CONFIG}.${metaInf.subNamespace}`],
+        props: [`${ns.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
             const calculateDomain = config.calculateDomain;
-            const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}00`,
-                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.0${metaInf.unitColIndex}0`,
-                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
-
+            const props = context.getRenderProps();
             const store = context.store();
             const namespaceInf = {
                 namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,
@@ -46,7 +44,7 @@ export const listenerMap = (context, ns, metaInf) => [
             };
             store.unsubscribe(namespaceInf);
             if (calculateDomain === false) {
-                props.push(`${ns.local}.${PROPS.DATA}.${metaInf.subNamespace}`);
+                props.push(`${ns.local}.${PROPS.DATA}`);
             }
             store.registerChangeListener(props,
                 () => {
