@@ -42,6 +42,17 @@ export const listenerMap = (context, namespace, metaInf) => ([
     },
     {
         type: 'registerImmediateListener',
+        props: [`${namespace.local}.${PROPS.LAYERDEFS}`, `${namespace.local}.${PROPS.DATA}`,
+            `${namespace.local}.${PROPS.CONFIG}`],
+        listener: () => {
+            context._renderedResolve = null;
+            context._renderedPromise = new Promise((resolve) => {
+                context._renderedResolve = resolve;
+            });
+        }
+    },
+    {
+        type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.LAYERDEFS}`],
         listener: ([, layerDefs]) => {
             const fieldsVal = context.fields();

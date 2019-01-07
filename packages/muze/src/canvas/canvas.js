@@ -321,9 +321,6 @@ export default class Canvas extends TransactionSupport {
 
         Promise.all(promises).then(() => {
             this._renderedResolve();
-        });
-
-        this.done().then(() => {
             const animDonePromises = [];
             visGroup.resolver().units().forEach((unitsRow) => {
                 unitsRow.forEach((unit) => {
@@ -333,11 +330,16 @@ export default class Canvas extends TransactionSupport {
                 });
             });
             Promise.all(animDonePromises).then(() => {
-                lifeCycleManager.notify({ client: this, action: 'animationend' });
+                this._animationEndCallback && this._animationEndCallback(this);
             });
         });
+
     }
 
+    onAnimationEnd (fn) {
+        this._animationEndCallback = fn;
+        return this;
+    }
     /**
      * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
      *
