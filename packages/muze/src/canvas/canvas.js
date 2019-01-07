@@ -329,17 +329,35 @@ export default class Canvas extends TransactionSupport {
                     });
                 });
             });
+
+            this.xAxes().forEach((axis) => {
+                axis.forEach((unitAxis) => {
+                    if (unitAxis.animationDone) {
+                        animDonePromises.push(unitAxis.animationDone());
+                    }
+                });
+            });
+
+            this.yAxes().forEach((axis) => {
+                axis.forEach((unitAxis) => {
+                    if (unitAxis.animationDone) {
+                        animDonePromises.push(unitAxis.animationDone());
+                    }
+                });
+            });
+
             Promise.all(animDonePromises).then(() => {
+                console.log('animationEnd');
                 this._animationEndCallback && this._animationEndCallback(this);
             });
         });
-
     }
 
     onAnimationEnd (fn) {
         this._animationEndCallback = fn;
         return this;
     }
+
     /**
      * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
      *

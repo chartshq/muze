@@ -54,6 +54,7 @@ export default class SimpleAxis {
 
         this._scale = this.createScale(this._config);
         this._axis = this.createAxis(this._config);
+        this._animationDonePromises = [];
     }
 
     /**
@@ -448,6 +449,28 @@ export default class SimpleAxis {
         const domain = scale.domain();
 
         return Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
+    }
+
+     /**
+     * Notifies when all animations/transitions of the axis are completed.
+     *
+     * @public
+     * @return {Promise} Returns a promise to notify the animation completion.
+     */
+    animationDone () {
+        return Promise.all(this._animationDonePromises);
+    }
+
+    registerAnimationDoneHook () {
+        let resolveFn;
+        const promise = new Promise((resolve) => {
+            resolveFn = resolve;
+        });
+        this._animationDonePromises.push(promise);
+
+        return () => {
+            resolveFn();
+        };
     }
 }
 

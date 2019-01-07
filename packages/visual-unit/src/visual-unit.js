@@ -69,7 +69,6 @@ export default class VisualUnit {
             smartLabel: dependencies.smartLabel,
             lifeCycleManager: dependencies.lifeCycleManager
         };
-
         this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
             this._renderedResolve();
             this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });

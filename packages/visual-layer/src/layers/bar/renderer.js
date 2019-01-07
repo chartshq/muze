@@ -17,7 +17,7 @@ const transitionBars = (layer, elem, datum, index, context) => {
         selection.transition()
         .duration(duration)
         .ease(easeFns[effect])
-        .on('end', layer._registerAnimationDoneHook());
+        .on('end', layer.registerAnimationDoneHook());
     const update = datum.update || datum;
     const updateStyle = datum.style || {};
     datum.className && selection.classed(datum.className, true);

@@ -46,7 +46,7 @@
         window.canvas = env.canvas();
         canvas = canvas.rows(['Acceleration', 'Horsepower', 'Weight_in_lbs']).columns(['Cylinders']).data(rootData).height(900).width(900).mount(mountPoint);
 
-        canvas.once('canvas.animationend').then((client) => {
+        canvas.onAnimationEnd((client) => {
             console.log(client);
             const element = document.getElementById('chart');
             element.classList.add('animateon');

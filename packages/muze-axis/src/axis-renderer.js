@@ -141,6 +141,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
 
                             .transition()
                             .duration(1000)
+                            .on('end', axisInstance.registerAnimationDoneHook())
                             .attr('dy', (d, i) => {
                                 if (orientation === BOTTOM || i !== 0) {
                                     return _smartTicks[0].oriTextHeight;
@@ -271,7 +272,9 @@ export function renderAxis (axisInstance) {
     setFixedBaseline(axisInstance);
     if (labels.smartTicks === false || tickSize === 0) {
         selectContainer.transition()
-                        .duration(1000).call(axis);
+                        .duration(1000)
+                        .on('end', axisInstance.registerAnimationDoneHook())
+                        .call(axis);
     } else {
         selectContainer.call(axis);
     }

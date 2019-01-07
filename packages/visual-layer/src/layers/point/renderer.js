@@ -87,7 +87,7 @@ const createShape = function (d, elem) {
     mergedGroups = disabled ? mergedGroups :
         mergedGroups.transition()
         .duration(transition.duration)
-        .on('end', layer._registerAnimationDoneHook());
+        .on('end', layer.registerAnimationDoneHook());
     mergedGroups.attr('transform', d => `translate(${d.update.x},${d.update.y})`)
                     .each(function (d) {
                         const style = d.style;

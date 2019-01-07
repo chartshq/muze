@@ -34,6 +34,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
     const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(filteredPoints));
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
+                    .on('end', layer.registerAnimationDoneHook())
                     .attr('d', updateAreaPath(filteredPoints))
                     .each(function (d) {
                         const element = selectElement(this);

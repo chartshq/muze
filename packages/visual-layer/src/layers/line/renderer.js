@@ -35,7 +35,7 @@ export const drawLine = (context) => {
     if (!transition.disabled) {
         element = element.transition()
         .duration(transition.duration)
-        .on('end', layer._registerAnimationDoneHook());
+        .on('end', layer.registerAnimationDoneHook());
     }
     element.attr('d', linepath(filteredPoints))
                     .style('fill-opacity', 0);
