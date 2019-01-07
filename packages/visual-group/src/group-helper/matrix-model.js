@@ -139,13 +139,15 @@ const pushToMatrix = (context, callback) => {
  * @param {Function} callback Callback executed after datamodels are prepared after sel/proj
  * @return {Object} set of matrices with the corresponding row and column keys
  */
-export const getMatrixModel = (dataModel, fieldInfo, callback) => {
+export const getMatrixModel = (dataModel, facetsAndProjections, callback) => {
     let rowDataModels = [];
     const rowKeys = [];
     const columnKeys = [];
     const allColumnProjections = [];
     const matrix = [];
     const facetInfo = [];
+
+    const fieldInfo = Object.assign({}, facetsAndProjections);
     const {
         rowFacets,
         colFacets,
