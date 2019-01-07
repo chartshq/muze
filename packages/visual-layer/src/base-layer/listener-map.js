@@ -60,6 +60,7 @@ export const listenerMap = context => [
         props: [PROPS.MOUNT, PROPS.DATA_UPDATED],
         listener: (mount, dataUpdated) => {
             if (mount[1] && dataUpdated[1]) {
+                context._animationDonePromises = [];
                 context.render(mount[1]);
                 context.dependencies().throwback.commit('onlayerdraw', true);
             }

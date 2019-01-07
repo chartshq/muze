@@ -252,9 +252,6 @@ export default class Canvas extends TransactionSupport {
 
         Promise.all(promises).then(() => {
             this._renderedResolve();
-        });
-
-        this.done().then(() => {
             const animDonePromises = [];
             this.composition().layout.viewInfo.viewMatricesInfo.matrices.center[1].forEach((cellsRow) => {
                 cellsRow.forEach((cell) => {
@@ -282,9 +279,15 @@ export default class Canvas extends TransactionSupport {
             });
 
             Promise.all(animDonePromises).then(() => {
-                lifeCycleManager.notify({ client: this, action: 'animationend' });
+                console.log('animationEnd');
+                this._animationEndCallback && this._animationEndCallback(this);
             });
         });
+    }
+
+    onAnimationEnd (fn) {
+        this._animationEndCallback = fn;
+        return this;
     }
 
     /**

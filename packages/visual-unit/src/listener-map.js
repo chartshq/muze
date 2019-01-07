@@ -34,6 +34,16 @@ export const listenerMap = context => ([
     },
     {
         type: 'registerImmediateListener',
+        props: [PROPS.CONFIG, PROPS.DATA, PROPS.LAYERDEFS],
+        listener: () => {
+            context._renderedResolve = null;
+            context._renderedPromise = new Promise((resolve) => {
+                context._renderedResolve = resolve;
+            });
+        }
+    },
+    {
+        type: 'registerImmediateListener',
         props: [PROPS.CONFIG],
         listener: ([, config]) => {
             config && context.firebolt().config(config.interaction);
