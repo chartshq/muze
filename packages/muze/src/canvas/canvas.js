@@ -347,7 +347,6 @@ export default class Canvas extends TransactionSupport {
             });
 
             Promise.all(animDonePromises).then(() => {
-                console.log('animationEnd');
                 this._animationEndCallback && this._animationEndCallback(this);
             });
         });
