@@ -267,7 +267,7 @@ export default class ArcLayer extends BaseLayer {
                                 return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
                                     ${individualClass}`;
                             })
-                            .on('end', this._registerAnimationDoneHook());
+                            .on('end', this.registerAnimationDoneHook());
         };
         const consecutiveExits = [];
         let exitCounter = 0;
