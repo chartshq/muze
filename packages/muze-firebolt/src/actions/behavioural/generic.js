@@ -1,11 +1,28 @@
 import { getSetInfo, getMergedSet, getSourceFields } from '../../helper';
 
+/**
+ * This is the base class has all the common functionalities needed for all behavioural actions. Any other behavioural
+ * action needs to extend this class.
+ *
+ * @public
+ * @class GenericBehaviour
+ * @module GenericBehaviour
+ */
 export default class GenericBehaviour {
     constructor (firebolt) {
         this.firebolt = firebolt;
         this._enabled = true;
     }
 
+    /**
+     * Returns entry and exit set information. This method is called by firebolt when ```dispatchBehaviour``` is called
+     * dynamically or when any physical action is triggered on the chart.
+     *
+     * @param {Object} payload Payload information.
+     * @param {Object|Array} payload.criteria Identifiers of data interacted with.
+     *
+     * @return {Array} Entry and exit set information.
+     */
     dispatch (payload) {
         const criteria = payload.criteria;
         const firebolt = this.firebolt;
@@ -23,6 +40,16 @@ export default class GenericBehaviour {
         return entryExitSets;
     }
 
+    /**
+     * Updates the selection set by adding uids to the instance of {@link SelectionSet} or removing them.
+     * {@link SelectionSet} keeps the information of which rows are in the entry set and exit set.
+     *
+     * @public
+     * @param {Array} addSet Array of row ids which got affected during interaction.
+     * @param {SelectionSet} selectionSet Instance of selection set.
+     *
+     * @return {GenericBehaviour} Instance of behaviour.
+     */
     setSelectionSet () {
         return this;
     }

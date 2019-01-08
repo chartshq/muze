@@ -1,19 +1,28 @@
 import { FieldType } from 'muze-utils';
 import { PointLayer } from '../point';
 import { defaultConfig } from './default-config';
-import * as PROPS from '../../enums/props';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
 import { getAxesScales, getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
+/**
+ * This layer is used to create small lines. The orientation of the line is determined by the positional
+ * encoding properties x0 and y0. The mark type of the layer is ```tick```.
+ *
+ * @public
+ *
+ * @class
+ * @module TickLayer
+ * @extends BaseLayer
+ */
 export default class TickLayer extends PointLayer {
 
     /**
      *
      *
-     * @static
-     * @returns
+     * @staticg
+     *
      * @memberof TickLayer
      */
     static defaultConfig () {
@@ -24,7 +33,7 @@ export default class TickLayer extends PointLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TickLayer
      */
     static formalName () {
@@ -35,7 +44,7 @@ export default class TickLayer extends PointLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof TickLayer
      */
     static drawFn () {
@@ -45,7 +54,7 @@ export default class TickLayer extends PointLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof TickLayer
      */
     elemType () {
@@ -80,7 +89,7 @@ export default class TickLayer extends PointLayer {
         const colorEncoding = encoding.color;
         const colorField = colorEncoding && colorEncoding.field;
         const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
-        const measurement = this._store.get(PROPS.MEASUREMENT);
+        const measurement = this.measurement();
         const colorAxis = axes.color;
         const { x: offsetX, y: offsetY } = config.offset;
         const { x: xSpan, y: ySpan } = config.span;

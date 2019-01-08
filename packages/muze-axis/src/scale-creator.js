@@ -66,7 +66,7 @@ export function getScheme (scheme) {
  *
  * @export
  * @param {*} scheme
- * @returns
+ *
  */
 export function getSchemeType (scheme) {
     let schemeType = '';
@@ -136,7 +136,7 @@ export function updateScaleRange (scale, range) {
  * @param {*} domainType
  * @param {*} rangeType
  * @param {*} steps
- * @returns
+ *
  */
 export function getScaleType (domainType, rangeType, steps) {
     if (rangeType === CONTINOUS) {

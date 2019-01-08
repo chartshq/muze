@@ -7,26 +7,24 @@ import { STACK, ENCODING } from '../../enums/constants';
 import { getAxesScales, positionPoints, getLayerColor, getIndividualClassName } from '../../helpers';
 
 /**
- * Area Layer creates a area plot.
- * @example
- * const config = {
- *  encoding = {
- *      x: {
- *          field: 'date'
- *      },
- *      // Top y value
- *      y: {
- *          field: 'maxTemp'
- *      },
- *      // Base y value
- *      y0: {
- *          field: 'minTemp
- *      }
- *  }
- * };
- * const areaLayer = layerFactory.getLayer('area', [dataModel, axes, config]);
- * areaLayer.render(container);
+ * Area layer renders a closed path. The mark type of this layer is ```area```. This layer can be used
+ * to create stacked or multi-series areas and vertical range area plots by using the encoding properties.
+ *
+ * To create this layer using layer configuration from canvas,
+ * ```
+ *      canvas.layers([{
+ *          mark: 'area',
+ *          transform: {
+ *              type: 'stack' // Produces a stacked area.
+ *          }
+ *      }]);
+ * ```
+ *
+ * @public
+ *
  * @class
+ * @module AreaLayer
+ * @extends LineLayer
  */
 export default class AreaLayer extends LineLayer {
     /** oation of line layer
@@ -40,7 +38,7 @@ export default class AreaLayer extends LineLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof AreaLayer
      */
     static formalName () {
@@ -56,7 +54,7 @@ export default class AreaLayer extends LineLayer {
         const domains = super.calculateDomainFromData(data, fieldsConfig);
         [ENCODING.X, ENCODING.Y].forEach((type) => {
             const { [`${type}FieldType`]: fieldType } = encodingFieldsInf;
-            if (fieldType === FieldType.MEASURE) {
+            if (fieldType === FieldType.MEASURE && domains[type] !== undefined) {
                 domains[type][0] = Math.min(domains[type][0], 0);
             }
         });

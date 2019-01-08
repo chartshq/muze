@@ -1,22 +1,26 @@
-import { DATA_UPDATE_COUNTER } from '../enums/defaults';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, CONFIG } from '../enums/constants';
 
 export const PROPS = {
     alias: {},
-    data: {
-        sanitization: (context, value) => {
-            if (context._data !== value) {
-                const store = context.store();
-                let hasDataUpdated = store.get(DATA_UPDATE_COUNTER);
-                store.commit(DATA_UPDATE_COUNTER, ++hasDataUpdated);
-            }
-            return value;
+    data: {},
+    cornerMatrices: {
+        defaultValue: {
+            topLeft: [],
+            topRight: [],
+            bottomLeft: [],
+            bottomRight: []
         }
     },
-    cornerMatrices: {},
     groupType: {},
-    matrixInstance: {},
-    metaData: {},
-    placeholderInfo: {},
+
+    metaData: {
+        defaultValue: {
+            border: {}
+        }
+    },
+    placeholderInfo: {
+        defaultValue: {}
+    },
     resolver: {},
     registry: {
         sanitization: (context, value) => {
@@ -27,5 +31,13 @@ export const PROPS = {
         }
     },
     selection: {},
-    store: {}
+    [CONFIG]: {},
+    [ROWS]: {},
+    [COLUMNS]: {},
+    [COLOR]: {},
+    [SHAPE]: {},
+    [SIZE]: {},
+    [DETAIL]: {},
+    [LAYERS]: {},
+    [TRANSFORM]: {}
 };

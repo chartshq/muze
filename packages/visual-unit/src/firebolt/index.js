@@ -1,5 +1,5 @@
 import { FieldType } from 'muze-utils';
-import { Firebolt, SpawnableSideEffect } from '@chartshq/muze-firebolt';
+import { Firebolt } from '@chartshq/muze-firebolt';
 import { registerListeners } from './helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
@@ -122,23 +122,17 @@ export default class UnitFireBolt extends Firebolt {
         };
     }
 
-    initializeSideEffects () {
-        super.initializeSideEffects();
-        const sideEffects = this.sideEffects();
-        for (const key in sideEffects) {
-            if ({}.hasOwnProperty.call(sideEffects, key)) {
-                sideEffects[key] instanceof SpawnableSideEffect && sideEffects[key].drawingContext(() => {
-                    const context = this.context;
-                    return context.getDrawingContext();
-                });
-            }
-        }
-    }
-
     prepareSelectionSets (behaviours) {
         const data = this.context.data();
         if (data) {
             this.createSelectionSet(data.getData().uids, behaviours);
+        }
+        return this;
+    }
+
+    initializeSideEffects () {
+        if (this.context.data()) {
+            super.initializeSideEffects();
         }
         return this;
     }

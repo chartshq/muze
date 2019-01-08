@@ -5,7 +5,8 @@ const events = [
     'beforedraw',
     'drawn',
     'beforeremove',
-    'removed'
+    'removed',
+    'animationend'
 ];
 
 const compositions = [

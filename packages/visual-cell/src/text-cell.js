@@ -16,6 +16,36 @@ import { DEFAULT_CONFIG } from './enums/defaults';
 import { CLASSPREFIX, TOP, BOTTOM, LEFT, RIGHT, HEADER, WIDTH, TEXT_CELL } from './enums/constants';
 import './text-cell.scss';
 
+const setSmartText = (context) => {
+    const source = context.source();
+    const {
+        height: minHeightSpace,
+        width: minWidthSpace
+    } = context.minSpacing();
+    const {
+       margin,
+       rotation
+   } = context.config();
+    const {
+        left,
+        right,
+        top,
+        bottom
+     } = margin;
+    const paddedHeight = top + bottom + minHeightSpace;
+    const paddedWidth = left + right + minWidthSpace;
+    const availHeight = context.availHeight() - paddedHeight;
+    const availWidth = context.availWidth() - paddedWidth;
+    const labelManager = context.dependencies().labelManager;
+
+    labelManager.setStyle(context._computedStyle);
+
+    !rotation && context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
+    rotation && context.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
+
+    return context;
+};
+
 /**
 * Computes the Logical Space for the text
 *
@@ -25,17 +55,50 @@ import './text-cell.scss';
 */
 const computeTextSpace = (context) => {
     const { labelManager } = context.dependencies();
-    const space = labelManager.getOriSize(context.source());
+    const {
+        height: minHeightSpace,
+        width: minWidthSpace
+    } = context.minSpacing();
     const {
        margin,
-        show
+       show,
+       maxLines,
+       minCharacters
    } = context.config();
+    const {
+       left,
+       right,
+       top,
+       bottom
+    } = margin;
+    const paddedHeight = top + bottom + minHeightSpace;
+    const paddedWidth = left + right + minWidthSpace;
+    const availHeight = context.availHeight() - paddedHeight;
+    const availWidth = context.availWidth() - paddedWidth;
+    const source = context.source();
+    const space = context.smartText();
+    const minText = new Array(minCharacters).fill('W').join('');
+    const _minTextSpace = labelManager.getOriSize(minText);
 
-    labelManager.setStyle(context._computedStyle);
+    context.config({ rotation: false });
+    if (space.width > (availWidth || 0) && maxLines) {
+        space.height = space.oriTextHeight * maxLines;
+    }
+    if (availWidth && availWidth < space.width) {
+        space.width = _minTextSpace.width;
+    }
+    if (availWidth && availWidth < Math.min(_minTextSpace.width, space.oriTextWidth)) {
+        const smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
+        space.width = smartSpace.height;
+        space.height = smartSpace.width;
+        context.config({ rotation: true });
+        context.smartText(smartSpace);
+    }
+
     if (show) {
         return {
-            width: space.width + margin.left + margin.right + context._minTickDiff.width,
-            height: space.height + margin.top + margin.bottom + context._minTickDiff.height
+            width: Math.ceil(space.width) + paddedWidth,
+            height: Math.ceil(space.height) + paddedHeight
         };
     } return {
         width: 0,
@@ -64,9 +127,10 @@ class TextCell extends SimpleCell {
                     (this._config.type === HEADER ? `${CLASSPREFIX}-${HEADER}-cell` : `${CLASSPREFIX}-${TEXT}-cell`);
         this._computedStyle = getSmartComputedStyle(selectElement('body'), this._className);
         this._dependencies.labelManager.setStyle(this._computedStyle);
-        this._minTickDiff = this._dependencies.labelManager.getOriSize('WW');
-
         generateGetterSetters(this, PROPS[TEXT]);
+        const space = this._dependencies.labelManager.getOriSize('w');
+        this.minSpacing({ width: Math.floor(space.width * 3 / 4), height: Math.floor(space.height / 2) });
+        setSmartText(this);
     }
 
     /**
@@ -159,6 +223,7 @@ class TextCell extends SimpleCell {
     setAvailableSpace (width, height) {
         this.availWidth(width);
         this.availHeight(height);
+        setSmartText(this);
         this.logicalSpace(null);
         return this;
     }
@@ -173,21 +238,43 @@ class TextCell extends SimpleCell {
      */
     render (mount) {
         const availWidth = this.availWidth();
+        const availHeight = this.availHeight();
         const {
             margin,
             show,
             verticalAlign,
-            textAlign
+            textAlign,
+            rotation
         } = this.config();
 
         this.mount(mount);
         if (show) {
             const container = selectElement(mount);
             const elem = makeElement(container, 'div', [this.id], `${CLASSPREFIX}-${TEXT_CELL}`);
+            const vAlign = verticalAlign || rotation ? 'middle' : 'top';
+            const {
+                width,
+                height
+            } = this.smartText();
+            const {
+                height: minHeightSpace
+            } = this.minSpacing();
+            const translation = {
+                top: width + minHeightSpace / 2,
+                middle: width / 2 + minHeightSpace,
+                bottom: minHeightSpace
+            };
 
-            container.style('vertical-align', verticalAlign);
+            container.style('vertical-align', vAlign);
+
+            // Set class name
             elem.classed(this._className, true);
-            // apply style on the returned element
+
+            // Apply styles
+            elem.style('text-align', textAlign);
+            elem.style('display', 'inline');
+            elem.style('transform', rotation ? `translate(${height / 2}px,
+                ${translation[vAlign]}px) rotate(-90deg)` : '');
             elem.style(WIDTH, availWidth ? `${availWidth}px` : '100%');
             [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
                 elem.style(`padding-${type}`, `${margin[type]}px`);
@@ -195,7 +282,8 @@ class TextCell extends SimpleCell {
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
             // set the text as the innerHTML
-            elem.html(this.source());
+            this._dependencies.labelManager.setStyle(this._computedStyle);
+            elem.html(this._dependencies.labelManager.getSmartText(this.source(), availWidth, availHeight, true).text);
         }
         return this;
     }

@@ -105,7 +105,7 @@ export default class Tooltip extends SpawnableSideEffect {
             }
 
             enter[i] = true;
-            const layoutContainer = drawingInf.parentContainer;
+            const { parentContainer: layoutContainer, parentContainerDimensions } = drawingInf;
             const layoutBoundBox = layoutContainer.getBoundingClientRect();
             const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
 
@@ -128,8 +128,8 @@ export default class Tooltip extends SpawnableSideEffect {
                             .extent({
                                 x: 0,
                                 y: 0,
-                                width: layoutBoundBox.width,
-                                height: layoutBoundBox.height
+                                width: parentContainerDimensions.width,
+                                height: parentContainerDimensions.height
                             })
                             .offset({
                                 x: offsetLeft + (config.offset.x || 0),

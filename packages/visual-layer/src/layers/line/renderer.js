@@ -15,7 +15,7 @@ const line = Symbols.line;
  */
 export const drawLine = (context) => {
     let filteredPoints;
-    const { container, points, interpolate, connectNullData, className, style, transition } = context;
+    const { layer, container, points, interpolate, connectNullData, className, style, transition } = context;
     const mount = selectElement(container).attr('class', className);
     const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
@@ -33,7 +33,9 @@ export const drawLine = (context) => {
     let element = makeElement(mount, 'path', [1]);
     element.classed(points[0].className, true);
     if (!transition.disabled) {
-        element = element.transition().duration(transition.duration);
+        element = element.transition()
+        .duration(transition.duration)
+        .on('end', layer.registerAnimationDoneHook());
     }
     element.attr('d', linepath(filteredPoints))
                     .style('fill-opacity', 0);

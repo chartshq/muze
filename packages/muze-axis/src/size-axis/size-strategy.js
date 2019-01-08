@@ -6,7 +6,7 @@ import { LINEAR, THRESHOLD } from '../enums/scale-type';
  *
  *
  * @param {*} domain
- * @returns
+ *
  */
 const indexedDomain = (domain) => {
     const uniqueVals = domain;
@@ -18,7 +18,7 @@ const indexedDomain = (domain) => {
  *
  *
  * @param {*} domain
- * @returns
+ *
  */
 const normalDomain = (domain) => {
     const uniqueVals = domain;
@@ -30,7 +30,7 @@ const normalDomain = (domain) => {
  *
  * @param {*} domain
  * @param {*} intervals
- * @returns
+ *
  */
 const steppedDomain = (domain, intervals) => {
     let newIntervals = [];
@@ -56,7 +56,7 @@ const steppedDomain = (domain, intervals) => {
  * @param {*} scale
  * @param {*} domain
  * @param {*} uniqueVals
- * @returns
+ *
  */
 const discreteRange = (domainValue, scale, domain) => {
     const numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
@@ -70,7 +70,7 @@ const discreteRange = (domainValue, scale, domain) => {
  * @param {*} domainValue
  * @param {*} scale
  * @param {*} domain
- * @returns
+ *
  */
 const pieceWiseRange = (domainValue, scale, domain, uniqueVals) => {
     const index = uniqueVals.indexOf(domainValue);

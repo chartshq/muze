@@ -23,14 +23,14 @@ export const defaultOptions = {
                 }
             }
         }
-    },
-    [PROPS.MOUNT]: {
-        value: null
-    },
-    [PROPS.AXES]: {
-        value: null
-    },
-    [PROPS.MEASUREMENT]: {
-        value: null
     }
+    // [PROPS.MOUNT]: {
+    //     value: null
+    // },
+    // [PROPS.AXES]: {
+    //     value: null
+    // },
+    // [PROPS.MEASUREMENT]: {
+    //     value: null
+    // }
 };

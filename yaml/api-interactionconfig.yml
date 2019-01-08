@@ -1,0 +1,10 @@
+---
+  title: "Interaction Config"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nConfiguration properties for interaction."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">tooltip</td>\n                <td><p>Object</p> </td>\n                <td><p>Tooltip configuration.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">mode</td>                 <td><p>string</p> </td>                 <td><p>Allows to display tooltip in various modes such as fragmented or consolidated. Supported values are &#39;<p><code>consolidated</code></p> &#39; and &#39;<p><code>consolidated</code></p> &#39;.Default mode is <p><code>consolidated</code></p> . In consolidated mode, all the rows of data model are show in one tooltip. In fragmented mode, all the rows of data model are shown in separate tooltips.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">formatter</td>                 <td><p>function</p> </td>                 <td><p>Returns a formatted content of tooltip <a href=\"TooltipFormatter\">TooltipFormatter</a>.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">fields</td>                 <td><p>Array</p> </td>                 <td><p>Allows to display only the specified fields in the tooltip.</p> </td>             </tr></table></p> </td>\n            </tr></table>"

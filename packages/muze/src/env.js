@@ -79,10 +79,19 @@ export default class Env {
      *
      * @public
      *
-     * @param {Config} config Partial or full configuration of canvas.
+     * @param {Object} config Partial or full configuration of canvas.
+     * @param {AxisConfig} config.axes.x X Axis configuration {@link AxisConfig}.
+     * @param {AxisConfig} config.axes.y Y Axis configuration {@link AxisConfig}.
+     * @param {GridLineConfig} config.gridLines Grid line configuration {@link GridLineConfig}.
+     * @param {GridBandConfig} config.gridBands Grid band configuration {@link GridBandConfig}.
+     * @param {GlobalLegendConfig} config.legend Legend configuration {@link GlobalLegendConfig}.
+     * @param {InteractionConfig} config.interaction Interaction configuration {@link InteractionConfig}
+     * @param {Object} config.autoGroupBy Group by configuration.
+     * @param {boolean} config.autoGroupBy.disabled If true, then disables automatic group by of datamodel in the
+     * chart. By default, set to false.
      * @return {Env} Instance of the environment
      */
-    config () { /* pseudo funciton */ }
+    config () { /* pseudo function */ }
 
     /**
      *  Creates an instance of {@link Canvas}
@@ -120,7 +129,6 @@ export default class Env {
      *      }
      * });
      * ```
-     * @public
      *
      * When called as a setter
      * @param {Object} override Key value pair where keys are the name of the cells user with to override. Allowed keys
@@ -145,6 +153,8 @@ export default class Env {
      *              BlankCell: BlankCell
      *          }
      *      ```
+     *
+     * @public
      */
     cellRegistry () { /* pseudo function */ }
 
@@ -191,8 +201,6 @@ export default class Env {
      *  }])
      * ```
      *
-     * @public
-     *
      * When called as a setter
      * @param {Object} override Key value pair where keys are the name of the cells user with to override. Allowed keys
      *      are
@@ -221,6 +229,8 @@ export default class Env {
      *              Tick: TickLayer
      *          }
      *      ```
+     *
+     * @public
      */
     layerRegistry () { /* pseudo function */ }
 }

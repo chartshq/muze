@@ -1,0 +1,37 @@
+---
+  title: "Simple Var"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=SimpleVariable></a> <span style=\"font-family: Source Code Pro; font-weight: 500;color: #eb5757;\">SimpleVariable</span>\n\nThis is a wrapper on top of fields passed in rows or columns in canvas. This is used to get the type of field or\nget min difference from the field values."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=oneVar></a> oneVar </span></h2>\n\nGets the field name associated with this variable instance."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Name of the field."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=numberFormat></a> numberFormat </span></h2>\n\nGets the number formatter function of this variable."
+    - 
+      type: "markdown-section"
+      content: "<a name=function></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">function:&nbsp;</span>Number formatter function."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getMembers></a> getMembers </span></h2>\n\nReturn the field names associated with this variable instance."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of fields."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=type></a> type </span></h2>\n\nReturns the type of the variable. Whether it is measure or dimension."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Type of variable."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=subtype></a> subtype </span></h2>\n\nReturns the subtype of the variable. Subtype can be categorical or temporal. If no subtype is found, then it\nreturns the type of the variable."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Subtype of variable."

@@ -4,7 +4,8 @@ import {
     setStyles,
     easeFns,
     selectElement,
-    DimensionSubtype
+    DimensionSubtype,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -89,7 +90,7 @@ export const focusUnfocusSelection = (context, selectionSet, isFocussed, interac
  *
  *
  * @param {*} axes
- * @returns
+ *
  */
 export const getAxesScales = (axes) => {
     const [xAxis, yAxis] = [ENCODING.X, ENCODING.Y].map(e => axes[e]);
@@ -107,7 +108,7 @@ export const getAxesScales = (axes) => {
  *
  * @param {*} encoding
  * @param {*} fieldsConfig
- * @returns
+ *
  */
 export const getEncodingFieldInf = (encoding, fieldsConfig) => {
     const [xField, yField, x0Field, y0Field, colorField, shapeField, sizeField] =
@@ -147,7 +148,7 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
  *
  * @param {*} layerConfig
  * @param {*} fieldsConfig
- * @returns
+ *
  */
 export const getValidTransform = (layerConfig, fieldsConfig, encodingFieldInf) => {
     let transformType;
@@ -176,7 +177,7 @@ export const getValidTransform = (layerConfig, fieldsConfig, encodingFieldInf) =
  * @param {*} dataModel
  * @param {*} config
  * @param {*} transformType
- * @returns
+ *
  */
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
@@ -448,4 +449,15 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
             padding
         };
     });
+};
+
+export const initializeGlobalState = (context) => {
+    const store = context.store();
+    const globalState = context.constructor.getState()[0];
+    const namespace = context.metaInf().namespace;
+    for (const prop in globalState) {
+        store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${prop}`, {
+            [namespace]: null
+        });
+    }
 };

@@ -9,7 +9,7 @@ const nest = Symbols.nest;
  *
  *
  * @param {*} isTransposed
- * @returns
+ *
  */
 const getMeasureInfo = (isTransposed) => {
     if (isTransposed) {
@@ -29,7 +29,7 @@ const getMeasureInfo = (isTransposed) => {
  *
  * @param {*} i
  * @param {*} page
- * @returns
+ *
  */
 const findInPage = (i, page) => {
     let count = 0;
@@ -207,8 +207,9 @@ export const getLogicalSpace = (item, measures, minMeasures, maxMeasure = []) =>
         let fMeasure = 0;
         let sMeasure = 0;
         valueArray.forEach((placeholder, colIndex) => {
-            placeholder.logicalSpace(null);
+            placeholder.setAvailableSpace();
             const space = placeholder.getLogicalSpace();
+
             sMeasure = Math.max(sMeasure, +space[secondMeasure], minMeasures[secondMeasure]);
             maxMeasure[colIndex] = Math.max(maxMeasure[colIndex] || 0, space[firstMeasure]);
             fMeasure += +maxMeasure[colIndex];

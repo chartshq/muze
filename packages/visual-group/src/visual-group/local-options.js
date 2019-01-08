@@ -1,7 +1,6 @@
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, CONFIG } from '../enums/constants';
 
 /**
- * @module
  * This is the local options semantics based on which setters getters are created and reactivity is initiated.
  * This local object is only valid for Artboard.
  * Artboard merges global and local object both to the model
@@ -17,16 +16,18 @@ import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, CONFIG } 
  *          sanitizaiton: // Need for sanitization before type is checked
  *      }
  *  }
+ *
+ * @module
  */
 
 export default {
     [CONFIG]: {},
-    [ROWS]: [],
-    [COLUMNS]: [],
-    [COLOR]: '',
-    [SHAPE]: '',
-    [SIZE]: '',
-    [DETAIL]: '',
-    [LAYERS]: '',
-    [TRANSFORM]: []
+    [ROWS]: {},
+    [COLUMNS]: {},
+    [COLOR]: {},
+    [SHAPE]: {},
+    [SIZE]: {},
+    [DETAIL]: {},
+    [LAYERS]: {},
+    [TRANSFORM]: {}
 };

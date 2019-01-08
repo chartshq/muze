@@ -11,7 +11,7 @@ import {
  *
  *
  * @param {*} str
- * @returns
+ *
  */
 const checkPath = (str) => {
     if (/^[mzlhvcsqta]\s*[-+.0-9][^mlhvzcsqta]+/i.test(str) && /[\dz]$/i.test(str) && str.length > 4) {
@@ -73,7 +73,7 @@ const createShape = function (d, elem) {
  */
 /* istanbul ignore next */ const drawSymbols = (params) => {
     let mergedGroups;
-    const { container, points, transition, className } = params;
+    const { layer, container, points, transition, className } = params;
     const { duration, effect, disabled } = transition;
     const mount = selectElement(container);
 
@@ -84,7 +84,10 @@ const createShape = function (d, elem) {
                     .each(function (d) {
                         createShape(d, this);
                     });
-    mergedGroups = disabled ? mergedGroups : mergedGroups.transition().duration(disabled ? 0 : transition.duration);
+    mergedGroups = disabled ? mergedGroups :
+        mergedGroups.transition()
+        .duration(transition.duration)
+        .on('end', layer.registerAnimationDoneHook());
     mergedGroups.attr('transform', d => `translate(${d.update.x},${d.update.y})`)
                     .each(function (d) {
                         const style = d.style;

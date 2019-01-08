@@ -4,7 +4,7 @@ const DATA_TYPES = {
     DIMENSION: 'dimension',
     CATEGORICAL: 'categorical',
     MEASURE: 'measure',
-    DATETIME: 'temporal'
+    TEMPORAL: 'temporal'
 };
 
 /**
@@ -13,6 +13,6 @@ const DATA_TYPES = {
 export const dataTypeScaleMap = {
     [DATA_TYPES.DIMENSION]: ScaleType.BAND,
     [DATA_TYPES.MEASURE]: ScaleType.LINEAR,
-    [DATA_TYPES.DATETIME]: ScaleType.TIME
+    [DATA_TYPES.TEMPORAL]: ScaleType.TIME
 };
 

@@ -8,11 +8,16 @@ import { makeElement, easeFns } from 'muze-utils';
  * @param {*} index
  * @param {*} context
  */
-const transitionBars = (elem, datum, index, context) => {
+const transitionBars = (layer, elem, datum, index, context) => {
     const { transition } = context;
     const { duration, disabled, effect } = transition;
     const selection = elem;
-    const selTransition = disabled ? selection : selection.transition().duration(duration).ease(easeFns[effect]);
+
+    const selTransition = disabled ? selection :
+        selection.transition()
+        .duration(duration)
+        .ease(easeFns[effect])
+        .on('end', layer.registerAnimationDoneHook());
     const update = datum.update || datum;
     const updateStyle = datum.style || {};
     datum.className && selection.classed(datum.className, true);
@@ -38,10 +43,10 @@ const barEnterFn = (elem, d) => {
  * @return {Selection} Bar Selection
  */
 /* istanbul ignore next */ export const drawRects = (params) => {
-    const { points, container, keyFn } = params;
+    const { layer, points, container, keyFn } = params;
     const updateFns = {
         enter (elem, d) { barEnterFn(elem, d); },
-        update (elem, d, i) { transitionBars(elem, d, i, params); }
+        update (elem, d, i) { transitionBars(layer, elem, d, i, params); }
     };
     return makeElement(container, 'rect', points, null, updateFns, keyFn);
 };
