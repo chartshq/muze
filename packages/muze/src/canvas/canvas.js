@@ -310,25 +310,16 @@ export default class Canvas extends TransactionSupport {
         // setLabelRotation
         setLabelRotationForAxes(this);
 
-        // Update life cycle
-        lifeCycleManager.notify({ client: this, action: 'drawn' });
+        const centerMatrix = visGroup.matrixInstance().value;
 
-        this.composition().layout.viewInfo().viewMatricesInfo.matrices.center[1].forEach((cellsRow) => {
-            cellsRow.forEach((cell) => {
-                promises.push(cell.valueOf().done());
-            });
+        centerMatrix.each((cell) => {
+            promises.push(cell.valueOf().done());
         });
 
         Promise.all(promises).then(() => {
-            this._renderedResolve();
+            // Update life cycle
+            lifeCycleManager.notify({ client: this, action: 'drawn' });
             const animDonePromises = [];
-            visGroup.resolver().units().forEach((unitsRow) => {
-                unitsRow.forEach((unit) => {
-                    unit.layers().forEach((layer) => {
-                        animDonePromises.push(layer.animationDone());
-                    });
-                });
-            });
 
             [this.xAxes(), this.yAxes()].forEach((axisArr) => {
                 axisArr = axisArr || [];
@@ -340,14 +331,9 @@ export default class Canvas extends TransactionSupport {
             });
 
             Promise.all(animDonePromises).then(() => {
-                this._animationEndCallback && this._animationEndCallback(this);
+                lifeCycleManager.notify({ client: this, action: 'animationend' });
             });
         });
-    }
-
-    onAnimationEnd (fn) {
-        this._animationEndCallback = fn;
-        return this;
     }
 
     /**
