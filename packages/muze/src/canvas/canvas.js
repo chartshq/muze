@@ -330,19 +330,12 @@ export default class Canvas extends TransactionSupport {
                 });
             });
 
-            this.xAxes().forEach((axis) => {
-                axis.forEach((unitAxis) => {
-                    if (unitAxis.animationDone) {
+            [this.xAxes(), this.yAxes()].forEach((axisArr) => {
+                axisArr = axisArr || [];
+                axisArr.forEach((axes) => {
+                    axes.forEach((unitAxis) => {
                         animDonePromises.push(unitAxis.animationDone());
-                    }
-                });
-            });
-
-            this.yAxes().forEach((axis) => {
-                axis.forEach((unitAxis) => {
-                    if (unitAxis.animationDone) {
-                        animDonePromises.push(unitAxis.animationDone());
-                    }
+                    });
                 });
             });
 
