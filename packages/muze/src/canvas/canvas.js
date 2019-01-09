@@ -321,11 +321,17 @@ export default class Canvas extends TransactionSupport {
             lifeCycleManager.notify({ client: this, action: 'drawn' });
             const animDonePromises = [];
 
+            centerMatrix.each((cell) => {
+                cell.valueOf().layers().forEach((layer) => {
+                    animDonePromises.push(layer.animationDone());
+                });
+            });
+
             [this.xAxes(), this.yAxes()].forEach((axisArr) => {
                 axisArr = axisArr || [];
                 axisArr.forEach((axes) => {
-                    axes.forEach((unitAxis) => {
-                        animDonePromises.push(unitAxis.animationDone());
+                    axes.forEach((axisInst) => {
+                        animDonePromises.push(axisInst.animationDone());
                     });
                 });
             });
@@ -334,6 +340,11 @@ export default class Canvas extends TransactionSupport {
                 lifeCycleManager.notify({ client: this, action: 'animationend' });
             });
         });
+    }
+
+    onAnimationEnd (fn) {
+        this._animationEndCallback = fn;
+        return this;
     }
 
     /**
