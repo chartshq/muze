@@ -3,7 +3,7 @@ import { STATE_NAMESPACES } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { getEncoder, getBorders } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
-import { registerDomainChangeListener } from './change-listener';
+import { registerDomainChangeListener, unsubscribeChangeListeners } from './change-listener';
 import ValueMatrix from './value-matrix';
 
 export const createUnitState = (context) => {
@@ -83,6 +83,8 @@ export const createMatrices = (context) => {
         layers,
         transform
     };
+
+    unsubscribeChangeListeners(context);
 
     const retinalConfig = sanitizeRetinalConfig({
         color,
