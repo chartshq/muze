@@ -44,11 +44,12 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        canvas = canvas.rows(['Acceleration', 'Horsepower', 'Weight_in_lbs'])
-        .columns(['Cylinders'])
+        canvas = canvas.rows(['Origin','Acceleration'])
+        .columns(['Year', 'Horsepower'])
         .data(rootData)
-        .height(900)
-        .width(900)
+        .height(400)
+        .width(400)
+      
         .mount(mountPoint);
 
         canvas.onAnimationEnd((client) => {

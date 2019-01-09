@@ -1,0 +1,59 @@
+.muze-scroll-bar{
+    
+    background: rgb(248, 248, 248);
+    position: relative;
+    font-size: 10px;
+}
+// #muze-scroll-bar-horizontal{
+//     width: 500px;
+//     height: 20px;
+// }
+// #muze-scroll-bar-vertical{
+//     height: 500px;
+//     width: 20px;
+// }
+
+.muze-scroll-arrow {
+    float: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(227, 227, 227);
+    color: rgb(139, 139, 139)
+}
+.muze-scroll-arrow-left{
+    height: 100%;
+    width: 20px;
+}
+.muze-scroll-arrow-right{
+    height: 100%;
+    width: 20px;
+}
+.muze-scroll-arrow-top{
+    width: 100%;
+    height: 20px;
+}
+.muze-scroll-arrow-bottom{
+    width: 100%;
+    height: 20px;
+}
+
+.muze-scroll-rect {
+    // width: 460px;
+    float: left;
+    // height: 100%;
+    position: relative;
+}
+.muze-scroll-mover {
+    // width: 200px;
+    // height: 100%;
+    position: absolute;
+    // left: 10px;
+    background: rgb(227, 227, 227);
+    cursor: -webkit-grab;
+}
+
+.muze-scroll-mover:active {
+    cursor: -webkit-grabbing;
+}

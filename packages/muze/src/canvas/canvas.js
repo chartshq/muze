@@ -13,6 +13,7 @@ import { initCanvas,
         createGroupState,
         createLayoutManager,
         setLayoutInfForUnits } from './helper';
+import { createScroll } from '../../../layout/src/scroll-maker';
 /**
  * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
  * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
@@ -301,6 +302,13 @@ export default class Canvas extends TransactionSupport {
         });
 
         this._layoutManager.renderAt(mount);
+
+        createScroll('horizontal', mount, {
+            classPrefix: 'muze'
+        }, { width: 500, height: 20 });
+        createScroll('vertical', mount, {
+            classPrefix: 'muze'
+        }, { width: 20, height: 500 });
 
         // Render each component
         renderLayout(this._layoutManager, this.layout(), renderDetails);

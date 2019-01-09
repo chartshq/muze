@@ -3,6 +3,7 @@ export const DEFAULT_CONFIG = {
     interaction: {
         sideEffect: 'individual'
     },
+    pagination: 'scroll',
     legend: {
         position: 'right',
         color: {

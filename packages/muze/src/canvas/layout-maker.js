@@ -68,7 +68,8 @@ export const getRenderDetails = (context, mount) => {
         minHeight,
         classPrefix,
         showHeaders,
-        legend
+        legend,
+        pagination
     } = context.config();
     // Get title configuration
     const titleConfig = context.title()[1];
@@ -129,6 +130,7 @@ export const getRenderDetails = (context, mount) => {
         border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
         legend,
+        pagination,
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,

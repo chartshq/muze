@@ -1,6 +1,7 @@
 import { makeElement } from 'muze-utils';
 import { cellSpanMaker, applySpans } from '../../../../layout/src/grid-layout/span-maker';
 import { applyBorders } from '../../../../layout/src/grid-layout/border-helper';
+
 import {
      TOP
 } from '../../../../layout/src/enums/constants';
@@ -28,7 +29,8 @@ export default class MatrixComponent extends MuzeComponent {
         const column = this.params.config.column;
         const dimensions = this.params.config.dimensions;
         const border = this.params.config.border;
-            // Creating containers for each matrix individually
+
+        // Creating containers for each matrix individually
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
             .classed(`${classPrefix}-grid-${row}`, true)
             .classed(`${classPrefix}-grid`, true);

@@ -249,5 +249,7 @@ export const ROW_ROOT = 'rowRoot';
 export const COLUMN_ROOT = 'columnRoot';
 export const PRIMARY = 'primary';
 export const SECONDARY = 'secondary';
+export const VERTICAL = 'vertical';
+export const HORIZONTAL = 'horizontal';
 
 export const BLANK_BORDERS = 'rgba(0,0,0,0)';

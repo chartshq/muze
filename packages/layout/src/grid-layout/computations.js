@@ -48,6 +48,42 @@ const setViewSpaces = (layout, pointerType, viewSpaces) => {
     return pointer;
 };
 
+const getColumnMatrixWidth = (layout, maxRowMatrixWidth) => {
+    const {
+        width
+    } = layout.measurement();
+    const {
+        border,
+        pagination
+    } = layout.config();
+
+    const availableWidth = width - maxRowMatrixWidth - border.width;
+    switch (pagination) {
+    case 'holistic':
+        return availableWidth;
+    default:
+        return Math.max(availableWidth, getMatrixMeasurement(layout.columnMatrix(), WIDTH));
+
+    }
+};
+const getRowMatrixHeight = (layout, maxColumnMatrixHeight) => {
+    const {
+        height
+    } = layout.measurement();
+    const {
+        pagination
+    } = layout.config();
+
+    const availableHeight = height - maxColumnMatrixHeight;
+    switch (pagination) {
+    case 'holistic':
+        return availableHeight;
+    default:
+        return Math.max(availableHeight, getMatrixMeasurement(layout.rowMatrix(), HEIGHT));
+
+    }
+};
+
 /**
  * Computes the measurements of space for all matrices in the
  * layout
@@ -80,7 +116,8 @@ export const computeLayoutMeasurements = (layout) => {
     const borderWidth = border.width;
 
     // Set width for column matrix
-    const columnMatrixWidth = width - maxRowMatrixWidth - borderWidth;
+    const columnMatrixWidth = getColumnMatrixWidth(layout, maxRowMatrixWidth);
+    // width - maxRowMatrixWidth - borderWidth;
 
     const maxColumnMatrixHeight = Math.min(columnMatrix.getLogicalSpace().height, height / 2);
 
@@ -96,7 +133,7 @@ export const computeLayoutMeasurements = (layout) => {
     const columnMatrixHeight = columnViewSpace.height.primary + columnViewSpace.height.secondary;
 
     // Set height for row matrix
-    const rowMatrixHeight = height - columnMatrixHeight;
+    const rowMatrixHeight = getRowMatrixHeight(layout, columnMatrixHeight);
 
     rowMatrix.setAvailableSpace(maxRowMatrixWidth, rowMatrixHeight);
     // Get heights of each cell of row matrix
