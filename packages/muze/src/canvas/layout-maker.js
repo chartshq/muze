@@ -229,6 +229,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
             name: GRID,
             component: grid,
             config: { ...target,
+                pagination: layoutConfig.pagination,
                 classPrefix: layoutConfig.classPrefix,
                 dimensions: { height: 0, width: 0 } }
         });

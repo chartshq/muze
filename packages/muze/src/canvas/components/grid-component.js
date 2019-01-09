@@ -14,6 +14,7 @@ export default class GridComponent extends MuzeComponent {
         let height = 0;
         let width = 0;
         const { viewMatricesInfo, layoutDimensions } = this.component.viewInfo();
+        const scrollInfo = this.component.scrollInfo();
 
         for (let i = 0; i < 3; i++) {
             if (!(this.gridComponents.length && this.gridComponents[i] instanceof Array)) {
@@ -27,6 +28,7 @@ export default class GridComponent extends MuzeComponent {
                     dimensions: matrixDim,
                     border: layoutDimensions.border,
                     classPrefix: this.params.config.classPrefix,
+                    scrollInfo,
                     row: ROW_MATRIX_INDEX[i],
                     column: j
                 };

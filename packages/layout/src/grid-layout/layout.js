@@ -3,7 +3,7 @@
  * and man other visualzations that require a tabular structure.
  */
 
-import { getUniqueId } from 'muze-utils';
+import { getUniqueId, mergeRecursive } from 'muze-utils';
 import GenericLayout from '../generic-layout';
 import { DEFAULT_CONFIGURATION, DEFAULT_MEASUREMENTS } from './defaults';
 import { generateVisualMatrices } from './layout-helper';
@@ -30,6 +30,7 @@ export default class GridLayout extends GenericLayout {
         this.config(this.constructor.defaultConfig());
         this._layoutId = getUniqueId();
         this._viewInfo = this.constructor.defaultViewInfo();
+        this._scrollInfo = { horizontal: false, vertical: false };
     }
 
     static defaultViewInfo () {
@@ -103,8 +104,11 @@ export default class GridLayout extends GenericLayout {
      * @memberof GridLayout
      */
     triggerReflow () {
-        computeLayoutMeasurements(this);
-        this.setViewInformation();
+        const {
+            maxHeightAvailableForRowMatrix,
+            maxWidthAvailableForColumnMatrix
+        } = computeLayoutMeasurements(this);
+        this.setViewInformation(maxHeightAvailableForRowMatrix, maxWidthAvailableForColumnMatrix);
         return this;
     }
 
@@ -138,20 +142,28 @@ export default class GridLayout extends GenericLayout {
         return this._viewInfo;
     }
 
+    scrollInfo (...scrollInfo) {
+        if (scrollInfo.length) {
+            this._scrollInfo = mergeRecursive(this._scrollInfo, scrollInfo[0]);
+            return this;
+        }
+        return this._scrollInfo;
+    }
+
     /**
      *
      *
      * @returns
      * @memberof GridLayout
      */
-    setViewInformation () {
+    setViewInformation (maxRowHeight, maxColWidth) {
         const {
             rowPointer,
             columnPointer,
             border
         } = this.config();
         const viewMatricesInfo = getViewMatrices(this, rowPointer, columnPointer);
-        const layoutDimensions = getViewMeasurements(this);
+        const layoutDimensions = getViewMeasurements(this, maxRowHeight, maxColWidth);
         layoutDimensions.border = border;
         this.viewInfo({
             viewMatricesInfo,

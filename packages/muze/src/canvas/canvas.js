@@ -303,12 +303,12 @@ export default class Canvas extends TransactionSupport {
 
         this._layoutManager.renderAt(mount);
 
-        createScroll('horizontal', mount, {
-            classPrefix: 'muze'
-        }, { width: 500, height: 20 });
-        createScroll('vertical', mount, {
-            classPrefix: 'muze'
-        }, { width: 20, height: 500 });
+        // createScroll('horizontal', mount, {
+        //     classPrefix: 'muze'
+        // }, { width: 500, height: 20 });
+        // createScroll('vertical', mount, {
+        //     classPrefix: 'muze'
+        // }, { width: 20, height: 500 });
 
         // Render each component
         renderLayout(this._layoutManager, this.layout(), renderDetails);

@@ -3,7 +3,7 @@ import { cellSpanMaker, applySpans } from '../../../../layout/src/grid-layout/sp
 import { applyBorders } from '../../../../layout/src/grid-layout/border-helper';
 
 import {
-     TOP
+     TOP, CENTER
 } from '../../../../layout/src/enums/constants';
 import MuzeComponent from './muze-chart-component';
 
@@ -22,6 +22,21 @@ export default class MatrixComponent extends MuzeComponent {
         this.className(params.config.className);
     }
 
+    applyScroll (container) {
+        const row = this.params.config.row;
+        const column = this.params.config.column;
+        const { horizontal, vertical } = this.params.config.scrollInfo;
+        if (horizontal && column === 1) {
+            container.style('overflow-x', 'hidden');
+            container.style('width', '100%');
+        }
+
+        if (vertical && row === CENTER) {
+            container.style('overflow-y', 'hidden');
+            container.style('height', '100%');
+        }
+    }
+
     renderMatrix (mountPoint) {
         // Creating containers for each matrix individually
         const classPrefix = this.params.config.classPrefix;
@@ -34,6 +49,8 @@ export default class MatrixComponent extends MuzeComponent {
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
             .classed(`${classPrefix}-grid-${row}`, true)
             .classed(`${classPrefix}-grid`, true);
+
+        this.applyScroll(containerForMatrix);
 
         const {
                 viewMatrix,
