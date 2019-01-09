@@ -6,9 +6,6 @@
 import { getUniqueId } from 'muze-utils';
 import GenericLayout from '../generic-layout';
 import { DEFAULT_CONFIGURATION, DEFAULT_MEASUREMENTS } from './defaults';
-import {
-    renderMatrices
-} from './renderer';
 import { generateVisualMatrices } from './layout-helper';
 import { computeLayoutMeasurements, getViewMeasurements, getViewMatrices } from './computations';
 /**
@@ -160,27 +157,6 @@ export default class GridLayout extends GenericLayout {
             viewMatricesInfo,
             layoutDimensions
         });
-        return this;
-    }
-
-    /**
-     * Renders the layout
-     *
-     * @return {Object} current instance
-     * @memberof GridLayout
-     */
-    renderGrid (mountPoint) {
-        this.mountPoint(mountPoint);
-        if (!this.mountPoint()) {
-            return this;
-        }
-        const viewInfo = this.viewInfo();
-        const {
-                viewMatricesInfo,
-                layoutDimensions
-            } = viewInfo;
-            // Render matrices
-        renderMatrices(this, viewMatricesInfo.matrices, layoutDimensions);
         return this;
     }
 }
