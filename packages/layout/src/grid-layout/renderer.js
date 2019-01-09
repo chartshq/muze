@@ -5,6 +5,12 @@ import {
 } from '../enums/constants';
 import { BLANK_BORDERS } from './defaults';
 
+const getCellsForRow = (rowData, rowIndex) => {
+    const cells = rowData.filter(e => e !== null && e.config().show).map(e =>
+        ({ placeholder: e, rowIndex }));
+    return cells;
+};
+
 /**
  * Creates a table element of the layout
  *
@@ -17,8 +23,7 @@ function renderTable (mount, className, rowData) {
     const table = makeElement(mount, 'table', ['layout'], `${className}-table`);
     const body = makeElement(table, 'tbody', ['layout'], `${className}-body`);
     const rows = makeElement(body, 'tr', rowData, `${className}-tr`);
-    const cells = makeElement(rows, 'td', (d, i) => d.filter(e => e !== null && e.config().show).map(e =>
-                                ({ placeholder: e, rowIndex: i })), `${className}-td`, {}, key => key.placeholder.id);
+    const cells = makeElement(rows, 'td', getCellsForRow, `${className}-td`, {}, key => key.placeholder.id);
 
     return { table, body, rows, cells };
 }
@@ -68,6 +73,65 @@ function applyBorders (cells, border, type, index) {
     }
 }
 
+const spaceAllocationDueToSpan = (span, placeholder, borderWidth) => {
+    const height = placeholder.availHeight();
+    const width = placeholder.availWidth();
+
+    return {
+        [ROW_SPAN] () {
+            selectElement(this).style('height', `${height + borderWidth}px`);
+            if (span > 1) {
+                selectElement(this).style('height', `${height * span + borderWidth * (span)}px`);
+                placeholder.setAvailableSpace(width, height * span);
+            }
+        },
+        [COL_SPAN] () {
+            if (span > 1) {
+                placeholder.setAvailableSpace(width * span + borderWidth * (span - 1), height);
+            }
+            selectElement(this).style('height', `${height}px`);
+        }
+    };
+};
+
+const spanApplier = (cells, spans, config, type) => {
+    const borderWidth = config.border.width;
+
+    cells.attr(type, function (cell, colIndex) {
+        const span = spans[cell.rowIndex][colIndex];
+        const placeholder = cell.placeholder;
+
+        spaceAllocationDueToSpan(span, placeholder, borderWidth)[type].bind(this)();
+        return span;
+    });
+};
+
+const spanApplierMap = {
+    [`${TOP}-0`]: null,
+    [`${TOP}-1`]: (...params) => spanApplier(...params, COL_SPAN),
+    [`${TOP}-2`]: null,
+    [`${CENTER}-0`]: (...params) => spanApplier(...params, ROW_SPAN),
+    [`${CENTER}-1`]: null,
+    [`${CENTER}-2`]: (...params) => spanApplier(...params, ROW_SPAN),
+    [`${BOTTOM}-0`]: null,
+    [`${BOTTOM}-1`]: (...params) => spanApplier(...params, COL_SPAN),
+    [`${BOTTOM}-2`]: null
+};
+
+export const applySpans = (cells, spans, config, type) => {
+    const applier = spanApplierMap[type];
+    if (applier) {
+        applier(cells, spans, config);
+    }
+};
+
+export const renderPlaceholders = (cells) => {
+      // Rendering content within placeholders
+    cells.each(function (cell) {
+        cell.placeholder.render(this);
+    });
+};
+
 /**
  * Renders a set of matrices in a row
  *
@@ -91,32 +155,11 @@ function renderMatrix (matrices, mountPoint, type, dimensions, classPrefix) {
         // Rendering the table components
         const { cells } = renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
 
-        if (type === CENTER && spans) {
-            cells.attr(ROW_SPAN, function (cell, colIndex) {
-                const span = spans[cell.rowIndex][colIndex];
-                const placeholder = cell.placeholder;
-                selectElement(this).style('height', `${placeholder.availHeight() + dimensions.border.width}px`);
-                if (span > 1) {
-                    placeholder.setAvailableSpace(placeholder.availWidth(), placeholder.availHeight() * span);
-                }
-                return span;
-            });
-        } else if ((type === TOP || type === BOTTOM) && index === 1) {
-            cells.attr(COL_SPAN, function (cell, colIndex) {
-                const span = spans[cell.rowIndex][colIndex];
-                const placeholder = cell.placeholder;
-                if (span > 1) {
-                    placeholder.setAvailableSpace(placeholder.availWidth() * span, placeholder.availHeight());
-                }
-                selectElement(this).style('height', `${placeholder.availHeight()}px`);
-                return span;
-            });
-        }
-        // Rendering content within placeholders
-        cells.each(function (cell) {
-            cell.placeholder && cell.placeholder.render(this);
-        }).exit().each((cell) => {
-            cell.placeholder && cell.placeholder.remove();
+        applySpans(cells, spans, { dimensions }, `${type}-${index}`);
+        renderPlaceholders(cells);
+
+        cells.exit().each((cell) => {
+            cell.placeholder.remove();
         });
 
         applyBorders(cells, dimensions.border, type, index);
@@ -137,6 +180,7 @@ export function renderMatrices (context, matrices, layoutDimensions) {
         center,
         bottom
     } = matrices;
+
     const {
         classPrefix
     } = context.config();

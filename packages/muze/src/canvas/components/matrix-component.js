@@ -1,5 +1,6 @@
 import { selectElement, makeElement } from 'muze-utils';
 import { cellSpanMaker } from '../../../../layout/src/grid-layout/span-maker';
+import { applySpans, renderPlaceholders } from '../../../../layout/src/grid-layout/renderer';
 import {
      TOP, LEFT, RIGHT, BOTTOM, CENTER, HEIGHT, WIDTH, ROW_SPAN, COL_SPAN
 } from '../../../../layout/src/enums/constants';
@@ -19,46 +20,70 @@ export default class MatrixComponent extends MuzeComponent {
         const classPrefix = this.params.config.classPrefix;
         const row = this.params.config.row;
         const column = this.params.config.column;
-        // const dimensions = this.params.config.dimensions;
+        const dimensions = this.params.config.dimensions;
         const border = this.params.config.border;
 
+        // const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
+        //         .classed(`${classPrefix}-grid-${row}`, true)
+        //         .classed(`${classPrefix}-grid`, true);
+
+        // const { viewMatrix, spans } = cellSpanMaker(this.component, row, column);
+        // if (row !== CENTER) {
+        //     containerForMatrix.style(WIDTH, `${this.getLogicalSpace().width}px`);
+        //     containerForMatrix.style(HEIGHT, `${this.getLogicalSpace().height}px`);
+        // }
+
+        // // Rendering the table components
+        // const { cells } = this.renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
+
+        // if (row === CENTER && spans) {
+        //     cells.attr(ROW_SPAN, function (cell, colIndex) {
+        //         const placeholder = cell.placeholder;
+        //         selectElement(this).style('height', `${placeholder.availHeight() + border.width}px`);
+        //         return spans[cell.rowIndex][colIndex];
+        //     });
+        // } else if ((row === TOP || row === BOTTOM) && column === 1) {
+        //     cells.attr(COL_SPAN, function (cell, colIndex) {
+        //         const span = spans[cell.rowIndex][colIndex];
+        //         const placeholder = cell.placeholder;
+        //         if (span > 1) {
+        //             placeholder.setAvailableSpace(placeholder.availWidth() * spans, placeholder.availHeight());
+        //         }
+        //         selectElement(this).style('height', `${placeholder.availHeight()}px`);
+        //         return span;
+        //     });
+        // }
+        // // Rendering content within placeholders
+        // cells.each(function (cell) {
+        //     cell.placeholder && cell.placeholder.render(this);
+        // }).exit().each((cell) => {
+        //     cell.placeholder && cell.placeholder.remove();
+        // });
+        // this.applyBorders(cells, border, row, column);
+
+        // matrices.forEach((matrix, index) => {
+            // Creating containers for each matrix individually
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
-                .classed(`${classPrefix}-grid-${row}`, true)
-                .classed(`${classPrefix}-grid`, true);
+            .classed(`${classPrefix}-grid-${row}`, true)
+            .classed(`${classPrefix}-grid`, true);
 
-        const { viewMatrix, spans } = cellSpanMaker(this.component, row, column);
-        if (row !== CENTER) {
-            containerForMatrix.style(WIDTH, `${this.getLogicalSpace().width}px`);
-            containerForMatrix.style(HEIGHT, `${this.getLogicalSpace().height}px`);
-        }
+        const {
+                viewMatrix,
+                spans
+            } = cellSpanMaker(this.component, row, column);
 
-        // Rendering the table components
+            // Rendering the table components
         const { cells } = this.renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
 
-        if (row === CENTER && spans) {
-            cells.attr(ROW_SPAN, function (cell, colIndex) {
-                const placeholder = cell.placeholder;
-                selectElement(this).style('height', `${placeholder.availHeight() + border.width}px`);
-                return spans[cell.rowIndex][colIndex];
-            });
-        } else if ((row === TOP || row === BOTTOM) && column === 1) {
-            cells.attr(COL_SPAN, function (cell, colIndex) {
-                const span = spans[cell.rowIndex][colIndex];
-                const placeholder = cell.placeholder;
-                if (span > 1) {
-                    placeholder.setAvailableSpace(placeholder.availWidth() * spans, placeholder.availHeight());
-                }
-                selectElement(this).style('height', `${placeholder.availHeight()}px`);
-                return span;
-            });
-        }
-        // Rendering content within placeholders
-        cells.each(function (cell) {
-            cell.placeholder && cell.placeholder.render(this);
-        }).exit().each((cell) => {
-            cell.placeholder && cell.placeholder.remove();
+        applySpans(cells, spans, { dimensions, border }, `${row}-${column}`);
+        renderPlaceholders(cells);
+
+        cells.exit().each((cell) => {
+            cell.placeholder.remove();
         });
+
         this.applyBorders(cells, border, row, column);
+        // });
     }
 
     applyBorders (cells, border, type, index) {
