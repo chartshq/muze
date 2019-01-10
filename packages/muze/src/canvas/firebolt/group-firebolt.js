@@ -1,7 +1,8 @@
 import {
     getDataModelFromIdentifiers,
     FieldType,
-    mergeRecursive
+    mergeRecursive,
+    CommonProps
 } from 'muze-utils';
 
 import { applyInteractionPolicy } from '../helper';
@@ -98,22 +99,9 @@ export default class GroupFireBolt {
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
             const context = this.context;
-            this.context.once('canvas.updated').then(() => {
-                applyInteractionPolicy([this._interactionPolicy], this);
-                const crossInteractionPolicy = this._crossInteractionPolicy;
-                const behaviours = crossInteractionPolicy.behaviours;
-                const sideEffects = crossInteractionPolicy.sideEffects;
-                const visualGroup = context.composition().visualGroup;
-                const valueMatrix = visualGroup.composition().matrices.value;
-                valueMatrix.each((cell) => {
-                    const unitFireBolt = cell.valueOf().firebolt();
-                    for (const key in behaviours) {
-                        unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
-                    }
-                    for (const key in sideEffects) {
-                        unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
-                    }
-                });
+            applyInteractionPolicy(this);
+            context._throwback.registerImmediateListener([CommonProps.UNITS_UPDATED], () => {
+                applyInteractionPolicy(this);
             });
             return this;
         }

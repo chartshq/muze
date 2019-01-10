@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -448,6 +448,8 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
+
+        this._dependencies.throwback.commit(CommonProps.UNITS_UPDATED, true);
 
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;

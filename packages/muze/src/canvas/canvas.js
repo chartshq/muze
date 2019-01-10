@@ -1,5 +1,5 @@
 import { GridLayout } from '@chartshq/layout';
-import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES } from 'muze-utils';
+import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
@@ -54,6 +54,10 @@ export default class Canvas extends TransactionSupport {
         this._composition.layout = new GridLayout();
         this._store = new Store(APP_INITIAL_STATE);
 
+        this._throwback = new Store({
+            [CommonProps.UNITS_UPDATED]: false
+        });
+
         // Setters and getters will be mounted on this. The object will be mutated.
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
         const [, store] = transactor(this, options, this._store.model, {
@@ -65,6 +69,7 @@ export default class Canvas extends TransactionSupport {
         transactor(this, canvasOptions, store, {
             namespace
         });
+
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
         this.firebolt(new GroupFireBolt(this));
         this.alias(`canvas-${getUniqueId()}`);
@@ -340,11 +345,6 @@ export default class Canvas extends TransactionSupport {
                 lifeCycleManager.notify({ client: this, action: 'animationend' });
             });
         });
-    }
-
-    onAnimationEnd (fn) {
-        this._animationEndCallback = fn;
-        return this;
     }
 
     /**
