@@ -143,10 +143,17 @@ export const getRenderDetails = (context, mount) => {
     };
 };
 
+const components = { verticalScrollBar: 0, horizontalScrollBar: 1, title: 2, subtitle: 3, legend: 4, grid: 5 };
+
 export const renderLayout = (layoutManager, grid, renderDetails) => {
     const compWrapMaker = componentWrapperMaker(layoutManager, grid, renderDetails);
-    const componentWrappers = ['verticalScrollBar', 'horizontalScrollBar', 'title', 'subtitle', 'legend', 'grid']
-                                    .map(e => compWrapMaker[e]());
+    const componentWrappers = Object.keys(components).map(e => compWrapMaker[e]());
+    const horizontalScrollWrapper = componentWrappers[components.horizontalScrollBar];
+    const verticalScrollWrapper = componentWrappers[components.verticalScrollBar];
+    const gridWrapper = componentWrappers[components.grid];
+
+    horizontalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
+    verticalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
     layoutManager.registerComponents(componentWrappers).compute();
 };
 

@@ -8,6 +8,7 @@ export class ScrollMaker {
     constructor () {
         this._components = {};
         this._logicalSpace = {};
+        this._attachedScrollAction = () => {};
     }
 
     logicalSpace (...l) {

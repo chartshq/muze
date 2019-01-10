@@ -53,7 +53,8 @@ const scrollBarMap = {
         layoutBasedMeasure: 'height',
         viewMeasure: 'viewHeight',
         rowAlign: 1,
-        colAlign: 2
+        colAlign: 2,
+        positon: 'top'
     },
     horizontal: {
         componentName: 'horizontalScrollBar',
@@ -62,7 +63,8 @@ const scrollBarMap = {
         viewMeasure: 'viewWidth',
         height: 'thickness',
         rowAlign: 2,
-        colAlign: 0
+        colAlign: 0,
+        position: 'bottom'
     }
 };
 
@@ -74,7 +76,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const { totalMeasures, actualCenterMeasures } = layoutDimensions;
     const {
         componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
-        viewMeasure
+        viewMeasure, position
     } = scrollBarMap[scrollBarType];
     const dimensions = {
         thickness: layoutConfig.scrollBar.thickness,
@@ -86,7 +88,8 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
         ...target,
         type: scrollBarType,
         alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
-        alignment: LAYOUT_ALIGN.LEFT
+        alignment: LAYOUT_ALIGN.LEFT,
+        position
     });
 
     const wrapperParams = {
@@ -107,7 +110,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     } else {
         scrollBarWrapper = new ScrollComponent(wrapperParams);
     }
-    scrollBarWrapper.attachScrollAction(grid.scrollActon);
+
     return scrollBarWrapper;
 };
 

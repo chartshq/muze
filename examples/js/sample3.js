@@ -44,8 +44,8 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        canvas = canvas.rows(['Origin','Acceleration'])
-        .columns(['Year', 'Horsepower'])
+        canvas = canvas.columns(['Origin','Acceleration'])
+        .rows(['Year', 'Horsepower'])
         .data(rootData)
         .height(400)
         // .title("sads",)

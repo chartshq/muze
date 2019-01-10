@@ -1,6 +1,24 @@
+import { selectElement } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
+
+const scrollActionApplier = (movement, context) => ({
+    horizontal: () => {
+        [0, 1, 2].forEach((e) => {
+            selectElement(`#${context.component[e][1].renderAt()}`)
+                            .selectAll('.muze-grid')
+                            .property('scrollLeft', movement);
+        });
+    },
+    vertical: () => {
+        [0, 1, 2].forEach((e) => {
+            selectElement(`#${context.component[1][e].renderAt()}`)
+                            .selectAll('.muze-grid')
+                            .property('scrollTop', movement);
+        });
+    }
+});
 
 export default class GridComponent extends MuzeComponent {
 
@@ -55,7 +73,14 @@ export default class GridComponent extends MuzeComponent {
             }
         }
         this.boundBox({ height, width });
+
         this.component = this.gridComponents;
+        this.allComponents = this.gridComponents;
+    }
+
+    scrollActon (direction, movedView) {
+        scrollActionApplier(movedView, this)[direction]();
+        return this;
     }
 
     getBoundBox () {

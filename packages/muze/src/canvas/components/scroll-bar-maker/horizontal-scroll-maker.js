@@ -17,16 +17,14 @@ export class HorizontalScrollMaker extends ScrollMaker {
             rect
         } = moverRect;
 
-        this.logicalSpace({
-            width: dimensions.width,
-            height: 100
-        });
+        const { height, width, totalLength, viewLength } = this.logicalSpace();
+        const scrollBarWithouArrowLength = width - height * 2;
 
         rect.style('width', `${dimensions.width - 40}px`);
         rect.style('height', `${100}%`);
-        mover.style('width', `${100}px`);
+        mover.style('width', `${(viewLength * scrollBarWithouArrowLength) / totalLength}px`);
         mover.style('height', `${100}%`);
-        mover.style('left', `${10}px`);
+        mover.style('left', `${0}px`);
 
         this._components = {
             prevArrow,
@@ -34,25 +32,35 @@ export class HorizontalScrollMaker extends ScrollMaker {
             moverRect,
             scrollBarContainer
         };
+        this._scrollBarWithouArrowLength = scrollBarWithouArrowLength;
         this.registerListeners();
     }
 
     changeMoverPosition (moverRect, newPosition) {
+        let currentPos;
         const {
             mover,
             rect
         } = moverRect;
         const rectStartPos = rect.node().getBoundingClientRect();
         const moverPos = mover.node().getBoundingClientRect();
+        const {
+            totalLength
+         } = this.logicalSpace();
 
         if (newPosition.x < 0) {
-            mover.style('left', `${0}px`);
+            currentPos = 0;
         } else if (newPosition.x + moverPos.width > rectStartPos.width) {
-            mover.style('left', `${rectStartPos.width - moverPos.width}px`);
+            currentPos = rectStartPos.width - moverPos.width;
         } else {
-            mover.style('left', `${newPosition.x}px`);
+            currentPos = newPosition.x;
         }
-        this._attachedScrollAction(this.constructor.type());
+
+        mover.style('left', `${currentPos}px`);
+        const totalDistance = this._scrollBarWithouArrowLength - moverPos.height;
+        const movedViewLength = (currentPos * totalLength) / totalDistance;
+
+        this._attachedScrollAction(this.constructor.type(), movedViewLength);
     }
 
 }

@@ -150,10 +150,6 @@ export default class GridLayout extends GenericLayout {
         return this._scrollInfo;
     }
 
-    scrollActon (direction) {
-        console.log(direction);
-    }
-
     /**
      *
      *
