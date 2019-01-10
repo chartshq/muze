@@ -111,11 +111,3 @@ export const scrollContainerHelper = (mountPoint, config, dimensions, type) => {
     return scrollBarContainer;
 };
 
-// export const createScroll = (type, mountPoint, config, dimensions) => {
-//     const ScrollMaker = scrollMakerMap[type];
-//     const newScrollMaker = new ScrollMaker();
-
-//     newScrollMaker.createScroll(mountPoint, config, dimensions);
-//     newScrollMaker.registerListeners();
-// };
-

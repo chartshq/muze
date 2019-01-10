@@ -4,6 +4,9 @@ export const DEFAULT_CONFIG = {
         sideEffect: 'individual'
     },
     pagination: 'scroll',
+    scrollBar: {
+        thickness: 20
+    },
     legend: {
         position: 'right',
         color: {
