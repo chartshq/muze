@@ -4,8 +4,8 @@ import {
     getD3Drag,
     getEvent
 } from 'muze-utils';
-import { HorizontalScrollMaker } from './horizontal-scroll-maker';
-import { VerticalScrollMaker } from './vertical-scroll-maker';
+// import { HorizontalScrollMaker } from './horizontal-scroll-maker';
+// import { VerticalScrollMaker } from './vertical-scroll-maker';
 import './scroll-bar.scss';
 
 const d3Drag = getD3Drag();
@@ -17,10 +17,10 @@ const arrowUnicodeMap = {
     bottom: '&#9660'
 };
 
-const scrollMakerMap = {
-    horizontal: HorizontalScrollMaker,
-    vertical: VerticalScrollMaker
-};
+// const scrollMakerMap = {
+//     horizontal: HorizontalScrollMaker,
+//     vertical: VerticalScrollMaker
+// };
 
 export const createScrollBarArrow = (mount, type, config) => {
     const {
@@ -111,11 +111,11 @@ export const scrollContainerHelper = (mountPoint, config, dimensions, type) => {
     return scrollBarContainer;
 };
 
-export const createScroll = (type, mountPoint, config, dimensions) => {
-    const ScrollMaker = scrollMakerMap[type];
-    const newScrollMaker = new ScrollMaker();
+// export const createScroll = (type, mountPoint, config, dimensions) => {
+//     const ScrollMaker = scrollMakerMap[type];
+//     const newScrollMaker = new ScrollMaker();
 
-    newScrollMaker.createScroll(mountPoint, config, dimensions);
-    newScrollMaker.registerListeners();
-};
+//     newScrollMaker.createScroll(mountPoint, config, dimensions);
+//     newScrollMaker.registerListeners();
+// };
 

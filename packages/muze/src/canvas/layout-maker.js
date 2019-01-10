@@ -5,6 +5,7 @@ import { createLegend, getLegendSpace } from './legend-maker';
 import { TOP, BOTTOM, LEFT, RIGHT, TITLE, SUB_TITLE, LEGEND } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
+import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
@@ -130,6 +131,7 @@ export const getRenderDetails = (context, mount) => {
         border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
         legend,
+        buffer: 20,
         pagination,
         title: titleConfig,
         subtitle: subtitleConfig,
@@ -156,11 +158,13 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     if (components.headers && components.headers.titleCell) {
         const title = components.headers.titleCell;
         let titleConfig = layoutConfig.title;
-        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix,
+        titleConfig = Object.assign({}, titleConfig, {
+            classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
             alignment: LAYOUT_ALIGN.LEFT,
-            className: TITLE_CONFIG.className });
+            className: TITLE_CONFIG.className
+        });
         if (layoutManager.getComponent(TITLE)) {
             titleWrapper = layoutManager
                             .getComponent(TITLE)
@@ -176,11 +180,13 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
         const subtitle = components.headers.subtitleCell;
         let subtitleConfig = layoutConfig.subtitle;
 
-        subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
+        subtitleConfig = Object.assign({}, subtitleConfig, {
+            classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
             alignment: LAYOUT_ALIGN.LEFT,
-            className: SUB_TITLE_CONFIG.className });
+            className: SUB_TITLE_CONFIG.className
+        });
         if (layoutManager.getComponent(SUB_TITLE)) {
             subtitleWrapper = layoutManager
                                 .getComponent(SUB_TITLE)
@@ -201,7 +207,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
                                 .updateWrapper({
                                     name: LEGEND,
                                     component: components.legends,
-                                    config: legendConfig });
+                                    config: legendConfig
+                                });
         } else {
             colorLegendWrapper = new LegendComponent({
                 name: LEGEND,
@@ -220,26 +227,69 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
                             .updateWrapper({
                                 name: GRID,
                                 component: grid,
-                                config: { ...target,
+                                config: {
+                                    ...target,
                                     classPrefix: layoutConfig.classPrefix,
-                                    dimensions: { height: 0, width: 0 } }
+                                    dimensions: { height: 0, width: 0 }
+                                }
                             });
     } else {
         gridWrapper = new GridComponent({
             name: GRID,
             component: grid,
-            config: { ...target,
+            config: {
+                ...target,
                 pagination: layoutConfig.pagination,
                 classPrefix: layoutConfig.classPrefix,
-                dimensions: { height: 0, width: 0 } }
+                dimensions: { height: 0, width: 0 }
+            }
         });
     }
 
+     // subtitle
+    let verticalScrollBarWrapper = null;
+    const horizontalScrollBarWrapper = null;
+
+    const scrollConfig = Object.assign({}, {
+        classPrefix: layoutConfig.classPrefix,
+        ...target,
+        type: 'vertical',
+        alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
+        alignment: LAYOUT_ALIGN.RIGHT
+        // className: SUB_TITLE_CONFIG.className
+    });
+    if (layoutManager.getComponent('verticalScrollBar')) {
+        verticalScrollBarWrapper = layoutManager
+                                 .getComponent('verticalScrollBar')
+                                 .updateWrapper({ name: 'verticalScrollBar', config: scrollConfig });
+    } else {
+        verticalScrollBarWrapper = new ScrollComponent({ name: 'verticalScrollBar', config: scrollConfig });
+    }
+
+    // const scrollConfigHor = Object.assign({}, {
+    //     classPrefix: layoutConfig.classPrefix,
+    //     ...target,
+    //     type: 'vertical',
+    //     alignWith: `${ROW_MATRIX_INDEX[1]}-${COLUMN_MATRIX_INDEX[2]}`,
+    //     alignment: LAYOUT_ALIGN.RIGHT
+    //     // className: SUB_TITLE_CONFIG.className
+    // });
+    // if (layoutManager.getComponent('horizontalScrollBar')) {
+    //     horizontalScrollBarWrapper = layoutManager
+    //                              .getComponent('horizontalScrollBar')
+    //                              .updateWrapper({ name: 'horizontalScrollBar', config: scrollConfigHor });
+    // } else {
+    //     horizontalScrollBarWrapper = new ScrollComponent({ name: 'horizontalScrollBar', config: scrollConfigHor });
+    // }
+    // debugger;
     layoutManager.registerComponents([
+        verticalScrollBarWrapper,
         titleWrapper,
         subtitleWrapper,
         colorLegendWrapper,
         gridWrapper
+        // horizontalScrollBarWrapper,
+
     ]).compute();
 };
 

@@ -50,7 +50,8 @@ const setViewSpaces = (layout, pointerType, viewSpaces) => {
 
 const getColumnMatrixWidth = (layout, maxWidthAvailableForColumnMatrix) => {
     const {
-        pagination
+        pagination,
+        buffer
     } = layout.config();
 
     switch (pagination) {
@@ -61,14 +62,15 @@ const getColumnMatrixWidth = (layout, maxWidthAvailableForColumnMatrix) => {
         if (columnMatrixWidth > maxWidthAvailableForColumnMatrix) {
             layout.scrollInfo({ horizontal: true });
         }
-        return Math.max(maxWidthAvailableForColumnMatrix, columnMatrixWidth);
+        return Math.max(maxWidthAvailableForColumnMatrix - buffer, columnMatrixWidth);
     }
 
     }
 };
 const getRowMatrixHeight = (layout, maxHeightAvailableForRowMatrix) => {
     const {
-        pagination
+        pagination,
+        buffer
     } = layout.config();
 
     switch (pagination) {
@@ -79,7 +81,7 @@ const getRowMatrixHeight = (layout, maxHeightAvailableForRowMatrix) => {
         if (rowMatrixHeight > maxHeightAvailableForRowMatrix) {
             layout.scrollInfo({ vertical: true });
         }
-        return Math.max(maxHeightAvailableForRowMatrix, rowMatrixHeight);
+        return Math.max(maxHeightAvailableForRowMatrix - buffer, rowMatrixHeight);
     }
 
     }
@@ -101,7 +103,8 @@ export const computeLayoutMeasurements = (layout) => {
         height
     } = layout.measurement();
     const {
-        border
+        border,
+        buffer
     } = layout.config();
     const matrices = layout.matrices();
     const {
@@ -168,11 +171,11 @@ export const computeLayoutMeasurements = (layout) => {
     return {
         rowMatrixHeight,
         rowMatrixWidth,
-        maxHeightAvailableForRowMatrix,
+        maxHeightAvailableForRowMatrix: maxHeightAvailableForRowMatrix - buffer,
 
         columnMatrixHeight,
         columnMatrixWidth,
-        maxWidthAvailableForColumnMatrix
+        maxWidthAvailableForColumnMatrix: maxWidthAvailableForColumnMatrix - buffer
     };
 };
 

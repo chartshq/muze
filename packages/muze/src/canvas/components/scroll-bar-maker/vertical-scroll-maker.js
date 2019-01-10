@@ -1,13 +1,14 @@
 import { ScrollMaker } from './scroll-maker';
 import { createScrollBarRect, createScrollBarArrow } from './helper';
-import { VERTICAL } from '../enums/constants';
+import { VERTICAL } from '../../../constants';
 
 export class VerticalScrollMaker extends ScrollMaker {
 
     static type () {
         return VERTICAL;
     }
-    createScroll (mountPoint, config, dimensions) {
+
+    createScroll (mountPoint, config, dimensions = this.logicalSpace()) {
         const { scrollBarContainer } = super.createScroll(mountPoint, config, dimensions);
         const prevArrow = createScrollBarArrow(scrollBarContainer, 'top', config);
         const moverRect = createScrollBarRect(scrollBarContainer, config);
@@ -16,6 +17,11 @@ export class VerticalScrollMaker extends ScrollMaker {
             mover,
             rect
         } = moverRect;
+
+        this.logicalSpace({
+            height: dimensions.height,
+            width: 100
+        });
 
         rect.style('height', `${dimensions.height - 40}px`);
         rect.style('width', `${100}%`);
@@ -29,6 +35,7 @@ export class VerticalScrollMaker extends ScrollMaker {
             moverRect,
             scrollBarContainer
         };
+        this.registerListeners();
     }
 
     changeMoverPosition (moverRect, newPosition) {

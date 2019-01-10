@@ -26,6 +26,7 @@ export default class MatrixComponent extends MuzeComponent {
         const row = this.params.config.row;
         const column = this.params.config.column;
         const { horizontal, vertical } = this.params.config.scrollInfo;
+
         if (horizontal && column === 1) {
             container.style('overflow-x', 'hidden');
             container.style('width', '100%');
@@ -53,9 +54,9 @@ export default class MatrixComponent extends MuzeComponent {
         this.applyScroll(containerForMatrix);
 
         const {
-                viewMatrix,
-                spans
-            } = cellSpanMaker(this.component, row, column);
+            viewMatrix,
+            spans
+        } = cellSpanMaker(this.component, row, column);
 
             // Rendering the table components
         const { cells } = this.renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
