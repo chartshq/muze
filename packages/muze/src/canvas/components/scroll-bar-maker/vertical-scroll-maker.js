@@ -8,8 +8,9 @@ export class VerticalScrollMaker extends ScrollMaker {
         return VERTICAL;
     }
 
-    createScroll (mountPoint, config, dimensions = this.logicalSpace()) {
-        const { scrollBarContainer } = super.createScroll(mountPoint, config, dimensions);
+    createScroll (mountPoint, dimensions = this.logicalSpace()) {
+        const config = this.config();
+        const { scrollBarContainer } = super.createScroll(mountPoint, dimensions);
         const prevArrow = createScrollBarArrow(scrollBarContainer, 'top', config);
         const moverRect = createScrollBarRect(scrollBarContainer, config);
         const nextArrow = createScrollBarArrow(scrollBarContainer, 'bottom', config);
@@ -37,6 +38,22 @@ export class VerticalScrollMaker extends ScrollMaker {
         this.registerListeners();
     }
 
+    emptyScrollAreaClick (event, moverRect) {
+        const {
+            mover,
+            rect
+        } = moverRect;
+        const speed = this.config().speed;
+        const { x, y } = mover.node().getBoundingClientRect();
+        const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
+
+        let positionAdjuster = speed * 10;
+        if (event.y < y) {
+            positionAdjuster = -speed * 10;
+        }
+        this.changeMoverPosition(moverRect, { x: x - rectX + positionAdjuster, y: y - rectY + positionAdjuster });
+    }
+
     changeMoverPosition (moverRect, newPosition) {
         let currentPos;
         const {
@@ -57,7 +74,7 @@ export class VerticalScrollMaker extends ScrollMaker {
             currentPos = newPosition.y;
         }
         mover.style('top', `${currentPos}px`);
-        const totalDistance = this._scrollBarWithouArrowLength - moverPos.height;
+        const totalDistance = this._scrollBarWithouArrowLength - rectStartPos.y;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 
         this._attachedScrollAction(this.constructor.type(), movedViewLength);

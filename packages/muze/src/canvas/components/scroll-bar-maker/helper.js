@@ -14,13 +14,21 @@ const arrowUnicodeMap = {
     top: '&#9650',
     bottom: '&#9660'
 };
+const arrowSizeMap = {
+    left: 'width',
+    right: 'width',
+    top: 'height',
+    bottom: 'height'
+};
 
 export const createScrollBarArrow = (mount, type, config) => {
     const {
-        classPrefix
+        classPrefix,
+        thickness
     } = config;
     const arrow = makeElement(mount, 'div', [type], `${classPrefix}-scroll-arrow-${type}`);
     arrow.classed(`${classPrefix}-scroll-arrow`, true);
+    arrow.style(arrowSizeMap[type], `${thickness}px`);
     arrow.html(arrowUnicodeMap[type]);
     return arrow;
 };
@@ -36,12 +44,11 @@ export const createScrollBarRect = (mount, config) => {
 
 export const applyRectClick = (scrollMaker, moverRect) => {
     const {
-        mover,
         rect
     } = moverRect;
     rect.on('click', () => {
-        const moverStartPos = mover.node().getBoundingClientRect();
-        scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x + 5, y: moverStartPos.y + 5 });
+        const event = getEvent();
+        scrollMaker.emptyScrollAreaClick(event, moverRect);
     });
 };
 
@@ -95,17 +102,22 @@ export const registerListeners = (scrollMaker) => {
         nextArrow
     } = scrollMaker._components;
     const {
-        mover
+        mover,
+        rect
     } = moverRect;
+    const speed = scrollMaker.config().speed;
     prevArrow.on('click', () => {
-        const moverStartPos = mover.node().getBoundingClientRect();
-        scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x - 1, y: moverStartPos.y - 1 });
+        const { x, y } = mover.node().getBoundingClientRect();
+        const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
+
+        scrollMaker.changeMoverPosition(moverRect, { x: x - rectX - speed, y: y - rectY - speed });
     });
     applyMoverDrag(scrollMaker, moverRect);
     applyRectClick(scrollMaker, moverRect);
     nextArrow.on('click', () => {
-        const moverStartPos = mover.node().getBoundingClientRect();
-        scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x + 1, y: moverStartPos.y + 1 });
+        const { x, y } = mover.node().getBoundingClientRect();
+        const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
+        scrollMaker.changeMoverPosition(moverRect, { x: x - rectX + speed, y: y - rectY + speed });
     });
 };
 

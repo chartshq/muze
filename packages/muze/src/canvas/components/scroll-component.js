@@ -13,14 +13,14 @@ export default class ScrollComponent extends MuzeComponent {
         const ScrollMaker = scrollMakerMap[params.config.type];
 
         params.component = new ScrollMaker();
-
+        params.component.config(params.config.scrollBarComponentConfig);
         params.component.logicalSpace(params.dimensions);
         super(params.name, params.component.getLogicalSpace(), 0);
         this.setParams(params);
     }
 
     draw (container) {
-        this.component.createScroll(container || document.getElementById(this.renderAt()), this.params.config);
+        this.component.createScroll(container || document.getElementById(this.renderAt()));
         return this;
     }
 

@@ -48,6 +48,12 @@
         .rows(['Year', 'Horsepower'])
         .data(rootData)
         .height(400)
+        .config({
+            scrollBar:{
+                thickness: 50
+                // speed: 10
+            }
+        })
         // .title("sads",)
         .width(400)
       
