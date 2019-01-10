@@ -44,31 +44,54 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails, target) =
 
 const scrollBarMap = {
     vertical: {
-        componentName: 'verticalScrollBar'
+        componentName: 'verticalScrollBar',
+        width: 'thickness',
+        height: 'layoutBasedMeasure',
+        layoutBasedMeasure: 'canvasHeight',
+        rowAlign: 1,
+        colAlign: 2
     },
     horizontal: {
-        componentName: 'horizontalScrollBar'
+        componentName: 'horizontalScrollBar',
+        width: 'layoutBasedMeasure',
+        layoutBasedMeasure: 'canvasWidth',
+        height: 'thickness',
+        rowAlign: 2,
+        colAlign: 0
     }
 };
 
 const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, target) => {
     let scrollBarWrapper = null;
-    const { layoutConfig } = renderDetails;
-    const { componentName } = scrollBarMap[scrollBarType];
+    const { layoutConfig, measurement } = renderDetails;
+    const {
+        componentName, layoutBasedMeasure, width, height, rowAlign, colAlign
+    } = scrollBarMap[scrollBarType];
 
+    const dimensions = {
+        thickness: layoutConfig.scrollBar.thickness,
+        layoutBasedMeasure: measurement[layoutBasedMeasure]
+    };
     const scrollConfig = Object.assign({}, {
         classPrefix: layoutConfig.classPrefix,
         ...target,
         type: scrollBarType,
-        alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
-        alignment: LAYOUT_ALIGN.RIGHT
+        alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
+        alignment: LAYOUT_ALIGN.LEFT
     });
     if (layoutManager.getComponent(componentName)) {
         scrollBarWrapper = layoutManager
                                 .getComponent(componentName)
                                 .updateWrapper({ name: componentName, config: scrollConfig });
     } else {
-        scrollBarWrapper = new ScrollComponent({ name: componentName, config: scrollConfig });
+        scrollBarWrapper = new ScrollComponent({
+            name: componentName,
+            config: scrollConfig,
+            dimensions: {
+                width: dimensions[width],
+                height: dimensions[height]
+            }
+        });
     }
     return scrollBarWrapper;
 };

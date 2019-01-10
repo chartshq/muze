@@ -145,7 +145,8 @@ export const getRenderDetails = (context, mount) => {
 
 export const renderLayout = (layoutManager, grid, renderDetails) => {
     const compWrapMaker = componentWrapperMaker(layoutManager, grid, renderDetails);
-    const componentWrappers = ['verticalScrollBar', 'title', 'subtitle', 'legend', 'grid'].map(e => compWrapMaker[e]());
+    const componentWrappers = ['verticalScrollBar', 'horizontalScrollBar', 'title', 'subtitle', 'legend', 'grid']
+                                    .map(e => compWrapMaker[e]());
     layoutManager.registerComponents(componentWrappers).compute();
 };
 

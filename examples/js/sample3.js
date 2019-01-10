@@ -48,6 +48,7 @@
         .columns(['Year', 'Horsepower'])
         .data(rootData)
         .height(400)
+        // .title("sads",)
         .width(400)
       
         .mount(mountPoint);

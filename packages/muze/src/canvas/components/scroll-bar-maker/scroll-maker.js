@@ -17,8 +17,10 @@ export class ScrollMaker {
         return this._logicalSpace;
     }
 
-    createScroll (mountPoint, config, dimensions) {
-        return { scrollBarContainer: scrollContainerHelper(mountPoint, config, dimensions, this.constructor.type()) };
+    createScroll (mountPoint, config) {
+        return {
+            scrollBarContainer: scrollContainerHelper(mountPoint, config, this.logicalSpace(), this.constructor.type())
+        };
     }
     getLogicalSpace () {
         return this.logicalSpace();

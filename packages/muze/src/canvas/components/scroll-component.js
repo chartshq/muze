@@ -11,22 +11,16 @@ const scrollMakerMap = {
 export default class ScrollComponent extends MuzeComponent {
     constructor (params) {
         const ScrollMaker = scrollMakerMap[params.config.type];
+
         params.component = new ScrollMaker();
-        params.component.logicalSpace({ width: 20, height: 500 });
+
+        params.component.logicalSpace(params.dimensions);
         super(params.name, params.component.getLogicalSpace(), 0);
         this.setParams(params);
-
-        // createScroll('vertical', mount, {
-        //     classPrefix: 'muze'
-        // }, { width: 20, height: 500 });
-        // createScroll('horizontal', mount, {
-     //     classPrefix: 'muze'
-     // }, { width: 500, height: 20 });
     }
 
     draw (container) {
         this.component.createScroll(container || document.getElementById(this.renderAt()), this.params.config);
-        // this.renderScrollBar(container || document.getElementById(this.renderAt()));
     }
 
     updateWrapper (params) {
