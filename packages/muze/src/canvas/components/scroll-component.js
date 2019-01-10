@@ -21,6 +21,12 @@ export default class ScrollComponent extends MuzeComponent {
 
     draw (container) {
         this.component.createScroll(container || document.getElementById(this.renderAt()), this.params.config);
+        return this;
+    }
+
+    attachScrollAction (callback) {
+        this.component.attachScrollAction(callback);
+        return this;
     }
 
     updateWrapper (params) {

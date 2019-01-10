@@ -22,6 +22,12 @@ export class ScrollMaker {
             scrollBarContainer: scrollContainerHelper(mountPoint, config, this.logicalSpace(), this.constructor.type())
         };
     }
+
+    attachScrollAction (externalScrollAction) {
+        this._attachedScrollAction = externalScrollAction;
+        return this;
+    }
+
     getLogicalSpace () {
         return this.logicalSpace();
     }

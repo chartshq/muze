@@ -53,6 +53,7 @@ export class VerticalScrollMaker extends ScrollMaker {
         } else {
             mover.style('top', `${newPosition.y}px`);
         }
+        this._attachedScrollAction(this.constructor.type());
     }
 
 }

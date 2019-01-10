@@ -52,6 +52,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
         } else {
             mover.style('left', `${newPosition.x}px`);
         }
+        this._attachedScrollAction(this.constructor.type());
     }
 
 }

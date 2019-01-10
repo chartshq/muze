@@ -17,10 +17,13 @@ const headerMap = {
     }
 };
 
-const createHeaderWrapper = (headerType, layoutManager, renderDetails, target) => {
+const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
+    let wrapper = null;
+
     const { components, layoutConfig } = renderDetails;
     const { headerCell, configType } = headerMap[headerType];
-    let wrapper = null;
+    const target = { target: CANVAS };
+
     if (components.headers && components.headers[headerCell]) {
         const header = components.headers[headerCell];
         let headerConfig = layoutConfig[headerType];
@@ -47,30 +50,36 @@ const scrollBarMap = {
         componentName: 'verticalScrollBar',
         width: 'thickness',
         height: 'layoutBasedMeasure',
-        layoutBasedMeasure: 'canvasHeight',
+        layoutBasedMeasure: 'height',
+        viewMeasure: 'viewHeight',
         rowAlign: 1,
         colAlign: 2
     },
     horizontal: {
         componentName: 'horizontalScrollBar',
         width: 'layoutBasedMeasure',
-        layoutBasedMeasure: 'canvasWidth',
+        layoutBasedMeasure: 'width',
+        viewMeasure: 'viewWidth',
         height: 'thickness',
         rowAlign: 2,
         colAlign: 0
     }
 };
 
-const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, target) => {
+const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetails) => {
     let scrollBarWrapper = null;
-    const { layoutConfig, measurement } = renderDetails;
+    const { layoutConfig } = renderDetails;
+    const target = { target: CANVAS };
+    const { layoutDimensions } = grid.viewInfo();
+    const { totalMeasures, actualCenterMeasures } = layoutDimensions;
     const {
-        componentName, layoutBasedMeasure, width, height, rowAlign, colAlign
+        componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
+        viewMeasure
     } = scrollBarMap[scrollBarType];
-
     const dimensions = {
         thickness: layoutConfig.scrollBar.thickness,
-        layoutBasedMeasure: measurement[layoutBasedMeasure]
+        layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
+
     };
     const scrollConfig = Object.assign({}, {
         classPrefix: layoutConfig.classPrefix,
@@ -79,20 +88,26 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, tar
         alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
         alignment: LAYOUT_ALIGN.LEFT
     });
+
+    const wrapperParams = {
+        name: componentName,
+        config: scrollConfig,
+        dimensions: {
+            width: dimensions[width],
+            height: dimensions[height],
+            totalLength: actualCenterMeasures[layoutBasedMeasure],
+            viewLength: layoutDimensions[viewMeasure][1]
+        }
+    };
+
     if (layoutManager.getComponent(componentName)) {
         scrollBarWrapper = layoutManager
                                 .getComponent(componentName)
-                                .updateWrapper({ name: componentName, config: scrollConfig });
+                                .updateWrapper(wrapperParams);
     } else {
-        scrollBarWrapper = new ScrollComponent({
-            name: componentName,
-            config: scrollConfig,
-            dimensions: {
-                width: dimensions[width],
-                height: dimensions[height]
-            }
-        });
+        scrollBarWrapper = new ScrollComponent(wrapperParams);
     }
+    scrollBarWrapper.attachScrollAction(grid.scrollActon);
     return scrollBarWrapper;
 };
 
@@ -100,8 +115,8 @@ export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
     const { components, layoutConfig, measurement } = renderDetails;
     const target = { target: CANVAS };
     return {
-        title: () => createHeaderWrapper(TITLE, layoutManager, renderDetails, target),
-        subtitle: () => createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails, target),
+        title: () => createHeaderWrapper(TITLE, layoutManager, renderDetails),
+        subtitle: () => createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
         legend: () => {
              // color legend
             let colorLegendWrapper = null;
@@ -156,7 +171,7 @@ export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
             }
             return gridWrapper;
         },
-        verticalScrollBar: () => createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, target),
-        horizontalScrollBar: () => createScrollBarWrapper(HORIZONTAL, layoutManager, renderDetails, target)
+        verticalScrollBar: () => createScrollBarWrapper(VERTICAL, layoutManager, grid, renderDetails),
+        horizontalScrollBar: () => createScrollBarWrapper(HORIZONTAL, layoutManager, grid, renderDetails)
     };
 };

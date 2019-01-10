@@ -257,11 +257,16 @@ export const getViewMeasurements = (layout, maxRowHeight, maxColWidth) => {
 
     const centerHeight = rowSpaces.rowHeights.primary.reduce((t, n) => t + n);
     const centerWidth = colSpaces.columnWidths.primary.reduce((t, n) => t + n);
+    const viewWidth = [leftWidth, Math.min(centerWidth, maxColWidth), rightWidth];
+    const viewHeight = [topHeight, Math.min(centerHeight, maxRowHeight), bottomHeight];
 
     return {
-        viewWidth: [leftWidth, Math.min(centerWidth, maxColWidth), rightWidth],
-        viewHeight: [topHeight, Math.min(centerHeight, maxRowHeight), bottomHeight],
-        actualCenterMeasures: { height: centerHeight, width: centerWidth }
-
+        viewWidth,
+        viewHeight,
+        actualCenterMeasures: { height: centerHeight, width: centerWidth },
+        totalMeasures: {
+            width: viewWidth.reduce((t, n) => t + n, 0),
+            height: viewHeight.reduce((t, n) => t + n, 0)
+        }
     };
 };
