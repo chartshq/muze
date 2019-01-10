@@ -4,8 +4,6 @@ import {
     getD3Drag,
     getEvent
 } from 'muze-utils';
-// import { HorizontalScrollMaker } from './horizontal-scroll-maker';
-// import { VerticalScrollMaker } from './vertical-scroll-maker';
 import './scroll-bar.scss';
 
 const d3Drag = getD3Drag();
@@ -16,11 +14,6 @@ const arrowUnicodeMap = {
     top: '&#9650',
     bottom: '&#9660'
 };
-
-// const scrollMakerMap = {
-//     horizontal: HorizontalScrollMaker,
-//     vertical: VerticalScrollMaker
-// };
 
 export const createScrollBarArrow = (mount, type, config) => {
     const {
@@ -41,6 +34,17 @@ export const createScrollBarRect = (mount, config) => {
     return { rect, mover };
 };
 
+export const applyRectClick = (scrollMaker, moverRect) => {
+    const {
+        mover,
+        rect
+    } = moverRect;
+    rect.on('click', () => {
+        const moverStartPos = mover.node().getBoundingClientRect();
+        scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x + 5, y: moverStartPos.y + 5 });
+    });
+};
+
 const applyMoverDrag = (scrollMaker, moverRect) => {
     const {
         mover,
@@ -52,6 +56,10 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
     let startPos = {};
 
     let endPos = {};
+    mover.on('click', () => {
+        const event = getEvent();
+        event.stopPropagation();
+    });
     mover.call(d3Drag()
                     .on('start', () => {
                         const event = getEvent();
@@ -94,6 +102,7 @@ export const registerListeners = (scrollMaker) => {
         scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x - 1, y: moverStartPos.y - 1 });
     });
     applyMoverDrag(scrollMaker, moverRect);
+    applyRectClick(scrollMaker, moverRect);
     nextArrow.on('click', () => {
         const moverStartPos = mover.node().getBoundingClientRect();
         scrollMaker.changeMoverPosition(moverRect, { x: moverStartPos.x + 1, y: moverStartPos.y + 1 });

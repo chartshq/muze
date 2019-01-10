@@ -83,6 +83,12 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
         layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
 
     };
+    const totalLength = actualCenterMeasures[layoutBasedMeasure];
+    const viewLength = layoutDimensions[viewMeasure][1];
+
+    if (viewLength >= totalLength) {
+        return null;
+    }
     const scrollConfig = Object.assign({}, {
         classPrefix: layoutConfig.classPrefix,
         ...target,
@@ -98,8 +104,8 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
         dimensions: {
             width: dimensions[width],
             height: dimensions[height],
-            totalLength: actualCenterMeasures[layoutBasedMeasure],
-            viewLength: layoutDimensions[viewMeasure][1]
+            totalLength,
+            viewLength
         }
     };
 

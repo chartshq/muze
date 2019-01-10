@@ -152,8 +152,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     const verticalScrollWrapper = componentWrappers[components.verticalScrollBar];
     const gridWrapper = componentWrappers[components.grid];
 
-    horizontalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
-    verticalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
+    horizontalScrollWrapper && horizontalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
+    verticalScrollWrapper && verticalScrollWrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
     layoutManager.registerComponents(componentWrappers).compute();
 };
 

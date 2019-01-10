@@ -1,52 +1,65 @@
-const res = `Media,Year,value,
-Youtube,2015,null,
-Youtube,2018,85,
-Instagram,2018,72,
-Instagram,2015,52,
-Snapchat,2018,69,
-Snapchat,2015,41,
-Facebook,2018,51,
-Facebook,2015,71,
-Twitter,2018,32,
-Twitter,2015,33,
-Tumblr,2018,9,
-Tumblr,2015,14,
-Reddit,2018,7,
-Reddit,2015,null,
-Vine,2015,24,
-Vine,2018,null,`;
+d3.csv('/data/coffee.csv', (data) => {  // load data and schema from url
+    const schema = [{
+        name: 'Market',
+        type: 'dimension'
+    },
+    {
+        name: 'Product',
+        type: 'dimension'
+    },
+    {
+        name: 'Product Type',
+        type: 'dimension'
+    },
 
-const env = muze();
-const canvas = env.canvas();
-const DataModel = muze.DataModel;
+    {
+        name: 'Revenue',
+        type: 'measure'
+    },
+    {
+        name: 'Expense',
+        type: 'measure'
+    },
+    {
+        name: 'Profit',
+        type: 'measure'
+    },
+    {
+        name: 'Order Count',
+        type: 'measure'
+    }];
+    const env = window.muze();
+    const DataModel = window.muze.DataModel;
+    const rootData = new DataModel(data, schema); /* data and schema is global */
+    const canvas = env.canvas();
+    canvas
+                    .rows(['Product Type', 'Product'])
+                    .columns(['Market', 'Revenue', 'Expense'])
+                    .data(rootData)
+                    .width(1700)
+                    .height(800)
+                    .config({
+                        showHeaders: true, /* show the headers of fields used in faceting */
+                        facetConfig: { rows: { verticalAlign: 'middle' } }, /* dimensional values are placed in middle */
+                        axes: {
+                            y: { showAxisName: false }, /* dont show axis name as we are showing headers, its redundant information */
+                            x: {
+                                tickFormat: (d) => {
+                                    if (d < 1000) return d;
+                                    if (d > 1000 && d < 1000000) return `${d / 1000}K`;
+                                    if (d > 1000000) return `${d / 1000}M`;
+                                    return d;
+                                }
+                            }
+                        }
+                    })
+        // .title('Visual Crosstab')
+                    .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
+                    .subtitle('Revenue and Expense by Product type and Market')
+                    .mount('#chart');
 
-const schema = [
-    { name: 'Media', type: 'dimension' },
-    { name: 'Year', type: 'dimension', subtype: 'temporal', format: '%Y' },
-    { name: 'value', type: 'measure' }
-];
-
-const dm = new DataModel(res, schema);
-canvas
-                .data(dm)
-                .width(600)
-                .height(400)
-                .config({
-                    axes: { y: { name: 'Value in percentage' } }
-                })
-                .rows(['value']) /* Plots against y-axis + provides panel split */
-                .columns(['Year'])  /* Plots against x-axis */
-                .color({
-                    field: 'Media',
-                    range: ['red', 'orange', 'yellow', '#33b5e91', '#31a6ea', 'grey', 'red', 'green']
-                })
-                .layers([
-                    {
-                        mark: 'line',
-                        connectNullData: true
-                    },
-        { mark: 'point' }
-                ])
-                .title('Shifts of teenagers in social media usage')
-                .mount('#chart-container');
-
+    canvas.once('canvas.animationend').then((client) => {
+        const element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
+});
