@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters, STATE_NAMESPACES, CommonProps } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,

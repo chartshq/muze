@@ -12,11 +12,9 @@ const defaultPolicy = (registrableComponents) => {
     };
 };
 
-const listenerFn = (canvas, fn) => {
-    return () => {
-        const valueMatrix = canvas.composition().visualGroup.matrixInstance().value;
-        valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
-    };
+const listenerFn = (canvas, fn) => () => {
+    const valueMatrix = canvas.composition().visualGroup.matrixInstance().value;
+    valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
 };
 
 const canvasIterator = (canvases, fn) => {

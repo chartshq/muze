@@ -288,7 +288,6 @@ export default class Canvas extends TransactionSupport {
      * @internal
      */
     render () {
-        const visGroup = this.composition().visualGroup;
         const mount = this.mount();
         // removeChild(mount);
         const lifeCycleManager = this.dependencies().lifeCycleManager;
