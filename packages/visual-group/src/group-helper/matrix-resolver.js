@@ -449,8 +449,6 @@ export default class MatrixResolver {
             units.push(el.source());
         });
 
-        this._dependencies.throwback.commit(CommonProps.UNITS_UPDATED, true);
-
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }

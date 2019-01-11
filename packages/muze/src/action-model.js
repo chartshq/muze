@@ -1,10 +1,5 @@
 import { mergeRecursive, CommonProps } from 'muze-utils';
 
-const listenerKey = {
-    namespace: 'actionModel',
-    key: 'updateListener'
-};
-
 const defaultPolicy = (registrableComponents) => {
     const aliases = registrableComponents.map(comp => comp.alias());
     return {
@@ -16,6 +11,14 @@ const defaultPolicy = (registrableComponents) => {
         }
     };
 };
+
+const listenerFn = (canvas, fn) => {
+    return () => {
+        const valueMatrix = canvas.composition().visualGroup.matrixInstance().value;
+        valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
+    };
+};
+
 const canvasIterator = (canvases, fn) => {
     canvases.forEach((canvas) => {
         const matrix = canvas.composition().visualGroup.matrixInstance().value;
@@ -23,10 +26,8 @@ const canvasIterator = (canvases, fn) => {
         // Also register actions on canvas update
         const throwback = canvas._throwback;
 
-        throwback.unsubscribe(listenerKey).registerImmediateListener([CommonProps.UNITS_UPDATED], () => {
-            const valueMatrix = canvas.composition().visualGroup.matrixInstance().value;
-            valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
-        }, false, listenerKey);
+        throwback.registerImmediateListener([CommonProps.MATRIX_CREATED],
+            listenerFn(canvas, fn));
     });
 };
 

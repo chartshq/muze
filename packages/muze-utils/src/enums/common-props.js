@@ -1,7 +1,7 @@
 const CommonProps = {
     ACTION_INF: 'actionInf',
     ON_LAYER_DRAW: 'onlayerdraw',
-    UNITS_UPDATED: 'unitsUpdated'
+    MATRIX_CREATED: 'matrixCreated'
 };
 
 export default CommonProps;

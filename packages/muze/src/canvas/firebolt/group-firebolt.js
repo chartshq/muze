@@ -100,7 +100,7 @@ export default class GroupFireBolt {
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
             const context = this.context;
             applyInteractionPolicy(this);
-            context._throwback.registerImmediateListener([CommonProps.UNITS_UPDATED], () => {
+            context._throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
                 applyInteractionPolicy(this);
             });
             return this;

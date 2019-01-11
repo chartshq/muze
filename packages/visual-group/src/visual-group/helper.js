@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { STATE_NAMESPACES } from 'muze-utils';
+import { STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { getEncoder, getBorders } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
@@ -54,6 +54,8 @@ export const setMatrixInstances = (context, placeholder) => {
         top: new ValueMatrix(columns[0]),
         bottom: new ValueMatrix(columns[1])
     };
+
+    context._dependencies.throwback.commit(CommonProps.MATRIX_CREATED, true);
     return context;
 };
 
