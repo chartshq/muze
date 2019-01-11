@@ -315,10 +315,12 @@ export default class Canvas extends TransactionSupport {
         // setLabelRotation
         setLabelRotationForAxes(this);
 
-        const centerMatrix = visGroup.matrixInstance().value;
+        const centerMatrix = this.layout().viewInfo().viewMatricesInfo.matrices.center[1];
 
-        centerMatrix.each((cell) => {
-            promises.push(cell.valueOf().done());
+        centerMatrix.forEach((cellArr) => {
+            cellArr.forEach((cell) => {
+                promises.push(cell.valueOf().done());
+            });
         });
 
         Promise.all(promises).then(() => {
@@ -326,9 +328,11 @@ export default class Canvas extends TransactionSupport {
             lifeCycleManager.notify({ client: this, action: 'drawn' });
             const animDonePromises = [];
 
-            centerMatrix.each((cell) => {
-                cell.valueOf().layers().forEach((layer) => {
-                    animDonePromises.push(layer.animationDone());
+            centerMatrix.forEach((cellArr) => {
+                cellArr.forEach((cell) => {
+                    cell.valueOf().layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
                 });
             });
 
