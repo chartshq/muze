@@ -32,7 +32,7 @@ const defaultTooltipFormatters = (type, formatter) => {
         [MeasureSubtype.CONTINUOUS]: value => formatter(value ? value.toFixed(2) : value),
         [DimensionSubtype.CATEGORICAL]: value => value
     };
-    return formatters[type];
+    return formatters[type] || formatters[DimensionSubtype.CATEGORICAL];
 };
 
 const getTabularData = (data, schema, fieldspace, timeDiffs) => {
