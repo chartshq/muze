@@ -1,7 +1,8 @@
 import {
     getDataModelFromIdentifiers,
     FieldType,
-    mergeRecursive
+    mergeRecursive,
+    isSimpleObject
 } from 'muze-utils';
 
 import { applyInteractionPolicy } from '../helper';
@@ -166,13 +167,19 @@ export default class GroupFireBolt {
     dispatchBehaviour (behaviour, payload) {
         const propPayload = Object.assign(payload);
         const criteria = propPayload.criteria;
-        const data = this.context.data();
-
-        propPayload.action = behaviour;
+        const data = this.context.composition().visualGroup.getGroupByData();
+        const fieldsConfig = data.getFieldsConfig();
         const model = getDataModelFromIdentifiers(data, criteria);
-        data.propagate(model, propPayload, {
-            sourceId: this.context.alias()
-        });
+        const fields = isSimpleObject(criteria) ? Object.keys(criteria) : (criteria ? criteria[0] : []);
+
+        const propConfig = {
+            payload: propPayload,
+            action: behaviour,
+            sourceId: this.context.alias(),
+            propagateInterpolatedValues: fields.every(field => fieldsConfig[field].def.type === FieldType.MEASURE)
+        };
+
+        data.propagate(model, propConfig);
         return this;
     }
 
