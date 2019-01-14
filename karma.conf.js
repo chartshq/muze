@@ -9,17 +9,6 @@ module.exports = function (config) {
             devtool: 'inline-source-map',
             module: {
                 rules: [
-                    // instrument only testing sources with Istanbul
-                    {
-                        test: /\.js$/,
-                        use: {
-                            loader: 'babel-loader',
-                            query: {
-                                presets: ['env']
-                            }
-                        },
-                        exclude: /node_modules/
-                    },
                     {
                         test: /\.(s*)css$/,
                         use: [
