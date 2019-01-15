@@ -51,5 +51,9 @@ export class ScrollMaker {
     registerListeners () {
         registerListeners(this);
     }
+
+    remove () {
+        this._components.scrollBarContainer.remove();
+    }
 }
 

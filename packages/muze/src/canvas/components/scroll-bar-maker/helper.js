@@ -48,7 +48,7 @@ export const applyRectClick = (scrollMaker, moverRect) => {
     } = moverRect;
     rect.on('click', () => {
         const event = getEvent();
-        scrollMaker.emptyScrollAreaClick(event, moverRect);
+        scrollMaker.emptyScrollAreaClick(event);
     });
 };
 
@@ -91,7 +91,7 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
                             y: moverStartPos.y + distanceMoved.y - rectStartPos.y
                         };
 
-                        scrollMaker.changeMoverPosition(moverRect, actualPosition);
+                        scrollMaker.changeMoverPosition(actualPosition);
                     }));
 };
 
@@ -110,14 +110,14 @@ export const registerListeners = (scrollMaker) => {
         const { x, y } = mover.node().getBoundingClientRect();
         const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
 
-        scrollMaker.changeMoverPosition(moverRect, { x: x - rectX - speed, y: y - rectY - speed });
+        scrollMaker.changeMoverPosition({ x: x - rectX - speed, y: y - rectY - speed });
     });
     applyMoverDrag(scrollMaker, moverRect);
     applyRectClick(scrollMaker, moverRect);
     nextArrow.on('click', () => {
         const { x, y } = mover.node().getBoundingClientRect();
         const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
-        scrollMaker.changeMoverPosition(moverRect, { x: x - rectX + speed, y: y - rectY + speed });
+        scrollMaker.changeMoverPosition({ x: x - rectX + speed, y: y - rectY + speed });
     });
 };
 

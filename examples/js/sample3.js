@@ -50,7 +50,7 @@
         .height(400)
         .config({
             scrollBar:{
-                thickness: 50
+                // thickness: 50
                 // speed: 10
             }
         })

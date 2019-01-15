@@ -37,11 +37,11 @@ export class HorizontalScrollMaker extends ScrollMaker {
         this.registerListeners();
     }
 
-    emptyScrollAreaClick (event, moverRect) {
+    emptyScrollAreaClick (event) {
         const {
             mover,
             rect
-        } = moverRect;
+        } = this._components.moverRect;
         const speed = this.config().speed;
         const { x, y } = mover.node().getBoundingClientRect();
         const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
@@ -49,15 +49,15 @@ export class HorizontalScrollMaker extends ScrollMaker {
         if (event.x < x) {
             positionAdjuster = -speed * 10;
         }
-        this.changeMoverPosition(moverRect, { x: x - rectX + positionAdjuster, y: y - rectY + positionAdjuster });
+        this.changeMoverPosition({ x: x - rectX + positionAdjuster, y: y - rectY + positionAdjuster });
     }
 
-    changeMoverPosition (moverRect, newPosition) {
+    changeMoverPosition (newPosition) {
         let currentPos;
         const {
             mover,
             rect
-        } = moverRect;
+        } = this._components.moverRect;
         const rectStartPos = rect.node().getBoundingClientRect();
         const moverPos = mover.node().getBoundingClientRect();
         const {

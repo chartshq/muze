@@ -35,14 +35,15 @@ export class VerticalScrollMaker extends ScrollMaker {
             scrollBarContainer
         };
         this._scrollBarWithouArrowLength = scrollBarWithouArrowLength;
+
         this.registerListeners();
     }
 
-    emptyScrollAreaClick (event, moverRect) {
+    emptyScrollAreaClick (event) {
         const {
             mover,
             rect
-        } = moverRect;
+        } = this._components.moverRect;
         const speed = this.config().speed;
         const { x, y } = mover.node().getBoundingClientRect();
         const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
@@ -51,15 +52,15 @@ export class VerticalScrollMaker extends ScrollMaker {
         if (event.y < y) {
             positionAdjuster = -speed * 10;
         }
-        this.changeMoverPosition(moverRect, { x: x - rectX + positionAdjuster, y: y - rectY + positionAdjuster });
+        this.changeMoverPosition({ x: x - rectX + positionAdjuster, y: y - rectY + positionAdjuster });
     }
 
-    changeMoverPosition (moverRect, newPosition) {
+    changeMoverPosition (newPosition) {
         let currentPos;
         const {
             mover,
             rect
-        } = moverRect;
+        } = this._components.moverRect;
         const {
             totalLength
          } = this.logicalSpace();

@@ -24,6 +24,10 @@ export default class ScrollComponent extends MuzeComponent {
         return this;
     }
 
+    changeScrollPosition (newPosition) {
+        this.component.changeScrollPosition(newPosition);
+    }
+
     attachScrollAction (callback) {
         this.component.attachScrollAction(callback);
         return this;
@@ -31,7 +35,9 @@ export default class ScrollComponent extends MuzeComponent {
 
     updateWrapper (params) {
         this.name(params.name);
-        this.boundBox(params.component.getLogicalSpace());
+        this.component.config(params.config.scrollBarComponentConfig);
+        this.component.logicalSpace(params.dimensions);
+        this.boundBox(this.component.getLogicalSpace());
         return this;
     }
 
@@ -43,5 +49,9 @@ export default class ScrollComponent extends MuzeComponent {
         this.className(params.config.className);
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
+    }
+
+    remove () {
+        this.component.remove();
     }
 }
