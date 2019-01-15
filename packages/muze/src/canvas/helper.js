@@ -16,7 +16,9 @@ import { LayoutManager } from '../../../layout/src/tree-layout';
 export const initCanvas = (context) => {
     const reg = context._registry.components;
 
-    return [new reg.VisualGroup(context._registry, context.dependencies())];
+    return [new reg.VisualGroup(context._registry, Object.assign({
+        throwback: context._throwback
+    }, context.dependencies()))];
 };
 
 export const setLayoutInfForUnits = (context) => {
@@ -118,11 +120,26 @@ export const setupChangeListener = (context) => {
     }, true);
 };
 
-export const applyInteractionPolicy = (policies, firebolt) => {
+export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
-    const valueMatrix = visualGroup.composition().matrices.value;
-    policies.forEach(policy => policy(valueMatrix, firebolt));
+    if (visualGroup) {
+        const valueMatrix = visualGroup.matrixInstance().value;
+        const interactionPolicy = firebolt._interactionPolicy;
+        interactionPolicy(valueMatrix, firebolt);
+        const crossInteractionPolicy = firebolt._crossInteractionPolicy;
+        const behaviours = crossInteractionPolicy.behaviours;
+        const sideEffects = crossInteractionPolicy.sideEffects;
+        valueMatrix.each((cell) => {
+            const unitFireBolt = cell.valueOf().firebolt();
+            for (const key in behaviours) {
+                unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+            }
+            for (const key in sideEffects) {
+                unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+            }
+        });
+    }
 };
 
 /**
