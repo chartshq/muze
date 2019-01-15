@@ -1,5 +1,6 @@
 import { GridLayout } from '@chartshq/layout';
 import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES, CommonProps } from 'muze-utils';
+import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
@@ -71,7 +72,11 @@ export default class Canvas extends TransactionSupport {
         });
 
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
-        this.firebolt(new GroupFireBolt(this));
+        this.firebolt(new GroupFireBolt(this, {
+            behavioural: behaviouralActions,
+            physical: physicalActions,
+            physicalBehaviouralMap: {}
+        }, sideEffects, behaviourEffectMap));
         this.alias(`canvas-${getUniqueId()}`);
         this.title('', {});
         this.subtitle('', {});

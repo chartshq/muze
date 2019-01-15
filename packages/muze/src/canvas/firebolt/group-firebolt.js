@@ -5,6 +5,7 @@ import {
     isSimpleObject,
     CommonProps
 } from 'muze-utils';
+import { Firebolt } from '@chartshq/muze-firebolt';
 
 import { applyInteractionPolicy } from '../helper';
 
@@ -72,9 +73,9 @@ const defaultCrossInteractionPolicy = {
  * @class GroupFireBolt
  * @public
  */
-export default class GroupFireBolt {
-    constructor (context) {
-        this.context = context;
+export default class GroupFireBolt extends Firebolt {
+    constructor (...params) {
+        super(...params);
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
         this.crossInteractionPolicy(this.constructor.defaultCrossInteractionPolicy());
     }
@@ -158,17 +159,30 @@ export default class GroupFireBolt {
         const data = this.context.composition().visualGroup.getGroupByData();
         const fieldsConfig = data.getFieldsConfig();
         const model = getDataModelFromIdentifiers(data, criteria);
-        const fields = isSimpleObject(criteria) ? Object.keys(criteria) : (criteria ? criteria[0] : []);
+        const behaviouralAction = this._actions.behavioural[behaviour];
 
-        const propConfig = {
-            payload: propPayload,
-            action: behaviour,
-            sourceId: this.context.alias(),
-            propagateInterpolatedValues: fields.every(field => fieldsConfig[field].def.type === FieldType.MEASURE)
-        };
-
-        data.propagate(model, propConfig);
+        if (behaviouralAction) {
+            const fields = isSimpleObject(criteria) ? Object.keys(criteria) : (criteria ? criteria[0] : []);
+            const validFields = fields.filter(field => field in fieldsConfig);
+            const mutates = behaviouralAction.constructor.mutates();
+            const propConfig = {
+                payload: propPayload,
+                action: behaviour,
+                criteria: model,
+                sourceId: this.context.alias(),
+                isMutableAction: mutates,
+                propagateInterpolatedValues: validFields.every(field => fieldsConfig[field].def.type ===
+                    FieldType.MEASURE)
+            };
+            data.propagate(model, propConfig, true);
+        }
         return this;
     }
 
+    registerSideEffects (sideEffects) {
+        for (const key in sideEffects) {
+            this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
+        }
+        return this;
+    }
 }
