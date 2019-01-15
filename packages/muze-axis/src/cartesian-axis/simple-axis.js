@@ -173,7 +173,9 @@ export default class SimpleAxis {
         return scale;
     }
 
-    getTickFormatter (tickFormat, numberFormat) {
+    getTickFormatter (value) {
+        const { tickFormat, numberFormat } = value;
+
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
         }
@@ -200,7 +202,7 @@ export default class SimpleAxis {
     }
 
     getFormattedText (text, index, axisTicks) {
-        const formatter = this.formatter;
+        const formatter = this.attachedFormatter;
         const scale = this.scale();
         return formatter ? formatter(axisTicks)(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
     }
@@ -212,17 +214,11 @@ export default class SimpleAxis {
      * @memberof SimpleAxis
      */
     createAxis (config) {
-        const {
-            tickFormat,
-            numberFormat,
-            orientation
-        } = config;
+        const { orientation } = config;
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
             const axis = axisClass(this.scale());
-            this.formatter = this.getTickFormatter(tickFormat, numberFormat);
-
             return axis;
         }
         return null;

@@ -12,6 +12,8 @@ export const PROPS = {
             if (value.orientation !== oldConfig.orientation) {
                 context.axis(context.createAxis(value));
             }
+            context.attachedFormatter = context.getTickFormatter(value);
+
             const {
                 labels,
                 show,
