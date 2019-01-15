@@ -52,7 +52,7 @@ export const getInterpolatedData = (domain, steps) => {
  */
 export const titleCreator = (container, title, measurement, config) => {
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
-            .style(WIDTH, `${measurement.width}px`)
+            .style(WIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
             .style(HEIGHT, `${measurement.height}px`)
             .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
@@ -99,9 +99,11 @@ export const getItemMeasures = (data, prop, labelManager, formatter) => {
     const space = [];
 
     data.forEach((item, index) => {
-        const value = prop ? item[prop] : item;
+        let value = prop ? item[prop] : item;
         const { height, width } = labelManager.getOriSize(formatter(value));
-        space[index] = { height: height + 1, width: width + 1 };
+        value = value.trim();
+        const whiteSpace = value.split(' ').length - 1;
+        space[index] = { height: height + 1, width: width + 1 + (3 * whiteSpace) };
     });
     return space;
 };

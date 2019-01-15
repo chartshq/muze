@@ -166,14 +166,14 @@ export default class SimpleLegend {
      */
     setLegendMeasures () {
         const {
-           width,
-           height,
-           maxWidth,
-           maxHeight,
-           padding,
-           margin,
-           border
-       } = this.measurement();
+            width,
+            height,
+            maxWidth,
+            maxHeight,
+            padding,
+            margin,
+            border
+        } = this.measurement();
         const {
             align
         } = this.config();
@@ -221,7 +221,7 @@ export default class SimpleLegend {
      */
     getTitleSpace () {
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
-                                                 `${this.config().classPrefix}-legend-title`));
+                                                `${this.config().classPrefix}-legend-title`));
         return this._labelManager.getOriSize(this.title().text ? this.title().text : '');
     }
 
@@ -233,11 +233,12 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     renderTitle (container) {
-        const { titleSpaces, border, padding, width } = this.measurement();
+        const { titleSpaces, border, padding, width, maxWidth } = this.measurement();
         const { borderStyle, borderColor } = this.config();
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
             width,
+            maxWidth,
             border,
             padding,
             borderStyle,
@@ -260,13 +261,13 @@ export default class SimpleLegend {
             borderColor
         } = this.config();
         const {
-           maxWidth,
-           maxHeight,
-           width,
-           height,
-           margin,
-           border
-       } = this.measurement();
+            maxWidth,
+            maxHeight,
+            width,
+            height,
+            margin,
+            border
+        } = this.measurement();
         const legendContainer = makeElement(selectElement(this.mount()), 'div', [1], `${classPrefix}-legend-box`);
 
         legendContainer.classed(`${classPrefix}-legend-box-${this._id}`, true);
