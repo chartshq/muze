@@ -101,6 +101,47 @@ const updateChecker = (props, params) => props.every((option, i) => {
     }
 });
 
+export const notifyAnimationEnd = (context) => {
+    const centerMatrix = context.layout().viewInfo().viewMatricesInfo.matrices.center[1] || [];
+    const promises = [];
+    centerMatrix.forEach((cellArr) => {
+        cellArr.forEach((cell) => {
+            promises.push(cell.valueOf().done());
+        });
+    });
+    const lifeCycleManager = context.lifeCycle();
+    if (promises.length) {
+        Promise.all(promises).then(() => {
+            // Update life cycle
+            lifeCycleManager.notify({ client: context, action: 'drawn' });
+            const animDonePromises = [];
+
+            centerMatrix.forEach((cellArr) => {
+                cellArr.forEach((cell) => {
+                    cell.valueOf().layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
+                });
+            });
+
+            [context.xAxes(), context.yAxes()].forEach((axisArr) => {
+                axisArr = axisArr || [];
+                axisArr.forEach((axes) => {
+                    axes.forEach((axisInst) => {
+                        animDonePromises.push(axisInst.animationDone());
+                    });
+                });
+            });
+
+            Promise.all(animDonePromises).then(() => {
+                lifeCycleManager.notify({ client: context, action: 'animationend' });
+            });
+        });
+    } else {
+        lifeCycleManager.notify({ client: context, action: 'animationend' });
+    }
+};
+
 export const setupChangeListener = (context) => {
     const store = context._store;
 
@@ -117,6 +158,7 @@ export const setupChangeListener = (context) => {
             dispatchProps(context);
             context.render();
         }
+        notifyAnimationEnd(context);
     }, true);
 };
 
