@@ -1,0 +1,88 @@
+---
+  title: "Selection Set"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=SelectionSet></a> <span style=\"font-family: Source Code Pro; font-weight: 500;color: #eb5757;\">SelectionSet</span>\n\nThis component is used to keep track of the row tuples of the data which gets added and removed. This keeps\ninformation of which rows are in previous and new entry set and previous and new exit set. This is initialized by\n[Firebolt](Firebolt)."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=add></a> add </span></h2>\n\nAdds a set of ids to the selection set. This also moves the other rows to exit set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">ids</td>\n                <td><p>Array&lt;(number|string)&gt;</p> </td>\n                <td><p>Array of unique ids.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=SelectionSet></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selectionset](api-selectionset):&nbsp;</span>Instance of selection set."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=updateEntry></a> updateEntry </span></h2>\n\nMoves all ids which in new entry set  to old entry set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">ids</td>\n                <td><p>Array&lt;(number|string)&gt;</p> </td>\n                <td><p>Array of unique ids</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=SelectionSet></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selectionset](api-selectionset):&nbsp;</span>Instance of selection set."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=updateExit></a> updateExit </span></h2>\n\nMoves an array of ids which are in new exit set to old exit set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">ids</td>\n                <td><p>Array&lt;(number|string)&gt;</p> </td>\n                <td><p>Array of unique ids.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=SelectionSet></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selectionset](api-selectionset):&nbsp;</span>Instance of selection set."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=remove></a> remove </span></h2>\n\nRemoves an array of ids from the selection set. It also moves the remaining row ids to entry set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">ids</td>\n                <td><p>Array<string></p> </td>\n                <td><p>Array of unique ids</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=SelectionSet></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selectionset](api-selectionset):&nbsp;</span>Instance of selection set"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=reset></a> reset </span></h2>\n\nResets an array of ids in the selection set to initial state. It sets the value of every unique id value to\nnull in the selection set which means they are neither in entry set nor in exit set. If no ids are passed,\nthen it resets all the ids to null."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">ids</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of unique ids.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=SelectionSet></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selectionset](api-selectionset):&nbsp;</span>Instance of selection set."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getEntrySet></a> getEntrySet </span></h2>\n\nGets the set of ids which are added in the selection set."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array.<string>></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[array&lt;string&gt;](api-array&lt;string&gt;):&nbsp;</span>Array of unique ids"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getExistingEntrySet></a> getExistingEntrySet </span></h2>\n\nReturns a set of unique ids which are already present in entry set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">addSet</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of unique ids which are added</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of unique ids which are already in old entry set or new entry set"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getExistingExitSet></a> getExistingExitSet </span></h2>\n\nReturns a set of unique ids which are already present in exit set."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">addSet</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of unique ids which are added</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of unique ids which are already in old exit set or new exit set"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getExitSet></a> getExitSet </span></h2>\n\nGets the array of ids which are in the exit set."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array.<string>></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[array&lt;string&gt;](api-array&lt;string&gt;):&nbsp;</span>Array of unique ids"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getCompleteSet></a> getCompleteSet </span></h2>\n\nGets all the ids which are either in exit or entry set."
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of unique ids"

@@ -1,10 +1,13 @@
 import * as scales from './scales';
 import * as colorSchemes from './color-schemes';
+import * as STATE_NAMESPACES from './enums/namespace';
 
 export {
     ReservedFields,
     CommonProps
 } from './enums';
+
+export { STATE_NAMESPACES };
 
 export {
     scales,

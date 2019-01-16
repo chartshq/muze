@@ -11,6 +11,18 @@ export const VIEW_INDEX = {
     bottom: 2
 };
 
+export const ROW_MATRIX_INDEX = {
+    0: 'top',
+    1: 'center',
+    2: 'bottom'
+};
+
+export const COLUMN_MATRIX_INDEX = {
+    0: 'left',
+    1: 'middle',
+    2: 'right'
+};
+
 /**
  * The width of the grid suppied by the user.
  */

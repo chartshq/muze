@@ -14,7 +14,7 @@ import {
  *
  *
  * @param {*} scale
- * @returns
+ *
  */
 export const getScaleInfo = (scale) => {
     const scaleType = scale.constructor.type();
@@ -30,7 +30,7 @@ export const getScaleInfo = (scale) => {
  *
  * @param {*} domain
  * @param {*} steps
- * @returns
+ *
  */
 export const getInterpolatedData = (domain, steps) => {
     const domainForLegend = [];
@@ -71,7 +71,7 @@ export const titleCreator = (container, title, measurement, config) => {
  * @param {*} data
  * @param {*} prop
  * @param {*} labelManager
- * @return
+ *
  */
 export const getMaxMeasures = (data, prop, labelManager) => {
     let maxHeight = -Infinity;
@@ -93,7 +93,7 @@ export const getMaxMeasures = (data, prop, labelManager) => {
  * @param {*} data
  * @param {*} prop
  * @param {*} labelManager
- * @return
+ *
  */
 export const getItemMeasures = (data, prop, labelManager, formatter) => {
     const space = [];
@@ -112,7 +112,7 @@ export const getItemMeasures = (data, prop, labelManager, formatter) => {
  * @param {*} textOrientation
  * @param {*} effPadding
  * @param {*} titleSpace
- * @return
+ *
  * @memberof Legend
  */
 export const computeItemSpaces = (config, measures, data) => {
@@ -223,7 +223,7 @@ export const computeItemSpaces = (config, measures, data) => {
  * @param {*} type
  * @param {*} scaleInfo
  * @param {*} domainInfo
- * @returns
+ *
  */
 export const getDomainBounds = (type, scaleInfo, domainInfo) => {
     const {

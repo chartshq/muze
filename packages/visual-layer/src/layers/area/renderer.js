@@ -13,7 +13,7 @@ const area = Symbols.area;
  */
 const /* istanbul ignore next */ drawArea = (params) => {
     let filteredPoints;
-    const { container, points, style, transition, className, connectNullData, interpolate } = params;
+    const { layer, container, points, style, transition, className, connectNullData, interpolate } = params;
 
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
@@ -34,13 +34,15 @@ const /* istanbul ignore next */ drawArea = (params) => {
     const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(filteredPoints));
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
+                    .on('end', layer.registerAnimationDoneHook())
                     .attr('d', updateAreaPath(filteredPoints))
                     .each(function (d) {
                         const element = selectElement(this);
 
                         element.classed(d[0].className, true);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
-                    });
+                    })
+                    .on('end', layer.registerAnimationDoneHook());
 };
 
 export default drawArea;

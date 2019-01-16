@@ -1,11 +1,17 @@
-import { FACET_BY_FIELDS, RETINAL_FIELDS, PARENT_ALIAS, LAYERS, STORE, CACHED_DATA } from './enums/constants';
+import { FACET_BY_FIELDS, RETINAL_FIELDS, PARENT_ALIAS, LAYERS, CACHED_DATA } from './enums/constants';
 
 export const PROPS = {
     [FACET_BY_FIELDS]: {},
     [RETINAL_FIELDS]: {},
     [PARENT_ALIAS]: {},
     [LAYERS]: {},
-    [STORE]: {},
     [CACHED_DATA]: {},
-    detailFields: {}
+    detailFields: {},
+    axes: {},
+    fields: {},
+    metaInf: {},
+    registry: {},
+    width: {},
+    height: {},
+    parentContainerInf: {}
 };

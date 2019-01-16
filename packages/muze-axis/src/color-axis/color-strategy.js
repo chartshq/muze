@@ -41,7 +41,7 @@ const rangeStops = (newStopsLength, range) => {
 *
 *
 * @param {*} domain
-* @returns
+*
 */
 const indexedDomain = (domain) => {
     const uniqueVals = domain;
@@ -53,7 +53,7 @@ const indexedDomain = (domain) => {
  *
  *
  * @param {*} domain
- * @returns
+ *
  */
 const indexedDomainMeasure = (domain, stops, range) => {
     const uniqueVals = domain;
@@ -64,7 +64,7 @@ const indexedDomainMeasure = (domain, stops, range) => {
  *
  *
  * @param {*} domain
- * @returns
+ *
  */
 const normalDomain = (domain, stops, range) => {
     const uniqueVals = domain;
@@ -76,7 +76,7 @@ const normalDomain = (domain, stops, range) => {
  *
  * @param {*} domain
  * @param {*} stops
- * @returns
+ *
  */
 const steppedDomain = (domain, stops, range) => {
     const { domain: uniqueVals, newStops } = getStops(domain, stops);
@@ -98,7 +98,7 @@ const continousSteppedDomain = (domain, stops, range) => {
  * @param {*} scale
  * @param {*} domain
  * @param {*} uniqueVals
- * @returns
+ *
  */
 const uniqueRange = (domainValue, scale, domain, uniqueVals) => {
     const index = uniqueVals.indexOf(domainValue);
@@ -112,7 +112,7 @@ const uniqueRange = (domainValue, scale, domain, uniqueVals) => {
  * @param {*} domainValue
  * @param {*} scale
  * @param {*} domain
- * @returns
+ *
  */
 const indexedRange = (domainValue, scale, domain) => {
     const numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);

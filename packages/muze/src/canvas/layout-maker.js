@@ -2,37 +2,43 @@ import { mergeRecursive } from 'muze-utils';
 import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
-import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { TOP, BOTTOM, LEFT, RIGHT, TITLE, SUB_TITLE, LEGEND } from '../constants';
+import HeaderComponent from './components/headerComponent';
+import LegendComponent from './components/legendComponent';
+import GridComponent from './components/grid-component';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
 
 /**
  *
  *
  * @param {*} context
- * @returns
+ *
  */
-export const prepareLayout = (layout, components, config, measurement) => {
+export const prepareLayout = (layout, renderDetails) => {
+    const { components, layoutConfig, measurement } = renderDetails;
     const {
         rows,
         columns,
         values,
         cornerMatrices
     } = components;
-
     const {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight
     } = cornerMatrices;
-
-    layout.measurement(measurement)
-                    .config(config)
-                    .matrices({
-                        top: [topLeft, columns[0], topRight],
-                        center: [rows[0], values, rows[1]],
-                        bottom: [bottomLeft, columns[1], bottomRight]
-                    })
-                    .triggerReflow();
+    if (rows && columns) {
+        layout.measurement(measurement)
+                        .config(layoutConfig)
+                        .matrices({
+                            top: [topLeft, columns[0], topRight],
+                            center: [rows[0], values, rows[1]],
+                            bottom: [bottomLeft, columns[1], bottomRight]
+                        })
+                        .triggerReflow();
+    }
 };
 
 /**
@@ -40,7 +46,7 @@ export const prepareLayout = (layout, components, config, measurement) => {
  *
  * @param {*} context
  * @param {*} mount
- * @returns
+ *
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
@@ -52,6 +58,7 @@ export const getRenderDetails = (context, mount) => {
     const {
         isColumnSizeEqual,
         isRowSizeEqual,
+        priority,
         rows,
         columns,
         values
@@ -125,7 +132,9 @@ export const getRenderDetails = (context, mount) => {
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,
-        isRowSizeEqual
+        isRowSizeEqual,
+        mount,
+        priority
     });
     return {
         layoutConfig,
@@ -133,3 +142,101 @@ export const getRenderDetails = (context, mount) => {
         measurement
     };
 };
+// const _getLegendOf = (legends, type) => legends.find(legend => legend.scaleType === type);
+
+export const renderLayout = (layoutManager, grid, renderDetails) => {
+    // generate component wrappers
+
+    const { components, layoutConfig, measurement } = renderDetails;
+    const target = { target: CANVAS };
+    // title;
+    let titleWrapper = null;
+    if (components.headers && components.headers.titleCell) {
+        const title = components.headers.titleCell;
+        let titleConfig = layoutConfig.title;
+        titleConfig = Object.assign({}, titleConfig, { classPrefix: layoutConfig.classPrefix,
+            ...target,
+            alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
+            alignment: LAYOUT_ALIGN.LEFT,
+            className: TITLE_CONFIG.className });
+        if (layoutManager.getComponent(TITLE)) {
+            titleWrapper = layoutManager
+                            .getComponent(TITLE)
+                            .updateWrapper({ name: TITLE, component: title, config: titleConfig });
+        } else {
+            titleWrapper = new HeaderComponent({ name: TITLE, component: title, config: titleConfig });
+        }
+    }
+
+     // subtitle
+    let subtitleWrapper = null;
+    if (components.headers && components.headers.subtitleCell) {
+        const subtitle = components.headers.subtitleCell;
+        let subtitleConfig = layoutConfig.subtitle;
+
+        subtitleConfig = Object.assign({}, subtitleConfig, { classPrefix: layoutConfig.classPrefix,
+            ...target,
+            alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
+            alignment: LAYOUT_ALIGN.LEFT,
+            className: SUB_TITLE_CONFIG.className });
+        if (layoutManager.getComponent(SUB_TITLE)) {
+            subtitleWrapper = layoutManager
+                                .getComponent(SUB_TITLE)
+                                .updateWrapper({ name: SUB_TITLE, component: subtitle, config: subtitleConfig });
+        } else {
+            subtitleWrapper = new HeaderComponent({ name: SUB_TITLE, component: subtitle, config: subtitleConfig });
+        }
+    }
+
+    // color legend
+    let colorLegendWrapper = null;
+    if (components.legends && components.legends.length) {
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+
+        if (layoutManager.getComponent(LEGEND)) {
+            colorLegendWrapper = layoutManager
+                                .getComponent(LEGEND)
+                                .updateWrapper({
+                                    name: LEGEND,
+                                    component: components.legends,
+                                    config: legendConfig });
+        } else {
+            colorLegendWrapper = new LegendComponent({
+                name: LEGEND,
+                component: components.legends,
+                config: legendConfig });
+        }
+    }
+
+    // grid components
+
+    let gridWrapper = null;
+
+    if (layoutManager.getComponent(GRID)) {
+        gridWrapper = layoutManager
+                            .getComponent(GRID)
+                            .updateWrapper({
+                                name: GRID,
+                                component: grid,
+                                config: { ...target,
+                                    classPrefix: layoutConfig.classPrefix,
+                                    dimensions: { height: 0, width: 0 } }
+                            });
+    } else {
+        gridWrapper = new GridComponent({
+            name: GRID,
+            component: grid,
+            config: { ...target,
+                classPrefix: layoutConfig.classPrefix,
+                dimensions: { height: 0, width: 0 } }
+        });
+    }
+
+    layoutManager.registerComponents([
+        titleWrapper,
+        subtitleWrapper,
+        colorLegendWrapper,
+        gridWrapper
+    ]).compute();
+};
+

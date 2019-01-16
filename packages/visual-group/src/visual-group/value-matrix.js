@@ -1,20 +1,21 @@
 /**
+ * This is a wrapper class over the matrix of cells which gets created in visual group. Visual Group creates left,
+ * right, bottom and top and center matrices and wraps them using this class.
  *
- *
- * @export
+ * @public
  * @class ValueMatrix
  */
 class ValueMatrix {
 
     /**
-     *Creates an instance of ValueMatrix.
-     * @param {*} matrixArr
-     * @memberof ValueMatrix
+     * Creates an instance of ValueMatrix.
+     *
+     * @param {Array} matrixArr Matrix array.
      */
     constructor (matrixArr) {
         const instancesById = {};
 
-        this.matrix(matrixArr);
+        this.matrix(matrixArr || []);
         this.filter(() => true);
 
         this.each((el, rIdx, cIdx) => {
@@ -32,13 +33,6 @@ class ValueMatrix {
         this.instancesById(instancesById);
     }
 
-    /**
-     *
-     *
-     * @param {*} id
-     * @return
-     * @memberof ValueMatrix
-     */
     instancesById (...id) {
         if (id.length) {
             this._instancesById = id[0];
@@ -48,11 +42,10 @@ class ValueMatrix {
     }
 
     /**
+     * Returns the array of matrices contained in this instance.
      *
-     *
-     * @param {*} m
-     * @return
-     * @memberof ValueMatrix
+     * @public
+     * @return {Array} Array of matrices.
      */
     matrix (...matrix) {
         if (matrix.length) {
@@ -63,11 +56,12 @@ class ValueMatrix {
     }
 
     /**
+     * Sets a filter criteria. This filter criteria gets applied when each function is called.
      *
+     * @public
+     * @param {Function} fn Filter function.
      *
-     * @param {*} fn
-     * @return
-     * @memberof ValueMatrix
+     * @return {ValueMatrix} Instance of value matrix.
      */
     filter (...fn) {
         if (fn.length) {
@@ -78,10 +72,9 @@ class ValueMatrix {
     }
 
     /**
+     * Returns the total width occupied by all the cells of the matrix.
      *
-     *
-     * @return
-     * @memberof ValueMatrix
+     * @return {Number} Width of the matrix.
      */
     width () {
         let rowWidth = 0;
@@ -97,10 +90,9 @@ class ValueMatrix {
     }
 
     /**
+     * Returns the total width occupied by all the cells of the matrix.
      *
-     *
-     * @return
-     * @memberof ValueMatrix
+     * @return {Number} Width of the matrix.
      */
     height () {
         let rowHeight = 0;
@@ -116,11 +108,11 @@ class ValueMatrix {
     }
 
     /**
+     * Iterates through the two dimensional matrix array and calls the given callback function with the cell instance,
+     * row index, column index and the matrix array.
      *
-     *
-     * @param {*} fn
-     * @return
-     * @memberof ValueMatrix
+     * @param {Function} fn Callback function which will get called for every cell.
+     * @return {ValueMatrix} Instance of the value matrix.
      */
     each (fn) {
         const matrix = this.matrix();
@@ -136,25 +128,8 @@ class ValueMatrix {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} id
-     * @return
-     * @memberof ValueMatrix
-     */
     findPlaceHolderById (id) {
         return this.instancesById()[id];
-    }
-
-    /**
-     *
-     *
-     * @return
-     * @memberof ValueMatrix
-     */
-    getMatrixArray () {
-        return this.matrix();
     }
 }
 

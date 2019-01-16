@@ -89,7 +89,7 @@ const normalizeFields = (config, type) => {
  *
  * @param {*} fields
  * @param {*} datamodel
- * @return
+ *
  */
 const convertToVar = (datamodel, fields) => {
     const vars = [];
@@ -111,7 +111,7 @@ const convertToVar = (datamodel, fields) => {
  * @param {*} rows
  * @param {*} columns
  * @param {*} datamodel
- * @return
+ *
  */
 export const transformFields = (datamodel, config) => {
     const [rowsInfo, columnsInfo] = [ROWS, COLUMNS].map((fields) => {

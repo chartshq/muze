@@ -64,7 +64,7 @@ export const getPreviousPoint = (prevData, currIndex, config) => {
  *
  * @param {*} path
  * @param {*} b
- * @returns
+ *
  * @memberof ArcLayer
  */
 export const tweenPie = (path, rangeValueGetter, b) => {
@@ -82,7 +82,7 @@ export const tweenPie = (path, rangeValueGetter, b) => {
  *
  * @param {*} path
  * @param {*} b
- * @returns
+ *
  * @memberof ArcLayer
  */
 export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, path) => {

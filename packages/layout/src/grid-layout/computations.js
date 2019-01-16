@@ -31,13 +31,6 @@ export function setMatrixMeasurement (matrix, type, value) {
     }
 }
 
-/**
- *
- *
- * @param {*} matrix
- * @param {*} widths
- * @param {*} heights
- */
 const setAvailableSpace = (matrix, widths, heights) => {
     matrix.forEach((row, rIdx) => {
         row.forEach((placeholder, cIdx) => {
@@ -46,14 +39,6 @@ const setAvailableSpace = (matrix, widths, heights) => {
     });
 };
 
-/**
- *
- *
- * @param {*} layout
- * @param {*} matrix
- * @param {*} pointer
- * @returns
- */
 const setViewSpaces = (layout, pointerType, viewSpaces) => {
     let pointer = layout.config()[`${pointerType}Pointer`];
     if (viewSpaces.length - 1 < pointer) {
@@ -89,15 +74,19 @@ export const computeLayoutMeasurements = (layout) => {
 
     // Get width of row matrix
     const rowMatrixWidth = getMatrixMeasurement(rowMatrix, WIDTH);
+    const maxRowMatrixWidth = Math.min(rowMatrixWidth, width / 2);
 
-    // Set width for column matrix
-
-       // Border adjustment for each cell in the central matrix
+    // Border adjustment for each cell in the central matrix
     const borderWidth = border.width;
 
-    const columnMatrixWidth = width - rowMatrixWidth - borderWidth;
-    setMatrixMeasurement(columnMatrix, WIDTH, columnMatrixWidth);
+    // Set width for column matrix
+    const columnMatrixWidth = width - maxRowMatrixWidth - borderWidth;
+
+    const maxColumnMatrixHeight = Math.min(columnMatrix.getLogicalSpace().height, height / 2);
+
+    columnMatrix.setAvailableSpace(columnMatrixWidth, maxColumnMatrixHeight);
     const columnViewPages = columnMatrix.getViewableSpaces();
+
     setViewSpaces(layout, COLUMN, columnViewPages);
 
     // Figuring out total space needed by current view space
@@ -109,8 +98,7 @@ export const computeLayoutMeasurements = (layout) => {
     // Set height for row matrix
     const rowMatrixHeight = height - columnMatrixHeight;
 
-    setMatrixMeasurement(rowMatrix, HEIGHT, rowMatrixHeight);
-
+    rowMatrix.setAvailableSpace(maxRowMatrixWidth, rowMatrixHeight);
     // Get heights of each cell of row matrix
     const rowViewableSpaces = rowMatrix.getViewableSpaces();
     setViewSpaces(layout, ROW, rowViewableSpaces);
@@ -156,8 +144,8 @@ export const getViewMatrices = (layout, rowPointer, columnPointer) => {
     const columnMatrix = layout.columnMatrix();
     const centerMatrix = layout.centerMatrix();
     const matrices = layout.matrices();
-    const rowMatrices = rowMatrix.getViewableData();
-    const columnMatrices = columnMatrix.getViewableData();
+    const rowMatrices = rowMatrix.getViewableMatrices();
+    const columnMatrices = columnMatrix.getViewableMatrices();
     const centralMatrixPointer = {
         row: 0,
         column: 0
@@ -206,22 +194,21 @@ export const getViewMeasurements = (layout) => {
     const rowMatrix = layout.rowMatrix();
     const columnMatrix = layout.columnMatrix();
     const {
-        width,
-        height
-    } = layout.measurement();
-    const {
         columnPointer,
         rowPointer
     } = layout.config();
 
-    const rowMatrixWidth = rowMatrix.getViewableSpaces()[rowPointer].width;
+    const rowSpaces = rowMatrix.getViewableSpaces()[rowPointer];
+    const rowMatrixWidth = rowSpaces.width;
     const { primary: leftWidth, secondary: rightWidth } = rowMatrixWidth;
 
-    const columnMatrixHeight = columnMatrix.getViewableSpaces()[columnPointer].height;
+    const colSpaces = columnMatrix.getViewableSpaces()[columnPointer];
+
+    const columnMatrixHeight = colSpaces.height;
     const { primary: topHeight, secondary: bottomHeight } = columnMatrixHeight;
 
-    const centerHeight = height - (topHeight + bottomHeight);
-    const centerWidth = width - (leftWidth + rightWidth);
+    const centerHeight = rowSpaces.rowHeights.primary.reduce((t, n) => t + n);
+    const centerWidth = colSpaces.columnWidths.primary.reduce((t, n) => t + n);
 
     return {
         viewWidth: [leftWidth, centerWidth, rightWidth],

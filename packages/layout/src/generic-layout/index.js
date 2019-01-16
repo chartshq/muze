@@ -21,14 +21,8 @@ export default class GenericLayout {
      * @param {Object} measurement The dimensions of the layout
      * @param {Object} config configuration to be given for the layout
      * @param {Object} dependencies external dependencies.
-     * @memberof GenericLayout
      *
-     * measurement : {
-     *      width : number => width of the container
-     *      height : number => height of the container
-     *      unitHeight : number => height of unit of the cells
-     *      unitWidth : number => width of unit of the cells
-     * }
+     * @memberof GenericLayout
      *
      */
     constructor (mountPoint, measurement, config, dependencies) {

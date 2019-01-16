@@ -4,7 +4,7 @@ import { TOP, BOTTOM, LEFT, TITLE, SUB_TITLE, GROUP, LAYOUT, LEGEND } from '../c
  *
  *
  * @param {*} context
- * @returns
+ *
  */
 export const arrangeComponents = (context) => {
     const legendConfig = context.config().legend;

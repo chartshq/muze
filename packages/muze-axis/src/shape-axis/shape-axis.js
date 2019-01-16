@@ -39,7 +39,7 @@ export default class ShapeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static defaultConfig () {
@@ -50,7 +50,7 @@ export default class ShapeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static type () {
@@ -61,7 +61,7 @@ export default class ShapeAxis {
      *
      *
      * @param {*} value
-     * @returns
+     *
      * @memberof ShapeAxis
      */
     getShape (value) {

@@ -28,7 +28,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof GradientLegend
      */
     static type () {
@@ -39,7 +39,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      *
      * @param {*} axis
-     * @returns
+     *
      * @memberof GradientLegend
      */
     axis (...axis) {
@@ -54,7 +54,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      *
      * @param {*} scale
-     * @returns
+     *
      * @memberof GradientLegend
      */
     dataFromScale (scale) {
@@ -90,7 +90,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      * @param {*} effPadding
      * @param {*} align
-     * @return
+     *
      * @memberof Legend
      */
     getLabelSpaces (effPadding) {
@@ -114,7 +114,7 @@ export default class GradientLegend extends SimpleLegend {
     /**
      *
      *
-     * @returns
+     *
      * @memberof GradientLegend
      */
     getDrawingContext () {
@@ -144,7 +144,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      *
      * @param {*} data
-     * @returns
+     *
      * @memberof SimpleLegend
      */
     getCriteriaFromData (data) {

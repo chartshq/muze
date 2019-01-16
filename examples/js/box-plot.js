@@ -2,7 +2,7 @@
 
 const DataModel = window.muze.DataModel;
 
-const share = window.muze.operators.share;
+const share = window.muze.Operators.share;
 const layerFactory = window.muze.layerFactory;
 
 const schema = [{
@@ -153,5 +153,5 @@ d3.json('../data/iris.cleared.json', (data) => {
     }
 }])
 .color('organ')
-        .mount(document.getElementsByClassName('chart')[0]);
+        .mount(document.getElementById('chart'));
 });

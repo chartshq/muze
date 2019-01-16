@@ -4,10 +4,12 @@
             "./packages/"
         ],
         "includePattern": ".+\\.js(doc|x)?$",
-        "excludePattern": "(^|\\/|\\\\)_|.+\\.spec.js?$|.+\\registerer.js?$"
+        "excludePattern": "(^|\\/|\\\\)_|.+\\.spec.js?$|.+\\registerer.js?$|node_modules|example"
     },
     "opts": {
         "destination": "./docs/",
+        "yaml": "./yaml/",
         "recurse": true
-    }
+    },
+    "plugins": ["plugins/markdown"]
 }

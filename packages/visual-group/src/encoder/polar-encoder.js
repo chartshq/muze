@@ -1,5 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
 import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR, COLOR } from '../enums/constants';
 /**
@@ -16,7 +16,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @param {*} axesCreators
      * @param {*} fieldInfo
-     * @return
+     *
      * @memberof PolarEncoder
      */
     createAxis (axesCreators, fieldInfo) {
@@ -48,7 +48,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      *
      * @param {*} fields
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getFacetsAndProjections (fields) {
@@ -87,10 +87,25 @@ export default class PolarEncoder extends VisualEncoder {
         };
     }
 
+    unionUnitDomains (context) {
+        const store = context.store();
+        const domains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
+        const domainProps = {
+            radius: [Infinity, -Infinity]
+        };
+        Object.values(domains).forEach((domainVal) => {
+            for (const key in domainVal) {
+                domainProps[key] = [Math.min(domainVal[key][0], domainProps[key][0]),
+                    Math.min(domainVal[key][1], domainProps[key][1])];
+            }
+        });
+        store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`, domainProps.radius);
+    }
+
     /**
      *
      *
-     * @return
+     *
      * @memberof PolarEncoder
      */
     setCommonDomain () {
@@ -101,7 +116,7 @@ export default class PolarEncoder extends VisualEncoder {
     /**
      *
      *
-     * @return
+     *
      * @memberof PolarEncoder
      */
     static type () {
@@ -195,7 +210,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @param {*} fields
      * @param {*} userLayerConfig
-     * @return
+     *
      * @memberof PolarEncoder
      */
     getLayerConfig (fields, userLayerConfig) {
@@ -231,7 +246,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      *
      * @param {*} layerArray
-     * @returns
+     *
      * @memberof PolarEncoder
      */
     serializeLayerConfig (layerArray) {

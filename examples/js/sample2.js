@@ -21,40 +21,29 @@ d3.json('../data/cars.json', (data) => {
             defAggFn: 'avg'
         },
 
-        {
-            name: 'Displacement',
-            type: 'measure'
-        },
-        {
-            name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'last'
-        },
-        {
-            name: 'Weight_in_lbs',
-            type: 'measure'
-        },
-        {
-            name: 'Acceleration',
-            type: 'measure',
-            defAggFn: 'sum'
-        },
-        {
-            name: 'Origin',
-            type: 'dimension'
-        },
-        {
-            name: 'Cylinders',
-            type: 'dimension'
-        },
-        {
-            name: 'Year',
-            type: 'dimension'
-      // subtype: 'temporal',
-      // format: '%Y-%m-%d'
-        }
-    ];
-    const dataModel = new DataModel(jsonData, schema);
+const dm = new DataModel(res, schema);
+canvas
+                .data(dm)
+                .width(600)
+                .height(400)
+                .config({
+                    axes: { y: { name: 'Value in percentage' } }
+                })
+                .rows(['value']) /* Plots against y-axis + provides panel split */
+                .columns(['Year'])  /* Plots against x-axis */
+                .color({
+                    field: 'Media',
+                    range: ['red', 'orange', 'yellow', '#33b5e91', '#31a6ea', 'grey', 'red', 'green']
+                })
+                .layers([
+                    {
+                        mark: 'line',
+                        connectNullData: true
+                    },
+        { mark: 'point' }
+                ])
+                .title('Shifts of teenagers in social media usage')
+                .mount('#chart-container');
 
   // Create a new variable which will keep count of cars per cylinder for a particular origin
     const rootData = dataModel.calculateVariable(
