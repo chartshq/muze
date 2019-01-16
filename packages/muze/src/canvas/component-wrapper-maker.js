@@ -81,6 +81,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     } = scrollBarMap[scrollBarType];
     const dimensions = {
         thickness: scrollBar.thickness,
+        // layoutBasedMeasure: layoutDimensions[viewMeasure][1]
         layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
 
     };

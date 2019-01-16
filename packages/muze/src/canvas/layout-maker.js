@@ -143,7 +143,7 @@ export const getRenderDetails = (context, mount) => {
     };
 };
 
-const components = { verticalScrollBar: 0, horizontalScrollBar: 1, title: 2, subtitle: 3, legend: 4, grid: 5 };
+const components = { title: 0, subtitle: 1, legend: 2, verticalScrollBar: 3, horizontalScrollBar: 4, grid: 5 };
 
 export const renderLayout = (layoutManager, grid, renderDetails) => {
     const compWrapMaker = componentWrapperMaker(layoutManager, grid, renderDetails);

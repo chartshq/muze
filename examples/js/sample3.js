@@ -47,7 +47,8 @@
         canvas = canvas.columns(['Origin','Acceleration'])
         .rows(['Year', 'Horsepower'])
         .data(rootData)
-        .height(400)
+        .height(900)
+        .color('Origin')
         .config({
             scrollBar:{
                 // thickness: 50

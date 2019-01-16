@@ -2,7 +2,8 @@ import {
     selectElement,
     makeElement,
     getD3Drag,
-    getEvent
+    getEvent,
+    getWindow
 } from 'muze-utils';
 import './scroll-bar.scss';
 
@@ -78,6 +79,7 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
                     })
                     .on('drag', () => {
                         const event = getEvent();
+                        const window = getWindow();
                         endPos = {
                             x: event.x,
                             y: event.y
@@ -87,8 +89,8 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
                             y: endPos.y - startPos.y
                         };
                         const actualPosition = {
-                            x: moverStartPos.x + distanceMoved.x - rectStartPos.x,
-                            y: moverStartPos.y + distanceMoved.y - rectStartPos.y
+                            x: moverStartPos.x + distanceMoved.x - rectStartPos.x + window.pageXOffset,
+                            y: moverStartPos.y + distanceMoved.y - rectStartPos.y + window.pageYOffset
                         };
 
                         scrollMaker.changeMoverPosition(actualPosition);
