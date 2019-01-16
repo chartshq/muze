@@ -20,13 +20,16 @@ export const setupChangeListeners = (context) => {
 
 export const registerDomainChangeListener = (context) => {
     const store = context.store();
-    store.unsubscribe({
-        namespace: 'group',
-        key: 'unionDomain'
-    });
     store.registerChangeListener([`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`], () => {
         context.resolver().encoder().unionUnitDomains(context);
     }, false, {
+        namespace: 'group',
+        key: 'unionDomain'
+    });
+};
+
+export const unsubscribeChangeListeners = (context) => {
+    context.store().unsubscribe({
         namespace: 'group',
         key: 'unionDomain'
     });

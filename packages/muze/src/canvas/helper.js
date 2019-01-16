@@ -16,7 +16,9 @@ import { LayoutManager } from '../../../layout/src/tree-layout';
 export const initCanvas = (context) => {
     const reg = context._registry.components;
 
-    return [new reg.VisualGroup(context._registry, context.dependencies())];
+    return [new reg.VisualGroup(context._registry, Object.assign({
+        throwback: context._throwback
+    }, context.dependencies()))];
 };
 
 export const setLayoutInfForUnits = (context) => {
@@ -99,6 +101,47 @@ const updateChecker = (props, params) => props.every((option, i) => {
     }
 });
 
+export const notifyAnimationEnd = (context) => {
+    const centerMatrix = context.layout().viewInfo().viewMatricesInfo.matrices.center[1] || [];
+    const promises = [];
+    centerMatrix.forEach((cellArr) => {
+        cellArr.forEach((cell) => {
+            promises.push(cell.valueOf().done());
+        });
+    });
+    const lifeCycleManager = context.lifeCycle();
+    if (promises.length) {
+        Promise.all(promises).then(() => {
+            // Update life cycle
+            lifeCycleManager.notify({ client: context, action: 'drawn' });
+            const animDonePromises = [];
+
+            centerMatrix.forEach((cellArr) => {
+                cellArr.forEach((cell) => {
+                    cell.valueOf().layers().forEach((layer) => {
+                        animDonePromises.push(layer.animationDone());
+                    });
+                });
+            });
+
+            [context.xAxes(), context.yAxes()].forEach((axisArr) => {
+                axisArr = axisArr || [];
+                axisArr.forEach((axes) => {
+                    axes.forEach((axisInst) => {
+                        animDonePromises.push(axisInst.animationDone());
+                    });
+                });
+            });
+
+            Promise.all(animDonePromises).then(() => {
+                lifeCycleManager.notify({ client: context, action: 'animationend' });
+            });
+        });
+    } else {
+        lifeCycleManager.notify({ client: context, action: 'animationend' });
+    }
+};
+
 export const setupChangeListener = (context) => {
     const store = context._store;
 
@@ -115,14 +158,30 @@ export const setupChangeListener = (context) => {
             dispatchProps(context);
             context.render();
         }
+        notifyAnimationEnd(context);
     }, true);
 };
 
-export const applyInteractionPolicy = (policies, firebolt) => {
+export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
-    const valueMatrix = visualGroup.composition().matrices.value;
-    policies.forEach(policy => policy(valueMatrix, firebolt));
+    if (visualGroup) {
+        const valueMatrix = visualGroup.matrixInstance().value;
+        const interactionPolicy = firebolt._interactionPolicy;
+        interactionPolicy(valueMatrix, firebolt);
+        const crossInteractionPolicy = firebolt._crossInteractionPolicy;
+        const behaviours = crossInteractionPolicy.behaviours;
+        const sideEffects = crossInteractionPolicy.sideEffects;
+        valueMatrix.each((cell) => {
+            const unitFireBolt = cell.valueOf().firebolt();
+            for (const key in behaviours) {
+                unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+            }
+            for (const key in sideEffects) {
+                unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+            }
+        });
+    }
 };
 
 /**

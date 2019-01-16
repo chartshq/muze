@@ -27,7 +27,8 @@ import {
     getLayerAxisIndex,
     sanitizeLayerDef,
     createSideEffectGroup,
-    resolveEncodingTransform
+    resolveEncodingTransform,
+    createRenderPromise
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -37,6 +38,7 @@ import {
 } from './enums/reactive-props';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
+import { initSideEffects } from './firebolt/helper';
 import './styles.scss';
 
 const FORMAL_NAME = 'unit';
@@ -69,6 +71,11 @@ export default class VisualUnit {
             smartLabel: dependencies.smartLabel,
             lifeCycleManager: dependencies.lifeCycleManager
         };
+        this._renderedResolve = null;
+        this._renderedPromise = new Promise((resolve) => {
+            this._renderedResolve = resolve;
+        });
+        createRenderPromise(this);
         this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
             this._renderedResolve();
             this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
@@ -212,6 +219,8 @@ export default class VisualUnit {
             height
         });
         this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
+        const firebolt = this.firebolt();
+        initSideEffects(firebolt.sideEffects(), firebolt);
         return this;
     }
 
