@@ -14,10 +14,7 @@
     "import/extensions": "off",
     "indent": [
       "error",
-      4,
-      {
-        "MemberExpression": 4
-      }
+      4
     ],
     "space-before-function-paren": [
       "error",
