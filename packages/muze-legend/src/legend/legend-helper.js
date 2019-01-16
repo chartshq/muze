@@ -58,13 +58,14 @@ export const titleCreator = (container, title, measurement, config) => {
             .style('text-align', title.orientation instanceof Function ?
                     title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
-                    .style(WIDTH, `${measurement.width}px`)
+                    .style(WIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
+                    .style('max-width', `${Math.min(measurement.maxWidth, measurement.width)}px`)
                     .style(HEIGHT, '100%')
                     .style('padding', `${measurement.padding}px`)
                     .text(title.text)
+                    .style('overflow-x', 'scroll')
                     .node();
 };
-
                                 /**
  *
  *
@@ -103,7 +104,7 @@ export const getItemMeasures = (data, prop, labelManager, formatter) => {
         const { height, width } = labelManager.getOriSize(formatter(value));
         value = value.trim();
         const whiteSpace = value.split(' ').length - 1;
-        space[index] = { height: height + 1, width: width + 1 + (3 * whiteSpace) };
+        space[index] = { height: height + 1, width: width + (3 * (whiteSpace + 1)) };
     });
     return space;
 };
