@@ -7,7 +7,8 @@ import {
     LEFT,
     RIGHT,
     TOP,
-    BOTTOM
+    BOTTOM,
+    MAXWIDTH
 } from '../enums/constants';
 
 /**
@@ -56,17 +57,19 @@ export const titleCreator = (container, title, measurement, config) => {
             .style(HEIGHT, `${measurement.height}px`)
             .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
-                    title.orientation(config.position) : title.orientation);
+            title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
                     .style(WIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
-                    .style('max-width', `${Math.min(measurement.maxWidth, measurement.width)}px`)
+                    .style(MAXWIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
                     .style(HEIGHT, '100%')
+                    .style('line-height', 1)
                     .style('padding', `${measurement.padding}px`)
                     .text(title.text)
                     .style('overflow-x', 'scroll')
                     .node();
 };
-                                /**
+
+/**
  *
  *
  * @param {*} data
@@ -100,11 +103,9 @@ export const getItemMeasures = (data, prop, labelManager, formatter) => {
     const space = [];
 
     data.forEach((item, index) => {
-        let value = prop ? item[prop] : item;
+        const value = prop ? item[prop] : item;
         const { height, width } = labelManager.getOriSize(formatter(value));
-        value = value.trim();
-        const whiteSpace = value.split(' ').length - 1;
-        space[index] = { height: height + 1, width: width + (3 * (whiteSpace + 1)) };
+        space[index] = { height: height + 1, width: width + 1 };
     });
     return space;
 };

@@ -186,6 +186,10 @@
     opacity: 0;
 }
 
+.#{$prefix}subtitle-cell, .#{$prefix}title-cell {
+    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 .#{$groupContainer}, .#{$layoutContainer}, .#{$legendContainer} {
     float: left;
 }

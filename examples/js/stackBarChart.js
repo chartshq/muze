@@ -66,7 +66,7 @@ d3.json('../data/cars.json', (data) => {
     canvas
   		.rows(['CountVehicle']) // CountVehicle goes in y axis
       	.columns(['Cylinders']) // Cylinders goes in x-axis
-      	.color('Name') // Colors encoding using the Origin field
+      	.color('Origin') // Colors encoding using the Origin field
                     .data(dmWithCount)
   		.layers({ // Draw a bar plot, by default stack transform is used
         	Acceleration: {
@@ -77,7 +77,7 @@ d3.json('../data/cars.json', (data) => {
                         legend: {
                             color: {
                                 title: {
-                                    text: 'Name of the Cars'
+                                    text: 'Countries'
                                 }
                             },
                             position: 'bottom'

@@ -60,6 +60,11 @@ $prefix: muze-;
     cursor: pointer;
     font-size: 12px;
 }
+
+.#{$prefix}legend-item-info, .#{$prefix}legend-title {
+    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 .#{$prefix}legend-item-info.center{
     justify-content: center;
 }
