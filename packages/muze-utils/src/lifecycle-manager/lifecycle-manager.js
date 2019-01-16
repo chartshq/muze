@@ -1,4 +1,5 @@
 import EVENT_LIST from './event-list';
+import { createPromise } from './helper';
 
 /**
  * At first call it accepts one function
@@ -76,7 +77,7 @@ export default class LifeCycleManager {
      */
     _makeNotifierPromise (eventName) {
         return new Promise((resolve) => {
-            this._notifiers[eventName] = this._notifiers[eventName](resolve);
+            this._notifiers[eventName] = resolver(resolve);
         });
     }
 
@@ -88,7 +89,9 @@ export default class LifeCycleManager {
      */
     _preparePromises () {
         this._eventList.forEach((eventName) => {
-            this._promises.set(eventName, this._makeNotifierPromise(eventName));
+            const promise = this._makeNotifierPromise(eventName);
+            this._promises.set(eventName, promise);
+            createPromise(promise, eventName, this);
         });
     }
 

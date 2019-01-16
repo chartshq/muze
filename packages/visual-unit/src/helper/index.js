@@ -325,3 +325,13 @@ export const removeLayersBy = (layers, searchBy, value) => {
 };
 
 export const createSideEffectGroup = (container, className) => makeElement(container, 'g', [1], className).node();
+
+export const createRenderPromise = (unit) => {
+    const renderedPromise = unit._renderedPromise;
+    renderedPromise.then(() => {
+        unit._renderedPromise = new Promise((resolve) => {
+            unit._renderedResolve = resolve;
+        });
+        createRenderPromise(unit);
+    });
+};

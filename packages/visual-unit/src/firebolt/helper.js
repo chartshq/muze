@@ -2,7 +2,7 @@ import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { DATA } from '../enums/reactive-props';
 
-const initSideEffects = (sideEffects, firebolt) => {
+export const initSideEffects = (sideEffects, firebolt) => {
     for (const key in sideEffects) {
         if ({}.hasOwnProperty.call(sideEffects, key)) {
             sideEffects[key] instanceof SpawnableSideEffect && sideEffects[key].drawingContext(() => {
@@ -56,7 +56,6 @@ export const registerListeners = (firebolt) => {
     context._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW],
         ([, onlayerdraw]) => {
             if (onlayerdraw) {
-                initSideEffects(firebolt.sideEffects(), firebolt);
                 dispatchQueuedSideEffects(firebolt);
                 clearActionHistory(firebolt);
             }
