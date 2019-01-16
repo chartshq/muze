@@ -3,23 +3,12 @@ module.exports = function (config) {
         basePath: './',
         frameworks: ['mocha', 'chai'],
         files: [
-            'packages/*/src/**/*.spec.js'
+            'packages/<%= packageName %>/src/**/*.spec.js'
         ],
         webpack: {
             devtool: 'inline-source-map',
             module: {
                 rules: [
-                    // instrument only testing sources with Istanbul
-                    {
-                        test: /\.js$/,
-                        use: {
-                            loader: 'babel-loader',
-                            query: {
-                                presets: ['env']
-                            }
-                        },
-                        exclude: /node_modules/
-                    },
                     {
                         test: /\.(s*)css$/,
                         use: [
@@ -51,8 +40,7 @@ module.exports = function (config) {
             }
         },
         preprocessors: {
-            '**/*.js': ['sourcemap'],
-            'packages/*/src/**/*.spec.js': ['webpack']
+            'packages/<%= packageName %>/src/**/*.spec.js': ['webpack']
         },
         exclude: [
             '**/*.swp'
