@@ -51,21 +51,18 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     createAxis (config) {
-        const {
-            tickFormat,
-            orientation
-        } = config;
+        const { orientation } = config;
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
             const axis = axisClass(this.scale());
-            this.formatter = this.getTickFormatter(tickFormat);
             return axis;
         }
         return null;
     }
 
-    getTickFormatter (tickFormat) {
+    getTickFormatter (value) {
+        const { tickFormat } = value;
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(val, i, ticks);
         }
