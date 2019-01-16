@@ -54,7 +54,8 @@ const scrollBarMap = {
         viewMeasure: 'viewHeight',
         rowAlign: 1,
         colAlign: 2,
-        positon: 'top'
+        positon: 'right',
+        alignment: 'top'
     },
     horizontal: {
         componentName: 'horizontalScrollBar',
@@ -63,8 +64,9 @@ const scrollBarMap = {
         viewMeasure: 'viewWidth',
         height: 'thickness',
         rowAlign: 2,
-        colAlign: 0,
-        position: 'bottom'
+        colAlign: 1,
+        position: 'bottom',
+        alignment: 'left'
     }
 };
 
@@ -74,15 +76,15 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const target = { target: CANVAS };
     const { scrollBar } = layoutConfig;
     const { layoutDimensions } = grid.viewInfo();
-    const { totalMeasures, actualCenterMeasures } = layoutDimensions;
+    const { actualCenterMeasures } = layoutDimensions;
     const {
         componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
-        viewMeasure, position
+        viewMeasure, position, alignment
     } = scrollBarMap[scrollBarType];
     const dimensions = {
         thickness: scrollBar.thickness,
-        // layoutBasedMeasure: layoutDimensions[viewMeasure][1]
-        layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
+        layoutBasedMeasure: layoutDimensions[viewMeasure][1]
+        // layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
 
     };
     const totalLength = actualCenterMeasures[layoutBasedMeasure];
@@ -94,7 +96,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
         scrollBarComponentConfig: { ...scrollBar, classPrefix: layoutConfig.classPrefix },
         type: scrollBarType,
         alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
-        alignment: LAYOUT_ALIGN.LEFT,
+        alignment,
         position
     });
 

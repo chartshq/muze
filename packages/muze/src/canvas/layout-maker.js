@@ -4,6 +4,7 @@ import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { componentWrapperMaker } from './component-wrapper-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { ScrollManager } from './scroll-manager';
 /**
  *
  *
@@ -157,6 +158,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
             wrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
         }
     });
+
+    const scrollBarManager = new ScrollManager();
 
     layoutManager.registerComponents(componentWrappers).compute();
 };

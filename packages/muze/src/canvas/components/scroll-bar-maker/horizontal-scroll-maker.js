@@ -73,7 +73,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
         }
 
         mover.style('left', `${currentPos}px`);
-        const totalDistance = this._scrollBarWithouArrowLength - rectStartPos.x;
+        const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 
         this._attachedScrollAction(this.constructor.type(), movedViewLength);

@@ -1,18 +1,8 @@
 .muze-scroll-bar{
-    
     background: rgb(248, 248, 248);
     position: relative;
     font-size: 10px;
 }
-// #muze-scroll-bar-horizontal{
-//     width: 500px;
-//     height: 20px;
-// }
-// #muze-scroll-bar-vertical{
-//     height: 500px;
-//     width: 20px;
-// }
-
 .muze-scroll-arrow {
     float: left;
     cursor: pointer;
@@ -40,16 +30,12 @@
 }
 
 .muze-scroll-rect {
-    // width: 460px;
     float: left;
-    // height: 100%;
     position: relative;
 }
 .muze-scroll-mover {
-    // width: 200px;
-    // height: 100%;
     position: absolute;
-    // left: 10px;
+    border: 1px solid rgba(100, 100, 100, 0.1);
     background: rgb(227, 227, 227);
     cursor: -webkit-grab;
 }

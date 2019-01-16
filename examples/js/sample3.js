@@ -48,15 +48,14 @@
         .rows(['Year', 'Horsepower'])
         .data(rootData)
         .height(900)
-        .color('Origin')
+        .color('Name')
         .config({
-            scrollBar:{
-                // thickness: 50
-                // speed: 10
-            }
+           legend:{
+               position: 'bottom'
+           }
         })
         // .title("sads",)
-        .width(400)
+        .width(900)
       
         .mount(mountPoint);
 
