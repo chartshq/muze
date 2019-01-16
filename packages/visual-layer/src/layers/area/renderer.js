@@ -41,8 +41,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
 
                         element.classed(d[0].className, true);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
-                    })
-                    .on('end', layer.registerAnimationDoneHook());
+                    });
 };
 
 export default drawArea;
