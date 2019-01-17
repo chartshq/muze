@@ -78,7 +78,18 @@ export class VerticalScrollMaker extends ScrollMaker {
         const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 
-        this._attachedScrollAction(this.constructor.type(), movedViewLength);
+        this.scrollBarManager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
+    }
+
+    triggerScrollBarAction (movement) {
+        const {
+            y
+        } = movement;
+        const {
+            totalLength
+         } = this.logicalSpace();
+        const movedYPosition = this._scrollBarWithouArrowLength * y / totalLength;
+        this.changeMoverPosition({ y: movedYPosition, x: 0 });
     }
 
 }

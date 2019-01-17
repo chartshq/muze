@@ -44,17 +44,21 @@
         env = env.data(rootData).minUnitHeight(140).minUnitWidth(140);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        var rows = ['Acceleration', 'Horsepower'],
-        columns = ['Year'];
-    canvas = canvas.rows(rows).columns(columns).data(rootData).width(300).height(400).mount(mountPoint)
-    .config({
-        scrollBar:{
-            thickness: 5
-            // vertical:{
-            //     align: 'left'
-            // }
-        }
-    })
+        canvas = canvas.columns(['Origin','Acceleration'])
+        .rows(['Year', 'Horsepower'])
+        .data(rootData)
+        .height(900)
+        .detail(['Name'])
+        .config({
+           legend:{
+               position: 'bottom'
+           }
+        })
+        .title("sads")
+        .color('Origin')
+        .width(900)
+      
+        .mount(mountPoint);
 
         canvas.onAnimationEnd((client) => {
 

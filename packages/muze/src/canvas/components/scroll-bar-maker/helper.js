@@ -3,9 +3,11 @@ import {
     makeElement,
     getD3Drag,
     getEvent,
-    getWindow
+    getWindow,
+    hasTouch
 } from 'muze-utils';
 import './scroll-bar.scss';
+import { WIDTH, HEIGHT } from '../../../constants';
 
 const d3Drag = getD3Drag();
 
@@ -16,10 +18,10 @@ const arrowUnicodeMap = {
     bottom: '&#9660'
 };
 const arrowSizeMap = {
-    left: 'width',
-    right: 'width',
-    top: 'height',
-    bottom: 'height'
+    left: WIDTH,
+    right: WIDTH,
+    top: HEIGHT,
+    bottom: HEIGHT
 };
 
 export const createScrollBarArrow = (mount, type, config) => {
@@ -97,30 +99,46 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
                     }));
 };
 
-export const registerListeners = (scrollMaker) => {
-    const {
-        prevArrow,
-        moverRect,
-        nextArrow
-    } = scrollMaker._components;
+const applyScrollMouseDownAction = (moverRect, scrollMaker, speed) => {
     const {
         mover,
         rect
     } = moverRect;
-    const speed = scrollMaker.config().speed;
-    prevArrow.on('click', () => {
-        const { x, y } = mover.node().getBoundingClientRect();
-        const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
+    const { x, y } = mover.node().getBoundingClientRect();
+    const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
 
-        scrollMaker.changeMoverPosition({ x: x - rectX - speed, y: y - rectY - speed });
+    scrollMaker.changeMoverPosition({ x: x - rectX + speed, y: y - rectY + speed });
+};
+
+const registerListenerOnArrow = (scrollMaker, moverRect, arrowType, speed) => {
+    let timer = '';
+    const arrow = scrollMaker._components[arrowType];
+    const isTouchDevice = hasTouch();
+
+    arrow.on(isTouchDevice ? 'touchstart' : 'mousedown', () => {
+        const event = getEvent();
+        event.preventDefault();
+        timer = setInterval(() => {
+            applyScrollMouseDownAction(moverRect, scrollMaker, speed);
+        }, 100);
+    }).on(isTouchDevice ? 'touchend' : 'mouseup', () => {
+        const event = getEvent();
+        event.preventDefault();
+        clearInterval(timer);
     });
+};
+
+export const registerListeners = (scrollMaker) => {
+    const {
+        moverRect
+    } = scrollMaker._components;
+
+    const speed = scrollMaker.config().speed;
+    registerListenerOnArrow(scrollMaker, moverRect, 'prevArrow', -speed);
+
     applyMoverDrag(scrollMaker, moverRect);
     applyRectClick(scrollMaker, moverRect);
-    nextArrow.on('click', () => {
-        const { x, y } = mover.node().getBoundingClientRect();
-        const { x: rectX, y: rectY } = rect.node().getBoundingClientRect();
-        scrollMaker.changeMoverPosition({ x: x - rectX + speed, y: y - rectY + speed });
-    });
+    registerListenerOnArrow(scrollMaker, moverRect, 'nextArrow', speed);
 };
 
 export const scrollContainerHelper = (mountPoint, config, dimensions, type) => {
@@ -129,8 +147,8 @@ export const scrollContainerHelper = (mountPoint, config, dimensions, type) => {
     } = config;
     const scrollBarContainer = makeElement(selectElement(mountPoint), 'div', [1], `#${classPrefix}-scroll-bar-${type}`);
     scrollBarContainer.classed(`${classPrefix}-scroll-bar`, true);
-    scrollBarContainer.style('width', `${dimensions.width}px`);
-    scrollBarContainer.style('height', `${dimensions.height}px`);
+    scrollBarContainer.style(WIDTH, `${dimensions.width}px`);
+    scrollBarContainer.style(HEIGHT, `${dimensions.height}px`);
     return scrollBarContainer;
 };
 

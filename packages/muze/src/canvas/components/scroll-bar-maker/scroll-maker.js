@@ -36,6 +36,14 @@ export class ScrollMaker {
         return this._config;
     }
 
+    scrollBarManager (...manager) {
+        if (manager.length) {
+            this._scrollBarManager = manager[0];
+            return this;
+        }
+        return this._scrollBarManager;
+    }
+
     logicalSpace (...l) {
         if (l.length) {
             this._logicalSpace = l[0];

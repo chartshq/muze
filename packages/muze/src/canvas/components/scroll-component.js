@@ -18,6 +18,18 @@ export default class ScrollComponent extends MuzeComponent {
         this.setParams(params);
     }
 
+    scrollBarManager (...manager) {
+        if (manager.length) {
+            this.component.scrollBarManager(manager[0]);
+            return this;
+        }
+        return this.component.scrollBarManager();
+    }
+
+    triggerScrollBarAction (movement) {
+        this.component.triggerScrollBarAction(movement);
+    }
+
     draw (container) {
         this.component.createScroll(container || document.getElementById(this.renderAt()));
         return this;

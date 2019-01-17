@@ -1,4 +1,4 @@
-import { selectElement } from 'muze-utils';
+import { selectElement, getEvent } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
@@ -19,6 +19,49 @@ const scrollActionApplier = (movement, context) => ({
         });
     }
 });
+
+const bindScrollEvent = (context) => {
+    let mouseHover = false;
+
+    selectElement(`#${context.component[1][1].renderAt()}`)
+                    .on('mouseenter', () => { mouseHover = true; })
+                    .on('mouseleave', () => { mouseHover = false; })
+                        // .selectAll('.muze-grid')
+                    .on('mousewheel', () => {
+                        const event = getEvent();
+                        event.stopPropagation();
+                        // const delta = event.wheelDelta;
+                        const deltaX = event.wheelDeltaX;
+                        const deltaY = event.wheelDeltaY;
+
+                        if (deltaX > 0) {
+                            context.scrollBarManager().triggerScrollBarAction('horizontal', { x: deltaX, y: deltaY });
+                            // console.log('go up');
+                        } else if (deltaX < 0) {
+                            context.scrollBarManager().triggerScrollBarAction('horizontal', { x: deltaX, y: deltaY });
+                            // console.log('go down');
+                        } else if (deltaY > 0) {
+                            context.scrollBarManager().triggerScrollBarAction('vertical', { x: deltaX, y: deltaY });
+                            // console.log('go down');
+                        } else {
+                            context.scrollBarManager().triggerScrollBarAction('vertical', { x: deltaX, y: deltaY });
+                            // console.log('go down');
+                        }
+
+                        // console.log(event);
+                    });
+    console.log(selectElement('body'));
+    selectElement('body').on('scroll', () => {
+        const e = getEvent();
+
+        console.log(mouseHover);
+        if (mouseHover) {
+            if (e.preventDefault) { e.preventDefault(); }
+            e.returnValue = false;
+        }
+        return false;
+    });
+};
 
 export default class GridComponent extends MuzeComponent {
 
@@ -78,7 +121,20 @@ export default class GridComponent extends MuzeComponent {
         this.allComponents = this.gridComponents;
     }
 
-    scrollActon (direction, movedView) {
+    scrollBarManager (...manager) {
+        if (manager.length) {
+            this._scrollBarManager = manager[0];
+            return this;
+        }
+        return this._scrollBarManager;
+    }
+
+    registerScrollEvent () {
+        bindScrollEvent(this);
+        // .property('scrollLeft', movement);
+    }
+
+    performScrollAction (direction, movedView) {
         scrollActionApplier(movedView, this)[direction]();
         return this;
     }

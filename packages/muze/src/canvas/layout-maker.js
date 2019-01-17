@@ -4,6 +4,7 @@ import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { componentWrapperMaker } from './component-wrapper-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { ScrollManager } from './scroll-manager';
 
 /**
  *
@@ -153,12 +154,25 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     const verticalScrollWrapper = componentWrappers[components.verticalScrollBar];
     const gridWrapper = componentWrappers[components.grid];
 
-    [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
-        if (wrapper) {
-            wrapper.attachScrollAction(gridWrapper.scrollActon.bind(gridWrapper));
-        }
+    // [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
+    //     if (wrapper) {
+    //         wrapper.attachScrollAction(gridWrapper.performScrollAction.bind(gridWrapper));
+    //     }
+    // });
+
+    const scrollBarManager = new ScrollManager();
+    const scrollBarComponents = {};
+    verticalScrollWrapper && (scrollBarComponents.vertical = verticalScrollWrapper);
+    horizontalScrollWrapper && (scrollBarComponents.horizontal = horizontalScrollWrapper);
+    scrollBarManager.scrollBarComponents(scrollBarComponents).attachedComponents({
+        grid: gridWrapper
     });
+    [horizontalScrollWrapper, verticalScrollWrapper, gridWrapper].forEach((wrapper) => {
+        wrapper && wrapper.scrollBarManager(scrollBarManager);
+    });
+    gridWrapper.scrollBarManager(scrollBarManager);
 
     layoutManager.registerComponents(componentWrappers).compute();
+    gridWrapper.registerScrollEvent();
 };
 
