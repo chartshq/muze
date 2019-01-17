@@ -17,15 +17,16 @@ const listenerFn = (canvas, fn) => () => {
     valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
 };
 
-const canvasIterator = (canvases, fn) => {
+const canvasIterator = (canvases, iteratorFn, cFn) => {
     canvases.forEach((canvas) => {
         const matrix = canvas.composition().visualGroup.matrixInstance().value;
-        matrix.each(cell => fn(cell.valueOf().firebolt()));
+        matrix.each(cell => iteratorFn(cell.valueOf().firebolt()));
+        cFn && cFn(canvas);
         // Also register actions on canvas update
         const throwback = canvas._throwback;
 
         throwback.registerImmediateListener([CommonProps.MATRIX_CREATED],
-            listenerFn(canvas, fn));
+            listenerFn(canvas, iteratorFn));
     });
 };
 
@@ -97,6 +98,8 @@ class ActionModel {
     registerPhysicalActions (action) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             firebolt.registerPhysicalActions(action);
+        }, (canvas) => {
+            canvas.firebolt().registerPhysicalActions(action);
         });
 
         return this;
@@ -140,7 +143,9 @@ class ActionModel {
      */
     registerBehaviouralActions (...actions) {
         canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerBehaviouralActions(...actions);
+            firebolt.registerBehaviouralActions(actions);
+        }, (canvas) => {
+            canvas.firebolt().registerBehaviouralActions(actions);
         });
 
         return this;
@@ -179,6 +184,8 @@ class ActionModel {
     registerPhysicalBehaviouralMap (map) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             firebolt.registerPhysicalBehaviouralMap(map);
+        }, (canvas) => {
+            canvas.firebolt().registerPhysicalBehaviouralMap(map);
         });
         return this;
     }
@@ -204,6 +211,8 @@ class ActionModel {
     registerPropagationBehaviourMap (map) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             firebolt.registerPropagationBehaviourMap(map);
+        }, (canvas) => {
+            canvas.firebolt().registerPropagationBehaviourMap(map);
         });
 
         return this;
@@ -240,6 +249,8 @@ class ActionModel {
     mapSideEffects (map) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             firebolt.mapSideEffects(map);
+        }, (canvas) => {
+            canvas.firebolt().mapSideEffects(map);
         });
         return this;
     }
@@ -269,6 +280,8 @@ class ActionModel {
     registerSideEffects (...sideEffects) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             firebolt.registerSideEffects(sideEffects);
+        }, (canvas) => {
+            canvas.firebolt().registerSideEffects(sideEffects);
         });
         return this;
     }
@@ -289,6 +302,8 @@ class ActionModel {
     dissociateBehaviour (...maps) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             maps.forEach(val => firebolt.dissociateBehaviour(val[0], val[1]));
+        }, (canvas) => {
+            maps.forEach(val => canvas.firebolt().dissociateBehaviour(val[0], val[1]));
         });
         return this;
     }
@@ -309,6 +324,8 @@ class ActionModel {
     dissociateSideEffect (...maps) {
         canvasIterator(this._registrableComponents, (firebolt) => {
             maps.forEach(val => firebolt.dissociateSideEffect(val[0], val[1]));
+        }, (canvas) => {
+            maps.forEach(val => canvas.firebolt().dissociateSideEffect(val[0], val[1]));
         });
         return this;
     }
