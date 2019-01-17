@@ -107,5 +107,7 @@ packages/*/.nsi.json
 
 packages/*/node_modules/
 */**/package-lock.json
+dist.zip
+sherlock.json
 
 # End of https://www.gitignore.io/api/node,macos
