@@ -88,8 +88,18 @@ export class VerticalScrollMaker extends ScrollMaker {
         const {
             totalLength
          } = this.logicalSpace();
+
         const movedYPosition = this._scrollBarWithouArrowLength * y / totalLength;
         this.changeMoverPosition({ y: movedYPosition, x: 0 });
+    }
+
+    scrollTo (scrollPercentage) {
+        const {
+            mover
+        } = this._components.moverRect;
+        const moverPos = mover.node().getBoundingClientRect();
+        const movement = (scrollPercentage * (this._scrollBarWithouArrowLength - moverPos.height)) / 100;
+        this.changeMoverPosition({ x: 0, y: movement });
     }
 
 }

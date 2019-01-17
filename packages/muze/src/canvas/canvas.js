@@ -304,7 +304,7 @@ export default class Canvas extends TransactionSupport {
         this._layoutManager.renderAt(mount);
 
         // Render each component
-        renderLayout(this._layoutManager, this.layout(), renderDetails);
+        renderLayout(this, renderDetails);
 
         setLayoutInfForUnits(this);
 

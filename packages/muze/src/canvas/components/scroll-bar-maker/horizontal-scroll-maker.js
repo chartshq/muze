@@ -80,5 +80,14 @@ export class HorizontalScrollMaker extends ScrollMaker {
         this.scrollBarManager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
     }
 
+    scrollTo (scrollPercentage) {
+        const {
+            mover
+        } = this._components.moverRect;
+        const moverPos = mover.node().getBoundingClientRect();
+        const movement = (scrollPercentage * (this._scrollBarWithouArrowLength - moverPos.width)) / 100;
+        this.changeMoverPosition({ y: 0, x: movement });
+    }
+
 }
 

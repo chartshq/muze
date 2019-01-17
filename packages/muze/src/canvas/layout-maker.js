@@ -147,7 +147,9 @@ export const getRenderDetails = (context, mount) => {
 
 const components = { title: 0, subtitle: 1, legend: 2, verticalScrollBar: 3, horizontalScrollBar: 4, grid: 5 };
 
-export const renderLayout = (layoutManager, grid, renderDetails) => {
+export const renderLayout = (canvas, renderDetails) => {
+    const layoutManager = canvas._layoutManager;
+    const grid = canvas.layout();
     const compWrapMaker = componentWrapperMaker(layoutManager, grid, renderDetails);
     const componentWrappers = Object.keys(components).map(e => compWrapMaker[e]());
     const horizontalScrollWrapper = componentWrappers[components.horizontalScrollBar];
@@ -163,7 +165,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
                     .attachedComponents({
                         grid: gridWrapper
                     });
-
+    canvas.composition().scroll = scrollBarComponents;
     [horizontalScrollWrapper, verticalScrollWrapper, gridWrapper].forEach((wrapper) => {
         wrapper && wrapper.scrollBarManager(scrollBarManager);
     });
