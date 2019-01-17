@@ -191,7 +191,6 @@ export default class SimpleLegend {
 
         // Get space occupied by labels
         const labelSpaces = this.getLabelSpaces(effPadding, align);
-
         const {
             totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth
         } = computeItemSpaces(this.config(),

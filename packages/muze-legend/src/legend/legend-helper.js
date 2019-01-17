@@ -210,7 +210,10 @@ export const computeItemSpaces = (config, measures, data) => {
             } else {
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
-                labelSpaces[i].width = maxItemSpaces.width - maxIconWidth;
+                /* Checking if modified width for label is less than require width.
+                 in that case returning the Actual width else modified width */
+                labelSpaces[i].width = (labelSpaces[i].width <= (maxItemSpaces.width - maxIconWidth)) ?
+                    (maxItemSpaces.width - maxIconWidth) : labelSpaces[i].width;
                 totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
             }
         }
