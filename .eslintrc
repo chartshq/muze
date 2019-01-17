@@ -1,7 +1,8 @@
 {
   "env": {
     "es6": true,
-    "browser": true
+    "browser": true,
+    "node": true
   },
   "extends": "airbnb",
   "parser": "babel-eslint",
@@ -14,10 +15,7 @@
     "import/extensions": "off",
     "indent": [
       "error",
-      4,
-      {
-        "MemberExpression": 4
-      }
+      4
     ],
     "space-before-function-paren": [
       "error",
