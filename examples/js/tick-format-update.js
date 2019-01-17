@@ -4,37 +4,41 @@
     let env = window.muze();
     const DataModel = window.muze.DataModel;
 
-    d3.csv('/data/coffee.csv', (data) => {
+    d3.json('/data/cars.json', (data) => {
         let jsonData = data,
         schema = [{
-            name: 'Market',
-            type: 'dimension'
-        },
-        {
-            name: 'Product',
-            type: 'dimension'
-        },
-        {
-            name: 'Product Type',
-            type: 'dimension'
-        },
-        {
-            name: 'Revenue',
-            type: 'measure'
-        },
-        {
-            name: 'Expense',
-            type: 'measure'
-        },
-        {
-            name: 'Profit',
-            type: 'measure',
-        },
-        {
-            name: 'Order Count',
-            type: 'measure'
-        },
-    ];
+        name: 'Name',
+        type: 'dimension'
+    }, {
+        name: 'Maker',
+        type: 'dimension'
+    }, {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    }, {
+        name: 'Displacement',
+        type: 'measure'
+    }, {
+        name: 'Horsepower',
+        type: 'measure'
+    }, {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    }, {
+        name: 'Acceleration',
+        type: 'measure'
+    }, {
+        name: 'Origin',
+        type: 'dimension'
+    }, {
+        name: 'Cylinders',
+        type: 'dimension'
+    }, {
+        name: 'Year',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    }];
     const dm = new DataModel(jsonData, schema);
     const canvas = env.canvas();
     
@@ -42,32 +46,31 @@
         .data(dm)
         .width(600)
         .height(400)
-        .rows(['Revenue'])
-        .columns(['Product'])
+        .rows(['Horsepower'])
+        .columns(['Year'])
         .mount('#chart') /* Attaching the canvas to DOM element */
         .config({
             axes: {
                 y: {
-                    tickFormat : (d)=>{
-                        if (d<1000) return d;
-                        if (d>1000 && d<=1000000) return `${d/1000}K`;
-                        if (d>1000000) return `${d/1000}M`;
-                        return d;
-                    },
-                    tickValues: [200000, 400000, 600000, 800000, 1000000],                        
-                }
+                    interpolator: 'pow',
+                    exponent: 2,
+                    orientation: 'right'
+                },
             }
-        });
+        })
 
         setTimeout(() => {
-            return canvas.config({
-                axes: {
-                    y: {                        
-                        name: 'hello world',
-                        tickFormat: (value) => `${value}h`
+            canvas
+                .config({
+                    axes: {
+                        y: {
+                            tickFormat: (d) => `${d/1000}K`,
+                            interpolator: 'linear',
+                            base: 2,
+                            orientation: 'left'
+                        }
                     }
-                }
-            });
+                });
         }, 2000);
     });
 }());

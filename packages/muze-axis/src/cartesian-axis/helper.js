@@ -312,15 +312,44 @@ export const calculateContinousSpace = (context) => {
     };
 };
 
-export const setContinousAxisDomain = (context, domain) => {
-    const { nice, domain: userDom } = context.config();
-    if (userDom) {
-        domain = userDom;
-    }
-    if (domain.length && domain[0] === domain[1]) {
-        domain = [0, +domain[0] * 2];
-    }
+const setContinousAxisDomain = (context, domain) => {
+    const { nice } = context;
+
     context.scale().domain(domain);
     nice && context.scale().nice();
     context._domain = context.scale().domain();
+};
+
+/**
+ * This function calls sanitizeDomain based on the callee
+ * sanitizeDomain is called only if callee is ContinousAxis
+ * @param {Object} context reference to the caller
+ * @param {Array} domain axes domain
+ */
+export const setContinousAxisDomainInitiator = (context, domain) => {
+    const { domain: userDom } = context.config();
+
+    if (userDom) {
+        domain = userDom;
+    }
+    if (context.constructor.name === 'ContinousAxis') {
+        context._interpolator.sanitizeDomain(domain);
+    }
+    setContinousAxisDomain(context, domain);
+};
+
+/**
+ * Checks if all the properties have changed between two objects
+ * @param {Object} obj first object
+ * @param {Object} obj1 second object
+ * @param {Array} properties properties to be compared between two objects
+ *
+ * @return {Boolean} boolean value
+ */
+export const hasAxesConfigChanged = (obj, obj1, properties) => {
+    if (!obj || !obj1) {
+        return null;
+    }
+    const configBoolMap = properties.map(key => obj[key] !== obj1[key]);
+    return configBoolMap.reduce((final, bool) => (final || !!bool), false);
 };

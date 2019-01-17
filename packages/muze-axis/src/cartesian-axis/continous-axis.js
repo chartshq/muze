@@ -6,7 +6,7 @@ import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import {
     getNumberOfTicks,
-    setContinousAxisDomain
+    setContinousAxisDomainInitiator
 } from './helper';
 
 export const interpolatorMap = {
@@ -92,7 +92,10 @@ export default class ContinousAxis extends SimpleAxis {
      */
     domain (domain) {
         if (domain && domain.length) {
-            setContinousAxisDomain(this, domain);
+            if (domain[0] === domain[1]) {
+                domain = [0, +domain[0] * 2];
+            }
+            setContinousAxisDomainInitiator(this, domain);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;

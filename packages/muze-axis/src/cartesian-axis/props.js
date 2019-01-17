@@ -1,4 +1,5 @@
 import { mergeRecursive } from 'muze-utils';
+import { hasAxesConfigChanged } from './helper';
 
 export const PROPS = {
     availableSpace: {},
@@ -7,10 +8,19 @@ export const PROPS = {
     config: {
         sanitization: (context, value) => {
             const oldConfig = Object.assign({}, context._config || {});
-            value = mergeRecursive(oldConfig, value);
+            const newValue = mergeRecursive({}, oldConfig);
+            value = mergeRecursive(newValue, value);
+
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             if (value.orientation !== oldConfig.orientation) {
                 context.axis(context.createAxis(value));
+            }
+            const shouldAxesScaleUpdate = hasAxesConfigChanged(value, oldConfig, ['interpolator', 'exponent', 'base']);
+
+            // Update scale and axis
+            if (shouldAxesScaleUpdate) {
+                context._scale = context.createScale(value);
+                context._axis = context.createAxis(value);
             }
             context.attachedFormatter = context.getTickFormatter(value);
 
