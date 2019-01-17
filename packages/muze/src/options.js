@@ -1,4 +1,3 @@
-import { fixScrollBarConfig } from './canvas/helper';
 /**
  * This is the global options semantics based on which setters getters are created and reactivity is initiated.
  * Format
@@ -16,6 +15,7 @@ import { fixScrollBarConfig } from './canvas/helper';
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
+import { fixScrollBarConfig } from './canvas/helper';
 import { DEFAULT_CONFIG } from './defaults';
 
 export default {
