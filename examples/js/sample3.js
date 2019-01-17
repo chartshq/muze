@@ -36,8 +36,6 @@
     }, {
         name: 'Year',
         type: 'dimension'
-			// subtype: 'temporal',
-			// format: '%Y-%m-%d'
     }];
         const rootData = new DataModel(jsonData, schema);
 
@@ -45,24 +43,7 @@
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         canvas = canvas.rows(['Acceleration', 'Horsepower', 'Weight_in_lbs'])
-            // .detail(['Name'])
             .columns(['Origin']).color('Cylinders').data(rootData).height(900).width(900).mount(mountPoint);
-
-        canvas.once('canvas.drawn').then(() => {
-            console.log('canvasDrawn');
-        });
-
-        // setTimeout(() => {
-        //     canvas.once('canvas.drawn').then(() => {
-        //         console.log('canvasDrawnAfterUpdate');
-        //     });
-        //     canvas.once('unit.drawn').then(() => {
-        //         console.log('unitDrawn');
-        //     });
-        //     canvas.rows(['Horsepower']);
-        // }, 3000);
-
-
     });
 }());
 
