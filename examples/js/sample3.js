@@ -41,23 +41,20 @@
     }];
         const rootData = new DataModel(jsonData, schema);
 
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+        env = env.data(rootData).minUnitHeight(140).minUnitWidth(140);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        canvas = canvas.columns(['Origin','Acceleration'])
-        .rows(['Year', 'Horsepower'])
-        .data(rootData)
-        .height(900)
-        .color('Name')
-        .config({
-           legend:{
-               position: 'bottom'
-           }
-        })
-        // .title("sads",)
-        .width(900)
-      
-        .mount(mountPoint);
+        var rows = ['Acceleration', 'Horsepower'],
+        columns = ['Year'];
+    canvas = canvas.rows(rows).columns(columns).data(rootData).width(300).height(400).mount(mountPoint)
+    .config({
+        scrollBar:{
+            thickness: 5
+            // vertical:{
+            //     align: 'left'
+            // }
+        }
+    })
 
         canvas.onAnimationEnd((client) => {
 

@@ -45,7 +45,7 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
     return wrapper;
 };
 
-const scrollBarMap = {
+const scrollBarMap = config => ({
     vertical: {
         componentName: 'verticalScrollBar',
         width: 'thickness',
@@ -53,8 +53,8 @@ const scrollBarMap = {
         layoutBasedMeasure: 'height',
         viewMeasure: 'viewHeight',
         rowAlign: 1,
-        colAlign: 2,
-        positon: 'right',
+        colAlign: config.align === 'right' ? 2 : 0,
+        position: config.align,
         alignment: 'top'
     },
     horizontal: {
@@ -63,12 +63,12 @@ const scrollBarMap = {
         layoutBasedMeasure: 'width',
         viewMeasure: 'viewWidth',
         height: 'thickness',
-        rowAlign: 2,
+        rowAlign: config.align === 'top' ? 0 : 2,
         colAlign: 1,
-        position: 'bottom',
+        position: config.align,
         alignment: 'left'
     }
-};
+});
 
 const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetails) => {
     let scrollBarWrapper = null;
@@ -80,7 +80,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const {
         componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
         viewMeasure, position, alignment
-    } = scrollBarMap[scrollBarType];
+    } = scrollBarMap(scrollBar[scrollBarType])[scrollBarType];
     const dimensions = {
         thickness: scrollBar.thickness,
         layoutBasedMeasure: layoutDimensions[viewMeasure][1]

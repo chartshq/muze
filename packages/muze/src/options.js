@@ -61,6 +61,7 @@ export default {
                 const oldConf = mergeRecursive({}, oldConfig);
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
                 const newConf = mergeRecursive(defConfig, config);
+                newConf.scrollBar.thickness = Math.min(50, Math.max(10, newConf.scrollBar.thickness));
                 return newConf;
             }
 
