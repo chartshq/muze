@@ -51,12 +51,17 @@
         .detail(['Name'])
         .config({
            legend:{
-               position: 'bottom'
+               position: 'bottom',
+               border: 10,
+               color:{
+                  
+                    // borderColor: 'red'
+               }
            }
         })
         .title("sads")
         .color('Origin')
-        .width(900)
+        .width(300)
       
         .mount(mountPoint);
 

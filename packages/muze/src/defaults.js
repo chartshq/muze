@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG = {
     },
     pagination: 'scroll',
     scrollBar: {
-        thickness: 20,
+        thickness: 10,
         speed: 2,
         vertical: {
             align: 'right'

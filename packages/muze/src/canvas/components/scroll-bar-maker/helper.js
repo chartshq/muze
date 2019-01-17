@@ -11,12 +11,6 @@ import { WIDTH, HEIGHT } from '../../../constants';
 
 const d3Drag = getD3Drag();
 
-const arrowUnicodeMap = {
-    left: '&#9664',
-    right: '&#9654',
-    top: '&#9650',
-    bottom: '&#9660'
-};
 const arrowSizeMap = {
     left: WIDTH,
     right: WIDTH,
@@ -32,7 +26,9 @@ export const createScrollBarArrow = (mount, type, config) => {
     const arrow = makeElement(mount, 'div', [type], `${classPrefix}-scroll-arrow-${type}`);
     arrow.classed(`${classPrefix}-scroll-arrow`, true);
     arrow.style(arrowSizeMap[type], `${thickness}px`);
-    arrow.html(arrowUnicodeMap[type]);
+    const chevron = makeElement(arrow, 'div', [1], `${classPrefix}-scroll-arrow-chevron`);
+    chevron.attr('id', `${classPrefix}-scroll-arrow-chevron-${type}`);
+    // arrow.html(arrowUnicodeMap[type]);
     return arrow;
 };
 
