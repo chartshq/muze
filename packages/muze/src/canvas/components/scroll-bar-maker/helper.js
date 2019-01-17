@@ -125,6 +125,8 @@ const registerListenerOnArrow = (scrollMaker, moverRect, arrowType, speed) => {
         const event = getEvent();
         event.preventDefault();
         clearInterval(timer);
+    }).on('click', () => {
+        applyScrollMouseDownAction(moverRect, scrollMaker, speed);
     });
 };
 

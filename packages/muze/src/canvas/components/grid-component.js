@@ -1,66 +1,26 @@
-import { selectElement, getEvent } from 'muze-utils';
+import { selectElement } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
 
-const scrollActionApplier = (movement, context) => ({
-    horizontal: () => {
-        [0, 1, 2].forEach((e) => {
-            selectElement(`#${context.component[e][1].renderAt()}`)
-                            .selectAll('.muze-grid')
-                            .property('scrollLeft', movement);
-        });
-    },
-    vertical: () => {
-        [0, 1, 2].forEach((e) => {
-            selectElement(`#${context.component[1][e].renderAt()}`)
-                            .selectAll('.muze-grid')
-                            .property('scrollTop', movement);
-        });
-    }
-});
-
-const bindScrollEvent = (context) => {
-    let mouseHover = false;
-
-    selectElement(`#${context.component[1][1].renderAt()}`)
-                    .on('mouseenter', () => { mouseHover = true; })
-                    .on('mouseleave', () => { mouseHover = false; })
-                        // .selectAll('.muze-grid')
-                    .on('mousewheel', () => {
-                        const event = getEvent();
-                        event.stopPropagation();
-                        // const delta = event.wheelDelta;
-                        const deltaX = event.wheelDeltaX;
-                        const deltaY = event.wheelDeltaY;
-
-                        if (deltaX > 0) {
-                            context.scrollBarManager().triggerScrollBarAction('horizontal', { x: deltaX, y: deltaY });
-                            // console.log('go up');
-                        } else if (deltaX < 0) {
-                            context.scrollBarManager().triggerScrollBarAction('horizontal', { x: deltaX, y: deltaY });
-                            // console.log('go down');
-                        } else if (deltaY > 0) {
-                            context.scrollBarManager().triggerScrollBarAction('vertical', { x: deltaX, y: deltaY });
-                            // console.log('go down');
-                        } else {
-                            context.scrollBarManager().triggerScrollBarAction('vertical', { x: deltaX, y: deltaY });
-                            // console.log('go down');
-                        }
-
-                        // console.log(event);
-                    });
-    console.log(selectElement('body'));
-    selectElement('body').on('scroll', () => {
-        const e = getEvent();
-
-        console.log(mouseHover);
-        if (mouseHover) {
-            if (e.preventDefault) { e.preventDefault(); }
-            e.returnValue = false;
+const scrollActionApplier = (movement, context) => {
+    const classPrefix = context.params.config.classPrefix;
+    return {
+        horizontal: () => {
+            [0, 1, 2].forEach((e) => {
+                selectElement(`#${context.component[e][1].renderAt()}`)
+                                .selectAll(`.${classPrefix}-grid`)
+                                .property('scrollLeft', movement);
+            });
+        },
+        vertical: () => {
+            [0, 1, 2].forEach((e) => {
+                selectElement(`#${context.component[1][e].renderAt()}`)
+                                .selectAll(`.${classPrefix}-grid`)
+                                .property('scrollTop', movement);
+            });
         }
-        return false;
-    });
+    };
 };
 
 export default class GridComponent extends MuzeComponent {
@@ -127,11 +87,6 @@ export default class GridComponent extends MuzeComponent {
             return this;
         }
         return this._scrollBarManager;
-    }
-
-    registerScrollEvent () {
-        bindScrollEvent(this);
-        // .property('scrollLeft', movement);
     }
 
     performScrollAction (direction, movedView) {

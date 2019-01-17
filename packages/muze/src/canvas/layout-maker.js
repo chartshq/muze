@@ -153,26 +153,23 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     const horizontalScrollWrapper = componentWrappers[components.horizontalScrollBar];
     const verticalScrollWrapper = componentWrappers[components.verticalScrollBar];
     const gridWrapper = componentWrappers[components.grid];
-
-    // [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
-    //     if (wrapper) {
-    //         wrapper.attachScrollAction(gridWrapper.performScrollAction.bind(gridWrapper));
-    //     }
-    // });
-
     const scrollBarManager = new ScrollManager();
     const scrollBarComponents = {};
+
     verticalScrollWrapper && (scrollBarComponents.vertical = verticalScrollWrapper);
     horizontalScrollWrapper && (scrollBarComponents.horizontal = horizontalScrollWrapper);
-    scrollBarManager.scrollBarComponents(scrollBarComponents).attachedComponents({
-        grid: gridWrapper
-    });
+    scrollBarManager
+                    .scrollBarComponents(scrollBarComponents)
+                    .attachedComponents({
+                        grid: gridWrapper
+                    });
+
     [horizontalScrollWrapper, verticalScrollWrapper, gridWrapper].forEach((wrapper) => {
         wrapper && wrapper.scrollBarManager(scrollBarManager);
     });
+
     gridWrapper.scrollBarManager(scrollBarManager);
 
     layoutManager.registerComponents(componentWrappers).compute();
-    gridWrapper.registerScrollEvent();
 };
 

@@ -25,8 +25,9 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
     const target = { target: CANVAS };
 
     if (components.headers && components.headers[headerCell]) {
-        const header = components.headers[headerCell];
         let headerConfig = layoutConfig[headerType];
+        const header = components.headers[headerCell];
+
         headerConfig = Object.assign({}, headerConfig, {
             classPrefix: layoutConfig.classPrefix,
             ...target,
@@ -34,12 +35,18 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             alignment: LAYOUT_ALIGN.LEFT,
             className: configType.className
         });
+
+        const wrapperParams = {
+            name: headerType,
+            component: header,
+            config: headerConfig
+        };
         if (layoutManager.getComponent(headerType)) {
             wrapper = layoutManager
                       .getComponent(headerType)
-                      .updateWrapper({ name: headerType, component: header, config: headerConfig });
+                      .updateWrapper(wrapperParams);
         } else {
-            wrapper = new HeaderComponent({ name: headerType, component: header, config: headerConfig });
+            wrapper = new HeaderComponent(wrapperParams);
         }
     }
     return wrapper;
@@ -139,52 +146,43 @@ export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
             let colorLegendWrapper = null;
             if (components.legends && components.legends.length) {
                 const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+                const wrapperParams = {
+                    name: LEGEND,
+                    component: components.legends,
+                    config: legendConfig
+                };
 
                 if (layoutManager.getComponent(LEGEND)) {
                     colorLegendWrapper = layoutManager
                                 .getComponent(LEGEND)
-                                .updateWrapper({
-                                    name: LEGEND,
-                                    component: components.legends,
-                                    config: legendConfig
-                                });
+                                .updateWrapper(wrapperParams);
                 } else {
-                    colorLegendWrapper = new LegendComponent({
-                        name: LEGEND,
-                        component: components.legends,
-                        config: legendConfig });
+                    colorLegendWrapper = new LegendComponent(wrapperParams);
                 }
             }
             return colorLegendWrapper;
         },
         grid: () => {
             // grid components
-
             let gridWrapper = null;
+            const config = {
+                ...target,
+                pagination: layoutConfig.pagination,
+                classPrefix: layoutConfig.classPrefix,
+                dimensions: { height: 0, width: 0 }
+            };
+            const wrapperParams = {
+                name: GRID,
+                component: grid,
+                config
+            };
 
             if (layoutManager.getComponent(GRID)) {
                 gridWrapper = layoutManager
                             .getComponent(GRID)
-                            .updateWrapper({
-                                name: GRID,
-                                component: grid,
-                                config: {
-                                    ...target,
-                                    classPrefix: layoutConfig.classPrefix,
-                                    dimensions: { height: 0, width: 0 }
-                                }
-                            });
+                            .updateWrapper(wrapperParams);
             } else {
-                gridWrapper = new GridComponent({
-                    name: GRID,
-                    component: grid,
-                    config: {
-                        ...target,
-                        pagination: layoutConfig.pagination,
-                        classPrefix: layoutConfig.classPrefix,
-                        dimensions: { height: 0, width: 0 }
-                    }
-                });
+                gridWrapper = new GridComponent(wrapperParams);
             }
             return gridWrapper;
         },
