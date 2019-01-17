@@ -2,25 +2,24 @@ const env = muze();
 const DataModel = muze.DataModel;
 const html = muze.Operators.html;
 
-
 d3.csv('../data/wildfires.csv', (data) => {
     const schema = [
         {
-            "name": "year",
-            "type": "dimension"
+            'name': 'year',
+            type: 'dimension'
         },
         {
-            "name": "gis_acres",
-            "type": "measure",
-            "defAggFn": "avg"
+            name: 'gis_acres',
+            'type': 'measure',
+            defAggFn: 'avg'
         },
         {
-            "name": "fire_name",
-            "type": "dimension"
+            name: 'fire_name',
+            'type': 'dimension'
         },
         {
-            "name": "alarm_date",
-            "type": "dimension"
+            'name': 'alarm_date',
+            type: 'dimension'
         }
     ];
 
@@ -38,21 +37,21 @@ d3.csv('../data/wildfires.csv', (data) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     env.canvas()
-        .rows(['year'])
-        .columns(['Months of Fire'])
-        .data(rootData.sort([['year', 'desc']]))
-        .width(1200)
-        .height(800)
-        .detail(['fire_name'])
-        .color({ value: 'rgba(255, 156, 25, 0.5)' })
-        .size({
+                    .rows(['year'])
+                    .columns(['Months of Fire'])
+                    .data(rootData.sort([['year', 'desc']]))
+                    .width(1200)
+                    .height(800)
+                    .detail(['fire_name'])
+                    .color({ value: 'rgba(255, 156, 25, 0.5)' })
+                    .size({
             field: 'gis_acres',
             range: [1, 450]
         })
-        .layers([{ mark: 'point' }])
-        .title('Wildfires over the year for different months')
-        .subtitle('Use data operators to transform data and visualize it and size (retinal) encoding channel to encode more information')
-        .config({
+                    .layers([{ mark: 'point' }])
+                    .title('Wildfires over the year for different months')
+                    .subtitle('Use data operators to transform data and visualize it and size (retinal) encoding channel to encode more information')
+                    .config({
             autoGroupBy: { disabled: true },
             gridLines: {
                 y: { show: true }
@@ -88,7 +87,7 @@ d3.csv('../data/wildfires.csv', (data) => {
                             const month = months[monthsOfFire.getMonth()];
 
                             tooltipContent += `<p>The <b>${fireName}</b> fire on <b>${date} ${month}, ${year}</b>
-                                        affected <b>${acres.toFixed(2)}</b> acres of land</p>`
+                                        affected <b>${acres.toFixed(2)}</b> acres of land</p>`;
                         });
                         return html`${tooltipContent}`;
                     }
@@ -98,5 +97,5 @@ d3.csv('../data/wildfires.csv', (data) => {
                 size: { show: false }
             }
         })
-        .mount('#chart-container');
+                    .mount('#chart-container');
 });

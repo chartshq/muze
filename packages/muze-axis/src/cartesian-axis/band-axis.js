@@ -9,13 +9,13 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @param {*} range
+     * @param {*} config axes configuration
      *
      * @memberof BandAxis
      */
-    createScale (range) {
-        const scale = super.createScale(range);
-        const { padding } = this.config();
+    createScale (config) {
+        const scale = super.createScale(config);
+        const { padding } = config;
         if (typeof padding === 'number') {
             scale.padding(padding);
         }

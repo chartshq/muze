@@ -8,8 +8,8 @@ export const PROPS = {
     config: {
         sanitization: (context, value) => {
             const oldConfig = Object.assign({}, context._config || {});
-            const newValue = mergeRecursive({}, oldConfig);
-            value = mergeRecursive(newValue, value);
+            const mockedOldConfig = mergeRecursive({}, oldConfig);
+            value = mergeRecursive(mockedOldConfig, value);
 
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             if (value.orientation !== oldConfig.orientation) {
