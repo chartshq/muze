@@ -1,3 +1,4 @@
+import { fixScrollBarConfig } from './canvas/helper';
 /**
  * This is the global options semantics based on which setters getters are created and reactivity is initiated.
  * Format
@@ -60,8 +61,9 @@ export default {
             sanitization: (config, oldConfig) => {
                 const oldConf = mergeRecursive({}, oldConfig);
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
-                const newConf = mergeRecursive(defConfig, config);
-                newConf.scrollBar.thickness = Math.min(50, Math.max(10, newConf.scrollBar.thickness));
+                let newConf = mergeRecursive(defConfig, config);
+                newConf = fixScrollBarConfig(newConf);
+
                 return newConf;
             }
 

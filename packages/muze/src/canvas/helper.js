@@ -19,6 +19,11 @@ export const initCanvas = (context) => {
     return [new reg.VisualGroup(context._registry, context.dependencies())];
 };
 
+export const fixScrollBarConfig = (config) => {
+    config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
+    return config;
+};
+
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
     const boundBox = layoutManager.getComponent('grid').getBoundBox();
