@@ -333,7 +333,7 @@ export const setContinousAxisDomainInitiator = (context, domain) => {
         domain = userDom;
     }
     if (context.constructor.name === 'ContinousAxis') {
-        context._interpolator.sanitizeDomain(domain);
+        domain = context._interpolator.sanitizeDomain(domain);
     }
     setContinousAxisDomain(context, domain);
 };
