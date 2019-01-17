@@ -1,6 +1,6 @@
 import { ScrollMaker } from './scroll-maker';
 import { createScrollBarRect, createScrollBarArrow } from './helper';
-import { VERTICAL } from '../../../constants';
+import { VERTICAL, TOP, HEIGHT, WIDTH } from '../../../constants';
 
 export class VerticalScrollMaker extends ScrollMaker {
 
@@ -22,11 +22,11 @@ export class VerticalScrollMaker extends ScrollMaker {
         const { height, width, totalLength, viewLength } = this.logicalSpace();
         const scrollBarWithouArrowLength = height - width * 2;
 
-        rect.style('height', `${scrollBarWithouArrowLength}px`);
-        rect.style('width', `${100}%`);
-        mover.style('width', `${100}%`);
-        mover.style('height', `${(viewLength * scrollBarWithouArrowLength) / totalLength}px`);
-        mover.style('top', `${0}px`);
+        rect.style(HEIGHT, `${scrollBarWithouArrowLength}px`);
+        rect.style(WIDTH, `${100}%`);
+        mover.style(WIDTH, `${100}%`);
+        mover.style(HEIGHT, `${(viewLength * scrollBarWithouArrowLength) / totalLength}px`);
+        mover.style(TOP, `${0}px`);
 
         this._components = {
             prevArrow,
@@ -74,7 +74,7 @@ export class VerticalScrollMaker extends ScrollMaker {
         } else {
             currentPos = newPosition.y;
         }
-        mover.style('top', `${currentPos}px`);
+        mover.style(TOP, `${currentPos}px`);
         const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 

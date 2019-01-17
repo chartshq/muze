@@ -1,5 +1,4 @@
 import MuzeComponent from './muze-chart-component';
-
 import { HorizontalScrollMaker } from './scroll-bar-maker/horizontal-scroll-maker';
 import { VerticalScrollMaker } from './scroll-bar-maker/vertical-scroll-maker';
 

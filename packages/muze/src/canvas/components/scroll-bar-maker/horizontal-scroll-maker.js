@@ -1,12 +1,13 @@
 import { ScrollMaker } from './scroll-maker';
 import { createScrollBarRect, createScrollBarArrow } from './helper';
-import { HORIZONTAL } from '../../../constants';
+import { HORIZONTAL, HEIGHT, WIDTH, LEFT } from '../../../constants';
 
 export class HorizontalScrollMaker extends ScrollMaker {
 
     static type () {
         return HORIZONTAL;
     }
+
     createScroll (mountPoint, dimensions = this.logicalSpace()) {
         const config = this.config();
         const { scrollBarContainer } = super.createScroll(mountPoint, config, dimensions);
@@ -21,11 +22,11 @@ export class HorizontalScrollMaker extends ScrollMaker {
         const { height, width, totalLength, viewLength } = this.logicalSpace();
         const scrollBarWithouArrowLength = width - height * 2;
 
-        rect.style('width', `${dimensions.width - height * 2}px`);
-        rect.style('height', `${100}%`);
-        mover.style('width', `${(viewLength * scrollBarWithouArrowLength) / totalLength}px`);
-        mover.style('height', `${100}%`);
-        mover.style('left', `${0}px`);
+        rect.style(WIDTH, `${dimensions.width - height * 2}px`);
+        rect.style(HEIGHT, `${100}%`);
+        mover.style(WIDTH, `${(viewLength * scrollBarWithouArrowLength) / totalLength}px`);
+        mover.style(HEIGHT, `${100}%`);
+        mover.style(LEFT, `${0}px`);
 
         this._components = {
             prevArrow,
@@ -72,7 +73,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
             currentPos = newPosition.x;
         }
 
-        mover.style('left', `${currentPos}px`);
+        mover.style(LEFT, `${currentPos}px`);
         const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 

@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, ERROR_MSG } from 'muze-utils';
 import {
     scrollContainerHelper,
     registerListeners
@@ -14,6 +14,18 @@ export class ScrollMaker {
             thickness: 20,
             speed: 2
         };
+    }
+
+    static type () {
+        throw new ERROR_MSG('Method not implemented');
+    }
+
+    emptyScrollAreaClick () {
+        throw new ERROR_MSG('Method not implemented');
+    }
+
+    changeMoverPosition () {
+        throw new ERROR_MSG('Method not implemented');
     }
 
     config (...c) {

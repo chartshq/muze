@@ -1,4 +1,4 @@
-import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL } from '../constants';
+import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
@@ -50,23 +50,23 @@ const scrollBarMap = config => ({
         componentName: 'verticalScrollBar',
         width: 'thickness',
         height: 'layoutBasedMeasure',
-        layoutBasedMeasure: 'height',
+        layoutBasedMeasure: HEIGHT,
         viewMeasure: 'viewHeight',
         rowAlign: 1,
         colAlign: config.align === 'right' ? 2 : 0,
         position: config.align,
-        alignment: 'top'
+        alignment: TOP
     },
     horizontal: {
         componentName: 'horizontalScrollBar',
         width: 'layoutBasedMeasure',
-        layoutBasedMeasure: 'width',
+        layoutBasedMeasure: WIDTH,
         viewMeasure: 'viewWidth',
         height: 'thickness',
         rowAlign: config.align === 'top' ? 0 : 2,
         colAlign: 1,
         position: config.align,
-        alignment: 'left'
+        alignment: LEFT
     }
 });
 
@@ -84,8 +84,6 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const dimensions = {
         thickness: scrollBar.thickness,
         layoutBasedMeasure: layoutDimensions[viewMeasure][1]
-        // layoutBasedMeasure: totalMeasures[layoutBasedMeasure]
-
     };
     const totalLength = actualCenterMeasures[layoutBasedMeasure];
     const viewLength = layoutDimensions[viewMeasure][1];
