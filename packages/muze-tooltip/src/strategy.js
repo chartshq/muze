@@ -23,17 +23,17 @@ const getNearestInterval = (interval) => {
     const index = getClosestIndexOf(timeDurations[1], interval);
     return timeDurations[0][index];
 };
-const defaultTooltipFormatters = (type, formatter) => {
-    const formatters = {
-        [DimensionSubtype.TEMPORAL]: (value, interval) => {
-            const nearestInterval = getNearestInterval(interval);
-            return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
-        },
-        [MeasureSubtype.CONTINUOUS]: value => formatter(value ? value.toFixed(2) : value),
-        [DimensionSubtype.CATEGORICAL]: value => value
-    };
-    return formatters[type] || formatters[DimensionSubtype.CATEGORICAL];
-};
+
+const formatters = formatter => ({
+    [DimensionSubtype.TEMPORAL]: (value, interval) => {
+        const nearestInterval = getNearestInterval(interval);
+        return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
+    },
+    [MeasureSubtype.CONTINUOUS]: value => formatter(value ? value.toFixed(2) : value),
+    [DimensionSubtype.CATEGORICAL]: value => value
+});
+
+const getDefaultTooltipFormatterFn = (formatter = formatters()[DimensionSubtype.CATEGORICAL]) => formatter;
 
 const getTabularData = (data, schema, fieldspace, timeDiffs) => {
     const rows = [];
@@ -43,7 +43,7 @@ const getTabularData = (data, schema, fieldspace, timeDiffs) => {
         schema.forEach((fieldObj, i) => {
             const interval = fieldObj.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[fieldObj.name] : 0;
             const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i].numberFormat();
-            const formatterFn = defaultTooltipFormatters(fieldObj.subtype || fieldObj.type, numberFormat);
+            const formatterFn = getDefaultTooltipFormatterFn(formatters(numberFormat)[fieldObj.subtype]);
             const value = formatterFn(d[i], interval);
             row.push(value);
         });
@@ -57,7 +57,6 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const dataObj = dataModel.getData();
     const data = dataObj.data;
     const schema = dataObj.schema;
-    const formatters = config.formatters;
     const separator = config.separator;
     const fieldsConfig = dataModel.getFieldsConfig();
     const fieldspace = dataModel.getFieldspace();
@@ -78,7 +77,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const index = fieldsConfig[field].index;
         const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ?
                 timeDiffs[field] : 0;
-        const formatterFn = (formatters && formatters[field]) || defaultTooltipFormatters(type, val => val);
+        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val)[type]);
 
         if (value !== null) {
             let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
@@ -113,8 +112,10 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         associatedMeasures.forEach((measure) => {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
-                            formattedValue = defaultTooltipFormatters(MeasureSubtype.CONTINUOUS,
-                                fieldspace.fields[measureIndex].numberFormat())(value, interval);
+                            const numberFormat = fieldspace.fields[measureIndex].numberFormat();
+                            const measureFormatter = getDefaultTooltipFormatterFn(
+                                formatters(numberFormat)[MeasureSubtype.CONTINUOUS]);
+                            formattedValue = measureFormatter(value, interval);
                             values.push([{
                                 value: `${measure}${separator}`,
                                 style: {
@@ -129,8 +130,10 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                     } else {
                         measureIndex = fieldsConfig[associatedMeasures[0]].index;
                         value = data[i][measureIndex];
-                        formattedValue = defaultTooltipFormatters(MeasureSubtype.CONTINUOUS,
-                            fieldspace.fields[measureIndex].numberFormat())(value, interval);
+                        const numberFormat = fieldspace.fields[measureIndex].numberFormat();
+                        const measureFormatter = getDefaultTooltipFormatterFn(
+                            formatters(numberFormat)[MeasureSubtype.CONTINUOUS]);
+                        formattedValue = measureFormatter(value, interval);
                         values.push([icon, {
                             value: `${key}${separator}`,
                             className: `${config.classPrefix}-tooltip-key`
