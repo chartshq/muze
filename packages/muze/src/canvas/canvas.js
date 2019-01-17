@@ -298,8 +298,6 @@ export default class Canvas extends TransactionSupport {
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
-        const promises = [];
-
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), renderDetails);
@@ -318,41 +316,6 @@ export default class Canvas extends TransactionSupport {
 
         // setLabelRotation
         setLabelRotationForAxes(this);
-
-        const centerMatrix = this.layout().viewInfo().viewMatricesInfo.matrices.center[1];
-
-        centerMatrix.forEach((cellArr) => {
-            cellArr.forEach((cell) => {
-                promises.push(cell.valueOf().done());
-            });
-        });
-
-        Promise.all(promises).then(() => {
-            // Update life cycle
-            lifeCycleManager.notify({ client: this, action: 'drawn' });
-            const animDonePromises = [];
-
-            centerMatrix.forEach((cellArr) => {
-                cellArr.forEach((cell) => {
-                    cell.valueOf().layers().forEach((layer) => {
-                        animDonePromises.push(layer.animationDone());
-                    });
-                });
-            });
-
-            [this.xAxes(), this.yAxes()].forEach((axisArr) => {
-                axisArr = axisArr || [];
-                axisArr.forEach((axes) => {
-                    axes.forEach((axisInst) => {
-                        animDonePromises.push(axisInst.animationDone());
-                    });
-                });
-            });
-
-            Promise.all(animDonePromises).then(() => {
-                lifeCycleManager.notify({ client: this, action: 'animationend' });
-            });
-        });
     }
 
     /**

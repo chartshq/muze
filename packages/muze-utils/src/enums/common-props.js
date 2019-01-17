@@ -1,6 +1,6 @@
 const CommonProps = {
     ACTION_INF: 'actionInf',
-    ON_LAYER_DRAW: 'onlayerdraw',
+    ON_LAYER_DRAW: 'onLayerDraw',
     MATRIX_CREATED: 'matrixCreated'
 };
 
