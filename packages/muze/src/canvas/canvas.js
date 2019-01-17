@@ -1,5 +1,6 @@
 import { GridLayout } from '@chartshq/layout';
-import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES } from 'muze-utils';
+import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES, CommonProps } from 'muze-utils';
+import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
 import { getRenderDetails, prepareLayout, renderLayout } from './layout-maker';
@@ -54,6 +55,10 @@ export default class Canvas extends TransactionSupport {
         this._composition.layout = new GridLayout();
         this._store = new Store(APP_INITIAL_STATE);
 
+        this._throwback = new Store({
+            [CommonProps.MATRIX_CREATED]: false
+        });
+
         // Setters and getters will be mounted on this. The object will be mutated.
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
         const [, store] = transactor(this, options, this._store.model, {
@@ -65,8 +70,13 @@ export default class Canvas extends TransactionSupport {
         transactor(this, canvasOptions, store, {
             namespace
         });
+
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
-        this.firebolt(new GroupFireBolt(this));
+        this.firebolt(new GroupFireBolt(this, {
+            behavioural: behaviouralActions,
+            physical: physicalActions,
+            physicalBehaviouralMap: {}
+        }, sideEffects, behaviourEffectMap));
         this.alias(`canvas-${getUniqueId()}`);
         this.title('', {});
         this.subtitle('', {});
@@ -283,14 +293,11 @@ export default class Canvas extends TransactionSupport {
      * @internal
      */
     render () {
-        const visGroup = this.composition().visualGroup;
         const mount = this.mount();
         // removeChild(mount);
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
-        const promises = [];
-
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), renderDetails);
@@ -309,52 +316,6 @@ export default class Canvas extends TransactionSupport {
 
         // setLabelRotation
         setLabelRotationForAxes(this);
-
-        // Update life cycle
-        lifeCycleManager.notify({ client: this, action: 'drawn' });
-
-        this.composition().layout.viewInfo().viewMatricesInfo.matrices.center[1].forEach((cellsRow) => {
-            cellsRow.forEach((cell) => {
-                promises.push(cell.valueOf().done());
-            });
-        });
-
-        Promise.all(promises).then(() => {
-            this._renderedResolve();
-            const animDonePromises = [];
-            visGroup.resolver().units().forEach((unitsRow) => {
-                unitsRow.forEach((unit) => {
-                    unit.layers().forEach((layer) => {
-                        animDonePromises.push(layer.animationDone());
-                    });
-                });
-            });
-
-            this.xAxes().forEach((axis) => {
-                axis.forEach((unitAxis) => {
-                    if (unitAxis.animationDone) {
-                        animDonePromises.push(unitAxis.animationDone());
-                    }
-                });
-            });
-
-            this.yAxes().forEach((axis) => {
-                axis.forEach((unitAxis) => {
-                    if (unitAxis.animationDone) {
-                        animDonePromises.push(unitAxis.animationDone());
-                    }
-                });
-            });
-
-            Promise.all(animDonePromises).then(() => {
-                this._animationEndCallback && this._animationEndCallback(this);
-            });
-        });
-    }
-
-    onAnimationEnd (fn) {
-        this._animationEndCallback = fn;
-        return this;
     }
 
     /**

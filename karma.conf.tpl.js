@@ -3,7 +3,7 @@ module.exports = function (config) {
         basePath: './',
         frameworks: ['mocha', 'chai'],
         files: [
-            'packages/*/src/**/*.spec.js'
+            'packages/<%= packageName %>/src/**/*.spec.js'
         ],
         webpack: {
             devtool: 'inline-source-map',
@@ -40,8 +40,7 @@ module.exports = function (config) {
             }
         },
         preprocessors: {
-            '**/*.js': ['sourcemap'],
-            'packages/*/src/**/*.spec.js': ['webpack']
+            'packages/<%= packageName %>/src/**/*.spec.js': ['webpack']
         },
         exclude: [
             '**/*.swp'

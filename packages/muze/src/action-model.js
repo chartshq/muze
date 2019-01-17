@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, CommonProps } from 'muze-utils';
 
 const defaultPolicy = (registrableComponents) => {
     const aliases = registrableComponents.map(comp => comp.alias());
@@ -10,6 +10,24 @@ const defaultPolicy = (registrableComponents) => {
             }
         }
     };
+};
+
+const listenerFn = (canvas, fn) => () => {
+    const valueMatrix = canvas.composition().visualGroup.matrixInstance().value;
+    valueMatrix.each(cell => fn(cell.valueOf().firebolt()));
+};
+
+const canvasIterator = (canvases, iteratorFn, cFn) => {
+    canvases.forEach((canvas) => {
+        const matrix = canvas.composition().visualGroup.matrixInstance().value;
+        matrix.each(cell => iteratorFn(cell.valueOf().firebolt()));
+        cFn && cFn(canvas);
+        // Also register actions on canvas update
+        const throwback = canvas._throwback;
+
+        throwback.registerImmediateListener([CommonProps.MATRIX_CREATED],
+            listenerFn(canvas, iteratorFn));
+    });
 };
 
 /**
@@ -78,14 +96,12 @@ class ActionModel {
      * @return {ActionModel} Instance of the action model.
      */
     registerPhysicalActions (action) {
-        const canvases = this._registrableComponents;
-
-        canvases.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().registerPhysicalActions(action));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.registerPhysicalActions(action);
+        }, (canvas) => {
+            canvas.firebolt().registerPhysicalActions(action);
         });
+
         return this;
     }
 
@@ -126,14 +142,12 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerBehaviouralActions (...actions) {
-        const canvases = this._registrableComponents;
-
-        canvases.forEach((canvas) => {
-            canvas.once('canvas.updated').then(() => {
-                const matrix = canvas.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().registerBehaviouralActions(...actions));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.registerBehaviouralActions(actions);
+        }, (canvas) => {
+            canvas.firebolt().registerBehaviouralActions(actions);
         });
+
         return this;
     }
 
@@ -168,13 +182,10 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerPhysicalBehaviouralMap (map) {
-        const canvases = this._registrableComponents;
-
-        canvases.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().registerPhysicalBehaviouralMap(map));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.registerPhysicalBehaviouralMap(map);
+        }, (canvas) => {
+            canvas.firebolt().registerPhysicalBehaviouralMap(map);
         });
         return this;
     }
@@ -198,14 +209,12 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerPropagationBehaviourMap (map) {
-        const canvases = this._registrableComponents;
-
-        canvases.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().registerPropagationBehaviourMap(map));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.registerPropagationBehaviourMap(map);
+        }, (canvas) => {
+            canvas.firebolt().registerPropagationBehaviourMap(map);
         });
+
         return this;
     }
 
@@ -238,13 +247,10 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     mapSideEffects (map) {
-        const canvases = this._registrableComponents;
-
-        canvases.forEach((canvas) => {
-            canvas.once('canvas.updated').then(() => {
-                const matrix = canvas.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().mapSideEffects(map));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.mapSideEffects(map);
+        }, (canvas) => {
+            canvas.firebolt().mapSideEffects(map);
         });
         return this;
     }
@@ -272,15 +278,11 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerSideEffects (...sideEffects) {
-        const registrableComponents = this._registrableComponents;
-
-        registrableComponents.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each(cell => cell.valueOf().firebolt().registerSideEffects(sideEffects));
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            firebolt.registerSideEffects(sideEffects);
+        }, (canvas) => {
+            canvas.firebolt().registerSideEffects(sideEffects);
         });
-
         return this;
     }
 
@@ -298,17 +300,11 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     dissociateBehaviour (...maps) {
-        const registrableComponents = this._registrableComponents;
-
-        registrableComponents.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each((cell) => {
-                    maps.forEach(val => cell.valueOf().firebolt().dissociateBehaviour(val[0], val[1]));
-                });
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            maps.forEach(val => firebolt.dissociateBehaviour(val[0], val[1]));
+        }, (canvas) => {
+            maps.forEach(val => canvas.firebolt().dissociateBehaviour(val[0], val[1]));
         });
-
         return this;
     }
 
@@ -326,17 +322,11 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     dissociateSideEffect (...maps) {
-        const registrableComponents = this._registrableComponents;
-
-        registrableComponents.forEach((canvas) => {
-            canvas.once('canvas.updated').then((args) => {
-                const matrix = args.client.composition().visualGroup.matrixInstance().value;
-                matrix.each((cell) => {
-                    maps.forEach(val => cell.valueOf().firebolt().dissociateSideEffect(val[0], val[1]));
-                });
-            });
+        canvasIterator(this._registrableComponents, (firebolt) => {
+            maps.forEach(val => firebolt.dissociateSideEffect(val[0], val[1]));
+        }, (canvas) => {
+            maps.forEach(val => canvas.firebolt().dissociateSideEffect(val[0], val[1]));
         });
-
         return this;
     }
 
