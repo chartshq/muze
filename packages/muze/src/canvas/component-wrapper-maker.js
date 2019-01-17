@@ -83,7 +83,11 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const target = { target: CANVAS };
     const { scrollBar } = layoutConfig;
     const { layoutDimensions } = grid.viewInfo();
-    const { actualCenterMeasures } = layoutDimensions;
+    const {
+        actualCenterMeasures,
+        unitHeights,
+        unitWidths
+    } = layoutDimensions;
     const {
         componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
         viewMeasure, position, alignment
@@ -98,7 +102,11 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     const scrollConfig = Object.assign({}, {
         classPrefix: layoutConfig.classPrefix,
         ...target,
-        scrollBarComponentConfig: { ...scrollBar, classPrefix: layoutConfig.classPrefix },
+        scrollBarComponentConfig: {
+            ...scrollBar,
+            classPrefix: layoutConfig.classPrefix
+        },
+
         type: scrollBarType,
         alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
         alignment,
@@ -112,7 +120,9 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
             width: dimensions[width],
             height: dimensions[height],
             totalLength,
-            viewLength
+            viewLength,
+            unitHeights,
+            unitWidths
         }
     };
 

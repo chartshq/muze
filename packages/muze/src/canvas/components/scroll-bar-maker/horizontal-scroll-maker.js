@@ -1,5 +1,5 @@
 import { ScrollMaker } from './scroll-maker';
-import { createScrollBarRect, createScrollBarArrow } from './helper';
+import { createScrollBarRect, createScrollBarArrow, getUnitPositions } from './helper';
 import { HORIZONTAL, HEIGHT, WIDTH, LEFT } from '../../../constants';
 
 export class HorizontalScrollMaker extends ScrollMaker {
@@ -19,7 +19,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
             rect
         } = moverRect;
 
-        const { height, width, totalLength, viewLength } = this.logicalSpace();
+        const { height, width, totalLength, viewLength, unitWidths } = this.logicalSpace();
         const scrollBarWithouArrowLength = width - height * 2;
 
         rect.style(WIDTH, `${dimensions.width - height * 2}px`);
@@ -35,6 +35,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
             scrollBarContainer
         };
         this._scrollBarWithouArrowLength = scrollBarWithouArrowLength;
+        this.unitPositions(getUnitPositions(unitWidths, totalLength, viewLength));
         this.registerListeners();
     }
 

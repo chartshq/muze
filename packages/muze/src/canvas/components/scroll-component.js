@@ -28,9 +28,16 @@ export default class ScrollComponent extends MuzeComponent {
 
     scrollTo (scrollPercentage) {
         this.component.scrollTo(scrollPercentage);
+        return this;
     }
 
-    getUnitsAtScrollPosition () {}
+    scrollToUnit (unitNum) {
+        this.component.scrollTo(this.component.unitPositions()[unitNum + 1]);
+    }
+
+    getScrollPositionsForUnits () {
+        return this.component.unitPositions();
+    }
 
     triggerScrollBarAction (movement) {
         this.component.triggerScrollBarAction(movement);

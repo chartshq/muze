@@ -1,5 +1,5 @@
 import { ScrollMaker } from './scroll-maker';
-import { createScrollBarRect, createScrollBarArrow } from './helper';
+import { createScrollBarRect, createScrollBarArrow, getUnitPositions } from './helper';
 import { VERTICAL, TOP, HEIGHT, WIDTH } from '../../../constants';
 
 export class VerticalScrollMaker extends ScrollMaker {
@@ -19,7 +19,7 @@ export class VerticalScrollMaker extends ScrollMaker {
             rect
         } = moverRect;
 
-        const { height, width, totalLength, viewLength } = this.logicalSpace();
+        const { height, width, totalLength, viewLength, unitHeights } = this.logicalSpace();
         const scrollBarWithouArrowLength = height - width * 2;
 
         rect.style(HEIGHT, `${scrollBarWithouArrowLength}px`);
@@ -35,6 +35,8 @@ export class VerticalScrollMaker extends ScrollMaker {
             scrollBarContainer
         };
         this._scrollBarWithouArrowLength = scrollBarWithouArrowLength;
+
+        this.unitPositions(getUnitPositions(unitHeights, totalLength, viewLength));
 
         this.registerListeners();
     }
@@ -91,6 +93,7 @@ export class VerticalScrollMaker extends ScrollMaker {
 
         const movedYPosition = this._scrollBarWithouArrowLength * y / totalLength;
         this.changeMoverPosition({ y: movedYPosition, x: 0 });
+        return this;
     }
 
     scrollTo (scrollPercentage) {
@@ -100,6 +103,7 @@ export class VerticalScrollMaker extends ScrollMaker {
         const moverPos = mover.node().getBoundingClientRect();
         const movement = (scrollPercentage * (this._scrollBarWithouArrowLength - moverPos.height)) / 100;
         this.changeMoverPosition({ x: 0, y: movement });
+        return this;
     }
 
 }

@@ -18,6 +18,18 @@ const arrowSizeMap = {
     bottom: HEIGHT
 };
 
+export const getUnitPositions = (unitMeasures, totalLength, viewLength) => {
+    let currentLen = 0;
+    const measures = unitMeasures.primary && unitMeasures.primary.length ?
+        unitMeasures.primary : unitMeasures.secondary;
+
+    return measures.map((e) => {
+        const unitPosition = currentLen * 100 / (totalLength - viewLength);
+        currentLen += e;
+        return unitPosition;
+    });
+};
+
 export const createScrollBarArrow = (mount, type, config) => {
     const {
         classPrefix,

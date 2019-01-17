@@ -247,26 +247,37 @@ export const getViewMeasurements = (layout, maxRowHeight, maxColWidth) => {
     } = layout.config();
 
     const rowSpaces = rowMatrix.getViewableSpaces()[rowPointer];
-    const rowMatrixWidth = rowSpaces.width;
-    const { primary: leftWidth, secondary: rightWidth } = rowMatrixWidth;
-
     const colSpaces = columnMatrix.getViewableSpaces()[columnPointer];
 
-    const columnMatrixHeight = colSpaces.height;
+    const {
+        rowHeights,
+        width: rowMatrixWidth
+    } = rowSpaces;
+    const {
+        columnWidths,
+        height: columnMatrixHeight
+    } = colSpaces;
+
+    const { primary: leftWidth, secondary: rightWidth } = rowMatrixWidth;
     const { primary: topHeight, secondary: bottomHeight } = columnMatrixHeight;
 
-    const centerHeight = rowSpaces.rowHeights.primary.reduce((t, n) => t + n);
-    const centerWidth = colSpaces.columnWidths.primary.reduce((t, n) => t + n);
+    const centerHeight = rowHeights.primary.reduce((t, n) => t + n);
+    const centerWidth = columnWidths.primary.reduce((t, n) => t + n);
     const viewWidth = [leftWidth, Math.min(centerWidth, maxColWidth), rightWidth];
     const viewHeight = [topHeight, Math.min(centerHeight, maxRowHeight), bottomHeight];
 
     return {
         viewWidth,
         viewHeight,
-        actualCenterMeasures: { height: centerHeight, width: centerWidth },
+        actualCenterMeasures: {
+            height: centerHeight,
+            width: centerWidth
+        },
         totalMeasures: {
             width: viewWidth.reduce((t, n) => t + n, 0),
             height: viewHeight.reduce((t, n) => t + n, 0)
-        }
+        },
+        unitHeights: rowHeights,
+        unitWidths: columnWidths
     };
 };

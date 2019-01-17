@@ -11,9 +11,10 @@ export class ScrollMaker {
         this._logicalSpace = {};
         this._attachedScrollAction = () => {};
         this._config = {
-            thickness: 20,
+            thickness: 10,
             speed: 2
         };
+        this._unitPositions = null;
     }
 
     static type () {
@@ -42,6 +43,14 @@ export class ScrollMaker {
             return this;
         }
         return this._scrollBarManager;
+    }
+
+    unitPositions (...positions) {
+        if (positions.length) {
+            this._unitPositions = positions[0];
+            return this;
+        }
+        return this._unitPositions;
     }
 
     logicalSpace (...l) {
