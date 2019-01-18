@@ -58,7 +58,7 @@ d3.json('../data/cars.json', (data) => {
           .columns(['Acceleration']) // Cylinders goes in x-axis
           .color({
               field: 'Acceleration',
-              stops: 20
+              stops: 5
           })
                     .data(rootData)
   		.layers({ // Draw a bar plot, by default stack transform is used
@@ -67,11 +67,6 @@ d3.json('../data/cars.json', (data) => {
         }
   })
                     .config({
-                        item: {
-                            title: {
-                                text: 'gavdakbdka djahvd akj djahv dak dvak'
-                            }
-                        },
                         legend: {
                             position: 'right'
                         }
