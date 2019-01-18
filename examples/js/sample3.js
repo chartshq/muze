@@ -34,7 +34,10 @@
             .color("Origin")
             .layers([
                 {
-                    mark: 'bar'
+                    mark: 'line',
+                    transform: {
+                        type: "group"
+                    }
                 }
             ])
             .height(500)

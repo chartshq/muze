@@ -172,7 +172,7 @@ export const retrieveGroupByAggFn = (dataModel, fieldName) => {
  * @param {*} fieldsConfig
  *
  */
-export const getValidTransform = (layerConfig, dataModel, encodingFieldInf) => {
+export const getValidTransform = (context, layerConfig, dataModel, encodingFieldInf) => {
     let transformType;
     const {
         transform
@@ -186,11 +186,13 @@ export const getValidTransform = (layerConfig, dataModel, encodingFieldInf) => {
     const groupByField = transform.groupBy;
     const fieldsConfig = dataModel.getFieldsConfig();
     const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
+    const isCustomTransformTypeProvided = context._customConfig && context._customConfig.transform &&
+    context._customConfig.transform.type;
     transformType = transform.type;
     if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
         yFieldType === FieldType.DIMENSION) {
         transformType = IDENTITY;
-    } else if (groupByField && xFieldType !== yFieldType) {
+    } else if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
         const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
         const aggFn = retrieveGroupByAggFn(dataModel, measureField);
         if (aggFn === AGG_FN_SUM) {

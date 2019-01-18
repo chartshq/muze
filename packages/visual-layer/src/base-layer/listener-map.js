@@ -20,7 +20,7 @@ export const listenerMap = (context, ns) => [
                 const fieldsConfig = data.getFieldsConfig();
                 const encodingFieldsInf = getEncodingFieldInf(encodingValue, fieldsConfig);
                 context.encodingFieldsInf(encodingFieldsInf);
-                context.transformType(getValidTransform(config, data, encodingFieldsInf));
+                context.transformType(getValidTransform(context, config, data, encodingFieldsInf));
                 context._transformedData = context.getTransformedData(data, config,
                     context.transformType(), encodingFieldsInf);
                 context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
