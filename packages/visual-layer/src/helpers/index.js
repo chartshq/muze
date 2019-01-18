@@ -9,7 +9,7 @@ import {
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 
@@ -144,13 +144,35 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
 };
 
 /**
+ * Retrieves the nearest groupBy aggFn function in its derivation cycle for the specified field.
+ *
+ * @param {DataModel} dataModel - The target DataModel instance.
+ * @param {string} fieldName - The target field name.
+ * @return {string} Returns the aggFn name.
+ */
+export const retrieveGroupByAggFn = (dataModel, fieldName) => {
+    let next = dataModel;
+    do {
+        const derivations = next.getDerivations();
+        if (derivations && derivations.length >= 1) {
+            const latestDerivation = derivations[derivations.length - 1];
+            if (latestDerivation.criteria && typeof latestDerivation.criteria[fieldName] === 'string') {
+                return latestDerivation.criteria[fieldName];
+            }
+        }
+    } while (next = next.getParent());
+
+    return null;
+};
+
+/**
  *
  *
  * @param {*} layerConfig
  * @param {*} fieldsConfig
  *
  */
-export const getValidTransform = (layerConfig, fieldsConfig, encodingFieldInf) => {
+export const getValidTransform = (layerConfig, dataModel, encodingFieldInf) => {
     let transformType;
     const {
         transform
@@ -162,11 +184,20 @@ export const getValidTransform = (layerConfig, fieldsConfig, encodingFieldInf) =
         yFieldType
     } = encodingFieldInf;
     const groupByField = transform.groupBy;
+    const fieldsConfig = dataModel.getFieldsConfig();
     const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
     transformType = transform.type;
     if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
         yFieldType === FieldType.DIMENSION) {
         transformType = IDENTITY;
+    } else if (groupByField && xFieldType !== yFieldType) {
+        const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
+        const aggFn = retrieveGroupByAggFn(dataModel, measureField);
+        if (aggFn === AGG_FN_SUM) {
+            transformType = STACK;
+        } else {
+            transformType = GROUP;
+        }
     }
     return transformType;
 };
