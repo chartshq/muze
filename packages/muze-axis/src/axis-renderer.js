@@ -227,7 +227,7 @@ export function renderAxis (axisInstance) {
     const {
         _axisNameStyle,
         _tickLabelStyle,
-        _tickFormatter,
+        fetchTickFormatter,
         tickValues
      } = axisInstance;
     const {
@@ -259,7 +259,7 @@ export function renderAxis (axisInstance) {
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    _tickFormatter && axis.tickFormat(_tickFormatter(tickValues || axis.tickValues() || labelFunc()));
+    fetchTickFormatter && axis.tickFormat(fetchTickFormatter(tickValues || axis.tickValues() || labelFunc()));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

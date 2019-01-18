@@ -321,17 +321,17 @@ export const calculateContinousSpace = (context) => {
  */
 export const getValidDomain = (context, domain) => {
     const { domain: userDom } = context.config();
-    if (userDom) {
-        domain = userDom;
-    }
-    return domain;
+
+    return userDom || domain;
 };
 
 export const setContinousAxisDomain = (context, domain) => {
     const { nice } = context.config();
-    context.scale().domain(domain);
-    nice && context.scale().nice();
-    context._domain = context.scale().domain();
+    const scale = context.scale.bind(context);
+
+    scale().domain(domain);
+    nice && scale().nice();
+    context._domain = scale().domain();
 };
 
 /**

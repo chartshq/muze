@@ -16,12 +16,11 @@ export const PROPS = {
                 value, oldConfig, ['interpolator', 'exponent', 'base', 'orientation']
             );
 
-            // Update scale and axis
             if (shouldAxesScaleUpdate) {
                 context._scale = context.createScale(value);
                 context._axis = context.createAxis(value);
             }
-            context._tickFormatter = context.getTickFormatter(value);
+            context.fetchTickFormatter = context.getTickFormatter(value);
 
             const {
                 labels,
