@@ -50,24 +50,17 @@ d3.json('../data/cars.json', (data) => {
     const DataModel = muze.DataModel;
     const rootData = new DataModel(data, schema);
 
-  	const dmWithCount = rootData.calculateVariable(
-      	{
-          name: 'CountVehicle',
-          type: 'measure',
-          defAggFn: 'count', // When ever aggregation happens, it counts the number of elements in the bin
-          numberFormat: val => parseInt(val, 10)
-      },
-        ['Name', () => 1]
-    );
-
     const env = muze();
     const canvas = env.canvas();
 
     canvas
-  		.rows(['CountVehicle']) // CountVehicle goes in y axis
-          .columns(['Cylinders']) // Cylinders goes in x-axis
-          .size('Origin')
-                    .data(dmWithCount)
+  		.rows(['Maker']) // CountVehicle goes in y axis
+          .columns(['Acceleration']) // Cylinders goes in x-axis
+          .color({
+              field: 'Acceleration',
+              stops: 20
+          })
+                    .data(rootData)
   		.layers({ // Draw a bar plot, by default stack transform is used
         	Acceleration: {
             	mark: 'bar'
@@ -75,11 +68,6 @@ d3.json('../data/cars.json', (data) => {
   })
                     .config({
                         legend: {
-                            color: {
-                                title: {
-                                    text: 'Countries'
-                                }
-                            },
                             position: 'right'
                         }
                     })
