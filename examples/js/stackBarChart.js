@@ -67,6 +67,11 @@ d3.json('../data/cars.json', (data) => {
         }
   })
                     .config({
+                        item: {
+                            title: {
+                                text: 'gavdakbdka djahvd akj djahv dak dvak'
+                            }
+                        },
                         legend: {
                             position: 'right'
                         }

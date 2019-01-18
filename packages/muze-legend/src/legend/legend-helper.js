@@ -52,15 +52,17 @@ export const getInterpolatedData = (domain, steps) => {
  * @param {*} classPrefix
  */
 export const titleCreator = (container, title, measurement, config) => {
+    const titleWidth = Math.min(measurement.maxWidth, measurement.width);
+
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
-            .style(WIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
+            .style(WIDTH, `${titleWidth}px`)
             .style(HEIGHT, `${measurement.height}px`)
             .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
             title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
-                    .style(WIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
-                    .style(MAXWIDTH, `${Math.min(measurement.maxWidth, measurement.width)}px`)
+                    .style(WIDTH, `${titleWidth}px`)
+                    .style(MAXWIDTH, `${titleWidth}px`)
                     .style(HEIGHT, '100%')
                     .style('line-height', 1)
                     .style('padding', `${measurement.padding}px`)
@@ -208,12 +210,13 @@ export const computeItemSpaces = (config, measures, data) => {
                 iconSpaces[i].width = totalWidth;
                 maxIconWidth = totalWidth;
             } else {
+                const labelWidth = labelSpaces[i].width;
+                const newLabelWidth = (maxItemSpaces.width - maxIconWidth);
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
-                /* Checking if modified width for label is less than require width.
-                 in that case returning the Actual width else modified width */
-                labelSpaces[i].width = (labelSpaces[i].width <= (maxItemSpaces.width - maxIconWidth)) ?
-                    (maxItemSpaces.width - maxIconWidth) : labelSpaces[i].width;
+                /* Checking if new width for label is less than require width to render in One line.
+                In that case returning the Actual width else new width */
+                labelSpaces[i].width = (labelWidth <= newLabelWidth) ? newLabelWidth : labelWidth;
                 totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
             }
         }
