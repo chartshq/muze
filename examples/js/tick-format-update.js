@@ -57,7 +57,6 @@
                 tickFormat: d => `${d / 1000}K`,
                 interpolator: 'linear',
                 exponent: 2,
-                orientation: 'right'
               },
             },
           });
@@ -69,7 +68,6 @@
                     tickFormat: d => d,
                     interpolator: 'log',
                     base: 2,
-                    orientation: 'left'
                   },
                 },
               });
