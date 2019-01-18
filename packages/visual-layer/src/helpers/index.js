@@ -5,7 +5,9 @@ import {
     easeFns,
     selectElement,
     DimensionSubtype,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    retrieveGroupByAggFn,
+    getObjProp
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -144,28 +146,6 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
 };
 
 /**
- * Retrieves the nearest groupBy aggFn function in its derivation cycle for the specified field.
- *
- * @param {DataModel} dataModel - The target DataModel instance.
- * @param {string} fieldName - The target field name.
- * @return {string} Returns the aggFn name.
- */
-export const retrieveGroupByAggFn = (dataModel, fieldName) => {
-    let next = dataModel;
-    do {
-        const derivations = next.getDerivations();
-        if (derivations && derivations.length >= 1) {
-            const latestDerivation = derivations[derivations.length - 1];
-            if (latestDerivation.criteria && typeof latestDerivation.criteria[fieldName] === 'string') {
-                return latestDerivation.criteria[fieldName];
-            }
-        }
-    } while (next = next.getParent());
-
-    return null;
-};
-
-/**
  *
  *
  * @param {*} layerConfig
@@ -186,8 +166,7 @@ export const getValidTransform = (context, layerConfig, dataModel, encodingField
     const groupByField = transform.groupBy;
     const fieldsConfig = dataModel.getFieldsConfig();
     const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
-    const isCustomTransformTypeProvided = context._customConfig && context._customConfig.transform &&
-    context._customConfig.transform.type;
+    const isCustomTransformTypeProvided = !!getObjProp(context._customConfig, 'transform', 'type');
     transformType = transform.type;
     if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
         yFieldType === FieldType.DIMENSION) {

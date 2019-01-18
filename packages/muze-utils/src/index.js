@@ -84,7 +84,8 @@ export {
     pathInterpolators,
     hslInterpolator,
     getSmallestDiff,
-    require
+    require,
+    retrieveGroupByAggFn
 } from './common-utils';
 
 export {

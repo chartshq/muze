@@ -1467,6 +1467,28 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
         setTimeout(callback, 16);
     };
 
+/**
+ * Retrieves the nearest groupBy aggFn function in its derivation cycle for the specified field.
+ *
+ * @param {DataModel} dataModel - The target DataModel instance.
+ * @param {string} fieldName - The target field name.
+ * @return {string} Returns the aggFn name.
+ */
+const retrieveGroupByAggFn = (dataModel, fieldName) => {
+    let next = dataModel;
+    do {
+        const derivations = next.getDerivations();
+        if (derivations && derivations.length >= 1) {
+            const latestDerivation = derivations[derivations.length - 1];
+            if (latestDerivation.criteria && typeof latestDerivation.criteria[fieldName] === 'string') {
+                return latestDerivation.criteria[fieldName];
+            }
+        }
+    } while (next = next.getParent());
+
+    return null;
+};
+
 export {
     require,
     Scales,
@@ -1537,5 +1559,6 @@ export {
     assembleModelFromIdentifiers,
     isValidValue,
     hslInterpolator,
-    getSmallestDiff
+    getSmallestDiff,
+    retrieveGroupByAggFn
 };
