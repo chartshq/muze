@@ -161,7 +161,7 @@ export const renderGradient = (context, container) => {
         legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);
 
         applyStyle(legendContainer, {
-            height: `${maxItemSpaces.height + padding + 2}px`,
+            height: `${maxItemSpaces.height + border + padding}px`,
             width: `${Math.min(width, maxWidth)}px`,
             padding: `${padding}px`
         });

@@ -220,7 +220,6 @@ export const computeItemSpaces = (config, measures, data) => {
     });
     totalWidth = Math.max(totalWidth, titleWidth);
     totalHeight += titleHeight + effPadding;
-
     return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };
 };
 
