@@ -312,34 +312,30 @@ export const calculateContinousSpace = (context) => {
     };
 };
 
-const setContinousAxisDomain = (context, domain) => {
-    const { nice } = context;
+/**
+ * Overwrites domain with user defined domain (if present)
+ * @param {Object} context reference to current axes
+ * @param {Array} domain default domain
+ *
+ * @return {Array} domain
+ */
+export const getValidDomain = (context, domain) => {
+    const { domain: userDom } = context.config();
+    if (userDom) {
+        domain = userDom;
+    }
+    return domain;
+};
 
+export const setContinousAxisDomain = (context, domain) => {
+    const { nice } = context.config();
     context.scale().domain(domain);
     nice && context.scale().nice();
     context._domain = context.scale().domain();
 };
 
 /**
- * This function calls sanitizeDomain based on the callee
- * sanitizeDomain is called only if callee is ContinousAxis
- * @param {Object} context reference to the caller
- * @param {Array} domain axes domain
- */
-export const setContinousAxisDomainInitiator = (context, domain) => {
-    const { domain: userDom } = context.config();
-
-    if (userDom) {
-        domain = userDom;
-    }
-    if (context.constructor.name === 'ContinousAxis') {
-        domain = context._interpolator.sanitizeDomain(domain);
-    }
-    setContinousAxisDomain(context, domain);
-};
-
-/**
- * Checks if all the properties have changed between two objects
+ * Checks if any of the properties have changed between two objects
  * @param {Object} obj first object
  * @param {Object} obj1 second object
  * @param {Array} properties properties to be compared between two objects
@@ -348,8 +344,7 @@ export const setContinousAxisDomainInitiator = (context, domain) => {
  */
 export const hasAxesConfigChanged = (obj, obj1, properties) => {
     if (!obj || !obj1) {
-        return null;
+        return false;
     }
-    const configBoolMap = properties.map(key => obj[key] !== obj1[key]);
-    return configBoolMap.reduce((final, bool) => (final || !!bool), false);
+    return properties.some(key => obj[key] !== obj1[key]);
 };

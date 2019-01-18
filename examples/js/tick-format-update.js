@@ -48,29 +48,31 @@
         .height(400)
         .rows(['Horsepower'])
         .columns(['Year'])
-        .mount('#chart') /* Attaching the canvas to DOM element */
-        .config({
+        // .detail(['Name'])
+        .mount('#chart'); /* Attaching the canvas to DOM element */
+        
+        canvas.config({
             axes: {
-                y: {
-                    interpolator: 'pow',
-                    exponent: 2,
-                    orientation: 'right'
-                },
-            }
-        })
-
-        setTimeout(() => {
+              y: {
+                tickFormat: d => `${d / 1000}K`,
+                interpolator: 'linear',
+                exponent: 2,
+                orientation: 'right'
+              },
+            },
+          });
+          setTimeout(() => {
             canvas
-                .config({
-                    axes: {
-                        y: {
-                            tickFormat: (d) => `${d/1000}K`,
-                            interpolator: 'linear',
-                            base: 2,
-                            orientation: 'left'
-                        }
-                    }
-                });
-        }, 2000);
+              .config({
+                axes: {
+                  y: {
+                    tickFormat: d => d,
+                    interpolator: 'log',
+                    base: 2,
+                    orientation: 'left'
+                  },
+                },
+              });
+          }, 2000);
     });
 }());

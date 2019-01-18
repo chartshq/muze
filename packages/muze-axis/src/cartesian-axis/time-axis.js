@@ -2,7 +2,7 @@ import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { calculateBandSpace, getRotatedSpaces, setContinousAxisDomainInitiator } from './helper';
+import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain } from './helper';
 import { spaceSetter } from './space-setter';
 
 /**
@@ -117,11 +117,13 @@ export default class TimeAxis extends SimpleAxis {
      */
     domain (domain) {
         if (domain) {
-            setContinousAxisDomainInitiator(this, domain);
+            domain = getValidDomain(this, domain);
+            setContinousAxisDomain(this, domain);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;
-        } return this._domain;
+        }
+        return this._domain;
     }
 
     /**

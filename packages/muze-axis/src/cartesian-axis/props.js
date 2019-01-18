@@ -12,17 +12,16 @@ export const PROPS = {
             value = mergeRecursive(mockedOldConfig, value);
 
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
-            if (value.orientation !== oldConfig.orientation) {
-                context.axis(context.createAxis(value));
-            }
-            const shouldAxesScaleUpdate = hasAxesConfigChanged(value, oldConfig, ['interpolator', 'exponent', 'base']);
+            const shouldAxesScaleUpdate = hasAxesConfigChanged(
+                value, oldConfig, ['interpolator', 'exponent', 'base', 'orientation']
+            );
 
             // Update scale and axis
             if (shouldAxesScaleUpdate) {
                 context._scale = context.createScale(value);
                 context._axis = context.createAxis(value);
             }
-            context.attachedFormatter = context.getTickFormatter(value);
+            context._tickFormatter = context.getTickFormatter(value);
 
             const {
                 labels,
