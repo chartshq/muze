@@ -20,7 +20,14 @@ export const PROPS = {
                 context._scale = context.createScale(value);
                 context._axis = context.createAxis(value);
             }
-            context.fetchTickFormatter = context.getTickFormatter(value);
+            const tickFormatter = context.getTickFormatter(value);
+            const scale = context._scale;
+            const labelFunc = scale.ticks || scale.quantile || scale.domain;
+
+            context.sanitizedTickFormatter = tickFormatter ?
+                tickFormatter(context.tickValues || context.axis().tickValues() || labelFunc())
+                : null;
+            context.fetchTickFormatter = tickFormatter;
 
             const {
                 labels,
