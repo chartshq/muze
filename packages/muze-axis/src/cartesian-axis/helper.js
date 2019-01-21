@@ -343,7 +343,7 @@ export const setContinousAxisDomain = (context, domain) => {
  * @return {Boolean} boolean value
  */
 export const hasAxesConfigChanged = (obj, obj1, properties) => {
-    if (!obj || !obj1) {
+    if (!obj || !obj1 || !Object.keys(obj).length || !Object.keys(obj1).length) {
         return false;
     }
     return properties.some(key => obj[key] !== obj1[key]);

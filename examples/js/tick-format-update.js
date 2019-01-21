@@ -44,7 +44,7 @@
     
     canvas
         .data(dm)
-        .width(600)
+        .width(400)
         .height(400)
         .rows(['Horsepower'])
         .columns(['Year'])
@@ -53,22 +53,35 @@
         
         canvas.config({
             axes: {
-              y: {
-                tickFormat: d => `${d / 1000}K`,
-                interpolator: 'linear',
-                exponent: 2,
-              },
+                x: {
+                    // tickFormat: d => `${d / 1000}K`,
+                    tickFormat: d => d.getFullYear(),
+                    labels: {
+                        rotation: 55,
+                    },
+                },
+                y: {
+                    tickFormat: d => `${d / 1000}K`,
+                    name: 'hello world'
+                }
             },
           });
           setTimeout(() => {
             canvas
               .config({
                 axes: {
+                x: {
+                    // tickFormat: d => d
+                    tickFormat: d => `${d.getDay()}K`,
+                    // showAxisName: false,
+                    // tickFormat: d => d,
+                },
                   y: {
-                    tickFormat: d => d,
+                    tickFormat: d => `${d / 100}`,
+                    name: 'hello asdf',
                     interpolator: 'log',
                     base: 2,
-                  },
+                  }
                 },
               });
           }, 2000);

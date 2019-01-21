@@ -41,7 +41,7 @@ const rotateAxis = (instance, tickText, labelManager) => {
 
         const tickFormatter = axis.tickFormat() ? axis.tickFormat : null;
 
-        const temp = tickSize ? (tickFormatter ? tickFormatter()(datum) : datum) : '';
+        const temp = tickSize ? (tickFormatter ? tickFormatter()(d) : datum) : '';
 
         datum = temp.toString();
 

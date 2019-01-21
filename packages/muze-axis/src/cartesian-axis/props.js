@@ -15,18 +15,19 @@ export const PROPS = {
             const shouldAxesScaleUpdate = hasAxesConfigChanged(
                 value, oldConfig, ['interpolator', 'exponent', 'base', 'orientation']
             );
+            const tickFormatter = context.getTickFormatter(value);
 
             if (shouldAxesScaleUpdate) {
                 context._scale = context.createScale(value);
                 context._axis = context.createAxis(value);
             }
-            const tickFormatter = context.getTickFormatter(value);
-            const scale = context._scale;
-            const labelFunc = scale.ticks || scale.quantile || scale.domain;
-
-            context.sanitizedTickFormatter = tickFormatter ?
-                tickFormatter(context.tickValues || context.axis().tickValues() || labelFunc())
-                : null;
+            if (context._scale) {
+                const scale = context._scale;
+                const labelFunc = scale.ticks || scale.quantile || scale.domain;
+                context.sanitizedTickFormatter = tickFormatter ?
+                    tickFormatter(context.tickValues || context.axis().tickValues() || labelFunc()) :
+                    null;
+            }
             context.fetchTickFormatter = tickFormatter;
 
             const {
