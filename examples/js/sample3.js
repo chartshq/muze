@@ -10,6 +10,7 @@
             {
                 name: 'Acceleration',
                 type: 'measure',
+                defAggFn: "avg"
             },
             {
                 name: 'Origin',
@@ -23,9 +24,9 @@
             }
         ];
 
-        const rootData = new DataModel(jsonData, schema);
-        const dm2 = rootData.groupBy(['Origin', 'Year'], {
-            Acceleration: 'sum'
+        let rootData = new DataModel(jsonData, schema);
+        rootData = rootData.groupBy(['Origin', 'Year'], {
+            Acceleration: 'max'
         });
 
         const mountPoint = document.getElementById('chart');
@@ -38,7 +39,7 @@
                 {
                     mark: 'bar',
                     // transform: {
-                    //     type: "group"
+                    //     type: "stack"
                     // }
                 }
             ])
@@ -46,7 +47,7 @@
                 autoGroupBy: {
                     disabled: true,
                     measures: {
-                        // Acceleration: 'avg'
+                         Acceleration: 'sum'
                     }
                 }
             })

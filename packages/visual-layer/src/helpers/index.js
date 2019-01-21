@@ -6,7 +6,7 @@ import {
     selectElement,
     DimensionSubtype,
     STATE_NAMESPACES,
-    retrieveGroupByAggFn,
+    retrieveNearestGroupByReducers,
     getObjProp
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
@@ -173,7 +173,7 @@ export const getValidTransform = (context, layerConfig, dataModel, encodingField
         transformType = IDENTITY;
     } else if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
         const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
-        const aggFn = retrieveGroupByAggFn(dataModel, measureField);
+        const { [measureField]: aggFn } = retrieveNearestGroupByReducers(dataModel, measureField);
         if (aggFn === AGG_FN_SUM) {
             transformType = STACK;
         } else {

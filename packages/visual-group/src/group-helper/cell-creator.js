@@ -524,8 +524,9 @@ export const computeMatrices = (context, config) => {
         const dimensions = allFields.filter(field =>
             fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
         const aggregationFns = groupBy.measures;
-        const nearestAggFns = retrieveNearestGroupByReducers(datamodel);
-        const resolvedAggFns = mergeRecursive({}, nearestAggFns, aggregationFns);
+        const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
+        const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
+        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
 
         groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }

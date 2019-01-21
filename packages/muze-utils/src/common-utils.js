@@ -59,6 +59,7 @@ import {
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import * as STACK_CONFIG from './enums/stack-config';
+import { DM_OPERATION_GROUP } from './enums';
 
 const HTMLElement = window.HTMLElement;
 
@@ -1467,39 +1468,14 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
         setTimeout(callback, 16);
     };
 
-/**
- * Retrieves the nearest groupBy aggFn function in its derivation cycle for the specified field.
- *
- * @param {DataModel} dataModel - The target DataModel instance.
- * @param {string} fieldName - The target field name.
- * @return {string} Returns the aggFn name.
- */
-const retrieveGroupByAggFn = (dataModel, fieldName) => {
-    let next = dataModel;
-    do {
-        const derivations = next.getDerivations();
-        if (derivations && derivations.length >= 1) {
-            const latestDerivation = derivations[derivations.length - 1];
-            if (latestDerivation.op === 'group') {
-                const aggFn = getObjProp(latestDerivation, 'criteria', fieldName);
-                if (aggFn) {
-                    return aggFn;
-                }
-            }
-        }
-    } while (next = next.getParent());
-
-    return null;
-};
-
-const retrieveNearestGroupByReducers = (dataModel) => {
+const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     let nearestReducers = {};
     let next = dataModel;
     do {
         const derivations = next.getDerivations();
         if (derivations && derivations.length >= 1) {
             const latestDerivation = derivations[derivations.length - 1];
-            if (latestDerivation.op === 'group') {
+            if (latestDerivation.op === DM_OPERATION_GROUP) {
                 nearestReducers = latestDerivation.criteria || {};
                 break;
             }
@@ -1508,9 +1484,14 @@ const retrieveNearestGroupByReducers = (dataModel) => {
 
     const filteredReducers = {};
     const measures = dataModel.getFieldspace().getMeasure();
-    Object.keys(measures).forEach((measureName) => {
+    measureFieldNames.forEach((measureName) => {
         if (nearestReducers[measureName]) {
             filteredReducers[measureName] = nearestReducers[measureName];
+        } else {
+            const measureField = measures[measureName];
+            if (measureField) {
+                filteredReducers[measureName] = measureField.defAggFn();
+            }
         }
     });
 
@@ -1588,6 +1569,5 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    retrieveGroupByAggFn,
     retrieveNearestGroupByReducers
 };
