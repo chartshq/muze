@@ -10,7 +10,6 @@
             {
                 name: 'Acceleration',
                 type: 'measure',
-                defAggFn: "avg"
             },
             {
                 name: 'Origin',
@@ -22,9 +21,12 @@
                 subtype: 'temporal',
                 format: '%Y-%m-%d'
             }
-            ];
+        ];
 
         const rootData = new DataModel(jsonData, schema);
+        const dm2 = rootData.groupBy(['Origin', 'Year'], {
+            Acceleration: 'sum'
+        });
 
         const mountPoint = document.getElementById('chart');
         const canvas = env.canvas()
@@ -34,12 +36,20 @@
             .color("Origin")
             .layers([
                 {
-                    mark: 'line',
-                    transform: {
-                        type: "group"
-                    }
+                    mark: 'bar',
+                    // transform: {
+                    //     type: "group"
+                    // }
                 }
             ])
+            .config({
+                autoGroupBy: {
+                    disabled: true,
+                    measures: {
+                        // Acceleration: 'avg'
+                    }
+                }
+            })
             .height(500)
             .width(600)
             .mount(mountPoint);

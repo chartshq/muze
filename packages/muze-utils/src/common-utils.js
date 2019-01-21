@@ -1480,13 +1480,41 @@ const retrieveGroupByAggFn = (dataModel, fieldName) => {
         const derivations = next.getDerivations();
         if (derivations && derivations.length >= 1) {
             const latestDerivation = derivations[derivations.length - 1];
-            if (latestDerivation.criteria && typeof latestDerivation.criteria[fieldName] === 'string') {
-                return latestDerivation.criteria[fieldName];
+            if (latestDerivation.op === 'group') {
+                const aggFn = getObjProp(latestDerivation, 'criteria', fieldName);
+                if (aggFn) {
+                    return aggFn;
+                }
             }
         }
     } while (next = next.getParent());
 
     return null;
+};
+
+const retrieveNearestGroupByReducers = (dataModel) => {
+    let nearestReducers = {};
+    let next = dataModel;
+    do {
+        const derivations = next.getDerivations();
+        if (derivations && derivations.length >= 1) {
+            const latestDerivation = derivations[derivations.length - 1];
+            if (latestDerivation.op === 'group') {
+                nearestReducers = latestDerivation.criteria || {};
+                break;
+            }
+        }
+    } while (next = next.getParent());
+
+    const filteredReducers = {};
+    const measures = dataModel.getFieldspace().getMeasure();
+    Object.keys(measures).forEach((measureName) => {
+        if (nearestReducers[measureName]) {
+            filteredReducers[measureName] = nearestReducers[measureName];
+        }
+    });
+
+    return filteredReducers;
 };
 
 export {
@@ -1560,5 +1588,6 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    retrieveGroupByAggFn
+    retrieveGroupByAggFn,
+    retrieveNearestGroupByReducers
 };

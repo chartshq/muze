@@ -85,7 +85,8 @@ export {
     hslInterpolator,
     getSmallestDiff,
     require,
-    retrieveGroupByAggFn
+    retrieveGroupByAggFn,
+    retrieveNearestGroupByReducers
 } from './common-utils';
 
 export {
