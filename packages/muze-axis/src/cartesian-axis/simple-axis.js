@@ -54,7 +54,6 @@ export default class SimpleAxis {
 
         this._scale = this.createScale(this._config);
         this._axis = this.createAxis(this._config);
-
         this._animationDonePromises = [];
     }
 

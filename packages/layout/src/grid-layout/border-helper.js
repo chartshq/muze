@@ -1,40 +1,53 @@
 import {
-    TOP, BOTTOM, LEFT, RIGHT, CENTER, BLANK_BORDERS
+    TOP, BOTTOM, LEFT, RIGHT, CENTER, BLANK_BORDERS, COLUMN, ROW, VIEW_INDEX
 } from '../enums/constants';
 
-const applyRowBorders = (cells, borderStyle, showBorders, color) => {
-    [TOP, BOTTOM].forEach((borderType) => {
-        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
-        cells.style(`border-${borderType}`, style);
-    });
+const borderMap = {
+    '00': null,
+    '01': COLUMN,
+    '02': null,
+    10: ROW,
+    11: CENTER,
+    12: ROW,
+    20: null,
+    21: COLUMN,
+    22: null
 };
 
-const applyColBorders = (cells, borderStyle, showBorders, color) => {
-    [LEFT, RIGHT].forEach((borderType) => {
-        const style = `${borderStyle} ${showBorders[borderType] ? color : BLANK_BORDERS}`;
-        cells.style(`border-${borderType}`, style);
-    });
+const applySpecificBorder = (cells, color, type, style) => {
+    cells.style(`border-${type}`, `${style} ${color}`);
 };
 
-export const applyBorders = (cells, border, type, index) => {
+const specificBorderApplier = (borderTypes, showBorders, cells, borderInfo) => {
     const {
-      width,
-      style,
-      color,
-      showRowBorders,
-      showColBorders,
-      showValueBorders
-  } = border;
+        color,
+        width,
+        style
+    } = borderInfo;
     const borderStyle = `${width}px ${style}`;
 
-    if (type === CENTER && index === 1) {
-        [TOP, BOTTOM, LEFT, RIGHT].forEach((borderType) => {
-            cells.style(`border-${borderType}`, `${borderStyle} ${showValueBorders[borderType] ?
-              color : BLANK_BORDERS}`);
-        });
-    } else if (type === CENTER) {
-        applyRowBorders(cells, borderStyle, showRowBorders, color);
-    } else if (index === 1) {
-        applyColBorders(cells, borderStyle, showColBorders, color);
+    borderTypes.forEach((borderType) => {
+        applySpecificBorder(cells, showBorders[borderType] ? color : BLANK_BORDERS, borderType, borderStyle);
+    });
+};
+
+const borderApplier = (cells, borderInfo) => {
+    const {
+       showRowBorders,
+      showColBorders,
+      showValueBorders
+  } = borderInfo;
+    return {
+        row: () => specificBorderApplier([TOP, BOTTOM], showRowBorders, cells, borderInfo),
+        column: () => specificBorderApplier([LEFT, RIGHT], showColBorders, cells, borderInfo),
+        center: () => specificBorderApplier([LEFT, RIGHT, TOP, BOTTOM], showValueBorders, cells, borderInfo)
+    };
+};
+
+export const applyBorders = (cells, border, row, column) => {
+    const borderApplierFn = borderApplier(cells, border);
+    const borderMapVal = borderMap[`${VIEW_INDEX[row]}${column}`];
+    if (borderMapVal) {
+        borderApplierFn[borderMapVal]();
     }
 };

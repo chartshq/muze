@@ -12,8 +12,8 @@ import { initCanvas,
         setLabelRotationForAxes,
         createGroupState,
         createLayoutManager,
-        setLayoutInfForUnits } from './helper';
-
+        setLayoutInfForUnits
+} from './helper';
 /**
  * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
  * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
