@@ -60,6 +60,9 @@ d3.json('../data/cars.json', (data) => {
               field: 'Acceleration',
               stops: 5
           })
+          .size('Origin')
+          .shape('Origin')
+
                     .data(rootData)
   		.layers({ // Draw a bar plot, by default stack transform is used
         	Acceleration: {
@@ -68,7 +71,7 @@ d3.json('../data/cars.json', (data) => {
   })
                     .config({
                         legend: {
-                            position: 'right'
+                            position: 'bottom'
                         }
                     })
       	.width(600)

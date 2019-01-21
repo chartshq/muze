@@ -214,9 +214,7 @@ export const computeItemSpaces = (config, measures, data) => {
                 const newLabelWidth = (maxItemSpaces.width - maxIconWidth);
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
-                /* Checking if new width for label is less than require width to render in One line.
-                In that case returning the Actual width else new width */
-                labelSpaces[i].width = (labelWidth <= newLabelWidth) ? newLabelWidth : labelWidth;
+                labelSpaces[i].width = Math.max(labelWidth, newLabelWidth);
                 totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
             }
         }
