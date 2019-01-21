@@ -78,6 +78,7 @@ export default class BaseLayer extends SimpleLayer {
         this._id = getUniqueId();
         this._measurement = {};
         this._animationDonePromises = [];
+        this._customConfig = null;
     }
 
     static getState () {

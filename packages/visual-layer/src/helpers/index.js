@@ -153,7 +153,6 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
  *
  */
 export const getValidTransform = (context, layerConfig, dataModel, encodingFieldInf) => {
-    let transformType;
     const {
         transform
     } = layerConfig;
@@ -167,18 +166,14 @@ export const getValidTransform = (context, layerConfig, dataModel, encodingField
     const fieldsConfig = dataModel.getFieldsConfig();
     const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
     const isCustomTransformTypeProvided = !!getObjProp(context._customConfig, 'transform', 'type');
-    transformType = transform.type;
+    let transformType = transform.type;
     if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
         yFieldType === FieldType.DIMENSION) {
         transformType = IDENTITY;
     } else if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
         const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
         const { [measureField]: aggFn } = retrieveNearestGroupByReducers(dataModel, measureField);
-        if (aggFn === AGG_FN_SUM) {
-            transformType = STACK;
-        } else {
-            transformType = GROUP;
-        }
+        transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
     }
     return transformType;
 };
