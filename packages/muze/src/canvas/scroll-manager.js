@@ -27,7 +27,7 @@ export class ScrollManager {
         });
     }
 
-    triggerScrollBarAction (type, ...params) {
-        this.scrollBarComponents()[type] && this.scrollBarComponents()[type].triggerScrollBarAction(...params);
+    triggerScrollBarAction (type, delta) {
+        this.scrollBarComponents()[type] && this.scrollBarComponents()[type].scrollDeltaTo(delta);
     }
 }

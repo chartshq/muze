@@ -83,16 +83,14 @@ export class VerticalScrollMaker extends ScrollMaker {
         this.scrollBarManager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
     }
 
-    triggerScrollBarAction (movement) {
+    scrollDeltaTo (delta) {
         const {
-            y
-        } = movement;
-        const {
-            totalLength
-         } = this.logicalSpace();
-
-        const movedYPosition = this._scrollBarWithouArrowLength * y / totalLength;
-        this.changeMoverPosition({ y: movedYPosition, x: 0 });
+            mover,
+            rect
+        } = this._components.moverRect;
+        const moverPos = mover.node().getBoundingClientRect();
+        const rectStartPos = rect.node().getBoundingClientRect();
+        this.changeMoverPosition({ y: moverPos.y - rectStartPos.y - delta, x: 0 });
         return this;
     }
 

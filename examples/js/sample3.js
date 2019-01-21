@@ -48,17 +48,22 @@
         .rows(['Year', 'Horsepower'])
         .data(rootData)
         .height(900)
+        .size({
+            field: 'Acceleration',
+            domain: [-15, 20, 30]
+            // range: [-20,20]
+        })
         .detail(['Name'])
         .config({
            legend:{
-               position: 'bottom',
-               border: 10,
-               color:{
-                  
-                    // borderColor: 'red'
-               }
+               position: 'bottom'
+           },
+           scrollBar:{
+               speed: 10
            }
+        //    border:{}
         })
+        // .layers([])
         .title("sads")
         .color('Origin')
         .width(300)

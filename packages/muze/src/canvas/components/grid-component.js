@@ -1,4 +1,4 @@
-import { selectElement } from 'muze-utils';
+import { selectElement, getEvent } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
@@ -87,6 +87,29 @@ export default class GridComponent extends MuzeComponent {
             return this;
         }
         return this._scrollBarManager;
+    }
+
+    attachScrollListener () {
+        selectElement(`#${this.component[1][1].renderAt()}`)
+                        .on('wheel', () => {
+                            const event = getEvent();
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const {
+                                wheelDeltaX,
+                                wheelDeltaY
+                            } = event;
+                            // console.log(event);
+                            // console.log(wheelDeltaX, wheelDeltaY);
+                            // const deltaX = -event.deltaX * (event.deltaMode ? 120 : 1) / 500;
+                            // const deltaY = -event.deltaY * (event.deltaMode ? 120 : 1) / 500;
+                            if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
+                                this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX);
+                            }
+                            if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
+                                this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY);
+                            }
+                        });
     }
 
     performScrollAction (direction, movedView) {

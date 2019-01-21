@@ -1,5 +1,6 @@
 .muze-scroll-bar{
     background: rgb(248, 248, 248);
+    // border: 1px solid rgba(248, 248, 248, 0.2);
     position: relative;
     font-size: 10px;
 }
@@ -47,6 +48,7 @@
     border-radius: 3px;
     background: #a2a2a2;
     cursor: -webkit-grab;
+    border-radius: 3px;
 }
 
 .muze-scroll-mover:active {

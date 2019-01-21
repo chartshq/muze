@@ -171,7 +171,7 @@ export const renderLayout = (canvas, renderDetails) => {
     });
 
     gridWrapper.scrollBarManager(scrollBarManager);
-
     layoutManager.registerComponents(componentWrappers).compute();
+    gridWrapper.attachScrollListener();
 };
 
