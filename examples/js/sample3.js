@@ -9,8 +9,7 @@
         const schema = [
             {
                 name: 'Acceleration',
-                type: 'measure',
-                defAggFn: "avg"
+                type: 'measure'
             },
             {
                 name: 'Origin',
@@ -25,9 +24,16 @@
         ];
 
         let rootData = new DataModel(jsonData, schema);
-        rootData = rootData.groupBy(['Origin', 'Year'], {
-            Acceleration: 'max'
-        });
+        // rootData = rootData.groupBy(['Origin', 'Year'], {
+        //     Acceleration: 'sum'
+        // });
+        // rootData = rootData.select(() => true);
+
+        const ops = DataModel.Operators;
+        rootData = ops.compose(
+            ops.groupBy(['Origin', 'Year'], { Acceleration: 'sum' }),
+            ops.select(() => true)
+        )(rootData);
 
         const mountPoint = document.getElementById('chart');
         const canvas = env.canvas()
@@ -47,7 +53,7 @@
                 autoGroupBy: {
                     disabled: true,
                     measures: {
-                         Acceleration: 'sum'
+                        Acceleration: 'sum'
                     }
                 }
             })

@@ -1473,10 +1473,10 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     let next = dataModel;
     do {
         const derivations = next.getDerivations();
-        if (derivations && derivations.length >= 1) {
-            const latestDerivation = derivations[derivations.length - 1];
-            if (latestDerivation.op === DM_OPERATION_GROUP) {
-                nearestReducers = latestDerivation.criteria || {};
+        if (derivations) {
+            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
+            if (groupDerivation) {
+                nearestReducers = groupDerivation.criteria || {};
                 break;
             }
         }
