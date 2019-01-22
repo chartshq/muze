@@ -4,6 +4,13 @@ import { HORIZONTAL, HEIGHT, WIDTH, LEFT } from '../../../constants';
 
 export class HorizontalScrollMaker extends ScrollMaker {
 
+    /**
+     * Describes the type of the ScrollMaker
+     *
+     * @public
+     *
+     * @return {String} Returns the type of scroll maker: horizontal
+     */
     static type () {
         return HORIZONTAL;
     }
@@ -93,6 +100,14 @@ export class HorizontalScrollMaker extends ScrollMaker {
         return this;
     }
 
+    /**
+     * Scrolls to the specific point in the page. The input is provided as a percentage (0 - 100)
+     *
+     * @public
+     *
+     * @param {number} scrollPercentage Its the percentage based on which the scroll action will occur
+     * @return {HorizontalScrollMaker} Instance of the HorizontalScrollMaker
+     */
     scrollTo (scrollPercentage) {
         const {
             mover

@@ -144,8 +144,9 @@ export const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].renderConfig().labels.rotation !== 0) {
-                    rotation = xAxes[i][j].renderConfig().labels.rotation;
+                const rotationVal = xAxes[i][j].renderConfig().labels.rotation;
+                if (rotationVal && rotationVal !== 0) {
+                    rotation = rotationVal;
                     return;
                 }
             }

@@ -53,6 +53,11 @@ export class ScrollMaker {
         return this;
     }
 
+    detachScrollAction () {
+        this._attachedScrollAction = () => {};
+        return this;
+    }
+
     getLogicalSpace () {
         return this.logicalSpace();
     }

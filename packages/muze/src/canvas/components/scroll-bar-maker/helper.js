@@ -78,10 +78,6 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
     } = moverRect;
     const rectStartPos = rect.node().getBoundingClientRect();
 
-    mover.on('click', () => {
-        const event = getEvent();
-        event.stopPropagation();
-    });
     mover.call(d3Drag()
                     .on('start', () => {
                         const event = getEvent();

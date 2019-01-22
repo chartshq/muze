@@ -7,7 +7,17 @@ const scrollMakerMap = {
     vertical: VerticalScrollMaker
 };
 
+/**
+ * Scroll Component acts as a wrapper over the scoll bars created using the respective Scroll Makers
+ * This provides a consistent API for layouting using the tree layout system.
+ *
+ *
+ * @class
+ * @public
+ * @module ScrollComponent
+ */
 export default class ScrollComponent extends MuzeComponent {
+
     constructor (params) {
         const ScrollMaker = scrollMakerMap[params.config.type];
 
@@ -26,28 +36,61 @@ export default class ScrollComponent extends MuzeComponent {
         return this.component.manager();
     }
 
+    /**
+     * Scrolls based on the actual pixel value provided. Since it's a delta change, the input will be
+     * a delta between (-Infinity, Infinity), based on which the scroll will occur. Only a delta movement in
+     * scroll occurs
+     *
+     * @public
+     *
+     * @param {number} delta Based on which the scroll will have a delta change in position
+     * @return {ScrollComponent} Instance of the ScrollComponent
+     */
     scrollDeltaTo (delta) {
         this.component.scrollDeltaTo(delta);
         return this;
     }
 
+    /**
+     * Scrolls to the specific point in the page. The input is provided as a percentage (0 - 100)
+     *
+     * @public
+     *
+     * @param {number} scrollPercentage Its the percentage based on which the scroll action will occur
+     * @return {ScrollComponent} Instance of the ScrollComponent
+     */
     scrollTo (scrollPercentage) {
         this.component.scrollTo(scrollPercentage);
         return this;
     }
 
-    scrollToUnitIndex (unitNum) {
-        this.component.scrollTo(this.component.unitPositions()[unitNum + 1]);
+    /**
+     * Scrolls to the specific point in the page based on the unit index.
+     * The input is provided as a number represting the index for the unit.
+     * For vertical scroll, it's the row index that will be required.
+     * For horizontal scroll, it's the column index that will be required
+     *
+     * @public
+     *
+     * @param {number} unitIndex Index of the unit appearing in the grid
+     * @return {ScrollComponent} Instance of the ScrollComponent
+     */
+    scrollToUnitIndex (unitIndex) {
+        this.component.scrollTo(this.component.unitPositions()[unitIndex + 1]);
         return this;
     }
 
+    /**
+     * Provides the positions of the units(either horizontal or vertical based on the type
+     * of scroll bar it wraps) relative to it's container. The position of the first unit starts at 0
+     *
+     *
+     * @public
+     *
+     * @return {Array} Positions of units either horizontal or vertical
+     */
     getScrollPositionsForUnits () {
         return this.component.unitPositions();
-    }
-
-    triggerScrollBarAction (movement) {
-        this.component.triggerScrollBarAction(movement);
-        return this;
     }
 
     draw (container) {
@@ -55,12 +98,26 @@ export default class ScrollComponent extends MuzeComponent {
         return this;
     }
 
-    changeScrollPosition (newPosition) {
-        this.component.changeScrollPosition(newPosition);
+    /**
+     * Can be used to attach a scroll action whenever scrolling occurs in the canvas
+     *
+     * @public
+     * @param {number} externalAction Action to be attached during scroll
+     * @return {ScrollComponent} Instance of the ScrollComponent
+     */
+    attachScrollAction (externalAction) {
+        this.component.attachScrollAction(externalAction);
+        return this;
     }
 
-    attachScrollAction (callback) {
-        this.component.attachScrollAction(callback);
+    /**
+     * Can be used to detach the scroll action already bound to the scroll bar
+     *
+     * @public
+     * @return {ScrollComponent} Instance of the ScrollComponent
+     */
+    detachScrollAction () {
+        this.component.detachScrollAction();
         return this;
     }
 

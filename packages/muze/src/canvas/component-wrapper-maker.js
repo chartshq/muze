@@ -138,6 +138,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, grid, renderDetail
     } else {
         scrollBarWrapper = new ScrollComponent(wrapperParams);
     }
+    console.log(viewLength, totalLength);
     if (viewLength >= totalLength) {
         return null;
     }

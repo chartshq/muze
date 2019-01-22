@@ -47,29 +47,27 @@
         canvas = canvas.columns(['Origin','Acceleration'])
         .rows(['Year', 'Horsepower'])
         .data(rootData)
-        .height(900)
+        .height(1900)
         // .size({
         //     field: 'Acceleration',
         //     domain: [-15, 20, 30]
         //     // range: [-20,20]
         // })
-        .color({
-            stops: 20,
-           field: 'Acceleration'
-        })
+        // .color({
+        //     stops: 20,
+        //    field: 'Acceleration'
+        // })
         .config({
            legend:{
                position: 'bottom'
            },
-           scrollBar:{
-            //    speed: 10
-           }
+        //    pagination: 'holistic'
         //    border:{}
         })
         // .layers([])
         .title("sads")
         // .color('Origin')
-        .width(300)
+        .width(900)
       
         .mount(mountPoint);
 

@@ -3,12 +3,24 @@ import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
 
-const applyScrollAction = (elem, classPrefix, movement, type) => {
+/**
+ * Based on the type of scroll, it changes the scrollLeft/scrollTop property of the specific
+ * elements based on the scroll distance provided
+ *
+ *
+ */
+const applyScrollAction = (elem, classPrefix, scollDistance, type) => {
     selectElement(elem)
                     .selectAll(`.${classPrefix}-grid`)
-                    .property(type, movement);
+                    .property(type, scollDistance);
 };
 
+/**
+ * Applies the action of the scroll by actually scrolling the respective matrices based on the
+ * type of scroll. It returns a function which has both the scroll methods available
+ *
+ * @return {Object} contains the horizontal and vertical scroll actions on the grid component
+ */
 const scrollActionApplier = (movement, context) => {
     const classPrefix = context.params.config.classPrefix;
 
@@ -90,6 +102,13 @@ export default class GridComponent extends MuzeComponent {
         return this._scrollBarManager;
     }
 
+    /**
+     * Attaches a mousewheel listener to the center matrix, based on which the scrolling can occur.
+     * It uses the scroll component to change the position of the scroller, which ultimately scrolls the center matrix
+     *
+     *
+     * @return {GridComponent} Instance of the GridComponent
+     */
     attachScrollListener () {
         selectElement(`#${this.component[1][1].renderAt()}`)
                         .on('wheel', () => {

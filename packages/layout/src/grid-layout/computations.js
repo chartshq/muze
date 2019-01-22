@@ -1,4 +1,4 @@
-import { HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL } from '../enums/constants';
+import { HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL, HOLISTIC } from '../enums/constants';
 
 /**
  * Gets measurement for an instance of visual matrix
@@ -63,6 +63,18 @@ const paginationDetailsMap = {
     }
 };
 
+/**
+ * This method provides the required width/height in the different pagination stages.
+ * If the pagination is holistic, then only the max width/height will be provided for layouting
+ * If scroll is enabled, then the entire width/height shall be provided for layouting
+ * Note: width is required for scrolling the columns while height is required for scrolling rows
+ *
+ *
+ * @param {Layout} layout Layout instance required for configuration details
+ * @param {Object} measureDetails different measure details for row/column
+ * @param {number} maxMeasure maximum width/height present for column/row respectively
+ * @return {number} Provides the width/height based on which further calculation can occur
+ */
 const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     const {
         pagination,
@@ -75,7 +87,7 @@ const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     } = measureDetails;
 
     switch (pagination) {
-    case 'holistic':
+    case HOLISTIC:
         return maxMeasure;
     default: {
         const actualMeasure = getMatrixMeasurement(layout[matrix](), measureType);
@@ -87,6 +99,16 @@ const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     }
 };
 
+/**
+ * This method uses the getMatrixMeasureForPagination function to calculate maximum measure
+ * depending on the layouting algorithm used
+ *
+ *
+ * @param {Layout} layout Layout instance required for configuration details
+ * @param {string} matrixType row/column
+ * @param {number} relatedMaxMeasure maximum width/height present for column/row respectively
+ * @return {number} Provides the width/height based on which further calculation can occur
+ */
 const paginationMeasureGetter = (layout, matrixType, relatedMaxMeasure) =>
     getMatrixMeasureForPagination(layout, paginationDetailsMap[matrixType], relatedMaxMeasure);
 
@@ -107,7 +129,8 @@ export const computeLayoutMeasurements = (layout) => {
     } = layout.measurement();
     const {
         border,
-        buffer
+        buffer,
+        pagination
     } = layout.config();
     const matrices = layout.matrices();
     const {
@@ -115,6 +138,7 @@ export const computeLayoutMeasurements = (layout) => {
         bottom
     } = matrices;
 
+    const actualBuffer = pagination === HOLISTIC ? 0 : buffer;
     // Get width of row matrix
     const rowMatrixWidth = getMatrixMeasurement(rowMatrix, WIDTH);
     const maxRowMatrixWidth = Math.min(rowMatrixWidth, width / 2);
@@ -173,11 +197,11 @@ export const computeLayoutMeasurements = (layout) => {
     return {
         rowMatrixHeight,
         rowMatrixWidth,
-        maxHeightAvailableForRowMatrix: maxHeightAvailableForRowMatrix - buffer,
+        maxHeightAvailableForRowMatrix: maxHeightAvailableForRowMatrix - actualBuffer,
 
         columnMatrixHeight,
         columnMatrixWidth,
-        maxWidthAvailableForColumnMatrix: maxWidthAvailableForColumnMatrix - buffer
+        maxWidthAvailableForColumnMatrix: maxWidthAvailableForColumnMatrix - actualBuffer
     };
 };
 

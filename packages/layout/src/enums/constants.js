@@ -256,3 +256,4 @@ export const BLANK_BORDERS = 'rgba(0,0,0,0)';
 
 export const PAGINATION = 'pagination';
 export const BUFFER = 'buffer';
+export const HOLISTIC = 'holistic';

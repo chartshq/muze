@@ -4,6 +4,13 @@ import { VERTICAL, TOP, HEIGHT, WIDTH } from '../../../constants';
 
 export class VerticalScrollMaker extends ScrollMaker {
 
+    /**
+     * Describes the type of the ScrollMaker
+     *
+     * @public
+     *
+     * @return {String} Returns the type of scroll maker: vertical
+     */
     static type () {
         return VERTICAL;
     }
@@ -81,6 +88,16 @@ export class VerticalScrollMaker extends ScrollMaker {
         this.manager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
     }
 
+    /**
+     * Scrolls based on the actual pixel value provided. Since it's a delta change, the input will be
+     * a delta between (-Infinity, Infinity), based on which the scroll will occur. Only a delta movement in
+     * scroll occurs
+     *
+     * @public
+     *
+     * @param {number} delta Based on which the scroll will have a delta change in position
+     * @return {VerticalScrollMaker} Instance of the VerticalScrollMaker
+     */
     scrollDeltaTo (delta) {
         const {
             mover,
@@ -93,6 +110,14 @@ export class VerticalScrollMaker extends ScrollMaker {
         return this;
     }
 
+    /**
+     * Scrolls to the specific point in the page. The input is provided as a percentage (0 - 100)
+     *
+     * @public
+     *
+     * @param {number} scrollPercentage Its the percentage based on which the scroll action will occur
+     * @return {VerticalScrollMaker} Instance of the VerticalScrollMaker
+     */
     scrollTo (scrollPercentage) {
         const {
             mover
