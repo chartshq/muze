@@ -14,7 +14,8 @@ import { spaceSetter } from './space-setter';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
-    calculateContinousSpace
+    calculateContinousSpace,
+    setOffset
 } from './helper';
 import { PROPS } from './props';
 
@@ -302,6 +303,7 @@ export default class SimpleAxis {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateContinousSpace(this));
             this.logicalSpace();
+            setOffset(this);
         }
 
         return this.logicalSpace();

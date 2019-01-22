@@ -2,7 +2,7 @@ import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain } from './helper';
+import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset } from './helper';
 import { spaceSetter } from './space-setter';
 
 /**
@@ -136,6 +136,7 @@ export default class TimeAxis extends SimpleAxis {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateBandSpace(this));
             this.logicalSpace();
+            setOffset(this);
         }
         return this.logicalSpace();
     }
