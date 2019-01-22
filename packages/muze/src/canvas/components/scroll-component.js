@@ -128,11 +128,12 @@ export default class ScrollComponent extends MuzeComponent {
         this.component.config(params.config.scrollBarComponentConfig);
         this.component.logicalSpace(params.dimensions);
         this.boundBox(this.component.getLogicalSpace());
+        this.setParams(params);
         return this;
     }
 
     setParams (params) {
-        this.component = params.component;
+        this.component = params.component || this.component;
         this.params = params;
         this.target(params.config.target);
         this.position(params.config.position);

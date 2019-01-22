@@ -53,9 +53,24 @@
   .width(500)
   .height(500)
   .mount(mountPoint)
+  .config({
+      scrollBar:{
+          vertical: {
+              align: 'left'
+          }
+      }
+  })
 
         canvas.once('canvas.animationend').then((client) => {
-            canvas.composition().vScrollBar.scrollToUnitIndex(10);
+
+            canvas.config({
+                scrollBar:{
+                    vertical: {
+                        align: 'right'
+                    }
+                }
+            })
+            // canvas.rows([[], ['Horsepower']])
             const element = document.getElementById('chart');
             element.classList.add('animateon');
         });
