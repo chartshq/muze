@@ -2,6 +2,7 @@ export const CLASSPREFIX = 'muze';
 export const IDFIELD = '__id__';
 export const GRIDLINEPARENTGROUPCLASS = 'grid-lines';
 export const GRIDBANDPARENTGROUPCLASS = 'grid-bands';
+export const GRIDPARENTGROUP = 'grid-parent-group';
 export const CONSOLIDATED = 'consolidated';
 export const FRAGMENTED = 'fragmented';
 export const FACET_BY_FIELDS = 'facetByFields';

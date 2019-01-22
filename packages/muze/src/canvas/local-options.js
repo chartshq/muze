@@ -101,7 +101,7 @@ export const localOptions = {
     },
 
     [LAYERS]: {
-        value: null,
+        value: [],
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Array'

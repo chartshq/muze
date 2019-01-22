@@ -1,7 +1,7 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel, createSelection } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { layerFactory } from '@chartshq/visual-layer';
-import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS } from '../enums/constants';
+import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS, GRIDPARENTGROUP } from '../enums/constants';
 import { TIMEDIFFS } from '../enums/reactive-props';
 
 const LINEAR = ScaleType.LINEAR;
@@ -130,31 +130,26 @@ export const createGridLineLayer = (context) => {
     ['band', 'line'].forEach((type) => {
         let mark;
         let config;
-        let instances;
+        let gridType;
         if (type === 'band') {
             mark = 'bar';
+            gridType = 'gridBand';
             config = vuConf.gridBands;
-            instances = context._gridbands;
         } else {
             mark = 'tick';
+            gridType = 'gridLine';
             config = vuConf.gridLines;
-            instances = context._gridlines;
         }
         const definitions = getGridLayerDefinitions(context, config, type);
 
-        definitions.forEach((atomicDef, i) => {
-            let layer;
+        context[`_${gridType}Selection`] = createSelection(context[`${type}Sel`], () => {
+            const inst = layerFactory.getLayerInstance({ mark });
+            inst.dependencies(context._layerDeps);
+            return inst;
+        }, definitions).each((layer, atomicDef, i) => {
             const definition = atomicDef.definition;
-            const axesObj = atomicDef.axes;
             const sConf = layerFactory.getSerializedConf(mark, definition);
-            sConf.mark = mark;
-            if (!instances[i]) {
-                layer = layerFactory.getLayerInstance(sConf);
-                layer.dependencies(context._layerDeps);
-            } else {
-                layer = instances[i];
-            }
-
+            const axesObj = atomicDef.axes;
             layer
                             .metaInf({
                                 unitRowIndex: metaInf.rowIndex,
@@ -167,7 +162,6 @@ export const createGridLineLayer = (context) => {
                                 timeDiffs: context.store().get(TIMEDIFFS)
                             })
                             .axes(axesObj);
-            instances[i] = layer;
         });
     });
 };
@@ -178,23 +172,25 @@ export const attachDataToGridLineLayers = (context) => {
         width: context.width(),
         height: context.height()
     };
-
+    const gridLines = context._gridLineSelection.getObjects();
+    const gridBands = context._gridBandSelection.getObjects();
     const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
-    [].concat(...context._gridbands, ...context._gridlines).forEach((inst) => {
+    [].concat(...gridBands, ...gridLines).forEach((inst) => {
         inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y).measurement(measurement);
     });
 };
 
 export const renderGridLineLayers = (context, container) => {
-    const axes = context.axes();
     const config = context.config();
     const classPrefix = config.classPrefix;
+    const gridLines = context._gridLineSelection.getObjects();
+    const gridBands = context._gridBandSelection.getObjects();
 
-    if (axes && ((axes.x && axes.x.length) || (axes.y && axes.y.length))) {
-        [[context._gridlines, `${classPrefix}-${GRIDLINEPARENTGROUPCLASS}`],
-            [context._gridbands, `${classPrefix}-${GRIDBANDPARENTGROUPCLASS}`]].forEach((entry) => {
+    const gridLineParentGroup = makeElement(container, 'g', [1], `${classPrefix}-${GRIDPARENTGROUP}`);
+    [[gridLines, `${classPrefix}-${GRIDLINEPARENTGROUPCLASS}`],
+            [gridBands, `${classPrefix}-${GRIDBANDPARENTGROUPCLASS}`]].forEach((entry) => {
                 const [instances, parentGroupClass] = entry;
-                const mountPoint = makeElement(container, 'g', [1], `.${parentGroupClass}`);
+                const mountPoint = makeElement(gridLineParentGroup, 'g', [1], `.${parentGroupClass}`);
                 const className = `${parentGroupClass}-group`;
                 makeElement(mountPoint, 'g', instances, `.${className}`, {
                     update: (group, instance) => {
@@ -202,5 +198,4 @@ export const renderGridLineLayers = (context, container) => {
                     }
                 });
             });
-    }
 };
