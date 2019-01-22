@@ -8,7 +8,6 @@ export const PROPS = {
             return value;
         }
     },
-
     manager: {},
     unitPositions: {},
     logicalSpace: {}

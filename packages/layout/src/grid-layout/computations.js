@@ -1,4 +1,4 @@
-import { HEIGHT, WIDTH, COLUMN, ROW } from '../enums/constants';
+import { HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL } from '../enums/constants';
 
 /**
  * Gets measurement for an instance of visual matrix
@@ -48,44 +48,47 @@ const setViewSpaces = (layout, pointerType, viewSpaces) => {
     return pointer;
 };
 
-const getColumnMatrixWidth = (layout, maxWidthAvailableForColumnMatrix) => {
+const paginationDetailsMap = {
+    column: {
+        maxMeasure: 'maxWidthAvailableForColumnMatrix',
+        matrix: 'columnMatrix',
+        measureType: WIDTH,
+        scrollType: HORIZONTAL
+    },
+    row: {
+        maxMeasure: 'maxHeightAvailableForRowMatrix',
+        matrix: 'rowMatrix',
+        measureType: HEIGHT,
+        scrollType: VERTICAL
+    }
+};
+
+const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     const {
         pagination,
         buffer
     } = layout.config();
-
-    switch (pagination) {
-    case 'holistic':
-        return maxWidthAvailableForColumnMatrix;
-    default: {
-        const columnMatrixWidth = getMatrixMeasurement(layout.columnMatrix(), WIDTH);
-        if (columnMatrixWidth > maxWidthAvailableForColumnMatrix) {
-            layout.scrollInfo({ horizontal: true });
-        }
-        return Math.max(maxWidthAvailableForColumnMatrix - buffer, columnMatrixWidth);
-    }
-
-    }
-};
-const getRowMatrixHeight = (layout, maxHeightAvailableForRowMatrix) => {
     const {
-        pagination,
-        buffer
-    } = layout.config();
+        matrix,
+        measureType,
+        scrollType
+    } = measureDetails;
 
     switch (pagination) {
     case 'holistic':
-        return maxHeightAvailableForRowMatrix;
+        return maxMeasure;
     default: {
-        const rowMatrixHeight = getMatrixMeasurement(layout.rowMatrix(), HEIGHT);
-        if (rowMatrixHeight > maxHeightAvailableForRowMatrix) {
-            layout.scrollInfo({ vertical: true });
+        const actualMeasure = getMatrixMeasurement(layout[matrix](), measureType);
+        if (actualMeasure > maxMeasure) {
+            layout.scrollInfo({ [scrollType]: true });
         }
-        return Math.max(maxHeightAvailableForRowMatrix - buffer, rowMatrixHeight);
+        return Math.max(maxMeasure - buffer, actualMeasure);
     }
-
     }
 };
+
+const paginationMeasureGetter = (layout, matrixType, relatedMaxMeasure) =>
+    getMatrixMeasureForPagination(layout, paginationDetailsMap[matrixType], relatedMaxMeasure);
 
 /**
  * Computes the measurements of space for all matrices in the
@@ -121,8 +124,7 @@ export const computeLayoutMeasurements = (layout) => {
 
     const maxWidthAvailableForColumnMatrix = width - maxRowMatrixWidth - border.width;
     // Set width for column matrix
-    const columnMatrixWidth = getColumnMatrixWidth(layout, maxWidthAvailableForColumnMatrix);
-    // width - maxRowMatrixWidth - borderWidth;
+    const columnMatrixWidth = paginationMeasureGetter(layout, COLUMN, maxWidthAvailableForColumnMatrix);
 
     const maxColumnMatrixHeight = Math.min(columnMatrix.getLogicalSpace().height, height / 2);
 
@@ -140,7 +142,7 @@ export const computeLayoutMeasurements = (layout) => {
     const maxHeightAvailableForRowMatrix = height - maxColumnMatrixHeight;
 
     // Set height for row matrix
-    const rowMatrixHeight = getRowMatrixHeight(layout, maxHeightAvailableForRowMatrix);
+    const rowMatrixHeight = paginationMeasureGetter(layout, ROW, maxHeightAvailableForRowMatrix);
 
     rowMatrix.setAvailableSpace(maxRowMatrixWidth, rowMatrixHeight);
     // Get heights of each cell of row matrix

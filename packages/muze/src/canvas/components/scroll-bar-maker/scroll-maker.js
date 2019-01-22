@@ -42,6 +42,7 @@ export class ScrollMaker {
 
     createScroll (mountPoint) {
         const config = this.config();
+
         return {
             scrollBarContainer: scrollContainerHelper(mountPoint, config, this.logicalSpace(), this.constructor.type())
         };

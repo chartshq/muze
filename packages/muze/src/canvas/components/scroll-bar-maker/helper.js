@@ -36,11 +36,14 @@ export const createScrollBarArrow = (mount, type, config) => {
         thickness
     } = config;
     const arrow = makeElement(mount, 'div', [type], `${classPrefix}-scroll-arrow-${type}`);
+
     arrow.classed(`${classPrefix}-scroll-arrow`, true);
     arrow.style(arrowSizeMap[type], `${thickness}px`);
+
     const chevron = makeElement(arrow, 'div', [1], `${classPrefix}-scroll-arrow-chevron`);
+
     chevron.attr('id', `${classPrefix}-scroll-arrow-chevron-${type}`);
-    // arrow.html(arrowUnicodeMap[type]);
+
     return arrow;
 };
 
@@ -50,6 +53,7 @@ export const createScrollBarRect = (mount, config) => {
     } = config;
     const rect = makeElement(mount, 'div', [1], `${classPrefix}-scroll-rect`);
     const mover = makeElement(rect, 'div', [1], `${classPrefix}-scroll-mover`);
+
     return { rect, mover };
 };
 
@@ -57,6 +61,7 @@ export const applyRectClick = (scrollMaker, moverRect) => {
     const {
         rect
     } = moverRect;
+
     rect.on('click', () => {
         const event = getEvent();
         scrollMaker.emptyScrollAreaClick(event);
@@ -64,16 +69,15 @@ export const applyRectClick = (scrollMaker, moverRect) => {
 };
 
 const applyMoverDrag = (scrollMaker, moverRect) => {
+    let startPos = {};
+    let moverStartPos = 0;
+    let endPos = {};
     const {
         mover,
         rect
     } = moverRect;
-    let moverStartPos = 0;
     const rectStartPos = rect.node().getBoundingClientRect();
 
-    let startPos = {};
-
-    let endPos = {};
     mover.on('click', () => {
         const event = getEvent();
         event.stopPropagation();
@@ -81,6 +85,7 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
     mover.call(d3Drag()
                     .on('start', () => {
                         const event = getEvent();
+
                         moverStartPos = mover.node().getBoundingClientRect();
                         startPos = {
                             x: event.x,
@@ -90,6 +95,7 @@ const applyMoverDrag = (scrollMaker, moverRect) => {
                     .on('drag', () => {
                         const event = getEvent();
                         const window = getWindow();
+
                         endPos = {
                             x: event.x,
                             y: event.y
@@ -125,13 +131,17 @@ const registerListenerOnArrow = (scrollMaker, moverRect, arrowType, speed) => {
 
     arrow.on(isTouchDevice ? 'touchstart' : 'mousedown', () => {
         const event = getEvent();
+
         event.preventDefault();
+
         timer = setInterval(() => {
             applyScrollMouseDownAction(moverRect, scrollMaker, speed);
         }, 100);
     }).on(isTouchDevice ? 'touchend' : 'mouseup', () => {
         const event = getEvent();
+
         event.preventDefault();
+
         clearInterval(timer);
     }).on('click', () => {
         applyScrollMouseDownAction(moverRect, scrollMaker, speed);
@@ -144,8 +154,8 @@ export const registerListeners = (scrollMaker) => {
     } = scrollMaker._components;
 
     const speed = scrollMaker.config().speed;
-    registerListenerOnArrow(scrollMaker, moverRect, 'prevArrow', -speed);
 
+    registerListenerOnArrow(scrollMaker, moverRect, 'prevArrow', -speed);
     applyMoverDrag(scrollMaker, moverRect);
     applyRectClick(scrollMaker, moverRect);
     registerListenerOnArrow(scrollMaker, moverRect, 'nextArrow', speed);
@@ -156,6 +166,7 @@ export const scrollContainerHelper = (mountPoint, config, dimensions, type) => {
         classPrefix
     } = config;
     const scrollBarContainer = makeElement(selectElement(mountPoint), 'div', [1], `#${classPrefix}-scroll-bar-${type}`);
+
     scrollBarContainer.classed(`${classPrefix}-scroll-bar`, true);
     scrollBarContainer.style(WIDTH, `${dimensions.width}px`);
     scrollBarContainer.style(HEIGHT, `${dimensions.height}px`);

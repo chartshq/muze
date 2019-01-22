@@ -3,22 +3,23 @@ import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
 
+const applyScrollAction = (elem, classPrefix, movement, type) => {
+    selectElement(elem)
+                    .selectAll(`.${classPrefix}-grid`)
+                    .property(type, movement);
+};
+
 const scrollActionApplier = (movement, context) => {
     const classPrefix = context.params.config.classPrefix;
+
     return {
         horizontal: () => {
-            [0, 1, 2].forEach((e) => {
-                selectElement(`#${context.component[e][1].renderAt()}`)
-                                .selectAll(`.${classPrefix}-grid`)
-                                .property('scrollLeft', movement);
-            });
+            [0, 1, 2].forEach(e =>
+                applyScrollAction(`#${context.component[e][1].renderAt()}`, classPrefix, movement, 'scrollLeft'));
         },
         vertical: () => {
-            [0, 1, 2].forEach((e) => {
-                selectElement(`#${context.component[1][e].renderAt()}`)
-                                .selectAll(`.${classPrefix}-grid`)
-                                .property('scrollTop', movement);
-            });
+            [0, 1, 2].forEach(e =>
+                applyScrollAction(`#${context.component[1][e].renderAt()}`, classPrefix, movement, 'scrollTop'));
         }
     };
 };
@@ -123,6 +124,7 @@ export default class GridComponent extends MuzeComponent {
     getBoundBox () {
         const { top, left } = this.component[0][0].boundBox();
         const { height, width } = this.boundBox();
+
         return {
             top,
             left,
