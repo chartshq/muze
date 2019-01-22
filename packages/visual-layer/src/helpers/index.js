@@ -5,13 +5,11 @@ import {
     easeFns,
     selectElement,
     DimensionSubtype,
-    STATE_NAMESPACES,
-    retrieveNearestGroupByReducers,
-    getObjProp
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 
@@ -165,15 +163,10 @@ export const getValidTransform = (context, layerConfig, dataModel, encodingField
     const groupByField = transform.groupBy;
     const fieldsConfig = dataModel.getFieldsConfig();
     const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
-    const isCustomTransformTypeProvided = !!getObjProp(context._customConfig, 'transform', 'type');
     let transformType = transform.type;
     if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
         yFieldType === FieldType.DIMENSION) {
         transformType = IDENTITY;
-    } else if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
-        const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
-        const { [measureField]: aggFn } = retrieveNearestGroupByReducers(dataModel, measureField);
-        transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
     }
     return transformType;
 };

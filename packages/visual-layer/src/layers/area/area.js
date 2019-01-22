@@ -1,9 +1,13 @@
-import { FieldType } from 'muze-utils';
+import {
+    FieldType,
+    retrieveNearestGroupByReducers,
+    getObjProp
+} from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { LineLayer } from '../line';
 import drawArea from './renderer';
 import './styles.scss';
-import { STACK, ENCODING } from '../../enums/constants';
+import { STACK, GROUP, ENCODING, AGG_FN_SUM } from '../../enums/constants';
 import { getAxesScales, positionPoints, getLayerColor, getIndividualClassName } from '../../helpers';
 
 /**
@@ -133,6 +137,33 @@ export default class AreaLayer extends LineLayer {
         });
         points = positionPoints(this, points);
         return points;
+    }
+
+    transformType (...transformType) {
+        if (transformType.length) {
+            this._transformType = this.sanitizeTransformType(transformType[0]);
+            return this;
+        }
+        return this._transformType;
+    }
+
+    sanitizeTransformType (transformType) {
+        const {
+            xField,
+            yField,
+            xFieldType,
+            yFieldType
+        } = this.encodingFieldsInf();
+        const groupByField = this.config().transform.groupBy;
+        const isCustomTransformTypeProvided = !!getObjProp(this._customConfig, 'transform', 'type');
+
+        if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
+            const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
+            const { [measureField]: aggFn } = retrieveNearestGroupByReducers(this.data(), measureField);
+            transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
+        }
+
+        return transformType;
     }
 
     /**

@@ -25,13 +25,13 @@
 
         let rootData = new DataModel(jsonData, schema);
         // rootData = rootData.groupBy(['Origin', 'Year'], {
-        //     Acceleration: 'sum'
+        //     Acceleration: 'svg'
         // });
         // rootData = rootData.select(() => true);
 
         const ops = DataModel.Operators;
         rootData = ops.compose(
-            ops.groupBy(['Origin', 'Year'], { Acceleration: 'sum' }),
+            ops.groupBy(['Origin', 'Year'], { Acceleration: 'avg' }),
             ops.select(() => true)
         )(rootData);
 
@@ -43,17 +43,17 @@
             .color("Origin")
             .layers([
                 {
-                    mark: 'bar',
-                    // transform: {
-                    //     type: "stack"
-                    // }
+                    mark: 'line',
+                    transform: {
+                        type: "stack"
+                    }
                 }
             ])
             .config({
                 autoGroupBy: {
-                    disabled: true,
+                    disabled: false,
                     measures: {
-                        Acceleration: 'sum'
+                        Acceleration: 'avg'
                     }
                 }
             })
