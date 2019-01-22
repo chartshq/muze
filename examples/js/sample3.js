@@ -38,39 +38,24 @@
         type: 'dimension'
     }];
         const rootData = new DataModel(jsonData, schema);
-
-        env = env.data(rootData).minUnitHeight(140).minUnitWidth(140);
+        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        canvas = canvas.columns(['Origin','Acceleration'])
-        .rows(['Year', 'Horsepower'])
-        .data(rootData)
-        .height(1900)
-        // .size({
-        //     field: 'Acceleration',
-        //     domain: [-15, 20, 30]
-        //     // range: [-20,20]
-        // })
-        // .color({
-        //     stops: 20,
-        //    field: 'Acceleration'
-        // })
-        .config({
-           legend:{
-               position: 'bottom'
-           },
-        //    pagination: 'holistic'
-        //    border:{}
-        })
-        // .layers([])
-        .title("sads")
-        // .color('Origin')
-        .width(900)
-      
-        .mount(mountPoint);
+        let rows = ['Cylinders', 'Horsepower', 'Weight_in_lbs'],
+		columns = ['Origin'];
+	canvas = canvas
+		.rows(rows)
+		.columns(columns)
+  .data(rootData)
+	.color('Origin')
+	.shape('Origin')
+	.size('Origin')
+  .width(500)
+  .height(500)
+  .mount(mountPoint)
 
-        canvas.onAnimationEnd((client) => {
-
+        canvas.once('canvas.animationend').then((client) => {
+            canvas.composition().vScrollBar.scrollToUnitIndex(10);
             const element = document.getElementById('chart');
             element.classList.add('animateon');
         });

@@ -145,32 +145,68 @@ export const getRenderDetails = (context, mount) => {
     };
 };
 
-const components = { title: 0, subtitle: 1, legend: 2, verticalScrollBar: 3, horizontalScrollBar: 4, grid: 5 };
+const componentIndexes = {
+    title: 0,
+    subtitle: 1,
+    legend: 2,
+    verticalScrollBar: 3,
+    horizontalScrollBar: 4,
+    grid: 5
+};
 
-export const renderLayout = (canvas, renderDetails) => {
-    const layoutManager = canvas._layoutManager;
-    const grid = canvas.layout();
-    const compWrapMaker = componentWrapperMaker(layoutManager, grid, renderDetails);
-    const componentWrappers = Object.keys(components).map(e => compWrapMaker[e]());
-    const horizontalScrollWrapper = componentWrappers[components.horizontalScrollBar];
-    const verticalScrollWrapper = componentWrappers[components.verticalScrollBar];
-    const gridWrapper = componentWrappers[components.grid];
+/**
+ * Responsible for creating a scroll manager that manages interactions between the grid
+ * component and the scroll bar components
+ *
+ * @param {Array} componentWrappers Contains the wrappers for all the components
+ * @param {Canvas} canvas Instance of the current canvas
+ * @return {Array} Positions of units either horizontal or vertical
+ */
+const createScrollManager = (componentWrappers, canvas) => {
+    const {
+        horizontalScrollBar,
+        verticalScrollBar,
+        grid
+    } = componentIndexes;
+
+    const horizontalScrollWrapper = componentWrappers[horizontalScrollBar];
+    const verticalScrollWrapper = componentWrappers[verticalScrollBar];
+    const gridWrapper = componentWrappers[grid];
     const scrollBarManager = new ScrollManager();
     const scrollBarComponents = {};
 
     verticalScrollWrapper && (scrollBarComponents.vertical = verticalScrollWrapper);
     horizontalScrollWrapper && (scrollBarComponents.horizontal = horizontalScrollWrapper);
+
     scrollBarManager
                     .scrollBarComponents(scrollBarComponents)
                     .attachedComponents({
                         grid: gridWrapper
                     });
-    canvas.composition().scroll = scrollBarComponents;
+    canvas.composition().hScrollBar = horizontalScrollWrapper;
+    canvas.composition().vScrollBar = verticalScrollWrapper;
+
     [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
         wrapper && wrapper.manager(scrollBarManager);
     });
 
     gridWrapper.scrollBarManager(scrollBarManager);
+};
+
+export const renderLayout = (canvas, renderDetails) => {
+    const layoutManager = canvas._layoutManager;
+    const gridLayout = canvas.layout();
+    const {
+
+        grid
+    } = componentIndexes;
+
+    // Get the component wrappers
+    const compWrappers = componentWrapperMaker(layoutManager, gridLayout, renderDetails);
+    const componentWrappers = Object.keys(componentIndexes).map(e => compWrappers[e]);
+    const gridWrapper = componentWrappers[grid];
+    createScrollManager(componentWrappers, canvas);
+
     layoutManager.registerComponents(componentWrappers).compute();
     gridWrapper.attachScrollListener();
 };

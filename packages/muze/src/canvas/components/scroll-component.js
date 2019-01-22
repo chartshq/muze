@@ -76,7 +76,9 @@ export default class ScrollComponent extends MuzeComponent {
      * @return {ScrollComponent} Instance of the ScrollComponent
      */
     scrollToUnitIndex (unitIndex) {
-        this.component.scrollTo(this.component.unitPositions()[unitIndex + 1]);
+        const unitPositions = this.component.unitPositions();
+        const sanitizedUnitIndex = Math.min(Math.max(0, unitIndex), unitPositions.length - 1);
+        this.component.scrollTo(unitPositions[sanitizedUnitIndex]);
         return this;
     }
 
