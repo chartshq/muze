@@ -1,8 +1,9 @@
-import { mergeRecursive, ERROR_MSG } from 'muze-utils';
+import { ERROR_MSG, generateGetterSetters } from 'muze-utils';
 import {
     scrollContainerHelper,
     registerListeners
 } from './helper';
+import { PROPS } from './props';
 
 export class ScrollMaker {
 
@@ -15,6 +16,8 @@ export class ScrollMaker {
             speed: 2
         };
         this._unitPositions = null;
+
+        generateGetterSetters(this, PROPS);
     }
 
     static type () {
@@ -29,36 +32,12 @@ export class ScrollMaker {
         throw new ERROR_MSG('Method not implemented');
     }
 
-    config (...c) {
-        if (c.length) {
-            this._config = mergeRecursive(this._config, c[0]);
-            return this;
-        }
-        return this._config;
+    scrollTo () {
+        throw new ERROR_MSG('Method not implemented');
     }
 
-    scrollBarManager (...manager) {
-        if (manager.length) {
-            this._scrollBarManager = manager[0];
-            return this;
-        }
-        return this._scrollBarManager;
-    }
-
-    unitPositions (...positions) {
-        if (positions.length) {
-            this._unitPositions = positions[0];
-            return this;
-        }
-        return this._unitPositions;
-    }
-
-    logicalSpace (...l) {
-        if (l.length) {
-            this._logicalSpace = l[0];
-            return this;
-        }
-        return this._logicalSpace;
+    scrollDeltaTo () {
+        throw new ERROR_MSG('Method not implemented');
     }
 
     createScroll (mountPoint) {
@@ -79,10 +58,12 @@ export class ScrollMaker {
 
     registerListeners () {
         registerListeners(this);
+        return this;
     }
 
     remove () {
         this._components.scrollBarContainer.remove();
+        return this;
     }
 }
 

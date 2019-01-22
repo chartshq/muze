@@ -62,7 +62,7 @@
                position: 'bottom'
            },
            scrollBar:{
-               speed: 10
+            //    speed: 10
            }
         //    border:{}
         })

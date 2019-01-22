@@ -78,7 +78,7 @@ export class HorizontalScrollMaker extends ScrollMaker {
         const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 
-        this.scrollBarManager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
+        this.manager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
     }
 
     scrollDeltaTo (delta) {
@@ -99,7 +99,9 @@ export class HorizontalScrollMaker extends ScrollMaker {
         } = this._components.moverRect;
         const moverPos = mover.node().getBoundingClientRect();
         const movement = (scrollPercentage * (this._scrollBarWithouArrowLength - moverPos.width)) / 100;
+
         this.changeMoverPosition({ y: 0, x: movement });
+        return this;
     }
 
 }

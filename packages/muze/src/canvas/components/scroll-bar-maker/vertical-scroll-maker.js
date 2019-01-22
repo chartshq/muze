@@ -80,7 +80,7 @@ export class VerticalScrollMaker extends ScrollMaker {
         const totalDistance = this._scrollBarWithouArrowLength;
         const movedViewLength = (currentPos * totalLength) / totalDistance;
 
-        this.scrollBarManager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
+        this.manager().performAttachedScrollFunction(this.constructor.type(), movedViewLength);
     }
 
     scrollDeltaTo (delta) {

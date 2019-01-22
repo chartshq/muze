@@ -93,23 +93,26 @@ export default class GridComponent extends MuzeComponent {
         selectElement(`#${this.component[1][1].renderAt()}`)
                         .on('wheel', () => {
                             const event = getEvent();
-                            event.preventDefault();
-                            event.stopPropagation();
                             const {
                                 wheelDeltaX,
                                 wheelDeltaY
                             } = event;
-                            // console.log(event);
-                            // console.log(wheelDeltaX, wheelDeltaY);
-                            // const deltaX = -event.deltaX * (event.deltaMode ? 120 : 1) / 500;
-                            // const deltaY = -event.deltaY * (event.deltaMode ? 120 : 1) / 500;
+
+                            // Prevent default behaviour and stop propagating
+                            event.preventDefault();
+                            event.stopPropagation();
+
+                            // Scrolling horizontally
                             if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
                                 this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX);
                             }
+
+                            // Scrolling Vertically
                             if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
                                 this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY);
                             }
                         });
+        return this;
     }
 
     performScrollAction (direction, movedView) {
@@ -141,5 +144,6 @@ export default class GridComponent extends MuzeComponent {
         this.target(params.config.target);
         this.className(params.config.className);
         this.sanitizeGrid();
+        return this;
     }
 }

@@ -166,8 +166,8 @@ export const renderLayout = (canvas, renderDetails) => {
                         grid: gridWrapper
                     });
     canvas.composition().scroll = scrollBarComponents;
-    [horizontalScrollWrapper, verticalScrollWrapper, gridWrapper].forEach((wrapper) => {
-        wrapper && wrapper.scrollBarManager(scrollBarManager);
+    [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
+        wrapper && wrapper.manager(scrollBarManager);
     });
 
     gridWrapper.scrollBarManager(scrollBarManager);

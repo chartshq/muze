@@ -18,25 +18,27 @@ export default class ScrollComponent extends MuzeComponent {
         this.setParams(params);
     }
 
-    scrollBarManager (...manager) {
+    manager (...manager) {
         if (manager.length) {
-            this.component.scrollBarManager(manager[0]);
+            this.component.manager(manager[0]);
             return this;
         }
-        return this.component.scrollBarManager();
+        return this.component.manager();
     }
 
     scrollDeltaTo (delta) {
         this.component.scrollDeltaTo(delta);
         return this;
     }
+
     scrollTo (scrollPercentage) {
         this.component.scrollTo(scrollPercentage);
         return this;
     }
 
-    scrollToUnit (unitNum) {
+    scrollToUnitIndex (unitNum) {
         this.component.scrollTo(this.component.unitPositions()[unitNum + 1]);
+        return this;
     }
 
     getScrollPositionsForUnits () {
@@ -45,6 +47,7 @@ export default class ScrollComponent extends MuzeComponent {
 
     triggerScrollBarAction (movement) {
         this.component.triggerScrollBarAction(movement);
+        return this;
     }
 
     draw (container) {
