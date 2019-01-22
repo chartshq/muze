@@ -1,14 +1,18 @@
 import {
-    FieldType,
-    retrieveNearestGroupByReducers,
-    getObjProp
+    FieldType
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { LineLayer } from '../line';
 import drawArea from './renderer';
 import './styles.scss';
-import { STACK, GROUP, ENCODING, AGG_FN_SUM } from '../../enums/constants';
-import { getAxesScales, positionPoints, getLayerColor, getIndividualClassName } from '../../helpers';
+import { STACK, ENCODING } from '../../enums/constants';
+import {
+    getAxesScales,
+    positionPoints,
+    getLayerColor,
+    getIndividualClassName,
+    getValidTransformForAggFn
+} from '../../helpers';
 
 /**
  * Area layer renders a closed path. The mark type of this layer is ```area```. This layer can be used
@@ -139,31 +143,8 @@ export default class AreaLayer extends LineLayer {
         return points;
     }
 
-    transformType (...transformType) {
-        if (transformType.length) {
-            this._transformType = this.sanitizeTransformType(transformType[0]);
-            return this;
-        }
-        return this._transformType;
-    }
-
-    sanitizeTransformType (transformType) {
-        const {
-            xField,
-            yField,
-            xFieldType,
-            yFieldType
-        } = this.encodingFieldsInf();
-        const groupByField = this.config().transform.groupBy;
-        const isCustomTransformTypeProvided = !!getObjProp(this._customConfig, 'transform', 'type');
-
-        if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
-            const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
-            const { [measureField]: aggFn } = retrieveNearestGroupByReducers(this.data(), measureField);
-            transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
-        }
-
-        return transformType;
+    resolveTransformType () {
+        this._transformType = getValidTransformForAggFn(this);
     }
 
     /**

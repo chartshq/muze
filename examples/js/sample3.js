@@ -31,7 +31,7 @@
 
         const ops = DataModel.Operators;
         rootData = ops.compose(
-            ops.groupBy(['Origin', 'Year'], { Acceleration: 'avg' }),
+            ops.groupBy(['Origin', 'Year'], { Acceleration: 'sum' }),
             ops.select(() => true)
         )(rootData);
 

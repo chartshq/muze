@@ -5,11 +5,13 @@ import {
     easeFns,
     selectElement,
     DimensionSubtype,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    retrieveNearestGroupByReducers,
+    getObjProp
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 
@@ -141,34 +143,6 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
         x0FieldIndex,
         y0FieldIndex
     };
-};
-
-/**
- *
- *
- * @param {*} layerConfig
- * @param {*} fieldsConfig
- *
- */
-export const getValidTransform = (context, layerConfig, dataModel, encodingFieldInf) => {
-    const {
-        transform
-    } = layerConfig;
-    const {
-        xField,
-        yField,
-        xFieldType,
-        yFieldType
-    } = encodingFieldInf;
-    const groupByField = transform.groupBy;
-    const fieldsConfig = dataModel.getFieldsConfig();
-    const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
-    let transformType = transform.type;
-    if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
-        yFieldType === FieldType.DIMENSION) {
-        transformType = IDENTITY;
-    }
-    return transformType;
 };
 
 /**
@@ -460,4 +434,48 @@ export const initializeGlobalState = (context) => {
             [namespace]: null
         });
     }
+};
+
+export const resolveInvalidTransformType = (context) => {
+    const {
+        xField,
+        yField,
+        xFieldType,
+        yFieldType
+    } = context.encodingFieldsInf();
+    const groupByField = context.config().transform.groupBy;
+    const fieldsConfig = context.data().getFieldsConfig();
+    const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
+    if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
+        yFieldType === FieldType.DIMENSION) {
+        return IDENTITY;
+    }
+    return null;
+};
+
+export const getValidTransform = context => resolveInvalidTransformType(context) || context.config().transform.type;
+
+export const getValidTransformForAggFn = (context) => {
+    const resolvedInvalidTransformType = resolveInvalidTransformType(context);
+    if (resolvedInvalidTransformType) {
+        return resolvedInvalidTransformType;
+    }
+
+    const {
+        xField,
+        yField,
+        xFieldType,
+        yFieldType
+    } = context.encodingFieldsInf();
+    const groupByField = context.config().transform.groupBy;
+    const isCustomTransformTypeProvided = !!getObjProp(context._customConfig, 'transform', 'type');
+    let transformType = context.config().transform.type;
+
+    if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
+        const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
+        const { [measureField]: aggFn } = retrieveNearestGroupByReducers(context.data(), measureField);
+        transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
+    }
+
+    return transformType;
 };

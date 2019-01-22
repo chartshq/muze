@@ -19,7 +19,8 @@ import {
     calculateDomainFromData,
     getNormalizedData,
     applyInteractionStyle,
-    initializeGlobalState
+    initializeGlobalState,
+    getValidTransform
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
@@ -373,17 +374,12 @@ export default class BaseLayer extends SimpleLayer {
         this._updateLock = false;
         return this;
     }
-    /**
-     *
-     *
-     *
-     * @memberof BaseLayer
-     */
-    transformType (...transformType) {
-        if (transformType.length) {
-            this._transformType = transformType[0];
-            return this;
-        }
+
+    resolveTransformType () {
+        this._transformType = getValidTransform(this);
+    }
+
+    transformType () {
         return this._transformType;
     }
 

@@ -7,17 +7,14 @@ import {
     DimensionSubtype,
     FieldType,
     MeasureSubtype,
-    Scales,
-    retrieveNearestGroupByReducers,
-    getObjProp
+    Scales
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
-import { getPlotMeasurement } from '../../helpers';
+import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
 import { getTranslatedPoints } from './bar-helper';
-import { STACK, GROUP, AGG_FN_SUM } from '../../enums/constants';
 
 const MEASURE = FieldType.MEASURE;
 const scaleBand = Scales.band;
@@ -221,31 +218,8 @@ export default class BarLayer extends BaseLayer {
         return this._plotPadding;
     }
 
-    transformType (...transformType) {
-        if (transformType.length) {
-            this._transformType = this.sanitizeTransformType(transformType[0]);
-            return this;
-        }
-        return this._transformType;
-    }
-
-    sanitizeTransformType (transformType) {
-        const {
-            xField,
-            yField,
-            xFieldType,
-            yFieldType
-        } = this.encodingFieldsInf();
-        const groupByField = this.config().transform.groupBy;
-        const isCustomTransformTypeProvided = !!getObjProp(this._customConfig, 'transform', 'type');
-
-        if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
-            const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
-            const { [measureField]: aggFn } = retrieveNearestGroupByReducers(this.data(), measureField);
-            transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
-        }
-
-        return transformType;
+    resolveTransformType () {
+        this._transformType = getValidTransformForAggFn(this);
     }
 
     /**

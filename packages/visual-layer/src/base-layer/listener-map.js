@@ -1,5 +1,5 @@
 import { CommonProps, STATE_NAMESPACES } from 'muze-utils';
-import { getValidTransform, getEncodingFieldInf } from '../helpers';
+import { getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
 const renderLayer = (context) => {
@@ -20,7 +20,7 @@ export const listenerMap = (context, ns) => [
                 const fieldsConfig = data.getFieldsConfig();
                 const encodingFieldsInf = getEncodingFieldInf(encodingValue, fieldsConfig);
                 context.encodingFieldsInf(encodingFieldsInf);
-                context.transformType(getValidTransform(context, config, data, encodingFieldsInf));
+                context.resolveTransformType();
                 context._transformedData = context.getTransformedData(data, config,
                     context.transformType(), encodingFieldsInf);
                 context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
