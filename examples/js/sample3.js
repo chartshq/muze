@@ -36,8 +36,6 @@
     }, {
         name: 'Year',
         type: 'dimension'
-			// subtype: 'temporal',
-			// format: '%Y-%m-%d'
     }];
         const rootData = new DataModel(jsonData, schema);
 
