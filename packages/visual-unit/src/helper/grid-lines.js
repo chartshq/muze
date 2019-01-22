@@ -2,7 +2,6 @@ import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel, cre
 import { ScaleType } from '@chartshq/muze-axis';
 import { layerFactory } from '@chartshq/visual-layer';
 import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS, GRIDPARENTGROUP } from '../enums/constants';
-import { TIMEDIFFS } from '../enums/reactive-props';
 
 const LINEAR = ScaleType.LINEAR;
 
@@ -127,6 +126,8 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
 export const createGridLineLayer = (context) => {
     const vuConf = context.config();
     const metaInf = context.metaInf();
+    const store = context.store();
+    const timeDiffs = context._timeDiffs;
     ['band', 'line'].forEach((type) => {
         let mark;
         let config;
@@ -150,18 +151,17 @@ export const createGridLineLayer = (context) => {
             const definition = atomicDef.definition;
             const sConf = layerFactory.getSerializedConf(mark, definition);
             const axesObj = atomicDef.axes;
-            layer
-                            .metaInf({
-                                unitRowIndex: metaInf.rowIndex,
-                                unitColIndex: metaInf.colIndex,
-                                namespace: `${metaInf.namespace}${type}${i}`
-                            })
-                            .store(context.store())
-                            .config(sConf)
-                            .dataProps({
-                                timeDiffs: context.store().get(TIMEDIFFS)
-                            })
-                            .axes(axesObj);
+            layer.metaInf({
+                unitRowIndex: metaInf.rowIndex,
+                unitColIndex: metaInf.colIndex,
+                namespace: `${metaInf.namespace}${type}${i}`
+            })
+                .store(store)
+                .config(sConf)
+                .dataProps({
+                    timeDiffs
+                })
+                .axes(axesObj);
         });
     });
 };
