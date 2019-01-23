@@ -91,7 +91,6 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     setColorStrategy (domainType, rangeType, schemeType) {
-        // const { stops } = this.config();
         return strategyGetter(domainType, rangeType, schemeType);
     }
 

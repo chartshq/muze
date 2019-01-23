@@ -176,4 +176,4 @@ const strategies = () => ({
  * @param {*} stops
  */
 export const strategyGetter = (domainType, rangeType, schemeType) =>
-     strategies()[`${domainType}-${rangeType}-${schemeType || ''}`];
+    strategies()[`${domainType}-${rangeType}-${schemeType || ''}`];
