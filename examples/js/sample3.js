@@ -5,7 +5,7 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        // const jsonData = data;
+        let jsonData = data;
         const schema = [
             {
                 name: 'Name',
@@ -51,14 +51,14 @@
             }
         ];
 
-        const jsonData = [
-            { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
-            { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
-            { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
-            { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
-            { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
-            { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
-        ];
+        // jsonData = [
+        //     { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
+        //     { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
+        //     { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
+        //     { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
+        //     { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
+        //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
+        // ];
         let rootData = new DataModel(jsonData, schema);
         rootData = rootData.groupBy(["Origin", "Year"], {
             Acceleration: "avg"

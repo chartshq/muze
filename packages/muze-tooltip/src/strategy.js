@@ -86,7 +86,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         };
                     }
                     if (associatedMeasures.length > 1) {
-                        values.push([icon, `${key}`]);
+                        const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
+                        values.push([icon, `${formattedKey}`]);
                         associatedMeasures.forEach((measure) => {
                             measureIndex = fieldsConfig[measure].index;
                             value = data[i][measureIndex];
@@ -112,13 +113,18 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         const measureFormatter = getDefaultTooltipFormatterFn(
                             formatters(numberFormat)[MeasureSubtype.CONTINUOUS]);
                         formattedValue = measureFormatter(value, interval);
-                        values.push([icon, {
-                            value: `${key}${separator}`,
-                            className: `${config.classPrefix}-tooltip-key`
-                        }, {
-                            value: `${formattedValue}`,
-                            className: `${config.classPrefix}-tooltip-value`
-                        }]);
+                        const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
+                        values.push([
+                            icon,
+                            {
+                                value: `${formattedKey}`,
+                                className: `${config.classPrefix}-tooltip-key`
+                            },
+                            {
+                                value: `${formattedValue}`,
+                                className: `${config.classPrefix}-tooltip-value`
+                            }
+                        ]);
                     }
                 } else {
                     key = field;

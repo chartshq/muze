@@ -75,17 +75,30 @@ export const listenerMap = (context, namespace, metaInf) => ([
         type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.DATA}`],
         listener: ([, dataModel]) => {
-            const axisFields = context.fields();
             const axesObj = context.axes();
-            if (dataModel && axisFields && axesObj) {
+            const dmFieldsObj = dataModel.getFieldspace().fieldsObj();
+            const allFields = {};
+            Object.entries(context.fields()).forEach(([type, [field]]) => {
+                if (field) {
+                    allFields[type] = dmFieldsObj[field.oneVar()];
+                }
+            });
+            Object.entries(context.retinalFields()).forEach(([type, { field: fieldName }]) => {
+                if (fieldName) {
+                    allFields[type] = dmFieldsObj[fieldName];
+                }
+            });
+
+            if (dataModel && allFields && axesObj) {
                 const timeDiffs = {};
                 const timeDiffsByField = {};
-                ['x', 'y'].forEach((type) => {
-                    const field = axisFields[type][0];
-                    if (field && field.subtype() === DimensionSubtype.TEMPORAL) {
-                        timeDiffs[type] = field.getMinDiff();
-                        timeDiffsByField[field] = timeDiffs[type];
-                        axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
+                Object.entries(allFields).forEach(([type, field]) => {
+                    if (field.subtype() === DimensionSubtype.TEMPORAL) {
+                        timeDiffs[type] = field.minimumConsecutiveDifference();
+                        timeDiffsByField[field.name()] = timeDiffs[type];
+                        if (type === 'x' || type === 'y') {
+                            axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
+                        }
                     }
                 });
                 context._timeDiffsByField = timeDiffsByField;
