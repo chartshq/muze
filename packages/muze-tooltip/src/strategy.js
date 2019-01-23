@@ -1,34 +1,12 @@
 import {
-    getClosestIndexOf,
-    DateTimeFormatter,
+    formatTemporal,
     DimensionSubtype,
     MeasureSubtype,
     FieldType
 } from 'muze-utils';
 
-const timeFormats = {
-    millisecond: '%A, %b %e, %H:%M:%S.%L',
-    second: '%A, %b %e, %H:%M:%S',
-    minute: '%A, %b %e, %H:%M',
-    hour: '%A, %b %e, %H:%M',
-    day: '%A, %b %e, %Y',
-    month: '%B %Y',
-    year: '%Y'
-};
-const timeDurations = [
-    ['millisecond', 'second', 'minute', 'hour', 'day', 'month', 'year'],
-    [1, 1000, 60000, 3600000, 86400000, 2592000000, 31536000000]
-];
-const getNearestInterval = (interval) => {
-    const index = getClosestIndexOf(timeDurations[1], interval);
-    return timeDurations[0][index];
-};
-
 const formatters = formatter => ({
-    [DimensionSubtype.TEMPORAL]: (value, interval) => {
-        const nearestInterval = getNearestInterval(interval);
-        return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
-    },
+    [DimensionSubtype.TEMPORAL]: (value, interval) => formatTemporal(value, interval),
     [MeasureSubtype.CONTINUOUS]: value => formatter(value ? value.toFixed(2) : value),
     [DimensionSubtype.CATEGORICAL]: value => value
 });

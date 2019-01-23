@@ -84,7 +84,8 @@ export {
     pathInterpolators,
     hslInterpolator,
     getSmallestDiff,
-    require
+    require,
+    formatTemporal
 } from './common-utils';
 
 export {
