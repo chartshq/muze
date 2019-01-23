@@ -51,7 +51,7 @@ export default class StepLegend extends SimpleLegend {
      *
      * @memberof StepLegend
      */
-    dataFromScale (scale) {
+    dataFromScale (scale, context) {
         let domainLeg = [];
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
 
@@ -69,7 +69,7 @@ export default class StepLegend extends SimpleLegend {
                 domainBounds.upper = [`${formatter.bounds.upper} ${steps[steps.length - 1]}`];
             }
         } else {
-            domainLeg = getInterpolatedData(domain, steps);
+            domainLeg = getInterpolatedData(domain, steps, context);
         }
 
         domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);

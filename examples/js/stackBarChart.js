@@ -54,14 +54,13 @@ d3.json('../data/cars.json', (data) => {
     const canvas = env.canvas();
 
     canvas
-  		.rows(['Maker']) // CountVehicle goes in y axis
-          .columns(['Acceleration']) // Cylinders goes in x-axis
+  		.rows(['Acceleration']) // CountVehicle goes in y axis
+          .columns(['Maker']) // Cylinders goes in x-axis
           .color({
               field: 'Acceleration',
-              stops: 5
+              step: true,
+              stops: 33
           })
-          .size('Origin')
-          .shape('Origin')
 
                     .data(rootData)
   		.layers({ // Draw a bar plot, by default stack transform is used

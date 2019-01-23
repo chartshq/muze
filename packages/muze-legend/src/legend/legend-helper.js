@@ -33,10 +33,33 @@ export const getScaleInfo = (scale) => {
  * @param {*} steps
  *
  */
-export const getInterpolatedData = (domain, steps) => {
+export const getInterpolatedData = (domain, steps, context) => {
+    // To round the floating values to Integer and checking if value is 1.
+    steps = Math.round(steps);
+    steps = steps < 1 ? (steps + 1) : steps;
+
+    // declaring recompute Variable
+    let recomputeSteps = 0;
+    const getTickMeasure = context._labelManager;
+    const maxWidth = context._measurement.maxWidth;
+    const maxHeight = context._measurement.maxHeight;
+    const alignment = context.config().position;
     const domainForLegend = [];
     const interpolatedFn = numberInterpolator()(domain[0], domain[1]);
 
+    // getting tick measure(i.e height and width)
+    const tickValue = getTickMeasure.getOriSize((domain[1].toFixed(2)).toString());
+
+    // checking alignment of the Axis
+    if (alignment === TOP || alignment === BOTTOM) {
+        recomputeSteps = Math.floor(maxWidth / (tickValue.width));
+        steps = Math.min(steps, recomputeSteps);
+    } else {
+        recomputeSteps = Math.floor(maxHeight / (tickValue.height));
+        steps = Math.min(steps, recomputeSteps);
+    }
+
+    // scaling the axis based on steps provided
     for (let i = 0; i <= steps; i++) {
         domainForLegend[i] = interpolatedFn(i / steps);
     }

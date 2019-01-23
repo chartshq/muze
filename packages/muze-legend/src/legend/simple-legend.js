@@ -183,7 +183,7 @@ export default class SimpleLegend {
         const effBorder = border * 2;
         const effMargin = margin * 2;
 
-        this.data(this.dataFromScale(this.scale()));
+        this.data(this.dataFromScale(this.scale(), this));
         // Get space occupied by title
         const titleSpace = this.getTitleSpace();
         const titleHeight = titleSpace.height > 0 ? titleSpace.height + effPadding : 0;

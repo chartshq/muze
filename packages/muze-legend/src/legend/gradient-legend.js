@@ -57,7 +57,7 @@ export default class GradientLegend extends SimpleLegend {
      *
      * @memberof GradientLegend
      */
-    dataFromScale (scale) {
+    dataFromScale (scale, context) {
         let domainForLegend = [];
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
 
@@ -70,7 +70,7 @@ export default class GradientLegend extends SimpleLegend {
                 domainForLegend.push(domain[1]);
             }
         } else {
-            domainForLegend = getInterpolatedData(domain, steps - 1);
+            domainForLegend = getInterpolatedData(domain, steps - 1, context);
         }
         domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
 
