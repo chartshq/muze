@@ -1,17 +1,18 @@
 import {
-    TOP, BOTTOM, LEFT, RIGHT, CENTER, BLANK_BORDERS, COLUMN, ROW, VIEW_INDEX
+    TOP, BOTTOM, LEFT, RIGHT, CENTER, BLANK_BORDERS, COLUMN, ROW,
+    VIEW_INDEX, ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, MIDDLE, NO_BORDERS
 } from '../enums/constants';
 
 const borderMap = {
-    '00': null,
-    '01': COLUMN,
-    '02': null,
-    10: ROW,
-    11: CENTER,
-    12: ROW,
-    20: null,
-    21: COLUMN,
-    22: null
+    [`${TOP}-${LEFT}`]: NO_BORDERS,
+    [`${TOP}-${MIDDLE}`]: COLUMN,
+    [`${TOP}-${RIGHT}`]: NO_BORDERS,
+    [`${CENTER}-${LEFT}`]: ROW,
+    [`${CENTER}-${MIDDLE}`]: CENTER,
+    [`${CENTER}-${RIGHT}`]: ROW,
+    [`${RIGHT}-${LEFT}`]: NO_BORDERS,
+    [`${RIGHT}-${MIDDLE}`]: COLUMN,
+    [`${RIGHT}-${RIGHT}`]: NO_BORDERS
 };
 
 const applySpecificBorder = (cells, color, type, style) => {
@@ -46,7 +47,7 @@ const borderApplier = (cells, borderInfo) => {
 
 export const applyBorders = (cells, border, row, column) => {
     const borderApplierFn = borderApplier(cells, border);
-    const borderMapVal = borderMap[`${VIEW_INDEX[row]}${column}`];
+    const borderMapVal = borderMap[`${ROW_MATRIX_INDEX[VIEW_INDEX[row]]}-${COLUMN_MATRIX_INDEX[column]}`];
     if (borderMapVal) {
         borderApplierFn[borderMapVal]();
     }

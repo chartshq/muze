@@ -257,3 +257,10 @@ export const BLANK_BORDERS = 'rgba(0,0,0,0)';
 export const PAGINATION = 'pagination';
 export const BUFFER = 'buffer';
 export const HOLISTIC = 'holistic';
+export const MIDDLE = 'middle';
+export const NO_BORDERS = null;
+
+export const MAX_WIDTH_AVAIL_FOR_COL_MATRIX = 'maxWidthAvailableForColumnMatrix';
+export const COLUMN_MATRIX = 'columnMatrix';
+export const MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX = 'maxHeightAvailableForRowMatrix';
+export const ROW_MATRIX = 'rowMatrix';

@@ -1,4 +1,7 @@
-import { HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL, HOLISTIC } from '../enums/constants';
+import {
+    HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL, HOLISTIC,
+    MAX_WIDTH_AVAIL_FOR_COL_MATRIX, COLUMN_MATRIX, MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX, ROW_MATRIX
+} from '../enums/constants';
 
 /**
  * Gets measurement for an instance of visual matrix
@@ -50,14 +53,14 @@ const setViewSpaces = (layout, pointerType, viewSpaces) => {
 
 const paginationDetailsMap = {
     column: {
-        maxMeasure: 'maxWidthAvailableForColumnMatrix',
-        matrix: 'columnMatrix',
+        maxMeasure: MAX_WIDTH_AVAIL_FOR_COL_MATRIX,
+        matrix: COLUMN_MATRIX,
         measureType: WIDTH,
         scrollType: HORIZONTAL
     },
     row: {
-        maxMeasure: 'maxHeightAvailableForRowMatrix',
-        matrix: 'rowMatrix',
+        maxMeasure: MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX,
+        matrix: ROW_MATRIX,
         measureType: HEIGHT,
         scrollType: VERTICAL
     }
@@ -258,6 +261,8 @@ export const getViewMatrices = (layout, rowPointer, columnPointer) => {
         columnPages: columnMatrices.length
     };
 };
+
+const measureSum = measureArr => measureArr.reduce((total, measure) => total + measure, 0);
 /**
  * Returns measurements of the cells of the current matrix
  *
@@ -287,8 +292,8 @@ export const getViewMeasurements = (layout, maxRowHeight, maxColWidth) => {
     const { primary: leftWidth, secondary: rightWidth } = rowMatrixWidth;
     const { primary: topHeight, secondary: bottomHeight } = columnMatrixHeight;
 
-    const centerHeight = rowHeights.primary.reduce((t, n) => t + n);
-    const centerWidth = columnWidths.primary.reduce((t, n) => t + n);
+    const centerHeight = measureSum(rowHeights.primary);
+    const centerWidth = measureSum(columnWidths.primary);
     const viewWidth = [leftWidth, Math.min(centerWidth, maxColWidth), rightWidth];
     const viewHeight = [topHeight, Math.min(centerHeight, maxRowHeight), bottomHeight];
 
@@ -300,8 +305,8 @@ export const getViewMeasurements = (layout, maxRowHeight, maxColWidth) => {
             width: centerWidth
         },
         totalMeasures: {
-            width: viewWidth.reduce((t, n) => t + n, 0),
-            height: viewHeight.reduce((t, n) => t + n, 0)
+            width: measureSum(viewWidth),
+            height: measureSum(viewHeight)
         },
         unitHeights: rowHeights,
         unitWidths: columnWidths
