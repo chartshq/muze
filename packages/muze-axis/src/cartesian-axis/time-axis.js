@@ -66,8 +66,8 @@ export default class TimeAxis extends SimpleAxis {
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(val, i, ticks);
         }
-        const defaultTickFormat = this.scale() && this.scale().tickFormat;
-        return () => text => (defaultTickFormat ? defaultTickFormat()(text) : text);
+
+        return () => text => (this.scale().tickFormat ? this.scale().tickFormat()(text) : text);
     }
 
      /**
