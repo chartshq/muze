@@ -59,18 +59,6 @@ export default class BandAxis extends SimpleAxis {
     }
 
     /**
-     * This method is used to set the padding between plots.
-     *
-     * @param {number} padding padding value supplied from config.
-     * @memberof BandAxis
-     */
-    updateAxisPadding (padding) {
-        if (typeof padding === 'number') {
-            this._scale.padding(padding);
-        }
-    }
-
-    /**
      *
      *
      *

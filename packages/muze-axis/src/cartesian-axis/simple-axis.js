@@ -15,7 +15,8 @@ import {
     getAxisComponentDimensions,
     computeAxisDimensions,
     calculateContinousSpace,
-    setOffset
+    setOffset,
+    getValidDomain
 } from './helper';
 import { PROPS } from './props';
 
@@ -120,12 +121,9 @@ export default class SimpleAxis {
      */
     domain (...domain) {
         if (domain.length) {
-            let dom = domain[0];
-            const userDom = this.config().domain;
-            if (userDom) {
-                dom = userDom;
-            }
-            this.scale().domain(dom);
+            let domainValue = domain[0];
+            domainValue = getValidDomain(this, domainValue);
+            this.scale().domain(domainValue);
             this._domain = this.scale().domain();
             this.setAxisComponentDimensions();
             this.logicalSpace(null);

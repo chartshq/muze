@@ -93,7 +93,7 @@ export default class ContinousAxis extends SimpleAxis {
      */
     domain (domain) {
         if (domain) {
-            if (Array.isArray(domain)) {
+            if (Array.isArray(domain) && domain.length) {
                 domain = getValidDomain(this, domain);
                 domain = this._interpolator.sanitizeDomain(domain);
                 setContinousAxisDomain(this, domain);

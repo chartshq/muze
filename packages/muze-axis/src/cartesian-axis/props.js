@@ -27,6 +27,12 @@ export const PROPS = {
                 context.sanitizedTickFormatter = tickFormatter ?
                     tickFormatter(context.tickValues || context.axis().tickValues() || labelFunc()) :
                     null;
+                // This method is used to set the padding between plots.
+                context.updateAxisPadding = (padding) => {
+                    if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
+                        context._scale.padding(padding);
+                    }
+                };
             }
             context.fetchTickFormatter = tickFormatter;
 
