@@ -38,8 +38,9 @@ export const getInterpolatedData = (domain, steps, context) => {
     steps = Math.round(steps);
     steps = steps < 1 ? (steps + 1) : steps;
 
-    // declaring recompute Variable
+    // declaring recomputeSteps Variable
     let recomputeSteps = 0;
+
     const getTickMeasure = context._labelManager;
     const maxWidth = context._measurement.maxWidth;
     const maxHeight = context._measurement.maxHeight;
@@ -53,11 +54,10 @@ export const getInterpolatedData = (domain, steps, context) => {
     // checking alignment of the Axis
     if (alignment === TOP || alignment === BOTTOM) {
         recomputeSteps = Math.floor(maxWidth / (tickValue.width));
-        steps = Math.min(steps, recomputeSteps);
     } else {
         recomputeSteps = Math.floor(maxHeight / (tickValue.height));
-        steps = Math.min(steps, recomputeSteps);
     }
+    steps = Math.min(steps, recomputeSteps);
 
     // scaling the axis based on steps provided
     for (let i = 0; i <= steps; i++) {
