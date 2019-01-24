@@ -44,47 +44,32 @@
     
     canvas
         .data(dm)
-        .width(400)
+        .width(600)
         .height(400)
         .rows(['Horsepower'])
-        .columns(['Year'])
+        .columns(['Cylinders'])
         // .detail(['Name'])
-        .mount('#chart'); /* Attaching the canvas to DOM element */
-        
-        canvas.config({
+        .mount('#chart') /* Attaching the canvas to DOM element */
+        .config({
             axes: {
-                x: {
-                    // tickFormat: d => `${d / 1000}K`,
-                    tickFormat: d => d.getFullYear(),
-                    labels: {
-                        rotation: 55,
-                    },
-                },
                 y: {
-                    tickFormat: d => `${d / 1000}K`,
-                    name: 'hello world'
-                }
-            },
-          });
-          setTimeout(() => {
+                    interpolator: 'pow',
+                    exponent: 2,
+                },
+            }
+        })
+
+        setTimeout(() => {
             canvas
-        .rows([[],['Horsepower']])
-              .config({
-                axes: {
-                x: {
-                    // tickFormat: d => d
-                    tickFormat: d => `${d.getDay()}K`,
-                    // showAxisName: false,
-                    // tickFormat: d => d,
-                },
-                  y: {
-                    tickFormat: d => `${d / 100}`,
-                    name: 'hello asdf',
-                    interpolator: 'log',
-                    base: 2,
-                  }
-                },
-              });
-          }, 2000);
+                .config({
+                    axes: {
+                        y: {
+                            tickFormat: (d) => `${d/1000}K`,
+                            interpolator: 'linear',
+                            base: 2,
+                        }
+                    }
+                });
+        }, 2000);
     });
 }());
