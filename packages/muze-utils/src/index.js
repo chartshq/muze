@@ -85,7 +85,8 @@ export {
     hslInterpolator,
     getSmallestDiff,
     require,
-    formatTemporal
+    formatTemporal,
+    createSelection
 } from './common-utils';
 
 export {
