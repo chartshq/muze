@@ -202,8 +202,8 @@ export default class SimpleAxis {
 
     getFormattedText (text, index, axisTicks) {
         const formatter = this.fetchTickFormatter;
-        const scale = this.scale();
-        return formatter ? formatter(axisTicks)(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
+
+        return formatter(axisTicks)(text, index);
     }
 
     /**
