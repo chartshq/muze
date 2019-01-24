@@ -58,10 +58,8 @@ d3.json('../data/cars.json', (data) => {
           .columns(['Acceleration']) // Cylinders goes in x-axis
           .color({
               field: 'Acceleration',
-              stops: 5
+              stops: 7
           })
-          .size('Origin')
-          .shape('Origin')
 
                     .data(rootData)
   		.layers({ // Draw a bar plot, by default stack transform is used
@@ -74,8 +72,8 @@ d3.json('../data/cars.json', (data) => {
                             position: 'bottom'
                         }
                     })
-      	.width(600)
-      	.height(400)
+      	.width(700)
+      	.height(500)
   		.title('Stacked bar chart', { position: 'top', align: 'right' })
   		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
       	.mount('#chart'); // Set the chart mount point
