@@ -222,11 +222,13 @@ export function renderAxis (axisInstance) {
     const mount = axisInstance.mount();
     const range = axisInstance.range();
     const axis = axisInstance.axis();
+    const scale = axisInstance.scale();
     const domain = axisInstance.domain() || [];
     const {
         _axisNameStyle,
         _tickLabelStyle,
-        sanitizedTickFormatter
+        tickValues,
+        fetchTickFormatter
      } = axisInstance;
     const {
         orientation,
@@ -255,7 +257,9 @@ export function renderAxis (axisInstance) {
     // Set style for tick labels
     labelManager.setStyle(_tickLabelStyle);
 
-    axis.tickFormat(sanitizedTickFormatter);
+    const labelFunc = scale.ticks || scale.quantile || scale.domain;
+
+    axis.tickFormat(fetchTickFormatter(tickValues || axis.tickValues() || labelFunc()));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

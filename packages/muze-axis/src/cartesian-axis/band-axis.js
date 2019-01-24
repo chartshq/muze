@@ -82,7 +82,9 @@ export default class BandAxis extends SimpleAxis {
         labelManager.setStyle(this._tickLabelStyle);
 
         // Update padding between plots
-        this.updateAxisPadding(padding);
+        if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
+            this.scale().padding(padding);
+        }
 
         if (domain && domain.length) {
             const values = tickValues || domain;

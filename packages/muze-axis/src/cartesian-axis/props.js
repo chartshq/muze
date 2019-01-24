@@ -21,20 +21,9 @@ export const PROPS = {
                 context._scale = context.createScale(value);
                 context._axis = context.createAxis(value);
             }
-            if (context._scale) {
-                const scale = context._scale;
-                const labelFunc = scale.ticks || scale.quantile || scale.domain;
-                context.sanitizedTickFormatter = tickFormatter ?
-                    tickFormatter(context.tickValues || context.axis().tickValues() || labelFunc()) :
-                    null;
-                // This method is used to set the padding between plots.
-                context.updateAxisPadding = (padding) => {
-                    if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
-                        context._scale.padding(padding);
-                    }
-                };
-            }
-            context.fetchTickFormatter = tickFormatter;
+
+            context.fetchTickFormatter = ticks => (tickFormatter ?
+                tickFormatter(ticks) : null);
 
             const {
                 labels,
