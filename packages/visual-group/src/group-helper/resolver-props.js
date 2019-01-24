@@ -9,5 +9,6 @@ export const RESOLVER_PROPS = {
     rowMatrix: {},
     columnMatrix: {},
     valueMatrix: {},
-    encoder: {}
+    encoder: {},
+    valueParser: {}
 };

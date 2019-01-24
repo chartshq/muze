@@ -1,4 +1,4 @@
-import { isEqual, STATE_NAMESPACES, selectElement } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
     from '../constants';
@@ -51,6 +51,9 @@ export const dispatchProps = (context) => {
             visualGroup[key] && visualGroup[key](value);
         }
     }
+    const { invalidValues } = context.config();
+
+    visualGroup.valueParser(getValueParser(invalidValues));
     visualGroup.createMatrices();
     context._cachedProps = {};
     lifeCycleManager.notify({ client: context, action: 'initialized' });

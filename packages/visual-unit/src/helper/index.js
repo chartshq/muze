@@ -75,6 +75,7 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
     definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
         instance.config(def);
+        instance.valueParser(context.valueParser());
         instance.dependencies(dependencies);
         instance.dataProps({
             timeDiffs: context._timeDiffs

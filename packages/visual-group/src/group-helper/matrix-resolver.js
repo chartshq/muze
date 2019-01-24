@@ -330,6 +330,7 @@ export default class MatrixResolver {
             !units[i] && (units[i] = []);
             units[i][j] = unit;
             unit.parentAlias(alias);
+            unit.valueParser(this.valueParser());
             el.config(unitConfig);
         });
 

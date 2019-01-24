@@ -4,5 +4,8 @@ export const props = {
     measurement: {},
     metaInf: {},
     data: {},
-    config: {}
+    config: {},
+    valueParser: {
+        defaultValue: val => val
+    }
 };

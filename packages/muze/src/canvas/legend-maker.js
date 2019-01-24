@@ -1,4 +1,5 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
+import { getValueParser } from 'muze-utils';
 import {
     VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, MARGIN
 } from '../constants';
@@ -57,7 +58,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
     } = legendConfig;
 
     const legendInfo = legendCreator(canvas);
+    const { invalidValues } = canvas.config();
 
+    const parser = getValueParser(invalidValues);
     legendInfo.forEach((dataInfo, index) => {
         let legend = {};
 
@@ -94,6 +97,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                 legendMeasures[e] = config[e];
             });
             legend.scale(scale)
+                            .valueParser(parser)
                             .title(title)
                             .fieldName(fieldName)
                             .config(config)
