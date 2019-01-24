@@ -274,7 +274,7 @@ export default class SimpleLegend {
         // set height and width
         legendContainer.style('width', `${Math.min(maxWidth, width) - margin * 2}px`)
                         .style('height', `${Math.min(maxHeight, height) - margin * 2}px`)
-                        .style('margin', `${margin}px`)
+                        // .style('margin', `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 

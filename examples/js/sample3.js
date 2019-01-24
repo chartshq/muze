@@ -55,19 +55,48 @@ d3.json('../../data/cars.json', (data) => {
     const mountPoint = document.getElementsByClassName('chart')[0];
     const canvas = env.canvas();
     window.canvas = canvas;
-    let rows = ['Displacement'],
-        columns = ['Year'];
+    let rows = ['Acceleration'],
+        columns = ['Displacement'];
+    canvas;
+        // .rows(rows)
+        // .columns(columns)
+        // .width(600)
+        // .height(400)
+        // .data(rootData)
+        // .color('Origin')
+        // .detail(['Name'])
+        // // .title('Hellooo')
+        // // .subtitle('Hello')
+        // .config({
+        //     legend: {
+        //         position: 'bottom'
+        //     }
+        // })
+        // .mount(document.getElementById('chart'));
+
     canvas
-        .rows(rows)
-        .columns(columns)
-        .width(600)
-        .height(600)
-        .data(rootData.groupBy(['Year', 'Origin']))
-        .color('Origin')
-        .config({
-            legend: {
-                position: 'bottom'
-            }
-        })
-        .mount(document.getElementById('chart'));
+  		.rows(['Maker']) // CountVehicle goes in y axis
+          .columns(['Acceleration']) // Cylinders goes in x-axis
+          .color({
+              field: 'Acceleration',
+              stops: 7
+          })
+        // .color('Origin')
+
+                    .data(rootData)
+//   		.layers({ // Draw a bar plot, by default stack transform is used
+//         	Acceleration: {
+//             	mark: 'bar'
+//         }
+//   })
+                    // .config({
+                    //     legend: {
+                    //         position: 'bottom'
+                    //     }
+                    // })
+      	.width(700)
+      	.height(500)
+  		// .title('Stacked bar chart', { position: 'top', align: 'right' })
+  		// .subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
+      	.mount('#chart');
 });
