@@ -58,6 +58,7 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
+import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
 import { DM_OPERATION_GROUP } from './enums';
 
@@ -910,6 +911,28 @@ const mergeRecursive = (source, sink) => {
     return source;
 };
 
+/**
+ * Creates a selection set from a data set with corresponding attributes
+ *
+ * @export
+ * @param {Selection} sel contains previous selection
+ * @param {Object} appendObj Object to be appended
+ * @param {Array} data Data based on which the selection is entered/updated/removed
+ * @param {Object} [attrs={}] Attributes to be set on the data
+ * @return {Selection} Merged selection
+ */
+const createSelection = (sel, appendObj, data, idFn) => {
+    let selection = sel || dataSelect([]);
+
+    selection = selection.data(data, idFn);
+
+    const enter = selection.enter().append(appendObj);
+    const mergedSelection = enter.merge(selection);
+
+    selection.exit() && selection.exit().remove();
+    return mergedSelection;
+};
+
 const interpolateArray = (data, fitCount) => {
     const linearInterpolate = function (before, after, atPoint) {
         return before + (after - before) * atPoint;
@@ -1569,5 +1592,6 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    retrieveNearestGroupByReducers
+    retrieveNearestGroupByReducers,
+    createSelection
 };

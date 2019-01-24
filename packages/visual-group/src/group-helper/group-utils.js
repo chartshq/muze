@@ -1,4 +1,4 @@
-import { Store, dataSelect, FieldType } from 'muze-utils';
+import { Store, FieldType } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -255,7 +255,7 @@ export const mutateAxesFromMap = (cacheMaps, axes) => {
 export const getEncoder = (layers) => {
     let encoder = new CartesianEncoder();
 
-    if (layers) {
+    if (layers.length) {
         // Figuring out the kind of layers the group will have
         encoder = layers.every(e => e.mark === 'arc') ? new PolarEncoder() : encoder;
     }
@@ -323,28 +323,6 @@ export const setFacetsAndProjections = (context, fieldInfo, encoder) => {
     context.projections({ [`${type}Projections`]: projections });
 
     return { facets, projections, fields };
-};
-
-/**
- * Creates a selection set from a data set with corresponding attributes
- *
- * @export
- * @param {Selection} sel contains previous selection
- * @param {Object} appendObj Object to be appended
- * @param {Array} data Data based on which the selection is entered/updated/removed
- * @param {Object} [attrs={}] Attributes to be set on the data
- * @return {Selection} Merged selection
- */
-export const createSelection = (sel, appendObj, data, idFn) => {
-    let selection = sel || dataSelect([]);
-
-    selection = selection.data(data, idFn);
-
-    const enter = selection.enter().append(appendObj);
-    const mergedSelection = enter.merge(selection);
-
-    selection.exit() && selection.exit().remove();
-    return mergedSelection;
 };
 
 const getRowBorders = (left, right) => {
