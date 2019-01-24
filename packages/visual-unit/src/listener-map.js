@@ -89,7 +89,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 }
             });
 
-            if (dataModel && allFields && axesObj) {
+            if (dataModel && axesObj) {
                 const timeDiffs = {};
                 const timeDiffsByField = {};
                 Object.entries(allFields).forEach(([type, field]) => {
