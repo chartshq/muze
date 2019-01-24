@@ -186,7 +186,8 @@ class Selection {
 
     map (fn) {
         Object.keys(this._idMap).forEach((...params) => {
-            this._idMap[params[0]] = fn(this._idMap[params[0]], ...params, this._dataMap[params[0]]);
+            const key = params[0];
+            this._idMap[key] = fn(this._idMap[key], ...params, this._dataMap[key]);
         });
         return this;
     }

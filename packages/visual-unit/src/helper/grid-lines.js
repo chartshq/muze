@@ -1,7 +1,15 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel, createSelection } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
-import { layerFactory } from '@chartshq/visual-layer';
-import { GRIDLINEPARENTGROUPCLASS, GRIDBANDPARENTGROUPCLASS, GRIDPARENTGROUP } from '../enums/constants';
+import { layerFactory, LAYER_TYPES } from '@chartshq/visual-layer';
+import {
+    GRID_BAND,
+    GRID_LINE,
+    GRID_BAND_PARENT_GROUP_CLASS,
+    GRID_LINE_PARENT_GROUP_CLASS,
+    GRID_PARENT_GROUP
+} from '../enums/constants';
+
+const { BAR_LAYER, TICK_LAYER } = LAYER_TYPES;
 
 const LINEAR = ScaleType.LINEAR;
 
@@ -11,12 +19,12 @@ const getLayerDefinition = (context, axes, type, orientation) => {
     const { classPrefix, gridLines, gridBands } = config;
     const gridLineColor = gridLines.color;
     const zeroLineColor = gridLines.zeroLineColor;
-    const defClassName = type === 'band' ? gridBands.defClassName : gridLines.defClassName;
+    const defClassName = type === GRID_BAND ? gridBands.defClassName : gridLines.defClassName;
     const gridBandColor = gridBands[orientation].color;
     const axis = axes[orientation][0];
     const isLinearScale = axis.constructor.type() === LINEAR;
 
-    if (type === 'band' && isLinearScale) {
+    if (type === GRID_BAND && isLinearScale) {
         encoding = {
             [orientation]: `${orientation}value`,
             [`${orientation}0`]: `${orientation}value0`
@@ -29,7 +37,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
     encoding.color = {
         value: (data, i) => {
             const isNegativeDomain = isLinearScale && axis.domain()[0] < 0;
-            if (type === 'band') {
+            if (type === GRID_BAND) {
                 return gridBandColor[i % 2];
             }
             return isNegativeDomain && data[orientation] === 0 ? zeroLineColor : gridLineColor;
@@ -40,17 +48,18 @@ const getLayerDefinition = (context, axes, type, orientation) => {
         definition: {
             defClassName: `${defClassName}-${orientation}`,
             className: config.className,
+            name: orientation,
             individualClassName: (data, i) => {
                 let className;
                 const isNegativeDomain = isLinearScale && axis.domain()[0] < 0;
-                if (isNegativeDomain && data.y === 0 && type !== 'band') {
+                if (isNegativeDomain && data.y === 0 && type !== GRID_BAND) {
                     className = `${classPrefix}-axis-zero-line`;
                 } else {
                     className = `${classPrefix}-grid-${type}-${orientation}-${i % 2}`;
                 }
                 return className;
             },
-            [`pad${orientation.toUpperCase()}`]: type === 'band' ? 0 : undefined,
+            [`pad${orientation.toUpperCase()}`]: type === GRID_BAND ? 0 : undefined,
             encoding
         },
         axes: {
@@ -123,38 +132,57 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
     return gridData;
 };
 
+// @todo Use dataSelect method to reuse instances when the method is fixed. #110
+export const createGridLines = (instances = {}, createFn, definitions, iteratorFn) => {
+    const map = {};
+    definitions.forEach((def) => {
+        const name = def.definition.name;
+        let instance = instances[name];
+        if (!instance) {
+            instances[name] = instance = createFn(def);
+        }
+        iteratorFn(instance, def, name);
+        map[name] = 1;
+    });
+    for (const key in instances) {
+        if (!(key in map)) {
+            instances[key].remove();
+            delete instances[key];
+        }
+    }
+    return instances;
+};
+
 export const createGridLineLayer = (context) => {
     const vuConf = context.config();
     const metaInf = context.metaInf();
     const store = context.store();
     const timeDiffs = context._timeDiffs;
-    ['band', 'line'].forEach((type) => {
+    [GRID_BAND, GRID_LINE].forEach((type) => {
         let mark;
         let config;
-        let gridType;
-        if (type === 'band') {
-            mark = 'bar';
-            gridType = 'gridBand';
+        if (type === GRID_BAND) {
+            mark = BAR_LAYER;
             config = vuConf.gridBands;
         } else {
-            mark = 'tick';
-            gridType = 'gridLine';
+            mark = TICK_LAYER;
             config = vuConf.gridLines;
         }
         const definitions = getGridLayerDefinitions(context, config, type);
 
-        context[`_${gridType}Selection`] = createSelection(context[`${type}Sel`], () => {
+        const sel = `_${type}Selection`;
+        context[sel] = createGridLines(context[sel], () => {
             const inst = layerFactory.getLayerInstance({ mark });
             inst.dependencies(context._layerDeps);
             return inst;
-        }, definitions).each((layer, atomicDef, i) => {
+        }, definitions, (layer, atomicDef, key) => {
             const definition = atomicDef.definition;
             const sConf = layerFactory.getSerializedConf(mark, definition);
             const axesObj = atomicDef.axes;
             layer.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${type}${i}`
+                namespace: `${metaInf.namespace}${type}${key}`
             })
                 .store(store)
                 .config(sConf)
@@ -163,6 +191,7 @@ export const createGridLineLayer = (context) => {
                 })
                 .axes(axesObj);
         });
+        context[`_${type}`] = Object.values(context[sel]);
     });
 };
 
@@ -172,8 +201,8 @@ export const attachDataToGridLineLayers = (context) => {
         width: context.width(),
         height: context.height()
     };
-    const gridLines = context._gridLineSelection.getObjects();
-    const gridBands = context._gridBandSelection.getObjects();
+    const gridLines = context._gridLines;
+    const gridBands = context._gridBands;
     const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
     [].concat(...gridBands, ...gridLines).forEach((inst) => {
         inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y).measurement(measurement);
@@ -183,12 +212,12 @@ export const attachDataToGridLineLayers = (context) => {
 export const renderGridLineLayers = (context, container) => {
     const config = context.config();
     const classPrefix = config.classPrefix;
-    const gridLines = context._gridLineSelection.getObjects();
-    const gridBands = context._gridBandSelection.getObjects();
+    const gridLines = context._gridLines;
+    const gridBands = context._gridBands;
 
-    const gridLineParentGroup = makeElement(container, 'g', [1], `${classPrefix}-${GRIDPARENTGROUP}`);
-    [[gridLines, `${classPrefix}-${GRIDLINEPARENTGROUPCLASS}`],
-            [gridBands, `${classPrefix}-${GRIDBANDPARENTGROUPCLASS}`]].forEach((entry) => {
+    const gridLineParentGroup = makeElement(container, 'g', [1], `${classPrefix}-${GRID_PARENT_GROUP}`);
+    [[gridLines, `${classPrefix}-${GRID_LINE_PARENT_GROUP_CLASS}`],
+            [gridBands, `${classPrefix}-${GRID_BAND_PARENT_GROUP_CLASS}`]].forEach((entry) => {
                 const [instances, parentGroupClass] = entry;
                 const mountPoint = makeElement(gridLineParentGroup, 'g', [1], `.${parentGroupClass}`);
                 const className = `${parentGroupClass}-group`;
