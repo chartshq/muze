@@ -51,14 +51,14 @@
             }
         ];
 
-        // jsonData = [
-        //     { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
-        //     { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
-        //     { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
-        //     { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
-        //     { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
-        //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
-        // ];
+        jsonData = [
+            { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
+            { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
+            { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
+            { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
+            { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
+            { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
+        ];
         let rootData = new DataModel(jsonData, schema);
         rootData = rootData.groupBy(["Origin", "Year"], {
             Acceleration: "avg"
@@ -67,8 +67,8 @@
         env.canvas()
             .data(rootData)
             .rows(['Acceleration',])
-            .columns(['Origin'])
-            .color('Year')
+            .columns(['Year'])
+            .color('Origin')
             .data(rootData)
             .height(600)
             .width(800)

@@ -76,34 +76,28 @@ export const listenerMap = (context, namespace, metaInf) => ([
         props: [`${namespace.local}.${PROPS.DATA}`],
         listener: ([, dataModel]) => {
             const axesObj = context.axes();
-            const dmFieldsObj = dataModel.getFieldspace().fieldsObj();
-            const allFields = {};
+            const timeDiffs = {};
+            const timeDiffsByField = {};
+
+            Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
+                if (fieldObj.subtype() !== DimensionSubtype.TEMPORAL) {
+                    return;
+                }
+                timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
+            });
+
             Object.entries(context.fields()).forEach(([type, [field]]) => {
                 if (field) {
-                    allFields[type] = dmFieldsObj[field.oneVar()];
-                }
-            });
-            Object.entries(context.retinalFields()).forEach(([type, { field: fieldName }]) => {
-                if (fieldName) {
-                    allFields[type] = dmFieldsObj[fieldName];
+                    const timeDiff = timeDiffsByField[field.oneVar()];
+                    if (timeDiff) {
+                        timeDiffs[type] = timeDiff;
+                        axesObj[type].forEach(axis => axis.minDiff(timeDiff));
+                    }
                 }
             });
 
-            if (dataModel && axesObj) {
-                const timeDiffs = {};
-                const timeDiffsByField = {};
-                Object.entries(allFields).forEach(([type, field]) => {
-                    if (field.subtype() === DimensionSubtype.TEMPORAL) {
-                        timeDiffs[type] = field.minimumConsecutiveDifference();
-                        timeDiffsByField[field.name()] = timeDiffs[type];
-                        if (type === 'x' || type === 'y') {
-                            axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
-                        }
-                    }
-                });
-                context._timeDiffsByField = timeDiffsByField;
-                context._timeDiffs = timeDiffs;
-            }
+            context._timeDiffsByField = timeDiffsByField;
+            context._timeDiffs = timeDiffs;
         }
     },
     {
