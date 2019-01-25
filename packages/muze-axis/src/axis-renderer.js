@@ -225,10 +225,10 @@ export function renderAxis (axisInstance) {
     const scale = axisInstance.scale();
     const domain = axisInstance.domain() || [];
     const {
-        _axisNameStyle,
-        _tickLabelStyle,
-        tickValues,
-        _tickFormatter
+        _axisNameStyle: axisNameStyle,
+        _tickLabelStyle: tickLabelStyle,
+        _tickFormatter: axisTickFormatter,
+        tickValues
      } = axisInstance;
     const {
         orientation,
@@ -255,11 +255,11 @@ export function renderAxis (axisInstance) {
         key => key.config().id);
 
     // Set style for tick labels
-    labelManager.setStyle(_tickLabelStyle);
+    labelManager.setStyle(tickLabelStyle);
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    axis.tickFormat(_tickFormatter(tickValues || axis.tickValues() || labelFunc()));
+    axis.tickFormat(axisTickFormatter(tickValues || axis.tickValues() || labelFunc()));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);
@@ -301,7 +301,7 @@ export function renderAxis (axisInstance) {
     const labelOffset = availableSpace / 2;
 
     // Set style for axis name
-    labelManager.setStyle(_axisNameStyle);
+    labelManager.setStyle(axisNameStyle);
     const axisNameSpace = labelManager.getOriSize(name);
     const measures = {
         labelProps,
