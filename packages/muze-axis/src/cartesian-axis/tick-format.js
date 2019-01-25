@@ -4,9 +4,10 @@
  * @public
  * @module tickFormat
  *
- * @param {Number|string} value tick value
- * @param {Number} i tick index
- * @param {Array} ticks Array of tick values
+ * @param {Number|string|Date} value - The parsed tick value.
+ * @param {Number|string} rawValue - The tick value without any modification.
+ * @param {Number} tickIndex - The current tick index in tick values.
+ * @param {Array} ticks - An array of all tick values.
  *
- * @return {Number|string} Formatted tick value.
+ * @return {Any} Returns the formatted tick value which will be converted to string.
  */

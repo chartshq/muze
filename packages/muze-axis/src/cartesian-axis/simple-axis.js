@@ -14,7 +14,9 @@ import { spaceSetter } from './space-setter';
 import {
     getAxisComponentDimensions,
     computeAxisDimensions,
-    calculateContinousSpace
+    calculateContinousSpace,
+    setOffset,
+    getValidDomain
 } from './helper';
 import { PROPS } from './props';
 
@@ -119,12 +121,9 @@ export default class SimpleAxis {
      */
     domain (...domain) {
         if (domain.length) {
-            let dom = domain[0];
-            const userDom = this.config().domain;
-            if (userDom) {
-                dom = userDom;
-            }
-            this.scale().domain(dom);
+            let domainValue = domain[0];
+            domainValue = getValidDomain(this, domainValue);
+            this.scale().domain(domainValue);
             this._domain = this.scale().domain();
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
@@ -173,9 +172,11 @@ export default class SimpleAxis {
         return scale;
     }
 
-    getTickFormatter (tickFormat, numberFormat) {
+    getTickFormatter (value) {
+        const { tickFormat, numberFormat } = value;
+
         if (tickFormat) {
-            return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
+            return ticks => (val, i) => tickFormat(numberFormat(val), val, i, ticks);
         }
         return () => val => numberFormat(val);
     }
@@ -200,9 +201,9 @@ export default class SimpleAxis {
     }
 
     getFormattedText (text, index, axisTicks) {
-        const formatter = this.formatter;
-        const scale = this.scale();
-        return formatter ? formatter(axisTicks)(text, index) : (scale.tickFormat ? scale.tickFormat()(text) : text);
+        const formatter = this._tickFormatter;
+
+        return formatter(axisTicks)(text, index);
     }
 
     /**
@@ -212,17 +213,11 @@ export default class SimpleAxis {
      * @memberof SimpleAxis
      */
     createAxis (config) {
-        const {
-            tickFormat,
-            numberFormat,
-            orientation
-        } = config;
+        const { orientation } = config;
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
             const axis = axisClass(this.scale());
-            this.formatter = this.getTickFormatter(tickFormat, numberFormat);
-
             return axis;
         }
         return null;
@@ -306,6 +301,7 @@ export default class SimpleAxis {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateContinousSpace(this));
             this.logicalSpace();
+            setOffset(this);
         }
 
         return this.logicalSpace();

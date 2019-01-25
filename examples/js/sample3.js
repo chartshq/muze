@@ -5,75 +5,101 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        let jsonData = data,
-		    schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
-        type: 'measure'
-    }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
-        type: 'dimension'
-    }];
-        const rootData = new DataModel(jsonData, schema);
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        const mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
-        let rows = ['Cylinders', 'Horsepower', 'Weight_in_lbs'],
-		columns = ['Origin', 'Year'];
-	canvas = canvas
-		.rows(rows)
-		.columns(columns)
-  .data(rootData)
-	.color('Origin')
-	.shape('Origin')
-	.size('Origin')
-  .width(500)
-  .height(500)
-  .mount(mountPoint)
-  .config({
-      scrollBar:{
-          vertical: {
-              align: 'left'
-          }
-      }
-  })
+        let jsonData = data;
+        const schema = [
+            {
+                name: 'Name',
+                type: 'dimension'
+            },
+            {
+                name: 'Maker',
+                type: 'dimension'
+            },
+            {
+                name: 'Miles_per_Gallon',
+                type: 'measure'
+            },
+            {
+                name: 'Displacement',
+                type: 'measure'
+            },
+            {
+                name: 'Horsepower',
+                type: 'measure'
+            },
+            {
+                name: 'Weight_in_lbs',
+                type: 'measure'
+            },
+            {
+                name: 'Acceleration',
+                type: 'measure'
+            },
+            {
+                name: 'Origin',
+                type: 'dimension'
+            },
+            {
+                name: 'Cylinders',
+                type: 'dimension'
+            },
+            {
+                name: 'Year',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            }
+        ];
 
-        canvas.once('canvas.animationend').then((client) => {
+        // jsonData = [
+        //     { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
+        //     { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
+        //     { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
+        //     { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
+        //     { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
+        //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
+        // ];
+        let rootData = new DataModel(jsonData, schema);
+        rootData = rootData.groupBy(["Origin", "Year"], {
+            Acceleration: "avg"
+        });
 
-            canvas.config({
-                scrollBar:{
-                    vertical: {
-                        align: 'right'
+        env.canvas()
+            .data(rootData)
+            .rows(['Acceleration',])
+            .columns(['Origin'])
+            .color("Year")
+            .data(rootData)
+            .height(600)
+            .width(800)
+            .layers([
+                {
+                    mark: "bar",
+                    transform: {
+                        type: "group"
                     }
                 }
+            ])
+            .config({
+                axes: {
+                    x: {
+                        tickFormat: (value, rawValue, index, ticks) => {
+                            console.log(value, rawValue);
+                            return value;
+                        },
+                        numberFormat: (v) => {
+                            return "$" + v;
+                        }
+                    },
+                    y: {
+                        tickFormat: (value, rawValue, index, ticks) => {
+                            // console.log(ticks);//
+                            return value;
+                        }
+                    },
+                },
             })
-            // canvas.rows([[], ['Horsepower']])
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+            .mount(document.getElementById('chart'));
     });
 }());
 
