@@ -7,6 +7,7 @@
  import { TickLayer } from './layers/tick';
  import { SimpleLayer } from './simple-layer';
  import { BaseLayer } from './base-layer';
+ import * as LAYER_TYPES from './enums/layer-types';
  import layerFactory from './layer-factory';
  import layerRegistry from './layer-registry';
 
@@ -21,5 +22,6 @@
     TickLayer,
     layerFactory,
     SimpleLayer,
-    layerRegistry
+    layerRegistry,
+    LAYER_TYPES
 };

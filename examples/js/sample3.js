@@ -42,7 +42,7 @@
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
         let rows = ['Cylinders', 'Horsepower', 'Weight_in_lbs'],
-		columns = ['Origin'];
+		columns = ['Origin', 'Year'];
 	canvas = canvas
 		.rows(rows)
 		.columns(columns)

@@ -59,7 +59,8 @@ export default {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config, oldConfig) => {
-                const oldConf = mergeRecursive({}, oldConfig);
+                // Reset the configuration when null is passed
+                const oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
                 let newConf = mergeRecursive(defConfig, config);
                 newConf = fixScrollBarConfig(newConf);
