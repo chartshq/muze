@@ -14,7 +14,7 @@ const FormData = require('form-data');
 const axios = require('axios');
 
 const mycroftProtocol = 'http';
-const mycroftHost = '192.168.102.171';
+const mycroftHost = 'sherlock.charts.com';
 const mycroftPort = '3001';
 const mollyProtocol = 'http';
 const mollyHost = '192.168.102.171';

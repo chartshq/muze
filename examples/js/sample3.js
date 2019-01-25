@@ -5,75 +5,61 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        let jsonData = data,
-		    schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
-        type: 'measure'
-    }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
-        type: 'dimension'
-    }];
-        const rootData = new DataModel(jsonData, schema);
-        env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+        let jsonData = data;
+        const schema = [
+            {
+                name: 'Acceleration',
+                type: 'measure'
+            },
+            {
+                name: 'Origin',
+                type: 'dimension'
+            },
+            {
+                name: 'Year',
+                type: 'dimension',
+                subtype: 'temporal',
+                format: '%Y-%m-%d'
+            }
+        ];
+
+        let rootData = new DataModel(jsonData, schema);
+        // rootData = rootData.groupBy(['Origin', 'Year'], {
+        //     Acceleration: 'svg'
+        // });
+        // rootData = rootData.select(() => true);
+
+        const ops = DataModel.Operators;
+        rootData = ops.compose(
+            ops.groupBy(['Origin', 'Year'], { Acceleration: 'sum' }),
+            ops.select(() => true)
+        )(rootData);
+
         const mountPoint = document.getElementById('chart');
-        window.canvas = env.canvas();
-        let rows = ['Cylinders', 'Horsepower', 'Weight_in_lbs'],
-		columns = ['Origin', 'Year'];
-	canvas = canvas
-		.rows(rows)
-		.columns(columns)
-  .data(rootData)
-	.color('Origin')
-	.shape('Origin')
-	.size('Origin')
-  .width(500)
-  .height(500)
-  .mount(mountPoint)
-  .config({
-      scrollBar:{
-          vertical: {
-              align: 'left'
-          }
-      }
-  })
-
-        canvas.once('canvas.animationend').then((client) => {
-
-            canvas.config({
-                scrollBar:{
-                    vertical: {
-                        align: 'right'
+        const canvas = env.canvas()
+            .data(rootData)
+            .rows(['Acceleration'])
+            .columns(['Year'])
+            .color("Origin")
+            .layers([
+                {
+                    mark: 'line',
+                    transform: {
+                        type: "stack"
+                    }
+                }
+            ])
+            .config({
+                autoGroupBy: {
+                    disabled: false,
+                    measures: {
+                        Acceleration: 'avg'
                     }
                 }
             })
-            // canvas.rows([[], ['Horsepower']])
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+            .height(500)
+            .width(600)
+            .mount(mountPoint);
     });
 }());
 
