@@ -65,3 +65,5 @@ export const DIMENSION = 'dimension';
 export const MEASURE = 'measure';
 export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
+export const HORIZONTAL_CENTER = 'h-center';
+export const VERTICAL_CENTER = 'v-center';

@@ -1,27 +1,24 @@
 import { makeElement, selectElement } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import {
-     LEFT, RIGHT, VERTICAL, HORIZONTAL, TOP, BOTTOM
+     LEFT, RIGHT, VERTICAL, HORIZONTAL, TOP, BOTTOM, HORIZONTAL_CENTER, VERTICAL_CENTER
 } from '../../constants';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
 
 function defaultAlignmentHelper (position) {
     let alignment = null;
-    let alignWith = null;
+    const alignWith = `${ROW_MATRIX_INDEX[1]}-${COLUMN_MATRIX_INDEX[1]}`;
     switch (position) {
     case TOP:
     case BOTTOM:
-        alignment = 'h-center';
-        alignWith = 'center-middle';
+        alignment = HORIZONTAL_CENTER;
         break;
-
     case LEFT:
     case RIGHT:
-        alignment = 'v-center';
-        alignWith = 'center-middle';
+        alignment = VERTICAL_CENTER;
         break;
     default:
-        alignment = 'v-center';
-        alignWith = 'center-middle';
+        alignment = VERTICAL_CENTER;
     }
     return { alignment, alignWith };
 }
