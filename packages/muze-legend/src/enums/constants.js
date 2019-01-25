@@ -5,6 +5,7 @@ export const DATAMODEL = 'dataModel';
 export const AXES = 'axes';
 export const LAYERDEFS = 'layerDef';
 export const WIDTH = 'width';
+export const MAXWIDTH = 'max-width';
 export const HEIGHT = 'height';
 export const MOUNTPOINT = 'mountPoint';
 export const GRIDLINEPARENTGROUPCLASS = 'grid-lines';
