@@ -69,11 +69,11 @@ export default class BandAxis extends SimpleAxis {
         let smartlabel;
         const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const { tickValues, tickFormat, padding } = this.config();
+        const { tickValues, padding } = this.config();
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
-        const tickFormatter = tickFormat || (val => val);
+        const tickFormatter = this._tickFormatter();
 
         tickValues && this.axis().tickValues(tickValues);
         smartTicks = tickValues || domain;
