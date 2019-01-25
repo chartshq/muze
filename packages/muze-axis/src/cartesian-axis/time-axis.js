@@ -63,10 +63,10 @@ export default class TimeAxis extends SimpleAxis {
 
     getTickFormatter (value) {
         const { tickFormat } = value;
+
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(val, i, ticks);
         }
-
         return () => text => this.scale().tickFormat()(text);
     }
 
