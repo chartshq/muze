@@ -63,6 +63,6 @@ export const PROPS = {
     tickSize: {},
     maxTickSpaces: {},
     valueParser: {
-        defaultValue: (val) => val
+        defaultValue: val => val
     }
 };

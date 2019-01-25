@@ -34,9 +34,9 @@ const formatters = (formatter, interval, valueParser) => ({
         const nearestInterval = getNearestInterval(interval);
         return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
     },
-    [MeasureSubtype.CONTINUOUS]: (value) => value instanceof InvalidAwareTypes ? valueParser(value) :
-        formatter(value ? value.toFixed(2) : value),
-    [DimensionSubtype.CATEGORICAL]: (value) => valueParser(value)
+    [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
+        formatter(value.toFixed(2))),
+    [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
 const getDefaultTooltipFormatterFn = (formatter = formatters()[DimensionSubtype.CATEGORICAL]) => formatter;

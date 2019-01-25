@@ -315,6 +315,11 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
     return side === 'left' ? high : high + 1;
 };
 
+const getNearestValue = (data, key) => {
+    const filterData = data.filter(d => typeof d === 'number');
+    return filterData[getClosestIndexOf(filterData, key)];
+};
+
 /**
  * Returns the browser window object
  * @return {Window} Window object
@@ -1578,5 +1583,6 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    createSelection
+    createSelection,
+    getNearestValue
 };

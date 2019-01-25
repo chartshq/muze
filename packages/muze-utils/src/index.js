@@ -23,6 +23,7 @@ export {
 };
 
 export {
+    getNearestValue,
     getValueParser,
     transformColors,
     detectColor,

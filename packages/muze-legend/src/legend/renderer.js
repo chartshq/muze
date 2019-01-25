@@ -345,9 +345,10 @@ export const renderStepItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    container.each(function (d) {
+    const dataArr = container.data();
+    container.each(function (d, i) {
         if (d[0] === VALUE) {
-            selectElement(this).text(formatter(d[1]));
+            selectElement(this).text(formatter(d[1], i, dataArr, context));
         } else {
             renderIcon(RECT, selectElement(this), d, {
                 classPrefix,
