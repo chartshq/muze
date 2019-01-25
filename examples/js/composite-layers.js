@@ -87,7 +87,7 @@ d3.json('../data/cars.json', (data) => {
             },
             text: {
                 field: 'compositePoint.encoding.y.field',
-                formatter: (val) => Math.round(val),
+                formatter: val => Math.round(val),
                 background: {
                     value: () => '#000'
                 }
@@ -164,6 +164,6 @@ d3.json('../data/cars.json', (data) => {
                         }
                     }])
                     // .detail(['Maker'])
-                    .mount('#chart1');
+                    .mount('#chart');
 });
 

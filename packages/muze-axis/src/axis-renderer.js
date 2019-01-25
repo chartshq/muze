@@ -41,7 +41,7 @@ const rotateAxis = (instance, tickText, labelManager) => {
 
         const tickFormatter = axis.tickFormat() ? axis.tickFormat : null;
 
-        const temp = tickSize ? (tickFormatter ? tickFormatter()(datum) : datum) : '';
+        const temp = tickSize ? (tickFormatter ? tickFormatter()(d) : datum) : '';
 
         datum = temp.toString();
 
@@ -227,8 +227,8 @@ export function renderAxis (axisInstance) {
     const {
         _axisNameStyle,
         _tickLabelStyle,
-        formatter,
-        tickValues
+        tickValues,
+        fetchTickFormatter
      } = axisInstance;
     const {
         orientation,
@@ -259,7 +259,7 @@ export function renderAxis (axisInstance) {
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    formatter && axis.tickFormat(formatter(tickValues || axis.tickValues() || labelFunc()));
+    axis.tickFormat(fetchTickFormatter(tickValues || axis.tickValues() || labelFunc()));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

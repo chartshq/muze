@@ -312,15 +312,43 @@ export const calculateContinousSpace = (context) => {
     };
 };
 
-export const setContinousAxisDomain = (context, domain) => {
-    const { nice, domain: userDom } = context.config();
+/**
+ * Overwrites domain with user defined domain (if present)
+ * @param {Object} context reference to current axes
+ * @param {Array} domain default domain
+ *
+ * @return {Array} domain
+ */
+export const getValidDomain = (context, domain) => {
+    const { domain: userDom } = context.config();
+
     if (userDom) {
         domain = userDom;
     }
-    if (domain.length && domain[0] === domain[1]) {
-        domain = [0, +domain[0] * 2];
+
+    return domain;
+};
+
+export const setContinousAxisDomain = (context, domain) => {
+    const { nice } = context.config();
+    const scale = context.scale.bind(context);
+
+    scale().domain(domain);
+    nice && scale().nice();
+    context._domain = scale().domain();
+};
+
+/**
+ * Checks if any of the properties have changed between two objects
+ * @param {Object} obj first object
+ * @param {Object} obj1 second object
+ * @param {Array} properties properties to be compared between two objects
+ *
+ * @return {Boolean} boolean value
+ */
+export const hasAxesConfigChanged = (obj = {}, obj1 = {}, properties) => {
+    if (!Object.keys(obj).length || !Object.keys(obj1).length) {
+        return false;
     }
-    context.scale().domain(domain);
-    nice && context.scale().nice();
-    context._domain = context.scale().domain();
+    return properties.some(key => obj[key] !== obj1[key]);
 };

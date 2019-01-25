@@ -1,11 +1,10 @@
 import { AxisOrientation } from '@chartshq/muze-axis';
-import { getObjProp, FieldType, STATE_NAMESPACES } from 'muze-utils';
+import { getObjProp, FieldType, STATE_NAMESPACES, createSelection } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
     getCellKey,
     isDistributionEqual,
     mutateAxesFromMap,
-    createSelection,
     getFieldsFromSuppliedLayers,
     extractFields
 } from './group-utils';

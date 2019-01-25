@@ -185,16 +185,18 @@ class AxisCell extends SimpleCell {
             right
         } = margin;
         const {
-            show
+            show,
+            orientation
         } = axis.config();
         const wrapperDiv = makeElement(selectElement(mount), 'div', [this], `${CLASSPREFIX}-${AXIS_CELL}`);
         const selection = makeElement(wrapperDiv, 'svg', [1], `${CLASSPREFIX}-axis-container`);
+        selection.classed(`${CLASSPREFIX}-axis-container-${orientation}`, true);
 
         this.mount(mount);
-        if (availWidth === 0 || !availWidth) {
+        if (!availWidth) {
             selection.attr(WIDTH, `${0}px`);
         }
-        if (availHeight === 0 || !availHeight) {
+        if (!availHeight) {
             selection.attr(HEIGHT, `${0}px`);
         }
         wrapperDiv.style(WIDTH, `${show ? Math.floor(availWidth) : 0}px`)

@@ -9,17 +9,12 @@ export default class BandAxis extends SimpleAxis {
     /**
      *
      *
-     * @param {*} range
+     * @param {*} config axes configuration
      *
      * @memberof BandAxis
      */
-    createScale (range) {
-        const scale = super.createScale(range);
-        const { padding } = this.config();
-        if (typeof padding === 'number') {
-            scale.padding(padding);
-        }
-        return scale;
+    createScale (config) {
+        return super.createScale(config);
     }
 
     /**
@@ -74,7 +69,7 @@ export default class BandAxis extends SimpleAxis {
         let smartlabel;
         const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const { tickValues, tickFormat } = this.config();
+        const { tickValues, tickFormat, padding } = this.config();
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
@@ -82,8 +77,14 @@ export default class BandAxis extends SimpleAxis {
 
         tickValues && this.axis().tickValues(tickValues);
         smartTicks = tickValues || domain;
+
         // set the style on the shared label manager instance
         labelManager.setStyle(this._tickLabelStyle);
+
+        // Update padding between plots
+        if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
+            this.scale().padding(padding);
+        }
 
         if (domain && domain.length) {
             const values = tickValues || domain;
