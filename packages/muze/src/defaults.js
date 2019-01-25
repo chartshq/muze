@@ -3,6 +3,17 @@ export const DEFAULT_CONFIG = {
     interaction: {
         sideEffect: 'individual'
     },
+    pagination: 'scroll',
+    scrollBar: {
+        thickness: 10,
+        speed: 2,
+        vertical: {
+            align: 'right'
+        },
+        horizontal: {
+            align: 'bottom'
+        }
+    },
     legend: {
         position: 'right',
         color: {

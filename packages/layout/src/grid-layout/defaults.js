@@ -12,6 +12,8 @@ export const DEFAULT_CONFIGURATION = {
         [FieldNames.COLLAPSE]: true,
         [FieldNames.SPACING]: 0
     },
+    [FieldNames.PAGINATION]: 'scroll',
+    [FieldNames.BUFFER]: 20,
     [FieldNames.GUTTERSPACE]: { rows: [], columns: [] },
     [FieldNames.DISTRIBUTION]: { rows: [], columns: [] },
     [FieldNames.BREAK_PAGE]: { rows: [], columns: [] },

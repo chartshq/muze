@@ -38,12 +38,42 @@
         type: 'dimension'
     }];
         const rootData = new DataModel(jsonData, schema);
-
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        canvas = canvas.rows(['Acceleration', 'Horsepower', 'Weight_in_lbs'])
-            .columns(['Origin']).color('Cylinders').data(rootData).height(900).width(900).mount(mountPoint);
+        let rows = ['Cylinders', 'Horsepower', 'Weight_in_lbs'],
+		columns = ['Origin', 'Year'];
+	canvas = canvas
+		.rows(rows)
+		.columns(columns)
+  .data(rootData)
+	.color('Origin')
+	.shape('Origin')
+	.size('Origin')
+  .width(500)
+  .height(500)
+  .mount(mountPoint)
+  .config({
+      scrollBar:{
+          vertical: {
+              align: 'left'
+          }
+      }
+  })
+
+        canvas.once('canvas.animationend').then((client) => {
+
+            canvas.config({
+                scrollBar:{
+                    vertical: {
+                        align: 'right'
+                    }
+                }
+            })
+            // canvas.rows([[], ['Horsepower']])
+            const element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
     });
 }());
 
