@@ -158,7 +158,8 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
             ...target,
             alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
             alignment: LAYOUT_ALIGN.LEFT,
-            className: TITLE_CONFIG.className });
+            className: TITLE_CONFIG.className
+        });
         if (layoutManager.getComponent(TITLE)) {
             titleWrapper = layoutManager
                             .getComponent(TITLE)
@@ -191,7 +192,7 @@ export const renderLayout = (layoutManager, grid, renderDetails) => {
     // color legend
     let colorLegendWrapper = null;
     if (components.legends && components.legends.length) {
-        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+        const legendConfig = { ...layoutConfig.legend, ...target, measurement, className: 'myLegend' };
 
         if (layoutManager.getComponent(LEGEND)) {
             colorLegendWrapper = layoutManager

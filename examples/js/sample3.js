@@ -76,7 +76,7 @@ d3.json('../../data/cars.json', (data) => {
 
     canvas
   		.rows(['Maker']) // CountVehicle goes in y axis
-          .columns(['Acceleration']) // Cylinders goes in x-axis
+          .columns([['Year']]) // Cylinders goes in x-axis
           .color({
               field: 'Acceleration',
               stops: 7
@@ -89,14 +89,14 @@ d3.json('../../data/cars.json', (data) => {
 //             	mark: 'bar'
 //         }
 //   })
-                    // .config({
-                    //     legend: {
-                    //         position: 'bottom'
-                    //     }
-                    // })
+                    .config({
+                        legend: {
+                            position: 'bottom'
+                        }
+                    })
       	.width(700)
       	.height(500)
-  		// .title('Stacked bar chart', { position: 'top', align: 'right' })
+  		.title('Stacked bar chart', { position: 'top', align: 'right' })
   		// .subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
       	.mount('#chart');
 });
