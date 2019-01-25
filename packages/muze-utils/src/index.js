@@ -86,7 +86,8 @@ export {
     getSmallestDiff,
     require,
     formatTemporal,
-    createSelection
+    createSelection,
+    temporalFields
 } from './common-utils';
 
 export {

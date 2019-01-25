@@ -1,4 +1,4 @@
-import { DimensionSubtype, STATE_NAMESPACES } from 'muze-utils';
+import { STATE_NAMESPACES, temporalFields } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -79,10 +79,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
             const timeDiffs = {};
             const timeDiffsByField = {};
 
-            Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
-                if (fieldObj.subtype() !== DimensionSubtype.TEMPORAL) {
-                    return;
-                }
+            Object.entries(temporalFields(dataModel)).forEach(([fieldName, fieldObj]) => {
                 timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
             });
 

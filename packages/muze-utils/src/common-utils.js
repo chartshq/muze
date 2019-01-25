@@ -1495,6 +1495,16 @@ const formatTemporal = (value, interval) => {
     return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
 };
 
+const temporalFields = (dataModel) => {
+    const filteredFields = {};
+    Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
+        if (fieldObj.subtype() === DimensionSubtype.TEMPORAL) {
+            filteredFields[fieldName] = fieldObj;
+        }
+    });
+    return filteredFields;
+};
+
 const require = (lookupWhat, lookupDetails) => ({
     resolvable: (store) => {
         const lookupTarget = store[lookupWhat];
@@ -1587,5 +1597,6 @@ export {
     hslInterpolator,
     getSmallestDiff,
     formatTemporal,
-    createSelection
+    createSelection,
+    temporalFields
 };
