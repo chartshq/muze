@@ -121,14 +121,14 @@ d3.json('../../data/cars.json', (data) => {
             }
             ])
 			.width(900)
-            .height(600)
+            .height(400)
             .config({
                 legend: {
                     position: 'bottom'
                 }
             })
-            .title('Chart')
-            .subtitle('Good Chart')
+            // .title('Chart')
+            // .subtitle('Good Chart')
                .color('Cylinders')
                .mount(mountPoint);
 });
