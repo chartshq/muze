@@ -12,7 +12,7 @@ import {
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
-import { getPlotMeasurement } from '../../helpers';
+import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
 import { getTranslatedPoints } from './bar-helper';
 
@@ -216,6 +216,10 @@ export default class BarLayer extends BaseLayer {
 
     getPlotPadding () {
         return this._plotPadding;
+    }
+
+    resolveTransformType () {
+        this._transformType = getValidTransformForAggFn(this);
     }
 
     /**
