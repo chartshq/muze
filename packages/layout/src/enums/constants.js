@@ -249,3 +249,18 @@ export const ROW_ROOT = 'rowRoot';
 export const COLUMN_ROOT = 'columnRoot';
 export const PRIMARY = 'primary';
 export const SECONDARY = 'secondary';
+export const VERTICAL = 'vertical';
+export const HORIZONTAL = 'horizontal';
+
+export const BLANK_BORDERS = 'rgba(0,0,0,0)';
+
+export const PAGINATION = 'pagination';
+export const BUFFER = 'buffer';
+export const HOLISTIC = 'holistic';
+export const MIDDLE = 'middle';
+export const NO_BORDERS = null;
+
+export const MAX_WIDTH_AVAIL_FOR_COL_MATRIX = 'maxWidthAvailableForColumnMatrix';
+export const COLUMN_MATRIX = 'columnMatrix';
+export const MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX = 'maxHeightAvailableForRowMatrix';
+export const ROW_MATRIX = 'rowMatrix';

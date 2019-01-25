@@ -15,6 +15,7 @@
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
+import { fixScrollBarConfig } from './canvas/helper';
 import { DEFAULT_CONFIG } from './defaults';
 
 export default {
@@ -61,7 +62,9 @@ export default {
                 // Reset the configuration when null is passed
                 const oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
-                const newConf = mergeRecursive(defConfig, config);
+                let newConf = mergeRecursive(defConfig, config);
+                newConf = fixScrollBarConfig(newConf);
+
                 return newConf;
             }
 
