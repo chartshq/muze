@@ -2,7 +2,7 @@ import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { calculateBandSpace, getRotatedSpaces, setContinousAxisDomain } from './helper';
+import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset } from './helper';
 import { spaceSetter } from './space-setter';
 
 /**
@@ -51,25 +51,23 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof SimpleAxis
      */
     createAxis (config) {
-        const {
-            tickFormat,
-            orientation
-        } = config;
+        const { orientation } = config;
         const axisClass = axisOrientationMap[orientation];
 
         if (axisClass) {
             const axis = axisClass(this.scale());
-            this.formatter = this.getTickFormatter(tickFormat);
             return axis;
         }
         return null;
     }
 
-    getTickFormatter (tickFormat) {
+    getTickFormatter (value) {
+        const { tickFormat } = value;
+
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(val, i, ticks);
         }
-        return null;
+        return () => text => this.scale().tickFormat()(text);
     }
 
      /**
@@ -120,11 +118,13 @@ export default class TimeAxis extends SimpleAxis {
      */
     domain (domain) {
         if (domain) {
+            domain = getValidDomain(this, domain);
             setContinousAxisDomain(this, domain);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;
-        } return this._domain;
+        }
+        return this._domain;
     }
 
     /**
@@ -137,6 +137,7 @@ export default class TimeAxis extends SimpleAxis {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateBandSpace(this));
             this.logicalSpace();
+            setOffset(this);
         }
         return this.logicalSpace();
     }
@@ -185,19 +186,20 @@ export default class TimeAxis extends SimpleAxis {
     setTickConfig () {
         let smartTicks;
         let smartlabel;
-        const { tickFormat, tickValues } = this.config();
+        const { tickValues } = this.config();
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
-        const scale = this.scale();
+
         tickValues && this.axis().tickValues(tickValues);
 
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
 
         smartTicks = tickValues || domain;
-        const tickFormatter = tickFormat || scale.tickFormat();
-         // set the style on the shared label manager instance
+        const tickFormatter = this._tickFormatter();
+
+        // set the style on the shared label manager instance
         labelManager.setStyle(this._tickLabelStyle);
 
         if (domain && domain.length) {

@@ -21,6 +21,11 @@ export const initCanvas = (context) => {
     }, context.dependencies()))];
 };
 
+export const fixScrollBarConfig = (config) => {
+    config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
+    return config;
+};
+
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
     const boundBox = layoutManager.getComponent('grid').getBoundBox();
@@ -198,8 +203,9 @@ export const setLabelRotationForAxes = (context) => {
     (() => {
         for (let i = 0; i < xAxes.length; i++) {
             for (let j = 0; j < xAxes[i].length; j++) {
-                if (xAxes[i][j].renderConfig().labels.rotation !== 0) {
-                    rotation = xAxes[i][j].renderConfig().labels.rotation;
+                const rotationVal = xAxes[i][j].renderConfig().labels.rotation;
+                if (rotationVal && rotationVal !== 0) {
+                    rotation = rotationVal;
                     return;
                 }
             }
