@@ -1,5 +1,12 @@
 import { AxisOrientation } from '@chartshq/muze-axis';
-import { getObjProp, FieldType, STATE_NAMESPACES, createSelection } from 'muze-utils';
+import {
+    getObjProp,
+    FieldType,
+    STATE_NAMESPACES,
+    retrieveNearestGroupByReducers,
+    mergeRecursive,
+    createSelection
+} from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
     getCellKey,
@@ -524,8 +531,11 @@ export const computeMatrices = (context, config) => {
         const dimensions = allFields.filter(field =>
             fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
         const aggregationFns = groupBy.measures;
+        const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
+        const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
+        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
 
-        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], aggregationFns).project(allFields);
+        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
     // return a callback function to create the cells from the matrix
