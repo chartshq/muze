@@ -61,5 +61,8 @@ export const PROPS = {
 
     smartTicks: {},
     tickSize: {},
-    maxTickSpaces: {}
+    maxTickSpaces: {},
+    valueParser: {
+        defaultValue: (val) => val
+    }
 };

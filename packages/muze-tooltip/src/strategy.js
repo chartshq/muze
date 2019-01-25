@@ -3,9 +3,11 @@ import {
     DateTimeFormatter,
     DimensionSubtype,
     MeasureSubtype,
-    FieldType
+    FieldType,
+    DataModel
 } from 'muze-utils';
 
+const { InvalidAwareTypes } = DataModel;
 const timeFormats = {
     millisecond: '%A, %b %e, %H:%M:%S.%L',
     second: '%A, %b %e, %H:%M:%S',
@@ -24,27 +26,33 @@ const getNearestInterval = (interval) => {
     return timeDurations[0][index];
 };
 
-const formatters = formatter => ({
-    [DimensionSubtype.TEMPORAL]: (value, interval) => {
+const formatters = (formatter, interval, valueParser) => ({
+    [DimensionSubtype.TEMPORAL]: (value) => {
+        if (value instanceof InvalidAwareTypes) {
+            return valueParser(value);
+        }
         const nearestInterval = getNearestInterval(interval);
         return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
     },
-    [MeasureSubtype.CONTINUOUS]: value => formatter(value ? value.toFixed(2) : value),
-    [DimensionSubtype.CATEGORICAL]: value => value
+    [MeasureSubtype.CONTINUOUS]: (value) => value instanceof InvalidAwareTypes ? valueParser(value) :
+        formatter(value ? value.toFixed(2) : value),
+    [DimensionSubtype.CATEGORICAL]: (value) => valueParser(value)
 });
 
 const getDefaultTooltipFormatterFn = (formatter = formatters()[DimensionSubtype.CATEGORICAL]) => formatter;
 
-const getTabularData = (data, schema, fieldspace, timeDiffs) => {
+const getTabularData = (data, schema, fieldspace, context) => {
     const rows = [];
     rows.push(schema.map(d => d.name));
+    const { valueParser, timeDiffs } = context;
     data.forEach((d) => {
         const row = [];
         schema.forEach((fieldObj, i) => {
             const interval = fieldObj.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[fieldObj.name] : 0;
             const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i].numberFormat();
-            const formatterFn = getDefaultTooltipFormatterFn(formatters(numberFormat)[fieldObj.subtype]);
-            const value = formatterFn(d[i], interval);
+            const formatterFn = getDefaultTooltipFormatterFn(formatters(numberFormat,
+                interval, valueParser)[fieldObj.subtype]);
+            const value = formatterFn(d[i]);
             row.push(value);
         });
         rows.push(row);
@@ -60,15 +68,17 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const separator = config.separator;
     const fieldsConfig = dataModel.getFieldsConfig();
     const fieldspace = dataModel.getFieldspace();
-    const dimensionMeasureMap = context.dimensionMeasureMap;
-    const axes = context.axes;
     const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
-    // const containsRetinalField = schema.find(d => d.name in dimensionMeasureMap);
     const containsDetailField = schema.find(d => detailFields.indexOf(d.name) !== -1);
-    const timeDiffs = context.timeDiffs;
     const dataLen = data.length;
+    const {
+        valueParser,
+        axes,
+        dimensionMeasureMap,
+        timeDiffs
+    } = context;
     const getRowContent = (field, type) => {
         let value;
         let formattedValue;
@@ -77,7 +87,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const index = fieldsConfig[field].index;
         const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ?
                 timeDiffs[field] : 0;
-        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val)[type]);
+        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type]);
 
         if (value !== null) {
             let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
@@ -114,8 +124,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             value = data[i][measureIndex];
                             const numberFormat = fieldspace.fields[measureIndex].numberFormat();
                             const measureFormatter = getDefaultTooltipFormatterFn(
-                                formatters(numberFormat)[MeasureSubtype.CONTINUOUS]);
-                            formattedValue = measureFormatter(value, interval);
+                                formatters(numberFormat, valueParser)[MeasureSubtype.CONTINUOUS]);
+                            formattedValue = measureFormatter(value);
                             values.push([{
                                 value: `${measure}${separator}`,
                                 style: {
@@ -132,8 +142,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         value = data[i][measureIndex];
                         const numberFormat = fieldspace.fields[measureIndex].numberFormat();
                         const measureFormatter = getDefaultTooltipFormatterFn(
-                            formatters(numberFormat)[MeasureSubtype.CONTINUOUS]);
-                        formattedValue = measureFormatter(value, interval);
+                            formatters(numberFormat, valueParser)[MeasureSubtype.CONTINUOUS]);
+                        formattedValue = measureFormatter(value);
                         values.push([icon, {
                             value: `${key}${separator}`,
                             className: `${config.classPrefix}-tooltip-key`
@@ -145,7 +155,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 } else {
                     key = field;
                     value = val;
-                    formattedValue = formatterFn(value, interval);
+                    formattedValue = formatterFn(value);
                     values.push([{
                         value: `${key}${separator}`,
                         className: `${config.classPrefix}-tooltip-key`
@@ -161,7 +171,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     let displayFormat = 'keyValue';
 
     if (dataLen > 1 && containsDetailField) {
-        fieldValues = getTabularData(data, schema, fieldspace, timeDiffs);
+        fieldValues = getTabularData(data, schema, fieldspace, context);
         displayFormat = 'table';
     } else {
         dimensions.forEach((item) => {

@@ -123,6 +123,15 @@ export default class BandAxis extends SimpleAxis {
         return this.axis().scale().domain();
     }
 
+    getTickFormatter (value) {
+        const { tickFormat } = value;
+
+        if (tickFormat) {
+            return ticks => (val, i) => tickFormat(val, i, ticks);
+        }
+        return () => val => this.valueParser()(val);
+    }
+
     /**
      *
      *
@@ -158,6 +167,6 @@ export default class BandAxis extends SimpleAxis {
      */
     invert (...value) {
         const values = value.map(d => this.scale().invert(d)) || [];
-        return value.length === 1 ? values[0] && values[0].toString() : values.map(d => d.toString());
+        return value.length === 1 ? values[0] : values.map(d => d);
     }
 }

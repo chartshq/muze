@@ -1,4 +1,5 @@
-import { mergeRecursive, getUniqueId } from 'muze-utils';
+import { mergeRecursive, getUniqueId, generateGetterSetters } from 'muze-utils';
+import { PROPS } from './props';
 
 /**
  * This is the base class of all side effects. It contains all common methods like setting configuration, disabling,
@@ -19,6 +20,7 @@ export default class GenericSideEffect {
         this._config = {};
         this._id = getUniqueId();
         this._strategies = {};
+        generateGetterSetters(this, PROPS);
         this.config(this.constructor.defaultConfig());
     }
 

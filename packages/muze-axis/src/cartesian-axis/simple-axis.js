@@ -178,6 +178,7 @@ export default class SimpleAxis {
         if (tickFormat) {
             return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
         }
+
         return () => val => numberFormat(val);
     }
 

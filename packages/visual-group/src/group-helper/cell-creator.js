@@ -74,7 +74,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     fieldInfo.normalizedColumns = verticalAxis.fields;
     fieldInfo.normalizedRows = horizontalAxis.fields;
 
-    const groupAxes = encoder.createAxis(axesCreators, fieldInfo);
+    const groupAxes = encoder.createAxis(axesCreators, fieldInfo, context);
 
     matrixLayers[rowIndex] = matrixLayers[rowIndex] ? matrixLayers[rowIndex] : [];
     matrixLayers[rowIndex][columnIndex] = layerConfigArr;
