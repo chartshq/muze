@@ -172,7 +172,7 @@ export default class SimpleAxis {
         return scale;
     }
 
-    getTickFormatter (value) {
+    sanitizeTickFormatter (value) {
         const { tickFormat, numberFormat } = value;
 
         if (tickFormat) {

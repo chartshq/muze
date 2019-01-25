@@ -123,7 +123,7 @@ export default class BandAxis extends SimpleAxis {
         return this.axis().scale().domain();
     }
 
-    getTickFormatter (value) {
+    sanitizeTickFormatter (value) {
         const { tickFormat } = value;
 
         if (tickFormat) {

@@ -15,7 +15,7 @@ export const PROPS = {
             const shouldAxesScaleUpdate = hasAxesConfigChanged(
                 value, oldConfig, ['interpolator', 'exponent', 'base', 'orientation']
             );
-            const tickFormatter = context.getTickFormatter(value);
+            const tickFormatter = context.sanitizeTickFormatter(value);
 
             if (shouldAxesScaleUpdate) {
                 context._scale = context.createScale(value);
