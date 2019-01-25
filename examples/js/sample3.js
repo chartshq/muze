@@ -8,11 +8,39 @@
         let jsonData = data;
         const schema = [
             {
+                name: 'Name',
+                type: 'dimension'
+            },
+            {
+                name: 'Maker',
+                type: 'dimension'
+            },
+            {
+                name: 'Miles_per_Gallon',
+                type: 'measure'
+            },
+            {
+                name: 'Displacement',
+                type: 'measure'
+            },
+            {
+                name: 'Horsepower',
+                type: 'measure'
+            },
+            {
+                name: 'Weight_in_lbs',
+                type: 'measure'
+            },
+            {
                 name: 'Acceleration',
                 type: 'measure'
             },
             {
                 name: 'Origin',
+                type: 'dimension'
+            },
+            {
+                name: 'Cylinders',
                 type: 'dimension'
             },
             {
@@ -23,43 +51,55 @@
             }
         ];
 
+        // jsonData = [
+        //     { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
+        //     { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
+        //     { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
+        //     { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
+        //     { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
+        //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
+        // ];
         let rootData = new DataModel(jsonData, schema);
-        // rootData = rootData.groupBy(['Origin', 'Year'], {
-        //     Acceleration: 'svg'
-        // });
-        // rootData = rootData.select(() => true);
+        rootData = rootData.groupBy(["Origin", "Year"], {
+            Acceleration: "avg"
+        });
 
-        const ops = DataModel.Operators;
-        rootData = ops.compose(
-            ops.groupBy(['Origin', 'Year'], { Acceleration: 'sum' }),
-            ops.select(() => true)
-        )(rootData);
-
-        const mountPoint = document.getElementById('chart');
-        const canvas = env.canvas()
+        env.canvas()
             .data(rootData)
-            .rows(['Acceleration'])
-            .columns(['Year'])
-            .color("Origin")
+            .rows(['Acceleration',])
+            .columns(['Origin'])
+            .color("Year")
+            .data(rootData)
+            .height(600)
+            .width(800)
             .layers([
                 {
-                    mark: 'line',
+                    mark: "bar",
                     transform: {
-                        type: "stack"
+                        type: "group"
                     }
                 }
             ])
             .config({
-                autoGroupBy: {
-                    disabled: false,
-                    measures: {
-                        Acceleration: 'avg'
-                    }
-                }
+                axes: {
+                    x: {
+                        tickFormat: (value, rawValue, index, ticks) => {
+                            console.log(value, rawValue);
+                            return value;
+                        },
+                        numberFormat: (v) => {
+                            return "$" + v;
+                        }
+                    },
+                    y: {
+                        tickFormat: (value, rawValue, index, ticks) => {
+                            // console.log(ticks);//
+                            return value;
+                        }
+                    },
+                },
             })
-            .height(500)
-            .width(600)
-            .mount(mountPoint);
+            .mount(document.getElementById('chart'));
     });
 }());
 
