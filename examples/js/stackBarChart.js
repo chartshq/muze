@@ -57,7 +57,7 @@ d3.json('../data/cars.json', (data) => {
   		.rows(['Maker']) // CountVehicle goes in y axis
           .columns(['Acceleration']) // Cylinders goes in x-axis
           .color({
-              field: 'Acceleration'
+              field: 'Origin'
           })
 
         .data(rootData)
@@ -68,7 +68,7 @@ d3.json('../data/cars.json', (data) => {
   })
                     .config({
                         legend: {
-                            position: 'bottom'
+                            position: 'right'
                         }
                     })
       	.width(700)
