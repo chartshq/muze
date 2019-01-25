@@ -111,14 +111,8 @@ export const resolveAligment = (context, componentData) => {
                 y: newNodeConfig.top,
                 height: newNodeConfig.height,
                 width: newNodeConfig.width
-                // renderAt: component.id()
-            });
 
-            // context.componentMap().get(host.name()).renderAt(component.id());
-            // context.componentMap().get(host.name()).boundBox({
-            //     height: newNodeConfig.height,
-            //     width: newNodeConfig.width
-            // });
+            });
         }
         resolveAligment(context, component);
     });
