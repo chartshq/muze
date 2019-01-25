@@ -98,6 +98,7 @@ d3.json('../data/by-election.json', (data) => {
                             'rgb(55, 86, 104)', 'rgb(185, 217, 238)']
 
                     })
+
                     .config({
                         border: {
                             width: 3,

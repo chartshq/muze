@@ -73,7 +73,6 @@ export default class BandAxis extends SimpleAxis {
         const { labels } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
-        const tickFormatter = this._tickFormatter();
 
         tickValues && this.axis().tickValues(tickValues);
         smartTicks = tickValues || domain;
@@ -88,10 +87,11 @@ export default class BandAxis extends SimpleAxis {
 
         if (domain && domain.length) {
             const values = tickValues || domain;
+            const tickFormatter = this._tickFormatter(values);
             smartTicks = values.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
 
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, values), width, height, noWrap);
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i), width, height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }

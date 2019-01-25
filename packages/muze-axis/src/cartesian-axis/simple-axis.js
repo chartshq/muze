@@ -176,7 +176,7 @@ export default class SimpleAxis {
         const { tickFormat, numberFormat } = value;
 
         if (tickFormat) {
-            return ticks => (val, i) => tickFormat(numberFormat(val), i, ticks);
+            return ticks => (val, i) => tickFormat(numberFormat(val), val, i, ticks);
         }
 
         return () => val => numberFormat(val);
