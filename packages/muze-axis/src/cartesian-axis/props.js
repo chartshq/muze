@@ -22,7 +22,7 @@ export const PROPS = {
                 context._axis = context.createAxis(value);
             }
 
-            context.fetchTickFormatter = ticks => tickFormatter(ticks);
+            context._tickFormatter = ticks => tickFormatter(ticks);
 
             const {
                 labels,
