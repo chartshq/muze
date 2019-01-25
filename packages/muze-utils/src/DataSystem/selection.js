@@ -13,7 +13,7 @@ class Selection {
         this._data = [];
         // // map of id to data
         this._idMap = {};
-
+        this._dataMap = {};
         this._mode = '';
         // data.forEach((item, idx) => {
         //     const index = item.id || idx;
@@ -31,7 +31,7 @@ class Selection {
      * @memberof Selection
      */
     getObjects () {
-        return Object.keys(this._idMap).map(e => this._idMap[e]);
+        return Object.values(this._idMap);
     }
 
     /**
@@ -112,6 +112,7 @@ class Selection {
             const data = params[0];
             const id = this._idGetter ? this._idGetter(...params) : (data.id || params[1]);
             this._idMap[id] = callback(...params);
+            this._dataMap[id] = data;
         });
         this._mode = '';
         return this;
@@ -177,15 +178,16 @@ class Selection {
     }
 
     each (fn) {
-        Object.keys(this._idMap).forEach((e) => {
-            fn(this._idMap[e]);
+        Object.keys(this._idMap).forEach((e, i) => {
+            fn(this._idMap[e], this._dataMap[e], i);
         });
         return this;
     }
 
     map (fn) {
         Object.keys(this._idMap).forEach((...params) => {
-            this._idMap[params[0]] = fn(this._idMap[params[0]], ...params);
+            const key = params[0];
+            this._idMap[key] = fn(this._idMap[key], ...params, this._dataMap[key]);
         });
         return this;
     }
