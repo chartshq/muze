@@ -93,6 +93,7 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             [PADDING, BORDER, MARGIN].forEach((e) => {
                 legendMeasures[e] = config[e];
             });
+
             legend.scale(scale)
                             .title(title)
                             .fieldName(fieldName)

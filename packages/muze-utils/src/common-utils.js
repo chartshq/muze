@@ -58,7 +58,9 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
+import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
+import { DM_OPERATION_GROUP } from './enums';
 
 const HTMLElement = window.HTMLElement;
 
@@ -909,6 +911,28 @@ const mergeRecursive = (source, sink) => {
     return source;
 };
 
+/**
+ * Creates a selection set from a data set with corresponding attributes
+ *
+ * @export
+ * @param {Selection} sel contains previous selection
+ * @param {Object} appendObj Object to be appended
+ * @param {Array} data Data based on which the selection is entered/updated/removed
+ * @param {Object} [attrs={}] Attributes to be set on the data
+ * @return {Selection} Merged selection
+ */
+const createSelection = (sel, appendObj, data, idFn) => {
+    let selection = sel || dataSelect([]);
+
+    selection = selection.data(data, idFn);
+
+    const enter = selection.enter().append(appendObj);
+    const mergedSelection = enter.merge(selection);
+
+    selection.exit() && selection.exit().remove();
+    return mergedSelection;
+};
+
 const interpolateArray = (data, fitCount) => {
     const linearInterpolate = function (before, after, atPoint) {
         return before + (after - before) * atPoint;
@@ -1467,6 +1491,36 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
         setTimeout(callback, 16);
     };
 
+const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
+    let nearestReducers = {};
+    let next = dataModel;
+    do {
+        const derivations = next.getDerivations();
+        if (derivations) {
+            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
+            if (groupDerivation) {
+                nearestReducers = groupDerivation.criteria || {};
+                break;
+            }
+        }
+    } while (next = next.getParent());
+
+    const filteredReducers = {};
+    const measures = dataModel.getFieldspace().getMeasure();
+    measureFieldNames.forEach((measureName) => {
+        if (nearestReducers[measureName]) {
+            filteredReducers[measureName] = nearestReducers[measureName];
+        } else {
+            const measureField = measures[measureName];
+            if (measureField) {
+                filteredReducers[measureName] = measureField.defAggFn();
+            }
+        }
+    });
+
+    return filteredReducers;
+};
+
 export {
     require,
     Scales,
@@ -1537,5 +1591,7 @@ export {
     assembleModelFromIdentifiers,
     isValidValue,
     hslInterpolator,
-    getSmallestDiff
+    getSmallestDiff,
+    retrieveNearestGroupByReducers,
+    createSelection
 };

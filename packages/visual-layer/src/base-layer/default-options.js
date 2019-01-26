@@ -6,6 +6,7 @@ export const defaultOptions = {
         value: null,
         meta: {
             sanitization: (config, oldConfig, context) => {
+                context._customConfig = config;
                 const constructor = context.constructor;
                 const newConf = mergeRecursive({}, constructor.defaultConfig());
                 return constructor.defaultPolicy(newConf, config);

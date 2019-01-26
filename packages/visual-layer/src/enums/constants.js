@@ -18,6 +18,8 @@ export const ENCODING = {
 
 export const ASCENDING = 'asc';
 
+export const AGG_FN_SUM = 'sum';
+
 export const AREA_LAYER = 'area';
 export const ARC_LAYER = 'arc';
 export const LINE_LAYER = 'line';

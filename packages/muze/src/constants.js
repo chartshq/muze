@@ -65,3 +65,6 @@ export const DIMENSION = 'dimension';
 export const MEASURE = 'measure';
 export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
+export const HIDDEN = 'hidden';
+export const OVERFLOW_X = 'overflow-x';
+export const OVERFLOW_Y = 'overflow-y';

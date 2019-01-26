@@ -9,7 +9,6 @@ export const TRANSFORM = 'transform';
 export const TRANSFORMEDDATA = 'transformedData';
 export const DATADOMAIN = 'dataDomain';
 export const FIELDS = 'fields';
-export const TIMEDIFFS = 'timeDiffs';
 export const LAYERAXISINDEX = 'layerAxisIndex';
 export const LAYERS = 'layers';
 export const DOMAIN = 'domain';

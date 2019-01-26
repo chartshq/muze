@@ -1,10 +1,18 @@
-import { FieldType } from 'muze-utils';
+import {
+    FieldType
+} from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { LineLayer } from '../line';
 import drawArea from './renderer';
 import './styles.scss';
 import { STACK, ENCODING } from '../../enums/constants';
-import { getAxesScales, positionPoints, getLayerColor, getIndividualClassName } from '../../helpers';
+import {
+    getAxesScales,
+    positionPoints,
+    getLayerColor,
+    getIndividualClassName,
+    getValidTransformForAggFn
+} from '../../helpers';
 
 /**
  * Area layer renders a closed path. The mark type of this layer is ```area```. This layer can be used
@@ -133,6 +141,10 @@ export default class AreaLayer extends LineLayer {
         });
         points = positionPoints(this, points);
         return points;
+    }
+
+    resolveTransformType () {
+        this._transformType = getValidTransformForAggFn(this);
     }
 
     /**

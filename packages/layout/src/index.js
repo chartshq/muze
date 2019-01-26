@@ -3,4 +3,9 @@
  * @module Layout
  */
 
-export { GridLayout } from './grid-layout';
+export {
+    GridLayout,
+    cellSpanMaker,
+    applySpans,
+    applyBorders
+} from './grid-layout';
