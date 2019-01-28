@@ -60,6 +60,7 @@ import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
+import { DM_OPERATION_GROUP } from './enums';
 
 const HTMLElement = window.HTMLElement;
 
@@ -1525,6 +1526,36 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
         setTimeout(callback, 16);
     };
 
+const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
+    let nearestReducers = {};
+    let next = dataModel;
+    do {
+        const derivations = next.getDerivations();
+        if (derivations) {
+            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
+            if (groupDerivation) {
+                nearestReducers = groupDerivation.criteria || {};
+                break;
+            }
+        }
+    } while (next = next.getParent());
+
+    const filteredReducers = {};
+    const measures = dataModel.getFieldspace().getMeasure();
+    measureFieldNames.forEach((measureName) => {
+        if (nearestReducers[measureName]) {
+            filteredReducers[measureName] = nearestReducers[measureName];
+        } else {
+            const measureField = measures[measureName];
+            if (measureField) {
+                filteredReducers[measureName] = measureField.defAggFn();
+            }
+        }
+    });
+
+    return filteredReducers;
+};
+
 export {
     require,
     Scales,
@@ -1598,5 +1629,6 @@ export {
     getSmallestDiff,
     formatTemporal,
     createSelection,
-    temporalFields
+    temporalFields,
+    retrieveNearestGroupByReducers
 };

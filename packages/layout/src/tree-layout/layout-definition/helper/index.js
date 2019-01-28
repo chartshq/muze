@@ -214,6 +214,7 @@ export function placeGridComponent (definitionModel, gridComponents) {
         }
         tempDefModel = second;
     }
+    return tempDefModel;
 }
 
 export function negotiateDimension (node) {
