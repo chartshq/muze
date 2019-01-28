@@ -17,4 +17,5 @@
  * @param {number} base Sets the base for log scale
  * @param {number} exponent Sets the exponent for pow scale.
  * @param {LinearAxisConfig} lAxis Sets LinearAxisConfig
+ * @param {Function} specificAxes function to set the y-axis config specifically
  */

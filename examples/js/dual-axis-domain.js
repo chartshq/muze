@@ -71,6 +71,8 @@
                     name: 'default',
                     // domain: [0, 1000],
                     specificAxes: (rowIndex, columnIndex, name) => {
+                        /* method to overwrite axis config,
+                        callback params - rowIndex, columnIndex, axesName */
                         if (rowIndex === 1 && columnIndex === 0) {
                             return {
                                 tickFormat: (d) => `${d}s`,
