@@ -1,4 +1,4 @@
-import { DimensionSubtype, STATE_NAMESPACES } from 'muze-utils';
+import { STATE_NAMESPACES, temporalFields } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -75,22 +75,26 @@ export const listenerMap = (context, namespace, metaInf) => ([
         type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.DATA}`],
         listener: ([, dataModel]) => {
-            const axisFields = context.fields();
             const axesObj = context.axes();
-            if (dataModel && axisFields && axesObj) {
-                const timeDiffs = {};
-                const timeDiffsByField = {};
-                ['x', 'y'].forEach((type) => {
-                    const field = axisFields[type][0];
-                    if (field && field.subtype() === DimensionSubtype.TEMPORAL) {
-                        timeDiffs[type] = field.getMinDiff();
-                        timeDiffsByField[field] = timeDiffs[type];
-                        axesObj[type].forEach(axis => axis.minDiff(timeDiffs[type]));
+            const timeDiffs = {};
+            const timeDiffsByField = {};
+
+            Object.entries(temporalFields(dataModel)).forEach(([fieldName, fieldObj]) => {
+                timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
+            });
+
+            Object.entries(context.fields()).forEach(([type, [field]]) => {
+                if (field) {
+                    const timeDiff = timeDiffsByField[field.oneVar()];
+                    if (timeDiff) {
+                        timeDiffs[type] = timeDiff;
+                        axesObj[type].forEach(axis => axis.minDiff(timeDiff));
                     }
-                });
-                context._timeDiffsByField = timeDiffsByField;
-                context._timeDiffs = timeDiffs;
-            }
+                }
+            });
+
+            context._timeDiffsByField = timeDiffsByField;
+            context._timeDiffs = timeDiffs;
         }
     },
     {

@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -1471,6 +1471,41 @@ const getSmallestDiff = (points) => {
     return minDiff;
 };
 
+const timeFormats = {
+    millisecond: '%A, %b %e, %H:%M:%S.%L',
+    second: '%A, %b %e, %H:%M:%S',
+    minute: '%A, %b %e, %H:%M',
+    hour: '%A, %b %e, %H:%M',
+    day: '%A, %b %e, %Y',
+    month: '%B %Y',
+    year: '%Y'
+};
+
+const timeDurations = [
+    ['millisecond', 'second', 'minute', 'hour', 'day', 'month', 'year'],
+    [1, 1000, 60000, 3600000, 86400000, 2592000000, 31536000000]
+];
+
+const getNearestInterval = (interval) => {
+    const index = getClosestIndexOf(timeDurations[1], interval);
+    return timeDurations[0][index];
+};
+
+const formatTemporal = (value, interval) => {
+    const nearestInterval = getNearestInterval(interval);
+    return DateTimeFormatter.formatAs(value, timeFormats[nearestInterval]);
+};
+
+const temporalFields = (dataModel) => {
+    const filteredFields = {};
+    Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
+        if (fieldObj.subtype() === DimensionSubtype.TEMPORAL) {
+            filteredFields[fieldName] = fieldObj;
+        }
+    });
+    return filteredFields;
+};
+
 const require = (lookupWhat, lookupDetails) => ({
     resolvable: (store) => {
         const lookupTarget = store[lookupWhat];
@@ -1592,6 +1627,8 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    retrieveNearestGroupByReducers,
-    createSelection
+    formatTemporal,
+    createSelection,
+    temporalFields,
+    retrieveNearestGroupByReducers
 };
