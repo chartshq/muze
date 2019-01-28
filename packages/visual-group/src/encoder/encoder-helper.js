@@ -108,7 +108,7 @@ export const getAdjustedDomain = (max, min) => {
  * @param {*} groupAxes
  *
  */
-export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes) => {
+export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes, indices) => {
     let axisKey;
     const currentAxes = [];
     const { fields, index } = fieldInfo;
@@ -121,6 +121,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
         const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators);
 
         let axis;
+        axisConfig.indices = indices;
         if (!map.has(axisKey)) {
             axis = createSimpleAxis(axisConfig, field, axesCreators);
         } else {
