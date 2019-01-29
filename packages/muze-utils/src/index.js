@@ -85,8 +85,10 @@ export {
     hslInterpolator,
     getSmallestDiff,
     require,
-    retrieveNearestGroupByReducers,
-    createSelection
+    formatTemporal,
+    createSelection,
+    temporalFields,
+    retrieveNearestGroupByReducers
 } from './common-utils';
 
 export {

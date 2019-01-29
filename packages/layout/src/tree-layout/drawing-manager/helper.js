@@ -96,7 +96,7 @@ export const resolveAligment = (context, componentData) => {
                 newNodeConfig = {
                     top: refNode.top,
                     left: node.left,
-                    height: refNode.height,
+                    height: refNode.top,
                     width: node.width
                 };
                 break;
@@ -106,12 +106,13 @@ export const resolveAligment = (context, componentData) => {
     // check if model in parent component
             Object.assign(newNodeConfig, { id: point.id(), className: host.className() });
             context.renderer().createAndPositionDiv(newNodeConfig);
-            context.componentMap().get(host.name()).renderAt(component.id());
-            context.componentMap().get(host.name()).boundBox({
+            context.componentMap().get(host.name()).setSpatialConfig({
+                x: newNodeConfig.left,
+                y: newNodeConfig.top,
                 height: newNodeConfig.height,
                 width: newNodeConfig.width
+
             });
-            // context.renderer().parentDiv.appendChild(childNode);
         }
         resolveAligment(context, component);
     });

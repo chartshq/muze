@@ -19,10 +19,10 @@ d3.json('../data/cars.json', (data) => {
             name: 'Miles_per_Gallon',
             type: 'measure',
             defAggFn: 'avg'
-        },
+        }];
 
-const dm = new DataModel(res, schema);
-canvas
+    const dm = new DataModel(res, schema);
+    canvas
                 .data(dm)
                 .width(600)
                 .height(400)

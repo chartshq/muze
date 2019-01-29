@@ -277,7 +277,7 @@ class TextCell extends SimpleCell {
                 ${translation[vAlign]}px) rotate(-90deg)` : '');
             elem.style(WIDTH, availWidth ? `${availWidth}px` : '100%');
             [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
-                elem.style(`padding-${type}`, `${margin[type]}px`);
+                container.style(`margin-${type}`, `${margin[type]}px`);
             });
             elem.style('text-align', textAlign);
             elem.style('display', 'inline');
