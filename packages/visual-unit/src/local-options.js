@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, DataModel } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { CONFIG, LAYERDEFS, TRANSFORM, DATA, LAYERS, TRANSFORMEDDATA } from './enums/reactive-props';
 import { sanitizeLayerDef } from './helper';
@@ -27,6 +27,7 @@ export default {
     [DATA]: {
         value: null,
         meta: {
+            typeCheck: d => d instanceof DataModel,
             preset: (data, context) => {
                 if (context._cache) {
                     const cachedData = context.cachedData();
