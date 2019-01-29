@@ -3,7 +3,7 @@ import { MUZE_PREFIX } from '../constants';
 export const TITLE_CONFIG = {
     position: 'top',
     align: 'left',
-    padding: 3,
+    padding: 4,
     className: `${MUZE_PREFIX}-title-container`
 };
 
