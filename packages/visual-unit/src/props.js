@@ -7,7 +7,12 @@ export const PROPS = {
     [LAYERS]: {},
     [CACHED_DATA]: {},
     detailFields: {},
-    axes: {},
+    axes: {
+        defaultValue: {
+            x: [],
+            y: []
+        }
+    },
     fields: {},
     metaInf: {},
     registry: {},
