@@ -2,6 +2,7 @@ import { numberInterpolator, piecewiseInterpolator, hslInterpolator } from 'muze
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
+import { treatNullMeasures } from '../helper';
 
 const getStops = (domain, stops) => {
     let newStops = [];
@@ -117,7 +118,7 @@ const uniqueRange = (domainValue, scale, domain, uniqueVals) => {
 const indexedRange = (domainValue, scale, domain) => {
     const numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
 
-    return scale(numVal);
+    return treatNullMeasures(domainValue, scale(numVal), scale(0));
 };
 
 /**
@@ -126,7 +127,8 @@ const indexedRange = (domainValue, scale, domain) => {
  * @param {*} domainValue
  * @param {*} scale
  */
-const normalRange = (domainValue, scale) => scale(domainValue);
+const normalRange = (domainValue, scale, domain) => treatNullMeasures(domainValue, scale(domainValue),
+    scale(domain[0]));
 
 /**
  *

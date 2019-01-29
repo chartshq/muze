@@ -7,7 +7,8 @@ import { getUniqueId, mergeRecursive } from 'muze-utils';
 import GenericLayout from '../generic-layout';
 import { DEFAULT_CONFIGURATION, DEFAULT_MEASUREMENTS } from './defaults';
 import { generateVisualMatrices } from './layout-helper';
-import { computeLayoutMeasurements, getViewMeasurements, getViewMatrices } from './computations';
+import { computeLayoutMeasurements } from './computations';
+import { getViewMeasurements, getViewMatrices } from './view-info-getter';
 /**
  * This class is used to create a tabular structure that
  * can house charts and values.

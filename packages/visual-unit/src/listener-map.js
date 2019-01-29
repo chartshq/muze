@@ -85,7 +85,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
 
             Object.entries(context.fields()).forEach(([type, [field]]) => {
                 if (field) {
-                    const timeDiff = timeDiffsByField[field.oneVar()];
+                    const timeDiff = timeDiffsByField[`${field}`];
                     if (timeDiff) {
                         timeDiffs[type] = timeDiff;
                         axesObj[type].forEach(axis => axis.minDiff(timeDiff));

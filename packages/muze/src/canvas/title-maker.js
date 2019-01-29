@@ -25,6 +25,7 @@ const resolveTitleSubTitleContent = (rawContent) => {
  *
  */
 const headerCreator = (config, cellType, labelManager, prevCell) => {
+    let margin = {};
     const {
         content,
         classPrefix,
@@ -41,13 +42,14 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
 
     cell.source(content);
     cell._minTickDiff = { height: 0, width: 0 };
-    let margin = {};
+
     if (config.position === TOP) {
         margin = { top: 0, bottom: config.padding };
     } else {
         margin = { top: config.padding, bottom: 0 };
     }
     cell.config({ margin });
+
     return {
         height: cell.getLogicalSpace().height,
         cell
@@ -82,6 +84,8 @@ const createHeading = (config, type, labelManager, prevCell) => {
 export const createHeaders = (context, canvasHeight, canvasWidth) => {
     let headerHeight = 0;
     const headers = {};
+    const subtitle = context.subtitle();
+    const isSubtitle = resolveTitleSubTitleContent(subtitle[0]);
 
     canvasHeight >= 200 && canvasWidth >= 200 && ['title', 'subtitle'].forEach((type) => {
         const headerOptions = context[type]();
@@ -93,14 +97,14 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
             config.height = context.height();
             config.classPrefix = context.config().classPrefix;
             config.content = content;
-            config.classPrefix = context.config().classPrefix;
+            config.padding = (type === 'title' && !isSubtitle.length) ? subtitle[1].padding : config.padding;
 
             const { height, cell } = createHeading(config, type, context.dependencies().smartlabel,
                 context[`${type}Cell`]);
 
             headers[`${type}Cell`] = cell;
             context._composition[type] = cell;
-            headerHeight += height + config.padding;
+            headerHeight += height;
         }
     });
     return { headerHeight, headers };
