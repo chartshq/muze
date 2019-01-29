@@ -202,7 +202,7 @@ const unionDomain = (domains, fieldType) => {
     domains = domains.filter(dom => dom && dom.length);
     if (domains.length) {
         if (fieldType === DimensionSubtype.CATEGORICAL) {
-            domain = domain = [].concat(...domains);
+            domain = [].concat(...domains);
         } else {
             domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
         }
