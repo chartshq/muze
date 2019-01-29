@@ -14,7 +14,7 @@ import { actionBehaviourMap } from '../firebolt/action-behaviour-map';
 import { physicalActions } from '../firebolt/physical';
 import * as sideEffects from '../firebolt/side-effects';
 import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
-import { VALUE, PATH } from '../enums/constants';
+import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM } from '../enums/constants';
 import { PROPS } from './props';
 import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
 import { getItemMeasures, titleCreator, computeItemSpaces } from './legend-helper';
@@ -257,7 +257,8 @@ export default class SimpleLegend {
         const {
             classPrefix,
             borderStyle,
-            borderColor
+            borderColor,
+            position
         } = this.config();
         const {
             maxWidth,
@@ -268,13 +269,26 @@ export default class SimpleLegend {
             border
         } = this.measurement();
         const legendContainer = makeElement(selectElement(this.mount()), 'div', [1], `${classPrefix}-legend-box`);
-
+        let marginPosition;
+        switch (position) {
+        case TOP:
+            marginPosition = `margin-${BOTTOM}`;
+            break;
+        case LEFT:
+            marginPosition = `margin-${RIGHT}`;
+            break;
+        case BOTTOM:
+            marginPosition = `margin-${TOP}`;
+            break;
+        default:
+            marginPosition = `margin-${LEFT}`;
+        }
         legendContainer.classed(`${classPrefix}-legend-box-${this._id}`, true);
         legendContainer.style('float', 'left');
         // set height and width
         legendContainer.style('width', `${Math.min(maxWidth, width) - margin * 2}px`)
                         .style('height', `${Math.min(maxHeight, height) - margin * 2}px`)
-                        .style('margin', `${margin}px`)
+                        .style(`${marginPosition}`, `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 

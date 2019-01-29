@@ -54,4 +54,12 @@ export default class HeaderComponent extends MuzeComponent {
         this.alignWith(params.config.alignWith);
         this.alignment(params.config.alignment);
     }
+
+    setSpatialConfig (conf) {
+        this.boundBox({ top: conf.y,
+            left: conf.x,
+            width: conf.width,
+            height: conf.height });
+        this.renderAt(conf.renderAt);
+    }
 }

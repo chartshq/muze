@@ -68,7 +68,7 @@ d3.json('../data/cars.json', (data) => {
   })
                     .config({
                         legend: {
-                            position: 'right'
+                            position: 'bottom'
                         }
                     })
       	.width(700)

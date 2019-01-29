@@ -1,9 +1,27 @@
 import { makeElement, selectElement } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import {
-     LEFT, RIGHT, VERTICAL, HORIZONTAL
+     LEFT, RIGHT, VERTICAL, HORIZONTAL, TOP, BOTTOM, HORIZONTAL_CENTER, VERTICAL_CENTER
 } from '../../constants';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
 
+function defaultAlignmentHelper (position) {
+    let alignment = null;
+    const alignWith = `${ROW_MATRIX_INDEX[1]}-${COLUMN_MATRIX_INDEX[1]}`;
+    switch (position) {
+    case TOP:
+    case BOTTOM:
+        alignment = HORIZONTAL_CENTER;
+        break;
+    case LEFT:
+    case RIGHT:
+        alignment = VERTICAL_CENTER;
+        break;
+    default:
+        alignment = VERTICAL_CENTER;
+    }
+    return { alignment, alignWith };
+}
 export default class LegendComponent extends MuzeComponent {
     constructor (params) {
         super(params.name, params.config.measurement.legendSpace, 0);
@@ -13,14 +31,13 @@ export default class LegendComponent extends MuzeComponent {
     renderLegend (container) {
         container = selectElement(container);
         const sectionComponents = [];
-        const { legendSpace, height, width } = this.params.config.measurement;
         const { position, classPrefix } = this.params.config;
         const legendMount = makeElement(container, 'div', [this.components],
                                         `${classPrefix}-inner-content`, {}, d => d);
         legendMount.classed(`${classPrefix}-legend`, true);
         const align = (position === LEFT || position === RIGHT) ? VERTICAL : HORIZONTAL;
-        const legWidth = align === VERTICAL ? legendSpace.width : width;
-        const legHeight = align === VERTICAL ? height : legendSpace.height;
+        const legWidth = this.newDimensions.width;
+        const legHeight = this.newDimensions.height;
 
         [container, legendMount].forEach((elem) => {
             elem.style('width', `${Math.floor(legWidth)}px`)
@@ -89,9 +106,10 @@ export default class LegendComponent extends MuzeComponent {
         this.params = params;
         this.target(params.config.target);
         this.position(params.config.position);
+        const { alignWith, alignment } = defaultAlignmentHelper(params.config.position);
         this.className(params.config.className);
-        this.alignWith(params.config.alignWith);
-        this.alignment(params.config.alignment);
+        this.alignWith(params.config.alignWith || alignWith);
+        this.alignment(params.config.alignment || alignment);
     }
 
 }
