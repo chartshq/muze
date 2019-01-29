@@ -9,7 +9,6 @@ import { createScale } from '../scale-creator';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
 import { defaultConfig } from './default-config';
 import { renderAxis } from '../axis-renderer';
-import { BAND } from '../enums/constants';
 import { spaceSetter } from './space-setter';
 import {
     getAxisComponentDimensions,
@@ -313,35 +312,23 @@ export default class SimpleAxis {
      * @param {number} value Value from the range.
      * @return {number} Value
      */
-    invert (...value) {
-        const values = value.map(d => this.scale().invert(d)) || [];
-        return value.length === 1 ? values[0] : values;
+    invert (value) {
+        return this.scale().invert(value);
     }
 
     /**
      * Gets the nearest range value from the given range values.
      * @param {number} v1 Start range value
      * @param {number} v2 End range value
+     *
      * @return {Array} range values
      */
     getNearestRange (v1, v2) {
-        let p1;
-        let p2;
-        let extent;
-        const {
-            type
-        } = this.config();
-        const scale = this.scale();
-        const range = scale.range();
-        const reverse = range[0] > range[1];
-
-        if (type === BAND) {
-            extent = scale.invertExtent(v1, v2);
-            p1 = scale(reverse ? extent[extent.length - 1] : extent[0]);
-            p2 = scale(reverse ? extent[0] : extent[extent.length - 1]) + scale.bandwidth();
-            return [p1, p2];
-        }
         return [v1, v2];
+    }
+
+    invertExtent (v1, v2) {
+        return [this.invert(v1), this.invert(v2)];
     }
 
     getMinTickDifference () {
