@@ -27,11 +27,70 @@ export const getScaleInfo = (scale) => {
 };
 
 /**
- *
- *
- * @param {*} domain
- * @param {*} steps
- *
+ * @param  {} domain
+ * @param  {} domainForLegend
+ * @param  {} context
+ */
+export const getInterpolatedArrayData = (domain, domainForLegend, context) => {
+    const { align } = context.config();
+    const availableSpace = context.measurement();
+    let currentTickValue;
+    let nextTickValue;
+    let upperBound = domainForLegend[domainForLegend.length - 1];
+    if (!Number.isInteger(domainForLegend[domainForLegend.length - 1])) {
+        upperBound = ((domainForLegend[domainForLegend.length - 1]).toFixed(2));
+    }
+    const [min, max] = [Math.min(...domainForLegend), Math.max(...domainForLegend)];
+    const tickDimension = context._labelManager;
+    const minimumTickSize = tickDimension.getOriSize('w');
+    const { height: tickDimHeight, width: tickDimWidth } = tickDimension.getOriSize((upperBound).toString());
+    let minTickDiff = (domainForLegend[1] - domainForLegend[0]);
+    for (let i = 1; i < domainForLegend.length; i++) {
+        if ((domainForLegend[i] - domainForLegend[i - 1]) < minTickDiff &&
+        (domainForLegend[i] - domainForLegend[i - 1]) !== 0) {
+            minTickDiff = domainForLegend[i] - domainForLegend[i - 1];
+        }
+    }
+    if (align === 'horizontal') {
+        const availableMaxWidth = availableSpace.maxWidth;
+        const requiredWidth = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width * 3 / 4));
+        if (availableMaxWidth >= requiredWidth) {
+            return domainForLegend;
+        }
+        const pixelPerTick = (availableMaxWidth / domainForLegend[domainForLegend.length - 1]);
+        currentTickValue = (tickDimension.getOriSize((domainForLegend[0]).toString()).width);
+        for (let i = 1; i < domainForLegend.length; i++) {
+            nextTickValue = ((currentTickValue / pixelPerTick) + (currentTickValue / 2) + domainForLegend[i - 1]);
+            if (domainForLegend[i] < nextTickValue) {
+                domainForLegend.splice(i, 1);
+                i -= 1;
+            }
+            currentTickValue = (tickDimension.getOriSize((domainForLegend[i]).toString()).width);
+        }
+        return domainForLegend;
+    }
+    const availableMaxHeight = availableSpace.maxHeight;
+    const requiredHeight = ((max - min) / Math.abs(minTickDiff)) * tickDimHeight;
+    if (availableMaxHeight >= requiredHeight) {
+        return domainForLegend;
+    }
+    const pixelPerTick = (availableMaxHeight / domainForLegend[domainForLegend.length - 1]);
+    currentTickValue = (tickDimension.getOriSize((domainForLegend[0]).toString()).height);
+    for (let i = 1; i < domainForLegend.length; i++) {
+        nextTickValue = ((currentTickValue / pixelPerTick) + domainForLegend[i - 1]);
+        if (domainForLegend[i] < nextTickValue) {
+            domainForLegend.splice(i, 1);
+            i -= 1;
+        }
+        currentTickValue = (tickDimension.getOriSize((domainForLegend[i]).toString()).height);
+    }
+    return domainForLegend;
+};
+
+/**
+ * @param  {} domain
+ * @param  {} steps
+ * @param  {} context
  */
 export const getInterpolatedData = (domain, steps, context) => {
     // To round the floating values to Integer and checking if value is 1.

@@ -1,5 +1,5 @@
 import SimpleLegend from './simple-legend';
-import { getScaleInfo, getInterpolatedData } from './legend-helper';
+import { getScaleInfo, getInterpolatedData, getInterpolatedArrayData } from './legend-helper';
 import { GRADIENT, LEFT, SIZE } from '../enums/constants';
 import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
@@ -69,6 +69,8 @@ export default class GradientLegend extends SimpleLegend {
             if (domain[domain.length - 1] > steps[steps.length - 1]) {
                 domainForLegend.push(domain[1]);
             }
+            domainForLegend = domainForLegend.sort((a, b) => a - b);
+            domainForLegend = getInterpolatedArrayData(domain, domainForLegend, context);
         } else {
             domainForLegend = getInterpolatedData(domain, steps - 1, context);
         }
