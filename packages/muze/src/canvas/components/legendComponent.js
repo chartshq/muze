@@ -31,7 +31,6 @@ export default class LegendComponent extends MuzeComponent {
     renderLegend (container) {
         container = selectElement(container);
         const sectionComponents = [];
-        // const { legendSpace, height, width } = this.params.config.measurement;
         const { position, classPrefix } = this.params.config;
         const legendMount = makeElement(container, 'div', [this.components],
                                         `${classPrefix}-inner-content`, {}, d => d);

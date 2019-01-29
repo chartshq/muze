@@ -3,8 +3,8 @@
 (function () {
 	let env = muze();
 	let DataTable = muze.DataModel,
-		share = muze.operators.share,
-		html = muze.operators.html;
+		share = muze.Operators.share,
+		html = muze.Operators.html;
 
 	d3.csv('../../../data/coffee.csv', (data) => {
 		const jsonData = data,
@@ -58,7 +58,7 @@
             .data(rootData)
             // .detail(['Market', 'Product Type', 'Product'])
             .minUnitHeight(10)
-			.width(900)
+			.width(500)
             .height(2000)
             .config({
                 border:{
