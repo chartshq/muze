@@ -109,7 +109,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             value = data[i][measureIndex];
                             const numberFormat = fieldspace.fields[measureIndex].numberFormat();
                             const measureFormatter = getDefaultTooltipFormatterFn(
-                                formatters(numberFormat, valueParser)[MeasureSubtype.CONTINUOUS]);
+                                formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
                             formattedValue = measureFormatter(value);
                             values.push([{
                                 value: `${measure}${separator}`,
@@ -127,8 +127,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         value = data[i][measureIndex];
                         const numberFormat = fieldspace.fields[measureIndex].numberFormat();
                         const measureFormatter = getDefaultTooltipFormatterFn(
-                            formatters(numberFormat, valueParser)[MeasureSubtype.CONTINUOUS]);
-                        formattedValue = measureFormatter(value, interval);
+                            formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
+                        formattedValue = measureFormatter(value);
                         const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
                         values.push([
                             icon,
