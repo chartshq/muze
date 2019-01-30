@@ -3,7 +3,7 @@ const env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
-    let jsonData = data;
+    const jsonData = data;
     const schema = [{
         name: 'Name',
         type: 'dimension'
@@ -49,31 +49,47 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    jsonData = [
-            { Origin: 'Canada', Year: '2018-03-11', Acceleration: 1088 },
-            { Origin: 'Canada', Year: '2018-03-12', Acceleration: 1923 },
-            { Origin: 'India', Year: '2018-03-11', Acceleration: 1111 },
-            { Origin: 'India', Year: '2018-03-12', Acceleration: 2534 },
-            { Origin: 'Japan', Year: '2018-03-11', Acceleration: 1123 },
-            { Origin: 'Japan', Year: '2018-03-12', Acceleration: 3664 }
-    ];
-    let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(['Origin', 'Year'], {
-        Acceleration: 'avg'
-    });
-
-    env.canvas()
-    .height(800)
-    .width(700)
-            .data(rootData)
-            .rows(['Acceleration'])
-            .columns(['Year'])
-            .color('Acceleration')
-            .data(rootData)
-            .layers([{
-                mark: 'bar'
+    const rootData = new DataModel(jsonData, schema);
+    let rows = ['Horsepower'],
+        columns = ['Year'];
+    canvas = env.data(rootData).canvas().rows(rows).columns(columns).height(850).color('Maker').width(800).minUnitWidth(40)
+    .config({
+        axes: {
+            x: {
+                // show: false
             }
-            ])
-            .mount(document.getElementById('chart'));
+        },
+        legend: {
+            position: 'bottom'
+        },
+        invalidValues: {
+            null: 'No Data Value is present in this particular tooltip'
+        }
+    })
+// {rows}
+.mount('#chart');
+
+    setTimeout(() => {
+        canvas.once('canvas.animationend').then((client) => {
+            const element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
+        // canvas.data(rootData)
+        // canvas.config({
+        //     axes: {
+        //         y: {
+        //             tickFormat: function tickFormat (val) {
+        //                 return `${val}$`;
+        //             }
+        //         },
+        //         x: {
+        //             tickFormat: function tickFormat (val) {
+        //                 return `${val}%%`;
+        //             }
+        //         }
+        //     }
+        // })
+        // .width(400).height(300);
+    }, 2000);
 });
 
