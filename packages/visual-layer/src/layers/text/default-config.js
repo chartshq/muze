@@ -29,6 +29,10 @@ export const defaultConfig = {
         color: {},
         text: {
             value: '',
+            formatter: (val, i, data, context) => {
+                const valueParser = context.valueParser();
+                return valueParser(val);
+            },
             background: {
                 padding: 10
             }

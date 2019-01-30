@@ -34,5 +34,8 @@ export const PROPS = {
         sanitization: (context, value) => mergeRecursive(context._title || {}, value)
     },
     labelManager: {},
-    minTickDistance: {}
+    minTickDistance: {},
+    valueParser: {
+        defaultValue: val => val
+    }
 };

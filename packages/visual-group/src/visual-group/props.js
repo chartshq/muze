@@ -22,6 +22,9 @@ export const PROPS = {
         defaultValue: {}
     },
     resolver: {},
+    valueParser: {
+        defaultValue: val => val
+    },
     registry: {
         sanitization: (context, value) => {
             if (context.resolver) {

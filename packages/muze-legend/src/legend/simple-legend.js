@@ -157,7 +157,7 @@ export default class SimpleLegend {
         } = this.config();
         this._labelManager.setStyle(getSmartComputedStyle(selectElement('body'),
             `${classPrefix}-legend-item-info`));
-        return getItemMeasures(this.data(), VALUE, this._labelManager, item.text.formatter);
+        return getItemMeasures(this, VALUE, item.text.formatter);
     }
 
     /**

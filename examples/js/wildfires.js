@@ -24,6 +24,7 @@ d3.csv('../data/wildfires.csv', (data) => {
     ];
 
     let rootData = new DataModel(data, schema);
+    console.log(rootData.getData());
     rootData = rootData.calculateVariable(
         {
             name: 'Months of Fire',
@@ -31,19 +32,15 @@ d3.csv('../data/wildfires.csv', (data) => {
             subtype: 'temporal',
             format: '%Y-%m-%d'
         },
-    ['alarm_date', date => {
-        const m = parseInt(date.substring(5, 7));
-        const d = date.substring(8, date.length);
-        return new Date(1970, m, d);
-    }]
-);
-    rootData = rootData.sort([['Months of Fire']]);
+        ['alarm_date', function (date) {
+            return `1970-${date.substring(5, date.length)}`;
+        }]);
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     env.canvas()
                     .rows(['year'])
                     .columns(['Months of Fire'])
-                    .data(rootData)
+                    .data(rootData.sort([['year', 'desc']]))
                     .width(600)
                     .height(600)
                     .detail(['fire_name'])
@@ -70,7 +67,7 @@ d3.csv('../data/wildfires.csv', (data) => {
                             },
                             x: {
                                 tickFormat: val => months[new Date(val).getMonth()],
-                                showInnerTicks: false,
+                                // showInnerTicks: false,
                                 showAxisName: false
                             }
                         },

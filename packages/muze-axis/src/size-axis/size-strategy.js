@@ -1,6 +1,7 @@
 import { numberInterpolator, piecewiseInterpolator } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, THRESHOLD } from '../enums/scale-type';
+import { treatNullMeasures } from '../helper';
 
 /**
  *
@@ -61,7 +62,7 @@ const steppedDomain = (domain, intervals) => {
 const discreteRange = (domainValue, scale, domain) => {
     const numVal = (domainValue - domain[0]) / (domain[domain.length - 1] - domain[0]);
     const interpolator = numberInterpolator()(...scale.range());
-    return interpolator(numVal);
+    return treatNullMeasures(domainValue, interpolator(numVal), interpolator(domain[0]));
 };
 
 /**
@@ -85,7 +86,8 @@ const pieceWiseRange = (domainValue, scale, domain, uniqueVals) => {
  * @param {*} domainValue
  * @param {*} scale
  */
-const normalRange = (domainValue, scale) => scale(domainValue);
+const normalRange = (domainValue, scale, domain) =>
+    treatNullMeasures(domainValue, scale(domainValue), scale(domain[0]));
 
 /**
  *

@@ -39,7 +39,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    createAxis (axesCreators, fieldInfo) {
+    createAxis (axesCreators, fieldInfo, context) {
         const geomCellAxes = {};
         const {
             axes
@@ -75,7 +75,10 @@ export default class CartesianEncoder extends VisualEncoder {
             } else {
                 axesCreators.position = this.axisFrom()[type];
             }
-            geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, axis === X ? xAxes : yAxes);
+            geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
+                groupAxes: axis === X ? xAxes : yAxes,
+                valueParser: context.resolver.valueParser()
+            });
         });
         return geomCellAxes;
     }

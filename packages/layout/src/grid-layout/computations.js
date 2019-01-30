@@ -2,7 +2,6 @@ import {
     HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL, HOLISTIC,
     MAX_WIDTH_AVAIL_FOR_COL_MATRIX, COLUMN_MATRIX, MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX, ROW_MATRIX, SCROLL
 } from '../enums/constants';
-import { isEqual } from 'muze-utils';
 
 /**
  * Gets measurement for an instance of visual matrix
@@ -79,10 +78,9 @@ const paginationDetailsMap = {
  * @param {number} maxMeasure maximum width/height present for column/row respectively
  * @return {number} Provides the width/height based on which further calculation can occur
  */
-const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
+const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure, buffer) => {
     const {
-        pagination,
-        buffer
+        pagination
     } = layout.config();
     const {
         matrix,
@@ -94,7 +92,7 @@ const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     case HOLISTIC:
         return maxMeasure;
     default: {
-        const actualMeasure = getMatrixMeasurement(layout[matrix](), measureType);
+        const actualMeasure = getMatrixMeasurement(layout[matrix](), measureType) + buffer;
 
         if (actualMeasure > maxMeasure) {
             layout.scrollInfo({ [scrollType]: true });
@@ -114,8 +112,8 @@ const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
  * @param {number} relatedMaxMeasure maximum width/height present for column/row respectively
  * @return {number} Provides the width/height based on which further calculation can occur
  */
-const paginationMeasureGetter = (layout, matrixType, relatedMaxMeasure) =>
-    getMatrixMeasureForPagination(layout, paginationDetailsMap[matrixType], relatedMaxMeasure);
+const paginationMeasureGetter = (layout, matrixType, relatedMaxMeasure, buffer) =>
+    getMatrixMeasureForPagination(layout, paginationDetailsMap[matrixType], relatedMaxMeasure, buffer);
 
 const getMatrixWidthDetails = (layout) => {
     const rowMatrix = layout.rowMatrix();
@@ -134,13 +132,13 @@ const getMatrixWidthDetails = (layout) => {
     const rowMatrixWidth = getMatrixMeasurement(rowMatrix, WIDTH);
 
     // Get maximum width allowed for the row matrix
-    const maxRowMatrixWidth = Math.min(rowMatrixWidth, (width - buffer) / 2);
+    const maxRowMatrixWidth = Math.min(rowMatrixWidth + buffer, width / 2);
 
     // Get maximum width available for the column matrix
     const maxWidthAvailableForColumnMatrix = width - maxRowMatrixWidth - borderWidth;
 
     // Set width for column matrix
-    const columnMatrixWidth = paginationMeasureGetter(layout, COLUMN, maxWidthAvailableForColumnMatrix);
+    const columnMatrixWidth = paginationMeasureGetter(layout, COLUMN, maxWidthAvailableForColumnMatrix, 0);
 
     return {
         rowMatrixWidth,
@@ -182,6 +180,9 @@ const getMatrixHeightDetails = (layout, columnMatrixWidth) => {
     const {
         height
     } = layout.measurement();
+    const {
+        buffer
+    } = layout.config();
 
     // Get actual height required by column matrix
     const { columnMatrixHeight, maxColumnMatrixHeight } = getHeightRequiredByColMatrix(layout, columnMatrixWidth);
@@ -190,7 +191,7 @@ const getMatrixHeightDetails = (layout, columnMatrixWidth) => {
     const maxHeightAvailableForRowMatrix = height - Math.min(maxColumnMatrixHeight, columnMatrixHeight);
 
     // Get height for row matrix
-    const rowMatrixHeight = paginationMeasureGetter(layout, ROW, maxHeightAvailableForRowMatrix);
+    const rowMatrixHeight = paginationMeasureGetter(layout, ROW, maxHeightAvailableForRowMatrix, buffer);
 
     return {
         columnMatrixHeight,
@@ -313,9 +314,7 @@ export const computeLayoutMeasurements = (layout) => {
         horizontalBuffer,
         verticalBuffer
     } = getActualBufferFromConfig(layout);
-
-    rowMatrix.setAvailableSpace(maxRowMatrixWidth, rowMatrixHeight - horizontalBuffer);
-    columnMatrix.setAvailableSpace(columnMatrixWidth - verticalBuffer, columnMatrixHeight);
+    rowMatrix.setAvailableSpace(maxRowMatrixWidth - verticalBuffer, rowMatrixHeight - horizontalBuffer);
 
     // Get row and columns viewable spaces
     const rowViewableSpaces = rowMatrix.getViewableSpaces();

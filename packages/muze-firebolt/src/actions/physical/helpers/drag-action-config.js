@@ -35,10 +35,8 @@ import { DimensionSubtype, MeasureSubtype } from 'muze-utils';
     const criteria = {};
     const isXDimension = xFieldType === DimensionSubtype.CATEGORICAL;
     const isYDimension = yFieldType === DimensionSubtype.CATEGORICAL;
-    const xRange = xAxis.constructor.type() === 'band' ? xAxis.scale().invertExtent(stPos.x, endPos.x) :
-        xAxis.invert(stPos.x, endPos.x);
-    const yRange = yAxis.constructor.type() === 'band' ? yAxis.scale().invertExtent(stPos.y, endPos.y) :
-        yAxis.invert(stPos.y, endPos.y);
+    const xRange = xAxis.invertExtent(stPos.x, endPos.x);
+    const yRange = yAxis.invertExtent(stPos.y, endPos.y);
     const selectedDomains = {
         x: stPos.x === endPos.x ? [] : (isXDimension ? xRange : xRange.sort((a, b) => a - b)),
         y: stPos.y === endPos.y ? [] : (isYDimension ? yRange : yRange.sort((a, b) => a - b))

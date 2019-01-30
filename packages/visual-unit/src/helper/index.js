@@ -7,9 +7,9 @@ import {
     unionDomain,
     makeElement,
     DimensionSubtype,
-    getClosestIndexOf,
     toArray,
-    MeasureSubtype
+    MeasureSubtype,
+    getNearestValue
 } from 'muze-utils';
 import { layerFactory } from '@chartshq/visual-layer';
 
@@ -75,6 +75,7 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
     definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
         instance.config(def);
+        instance.valueParser(context.valueParser());
         instance.dependencies(dependencies);
         instance.dataProps({
             timeDiffs: context._timeDiffs
@@ -302,7 +303,7 @@ export const getNearestDimensionalValue = (context, position) => {
     let key = axes[entryVal[0]][0].invert(position[entryVal[0]]);
     if (entryVal[1] === DimensionSubtype.TEMPORAL) {
         const filterData = [...new Set(data.getData().data.map(d => d[index]))];
-        key = filterData[getClosestIndexOf(filterData, key)];
+        key = getNearestValue(filterData, key);
     }
 
     return key !== undefined ? [[field], [key]] : null;

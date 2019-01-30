@@ -126,12 +126,13 @@ export default class ColorAxis {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
-
-            if (typeof color === 'string') {
-                const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
-                return rgbToHsv(...col);
+            if (color) {
+                if (typeof color === 'string') {
+                    const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
+                    return rgbToHsv(...col);
+                }
+                return [...color];
             }
-            return [...color];
         }
         return [...this.config().value];
     }
