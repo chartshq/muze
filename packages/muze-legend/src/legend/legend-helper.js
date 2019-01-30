@@ -101,12 +101,14 @@ export const getMaxMeasures = (data, prop, labelManager) => {
  * @param {*} labelManager
  *
  */
-export const getItemMeasures = (data, prop, labelManager, formatter) => {
+export const getItemMeasures = (context, prop, formatter) => {
     const space = [];
+    const data = context.data();
+    const labelManager = context._labelManager;
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const { height, width } = labelManager.getOriSize(formatter(value));
+        const { height, width } = labelManager.getOriSize(formatter(value, index, data, context));
         space[index] = { height: height + 1, width: width + 1 };
     });
     return space;

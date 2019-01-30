@@ -118,6 +118,7 @@ export default class Tooltip extends SpawnableSideEffect {
             sourceInf.firebolt = this.firebolt;
             sourceInf.detailFields = context.detailFields();
             sourceInf.timeDiffs = context.timeDiffsByField();
+            sourceInf.valueParser = context.valueParser();
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {

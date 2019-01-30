@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -62,6 +62,7 @@ import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
 import { DM_OPERATION_GROUP } from './enums';
 
+const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
 
 const isSimpleObject = (obj) => {
@@ -144,7 +145,7 @@ const sanitizeIP = {
  * @param  {string} field Field name
  * @return {number} Maximum value
  */
-const getMax = (data, field) => Math.max(...data.filter(d => !isNaN(d[field])).map(d => d[field]));
+const getMax = (data, field) => Math.max(...data.map(d => d[field]));
 
 /**
  * Gets the minimum value from an array of objects for a given property name
@@ -152,7 +153,7 @@ const getMax = (data, field) => Math.max(...data.filter(d => !isNaN(d[field])).m
  * @param  {string} field Field name
  * @return {number} Minimum value
  */
-const getMin = (data, field) => Math.min(...data.filter(d => !isNaN(d[field])).map(d => d[field]));
+const getMin = (data, field) => Math.min(...data.map(d => d[field]));
 
 /**
  * Gets the domain from the data based on the field name and type of field
@@ -164,21 +165,27 @@ const getMin = (data, field) => Math.min(...data.filter(d => !isNaN(d[field])).m
  */
 const getDomainFromData = (data, fields, fieldType) => {
     let domain;
-    let domArr;
+    const domArr = [];
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
     case DimensionSubtype.CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
         break;
     default:
-        domArr = data.map((arr) => {
-            const firstMin = getMin(arr, fields[0]);
-            const secondMin = getMin(arr, fields[1]);
-            const firstMax = getMax(arr, fields[0]);
-            const secondMax = getMax(arr, fields[1]);
-            return [Math.min(firstMin, secondMin), Math.max(firstMax, secondMax)];
-        });
-        domain = [Math.min(...domArr.map(d => d[0])), Math.max(...domArr.map(d => d[1]))];
+        for (let i = 0, len = data.length; i < len; i++) {
+            const arr = data[i];
+            const [field0, field1] = fields;
+            const arr0 = arr.filter(d => !isNaN(d[field0]));
+            const arr1 = arr.filter(d => !isNaN(d[field1]));
+            if (arr0.length || arr1.length) {
+                const firstMin = getMin(arr0, field0);
+                const secondMin = getMin(arr1, field1);
+                const firstMax = getMax(arr0, field0);
+                const secondMax = getMax(arr1, field1);
+                domArr.push([Math.min(firstMin, secondMin), Math.max(firstMax, secondMax)]);
+            }
+        }
+        domain = domArr.length ? [Math.min(...domArr.map(d => d[0])), Math.max(...domArr.map(d => d[1]))] : [];
         break;
     }
     return domain;
@@ -191,12 +198,14 @@ const getDomainFromData = (data, fields, fieldType) => {
  * @return {Array} Unioned domain of all domain values.
  */
 const unionDomain = (domains, fieldType) => {
-    let domain;
+    let domain = [];
     domains = domains.filter(dom => dom && dom.length);
-    if (fieldType === DimensionSubtype.CATEGORICAL) {
-        domain = domain = [].concat(...domains);
-    } else {
-        domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
+    if (domains.length) {
+        if (fieldType === DimensionSubtype.CATEGORICAL) {
+            domain = [].concat(...domains);
+        } else {
+            domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
+        }
     }
 
     return domain;
@@ -305,6 +314,11 @@ const getMaxPoint = (points, compareValue) => getExtremePoint(points, compareVal
     }
     if (high === arr.length - 1) { return high; }
     return side === 'left' ? high : high + 1;
+};
+
+const getNearestValue = (data, key) => {
+    const filterData = data.filter(d => typeof d === 'number');
+    return filterData[getClosestIndexOf(filterData, key)];
 };
 
 /**
@@ -1526,6 +1540,13 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
         setTimeout(callback, 16);
     };
 
+const getValueParser = config => (val) => {
+    if (val instanceof InvalidAwareTypes) {
+        return val in config ? config[val] : `${val}`;
+    }
+    return val;
+};
+
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     let nearestReducers = {};
     let next = dataModel;
@@ -1557,6 +1578,7 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
 };
 
 export {
+    getValueParser,
     require,
     Scales,
     Symbols,
@@ -1627,8 +1649,9 @@ export {
     isValidValue,
     hslInterpolator,
     getSmallestDiff,
-    formatTemporal,
+    getNearestValue,
+    retrieveNearestGroupByReducers,
     createSelection,
-    temporalFields,
-    retrieveNearestGroupByReducers
+    formatTemporal,
+    temporalFields
 };

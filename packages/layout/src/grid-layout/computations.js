@@ -2,7 +2,6 @@ import {
     HEIGHT, WIDTH, COLUMN, ROW, HORIZONTAL, VERTICAL, HOLISTIC,
     MAX_WIDTH_AVAIL_FOR_COL_MATRIX, COLUMN_MATRIX, MAX_HEIGHT_AVAIL_FOR_ROW_MATRIX, ROW_MATRIX, SCROLL
 } from '../enums/constants';
-import { isEqual } from 'muze-utils';
 
 /**
  * Gets measurement for an instance of visual matrix
@@ -81,8 +80,7 @@ const paginationDetailsMap = {
  */
 const getMatrixMeasureForPagination = (layout, measureDetails, maxMeasure) => {
     const {
-        pagination,
-        buffer
+        pagination
     } = layout.config();
     const {
         matrix,

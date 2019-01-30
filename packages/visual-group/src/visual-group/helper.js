@@ -74,6 +74,7 @@ export const createMatrices = (context) => {
     // Get the resolver for the matrices
     const resolver = context.resolver();
     resolver.store(context.store());
+    resolver.valueParser(context.valueParser());
     // Prepare configuration for matrix preparation
     let matrixConfig = {
         selection: context.selection(),
