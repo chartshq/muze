@@ -316,8 +316,6 @@ export const computeLayoutMeasurements = (layout) => {
     } = getActualBufferFromConfig(layout);
     rowMatrix.setAvailableSpace(maxRowMatrixWidth - verticalBuffer, rowMatrixHeight - horizontalBuffer);
 
-    // columnMatrix.setAvailableSpace(columnMatrixWidth - verticalBuffer, columnMatrixHeight);
-
     // Get row and columns viewable spaces
     const rowViewableSpaces = rowMatrix.getViewableSpaces();
     const columnViewableSpaces = columnMatrix.getViewableSpaces();
