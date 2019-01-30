@@ -9,6 +9,7 @@ export const initSideEffects = (sideEffects, firebolt) => {
                 const context = firebolt.context;
                 return context.getDrawingContext();
             });
+            sideEffects[key].valueParser(firebolt.context.valueParser());
         }
     }
 };

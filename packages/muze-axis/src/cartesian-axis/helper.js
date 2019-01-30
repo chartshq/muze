@@ -241,6 +241,7 @@ export const calculateBandSpace = (context) => {
         }
         if (show === false) {
             height = 0;
+            width = 0;
         }
 
         return {

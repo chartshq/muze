@@ -175,8 +175,10 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
             const selectedDataModel = createSelectedDataModel(dataModel, rowFacetFieldNames, val);
 
             // Project the datamodel based on the number of projections (based on last levels)
-            rowDataModels.push(...projectRows(selectedDataModel, fieldInfo));
-            rowDataModels.forEach(() => {
+            const newProjectedDataModels = projectRows(selectedDataModel, fieldInfo);
+            rowDataModels.push(...newProjectedDataModels);
+
+            newProjectedDataModels.forEach(() => {
                 facetInfo.push([rowFacets, val]);
             });
         });

@@ -81,7 +81,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     fieldInfo.normalizedColumns = verticalAxis.fields;
     fieldInfo.normalizedRows = horizontalAxis.fields;
 
-    const groupAxes = encoder.createAxis(axesCreators, fieldInfo);
+    const groupAxes = encoder.createAxis(axesCreators, fieldInfo, context);
 
     matrixLayers[rowIndex] = matrixLayers[rowIndex] ? matrixLayers[rowIndex] : [];
     matrixLayers[rowIndex][columnIndex] = layerConfigArr;
@@ -239,7 +239,8 @@ const generatePlaceholders = (context, cells, labelManager) => {
         facetsAndProjections,
         selection,
         facet,
-        encoders
+        encoders,
+        resolver
     } = context;
     const {
         rows,
@@ -302,7 +303,7 @@ const generatePlaceholders = (context, cells, labelManager) => {
             keys = columnKeys;
             length = colProjections.length > 0 ? colProjections.length : 1;
         }
-
+        keys = keys.map(arr => arr.map(val => resolver.valueParser()(val)));
         if (section.length && headerFrom === type && axis && keys.length) {
             const hContext = { axis, length, type };
             let headers = [];
@@ -343,7 +344,8 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         selection,
         axisFrom,
         facet,
-        encoders
+        encoders,
+        resolver
      } = context;
     const placeholderContext = {
         fields: {
@@ -355,7 +357,8 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         selection,
         axisFrom,
         facet,
-        encoders
+        encoders,
+        resolver
     };
     // Generate placeholders for all matrices
     const selectionObj = generatePlaceholders(placeholderContext, cells, labelManager);
@@ -485,7 +488,8 @@ export const computeMatrices = (context, config) => {
         encoders,
         facet: globalConfig.facet || {},
         axisFrom: globalConfig.axisFrom || {},
-        selection
+        selection,
+        resolver
     };
     const cells = {
         GeomCell: resolver.getCellDef(registry.GeomCell),

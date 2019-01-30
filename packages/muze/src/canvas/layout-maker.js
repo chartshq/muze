@@ -109,6 +109,7 @@ export const getRenderDetails = (context, mount) => {
         values,
         cornerMatrices: visGroup.cornerMatrices()
     };
+
     const measurement = {
         mountSpace: {
             height,

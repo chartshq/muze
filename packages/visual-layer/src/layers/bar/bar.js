@@ -1,5 +1,4 @@
 import {
-    getClosestIndexOf,
     getQualifiedClassName,
     selectElement,
     createElements,
@@ -7,7 +6,8 @@ import {
     DimensionSubtype,
     FieldType,
     MeasureSubtype,
-    Scales
+    Scales,
+    getNearestValue
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
@@ -234,7 +234,6 @@ export default class BarLayer extends BaseLayer {
         }
         let axis;
         let value;
-        let index;
         let points;
         let uniqueFieldType;
         let uniqueFieldIndex;
@@ -272,8 +271,7 @@ export default class BarLayer extends BaseLayer {
 
         if (uniqueFieldType === DimensionSubtype.TEMPORAL) {
             filterData = [...new Set(data.map(d => d[uniqueFieldIndex]))];
-            index = getClosestIndexOf(filterData, value);
-            value = filterData[index];
+            value = getNearestValue(filterData, value);
             points = pointMap[value];
         }
         const len = points && points.length;

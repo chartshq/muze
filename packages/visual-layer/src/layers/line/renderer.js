@@ -8,6 +8,11 @@ import { updateStyle } from '../../helpers';
 
 const line = Symbols.line;
 
+const filterFn = (d) => {
+    const { update } = d;
+    return update.y !== null && update.x !== null;
+};
+
 /**
  * Draws a line from the points
  * Generates a svg path string
@@ -22,11 +27,11 @@ export const drawLine = (context) => {
                 .curve(curveInterpolatorFn)
                 .x(d => d.update.x)
                 .y(d => d.update.y)
-                .defined(d => d.update.y !== null);
+                .defined(filterFn);
 
     filteredPoints = points;
     if (connectNullData) {
-        filteredPoints = points.filter(d => d.update.y !== null);
+        filteredPoints = points.filter(filterFn);
     }
 
     updateStyle(mount, style);

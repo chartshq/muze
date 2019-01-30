@@ -17,6 +17,7 @@
       "error",
       4
     ],
+    "import/no-named-default": "off",
     "space-before-function-paren": [
       "error",
       "always"

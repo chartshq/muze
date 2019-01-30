@@ -111,6 +111,15 @@ export default class BandAxis extends SimpleAxis {
         return this.axis().scale().domain();
     }
 
+    sanitizeTickFormatter (value) {
+        const { tickFormat } = value;
+
+        if (tickFormat) {
+            return ticks => (val, i) => tickFormat(val, i, ticks);
+        }
+        return () => val => this.valueParser()(val);
+    }
+
     /**
      *
      *
@@ -139,13 +148,24 @@ export default class BandAxis extends SimpleAxis {
         return axis.tickSize();
     }
 
+    invertExtent (v1, v2) {
+        return this.scale().invertExtent(v1, v2);
+    }
+
     /**
-     * Returns the value from the domain when given a value from the range.
-     * @param {number} value Value from the range.
-     * @return {number} Value
+     * Gets the nearest range value from the given range values.
+     * @param {number} v1 Start range value
+     * @param {number} v2 End range value
+     * @return {Array} range values
      */
-    invert (...value) {
-        const values = value.map(d => this.scale().invert(d)) || [];
-        return value.length === 1 ? values[0] && values[0].toString() : values.map(d => d.toString());
+    getNearestRange (v1, v2) {
+        const scale = this.scale();
+        const range = scale.range();
+        const reverse = range[0] > range[1];
+
+        const extent = this.invertExtent(v1, v2);
+        const p1 = scale(reverse ? extent[extent.length - 1] : extent[0]);
+        const p2 = scale(reverse ? extent[0] : extent[extent.length - 1]) + scale.bandwidth();
+        return [p1, p2];
     }
 }

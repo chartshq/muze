@@ -44,7 +44,7 @@ export default class TimeAxis extends SimpleAxis {
         return TIME;
     }
 
-    getTickFormatter (value) {
+    sanitizeTickFormatter (value) {
         const { tickFormat } = value;
 
         if (tickFormat) {

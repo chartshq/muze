@@ -1,4 +1,4 @@
-import { nestCollection } from 'muze-utils';
+import { nestCollection, InvalidAwareTypes } from 'muze-utils';
 
 /**
  * Create multiple datasets from a single dataset by grouping the data using
@@ -16,8 +16,16 @@ export default (schema, data, config) => {
         throw new Error(`Groupby field ${groupBy} not found in schema`);
     }
 
-    return nestCollection({
+    const groupedData = nestCollection({
         keys: groupByIndices,
         data
     });
+
+    groupedData.forEach((d) => {
+        const key = d.key;
+        if (InvalidAwareTypes.isInvalid(key)) {
+            d.key = InvalidAwareTypes.getInvalidType(key);
+        }
+    });
+    return groupedData;
 };

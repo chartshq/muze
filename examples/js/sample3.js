@@ -1,86 +1,95 @@
-/* eslint-disable */
+/* eslint disable */
+const env = muze();
+const DataModel = muze.DataModel;
 
-(function () {
-    let env = window.muze();
-    const DataModel = window.muze.DataModel;
+d3.json('../../data/cars.json', (data) => {
+    const jsonData = data;
+    const schema = [{
+        name: 'Name',
+        type: 'dimension'
+    },
+    {
+        name: 'Maker',
+        type: 'dimension'
+    },
+    {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    },
 
-    d3.json('/data/cars.json', (data) => {
-        let jsonData = data;
-        const schema = [
-            {
-                name: 'Name',
-                type: 'dimension'
-            },
-            {
-                name: 'Maker',
-                type: 'dimension'
-            },
-            {
-                name: 'Miles_per_Gallon',
-                type: 'measure'
-            },
-            {
-                name: 'Displacement',
-                type: 'measure'
-            },
-            {
-                name: 'Horsepower',
-                type: 'measure'
-            },
-            {
-                name: 'Weight_in_lbs',
-                type: 'measure'
-            },
-            {
-                name: 'Acceleration',
-                type: 'measure'
-            },
-            {
-                name: 'Origin',
-                type: 'dimension'
-            },
-            {
-                name: 'Cylinders',
-                type: 'dimension'
-            },
-            {
-                name: 'Year',
-                type: 'dimension',
-                subtype: 'temporal',
-                format: '%Y-%m-%d'
+    {
+        name: 'Displacement',
+        type: 'measure'
+    },
+    {
+        name: 'Horsepower',
+        type: 'measure'
+    },
+    {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    },
+    {
+        name: 'Acceleration',
+        type: 'measure'
+    },
+    {
+        name: 'Origin',
+        type: 'dimension'
+    },
+    {
+        name: 'Cylinders',
+        type: 'dimension'
+    },
+    {
+        name: 'Year',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    }
+    ];
+
+    const rootData = new DataModel(jsonData, schema);
+    let rows = ['Horsepower'],
+        columns = ['Year'];
+    canvas = env.data(rootData).canvas().rows(rows).columns(columns).height(850).color('Maker').width(800).minUnitWidth(40)
+    .config({
+        axes: {
+            x: {
+                // show: false
             }
-        ];
+        },
+        legend: {
+            position: 'bottom'
+        },
+        invalidValues: {
+            null: 'No Data Value is present in this particular tooltip'
+        }
+    })
+// {rows}
+.mount('#chart');
 
-        jsonData = [
-            { Origin: "Canada", Year: "2018-03-11", Acceleration: 1088 },
-            { Origin: "Canada", Year: "2018-03-12", Acceleration: 1923 },
-            { Origin: "India", Year: "2018-03-11", Acceleration: 1111 },
-            { Origin: "India", Year: "2018-03-12", Acceleration: 2534 },
-            { Origin: "Japan", Year: "2018-03-11", Acceleration: 1123 },
-            { Origin: "Japan", Year: "2018-03-12", Acceleration: 3664 },
-        ];
-        let rootData = new DataModel(jsonData, schema);
-        rootData = rootData.groupBy(["Origin", "Year"], {
-            Acceleration: "avg"
+    setTimeout(() => {
+        canvas.once('canvas.animationend').then((client) => {
+            const element = document.getElementById('chart');
+            element.classList.add('animateon');
         });
-
-        env.canvas()
-            .data(rootData)
-            .rows(['Acceleration',])
-            .columns(['Year'])
-            .color('Origin')
-            .data(rootData)
-            .height(600)
-            .width(800)
-            .layers([
-                {
-                    mark: "bar",
-                    transform: {
-                        type: "group"
-                    }
-                }
-            ])
-            .mount(document.getElementById('chart'));
-    });
-}());
+        // canvas.data(rootData)
+        // canvas.config({
+        //     axes: {
+        //         y: {
+        //             tickFormat: function tickFormat (val) {
+        //                 return `${val}$`;
+        //             }
+        //         },
+        //         x: {
+        //             tickFormat: function tickFormat (val) {
+        //                 return `${val}%%`;
+        //             }
+        //         }
+        //     }
+        // })
+        // .width(400).height(300);
+    }, 2000);
+});
 

@@ -80,7 +80,7 @@ export default class TextLayer extends BaseLayer {
                     x: xPx,
                     y: yPx
                 },
-                text: textFormatter ? textFormatter(textValue) : textValue,
+                text: textFormatter(textValue, i, data, this),
                 color,
                 background: {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, this) : null,
@@ -98,15 +98,15 @@ export default class TextLayer extends BaseLayer {
                 rowId: d._id
             };
 
-            if (d.x !== null && d.y !== null) {
-                points.push(point);
-            }
-
             point.className = getIndividualClassName(d, i, data, this);
+            points.push(point);
         }
 
         points = positionPoints(this, points);
-
+        points = points.filter((d) => {
+            const update = d.update;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 

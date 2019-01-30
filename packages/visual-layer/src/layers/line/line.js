@@ -4,7 +4,8 @@ import {
     selectElement,
     makeElement,
     FieldType,
-    getObjProp
+    getObjProp,
+    InvalidAwareTypes
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawLine } from './renderer';
@@ -130,7 +131,7 @@ export default class LineLayer extends BaseLayer {
 
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
-            const yPx = yAxis.getScaleValue(d.y);
+            const yPx = yAxis.getScaleValue(d.y) + yAxis.getUnitWidth() / 2;
             const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
                 colorEncoding, colorAxis, colorFieldIndex });
 
@@ -143,8 +144,8 @@ export default class LineLayer extends BaseLayer {
             const point = {
                 enter: {},
                 update: {
-                    x: xPx,
-                    y: d.y === null ? null : yPx
+                    x: d.x instanceof InvalidAwareTypes ? null : xPx,
+                    y: d.y instanceof InvalidAwareTypes ? null : yPx
                 },
                 style,
                 _data: d._data,

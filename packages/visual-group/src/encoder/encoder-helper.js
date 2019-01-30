@@ -120,8 +120,9 @@ export const getAdjustedDomain = (max, min) => {
  * @param {*} groupAxes
  *
  */
-export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes, indices) => {
+export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo, indices) => {
     let axisKey;
+    const { groupAxes, valueParser } = axesInfo;
     const currentAxes = [];
     const { fields, index } = fieldInfo;
     const { cacheMaps } = axesCreators;
@@ -141,6 +142,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
             axis.config(axisConfig);
             axisConfig && axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
+        axis.valueParser(valueParser);
         currentAxes.push(axis);
         map.set(axisKey, axis);
     });

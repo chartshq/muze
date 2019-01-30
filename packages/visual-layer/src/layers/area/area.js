@@ -1,6 +1,4 @@
-import {
-    FieldType
-} from 'muze-utils';
+import { FieldType, InvalidAwareTypes } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { LineLayer } from '../line';
 import drawArea from './renderer';
@@ -116,16 +114,18 @@ export default class AreaLayer extends LineLayer {
             meta.stateColor = {};
             meta.originalColor = rawColor;
             meta.colorTransform = {};
+            const invalidY = d.y instanceof InvalidAwareTypes;
+            const invalidY0 = d.y0 instanceof InvalidAwareTypes;
             const point = {
                 enter: {
                     x: xPx,
-                    y: d.y === null ? d.y : yAxis.getScaleValue(0),
-                    y0: d.y0 === null ? d.y0 : yAxis.getScaleValue(0)
+                    y: invalidY ? null : yAxis.getScaleValue(0),
+                    y0: invalidY0 ? null : yAxis.getScaleValue(0)
                 },
                 update: {
                     x: xPx,
-                    y: d.y === null ? d.y : yPx,
-                    y0: d.y0 === null ? d.y0 : y0Px
+                    y: invalidY ? null : yPx,
+                    y0: invalidY0 ? null : y0Px
                 },
                 _id: d._id,
                 _data: d._data,

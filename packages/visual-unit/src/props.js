@@ -18,5 +18,8 @@ export const PROPS = {
     registry: {},
     width: {},
     height: {},
-    parentContainerInf: {}
+    parentContainerInf: {},
+    valueParser: {
+        defaultValue: val => val
+    }
 };
