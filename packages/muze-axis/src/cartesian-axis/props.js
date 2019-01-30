@@ -7,20 +7,9 @@ export const PROPS = {
     axisComponentDimensions: {},
     config: {
         sanitization: (context, value) => {
-            Object.keys(value).forEach(key => value[key] === undefined && delete value[key]);
-
             const oldConfig = Object.assign({}, context._config || {});
             const mockedOldConfig = mergeRecursive({}, oldConfig);
             value = mergeRecursive(mockedOldConfig, value);
-
-            // Apply specificConfig if user has passed a function to handle it
-            if (value.specificAxes && typeof value.specificAxes === 'function') {
-                const { name, indices } = value;
-                const { rowIndex, columnIndex } = indices;
-                const specificConfig = value.specificAxes(rowIndex, columnIndex, name);
-
-                value = mergeRecursive(value, specificConfig);
-            }
 
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
             const shouldAxesScaleUpdate = hasAxesConfigChanged(

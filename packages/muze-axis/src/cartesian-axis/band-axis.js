@@ -5,18 +5,6 @@ import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
 import { spaceSetter } from './space-setter';
 
 export default class BandAxis extends SimpleAxis {
-
-    /**
-     *
-     *
-     * @param {*} config axes configuration
-     *
-     * @memberof BandAxis
-     */
-    createScale (config) {
-        return super.createScale(config);
-    }
-
     /**
      *
      *
@@ -81,8 +69,9 @@ export default class BandAxis extends SimpleAxis {
         labelManager.setStyle(this._tickLabelStyle);
 
         // Update padding between plots
-        if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
-            this.scale().padding(padding);
+        if (typeof padding === 'number') {
+            const paddingNormalized = Math.min(1, Math.max(0, padding));
+            this.scale().padding(paddingNormalized);
         }
 
         if (domain && domain.length) {
@@ -107,9 +96,8 @@ export default class BandAxis extends SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            this.logicalSpace(calculateBandSpace(this));
             setOffset(this);
-            this.logicalSpace();
+            this.logicalSpace(calculateBandSpace(this));
         }
         return this.logicalSpace();
     }

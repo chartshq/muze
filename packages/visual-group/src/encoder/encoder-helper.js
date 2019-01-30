@@ -13,11 +13,23 @@ import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/const
  * @param {*} axesCreators
  *
  */
-const getAxisConfig = (axisInfo, field, axesCreators) => {
+const getAxisConfig = (axisInfo, field, axesCreators, indices) => {
     let axisOrientation;
     const { index, axisIndex, axisType } = axisInfo;
     const { config, position } = axesCreators;
-    const userAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+    const { rowIndex, columnIndex } = indices;
+    const rawUserAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+
+    // Change config object to a function if not already one
+    const userAxisConfigFn = typeof rawUserAxisConfig !== 'function' ?
+        () => rawUserAxisConfig : rawUserAxisConfig;
+    const userAxisConfig = userAxisConfigFn(field._oneVar, rowIndex, columnIndex);
+
+    // If current config does not specifes config for an axis, retain old config
+    if (!userAxisConfig) {
+        return false;
+    }
+
     const {
         LEFT,
         RIGHT,
@@ -118,17 +130,16 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, groupAxes
     const commonAxisKey = getAxisKey(axisType, index);
     fields.forEach((field, axisIndex) => {
         axisKey = getAxisKey(axisType, index, axisIndex, dataTypeScaleMap[field.subtype()]);
-        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators);
+        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators, indices);
 
         let axis;
-        axisConfig.indices = indices;
         if (!map.has(axisKey)) {
             axis = createSimpleAxis(axisConfig, field, axesCreators);
         } else {
             axis = map.get(axisKey);
             axis._rotationLock = false;
             axis.config(axisConfig);
-            axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
+            axisConfig && axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
         currentAxes.push(axis);
         map.set(axisKey, axis);

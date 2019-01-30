@@ -1,7 +1,7 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
-import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
+import { BOTTOM, TOP } from '../enums/axis-orientation';
 import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset } from './helper';
 import { spaceSetter } from './space-setter';
 
@@ -42,23 +42,6 @@ export default class TimeAxis extends SimpleAxis {
      */
     static type () {
         return TIME;
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof SimpleAxis
-     */
-    createAxis (config) {
-        const { orientation } = config;
-        const axisClass = axisOrientationMap[orientation];
-
-        if (axisClass) {
-            const axis = axisClass(this.scale());
-            return axis;
-        }
-        return null;
     }
 
     getTickFormatter (value) {
@@ -138,9 +121,8 @@ export default class TimeAxis extends SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            this.logicalSpace(calculateBandSpace(this));
-            this.logicalSpace();
             setOffset(this);
+            this.logicalSpace(calculateBandSpace(this));
         }
         return this.logicalSpace();
     }

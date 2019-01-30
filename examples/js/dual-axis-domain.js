@@ -42,70 +42,55 @@
     const canvas = env.canvas();
     
     canvas
-        .rows(['Acceleration', 'Weight_in_lbs']) // Acceleration goes in Y-Axis
-        .columns(['Cylinders']) // Cylinders goes in X-Axis
+        // .rows(['Acceleration'])
+        .rows(['Acceleration', 'Displacement'])
+        .columns(['Cylinders'])
         .minUnitHeight(10)	
         .minUnitHeight(10)		
         .width(1000)
         .height(400)
         .data(dm)
-        // .rows(['Horsepower'])
-        // .columns(['Cylinders'])
-        // .detail(['Name'])
         .mount('#chart')
         .config({
             axes: {
                 x: {
-                    name: 'x-axis'
-                    // specificAxes: (rowIndex, columnIndex, name) => {
-                    //     if (rowIndex === 0 && columnIndex === 1) {
-                    //         return {
-                    //             name: 'hello world',
-                    //             tickValues: ['USA']
-                    //         };
-                    //     }
-                    // }
+                    name: 'xAxis this is',
+                    padding: 0.7
                 },
-                y: {
-                    // tickFormat: (d) => `${d}M`,
-                    name: 'default',
-                    // domain: [0, 1000],
-                    specificAxes: (rowIndex, columnIndex, name) => {
-                        /* method to overwrite axis config,
-                        callback params - rowIndex, columnIndex, axesName */
-                        if (rowIndex === 1 && columnIndex === 0) {
-                            return {
-                                tickFormat: (d) => `${d}s`,
-                                domain: [0, 700],
-                                name: 'hello'
-                            };
-                        }
-                        return null;
+                y: function (nameOfVar, rowIndex, columnIndex) {
+                    if (nameOfVar === 'Acceleration') {
+                        // Apply to only Acceleration axes
+                        return {
+                            tickFormat: (d) => `${d / 1000}M`,
+                            domain: [0, 4000],
+                            name: 'update 1',
+                        };
                     }
+                    // Apply to all y-axes
+                    return {
+                        name: 'hello world',
+                        tickFormat: (d) => `${d / 1000}K`,
+                    };
                 }
             }
-        });
-
+        })
+    
         setTimeout(() => {
             canvas
                 .config({
                     axes: {
-                        y: {
-                            // name: 'adarsh',
-                            // domain: [0, 500],
-                            specificAxes: (rowIndex, columnIndex, name) => {
-                                if (rowIndex === 0 && columnIndex === 0) {
-                                    return {
-                                        name: 'hello aga1in',
-                                        // tickFormat: (d) => `${d}l`,
-                                        // showAxisName: false,
-                                        domain: [0, 900],
-                                    };
-                                }
+                        y: function (nameOfVar, rowIndex, columnIndex) {
+                            // Update only one axis
+                            if (rowIndex === 1 && columnIndex === 0) {
+                                return {
+                                    domain: [0, 20000],
+                                    name: 'update 2'
+                                };
                             }
-                        }
+                            return null;
+                        },
                     }
                 });
-        }, 2000);
+        }, 2000)
     });
-}());
+})();
