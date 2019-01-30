@@ -3,7 +3,8 @@ import {
     DimensionSubtype,
     MeasureSubtype,
     FieldType,
-    DataModel
+    DataModel,
+    defaultValue
 } from 'muze-utils';
 
 const { InvalidAwareTypes } = DataModel;
@@ -20,10 +21,11 @@ const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
-const getDefaultTooltipFormatterFn = (formatter = formatters()[DimensionSubtype.CATEGORICAL]) => formatter;
+const getDefaultTooltipFormatterFn = (formatter, defaultFormatter) => defaultValue(formatter, defaultFormatter);
 
-const getTabularData = (data, schema, fieldspace, context) => {
+const getTabularData = (dataObj, context, defaultFormatter) => {
     const rows = [];
+    const { data, schema, fieldspace } = dataObj;
     rows.push(schema.map(d => d.name));
     const { valueParser, timeDiffs } = context;
     data.forEach((d) => {
@@ -32,7 +34,7 @@ const getTabularData = (data, schema, fieldspace, context) => {
             const interval = fieldObj.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[fieldObj.name] : 0;
             const numberFormat = fieldObj.type === FieldType.MEASURE && fieldspace.fields[i].numberFormat();
             const formatterFn = getDefaultTooltipFormatterFn(formatters(numberFormat,
-                interval, valueParser)[fieldObj.subtype]);
+                interval, valueParser)[fieldObj.subtype], defaultFormatter);
             const value = formatterFn(d[i]);
             row.push(value);
         });
@@ -60,15 +62,16 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         dimensionMeasureMap,
         timeDiffs
     } = context;
+    const defFormatter = formatters(null, null, valueParser)[DimensionSubtype.CATEGORICAL];
     const getRowContent = (field, type) => {
         let value;
         let formattedValue;
         let measureIndex;
         const values = [];
         const index = fieldsConfig[field].index;
-        const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ?
-                timeDiffs[field] : 0;
-        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type]);
+        const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
+        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type],
+            defFormatter);
 
         if (value !== null) {
             let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
@@ -158,7 +161,11 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     let displayFormat = 'keyValue';
 
     if (dataLen > 1 && containsDetailField) {
-        fieldValues = getTabularData(data, schema, fieldspace, context);
+        fieldValues = getTabularData({
+            data,
+            schema,
+            fieldspace
+        }, context, defFormatter);
         displayFormat = 'table';
     } else {
         dimensions.forEach((item) => {
