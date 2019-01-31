@@ -329,11 +329,11 @@ export const computeLayoutMeasurements = (layout) => {
 
     return {
         rowMatrixHeight: rowMatrixHeight - horizontalBuffer,
-        rowMatrixWidth,
+        rowMatrixWidth: rowMatrixWidth - verticalBuffer,
         maxHeightAvailableForRowMatrix: maxHeightAvailableForRowMatrix - horizontalBuffer,
 
         columnMatrixHeight,
-        columnMatrixWidth: columnMatrixWidth - verticalBuffer,
-        maxWidthAvailableForColumnMatrix: maxWidthAvailableForColumnMatrix - verticalBuffer
+        columnMatrixWidth,
+        maxWidthAvailableForColumnMatrix
     };
 };

@@ -117,6 +117,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         thickness: scrollBar.thickness,
         layoutBasedMeasure: layoutDimensions[viewMeasure][1]
     };
+
     const totalLength = actualCenterMeasures[layoutBasedMeasure];
     const viewLength = layoutDimensions[viewMeasure][1];
 
