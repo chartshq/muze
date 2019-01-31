@@ -57,7 +57,8 @@ d3.json('../data/cars.json', (data) => {
   		.rows(['Acceleration']) // CountVehicle goes in y axis
           .columns(['Maker']) // Cylinders goes in x-axis
           .color({
-              field: 'Name'
+              field: 'Acceleration',
+              step: true
           })
           .shape('Name')
           .size('Name')
