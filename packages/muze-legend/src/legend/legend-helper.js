@@ -221,9 +221,9 @@ export const computeItemSpaces = (config, measures, data) => {
             }
         }
     });
-    totalWidth = Math.ceil(Math.max(totalWidth, titleWidth));
-    console.log(totalWidth);
+    totalWidth = Math.ceil(Math.max(totalWidth, titleWidth)) + effPadding;
     totalHeight += titleHeight + effPadding;
+    totalHeight = Math.ceil(totalHeight);
     return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };
 };
 
