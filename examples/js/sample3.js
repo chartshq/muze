@@ -56,16 +56,17 @@ d3.json('../../data/cars.json', (data) => {
         .canvas()
         .rows(rows)
         .columns(columns)
-        .height(850)
-        .color('Maker')
-        .width(1000)
+        .height(400)
+        .color('Origin')
+        .width(600)
         .minUnitWidth(40)
         .config({
             invalidValues: {
                 null: 'No Data Value is present in this particular tooltip'
             }
         })
-        .title('Hellooooooooooooooooooooooooooooooo', { position: 'top', align: 'right' })
+        .subtitle('A Nice Chart')
+        .title('Horsepower-Year')
 
 // {rows}
 .mount('#chart');
