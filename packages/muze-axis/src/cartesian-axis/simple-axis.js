@@ -120,8 +120,7 @@ export default class SimpleAxis {
      */
     domain (...domain) {
         if (domain.length) {
-            let domainValue = domain[0];
-            domainValue = getValidDomain(this, domainValue);
+            const domainValue = getValidDomain(this, domain[0]);
             this.scale().domain(domainValue);
             this._domain = this.scale().domain();
             this.setAxisComponentDimensions();
