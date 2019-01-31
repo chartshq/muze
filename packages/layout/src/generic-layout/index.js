@@ -58,6 +58,7 @@ export default class GenericLayout {
     config (config) {
         if (config) {
             this._config = mergeRecursive(this._config || {}, config);
+            this._config.border.width = Math.max(0, this._config.border.width);
             return this;
         }
         return this._config;
