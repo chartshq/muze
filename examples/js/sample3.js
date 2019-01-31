@@ -64,26 +64,8 @@ d3.json('../../data/cars.json', (data) => {
     window.canvas = env.canvas();
     let rows = ['Cylinders', 'Horsepower'],
         columns = ['Origin', 'Year'];
-    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Origin').width(750)
+    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Maker').size('Maker').shape('Maker').width(750)
     // {rows}
     .mount(mountPoint);
-
-    setTimeout(() => {
-        canvas.once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
-        canvas.rows([['Acceleration'], ['Horsepower']]).columns(['Year']).layers([{
-            mark: 'line',
-            encoding: {
-                y: 'Acceleration'
-            }
-        }, {
-            mark: 'bar',
-            encoding: {
-                y: 'Horsepower'
-            }
-        }]);
-    }, 2000);
 });
 

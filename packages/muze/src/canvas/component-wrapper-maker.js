@@ -59,9 +59,10 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             component: header,
             config: headerConfig
         };
-        if (layoutManager.getComponent(headerType)) {
-            wrapper = layoutManager
-                      .getComponent(headerType)
+
+        const existingComponent = layoutManager.getComponent(headerType);
+        if (existingComponent) {
+            wrapper = existingComponent
                       .updateWrapper(wrapperParams);
         } else {
             wrapper = new HeaderComponent(wrapperParams);
@@ -156,20 +157,18 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         }
     };
 
-    if (layoutManager.getComponent(componentName)) {
-        scrollBarWrapper = layoutManager
-                                .getComponent(componentName)
+    const existingComponent = layoutManager.getComponent(componentName);
+
+    if (!isScroll) {
+        existingComponent && existingComponent.remove();
+        return null;
+    }
+
+    if (existingComponent) {
+        scrollBarWrapper = existingComponent
                                 .updateWrapper(wrapperParams);
-        if (!isScroll) {
-            layoutManager
-                            .getComponent(componentName)
-                            .remove();
-        }
     } else {
         scrollBarWrapper = new ScrollComponent(wrapperParams);
-    }
-    if (!isScroll) {
-        return null;
     }
 
     return scrollBarWrapper;
@@ -196,9 +195,10 @@ const createLegendWrapper = (layoutManager, renderDetails) => {
             config: legendConfig
         };
 
-        if (layoutManager.getComponent(LEGEND)) {
-            legendWrapper = layoutManager
-                       .getComponent(LEGEND)
+        const existingComponent = layoutManager.getComponent(LEGEND);
+
+        if (existingComponent) {
+            legendWrapper = existingComponent
                        .updateWrapper(wrapperParams);
         } else {
             legendWrapper = new LegendComponent(wrapperParams);
@@ -232,10 +232,9 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
         component: grid,
         config
     };
-
-    if (layoutManager.getComponent(GRID)) {
-        gridWrapper = layoutManager
-                    .getComponent(GRID)
+    const existingComponent = layoutManager.getComponent(GRID);
+    if (existingComponent) {
+        gridWrapper = existingComponent
                     .updateWrapper(wrapperParams);
     } else {
         gridWrapper = new GridComponent(wrapperParams);
