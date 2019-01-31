@@ -479,3 +479,6 @@ export const getValidTransformForAggFn = (context) => {
 
     return transformType;
 };
+
+export const getMarkId = (source, schema) => source.filter((val, i) => schema[i] &&
+    schema[i].type === FieldType.DIMENSION).join();
