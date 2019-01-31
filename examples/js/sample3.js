@@ -51,15 +51,25 @@ d3.json('../../data/cars.json', (data) => {
 
     const rootData = new DataModel(jsonData, schema);
     let rows = ['Horsepower'],
-        columns = ['Year'];
+        columns = ['Origin'];
     canvas = env.data(rootData)
         .canvas()
         .rows(rows)
         .columns(columns)
         .height(400)
-        .color('Origin')
+        .color('Year')
         .width(600)
         .minUnitWidth(40)
+        .config({
+            axes: {
+                x: {
+                    tickFormat: (value, rawValue, i, ticks) => {
+                        console.log(ticks);
+                        return value;
+                    }
+                }
+            }
+        })
         .config({
             invalidValues: {
                 null: 'No Data Value is present in this particular tooltip'
