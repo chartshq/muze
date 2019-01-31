@@ -62,7 +62,7 @@ d3.json('../../data/cars.json', (data) => {
     window.canvas = env.canvas();
     let rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
         columns = ['Year'];
-    canvas = canvas.rows(rows).columns(columns).data(rootData).width(900).height(300).config({
+    canvas = canvas.rows(rows).columns(columns).data(rootData).width(300).height(700).config({
         border: {
             style: 'solid',
             color: 'black',
