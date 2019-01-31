@@ -6,7 +6,7 @@ import {
      TOP, CENTER
 } from '../../../../layout/src/enums/constants';
 import MuzeComponent from './muze-chart-component';
-import { WIDTH, HEIGHT, HIDDEN, OVERFLOW } from '../../constants';
+import { WIDTH, HEIGHT, HIDDEN, OVERFLOW, AUTO, VISIBLE } from '../../constants';
 
 const renderPlaceholders = (cells) => {
     // Rendering content within placeholders
@@ -27,6 +27,9 @@ export default class MatrixComponent extends MuzeComponent {
         const row = this.params.config.row;
         const column = this.params.config.column;
         const { horizontal, vertical } = this.params.config.scrollInfo;
+        container.style(OVERFLOW, VISIBLE);
+        container.style(WIDTH, AUTO);
+        container.style(HEIGHT, AUTO);
 
         if (horizontal && column === 1) {
             container.style(OVERFLOW, HIDDEN);

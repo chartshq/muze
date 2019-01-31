@@ -71,3 +71,5 @@ export const HIDDEN = 'hidden';
 export const OVERFLOW = 'overflow';
 export const OVERFLOW_X = 'overflow-x';
 export const OVERFLOW_Y = 'overflow-y';
+export const AUTO = 'auto';
+export const VISIBLE = 'visible';
