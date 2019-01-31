@@ -117,7 +117,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         thickness: scrollBar.thickness,
         layoutBasedMeasure: layoutDimensions[viewMeasure][1]
     };
-
+    const isScroll = grid.scrollInfo()[scrollBarType];
     const totalLength = actualCenterMeasures[layoutBasedMeasure];
     const viewLength = layoutDimensions[viewMeasure][1];
 
@@ -152,7 +152,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         scrollBarWrapper = layoutManager
                                 .getComponent(componentName)
                                 .updateWrapper(wrapperParams);
-        if (viewLength >= totalLength) {
+        if (!isScroll) {
             layoutManager
                             .getComponent(componentName)
                             .remove();
@@ -160,7 +160,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
     } else {
         scrollBarWrapper = new ScrollComponent(wrapperParams);
     }
-    if (viewLength >= totalLength) {
+    if (!isScroll) {
         return null;
     }
 

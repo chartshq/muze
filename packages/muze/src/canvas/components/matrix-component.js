@@ -26,13 +26,14 @@ export default class MatrixComponent extends MuzeComponent {
     applyScroll (container) {
         const row = this.params.config.row;
         const column = this.params.config.column;
+        const { horizontal, vertical } = this.params.config.scrollInfo;
 
-        if (column === 1) {
+        if (horizontal && column === 1) {
             container.style(OVERFLOW_X, HIDDEN);
             container.style(WIDTH, '100%');
         }
 
-        if (row === CENTER) {
+        if (vertical && row === CENTER) {
             container.style(OVERFLOW_Y, HIDDEN);
             container.style(HEIGHT, '100%');
         }
