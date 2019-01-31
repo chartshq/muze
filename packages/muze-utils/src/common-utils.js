@@ -473,7 +473,7 @@ const objectIterator = (obj, fn) => {
      * Initialize the voronoi with the data given.
      * @param {Array.<Object>} data Array of points.
      */
-    constructor (data) {
+    constructor (data = []) {
         this._voronoi = voronoi().x(d => d.x).y(d => d.y);
         this.data(data);
     }

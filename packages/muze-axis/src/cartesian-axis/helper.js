@@ -1,3 +1,4 @@
+import { defaultValue } from 'muze-utils';
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 
 export const getRotatedSpaces = (rotation = 0, width, height) => {
@@ -327,7 +328,7 @@ export const getValidDomain = (context, domain) => {
         domain = userDom;
     }
 
-    return domain;
+    return defaultValue(domain, []);
 };
 
 export const setContinousAxisDomain = (context, domain) => {

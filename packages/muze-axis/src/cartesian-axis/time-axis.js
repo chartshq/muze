@@ -119,10 +119,10 @@ export default class TimeAxis extends SimpleAxis {
      *
      * @memberof SimpleAxis
      */
-    domain (domain) {
-        if (domain) {
-            domain = getValidDomain(this, domain);
-            setContinousAxisDomain(this, domain);
+    domain (...domain) {
+        if (domain.length) {
+            const domainValue = getValidDomain(this, domain[0]);
+            setContinousAxisDomain(this, domainValue);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
             return this;

@@ -91,17 +91,12 @@ export default class ContinousAxis extends SimpleAxis {
      *
      * @memberof SimpleAxis
      */
-    domain (domain) {
-        if (domain) {
-            if (Array.isArray(domain) && domain.length) {
-                domain = getValidDomain(this, domain);
-                domain = this._interpolator.sanitizeDomain(domain);
-                setContinousAxisDomain(this, domain);
-                this.setAxisComponentDimensions();
-                this.logicalSpace(null);
-            } else {
-                this._domain = [];
-            }
+    domain (...domain) {
+        if (domain.length) {
+            const domainVal = this._interpolator.sanitizeDomain(getValidDomain(this, domain[0]));
+            setContinousAxisDomain(this, domainVal);
+            this.setAxisComponentDimensions();
+            this.logicalSpace(null);
             return this;
         }
         return this._domain;
