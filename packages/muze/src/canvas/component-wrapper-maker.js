@@ -4,7 +4,8 @@ import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
-import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../layout/src/enums/constants';
+import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
+import { RIGHT } from '../../../muze-legend/src/enums/constants';
 
 // Mapping between types of headers and their required configs for wrapper creation
 const headerMap = {
@@ -45,6 +46,14 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             alignment: LAYOUT_ALIGN.LEFT,
             className: configType.className
         });
+
+        if (headerConfig.align === CENTER) {
+            headerConfig.alignment = null;
+            headerConfig.alignWith = null;
+        }
+        if (headerConfig.align === RIGHT) {
+            headerConfig.alignment = RIGHT;
+        }
 
         const wrapperParams = {
             name: headerType,

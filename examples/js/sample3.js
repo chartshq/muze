@@ -52,44 +52,23 @@ d3.json('../../data/cars.json', (data) => {
     const rootData = new DataModel(jsonData, schema);
     let rows = ['Horsepower'],
         columns = ['Year'];
-    canvas = env.data(rootData).canvas().rows(rows).columns(columns).height(850).color('Maker').width(800).minUnitWidth(40)
-    .config({
-        axes: {
-            x: {
-                // show: false
+    canvas = env.data(rootData)
+        .canvas()
+        .rows(rows)
+        .columns(columns)
+        .height(400)
+        .color('Origin')
+        .width(600)
+        .minUnitWidth(40)
+        .config({
+            invalidValues: {
+                null: 'No Data Value is present in this particular tooltip'
             }
-        },
-        legend: {
-            position: 'bottom'
-        },
-        invalidValues: {
-            null: 'No Data Value is present in this particular tooltip'
-        }
-    })
+        })
+        .subtitle('A Nice Chart')
+        .title('Horsepower-Year')
+
 // {rows}
 .mount('#chart');
-
-    setTimeout(() => {
-        canvas.once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
-        // canvas.data(rootData)
-        // canvas.config({
-        //     axes: {
-        //         y: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}$`;
-        //             }
-        //         },
-        //         x: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}%%`;
-        //             }
-        //         }
-        //     }
-        // })
-        // .width(400).height(300);
-    }, 2000);
 });
 
