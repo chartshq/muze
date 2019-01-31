@@ -39,7 +39,7 @@ export class LegendFireBolt extends Firebolt {
         } else {
             values = criteria[1];
             if (values) {
-                uniqueIds = this.context.data().filter(d => values.indexOf(d.value) !== -1).map(d => d.id);
+                uniqueIds = this.context.data().filter(d => values.indexOf(d.rawVal) !== -1).map(d => d.id);
             } else {
                 values = Object.values(criteria);
                 uniqueIds = this.context.data().filter(d => values.indexOf(d.range) !== -1).map(d => d.id);
