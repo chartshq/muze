@@ -1,5 +1,5 @@
 /* eslint disable */
-let env = muze();
+const env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
@@ -50,38 +50,30 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
     const rootData = new DataModel(jsonData, schema);
-    let rows = ['Horsepower'],
-        columns = ['Origin'];
+    let rows = ['Origin'],
+        columns = ['Horsepower'];
     canvas = env.data(rootData)
         .canvas()
         .rows(rows)
         .columns(columns)
         .height(400)
-        .color('Year')
-        .width(600)
-        .minUnitWidth(40)
-        .config({
-            axes: {
-                x: {
-                    tickFormat: (value, rawValue, i, ticks) => value
-                }
-            }
-        })
+        // .color('Y.ear')
+        .width(250)
+        .minUnitWidth(140)
+        // .config({
+        //     axes: {
+        //         x: {
+        //             tickFormat: (value, rawValue, i, ticks) => value
+        //         }
+        //     }
+        // })
         .config({
             invalidValues: {
                 null: 'No Data Value is present in this particular tooltip'
             }
         })
         .subtitle('A Nice Chart')
-        .title('Horsepower-Year');
-
-    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-    const mountPoint = document.getElementById('chart');
-    window.canvas = env.canvas();
-    let rows = ['Cylinders', 'Horsepower'],
-        columns = ['Origin', 'Year'];
-    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Maker').size('Maker').shape('Maker').width(750)
-    // {rows}
-    .mount(mountPoint);
+        .title('Horsepower-Year')
+    .mount('#chart');
 });
 
