@@ -1,5 +1,5 @@
 /* eslint disable */
-const env = muze();
+let env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
@@ -63,10 +63,7 @@ d3.json('../../data/cars.json', (data) => {
         .config({
             axes: {
                 x: {
-                    tickFormat: (value, rawValue, i, ticks) => {
-                        console.log(ticks);
-                        return value;
-                    }
+                    tickFormat: (value, rawValue, i, ticks) => value
                 }
             }
         })
@@ -76,9 +73,15 @@ d3.json('../../data/cars.json', (data) => {
             }
         })
         .subtitle('A Nice Chart')
-        .title('Horsepower-Year')
+        .title('Horsepower-Year');
 
-// {rows}
-.mount('#chart');
+    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+    const mountPoint = document.getElementById('chart');
+    window.canvas = env.canvas();
+    let rows = ['Cylinders', 'Horsepower'],
+        columns = ['Origin', 'Year'];
+    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Maker').size('Maker').shape('Maker').width(750)
+    // {rows}
+    .mount(mountPoint);
 });
 
