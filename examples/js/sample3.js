@@ -1,5 +1,5 @@
 /* eslint disable */
-const env = muze();
+let env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
@@ -49,47 +49,23 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    const rootData = new DataModel(jsonData, schema);
-    let rows = ['Horsepower'],
-        columns = ['Year'];
-    canvas = env.data(rootData).canvas().rows(rows).columns(columns).height(850).color('Maker').width(800).minUnitWidth(40)
-    .config({
-        axes: {
-            x: {
-                // show: false
-            }
-        },
-        legend: {
-            position: 'bottom'
-        },
-        invalidValues: {
-            null: 'No Data Value is present in this particular tooltip'
-        }
-    })
-// {rows}
-.mount('#chart');
+    let rootData = new DataModel(jsonData, schema);
+    rootData = rootData.calculateVariable({
+        name: 'date',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    }, ['Year', function (d) {
+        return d;
+    }]);
 
-    setTimeout(() => {
-        canvas.once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
-        // canvas.data(rootData)
-        // canvas.config({
-        //     axes: {
-        //         y: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}$`;
-        //             }
-        //         },
-        //         x: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}%%`;
-        //             }
-        //         }
-        //     }
-        // })
-        // .width(400).height(300);
-    }, 2000);
+    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+    const mountPoint = document.getElementById('chart');
+    window.canvas = env.canvas();
+    let rows = ['Cylinders', 'Horsepower'],
+        columns = ['Origin', 'Year'];
+    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Maker').size('Maker').shape('Maker').width(750)
+    // {rows}
+    .mount(mountPoint);
 });
 

@@ -53,35 +53,29 @@ d3.json('../data/cars.json', (data) => {
     const canvas = env.canvas();
 
     canvas
-        .rows(['Acceleration']) // Acceleration goes in y axis
-        .columns(['Maker']) // Maker goes in x-axis
-        .color({
-            field: 'Acceleration',
-            // step: true,
-            stops: [0, 16, 35, 25, 45, 48, 60, 80, 100, 120, 140, 160, 180,
-                200, 22, 25, 30, 50, 70, 100, 110, 130, 150, 200, 301, 300, 405, 506, 700, 706]
-        })
+  		.rows(['Acceleration']) // CountVehicle goes in y axis
+          .columns(['Maker']) // Cylinders goes in x-axis
+          .color({
+              field: 'Acceleration',
+              step: true
+          })
+          .shape('Name')
+          .size('Name')
 
         .data(rootData)
-        .layers({ // Draw a bar plot, by default stack transform is used
-            Acceleration: {
-                mark: 'bar'
-            }
-        })
-        .config({
-            legend: {
-                position: 'bottom'
-            }
-        })
-        .width(600)
-        .height(500)
-        .title('Stacked bar chart', {
-            position: 'top',
-            align: 'right'
-        })
-        .subtitle('Count of cars per cylinder per origin', {
-            position: 'top',
-            align: 'right'
-        })
-        .mount('#chart'); // Set the chart mount point
+  		.layers({ // Draw a bar plot, by default stack transform is used
+        	Acceleration: {
+            	mark: 'bar'
+        }
+  })
+                    .config({
+                        legend: {
+                            position: 'bottom'
+                        }
+                    })
+      	.width(1000)
+      	.height(500)
+  		.title('Stacked bar chart', { position: 'top', align: 'right' })
+  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
+      	.mount('#chart'); // Set the chart mount point
 });
