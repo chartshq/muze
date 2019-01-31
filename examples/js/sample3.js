@@ -49,15 +49,31 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.calculateVariable({
-        name: 'date',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
-    }, ['Year', function (d) {
-        return d;
-    }]);
+    const rootData = new DataModel(jsonData, schema);
+    let rows = ['Horsepower'],
+        columns = ['Origin'];
+    canvas = env.data(rootData)
+        .canvas()
+        .rows(rows)
+        .columns(columns)
+        .height(400)
+        .color('Year')
+        .width(600)
+        .minUnitWidth(40)
+        .config({
+            axes: {
+                x: {
+                    tickFormat: (value, rawValue, i, ticks) => value
+                }
+            }
+        })
+        .config({
+            invalidValues: {
+                null: 'No Data Value is present in this particular tooltip'
+            }
+        })
+        .subtitle('A Nice Chart')
+        .title('Horsepower-Year');
 
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
     const mountPoint = document.getElementById('chart');
