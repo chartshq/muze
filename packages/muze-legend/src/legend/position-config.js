@@ -55,8 +55,8 @@ const legendOrientation = {
             const {
                 width
             } = measurement;
-            console.log(width);
             const { padding } = config;
+
             return {
                 row: {
                     width: `${width}px`,
