@@ -10,9 +10,9 @@ const borderMap = {
     [`${CENTER}-${LEFT}`]: ROW,
     [`${CENTER}-${MIDDLE}`]: CENTER,
     [`${CENTER}-${RIGHT}`]: ROW,
-    [`${RIGHT}-${LEFT}`]: NO_BORDERS,
-    [`${RIGHT}-${MIDDLE}`]: COLUMN,
-    [`${RIGHT}-${RIGHT}`]: NO_BORDERS
+    [`${BOTTOM}-${LEFT}`]: NO_BORDERS,
+    [`${BOTTOM}-${MIDDLE}`]: COLUMN,
+    [`${BOTTOM}-${RIGHT}`]: NO_BORDERS
 };
 
 const applySpecificBorder = (cells, color, type, style) => {
