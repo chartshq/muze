@@ -1,0 +1,25 @@
+---
+  title: "Firebolt"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nThis class is responsible for dispatching behavioural actions and side effects. It also keeps the information of\nregistered physical actions, behavioural actions and side effects. Also, it keeps the map of physical and behavioural\nactions and behavioural actions and side effects. Whenever any behavioural action is dispatched, it also propagates\nthe rows which got affected to the other datamodels. This class is initialized by [VisualUnit](VisualUnit) and legend to\nmanage it's interaction."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=propagateWith></a> propagateWith </span></h2>\n\nAllows to propagate the datamodel with only the supplied fields. When propagation is done, then the fields\nwhich are supplied for the specified behavioural action is propagated."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">action</td>\n                <td><p>string</p> </td>\n                <td><p>Name of behavioural action. If &#39;*&#39; is specified, then for all behavioural actions it is applied.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">fields</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of field names which will be propagated.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">append</td>\n                <td><p>boolean</p> </td>\n                <td><p>If true, then it is appended to the existing propagation data model fields else only those fields are projected from propagation data model and propagated.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Firebolt></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[firebolt](api-firebolt):&nbsp;</span>Instance of firebolt"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getEntryExitSet></a> getEntryExitSet </span></h2>\n\nReturns the entry and exit set information of the specified behavioural action."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">behaviour</td>\n                <td><p>string</p> </td>\n                <td><p>Name of behavioural action.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span>Entry exit set information."

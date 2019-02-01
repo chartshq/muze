@@ -1,5 +1,4 @@
-import { FieldType, DimensionSubtype } from 'muze-utils';
-import * as PROPS from '../../enums/props';
+import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
 import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
@@ -10,7 +9,7 @@ import { getLayerColor, positionPoints, getIndividualClassName } from '../../hel
  * @param {*} fieldInfo
  * @param {*} config
  * @param {*} data
- * @returns
+ *
  */
 const resolveDimByField = (type, axesInfo, config, data) => {
     const spaceType = type === 'x' ? 'width' : 'height';
@@ -40,7 +39,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
                     pos: undefined,
                     space: undefined
                 };
-            } else if (fieldType === FieldType.MEASURE || fieldType === DimensionSubtype.TEMPORAL) {
+            } else if (fieldType === MeasureSubtype.CONTINUOUS || fieldType === DimensionSubtype.TEMPORAL) {
                 min = Math.min(minVal, maxVal);
                 max = Math.max(minVal, maxVal);
             } else {
@@ -99,7 +98,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
  * @param {*} data
  * @param {*} config
  * @param {*} axes
- * @returns
+ *
  */
 const resolveDimensions = (data, config, axes) => {
     const axesInfo = {
@@ -158,7 +157,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             xFieldSubType,
             yFieldSubType
         } = context.encodingFieldsInf();
-    const measurement = context._store.get(PROPS.MEASUREMENT);
+    const measurement = context.measurement();
     const isXDim = xFieldSubType === DimensionSubtype.CATEGORICAL || xFieldSubType === DimensionSubtype.TEMPORAL;
     const isYDim = yFieldSubType === DimensionSubtype.CATEGORICAL || yFieldSubType === DimensionSubtype.TEMPORAL;
     const key = isXDim ? 'x' : (isYDim ? 'y' : null);

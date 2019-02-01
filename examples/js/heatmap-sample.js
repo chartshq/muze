@@ -1,9 +1,9 @@
 (function () {
     let env = muze();
     let DataModel = muze.DataModel,
-        share = muze.operators.share,
-        html = muze.operators.html,
-        actionModel = muze.ActionModel;
+        // share = muze.operators.share,
+        // html = muze.operators.html,
+        // actionModel = muze.ActionModel;
     layerFactory = muze.layerFactory;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 

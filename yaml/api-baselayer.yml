@@ -1,0 +1,106 @@
+---
+  title: "Base Layer"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nAn abstract class which gives definition of common layer functionality like\n- transforming data for various modes. Supported modes: identity, group and stack.\n- calculating data domain\n- linking dependent layers\n- merging policy of configuration\n- interaction sideffect helpers\n- retrieving dom elements from data using id\n- retrieving the physical dimensions of marks\n- disposing layer\n\nEvery layer has to extend base layer and give concrete definition.\nThis layer does not have any default visual. A new layer has to define the logic of `render` for rendering the\nvisuals"
+    - 
+      type: "markdown-section"
+      content: "## <span style=\"font-family: Source Code Pro;font-weight: 500; color: #eb5757;\"><a name=\"constructor\"></a> constructor</span>\n\nCreates a layer using a configuration and data."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">data</td>\n                <td><p>DataModel</p> </td>\n                <td><p>Instance of DataModel to be used. This DataModel instance serves as the data for a layer.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">axes</td>\n                <td><p>Object</p> </td>\n                <td><p>Axes instances to be used for rendering the layer. Axes are used for mapping data from      value to px.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">x</td>                 <td><p>SimpleAxis</p> </td>                 <td><p>X axis of the layer. Based on the type of variable it gets instance of BandAxis,      TimeAxis, ContinuousAxis</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">y</td>                 <td><p>SimpleAxis</p> </td>                 <td><p>X axis of the layer. Based on the type of variable it gets instance of BandAxis,      TimeAxis, ContinuousAxis</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">color</td>                 <td><p>ColorAxis</p> </td>                 <td><p>Axis for coloring a layer using color interpolators</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">shape</td>                 <td><p>ShapeAxis</p> </td>                 <td><p>Axis for providing a shape</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">size</td>                 <td><p>SizeAxis</p> </td>                 <td><p>Axis for determining size of a mark using size interpolator</p> </td>             </tr></table></p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>LayerConfig</p> </td>\n                <td><p>Configuration of the layer</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">dependencies</td>\n                <td><p>Object</p> </td>\n                <td><p>Dependencies of the layer<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">smartLabel</td>                 <td><p>SmartLabel</p> </td>                 <td><p>Smartlabel singleton instance</p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=defaultConfig></a> defaultConfig </span></h2>\n\nDefault configuration of the layer. This configuration gets merged to the user passed configuration using a\nplolicy. Base layer only returns part of configuraion, any layer overridding base layer should return its own\nconfiguration."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span>Default configuration"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=defaultPolicy></a> defaultPolicy </span></h2>\n\nPolicy defines how user config gets merged to default config. The default policy here does a deep copy\noperation.\nAny policy which does more than deep copying should define the policy as a static member."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">conf</td>\n                <td><p>LayerConfig</p> </td>\n                <td><p>Configuration with which the user config will be merged</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">userConf</td>\n                <td><p>LayerConfig</p> </td>\n                <td><p>Configuration given by the user</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=LayerConfig></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[layerconfig](api-layerconfig):&nbsp;</span>Merged layer configuration"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=formalName></a> formalName </span></h2>\n\nDetermines a name for a layer. This name of the layer is used in the input data to refer to this layer.\n```\n .layer([\n     mark: 'bar',\n     encoding: { ... }\n ])\n```"
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>name of layer"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=alias></a> alias </span></h2>\n\nProvides a alias for a layer. Like it's possible to have same layer (like bar) multiple times, but among multiple\nlayers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set\nas the alias name.\n\n\nIf used as setter"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">alias</td>\n                <td><p>string</p> </td>\n                <td><p>Name of the alias</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=BaseLayer></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[baselayer](api-baselayer):&nbsp;</span>Instance of current base layer\n\nIf used as getter"
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>Alias of the current layer"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=serialize></a> serialize </span></h2>\n\nSerialize the schema. Merge config is used for serialization."
+    - 
+      type: "markdown-section"
+      content: "<a name=LayerConfig></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[layerconfig](api-layerconfig):&nbsp;</span>Serialized schema"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=id></a> id </span></h2>\n\nReturns the unique identifier of this layer. Id is auto generated during the creation proceess of a schema."
+    - 
+      type: "markdown-section"
+      content: "<a name=string></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">string:&nbsp;</span>id of the layer"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getNearestPoint></a> getNearestPoint </span></h2>\n\nGets the nearest point closest to the given x and y coordinate. If no nearest point is found, then it returns\nnull."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">x</td>\n                <td><p>number</p> </td>\n                <td><p>X Coordinate.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">y</td>\n                <td><p>number</p> </td>\n                <td><p>Y Coordinate.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Information of the nearest point.</p>\n<pre><code>     {\n         // id property contains the field names and their corresponding values in a 2d array. This is the data\n         // associated with the nearest point.\n         id: // Example data: [[&#39;Origin&#39;], [&#39;USA&#39;]],\n         dimensions: // Physical dimensions of the point.\n         layerId: // Id of the layer instance.\n     }\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getPointsFromIdentifiers></a> getPointsFromIdentifiers </span></h2>\n\nReturns the information of the marks corresponding to the supplied identifiers. Identifiers are a set of field\nnames and their corresponding values in an array. It can also be an instance of datamodel.\n\nFor example,\n```\n const identifiers = [\n     ['Origin', 'Cylinders'],\n     ['USA', '8']\n ];\n const points = barLayer.getPointsFromIdentifiers(identifiers);\n```"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">identifiers</td>\n                <td><p>Array</p> <p>DataModel</p> </td>\n                <td><p>Identifiers of the marks.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Optional configuration which describes how to get the information.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">getAllAttrs</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then returns all the information of the points, else returns only the positions of the points.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">getBBox</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then returns the bounding box of all the marks.</p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Array></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">array:&nbsp;</span>Array of points contains"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=getPlotElementsFromSet></a> getPlotElementsFromSet </span></h2>\n\nReturns the dom elements associated with the supplied set of row ids.\nEach element in the layer is mapped with a row of the datamodel. When given an array of row ids, it returns all\nthe elements which is mapped with those row ids."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">set</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of row ids</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Selection></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[selection](api-selection):&nbsp;</span>D3 Selection of dom elements."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=data></a> data </span></h2>\n\nUpdates the layer with new data model."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">data</td>\n                <td><p>DataModel</p> </td>\n                <td><p>Instance of new data model.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=BaseLayer></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[baselayer](api-baselayer):&nbsp;</span>Instance of layer."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=axes></a> axes </span></h2>\n\nReturns the axes attached with the layer."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Axes instances of the layer.</p>\n<pre><code>     {\n         // x and y axis is only returned for cartesian layers\n         x: // X Axis Instance.\n         y: // Y Axis Instance.\n         color: // Color Axis instance\n         shape: // Shape Axis instance.\n         size: // Size Axis instance.\n     }\n</code></pre>"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=config></a> config </span></h2>\n\nReturns the configuration of the layer."
+    - 
+      type: "markdown-section"
+      content: "<a name=Object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span>Configuration of layer."

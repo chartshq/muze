@@ -4,11 +4,14 @@ import {
     setStyles,
     easeFns,
     selectElement,
-    DimensionSubtype
+    DimensionSubtype,
+    STATE_NAMESPACES,
+    retrieveNearestGroupByReducers,
+    getObjProp
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 
@@ -89,7 +92,7 @@ export const focusUnfocusSelection = (context, selectionSet, isFocussed, interac
  *
  *
  * @param {*} axes
- * @returns
+ *
  */
 export const getAxesScales = (axes) => {
     const [xAxis, yAxis] = [ENCODING.X, ENCODING.Y].map(e => axes[e]);
@@ -107,7 +110,7 @@ export const getAxesScales = (axes) => {
  *
  * @param {*} encoding
  * @param {*} fieldsConfig
- * @returns
+ *
  */
 export const getEncodingFieldInf = (encoding, fieldsConfig) => {
     const [xField, yField, x0Field, y0Field, colorField, shapeField, sizeField] =
@@ -145,38 +148,10 @@ export const getEncodingFieldInf = (encoding, fieldsConfig) => {
 /**
  *
  *
- * @param {*} layerConfig
- * @param {*} fieldsConfig
- * @returns
- */
-export const getValidTransform = (layerConfig, fieldsConfig, encodingFieldInf) => {
-    let transformType;
-    const {
-        transform
-    } = layerConfig;
-    const {
-        xField,
-        yField,
-        xFieldType,
-        yFieldType
-    } = encodingFieldInf;
-    const groupByField = transform.groupBy;
-    const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
-    transformType = transform.type;
-    if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
-        yFieldType === FieldType.DIMENSION) {
-        transformType = IDENTITY;
-    }
-    return transformType;
-};
-
-/**
- *
- *
  * @param {*} dataModel
  * @param {*} config
  * @param {*} transformType
- * @returns
+ *
  */
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
@@ -449,3 +424,61 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
         };
     });
 };
+
+export const initializeGlobalState = (context) => {
+    const store = context.store();
+    const globalState = context.constructor.getState()[0];
+    const namespace = context.metaInf().namespace;
+    for (const prop in globalState) {
+        store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${prop}`, {
+            [namespace]: null
+        });
+    }
+};
+
+export const resolveInvalidTransformType = (context) => {
+    const {
+        xField,
+        yField,
+        xFieldType,
+        yFieldType
+    } = context.encodingFieldsInf();
+    const groupByField = context.config().transform.groupBy;
+    const fieldsConfig = context.data().getFieldsConfig();
+    const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
+    if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
+        yFieldType === FieldType.DIMENSION) {
+        return IDENTITY;
+    }
+    return null;
+};
+
+export const getValidTransform = context => resolveInvalidTransformType(context) || context.config().transform.type;
+
+export const getValidTransformForAggFn = (context) => {
+    const resolvedInvalidTransformType = resolveInvalidTransformType(context);
+    if (resolvedInvalidTransformType) {
+        return resolvedInvalidTransformType;
+    }
+
+    const {
+        xField,
+        yField,
+        xFieldType,
+        yFieldType
+    } = context.encodingFieldsInf();
+    const groupByField = context.config().transform.groupBy;
+    const isCustomTransformTypeProvided = !!getObjProp(context._customConfig, 'transform', 'type');
+    let transformType = context.config().transform.type;
+
+    if (!isCustomTransformTypeProvided && groupByField && xFieldType !== yFieldType) {
+        const measureField = xFieldType === FieldType.MEASURE ? xField : yField;
+        const { [measureField]: aggFn } = retrieveNearestGroupByReducers(context.data(), measureField);
+        transformType = aggFn === AGG_FN_SUM ? STACK : GROUP;
+    }
+
+    return transformType;
+};
+
+export const getMarkId = (source, schema) => source.filter((val, i) => schema[i] &&
+    schema[i].type === FieldType.DIMENSION).join();

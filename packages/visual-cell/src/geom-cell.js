@@ -123,7 +123,7 @@ class GeomCell extends SimpleCell {
     updateModel () {
         const unit = this.source();
         unit.lockModel();
-        [DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, DETAIL_FIELDS].forEach((prop) => {
+        [LAYER_DEF, TRANSFORM, AXES, FIELDS, CONFIG, DATA, AXES, FACET_BY_FIELDS, DETAIL_FIELDS].forEach((prop) => {
             this[prop]() && unit[prop](this[prop]());
         });
         unit.unlockModel();

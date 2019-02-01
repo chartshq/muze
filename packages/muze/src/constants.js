@@ -33,6 +33,7 @@ export const STEP_COLOR = 'step-color';
 export const GRADIENT = 'gradient';
 export const LINEAR = 'linear';
 export const ORDINAL = 'ordinal';
+export const MUZE_PREFIX = 'muze';
 
 export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'script',
@@ -64,4 +65,11 @@ export const DIMENSION = 'dimension';
 export const MEASURE = 'measure';
 export const VERTICAL = 'vertical';
 export const HORIZONTAL = 'horizontal';
-
+export const HORIZONTAL_CENTER = 'h-center';
+export const VERTICAL_CENTER = 'v-center';
+export const HIDDEN = 'hidden';
+export const OVERFLOW = 'overflow';
+export const OVERFLOW_X = 'overflow-x';
+export const OVERFLOW_Y = 'overflow-y';
+export const AUTO = 'auto';
+export const VISIBLE = 'visible';

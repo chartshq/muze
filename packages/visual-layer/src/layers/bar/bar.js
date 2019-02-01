@@ -1,18 +1,18 @@
 import {
-    getClosestIndexOf,
     getQualifiedClassName,
     selectElement,
     createElements,
     clipElement,
     DimensionSubtype,
     FieldType,
-    Scales
+    MeasureSubtype,
+    Scales,
+    getNearestValue
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
-import * as PROPS from '../../enums/props';
-import { getPlotMeasurement } from '../../helpers';
+import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
 import { getTranslatedPoints } from './bar-helper';
 
@@ -20,15 +20,15 @@ const MEASURE = FieldType.MEASURE;
 const scaleBand = Scales.band;
 
 /**
- * Bar Layer creates a bar plot. It needs to be passed a data table, axes and configuration of the layer.
+ * Bar layer creates rectangle marks. The mark type of this layer is ```bar```. This layer can be used
+ * to create stacked or grouped bars, range bars, heatmap plots and also reference bands by using
+ * the encoding properties.
  *
- * @example
- * const BarLayer = layerFactory.getLayer('bar');
- * BarLayer.create()
- *  .config(config)
- *  .data(dt)
- *  .mountPoint(container);
+ * @public
+ *
  * @class
+ * @module BarLayer
+ * @extends BaseLayer
  */
 export default class BarLayer extends BaseLayer {
     /**
@@ -51,7 +51,7 @@ export default class BarLayer extends BaseLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BarLayer
      */
     elemType () {
@@ -62,7 +62,7 @@ export default class BarLayer extends BaseLayer {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof BarLayer
      */
     static formalName () {
@@ -83,7 +83,7 @@ export default class BarLayer extends BaseLayer {
      * @static
      * @param {*} conf
      * @param {*} userConf
-     * @returns
+     *
      * @memberof BarLayer
      */
     static defaultPolicy (conf, userConf) {
@@ -103,7 +103,7 @@ export default class BarLayer extends BaseLayer {
      *
      * @param {*} data
      * @param {*} fieldsConfig
-     * @returns
+     *
      * @memberof BarLayer
      */
     calculateDomainFromData (data, encodingFieldInf, fieldsConfig) {
@@ -137,9 +137,8 @@ export default class BarLayer extends BaseLayer {
     render (container) {
         const config = this.config();
         const transition = config.transition;
-        const store = this._store;
-        const normalizedDataArr = store.get(PROPS.NORMALIZED_DATA);
-        const transformedData = store.get(PROPS.TRANSFORMED_DATA);
+        const normalizedDataArr = this._normalizedData;
+        const transformedData = this._transformedData;
         const keys = transformedData.map(d => d.key);
         const fieldsConfig = this.data().getFieldsConfig();
         const axes = this.axes();
@@ -171,6 +170,7 @@ export default class BarLayer extends BaseLayer {
                 const seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
                 group.style('display', 'block');
                 drawRects({
+                    layer: this,
                     container: group.node(),
                     points,
                     className: seriesClassName,
@@ -188,7 +188,7 @@ export default class BarLayer extends BaseLayer {
      *
      * @param {*} normalizedData
      * @param {*} keys
-     * @returns
+     *
      * @memberof BarLayer
      */
     generateDataPoints (normalizedData, keys) {
@@ -218,6 +218,10 @@ export default class BarLayer extends BaseLayer {
         return this._plotPadding;
     }
 
+    resolveTransformType () {
+        this._transformType = getValidTransformForAggFn(this);
+    }
+
     /**
      * Gets the nearest point of the position passed.
      * @param {number} x x position
@@ -230,7 +234,6 @@ export default class BarLayer extends BaseLayer {
         }
         let axis;
         let value;
-        let index;
         let points;
         let uniqueFieldType;
         let uniqueFieldIndex;
@@ -250,7 +253,7 @@ export default class BarLayer extends BaseLayer {
                 yFieldSubType
             } = this.encodingFieldsInf();
 
-        if (xFieldSubType === FieldType.MEASURE) {
+        if (xFieldSubType === MeasureSubtype.CONTINUOUS) {
             axis = axes.y;
             value = axis.invert(y);
             uniqueFieldIndex = fieldsConfig[yField].index;
@@ -268,8 +271,7 @@ export default class BarLayer extends BaseLayer {
 
         if (uniqueFieldType === DimensionSubtype.TEMPORAL) {
             filterData = [...new Set(data.map(d => d[uniqueFieldIndex]))];
-            index = getClosestIndexOf(filterData, value);
-            value = filterData[index];
+            value = getNearestValue(filterData, value);
             points = pointMap[value];
         }
         const len = points && points.length;

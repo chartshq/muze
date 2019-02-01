@@ -105,7 +105,7 @@ export default class Tooltip extends SpawnableSideEffect {
             }
 
             enter[i] = true;
-            const layoutContainer = drawingInf.parentContainer;
+            const { parentContainer: layoutContainer, parentContainerDimensions } = drawingInf;
             const layoutBoundBox = layoutContainer.getBoundingClientRect();
             const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
 
@@ -118,6 +118,7 @@ export default class Tooltip extends SpawnableSideEffect {
             sourceInf.firebolt = this.firebolt;
             sourceInf.detailFields = context.detailFields();
             sourceInf.timeDiffs = context.timeDiffsByField();
+            sourceInf.valueParser = context.valueParser();
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
@@ -128,8 +129,8 @@ export default class Tooltip extends SpawnableSideEffect {
                             .extent({
                                 x: 0,
                                 y: 0,
-                                width: layoutBoundBox.width,
-                                height: layoutBoundBox.height
+                                width: parentContainerDimensions.width,
+                                height: parentContainerDimensions.height
                             })
                             .offset({
                                 x: offsetLeft + (config.offset.x || 0),

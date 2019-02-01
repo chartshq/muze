@@ -1,6 +1,12 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive } from 'muze-utils';
-import { generateAxisFromMap, getDefaultMark, getIndex, getLayerConfFromFields } from './encoder-helper';
+import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import {
+    generateAxisFromMap,
+    getDefaultMark,
+    getIndex,
+    getLayerConfFromFields,
+    getAdjustedDomain
+} from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
 import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
@@ -18,7 +24,7 @@ export default class CartesianEncoder extends VisualEncoder {
     /**
      *
      *
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     static type () {
@@ -30,10 +36,10 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} axesCreators
      * @param {*} fieldInfo
-     * @return
+     *
      * @memberof CartesianEncoder
      */
-    createAxis (axesCreators, fieldInfo) {
+    createAxis (axesCreators, fieldInfo, context) {
         const geomCellAxes = {};
         const {
             axes
@@ -69,16 +75,96 @@ export default class CartesianEncoder extends VisualEncoder {
             } else {
                 axesCreators.position = this.axisFrom()[type];
             }
-            geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, axis === X ? xAxes : yAxes);
+            geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
+                groupAxes: axis === X ? xAxes : yAxes,
+                valueParser: context.resolver.valueParser()
+            });
         });
         return geomCellAxes;
+    }
+
+    updateDomains (store, axes) {
+        const xAxes = axes.x;
+        const yAxes = axes.y;
+        store.model.lock();
+        for (let i = 0; i < xAxes.length; i++) {
+            for (let j = 0; j < xAxes[i].length; j++) {
+                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${0}${i}0`, xAxes[i][j].domain());
+            }
+        }
+        for (let i = 0; i < yAxes.length; i++) {
+            for (let j = 0; j < yAxes[i].length; j++) {
+                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${i}${0}0`, yAxes[i][j].domain());
+                yAxes[i][j]._domainLock = false;
+            }
+        }
+
+        store.model.unlock();
+    }
+
+    unionUnitDomains (context) {
+        const store = context.store();
+        const unitDomains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
+        const resolver = context.resolver();
+        const units = resolver.units();
+        const domains = {
+            0: {},
+            1: {}
+        };
+
+        for (let rIdx = 0, len = units.length; rIdx < len; rIdx++) {
+            const unitsArr = units[rIdx];
+            for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
+                const unit = unitsArr[cIdx];
+                const axisFields = unit.fields();
+                [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
+                    fieldArr.forEach((field, axisIndex) => {
+                        const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
+                        const dom = unitDomains[`${rIdx}${cIdx}`];
+                        if (dom && Object.keys(dom).length !== 0) {
+                            domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
+                                dom[`${field}`]], field.subtype());
+                        }
+                    });
+                });
+            }
+        }
+
+        const { x: xAxes, y: yAxes } = resolver.axes();
+        store.model.lock();
+        [xAxes, yAxes].forEach((axesArr, axisType) => {
+            axesArr.forEach((axes, idx) => {
+                const min = [];
+                const max = [];
+                let domain = [];
+                let adjustedDomain = [];
+                if (axes.length > 1 && axes[0].constructor.type() === 'linear' && axes[0].config().alignZeroLine) {
+                    axes.forEach((axis, i) => {
+                        const key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
+                        domain = domains[axisType][key];
+                        min[i] = domain[0];
+                        max[i] = domain[1];
+                    });
+                    adjustedDomain = getAdjustedDomain(max, min);
+                }
+
+                axes.forEach((axis, index) => {
+                    const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
+                    domain = adjustedDomain[index] || domains[axisType][key];
+                    axis.domain(domain);
+                    const type = !axisType ? 'x' : 'y';
+                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
+                });
+            });
+        });
+        store.model.unlock();
     }
 
     /**
      *
      *
      * @param {*} fields
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getFacetsAndProjections (fields, type) {
@@ -159,7 +245,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} datamodel
      * @param {*} config
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     fieldSanitizer (datamodel, config) {
@@ -170,7 +256,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      *
      * @param {*} datamodel
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getRetinalFieldsDomain (dataModels, encoding) {
@@ -211,7 +297,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @param {*} fields
      * @param {*} userLayerConfig
-     * @return
+     *
      * @memberof CartesianEncoder
      */
     getLayerConfig (fields, userLayerConfig) {
@@ -270,4 +356,3 @@ export default class CartesianEncoder extends VisualEncoder {
         return layerConfig;
     }
 }
-

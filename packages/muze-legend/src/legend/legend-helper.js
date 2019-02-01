@@ -7,14 +7,15 @@ import {
     LEFT,
     RIGHT,
     TOP,
-    BOTTOM
+    BOTTOM,
+    MAXWIDTH
 } from '../enums/constants';
 
 /**
  *
  *
  * @param {*} scale
- * @returns
+ *
  */
 export const getScaleInfo = (scale) => {
     const scaleType = scale.constructor.type();
@@ -30,7 +31,7 @@ export const getScaleInfo = (scale) => {
  *
  * @param {*} domain
  * @param {*} steps
- * @returns
+ *
  */
 export const getInterpolatedData = (domain, steps) => {
     const domainForLegend = [];
@@ -51,27 +52,32 @@ export const getInterpolatedData = (domain, steps) => {
  * @param {*} classPrefix
  */
 export const titleCreator = (container, title, measurement, config) => {
+    const titleWidth = Math.min(measurement.maxWidth, measurement.width);
+
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
-            .style(WIDTH, `${measurement.width}px`)
+            .style(WIDTH, `${titleWidth}px`)
             .style(HEIGHT, `${measurement.height}px`)
             .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
-                    title.orientation(config.position) : title.orientation);
+            title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
-                    .style(WIDTH, `${measurement.width}px`)
+                    .style(WIDTH, `${titleWidth}px`)
+                    .style(MAXWIDTH, `${titleWidth}px`)
                     .style(HEIGHT, '100%')
+                    .style('line-height', 1)
                     .style('padding', `${measurement.padding}px`)
                     .text(title.text)
+                    .style('overflow-x', 'scroll')
                     .node();
 };
 
-                                /**
+/**
  *
  *
  * @param {*} data
  * @param {*} prop
  * @param {*} labelManager
- * @return
+ *
  */
 export const getMaxMeasures = (data, prop, labelManager) => {
     let maxHeight = -Infinity;
@@ -93,14 +99,16 @@ export const getMaxMeasures = (data, prop, labelManager) => {
  * @param {*} data
  * @param {*} prop
  * @param {*} labelManager
- * @return
+ *
  */
-export const getItemMeasures = (data, prop, labelManager, formatter) => {
+export const getItemMeasures = (context, prop, formatter) => {
     const space = [];
+    const data = context.data();
+    const labelManager = context._labelManager;
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const { height, width } = labelManager.getOriSize(formatter(value));
+        const { height, width } = labelManager.getOriSize(formatter(value, index, data, context));
         space[index] = { height: height + 1, width: width + 1 };
     });
     return space;
@@ -112,7 +120,7 @@ export const getItemMeasures = (data, prop, labelManager, formatter) => {
  * @param {*} textOrientation
  * @param {*} effPadding
  * @param {*} titleSpace
- * @return
+ *
  * @memberof Legend
  */
 export const computeItemSpaces = (config, measures, data) => {
@@ -174,7 +182,7 @@ export const computeItemSpaces = (config, measures, data) => {
             totalHeight = Math.max(totalHeight, itemSpace.height);
         } else {
             totalHeight += itemSpace.height;
-            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth) + effPadding;
+            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
         }
         maxItemSpaces = {
             width: Math.max(itemSpace.width, maxItemSpaces.width),
@@ -204,16 +212,18 @@ export const computeItemSpaces = (config, measures, data) => {
                 iconSpaces[i].width = totalWidth;
                 maxIconWidth = totalWidth;
             } else {
+                const labelWidth = labelSpaces[i].width;
+                const newLabelWidth = (maxItemSpaces.width - maxIconWidth);
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
-                labelSpaces[i].width = maxItemSpaces.width - maxIconWidth;
-                totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
+                labelSpaces[i].width = Math.max(labelWidth, newLabelWidth);
+                totalWidth = Math.max(totalWidth, itemSpace.width);
             }
         }
     });
-    totalWidth = Math.max(totalWidth, titleWidth);
+    totalWidth = Math.ceil(Math.max(totalWidth, titleWidth)) + effPadding;
     totalHeight += titleHeight + effPadding;
-
+    totalHeight = Math.ceil(totalHeight);
     return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };
 };
 
@@ -223,7 +233,7 @@ export const computeItemSpaces = (config, measures, data) => {
  * @param {*} type
  * @param {*} scaleInfo
  * @param {*} domainInfo
- * @returns
+ *
  */
 export const getDomainBounds = (type, scaleInfo, domainInfo) => {
     const {

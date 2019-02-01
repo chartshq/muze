@@ -150,9 +150,14 @@ class AxisCell extends SimpleCell {
             margin,
             isOffset
         } = this.config();
-        this.source().setAvailableSpace(width, height, margin, isOffset);
+
+        if (width || height) {
+            this.source().setAvailableSpace(width, height, margin, isOffset);
+            this.source().logicalSpace(null);
+        } else {
+            this.source().resetLogicalSpace();
+        }
         this.logicalSpace(null);
-        this.source().logicalSpace(null);
         return this;
     }
 
@@ -180,20 +185,22 @@ class AxisCell extends SimpleCell {
             right
         } = margin;
         const {
-            show
+            show,
+            orientation
         } = axis.config();
         const wrapperDiv = makeElement(selectElement(mount), 'div', [this], `${CLASSPREFIX}-${AXIS_CELL}`);
         const selection = makeElement(wrapperDiv, 'svg', [1], `${CLASSPREFIX}-axis-container`);
+        selection.classed(`${CLASSPREFIX}-axis-container-${orientation}`, true);
 
         this.mount(mount);
-        if (availWidth === 0 || !availWidth) {
+        if (!availWidth) {
             selection.attr(WIDTH, `${0}px`);
         }
-        if (availHeight === 0 || !availHeight) {
+        if (!availHeight) {
             selection.attr(HEIGHT, `${0}px`);
         }
-        wrapperDiv.style(WIDTH, `${show ? availWidth : 0}px`)
-                        .style(HEIGHT, `${show ? availHeight : 0}px`)
+        wrapperDiv.style(WIDTH, `${show ? Math.floor(availWidth) : 0}px`)
+                        .style(HEIGHT, `${show ? Math.floor(availHeight) : 0}px`)
                         .style('margin-top', top)
                         .style('margin-bottom', bottom)
                         .style('margin-left', left)

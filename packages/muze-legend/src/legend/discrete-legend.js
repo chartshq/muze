@@ -1,3 +1,8 @@
+import {
+    FieldType,
+    DimensionSubtype,
+    formatTemporal
+} from 'muze-utils';
 import SimpleLegend from './simple-legend';
 import { DISCRETE, LEFT, SIZE } from '../enums/constants';
 import { getScaleInfo } from './legend-helper';
@@ -28,7 +33,7 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof DiscreteLegend
      */
     static type () {
@@ -39,30 +44,37 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      *
      * @param {*} scale
-     * @returns
+     *
      * @memberof DiscreteLegend
      */
     dataFromScale (scale) {
         const { scaleType, domain, scaleFn } = getScaleInfo(scale);
         let domainForLegend = [...new Set(domain)];
-        const type = this.metaData().getData().schema[0].type;
+        const field = this.metaData().getFieldspace().fields[0];
+        const { type, subtype } = field.schema();
 
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;
-            if (type === 'measure') {
+            const rawVal = domainForLegend[i];
+            if (type === FieldType.MEASURE) {
                 value = (+domainForLegend[i]).toFixed(0);
                 const nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
                 range = [value, nextVal.toFixed(0)];
             } else {
-                value = domainForLegend[i];
-                range = [domainForLegend[i]];
+                let domainVal = rawVal;
+                if (subtype === DimensionSubtype.TEMPORAL) {
+                    domainVal = formatTemporal(domainForLegend[i], field.minimumConsecutiveDifference());
+                }
+                value = domainVal;
+                range = [domainVal];
             }
             return {
                 [scaleType]: scale[scaleFn](ele),
                 value,
                 id: i,
-                range
+                range,
+                rawVal
             };
         }).filter(d => d.value !== null);
 

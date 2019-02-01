@@ -1,10 +1,21 @@
+import { default as DataModel } from 'datamodel';
 import * as scales from './scales';
 import * as colorSchemes from './color-schemes';
+import * as STATE_NAMESPACES from './enums/namespace';
+
+const InvalidAwareTypes = DataModel.InvalidAwareTypes;
+
+export {
+    InvalidAwareTypes,
+    DataModel
+};
 
 export {
     ReservedFields,
     CommonProps
 } from './enums';
+
+export { STATE_NAMESPACES };
 
 export {
     scales,
@@ -12,6 +23,8 @@ export {
 };
 
 export {
+    getNearestValue,
+    getValueParser,
     transformColors,
     detectColor,
     hslToRgb,
@@ -81,7 +94,11 @@ export {
     pathInterpolators,
     hslInterpolator,
     getSmallestDiff,
-    require
+    require,
+    formatTemporal,
+    createSelection,
+    temporalFields,
+    retrieveNearestGroupByReducers
 } from './common-utils';
 
 export {
@@ -111,4 +128,5 @@ export { dataSelect, DataObject } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
 
-export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
+export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter } from 'datamodel';
+

@@ -18,12 +18,10 @@ export const defaultConfig = {
     interpolator: 'linear',
     fixedBaseline: true,
     labels: {
-        rotation: 0,
-        smartTicks: false
+        rotation: null,
+        smartTicks: null
     },
     orientation: 'left',
-    maxHeight: 50, // @todo: height and width wont be hardcoded
-    maxWidth: 40,
     numberFormat: val => val,
     padding: 0.3,
     nice: true,
@@ -31,13 +29,13 @@ export const defaultConfig = {
     rotate: false,
     show: true,
     showAxisName: true,
-    showInnerTicks: null,
-    showOuterTicks: null,
+    showInnerTicks: true,
+    showOuterTicks: true,
     style: {},
     type: 'linear',
     tickFormat: null,
     tickValues: null,
-    xOffset: undefined,
-    yOffset: undefined
+    xOffset: 0,
+    yOffset: 0
 };
 

@@ -6,6 +6,7 @@ export const defaultOptions = {
         value: null,
         meta: {
             sanitization: (config, oldConfig, context) => {
+                context._customConfig = config;
                 const constructor = context.constructor;
                 const newConf = mergeRecursive({}, constructor.defaultConfig());
                 return constructor.defaultPolicy(newConf, config);
@@ -23,14 +24,14 @@ export const defaultOptions = {
                 }
             }
         }
-    },
-    [PROPS.MOUNT]: {
-        value: null
-    },
-    [PROPS.AXES]: {
-        value: null
-    },
-    [PROPS.MEASUREMENT]: {
-        value: null
     }
+    // [PROPS.MOUNT]: {
+    //     value: null
+    // },
+    // [PROPS.AXES]: {
+    //     value: null
+    // },
+    // [PROPS.MEASUREMENT]: {
+    //     value: null
+    // }
 };

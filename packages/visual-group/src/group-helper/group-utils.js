@@ -1,4 +1,4 @@
-import { Store, dataSelect, FieldType } from 'muze-utils';
+import { Store, FieldType } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -70,7 +70,7 @@ export const initializeCacheMaps = () => ({
  * @param {*} axisName
  * @param {*} id
  */
-export const getAxisKey = (axisName, id, scaleType) => `${axisName}-axis-${id}-${scaleType}`;
+export const getAxisKey = (axisName, ...params) => `${axisName}-axis-${params.join('-')}`;
 
 /**
  *
@@ -84,7 +84,7 @@ export const getCellKey = (rowId, columnId) => `cell-${rowId}-${columnId}`;
  *
  *
  * @param {*} config
- * @return
+ *
  */
 export const extractUnitConfig = (config) => {
     const unitConfig = {};
@@ -104,7 +104,7 @@ export const extractUnitConfig = (config) => {
  * @param {*} headers
  * @param {*} index
  * @param {*} rowLength
- * @return
+ *
  * @memberof MatrixResolver
  */
 export const getHeaderText = (headers, index, rowLength) => {
@@ -129,11 +129,15 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @param {*} fieldHeaders
  * @param {*} TextCell
  * @param {*} labelManager
- * @return
+ *
  */
-export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
-    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({ type: HEADER }, { labelManager })
-                    .source(getHeaderText(fieldHeaders, i, fields[0].length))
+export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, labelManager }) => {
+    const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({
+        type: HEADER,
+        className: `${classPrefix}-grid-headers`
+    }, {
+        labelManager
+    }).source(getHeaderText(fieldHeaders, i, fields[0].length))
                     .config({ show: cell.config().show })) : [];
     return headers;
 };
@@ -143,7 +147,7 @@ export const headerCreator = (fields, fieldHeaders, TextCell, labelManager) => {
  *
  * @param {*} variable
  * @param {*} allFields
- * @return
+ *
  */
 export const findInGroup = (variable, allFields) => {
     let channel = null;
@@ -205,10 +209,10 @@ export const getAxisType = (fieldsConfig, field) => {
  *
  * @param {*} datamodel
  * @param {*} fieldName
- * @return
+ *
  */
 export const retriveDomainFromData = (datamodel, fieldName) => {
-    const field = datamodel.getFieldspace().fields.find(d => d._ref.name === fieldName.toString());
+    const field = datamodel.getFieldspace().fields.find(d => d.name() === fieldName.toString());
     return field.domain();
 };
 
@@ -250,12 +254,12 @@ export const mutateAxesFromMap = (cacheMaps, axes) => {
  *
  *
  * @param {*} layers
- * @return
+ *
  */
 export const getEncoder = (layers) => {
     let encoder = new CartesianEncoder();
 
-    if (layers) {
+    if (layers.length) {
         // Figuring out the kind of layers the group will have
         encoder = layers.every(e => e.mark === 'arc') ? new PolarEncoder() : encoder;
     }
@@ -268,7 +272,7 @@ export const getEncoder = (layers) => {
  * @param {*} type
  * @param {*} fields
  * @param {*} userAxisFromConfig
- * @return
+ *
  */
 export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
     let axisFrom = userAxisFromConfig[type];
@@ -309,7 +313,7 @@ export const getHeaderAxisFrom = (type, fields, userAxisFromConfig) => {
  * @param {*} type
  * @param {*} fields
  * @param {*} layers
- * @return
+ *
  * @memberof MatrixResolver
  */
 export const setFacetsAndProjections = (context, fieldInfo, encoder) => {
@@ -323,28 +327,6 @@ export const setFacetsAndProjections = (context, fieldInfo, encoder) => {
     context.projections({ [`${type}Projections`]: projections });
 
     return { facets, projections, fields };
-};
-
-/**
- * Creates a selection set from a data set with corresponding attributes
- *
- * @export
- * @param {Selection} sel contains previous selection
- * @param {Object} appendObj Object to be appended
- * @param {Array} data Data based on which the selection is entered/updated/removed
- * @param {Object} [attrs={}] Attributes to be set on the data
- * @return {Selection} Merged selection
- */
-export const createSelection = (sel, appendObj, data, idFn) => {
-    let selection = sel || dataSelect([]);
-
-    selection = selection.data(data, idFn);
-
-    const enter = selection.enter().append(appendObj);
-    const mergedSelection = enter.merge(selection);
-
-    selection.exit() && selection.exit().remove();
-    return mergedSelection;
 };
 
 const getRowBorders = (left, right) => {

@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { getUniqueId, getSymbol, generateGetterSetters, mergeRecursive } from 'muze-utils';
+import { getUniqueId, getSymbol, generateGetterSetters, mergeRecursive, InvalidAwareTypes } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { DEFAULT_CONFIG } from './defaults';
 import { SHAPE } from '../enums/constants';
@@ -39,7 +39,7 @@ export default class ShapeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static defaultConfig () {
@@ -50,7 +50,7 @@ export default class ShapeAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static type () {
@@ -61,11 +61,11 @@ export default class ShapeAxis {
      *
      *
      * @param {*} value
-     * @returns
+     *
      * @memberof ShapeAxis
      */
     getShape (value) {
-        if (!this.scale() || !this.domain() || !value) {
+        if (!this.scale() || !this.domain() || !value || value instanceof InvalidAwareTypes) {
             return this.config().value;
         }
 

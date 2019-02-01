@@ -1,70 +1,57 @@
-import { nextFrame } from 'muze-utils';
-import { getValidTransform, getEncodingFieldInf } from '../helpers';
+import { CommonProps, STATE_NAMESPACES } from 'muze-utils';
+import { getEncodingFieldInf } from '../helpers';
 import * as PROPS from '../enums/props';
 
-export const listenerMap = context => [
+const renderLayer = (context) => {
+    const mount = context.mount();
+    if (mount) {
+        context.render(mount);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+    }
+};
+
+export const listenerMap = (context, ns) => [
     {
-        props: [PROPS.TRANSFORMED_DATA],
-        listener: fetch => fetch(PROPS.DATA, PROPS.CONFIG, (dataModel, config) => {
-            const dataModelValue = dataModel.value;
-            const configValue = config.value;
-            const encodingValue = configValue && configValue.encoding;
-            if (dataModelValue && encodingValue) {
-                const fieldsConfig = dataModelValue.getFieldsConfig();
+        props: [`${ns.local}.${PROPS.DATA}`],
+        listener: ([, data]) => {
+            const config = context.config();
+            const encodingValue = config.encoding;
+            if (data && encodingValue) {
+                const fieldsConfig = data.getFieldsConfig();
                 const encodingFieldsInf = getEncodingFieldInf(encodingValue, fieldsConfig);
                 context.encodingFieldsInf(encodingFieldsInf);
-                context.transformType(getValidTransform(configValue, fieldsConfig, encodingFieldsInf));
-                return context.getTransformedData(dataModelValue, configValue, context.transformType(),
-                    encodingFieldsInf);
-            }
-            return null;
-        }),
-        type: 'computed'
-    },
-    {
-        props: [PROPS.NORMALIZED_DATA],
-        listener: fetch => fetch(PROPS.TRANSFORMED_DATA, (transformedData) => {
-            const transformedDataValue = transformedData.value;
-            if (transformedDataValue) {
-                const fieldsConfig = context.data().getFieldsConfig();
-                return context.getNormalizedData(transformedDataValue, fieldsConfig);
-            }
-            return null;
-        }),
-        type: 'computed'
-    },
-    {
-        props: [PROPS.DOMAIN],
-        listener: fetch => fetch(PROPS.NORMALIZED_DATA, (normalizedData) => {
-            const normalizedDataValue = normalizedData.value;
-            if (normalizedDataValue) {
-                return context.calculateDomainFromData(normalizedDataValue, context.encodingFieldsInf(),
+                context.resolveTransformType();
+                context._transformedData = context.getTransformedData(data, config,
+                    context.transformType(), encodingFieldsInf);
+                context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
+                const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
                     context.data().getFieldsConfig());
-            }
-            return null;
-        }),
-        type: 'computed'
-    },
-    {
-        props: [PROPS.DATA],
-        listener: (data) => {
-            if (data[1]) {
-                nextFrame(() => {
-                    context.store().commit(PROPS.DATA_UPDATED, true);
-                });
+                context._domain = domain;
+                !context._updateLock && context.domain(domain);
             }
         },
         type: 'registerImmediateListener'
     },
     {
-        props: [PROPS.MOUNT, PROPS.DATA_UPDATED],
-        listener: (mount, dataUpdated) => {
-            if (mount[1] && dataUpdated[1]) {
-                context.render(mount[1]);
-                context.dependencies().throwback.commit('onlayerdraw', true);
+        props: [`${ns.local}.${PROPS.CONFIG}`],
+        listener: ([, config]) => {
+            const calculateDomain = config.calculateDomain;
+            const props = context.getRenderProps();
+            const store = context.store();
+            const namespaceInf = {
+                namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,
+                key: 'renderListener'
+            };
+            store.unsubscribe(namespaceInf);
+            if (calculateDomain === false) {
+                props.push(`${ns.local}.${PROPS.DATA}`);
             }
+            store.registerChangeListener(props,
+                () => {
+                    renderLayer(context);
+                }, false, namespaceInf);
         },
-        type: 'registerChangeListener'
+        type: 'registerImmediateListener'
     }
 ];
 

@@ -1,0 +1,91 @@
+---
+  title: "Env"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "## <a name=Muze></a> <span style=\"font-family: Source Code Pro; font-weight: 500;color: #eb5757;\">Muze</span>\n\nEnvironment, like the name suggest, is similar to the concpet of closure in ECMAScript. Every time a canvas is\ncreated from environment, it gets the configuration from environment itself. Configuraiton can be directly set on\nCanvas also."
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=data></a> data </span></h2>\n\nSets the data configuration property.\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">data</td>\n                <td><p>DataModel</p> </td>\n                <td><p>Instance of datamodel to be visualized</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=width></a> width </span></h2>\n\nSets the width configuration property. Width in px is total horizontal space each canvas should take.\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">width</td>\n                <td><p>Number</p> </td>\n                <td><p>Width of the visualization area</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=height></a> height </span></h2>\n\nSets the height configuration property. Height in px is total horizontal space each canvas should take.\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">width</td>\n                <td><p>Number</p> </td>\n                <td><p>Height of the visualization area</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=minUnitWidth></a> minUnitWidth </span></h2>\n\nSets the configuration property for setting minimium unit width. *Unit* here is [VisualUnit](VisualUnit) component of\nMuze.\n\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">minWidth</td>\n                <td><p>Number</p> </td>\n                <td><p>Min width of a <a href=\"VisualUnit\">VisualUnit</a></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=minUnitHeight></a> minUnitHeight </span></h2>\n\nSets the configuration property for setting minimium unit height. *Unit* here is [VisualUnit](VisualUnit) component of\nMuze.\n\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">minWidth</td>\n                <td><p>Number</p> </td>\n                <td><p>Min height of a <a href=\"VisualUnit\">VisualUnit</a></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=config></a> config </span></h2>\n\nSets the configuration for canvases. User passed configuration is merged with default configuration and then\nset to canvas\n\nThis is a getter-setter function."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">config</td>\n                <td><p>Object</p> </td>\n                <td><p>Partial or full configuration of canvas.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">axes</td>                 <td><p>AxisConfig</p> </td>                 <td><p>X Axis configuration <a href=\"AxisConfig\">AxisConfig</a>.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">y</td>                 <td><p>AxisConfig</p> </td>                 <td><p>Y Axis configuration <a href=\"AxisConfig\">AxisConfig</a>.</p> </td>             </tr></table></p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">gridLines</td>                 <td><p>GridLineConfig</p> </td>                 <td><p>Grid line configuration <a href=\"GridLineConfig\">GridLineConfig</a>.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">gridBands</td>                 <td><p>GridBandConfig</p> </td>                 <td><p>Grid band configuration <a href=\"GridBandConfig\">GridBandConfig</a>.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">legend</td>                 <td><p>GlobalLegendConfig</p> </td>                 <td><p>Legend configuration <a href=\"GlobalLegendConfig\">GlobalLegendConfig</a>.</p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">interaction</td>                 <td><p>InteractionConfig</p> </td>                 <td><p>Interaction configuration <a href=\"InteractionConfig\">InteractionConfig</a></p> </td>             </tr></p> <p><tr>                 <td class=\"param-name\">autoGroupBy</td>                 <td><p>Object</p> </td>                 <td><p>Group by configuration.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">disabled</td>                 <td><p>boolean</p> </td>                 <td><p>If true, then disables automatic group by of datamodel in the chart. By default, set to false.</p> </td>             </tr></table></p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of the environment"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=canvas></a> canvas </span></h2>\n\nCreates an instance of [Canvas](Canvas)"
+    - 
+      type: "markdown-section"
+      content: "<a name=Canvas></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[canvas](api-canvas):&nbsp;</span>Instance of canvas"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=cellRegistry></a> cellRegistry </span></h2>\n\nComponents of Muze are loaded from registry. User can override the default component by overriding the registry\nwith new component definition.\n\nMuze creates multiple cells to house the visualization components. Those are called [Cells](Cells).\n`cellRegistry` is the registry for those cells.\n- [SimpleCell](SimpleCell)\n- [TextCell](TextCell)\n- [AxisCell](AxisCell)\n- [GeomCell](GeomCell)\n- [BlankCell](BlankCell)\n\nThis funciton acts as getter and setter.\nWhen acts as a getter this returns the list of registries you can extend.\nWhen acts as a setter this allows user to register a component for a existing key. During the process of setting\na new component in registry, it is not allowed to create a new key.\n\n```\n const GeomCell = env.cellRegistry().GeomCell;\n env.cellRegistry({\n     GeomCell: class NewGeomCell extends GeomCell {\n         render () {\n             // override the render\n         }\n     }\n});\n```\n\nWhen called as a setter"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">override</td>\n                <td><p>Object</p> </td>\n                <td><p>Key value pair where keys are the name of the cells user with to override. Allowed keys      are      - <code>SimpleCell</code>      - <code>TextCell</code>      - <code>AxisCell</code>      - <code>GeomCell</code>      - <code>BlankCell</code>      And value being the overridden class definition.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of current environment\n\nWhen called as a getter"
+    - 
+      type: "markdown-section"
+      content: "<a name=object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Object containing the registration key and class definition\n     <pre><code>         {\n             SimpleCell: SimpleCell,\n             TextCell: TextCell,\n             AxisCell: AxisCell,\n             GeomCell: GeomCell,\n             BlankCell: BlankCell\n         }\n</code></pre></p>\n"
+    - 
+      type: "markdown-section"
+      content: "<h2><span style=\"font-family: Source Code Pro;font-weight:500;font-size:24px;color: #eb5757\"><a name=layerRegistry></a> layerRegistry </span></h2>\n\nComponents of Muze are loaded from registry. User can override the default component by overriding the registry\nwith new component definition.\n\nMuze composes layers to create a visualization. Each layer contain one mark (plot) type. Superposition of\none or multiple such layers create one visulization. Muze provides definition of atomic layers. A new layer can\nbe created and used as a mark type. `layerRegistry` handles the registrtion process. Atomic layers are\n     - [AreaLayer](AreaLayer)\n     - [ArcLayer](ArcLayer)\n     - [LineLayer](LineLayer)\n     - [TextLayer](TextLayer)\n     - [PointLayer](PointLayer)\n     - [TickLayer](TickLayer)\n     - [BarLayer](BarLayer)\n     - [BaseLayer](BaseLayer)\n\nFor `layerRegistry` a new layer can be registered by using a new key.\n\n```\n const PointLayer = env.layerRegistry().point;\n env.layerRegistry({\n     grass: class GrassLayer extends PointLayer {\n         render () {\n             // renders layer here\n         }\n     }\n });\n```\nAccess the new layer type by mentioning it as a mark type\n```\n .layers([{\n     mark: 'bar',\n     encoding: {\n         y: 'Acceleration'\n     }\n }, {\n     mark: 'grass', // new mark type\n     encoding: {\n         y: 'Displacement'\n     }\n }])\n```\n\nWhen called as a setter"
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">override</td>\n                <td><p>Object</p> </td>\n                <td><p>Key value pair where keys are the name of the cells user with to override. Allowed keys      are      - <code>Area</code>      - <code>Arc</code>      - <code>Line</code>      - <code>Text</code>      - <code>Point</code>      - <code>Tick</code>      - <code>Bar</code>      And value being the overridden class definition.</p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=Env></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[env](api-env):&nbsp;</span>Instance of current environment\n\nWhen called as a getter"
+    - 
+      type: "markdown-section"
+      content: "<a name=object></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">object:&nbsp;</span><p>Object containing the registration key and class definition\n     <pre><code>         {\n             Area: AreaLayer,\n             Text: TextLayer,\n             Arc: ArcLayer,\n             Line: LineLayer,\n             Bar: BarLayer,\n             Line: LineLayer,\n             Point: PointLayer,\n             Tick: TickLayer\n         }\n</code></pre></p>\n"

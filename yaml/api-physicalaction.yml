@@ -1,0 +1,19 @@
+---
+  title: "Physical Action"
+  description: "Documented Methods"
+  sections: 
+    - 
+      type: "markdown-section"
+      content: "\n\nPhysical action is a function which returns a function that gets called with the target element and\nan array of mapped behaviour names."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">firebolt</td>\n                <td><p>Firebolt</p> </td>\n                <td><p>Instance of firebolt.<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead></p> <p><tr>                 <td class=\"param-name\">context</td>                 <td><p>VisualUnit</p> </td>                 <td><p>Instance of visual unit attached with the firebolt.</p> </td>             </tr></table></p> </td>\n            </tr></table>"
+    - 
+      type: "markdown-section"
+      content: "<a name=PhysicalActionInitializer></a><p class=\"sub-header\">Returns:</p>\n\n <span style=\"font-family: 'Source Code Pro';margin-left: 2%;\">[physicalactioninitializer](api-physicalactioninitializer):&nbsp;</span>Function which dispatches the behavioural action on event trigger."
+    - 
+      type: "markdown-section"
+      content: "## <a name=PhysicalActionInitializer></a> PhysicalActionInitializer\n\nThis function binds the dom event to the target element and dispatches the behaviours with a\npayload which contains the criteria."
+    - 
+      type: "markdown-section"
+      content: "<p class=\"sub-header\">Parameters:</p>\n<table><thead><tr><td>Name</td><td>Type</td><td>Description</td></tr></thead>\n<tr>\n                <td class=\"param-name\">targetEl</td>\n                <td><p>D3Selection</p> </td>\n                <td><p>d3 selection of the target element.</p> </td>\n            </tr>\n<tr>\n                <td class=\"param-name\">behaviours</td>\n                <td><p>Array</p> </td>\n                <td><p>Array of behaviours.</p> </td>\n            </tr></table>"

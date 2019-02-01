@@ -3,6 +3,17 @@ export const DEFAULT_CONFIG = {
     interaction: {
         sideEffect: 'individual'
     },
+    pagination: 'scroll',
+    scrollBar: {
+        thickness: 10,
+        speed: 2,
+        vertical: {
+            align: 'right'
+        },
+        horizontal: {
+            align: 'bottom'
+        }
+    },
     legend: {
         position: 'right',
         color: {
@@ -33,6 +44,16 @@ export const DEFAULT_CONFIG = {
     showHeaders: false,
     minWidth: 100,
     minHeight: 100,
+    facet: {
+        rows: {
+            minCharacters: 3
+        },
+        columns: {
+            maxLines: 2,
+            verticalAlign: 'middle',
+            minCharacters: 1
+        }
+    },
     border: {
         style: 'solid',
         color: '#d6d6d6',
@@ -42,5 +63,6 @@ export const DEFAULT_CONFIG = {
     },
     autoGroupBy: {
         disabled: false
-    }
+    },
+    invalidValues: {}
 };

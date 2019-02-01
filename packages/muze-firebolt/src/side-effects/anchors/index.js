@@ -1,15 +1,58 @@
-import { DataModel } from 'muze-utils';
-
+import { DataModel, STATE_NAMESPACES, getObjProp } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
 
+const addLayer = (layerDefs, layerRegistry, context, sideEffect) => {
+    const layers = [];
+    if (layerDefs) {
+        layerDefs.forEach((layerDef) => {
+            const mark = layerDef.mark;
+            const layerCls = layerRegistry[mark];
+            if (layerCls && layerCls.shouldDrawAnchors()) {
+                const depLayerEncoding = layerDef.def.encoding;
+                const encoding = {
+                    x: getObjProp(depLayerEncoding, 'x', 'field'),
+                    y: getObjProp(depLayerEncoding, 'y', 'field'),
+                    color: getObjProp(depLayerEncoding, 'color', 'field'),
+                    size: {
+                        field: getObjProp(depLayerEncoding, 'size', 'field'),
+                        value: sideEffect.defaultSizeValue()
+                    }
+                };
+                const name = `${layerDef.def.name}-${sideEffect.constructor.formalName()}`;
+                const layerObj = {
+                    instances: context.addLayer({
+                        name,
+                        mark: 'point',
+                        className: sideEffect.constructor.defaultConfig().className,
+                        encoding,
+                        transform: {
+                            type: 'identity'
+                        },
+                        transition: sideEffect.getTransitionConfig(),
+                        calculateDomain: false,
+                        source: dm => dm.select(() => false, {
+                            saveChild: false
+                        }),
+                        interactive: false,
+                        render: false
+                    }),
+                    linkedLayer: layerDef.def.name
+                };
+                layers.push(layerObj);
+            }
+        });
+    }
+    return layers;
+};
+
 export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
-        const context = this.firebolt.context;
-        this._layers = this.addAnchorLayers(context);
+        this._layersMap = {};
+        this.addAnchorLayers();
     }
 
     static target () {
@@ -26,45 +69,17 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 'anchors';
     }
 
-    addAnchorLayers (context) {
-        const layers = [];
-        this.firebolt.context.layers().forEach((layer, idx) => {
-            const shouldDrawAnchors = layer.shouldDrawAnchors();
-            if (shouldDrawAnchors) {
-                const encodingFieldsInf = layer.encodingFieldsInf();
-                const layerObj = {
-                    instances: context.addLayer({
-                        name: `${layer.alias()}-${this.constructor.formalName()}-${idx}`,
-                        mark: 'point',
-                        encoding: {
-                            x: encodingFieldsInf.xField,
-                            y: encodingFieldsInf.yField,
-                            color: {
-                                field: encodingFieldsInf.colorField
-                            },
-                            size: {
-                                field: encodingFieldsInf.sizeField,
-                                value: this.defaultSizeValue()
-                            }
-                        },
-                        transform: {
-                            type: 'identity'
-                        },
-                        transition: this.getTransitionConfig(),
-                        calculateDomain: false,
-                        source: dt => dt.select(() => false, {
-                            saveChild: false
-                        }),
-                        interactive: false,
-                        render: false
-                    }),
-                    linkedLayer: layer
-                };
-
-                layers.push(layerObj);
-            }
-        });
-        return layers;
+    addAnchorLayers () {
+        const context = this.firebolt.context;
+        const metaInf = context.metaInf();
+        const layerRegistry = context.registry().layerRegistry;
+        const layerDefsVal = context.layerDef();
+        context.store().registerImmediateListener(
+            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}.layerDef`, ([, layerDefs]) => {
+                this._layers = addLayer(layerDefs, layerRegistry, context, this);
+            });
+        this._layers = addLayer(layerDefsVal, layerRegistry, context, this);
+        return this;
     }
 
     getTransitionConfig () {
@@ -90,11 +105,11 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const className = `${this.config().className}`;
             const layers = this._layers;
             const parentGroup = this.createElement(sideEffectGroup, 'g', [1], `${className}-container`);
-            const anchorGroups = this.createElement(parentGroup, 'g', layers);
+            const anchorGroups = this.createElement(parentGroup, 'g', Object.values(layers));
             anchorGroups.each(function (layer) {
                 const instances = layer.instances;
                 const elems = self.createElement(this, 'g', instances, className);
-                const linkedLayer = layer.linkedLayer;
+                const linkedLayer = self.firebolt.context.getLayerByName(layer.linkedLayer);
                 const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
                 const transformedDataModel = new DataModel(transformedData, schema);
                 elems.each(function (d, i) {

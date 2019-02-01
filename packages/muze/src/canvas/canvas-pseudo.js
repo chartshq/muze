@@ -1,20 +1,3 @@
-/**
- * Canvas is a logical component which houses a visualization by taking multiple variable in different encoding channel.
- * Canvas manages lifecycle of many other logical component and exposes one consistent interface for creation of chart.
- * Canvas is intialized from environment with settings from environment and singleton dependencies.
- *
- * To create an instance of canvas
- * ```
- *  const env = Muze();
- *  const canvas = env.canvas()
- * ```
- *
- *
- * @class
- * @public
- * @namespace Muze
- */
-
 // @warn Pseudo class of Canvas to generate docs. Real Canvas attach method to instance dynamically hence property
 // jsdoc on all the mthod is not possible
 export default class {
@@ -24,21 +7,23 @@ export default class {
      * different variations}.
      *
      * @public
+     * @segment Canvas
      *
      * @param {Array.<string> | null} leftVars Variables using which the left facets are created
      * @param {Array.<string> | null} rightVars Variables using which the right facets are created
      *
      * @return {Canvas} instance of current canvas
-     * }
      */
     rows () { /* pseudo definition */ }
 
     /**
-     * Takes the variable using which the column facets are made. Columns facets are verticle facet. The variables in
+     * Takes the variable using which the column facets are made. Columns facets are vertical facet. The variables in
      * parameter of the method controls presentation of facets can have {@link http://www.layoutvariation.com |
      * different variations}.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {Array.<string> | null} bottomVars Variables using which the bottom facets are created
      * @param {Array.<string> | null} topVars Variables using which the top facets are created
@@ -54,6 +39,8 @@ export default class {
      * color scale is created.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string | object} encoding Name of the variable which is assigned to color encoding channel or an object
      *      containing scale information
@@ -78,6 +65,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {string | object} encoding Name of the dimension which is assigned to shape encoding channel or an object
      *      containing scale information.
      * @param {string} encoding.field Name of the dimension
@@ -94,6 +83,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {string | object} encoding Name of the variable which is assigned to size encoding channel or an object
      *      containing scale information.
      * @param {string} encoding.field Name of the variable
@@ -105,10 +96,12 @@ export default class {
     size () { /* pseudo definition */ }
 
     /**
-     * Takes a dimension which wont be assigned in any encoding channels but would be used to mantain granulaity of
+     * Takes a dimension which wont be assigned in any encoding channels but would be used to mantain granularity of
      * data.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string | object} encoding Name of the variable which is assigned to size encoding channel or an object
      *      containing scale information.
@@ -116,12 +109,39 @@ export default class {
      *
      * @return {Canvas} Instance of current canvas
      */
-    details () { /* pseudo definition */ }
+    detail () { /* pseudo definition */ }
 
     /**
-     * Defines custom layers for a given settings of encoding.
+     * Defines an array of layers for the canvas. Each object in the array contains the definition of each layer which
+     * will be shown in the canvas. Based on the rows and columns, and the x and y encoding fields given in the layer
+     * definition, it will be decided which layer will be shown on which unit in the canvas.
+     *
+     * To give a layer definition,
+     * ```
+     *    canvas
+     *      .rows(['Acceleration', 'Displacement'])
+     *      .columns(['Origin'])
+     *      .layers([
+     *          {
+     *              mark: 'bar',
+     *              encoding: {
+     *                  y: 'Acceleration'
+     *              }
+     *          },
+     *          {
+     *              mark: 'line',
+     *              encoding: {
+     *                  y: 'Displacement'
+     *              }
+     *          }
+     *      ]);
+     * ```
+     * This will create a two visual units on top of each other, and plot one bar layer for Acceleration measure and
+     * a line layer for Displacement measure.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {LayerConfig} def Layers definition
      *
@@ -140,6 +160,8 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {Object} def named definition of transformed data. This is a key value pair, where the key is name of the
      *      source and value being the transfromation function. The name is used to refer in layers to invoke and attach
      *      the data source to the layer instance.
@@ -154,14 +176,18 @@ export default class {
      *
      * @public
      *
+     * @segment Canvas
+     *
      * @param {HTMLElement | string} el Reference of html element or css selectors on which the viz will house.
      */
     mount () { /* pseudo definition */ }
 
     /**
-     * Provides the title for a visulization
+     * Provides the title for a visualization.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string} text Title text. Text returned from `operator.html` is also supported.
      * @param {object} [config] Title configuration.
@@ -173,9 +199,11 @@ export default class {
     title () { /* pseudo definition */ }
 
     /**
-     * Provides the subtitle for a visulization
+     * Provides the subtitle for a visualization.
      *
      * @public
+     *
+     * @segment Canvas
      *
      * @param {string} text Subtitle text. Text returned from `operator.html` is also supported.
      * @param {object} [config] Subtitle configuration.
@@ -185,32 +213,4 @@ export default class {
      * @return {Canvas} Instance of current canvas
      */
     subtitle () { /* pseudo definition */ }
-
-    /**
-     * Retrieves an instance of layout which is responsible for layouting. Layout is responsible for creating faceted
-     * presentation using table layout.
-     *
-     * @public
-     *
-     * @return {GridLayout} Instance of layout attached to canvas.
-     */
-    layout () { /* pseudo definition */ }
-
-    /**
-     * Retrieves the composition for a canvas
-     *
-     * @public
-     *
-     * @return {object} Instances of the components which canvas requires to draw the full visualization.
-     *      ```
-     *          {
-     *              layout: // Instance of {@link GridLayout}
-     *              legend: // Instance of {@link Legend}
-     *              subtitle: // Instance of {@link TextCell} using which the title is rendered
-     *              title: // Instance of {@link TextCell} using which the title is rendered
-     *              visualGroup: // Instance of {@link visualGroup}
-     *          }
-     *      ```
-     */
-    composition () { /* pseudo definition */ }
 }

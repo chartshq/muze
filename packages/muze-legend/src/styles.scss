@@ -1,17 +1,18 @@
 @import "./firebolt/side-effects/selection-box/styles.scss";
+@import "../../muze-utils/src/styles.scss";
 $prefix: muze-;
 
 .#{$prefix}legend-box {
-    font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif;
-
+    @extend %font;
     line-height: 10px !important;
     height: 100px;
-    float: none !important;
+    // float: none !important;
     display: inline-block;
 
 }
 
 .#{$prefix}legend-title {
+    @extend %font;
     display: table;
     align-items: center;
     float: left;
@@ -54,12 +55,14 @@ $prefix: muze-;
     fill-opacity: 1;
 }
 .#{$prefix}legend-item-info {
+    @extend %font;
     float: left;
     display: flex;
     align-items: center;
     cursor: pointer;
     font-size: 12px;
 }
+
 .#{$prefix}legend-item-info.center{
     justify-content: center;
 }

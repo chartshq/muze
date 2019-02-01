@@ -8,7 +8,7 @@ import '../styles.scss';
  *
  *
  * @param {*} data
- * @returns
+ *
  */
 export const getGradientDomain = (data) => {
     if (typeof data[0].value === 'number') {
@@ -25,7 +25,7 @@ export const getGradientDomain = (data) => {
  * @param {*} container
  * @param {*} data
  * @param {*} domain
- * @returns
+ *
  */
 export const makeLinearGradient = (container, data, domain) => {
     const defs = makeElement(container, 'defs', [1]);
@@ -57,7 +57,10 @@ export const createAxis = (context) => {
         nice: false,
         showAxisName: false,
         tickValues: data.map(d => d.value),
-        fixedBaseline: false
+        fixedBaseline: false,
+        labels: {
+            rotation: 0
+        }
     }, { labelManager: context._labelManager });
 
     newAxis.domain(getGradientDomain(data));
@@ -73,7 +76,7 @@ export const createAxis = (context) => {
  * @param {*} container
  * @param {*} data
  * @param {*} classPrefix
- * @returns
+ *
  * @memberof GradientLegend
  */
 const createLegendSkeleton = (container, classPrefix, data) => {
@@ -106,6 +109,7 @@ export const renderAxis = (context, container, height, width) => {
 
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
+    axis.source().render();
 };
 
 /**
@@ -131,12 +135,13 @@ export const renderGradient = (context, container) => {
         linearGradient,
         legendRect
     } = createLegendSkeleton(container, classPrefix, data);
-    const labelDim = context.axis().source().getAxisDimensions().tickLabelDim;
+    const labelDim = context.axis().source().getAxisDimensions().tickDimensions;
     const {
         padding,
         margin,
         border,
         titleSpaces,
+        maxItemSpaces,
         maxHeight,
         maxWidth,
         height,
@@ -156,7 +161,7 @@ export const renderGradient = (context, container) => {
         legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);
 
         applyStyle(legendContainer, {
-            height: `${height}px`,
+            height: `${maxItemSpaces.height + border + padding}px`,
             width: `${Math.min(width, maxWidth)}px`,
             padding: `${padding}px`
         });

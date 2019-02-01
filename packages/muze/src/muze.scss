@@ -1,8 +1,9 @@
 @import "./prefix.scss";
 @import "./fonts.scss";
+@import "../../muze-utils/src/styles.scss";
 
 .#{$groupContainer} {
-    font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
+    @extend %font;
     font-size: 14px;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     line-height: 1.42857143;
@@ -20,7 +21,6 @@
         box-sizing: border-box;
     }
 
-  
 
     .#{$prefix}table-arrow {
         margin: 5px;
@@ -72,7 +72,7 @@
         visibility: hidden;
         border-top: none;
     }
-
+    
     svg {
         display: block;
         width: inherit;
@@ -132,8 +132,6 @@
 .#{$prefix}grid-layout-container {
     position: relative;
     float: left;
-
-    // overflow: scroll;
 }
 .#{$prefix}grid-table {
     background-color: transparent;
@@ -165,22 +163,28 @@
     float: left;
 }
 
-.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
+.#{$prefix}grid div{
     float: left;
     border-collapse: collapse;
 }
 
-.#{$prefix}layout-grid-container div, .#{$prefix}layout-grid-container table {
-    float: left;
+.#{$prefix}grid table{
     border-collapse: collapse;
 }
-.#{$titleContainer} .#{$prefix}header-cell{
+.#{$prefix}title-cell{
+    @extend %font;
     font-size: 24px;
     font-weight: bold;
     color: #5f5f5f;
   }
+.#{$prefix}grid-headers{
+    font-size: 14px;
+    font-weight: bold;
 
-  .#{$subtitleContainer} .#{$prefix}text-cell {
+  }
+
+ .#{$prefix}subtitle-cell {
+     @extend %font;
     font-size: 16px;
     font-weight: normal;
     color:#b1b1b1;

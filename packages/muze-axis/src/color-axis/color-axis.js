@@ -45,7 +45,7 @@ export default class ColorAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static defaultConfig () {
@@ -56,7 +56,7 @@ export default class ColorAxis {
      *
      *
      * @static
-     * @returns
+     *
      * @memberof ColorAxis
      */
     static type () {
@@ -67,7 +67,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} colorStrategy
-     * @returns
+     *
      * @memberof ColorAxis
      */
     createScale (colorStrategy) {
@@ -87,7 +87,7 @@ export default class ColorAxis {
      * @param {*} domainType
      * @param {*} rangeType
      * @param {*} schemeType
-     * @returns
+     *
      * @memberof ColorAxis
      */
     setColorStrategy (domainType, rangeType, schemeType) {
@@ -100,7 +100,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getHslString (hslColorArray) {
@@ -110,7 +110,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getColor (domainVal) {
@@ -120,7 +120,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} domainVal
-     * @returns
+     *
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
@@ -128,12 +128,13 @@ export default class ColorAxis {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
-
-            if (typeof color === 'string') {
-                const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
-                return rgbToHsv(...col);
+            if (color) {
+                if (typeof color === 'string') {
+                    const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
+                    return rgbToHsv(...col);
+                }
+                return [...color];
             }
-            return [...color];
         }
         return [...this.config().value];
     }
@@ -142,7 +143,7 @@ export default class ColorAxis {
      *
      *
      * @param {*} [domain=[]]
-     * @returns
+     *
      * @memberof ColorAxis
      */
     updateDomain (domain = []) {

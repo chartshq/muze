@@ -7,7 +7,7 @@ import { retriveDomainFromData } from './group-utils';
  *
  * @param {*} fields1
  * @param {*} [fields2=[]]
- * @return
+ *
  */
 const getFieldNames = (fields1, fields2 = []) => [fields1, fields2].map(fields => fields.reduce((acc, d) => {
     acc = [...acc, ...d.getMembers()];
@@ -30,7 +30,7 @@ const createSelectedDataModel = (datamodel, fieldNames, fieldValues) =>
  *
  * @param {*} facets
  * @param {*} keyArray
- * @return
+ *
  */
 const uniqueKeyGenerator = (keyArray, context, depth = 0, val = []) => {
     const {
@@ -86,9 +86,9 @@ const projectRows = (datamodel, projections) => {
  * Adds the datamodels to current row index based on column fields
  *
  * @param {Array} context current context
- * @param {Array} callback List of facets applied to the current datamodel
+ * @param {Array} valueCellCreator List of facets applied to the current datamodel
  */
-const pushToMatrix = (context, callback) => {
+const pushToMatrix = (context, valueCellCreator) => {
     let cells = [];
     const {
         matrix,
@@ -117,13 +117,13 @@ const pushToMatrix = (context, callback) => {
             const projections = { rowFields: rowProj, columnFields: projectFields };
             const indices = { rowIndex, columnIndex: columnIndex * colProjections.length + projIdx };
 
-            return callback(projectedDm, { projections, indices }, facetInfo);
+            return valueCellCreator(projectedDm, { projections, indices }, facetInfo);
         });
     } else {
         const projections = { rowFields: rowProj, columnFields: [] };
         const indices = { rowIndex, columnIndex };
 
-        cells = [callback(datamodel, { projections, indices }, facetInfo)];
+        cells = [valueCellCreator(datamodel, { projections, indices }, facetInfo)];
     }
 
     matrix[rowIndex] = matrix[rowIndex] || [];
@@ -136,16 +136,18 @@ const pushToMatrix = (context, callback) => {
  * @param {Object} dataModel input datamodel
  * @param {Object} fieldMap corresponding fieldmap
  * @param {Array} facetsAndProjections contains the set of facets and projections for the matrices
- * @param {Function} callback Callback executed after datamodels are prepared after sel/proj
+ * @param {Function} valueCellCreator Callback executed after datamodels are prepared after sel/proj
  * @return {Object} set of matrices with the corresponding row and column keys
  */
-export const getMatrixModel = (dataModel, fieldInfo, callback) => {
+export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator) => {
     let rowDataModels = [];
     const rowKeys = [];
     const columnKeys = [];
     const allColumnProjections = [];
     const matrix = [];
     const facetInfo = [];
+
+    const fieldInfo = Object.assign({}, facetsAndProjections);
     const {
         rowFacets,
         colFacets,
@@ -173,8 +175,12 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
             const selectedDataModel = createSelectedDataModel(dataModel, rowFacetFieldNames, val);
 
             // Project the datamodel based on the number of projections (based on last levels)
-            facetInfo.push([rowFacets, val]);
-            rowDataModels.push(...projectRows(selectedDataModel, fieldInfo));
+            const newProjectedDataModels = projectRows(selectedDataModel, fieldInfo);
+            rowDataModels.push(...newProjectedDataModels);
+
+            newProjectedDataModels.forEach(() => {
+                facetInfo.push([rowFacets, val]);
+            });
         });
     } else {
         // No row facets, hence only row projection
@@ -197,7 +203,6 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
             dataModel,
             uniqueValues: firstLevelColumnKeys
         });
-
         // For each row in the datamodel, apply selection -> projection -> push the projection to matri
         rowDataModels.forEach((dme, rIndex) => {
             facetInfo[rIndex] = facetInfo[rIndex] || [[], []];
@@ -220,7 +225,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
                     },
                     fieldInfo
                 };
-                pushToMatrix(context, callback);
+                pushToMatrix(context, valueCellCreator);
             });
         });
     } else {
@@ -239,7 +244,7 @@ export const getMatrixModel = (dataModel, fieldInfo, callback) => {
                 fieldInfo
             };
 
-            pushToMatrix(context, callback);
+            pushToMatrix(context, valueCellCreator);
         });
     }
 

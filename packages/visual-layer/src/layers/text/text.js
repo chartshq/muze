@@ -9,17 +9,19 @@ import drawText from './renderer';
 import { defaultConfig } from './default-config';
 import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
-import * as PROPS from '../../enums/props';
 
 import './styles.scss';
 
 /**
- * Text Layer creates labels. It needs to be passed a data table, axes and configuration
- * of the layer.
- * Example :-
- * const textLayer = layerFactory.getLayer('text', [dataModel, axes, config]);
- * textLayer.render(container);
+ * This layer is used to create labels for each data point. It has an encoding property ```text```
+ * which determines from which field's data the value of the label will be taken. The text encoding
+ * property is necessary for the layer to render the text.The mark type of this layer is ```text```.
+ *
+ * @public
+ *
  * @class
+ * @module TextLayer
+ * @extends BaseLayer
  */
 export default class TextLayer extends BaseLayer {
     /**
@@ -78,7 +80,7 @@ export default class TextLayer extends BaseLayer {
                     x: xPx,
                     y: yPx
                 },
-                text: textFormatter ? textFormatter(textValue) : textValue,
+                text: textFormatter(textValue, i, data, this),
                 color,
                 background: {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, this) : null,
@@ -96,15 +98,15 @@ export default class TextLayer extends BaseLayer {
                 rowId: d._id
             };
 
-            if (d.x !== null && d.y !== null) {
-                points.push(point);
-            }
-
             point.className = getIndividualClassName(d, i, data, this);
+            points.push(point);
         }
 
         points = positionPoints(this, points);
-
+        points = points.filter((d) => {
+            const update = d.update;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 
@@ -117,7 +119,7 @@ export default class TextLayer extends BaseLayer {
         let points;
         const config = this.config();
         const encoding = config.encoding;
-        const normalizedData = this._store.get(PROPS.NORMALIZED_DATA);
+        const normalizedData = this._normalizedData;
         const className = config.className;
         const qualifiedClassName = getQualifiedClassName(config.defClassName, this.id(), config.classPrefix);
         const axes = this.axes();

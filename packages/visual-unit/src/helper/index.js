@@ -1,8 +1,17 @@
-import { FieldType, getDependencyOrder, getObjProp,
-    defaultValue, objectIterator, unionDomain, makeElement,
-    DimensionSubtype, getClosestIndexOf, toArray } from 'muze-utils';
+import {
+    FieldType,
+    getDependencyOrder,
+    getObjProp,
+    defaultValue,
+    objectIterator,
+    unionDomain,
+    makeElement,
+    DimensionSubtype,
+    toArray,
+    MeasureSubtype,
+    getNearestValue
+} from 'muze-utils';
 import { layerFactory } from '@chartshq/visual-layer';
-import { TIMEDIFFS } from '../enums/reactive-props';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -45,11 +54,20 @@ export const transformDataModels = (transform, dataModel) => {
     return dataModels;
 };
 
-export const getLayerFromDef = (context, definition, existingLayer) => {
+export const getLayerFromDef = (context, definition, existingLayer, namespaces) => {
     let instances = existingLayer;
     const dependencies = context._layerDeps;
+    const metaInf = context.metaInf();
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
+        toArray(instances).forEach((inst, i) => {
+            inst.metaInf({
+                unitRowIndex: metaInf.rowIndex,
+                unitColIndex: metaInf.colIndex,
+                namespace: namespaces[i]
+            });
+            inst.store(context.store());
+        });
     }
     const layers = {};
     const instanceArr = toArray(instances);
@@ -57,7 +75,11 @@ export const getLayerFromDef = (context, definition, existingLayer) => {
     definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
         instance.config(def);
+        instance.valueParser(context.valueParser());
         instance.dependencies(dependencies);
+        instance.dataProps({
+            timeDiffs: context._timeDiffs
+        });
         if (def.name) {
             instance.alias(def.name);
         }
@@ -100,7 +122,7 @@ export const createLayers = (context, layerDefinitions) => {
             def.order = layerDef.order + layerIndex;
         });
         layerIndex += defArr.length;
-        const instances = getLayerFromDef(context, definition, layersMap[markId]);
+        const instances = getLayerFromDef(context, definition, layersMap[markId], i);
         store.layers = Object.assign(store.layers, instances);
         const instanceValues = Object.values(instances);
         layersArr = layersArr.concat(...instanceValues);
@@ -126,11 +148,38 @@ export const createLayers = (context, layerDefinitions) => {
     return layers;
 };
 
+export const sanitizeLayerDef = (layerDefs) => {
+    const sanitizedDefs = [];
+    layerDefs.forEach((layerDef, i) => {
+        const def = layerDef.def;
+        const mark = layerDef.mark;
+        if (!def) {
+            const sConf = layerFactory.getSerializedConf(layerDef.mark, layerDef);
+            if (!sConf.name) {
+                sConf.name = `${mark}-${i}`;
+            }
+            sanitizedDefs.push({
+                mark: layerDef.mark,
+                def: sConf
+            });
+        } else {
+            if (!def.name) {
+                def.name = `${mark}-${i}`;
+            }
+            sanitizedDefs.push(layerDef);
+        }
+    });
+    return sanitizedDefs;
+};
+
 export const attachDataToLayers = (layers, dm, transformedDataModels) => {
     layers.forEach((layer) => {
         const dataSource = layer.config().source;
-        const dataModel = dataSource instanceof Function ? dataSource(dm) : (transformedDataModels[dataSource] || dm);
-        layer.data(dataModel);
+        const dataModel = dataSource instanceof Function ? dataSource(dm) :
+            (transformedDataModels[dataSource] || dm);
+        if (layer.data() !== dataModel) {
+            layer.data(dataModel);
+        }
     });
 };
 
@@ -181,20 +230,21 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
 
         if (layerDomain !== null && config.calculateDomain !== false) {
             domainValues = Object.entries(layerDomain);
-            if (layerDomain.x || layerDomain.y) {
-                domains = domainValues.reduce((fieldDomain, domain) => {
-                    const encodingType = domain[0];
-                    const field = encoding[encodingType].field;
-                    const axisIndex = layerAxisIndex[layerId][encodingType];
+            domains = domainValues.reduce((fieldDomain, domain) => {
+                const encodingType = domain[0];
+                const field = encoding[encodingType].field;
+                const axisIndex = layerAxisIndex[layerId][encodingType];
+                if (encodingType in axisFields) {
                     const fieldStr = `${axisFields[encodingType][axisIndex]}`;
                     fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
                     fieldDomain[fieldStr] = unionDomain(([fieldDomain[fieldStr], domain[1]]),
                         fieldsConfig[field].def.subtype ? fieldsConfig[field].def.subtype :
                                 fieldsConfig[field].def.type);
-
-                    return fieldDomain;
-                }, domains);
-            } else { domains = domainValues; }
+                } else {
+                    fieldDomain[encodingType] = domain[1];
+                }
+                return fieldDomain;
+            }, domains);
         }
     });
     return domains;
@@ -206,14 +256,25 @@ export const renderLayers = (context, container, layers, measurement) => {
     const classPrefix = config.classPrefix;
     const orderedLayers = context.layers().sort((a, b) => a.config().order - b.config().order);
     const layerParentGroup = makeElement(container, 'g', [1], `${classPrefix}-layer-group`);
+    const layerDepOrder = getDependencyOrder(context._layerDepOrder);
+    const groups = {};
     makeElement(layerParentGroup, 'g', orderedLayers, null, {
         update: (group, layer) => {
-            layer.measurement(measurement);
-            layer.dataProps({
-                timeDiffs: context.store().get(TIMEDIFFS)
-            });
-            layer.config().render !== false && layer.mount(group.node());
+            groups[layer.alias()] = {
+                group,
+                layer
+            };
         }
+    });
+    const layerSeq = layerDepOrder.map(name => groups[name]);
+    layerSeq.forEach((o) => {
+        const layer = o.layer;
+        const group = o.group;
+        layer.measurement(measurement);
+        layer.dataProps({
+            timeDiffs: context._timeDiffs
+        });
+        layer.config().render !== false && layer.mount(group.node());
     });
     return this;
 };
@@ -228,15 +289,13 @@ export const getNearestDimensionalValue = (context, position) => {
     const fieldsConfig = data.getFieldsConfig();
     const xField = getObjProp(fields, 'x', 0).getMembers()[0];
     const yField = getObjProp(fields, 'y', 0).getMembers()[0];
-    const xFieldType = fieldsConfig[xField] && (fieldsConfig[xField].def.subtype ? fieldsConfig[xField].def.subtype :
-        fieldsConfig[xField].def.type);
-    const yFieldType = fieldsConfig[yField] && (fieldsConfig[yField].def.subtype ? fieldsConfig[yField].def.subtype :
-                fieldsConfig[yField].def.type);
+    const xFieldType = fieldsConfig[xField].def.subtype;
+    const yFieldType = fieldsConfig[yField].def.subtype;
 
     const entryVal = [['x', xFieldType, xField], ['y', yFieldType, yField]].find(entry =>
         entry[1] === DimensionSubtype.CATEGORICAL || entry[1] === DimensionSubtype.TEMPORAL);
 
-    if (!entryVal || (xFieldType !== FieldType.MEASURE && yFieldType !== FieldType.MEASURE)) {
+    if (!entryVal || (xFieldType !== MeasureSubtype.CONTINUOUS && yFieldType !== MeasureSubtype.CONTINUOUS)) {
         return null;
     }
     const field = entryVal[2];
@@ -244,7 +303,7 @@ export const getNearestDimensionalValue = (context, position) => {
     let key = axes[entryVal[0]][0].invert(position[entryVal[0]]);
     if (entryVal[1] === DimensionSubtype.TEMPORAL) {
         const filterData = [...new Set(data.getData().data.map(d => d[index]))];
-        key = filterData[getClosestIndexOf(filterData, key)];
+        key = getNearestValue(filterData, key);
     }
 
     return key !== undefined ? [[field], [key]] : null;
@@ -268,39 +327,12 @@ export const removeLayersBy = (layers, searchBy, value) => {
 
 export const createSideEffectGroup = (container, className) => makeElement(container, 'g', [1], className).node();
 
-export const getAdjustedDomain = (max, min) => {
-    const y1ratio = max[0] / (max[0] - min[0]);
-    const y2ratio = max[1] / (max[1] - min[1]);
-
-    // adjust min/max values for positive negative values zero line etc
-    let allSameSign = false;
-
-    // if all numbers are positive set floor to zero
-    if (min[0] > 0 && min[1] > 0 && min[1] > 0 && max[1] > 0) {
-        allSameSign = true;
-        min[0] = 0;
-        min[1] = 0;
-    }
-
-    // if all numbers are negative set ceiling to zero
-    if (min[0] < 0 && min[1] < 0 && min[1] < 0 && max[1] < 0) {
-        allSameSign = true;
-        max[0] = 0;
-        max[1] = 0;
-    }
-
-    // align zero line if necessary
-    if (!allSameSign && y1ratio !== y2ratio) {
-        if (y1ratio < y2ratio) {
-                    // adjust min[1]
-            min[1] = min[0] / max[0] * max[1];
-        } else {
-                    // adjust min[0]
-            min[0] = min[1] / max[1] * max[0];
-        }
-    }
-    return {
-        max,
-        min
-    };
+export const createRenderPromise = (unit) => {
+    const renderedPromise = unit._renderedPromise;
+    renderedPromise.then(() => {
+        unit._renderedPromise = new Promise((resolve) => {
+            unit._renderedResolve = resolve;
+        });
+        createRenderPromise(unit);
+    });
 };

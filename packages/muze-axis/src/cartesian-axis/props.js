@@ -1,37 +1,68 @@
 import { mergeRecursive } from 'muze-utils';
+import { hasAxesConfigChanged } from './helper';
 
 export const PROPS = {
     availableSpace: {},
     axisDimensions: {},
+    axisComponentDimensions: {},
     config: {
         sanitization: (context, value) => {
-            if (value.labels && value.labels.rotation) {
-                context._rotationLock = true;
-            }
-            value = mergeRecursive(context._config || {}, value);
+            const oldConfig = Object.assign({}, context._config || {});
+            const mockedOldConfig = mergeRecursive({}, oldConfig);
+            value = mergeRecursive(mockedOldConfig, value);
+
             value.axisNamePadding = Math.max(value.axisNamePadding, 0);
-            context.axis(context.createAxis(value));
-            context.store().commit('config', value);
+            const shouldAxesScaleUpdate = hasAxesConfigChanged(
+                value, oldConfig, ['interpolator', 'exponent', 'base', 'orientation']
+            );
+            const tickFormatter = context.sanitizeTickFormatter(value);
+
+            if (shouldAxesScaleUpdate) {
+                context._scale = context.createScale(value);
+                context._axis = context.createAxis(value);
+            }
+
+            context._tickFormatter = ticks => tickFormatter(ticks);
+
+            const {
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            } = value;
+            context.renderConfig({
+                labels,
+                show,
+                showInnerTicks,
+                showOuterTicks,
+                showAxisName
+            });
+            return value;
+        }
+    },
+    renderConfig: {
+        sanitization: (context, value) => {
+            const oldConfig = Object.assign({}, context._renderConfig || {});
+            value = mergeRecursive(oldConfig, value);
             return value;
         }
     },
     logicalSpace: {},
     mount: {
-        sanitization: (context, value) => {
-            context.store().commit('mount', value);
-            return value;
-        }
     },
     range: {
         sanitization: (context, value) => {
             context.scale().range(value);
             context.logicalSpace(null);
-            context.store().commit('range', value);
             return value;
         }
     },
 
     smartTicks: {},
-    store: {},
-    tickSize: {}
+    tickSize: {},
+    maxTickSpaces: {},
+    valueParser: {
+        defaultValue: val => val
+    }
 };

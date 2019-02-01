@@ -1,114 +1,105 @@
 import SimpleAxis from './simple-axis';
 import { BAND } from '../enums/scale-type';
 import { TOP, BOTTOM } from '../enums/axis-orientation';
-import { calculateBandSpace, setOffset } from './helper';
+import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
+import { spaceSetter } from './space-setter';
 
 export default class BandAxis extends SimpleAxis {
 
     /**
      *
      *
-     * @param {*} range
-     * @returns
+     * @param {*} config axes configuration
+     *
      * @memberof BandAxis
      */
-    createScale (range) {
-        const scale = super.createScale(range);
-        const { padding } = this.config();
-        if (typeof padding === 'number') {
-            scale.padding(padding);
-        }
-        return scale;
+    createScale (config) {
+        return super.createScale(config);
     }
 
     /**
      *
      *
      * @static
-     * @returns
+     *
      * @memberof BandAxis
      */
     static type () {
         return BAND;
     }
 
-    /**
+     /**
+     * This method is used to set the space availiable to render
+     * the SimpleCell.
      *
-     *
-     * @param {*} width
-     * @param {*} height
-     * @param {*} padding
-     * @param {*} isOffset
-     * @memberof BandAxis
+     * @param {number} width The width of SimpleCell.
+     * @param {number} height The height of SimpleCell.
+     * @memberof AxisCell
      */
-    setAvailableSpace (width, height, padding, isOffset) {
+    setAvailableSpace (width = 0, height, padding, isOffset) {
+        let labelConfig = {};
         const {
-            left,
-            right,
-            top,
-            bottom
-        } = padding;
-        const {
-            orientation,
-            showAxisName,
-            axisNamePadding
-        } = this.config();
-        const { axisLabelDim } = this.getAxisDimensions();
-        const { height: axisDimHeight } = axisLabelDim;
+           orientation
+       } = this.config();
 
-        this.availableSpace({ width, height });
+        this.availableSpace({ width, height, padding });
+
         if (orientation === TOP || orientation === BOTTOM) {
-            // Set x axis range
-            this.range([0, width - left - right]);
-            const axisHeight = this.getLogicalSpace().height - (showAxisName === false ?
-                (axisDimHeight + axisNamePadding) : 0);
-            isOffset && this.config({ yOffset: Math.max(axisHeight, height) });
+            labelConfig = spaceSetter(this, { isOffset }).band.x();
         } else {
-            // Set y axis range
-            this.range([height - bottom, top]);
-            const axisWidth = this.getLogicalSpace().width - (showAxisName === false ? axisDimHeight : 0);
-            isOffset && this.config({ xOffset: Math.max(axisWidth, width) });
+            labelConfig = spaceSetter(this, { isOffset }).band.y();
         }
+
+        // Set config
+        this.renderConfig({
+            labels: labelConfig
+        });
+        this.setTickConfig();
         return this;
     }
 
     /**
      *
      *
-     * @returns
-     * @memberof BandAxis
-     */
-    getUnitWidth () {
-        return this.scale().bandwidth();
-    }
-
-    /**
      *
-     *
-     * @returns
      * @memberof BandAxis
      */
     setTickConfig () {
         let smartTicks = '';
         let smartlabel;
-        const { maxWidth, maxHeight, tickFormat } = this.config();
+        const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const domain = this.axis().scale().domain();
+        const { tickValues, padding } = this.config();
+        const { labels } = this.renderConfig();
+        const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
+        const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
 
-        smartTicks = domain;
-        const tickFormatter = tickFormat || (val => val);
+        tickValues && this.axis().tickValues(tickValues);
+        smartTicks = tickValues || domain;
+
+        // set the style on the shared label manager instance
+        labelManager.setStyle(this._tickLabelStyle);
+
+        // Update padding between plots
+        if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
+            this.scale().padding(padding);
+        }
 
         if (domain && domain.length) {
-            smartTicks = domain.map((d, i) => {
+            const values = tickValues || domain;
+            const tickFormatter = this._tickFormatter(values);
+            smartTicks = values.map((d, i) => {
                 labelManager.useEllipsesOnOverflow(true);
-                smartlabel = labelManager.getSmartText(tickFormatter(d, i, domain), maxWidth, maxHeight);
+
+                smartlabel = labelManager.getSmartText(tickFormatter(d, i), width, height, noWrap);
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
-        return smartTicks;
+        this.smartTicks(smartTicks);
+        return this;
     }
 
-/**
+    /**
      * Gets the space occupied by the axis
      *
      * @return {Object} object with details about size of the axis.
@@ -122,55 +113,46 @@ export default class BandAxis extends SimpleAxis {
         }
         return this.logicalSpace();
     }
-    /**
-     *
-     *
-     * @param {*} axisTickLabels
-     * @param {*} labelWidth
-     * @returns
-     * @memberof BandAxis
-     */
-    setRotationConfig (axisTickLabels, labelWidth) {
-        const { orientation } = this.config();
-        const range = this.range();
-        const availSpace = Math.abs(range[0] - range[1]);
-
-        this.config({ labels: { rotation: 0, smartTicks: false } });
-        if (orientation === TOP || orientation === BOTTOM) {
-            const smartWidth = this.smartTicks().reduce((acc, n) => acc + n.width + this._minTickDistance.width, 0);
-            // set multiline config
-            if (availSpace > 0 && axisTickLabels.length * (labelWidth + this._minTickDistance.width) > availSpace) {
-                if (availSpace && smartWidth < availSpace) {
-                    this.config({ labels: { smartTicks: true } });
-                } else {
-                    this.config({ labels: { rotation: -90 } });
-                }
-            }
-        }
-        return this;
-    }
 
     /**
      *
      *
-     * @returns
      * @memberof BandAxis
      */
     getTickValues () {
         return this.axis().scale().domain();
     }
 
+    sanitizeTickFormatter (value) {
+        const { tickFormat } = value;
+
+        if (tickFormat) {
+            return ticks => (val, i) => tickFormat(val, val, i, ticks);
+        }
+        return () => val => this.valueParser()(val);
+    }
+
     /**
      *
      *
-     * @returns
+     *
+     * @memberof BandAxis
+     */
+    getUnitWidth () {
+        return this.scale().bandwidth();
+    }
+
+    /**
+     *
+     *
+     *
      * @memberof SimpleAxis
      */
     getTickSize () {
         const {
             showInnerTicks,
             showOuterTicks
-        } = this.config();
+        } = this.renderConfig();
         const axis = this.axis();
 
         axis.tickSizeInner(showInnerTicks ? 6 : 0);
@@ -178,33 +160,24 @@ export default class BandAxis extends SimpleAxis {
         return axis.tickSize();
     }
 
-    /**
-     * This method is used to assign a domain to the axis.
-     *
-     * @param {Array} domain the domain of the scale
-     * @memberof SimpleAxis
-     */
-    updateDomainBounds (domain) {
-        let currentDomain = this.domain();
-        if (this.config().domain) {
-            currentDomain = this.config().domain;
-        } else {
-            if (currentDomain.length === 0) {
-                currentDomain = domain;
-            }
-            currentDomain = currentDomain.concat(domain);
-        }
-        this.domain(currentDomain);
-        return this;
+    invertExtent (v1, v2) {
+        return this.scale().invertExtent(v1, v2);
     }
 
     /**
-     * Returns the value from the domain when given a value from the range.
-     * @param {number} value Value from the range.
-     * @return {number} Value
+     * Gets the nearest range value from the given range values.
+     * @param {number} v1 Start range value
+     * @param {number} v2 End range value
+     * @return {Array} range values
      */
-    invert (...value) {
-        const values = value.map(d => this.scale().invert(d)) || [];
-        return value.length === 1 ? values[0] && values[0].toString() : values.map(d => d.toString());
+    getNearestRange (v1, v2) {
+        const scale = this.scale();
+        const range = scale.range();
+        const reverse = range[0] > range[1];
+
+        const extent = this.invertExtent(v1, v2);
+        const p1 = scale(reverse ? extent[extent.length - 1] : extent[0]);
+        const p2 = scale(reverse ? extent[0] : extent[extent.length - 1]) + scale.bandwidth();
+        return [p1, p2];
     }
 }

@@ -1,8 +1,6 @@
-
-let env = muze.Muze();
+let env = muze();
 let DataModel = muze.DataModel,
-    share = muze.operators.share;
-
+    share = muze.Operators.share;
 
 d3.json('../../data/movies.json', (data) => {
     const jsonData = data,
@@ -10,10 +8,10 @@ d3.json('../../data/movies.json', (data) => {
             name: 'IMDB_Rating',
             type: 'measure'
         }];
-    let rootData = new DataModel(jsonData, schema);
+    const rootData = new DataModel(jsonData, schema);
     // rootData = rootData.bin('IMDB_Rating', { numOfBins: 10 }, 'count');
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-    let mountPoint = document.getElementsByClassName('chart')[0];
+    const mountPoint = document.getElementsByClassName('chart')[0];
     let rows = ['y'],
         columns = [share('x', 'x0')];
     let canvas = env.canvas();

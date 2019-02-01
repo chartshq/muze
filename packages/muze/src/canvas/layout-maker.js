@@ -2,37 +2,40 @@ import { mergeRecursive } from 'muze-utils';
 import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
+import { componentWrapperMaker } from './component-wrapper-maker';
 import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import { ScrollManager } from './scroll-manager';
 
 /**
  *
  *
  * @param {*} context
- * @returns
+ *
  */
-export const prepareLayout = (layout, components, config, measurement) => {
+export const prepareLayout = (layout, renderDetails) => {
+    const { components, layoutConfig, measurement } = renderDetails;
     const {
         rows,
         columns,
         values,
         cornerMatrices
     } = components;
-
     const {
         topLeft,
         topRight,
         bottomLeft,
         bottomRight
     } = cornerMatrices;
-
-    layout.measurement(measurement)
-                    .config(config)
-                    .matrices({
-                        top: [topLeft, columns[0], topRight],
-                        center: [rows[0], values, rows[1]],
-                        bottom: [bottomLeft, columns[1], bottomRight]
-                    })
-                    .triggerReflow();
+    if (rows && columns) {
+        layout.measurement(measurement)
+                        .config(layoutConfig)
+                        .matrices({
+                            top: [topLeft, columns[0], topRight],
+                            center: [rows[0], values, rows[1]],
+                            bottom: [bottomLeft, columns[1], bottomRight]
+                        })
+                        .triggerReflow();
+    }
 };
 
 /**
@@ -40,7 +43,7 @@ export const prepareLayout = (layout, components, config, measurement) => {
  *
  * @param {*} context
  * @param {*} mount
- * @returns
+ *
  */
 export const getRenderDetails = (context, mount) => {
     let layoutConfig = mergeRecursive({}, context.config());
@@ -52,6 +55,7 @@ export const getRenderDetails = (context, mount) => {
     const {
         isColumnSizeEqual,
         isRowSizeEqual,
+        priority,
         rows,
         columns,
         values
@@ -61,8 +65,11 @@ export const getRenderDetails = (context, mount) => {
         minHeight,
         classPrefix,
         showHeaders,
-        legend
+        legend,
+        pagination,
+        scrollBar
     } = context.config();
+
     // Get title configuration
     const titleConfig = context.title()[1];
      // Get subtitle configuration
@@ -102,6 +109,7 @@ export const getRenderDetails = (context, mount) => {
         values,
         cornerMatrices: visGroup.cornerMatrices()
     };
+
     const measurement = {
         mountSpace: {
             height,
@@ -122,10 +130,14 @@ export const getRenderDetails = (context, mount) => {
         border: mergeRecursive(visGroup.metaData().border, context.config().border),
         layoutArrangement,
         legend,
+        buffer: scrollBar.thickness,
+        pagination,
         title: titleConfig,
         subtitle: subtitleConfig,
         isColumnSizeEqual,
-        isRowSizeEqual
+        isRowSizeEqual,
+        mount,
+        priority
     });
     return {
         layoutConfig,
@@ -133,3 +145,70 @@ export const getRenderDetails = (context, mount) => {
         measurement
     };
 };
+
+const componentIndexes = {
+    title: 0,
+    subtitle: 1,
+    legend: 2,
+    verticalScrollBar: 3,
+    horizontalScrollBar: 4,
+    grid: 5
+};
+
+/**
+ * Responsible for creating a scroll manager that manages interactions between the grid
+ * component and the scroll bar components
+ *
+ * @param {Array} componentWrappers Contains the wrappers for all the components
+ * @param {Canvas} canvas Instance of the current canvas
+ * @return {Array} Positions of units either horizontal or vertical
+ */
+const createScrollManager = (componentWrappers, canvas) => {
+    const {
+        horizontalScrollBar,
+        verticalScrollBar,
+        grid
+    } = componentIndexes;
+
+    const horizontalScrollWrapper = componentWrappers[horizontalScrollBar];
+    const verticalScrollWrapper = componentWrappers[verticalScrollBar];
+    const gridWrapper = componentWrappers[grid];
+    const scrollBarManager = new ScrollManager();
+    const scrollBarComponents = {};
+
+    verticalScrollWrapper && (scrollBarComponents.vertical = verticalScrollWrapper);
+    horizontalScrollWrapper && (scrollBarComponents.horizontal = horizontalScrollWrapper);
+
+    scrollBarManager
+                    .scrollBarComponents(scrollBarComponents)
+                    .attachedComponents({
+                        grid: gridWrapper
+                    });
+    canvas.composition().hScrollBar = horizontalScrollWrapper;
+    canvas.composition().vScrollBar = verticalScrollWrapper;
+
+    [horizontalScrollWrapper, verticalScrollWrapper].forEach((wrapper) => {
+        wrapper && wrapper.manager(scrollBarManager);
+    });
+
+    gridWrapper.scrollBarManager(scrollBarManager);
+};
+
+export const renderLayout = (canvas, renderDetails) => {
+    const layoutManager = canvas._layoutManager;
+    const gridLayout = canvas.layout();
+    const {
+
+        grid
+    } = componentIndexes;
+
+    // Get the component wrappers
+    const compWrappers = componentWrapperMaker(layoutManager, gridLayout, renderDetails);
+    const componentWrappers = Object.keys(componentIndexes).map(e => compWrappers[e]);
+    const gridWrapper = componentWrappers[grid];
+    createScrollManager(componentWrappers, canvas);
+
+    layoutManager.registerComponents(componentWrappers).compute();
+    gridWrapper.attachScrollListener();
+};
+

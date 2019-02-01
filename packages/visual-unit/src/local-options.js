@@ -1,6 +1,7 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, DataModel } from 'muze-utils';
 import { defaultConfig } from './default-config';
-import { CONFIG, LAYERDEFS, AXES, WIDTH, HEIGHT, MOUNT, TRANSFORM, FIELDS, DATA } from './enums/reactive-props';
+import { CONFIG, LAYERDEFS, TRANSFORM, DATA, LAYERS, TRANSFORMEDDATA } from './enums/reactive-props';
+import { sanitizeLayerDef } from './helper';
 
 export default {
     [CONFIG]: {
@@ -12,32 +13,21 @@ export default {
         }
     },
     [LAYERDEFS]: {
-        value: null
-    },
-    [AXES]: {
         value: null,
         meta: {
-            sanitization: (axes, prevAxes) => Object.assign(prevAxes || {}, axes)
+            preset: layerDef => sanitizeLayerDef(layerDef)
         }
-    },
-    [WIDTH]: {
-        value: null
-    },
-    [HEIGHT]: {
-        value: null
-    },
-    [MOUNT]: {
-        value: null
     },
     [TRANSFORM]: {
         value: null
     },
-    [FIELDS]: {
+    [LAYERS]: {
         value: null
     },
     [DATA]: {
         value: null,
         meta: {
+            typeCheck: d => d instanceof DataModel,
             preset: (data, context) => {
                 if (context._cache) {
                     const cachedData = context.cachedData();
@@ -48,6 +38,12 @@ export default {
                     context.cachedData([data]);
                 }
             }
+        }
+    },
+    [TRANSFORMEDDATA]: {
+        value: null,
+        meta: {
+            addAsMethod: false
         }
     }
 };

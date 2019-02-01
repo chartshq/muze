@@ -299,7 +299,6 @@ const getSmartComputedStyle = (group, css) => {
     }
 
     textEl.style(mandatoryStyle);
-
     const computedStyle = window.getComputedStyle(textEl.node());
     const styleForSmartLabel = {
         fontSize: computedStyle.fontSize,

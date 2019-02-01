@@ -43,7 +43,7 @@ export const DEFAULT_CONFIG = {
         text: {
             orientation: 'right',
             width: 10,
-            formatter: val => val
+            formatter: (val, i, data, context) => context.valueParser()(val)
         },
         icon: {
             className: 'legend-icon',

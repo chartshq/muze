@@ -3,7 +3,7 @@
  *
  * @param {*} domain
  * @param {*} generatorFn
- * @returns
+ *
  */
 export const shapeGenerator = (domain, generatorFn) => {
     const generatedShapes = {};

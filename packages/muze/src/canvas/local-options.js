@@ -1,4 +1,4 @@
-import { mergeRecursive, selectElement } from 'muze-utils';
+import { mergeRecursive } from 'muze-utils';
 import {
     ROWS,
     COLUMNS,
@@ -8,13 +8,11 @@ import {
     DETAIL,
     LAYERS,
     TRANSFORM,
-    MOUNT,
     TITLE,
     SUB_TITLE
 } from '../constants';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
 /**
- * @module
  * This is the local options semantics based on which setters getters are created and reactivity is initiated.
  * This local object is only valid for Canvas.
  * Canvas merges global and local object both to the model
@@ -30,6 +28,8 @@ import { TITLE_CONFIG, SUB_TITLE_CONFIG } from './defaults';
  *          sanitizaiton: // Need for sanitization before type is checked
  *      }
  *  }
+ *
+ * @module LocalOptions
  */
 
 export const localOptions = {
@@ -53,7 +53,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
@@ -68,7 +68,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
@@ -83,7 +83,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string') {
+                if (typeof config === 'string' || config === null) {
                     return {
                         field: config
                     };
@@ -101,7 +101,7 @@ export const localOptions = {
     },
 
     [LAYERS]: {
-        value: null,
+        value: [],
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Array'
@@ -112,17 +112,6 @@ export const localOptions = {
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Object'
-        }
-    },
-    [MOUNT]: {
-        value: null,
-        meta: {
-            sanitization: (value) => {
-                if (typeof value === 'string') {
-                    return selectElement(value).node();
-                }
-                return value;
-            }
         }
     }
 };

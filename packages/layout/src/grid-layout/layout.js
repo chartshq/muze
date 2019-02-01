@@ -3,14 +3,12 @@
  * and man other visualzations that require a tabular structure.
  */
 
-import { getUniqueId } from 'muze-utils';
+import { getUniqueId, mergeRecursive } from 'muze-utils';
 import GenericLayout from '../generic-layout';
 import { DEFAULT_CONFIGURATION, DEFAULT_MEASUREMENTS } from './defaults';
-import {
-    renderMatrices
-} from './renderer';
 import { generateVisualMatrices } from './layout-helper';
-import { computeLayoutMeasurements, getViewMeasurements, getViewMatrices } from './computations';
+import { computeLayoutMeasurements } from './computations';
+import { getViewMeasurements, getViewMatrices } from './view-info-getter';
 /**
  * This class is used to create a tabular structure that
  * can house charts and values.
@@ -26,20 +24,29 @@ export default class GridLayout extends GenericLayout {
      * @param {Object} measurement The dimensions of the layout
      * @param {Object} config external configurations.
      * @memberof GenericLayout
-     *
-     * measurement : {
-     *      width : number => width of the container
-     *      height : number => height of the container
-     *      unitHeight : number => height of unit of the cells
-     *      unitWidth : number => width of unit of the cells
-     * }
-     *
      */
     constructor (matrices, mountPoint, measurement, config) {
         super(mountPoint, measurement, config);
         this.matrices(matrices);
         this.config(this.constructor.defaultConfig());
         this._layoutId = getUniqueId();
+        this._viewInfo = this.constructor.defaultViewInfo();
+        this._scrollInfo = { horizontal: false, vertical: false };
+    }
+
+    static defaultViewInfo () {
+        return Object.assign({}, {
+            layoutDimensions: {
+                border: this.defaultConfig().border,
+                viewHeight: [0, 0, 0],
+                viewWidth: [0, 0, 0]
+            },
+            viewMatricesInfo: {
+                columnPages: 0,
+                rowPages: 0,
+                matrices: { top: [], center: [], bottom: [] }
+            }
+        });
     }
 
     /**
@@ -98,22 +105,19 @@ export default class GridLayout extends GenericLayout {
      * @memberof GridLayout
      */
     triggerReflow () {
-        computeLayoutMeasurements(this);
-        this.setViewInformation();
+        this.scrollInfo({ horizontal: false, vertical: false });
+        const {
+            maxHeightAvailableForRowMatrix,
+            maxWidthAvailableForColumnMatrix
+        } = computeLayoutMeasurements(this);
+
+        this.setViewInformation(maxHeightAvailableForRowMatrix, maxWidthAvailableForColumnMatrix);
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} type
-     * @param {*} pageNumber
-     * @returns
-     * @memberof GridLayout
-     */
     gotoPage (type, pageNumber) {
         const pageType = type.toLowerCase();
-        const { viewMatricesInfo } = this.getViewInformation();
+        const { viewMatricesInfo } = this.viewInfo();
         const totalPages = viewMatricesInfo[`${pageType}Pages`];
         const pointer = Math.min(Math.max(1, pageNumber), totalPages);
         this.config({
@@ -124,15 +128,8 @@ export default class GridLayout extends GenericLayout {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} type
-     * @returns
-     * @memberof GridLayout
-     */
     pages (type) {
-        const { viewMatricesInfo } = this.getViewInformation();
+        const { viewMatricesInfo } = this.viewInfo();
         const pageType = type.toLowerCase();
         return {
             totalPages: viewMatricesInfo[`${pageType}Pages`],
@@ -140,55 +137,41 @@ export default class GridLayout extends GenericLayout {
         };
     }
 
+    viewInfo (...viewInfo) {
+        if (viewInfo.length) {
+            this._viewInfo = viewInfo[0];
+            return this;
+        }
+        return this._viewInfo;
+    }
+
+    scrollInfo (...scrollInfo) {
+        if (scrollInfo.length) {
+            this._scrollInfo = mergeRecursive(this._scrollInfo, scrollInfo[0]);
+            return this;
+        }
+        return this._scrollInfo;
+    }
+
     /**
      *
      *
      * @returns
      * @memberof GridLayout
      */
-    setViewInformation () {
+    setViewInformation (maxRowHeight, maxColWidth) {
         const {
             rowPointer,
             columnPointer,
             border
         } = this.config();
         const viewMatricesInfo = getViewMatrices(this, rowPointer, columnPointer);
-        const layoutDimensions = getViewMeasurements(this);
+        const layoutDimensions = getViewMeasurements(this, maxRowHeight, maxColWidth);
         layoutDimensions.border = border;
-        this.viewInfo = {
+        this.viewInfo({
             viewMatricesInfo,
             layoutDimensions
-        };
-        return this;
-    }
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof GridLayout
-     */
-    getViewInformation () {
-        return this.viewInfo;
-    }
-
-    /**
-     * Renders the layout
-     *
-     * @return {Object} current instance
-     * @memberof GridLayout
-     */
-    renderGrid (mountPoint) {
-        this.mountPoint(mountPoint);
-        if (!this.mountPoint()) {
-            return this;
-        }
-        const {
-            viewMatricesInfo,
-            layoutDimensions
-        } = this.getViewInformation();
-        // Render matrices
-        renderMatrices(this, viewMatricesInfo.matrices, layoutDimensions);
+        });
         return this;
     }
 }

@@ -1,29 +1,33 @@
 import {
     getUniqueId,
     mergeRecursive,
-    Store,
     FieldType,
     selectElement,
     ReservedFields,
     registerListeners,
     transactor,
     DataModel,
-    clone
+    clone,
+    generateGetterSetters,
+    STATE_NAMESPACES
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
+import { props } from './props';
 import {
     transformData,
     calculateDomainFromData,
     getNormalizedData,
-    applyInteractionStyle
+    applyInteractionStyle,
+    initializeGlobalState,
+    getValidTransform
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
 
 /**
- * An abstract class which gives defination of common layer functionality like
- * - transfromation data for various {@link mode}
+ * An abstract class which gives definition of common layer functionality like
+ * - transforming data for various modes. Supported modes: identity, group and stack.
  * - calculating data domain
  * - linking dependent layers
  * - merging policy of configuration
@@ -38,7 +42,7 @@ import { defaultOptions } from './default-options';
  *
  * @public
  * @class
- * @namespace Muze
+ * @module BaseLayer
  */
 export default class BaseLayer extends SimpleLayer {
 
@@ -46,7 +50,7 @@ export default class BaseLayer extends SimpleLayer {
      * Creates a layer using a configuration and data.
      *
      * @public
-     *
+     * @constructor
      * @param {DataModel} data Instance of DataModel to be used. This DataModel instance serves as the data for a layer.
      * @param {Object} axes Axes instances to be used for rendering the layer. Axes are used for mapping data from
      *      value to px.
@@ -56,18 +60,15 @@ export default class BaseLayer extends SimpleLayer {
      *      TimeAxis, ContinuousAxis
      * @param {ColorAxis} axes.color Axis for coloring a layer using color interpolators
      * @param {ShapeAxis} axes.shape Axis for providing a shape
-     * @param {SizeAxis} axes.shape Axis for determining size of a mark using size interpolator
+     * @param {SizeAxis} axes.size Axis for determining size of a mark using size interpolator
      * @param {LayerConfig} config Configuration of the layer
      * @param {Object} dependencies Dependencies of the layer
-     * @param {SmartLabel} smartLabel Smartlabel singleton instance
+     * @param {SmartLabel} dependencies.smartLabel Smartlabel singleton instance
      */
-    constructor (data, axes, config, dependencies) {
+    constructor (data, axes, config, dependencies = {}) {
         super();
-        this.store(new Store({
-            DATA: null,
-            [PROPS.DATA_UPDATED]: null
-        }));
-        transactor(this, defaultOptions, this.store().model);
+
+        generateGetterSetters(this, props);
         this.data(data);
         this.axes(axes);
         this.config(config);
@@ -77,7 +78,55 @@ export default class BaseLayer extends SimpleLayer {
         this._cachedData = [];
         this._id = getUniqueId();
         this._measurement = {};
-        registerListeners(this, listenerMap);
+        this._animationDonePromises = [];
+        this._customConfig = null;
+    }
+
+    static getState () {
+        return [
+            {
+                domain: {}
+            },
+            {
+                config: {},
+                data: {}
+            }
+        ];
+    }
+
+    store (...params) {
+        if (params.length) {
+            this._store = params[0];
+            const metaInf = this.metaInf();
+            const localNs = `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${metaInf.namespace}`;
+            initializeGlobalState(this);
+            const store = this.store();
+            store.append(`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}`, {
+                [metaInf.namespace]: null
+            });
+
+            transactor(this, defaultOptions, store.model, {
+                namespace: localNs
+            });
+            registerListeners(this, listenerMap, {
+                local: localNs,
+                global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
+            }, {
+                unitRowIndex: metaInf.unitRowIndex,
+                unitColIndex: metaInf.unitColIndex
+            });
+            return this;
+        }
+        return this._store;
+    }
+
+    domain (...dom) {
+        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`;
+        if (dom.length) {
+            this.store().commit(prop, dom[0]);
+            return this;
+        }
+        return this.store().get(prop);
     }
 
     /**
@@ -126,7 +175,7 @@ export default class BaseLayer extends SimpleLayer {
     /**
      * Determines a name for a layer. This name of the layer is used in the input data to refer to this layer.
      * ```
-     *  .layer([
+     *  .layers([
      *      mark: 'bar',
      *      encoding: { ... }
      *  ])
@@ -135,18 +184,10 @@ export default class BaseLayer extends SimpleLayer {
      * @static
      * @public
      *
-     * @returns {string} name of layer
+     * @return {string} name of layer
      */
     static formalName () {
         return 'base';
-    }
-
-    store (...store) {
-        if (store.length) {
-            this._store = store[0];
-            return this;
-        }
-        return this._store;
     }
 
     encodingFieldsInf (...fieldsInf) {
@@ -170,7 +211,6 @@ export default class BaseLayer extends SimpleLayer {
      * layers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set
      * as the alias name.
      *
-     * @public
      *
      * If used as setter
      * @param  {string} alias Name of the alias
@@ -178,6 +218,8 @@ export default class BaseLayer extends SimpleLayer {
      *
      * If used as getter
      * @return {string} Alias of the current layer
+     *
+     * @public
      */
     alias (...params) {
         if (params.length) {
@@ -219,6 +261,8 @@ export default class BaseLayer extends SimpleLayer {
     /**
      * Returns the unique identifier of this layer. Id is auto generated during the creation proceess of a schema.
      *
+     * @public
+     *
      * @return {string} id of the layer
      */
     id () {
@@ -226,11 +270,10 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Gets the transform method from transform factory based on type of transform. It then calls the
+     * Returns the transformed data based on given transform type.
+     * It first gets the transform method from transform factory based on type of transform. It then calls the
      * transform method with the data and passes the configuration parameters of transform such as
      * groupBy, value field, etc.
-     *
-     * @public
      *
      * @param {DataModel} dataModel Instance of DataModel
      * @param {Object} config Configuration for transforming data
@@ -244,7 +287,7 @@ export default class BaseLayer extends SimpleLayer {
      * Calculates the domain from the data.
      * It checks the type of field and calculates the domain based on that. For example, if it
      * is a quantitative or temporal field, then it calculates the min and max from the data or
-     * if it is a nominal field then it gets all the values from the data of that field.
+     * if it is a categorical field then it gets all the values from the data of that field.
      * @param {Array} data DataArray
      * @param {Object} fieldsConfig Configuration of fields
      * @return {Array} Domain values array.
@@ -259,7 +302,7 @@ export default class BaseLayer extends SimpleLayer {
         return domains;
     }
 
-    shouldDrawAnchors () {
+    static shouldDrawAnchors () {
         return false;
     }
 
@@ -270,12 +313,13 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Axis domains
      */
     getDataDomain (encodingType) {
-        const domains = this.store().get(PROPS.DOMAIN);
+        const domains = this.store()
+            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
     /**
-     * Returns the domain for the axis.
+     * Normalizes the transformed data and returns it.
      *
      * @param {string} encodingType type of encoding x, y, etc.
      * @return {Object} Axis domains
@@ -285,17 +329,34 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Abstract method for getting nearest point
-     * @return {BaseLayer} Instance of base layer
+     * Gets the nearest point closest to the given x and y coordinate. If no nearest point is found, then it returns
+     * null.
+     *
+     * @public
+     *
+     * @param {number} x X Coordinate.
+     * @param {number} y Y Coordinate.
+     *
+     * @return {Object} Information of the nearest point.
+     * ```
+     *      {
+     *          // id property contains the field names and their corresponding values in a 2d array. This is the data
+     *          // associated with the nearest point.
+     *          id: // Example data: [['Origin'], ['USA']],
+     *          dimensions: // Physical dimensions of the point.
+     *          layerId: // Id of the layer instance.
+     *      }
+     * ```
      */
     getNearestPoint () {
         return null;
     }
 
-    applyInteractionStyle (interactionType, selectionSet, apply) {
+    applyInteractionStyle (interactionType, selectionSet, apply, styles) {
         const interactionConfig = this.config().interaction || {};
 
-        const interactionStyles = interactionConfig[interactionType];
+        let interactionStyles = interactionConfig[interactionType];
+        interactionStyles = styles || interactionStyles;
         if (interactionStyles) {
             applyInteractionStyle(this, selectionSet, interactionStyles, {
                 apply,
@@ -304,17 +365,21 @@ export default class BaseLayer extends SimpleLayer {
         }
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof BaseLayer
-     */
-    transformType (...transformType) {
-        if (transformType.length) {
-            this._transformType = transformType[0];
-            return this;
-        }
+    disableUpdate () {
+        this._updateLock = true;
+        return this;
+    }
+
+    enableUpdate () {
+        this._updateLock = false;
+        return this;
+    }
+
+    resolveTransformType () {
+        this._transformType = getValidTransform(this);
+    }
+
+    transformType () {
         return this._transformType;
     }
 
@@ -329,7 +394,7 @@ export default class BaseLayer extends SimpleLayer {
     /**
      *
      *
-     * @returns
+     *
      * @memberof BaseLayer
      */
     elemType () {
@@ -337,11 +402,14 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
-     * Disposes the entire layer
+     * Disposes the entire layer.
+     *
      * @return {BaseLayer} Instance of layer.
      */
     remove () {
-        this.store().unsubscribeAll();
+        this.store().unsubscribe({
+            namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
+        });
         selectElement(this.mount()).remove();
         return this;
     }
@@ -367,7 +435,7 @@ export default class BaseLayer extends SimpleLayer {
      *
      *
      * @param {*} dataProps
-     * @returns
+     *
      * @memberof BaseLayer
      */
     dataProps (...dataProps) {
@@ -383,7 +451,7 @@ export default class BaseLayer extends SimpleLayer {
      *
      * @param {*} data
      * @param {*} id
-     * @returns
+     *
      * @memberof BaseLayer
      */
     getIdentifiersFromData (data) {
@@ -430,11 +498,25 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
+     * Returns the information of the marks corresponding to the supplied identifiers. Identifiers are a set of field
+     * names and their corresponding values in an array. It can also be an instance of datamodel.
      *
+     * For example,
+     * ```
+     *  const identifiers = [
+     *      ['Origin', 'Cylinders'],
+     *      ['USA', '8']
+     *  ];
+     *  const points = barLayer.getPointsFromIdentifiers(identifiers);
+     * ```
+     * @public
+     * @param {Array|DataModel} identifiers Identifiers of the marks.
+     * @param {Object} config Optional configuration which describes how to get the information.
+     * @param {boolean} config.getAllAttrs If true, then returns all the information of the points, else returns only
+     * the positions of the points.
+     * @param {boolean} config.getBBox If true, then returns the bounding box of all the marks.
      *
-     * @param {*} identifiers
-     * @returns
-     * @memberof BaseLayer
+     * @return {Array} Array of points contains
      */
     getPointsFromIdentifiers (identifiers, config = {}) {
         const getAllAttrs = config.getAllAttrs;
@@ -493,7 +575,7 @@ export default class BaseLayer extends SimpleLayer {
 
     getTransformedDataFromIdentifiers (identifiers) {
         const { data: identifierData, schema: identifierSchema } = identifiers.getData();
-        const normalizedData = this.store().get(PROPS.NORMALIZED_DATA);
+        const normalizedData = this._normalizedData;
         const fieldsConfig = this.data().getFieldsConfig();
         const {
             yField,
@@ -537,14 +619,45 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     /**
+     * Returns the dom elements associated with the supplied set of row ids.
+     * Each element in the layer is mapped with a row of the datamodel. When given an array of row ids, it returns all
+     * the elements which is mapped with those row ids.
      *
+     * @public
+     * @param {Array} set Array of row ids
      *
-     * @param {*} set
-     * @returns
-     * @memberof BaseLayer
+     * @return {Selection} D3 Selection of dom elements.
      */
     getPlotElementsFromSet (set) {
         return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
             (data ? set.indexOf(data._id) !== -1 : false));
+    }
+
+    /**
+     * Notifies when all animations/transitions of the layer are completed.
+     *
+     * @public
+     * @return {Promise} Returns a promise to notify the animation completion.
+     */
+    animationDone () {
+        return Promise.all(this._animationDonePromises);
+    }
+
+    registerAnimationDoneHook () {
+        let resolveFn;
+        const promise = new Promise((resolve) => {
+            resolveFn = resolve;
+        });
+        this._animationDonePromises.push(promise);
+
+        return () => {
+            resolveFn();
+        };
+    }
+
+    getRenderProps () {
+        const metaInf = this.metaInf();
+        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}0`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.unitColIndex}0`];
     }
 }
