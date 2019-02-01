@@ -50,16 +50,23 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
     const rootData = new DataModel(jsonData, schema);
-    let rows = ['Horsepower'],
-        columns = ['Year'];
+    let rows = ['Origin'],
+        columns = ['Horsepower'];
     canvas = env.data(rootData)
         .canvas()
         .rows(rows)
         .columns(columns)
         .height(400)
-        .color('Origin')
-        .width(600)
-        .minUnitWidth(40)
+        // .color('Y.ear')
+        .width(250)
+        .minUnitWidth(140)
+        // .config({
+        //     axes: {
+        //         x: {
+        //             tickFormat: (value, rawValue, i, ticks) => value
+        //         }
+        //     }
+        // })
         .config({
             invalidValues: {
                 null: 'No Data Value is present in this particular tooltip'
@@ -67,8 +74,6 @@ d3.json('../../data/cars.json', (data) => {
         })
         .subtitle('A Nice Chart')
         .title('Horsepower-Year')
-
-// {rows}
-.mount('#chart');
+    .mount('#chart');
 });
 

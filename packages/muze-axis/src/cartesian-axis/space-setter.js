@@ -180,8 +180,8 @@ export const spaceSetter = (context, spaceConfig) => {
             y: () => {
                 setAxisRange(context, 'x', [availHeight - bottom, top], isOffset ? availWidth : null);
 
-                let widthForTicks = availWidth;
-                if (availWidth - axisNameHeight - namePadding <= minTickDistance.width) {
+                let widthForTicks = availWidth - axisNameHeight - tickSize - namePadding;
+                if (widthForTicks <= minTickDistance.width) {
                     widthForTicks = 0;
                     context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                 }

@@ -127,7 +127,7 @@ export default class BandAxis extends SimpleAxis {
         const { tickFormat } = value;
 
         if (tickFormat) {
-            return ticks => (val, i) => tickFormat(val, i, ticks);
+            return ticks => (val, i) => tickFormat(val, val, i, ticks);
         }
         return () => val => this.valueParser()(val);
     }

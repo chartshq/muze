@@ -26,14 +26,13 @@ const checkPath = (str) => {
  * @param {*} d
  * @param {*} elem
  */
-const createShape = function (d, elem) {
-    const groupElement = selectElement(elem);
+const createShape = function (d, groupElement) {
     const { shape, size, update } = d;
 
     if (shape instanceof Promise) {
         shape.then((res) => {
             d.shape = res;
-            createShape(d, elem);
+            createShape(d, groupElement);
         });
     } else if (shape instanceof Element) {
         let newShape = shape.cloneNode(true);
@@ -52,7 +51,7 @@ const createShape = function (d, elem) {
         }
         shapeElement.attr('x', -size / 2);
         shapeElement.attr('y', -size / 2);
-        selectElement(groupElement.node().appendChild(newShape));
+        makeElement(groupElement, () => newShape, [1]);
     } else if (typeof shape === 'string') {
         let pathStr;
         if (checkPath(shape)) {
@@ -63,7 +62,7 @@ const createShape = function (d, elem) {
         makeElement(groupElement, 'path', data => [data]).attr('d', pathStr);
     } else {
         d.shape = 'circle';
-        createShape(d, elem);
+        createShape(d, groupElement);
     }
 };
 
@@ -72,43 +71,41 @@ const createShape = function (d, elem) {
  * @param {Object} params Contains the svg container, points and other symbol related attributes.
  */
 /* istanbul ignore next */ const drawSymbols = (params) => {
-    let mergedGroups;
     const { layer, container, points, transition, className } = params;
     const { duration, effect, disabled } = transition;
     const mount = selectElement(container);
 
     mount.attr('class', className);
-    const symbolGroups = mount.selectAll('g').data(points, params.keyFn);
-    const symbolEnter = symbolGroups.enter().append('g').attr('transform', d => `translate(${d.enter.x},${d.enter.y})`);
-    mergedGroups = symbolGroups.merge(symbolEnter)
-                    .each(function (d) {
-                        createShape(d, this);
-                    });
-    mergedGroups = disabled ? mergedGroups :
-        mergedGroups.transition()
-        .duration(transition.duration)
-        .on('end', layer.registerAnimationDoneHook());
-    mergedGroups.attr('transform', d => `translate(${d.update.x},${d.update.y})`)
-                    .each(function (d) {
-                        const style = d.style;
-                        const element = selectElement(this);
-                        objectIterator(style, key => element.style(key, style[key]));
-                        element.attr('class', `${className}`);
-                        element.classed(d.className, true);
-                    });
-
-    const exitGroups = symbolGroups.exit();
-    if (!disabled) {
-        exitGroups.transition().ease(easeFns[effect])
-                        .duration(duration)
-                        .on('end', function () {
-                            selectElement(this).remove();
-                        })
-                        .style('fill-opacity', 0)
-                        .style('stroke-opacity', 0);
-    } else {
-        exitGroups.remove();
-    }
+    return makeElement(mount, 'g', points, null, {
+        enter: (group, d) => {
+            const { enter } = d;
+            group.attr('transform', `translate(${enter.x},${enter.y})`);
+        },
+        update: (group, d) => {
+            createShape(d, group);
+            const { update, style } = d;
+            objectIterator(style, key => group.style(key, style[key]));
+            group.attr('class', className);
+            group.classed(d.className, true);
+            if (!disabled) {
+                group = group.transition()
+                    .duration(transition.duration)
+                    .on('end', layer.registerAnimationDoneHook());
+            }
+            group.attr('transform', `translate(${update.x},${update.y})`);
+        },
+        exit: (exitGroup) => {
+            if (!disabled) {
+                exitGroup.transition().ease(easeFns[effect])
+                .duration(duration)
+                .on('end', () => exitGroup.remove())
+                .style('fill-opacity', 0)
+                .style('stroke-opacity', 0);
+            } else {
+                exitGroup.remove();
+            }
+        }
+    }, params.keyFn);
 };
 
 export default drawSymbols;

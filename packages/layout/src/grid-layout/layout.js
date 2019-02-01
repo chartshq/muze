@@ -105,10 +105,12 @@ export default class GridLayout extends GenericLayout {
      * @memberof GridLayout
      */
     triggerReflow () {
+        this.scrollInfo({ horizontal: false, vertical: false });
         const {
             maxHeightAvailableForRowMatrix,
             maxWidthAvailableForColumnMatrix
         } = computeLayoutMeasurements(this);
+
         this.setViewInformation(maxHeightAvailableForRowMatrix, maxWidthAvailableForColumnMatrix);
         return this;
     }

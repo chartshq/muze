@@ -182,7 +182,7 @@ export const computeItemSpaces = (config, measures, data) => {
             totalHeight = Math.max(totalHeight, itemSpace.height);
         } else {
             totalHeight += itemSpace.height;
-            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth) + effPadding;
+            totalWidth = Math.max(totalWidth, itemSpace.width, titleWidth);
         }
         maxItemSpaces = {
             width: Math.max(itemSpace.width, maxItemSpaces.width),
@@ -217,12 +217,13 @@ export const computeItemSpaces = (config, measures, data) => {
                 iconSpaces[i].width = maxIconWidth;
                 itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
                 labelSpaces[i].width = Math.max(labelWidth, newLabelWidth);
-                totalWidth = Math.max(totalWidth, itemSpace.width) + effPadding;
+                totalWidth = Math.max(totalWidth, itemSpace.width);
             }
         }
     });
-    totalWidth = Math.max(totalWidth, titleWidth);
+    totalWidth = Math.ceil(Math.max(totalWidth, titleWidth)) + effPadding;
     totalHeight += titleHeight + effPadding;
+    totalHeight = Math.ceil(totalHeight);
     return { totalHeight, totalWidth, itemSpaces, iconSpaces, maxItemSpaces, maxIconWidth };
 };
 

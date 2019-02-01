@@ -1,11 +1,10 @@
-import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT } from '../constants';
+import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT, RIGHT } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
-import { RIGHT } from '../../../muze-legend/src/enums/constants';
 
 // Mapping between types of headers and their required configs for wrapper creation
 const headerMap = {
@@ -60,9 +59,10 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             component: header,
             config: headerConfig
         };
-        if (layoutManager.getComponent(headerType)) {
-            wrapper = layoutManager
-                      .getComponent(headerType)
+
+        const existingComponent = layoutManager.getComponent(headerType);
+        if (existingComponent) {
+            wrapper = existingComponent
                       .updateWrapper(wrapperParams);
         } else {
             wrapper = new HeaderComponent(wrapperParams);
@@ -126,6 +126,7 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         thickness: scrollBar.thickness,
         layoutBasedMeasure: layoutDimensions[viewMeasure][1]
     };
+    const isScroll = grid.scrollInfo()[scrollBarType];
     const totalLength = actualCenterMeasures[layoutBasedMeasure];
     const viewLength = layoutDimensions[viewMeasure][1];
 
@@ -156,20 +157,18 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
         }
     };
 
-    if (layoutManager.getComponent(componentName)) {
-        scrollBarWrapper = layoutManager
-                                .getComponent(componentName)
+    const existingComponent = layoutManager.getComponent(componentName);
+
+    if (!isScroll) {
+        existingComponent && existingComponent.remove();
+        return null;
+    }
+
+    if (existingComponent) {
+        scrollBarWrapper = existingComponent
                                 .updateWrapper(wrapperParams);
-        if (viewLength >= totalLength) {
-            layoutManager
-                            .getComponent(componentName)
-                            .remove();
-        }
     } else {
         scrollBarWrapper = new ScrollComponent(wrapperParams);
-    }
-    if (viewLength >= totalLength) {
-        return null;
     }
 
     return scrollBarWrapper;
@@ -196,9 +195,10 @@ const createLegendWrapper = (layoutManager, renderDetails) => {
             config: legendConfig
         };
 
-        if (layoutManager.getComponent(LEGEND)) {
-            legendWrapper = layoutManager
-                       .getComponent(LEGEND)
+        const existingComponent = layoutManager.getComponent(LEGEND);
+
+        if (existingComponent) {
+            legendWrapper = existingComponent
                        .updateWrapper(wrapperParams);
         } else {
             legendWrapper = new LegendComponent(wrapperParams);
@@ -232,10 +232,9 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
         component: grid,
         config
     };
-
-    if (layoutManager.getComponent(GRID)) {
-        gridWrapper = layoutManager
-                    .getComponent(GRID)
+    const existingComponent = layoutManager.getComponent(GRID);
+    if (existingComponent) {
+        gridWrapper = existingComponent
                     .updateWrapper(wrapperParams);
     } else {
         gridWrapper = new GridComponent(wrapperParams);
