@@ -1,4 +1,4 @@
-/* eslint disable */
+/* eslint-disable */
 const env = muze();
 const DataModel = muze.DataModel;
 
@@ -49,31 +49,19 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    const rootData = new DataModel(jsonData, schema);
-    let rows = ['Origin'],
-        columns = ['Horsepower'];
-    canvas = env.data(rootData)
-        .canvas()
-        .rows(rows)
-        .columns(columns)
-        .height(400)
-        // .color('Y.ear')
-        .width(250)
-        .minUnitWidth(140)
-        // .config({
-        //     axes: {
-        //         x: {
-        //             tickFormat: (value, rawValue, i, ticks) => value
-        //         }
-        //     }
-        // })
-        .config({
-            invalidValues: {
-                null: 'No Data Value is present in this particular tooltip'
-            }
-        })
-        .subtitle('A Nice Chart')
-        .title('Horsepower-Year')
-    .mount('#chart');
+    let rootData = new DataModel(jsonData, schema);
+    rootData = rootData.groupBy(["Origin", "Year"], {
+        Acceleration: "avg"
+    })
+
+    env.canvas()
+        .data(rootData)
+        .rows(['Acceleration'])
+        .columns(["Year"])
+        .color("Origin")
+        .height(500)
+        .width(600)
+        .title("Year wise average car Acceleration")
+        .mount('#chart');
 });
 
