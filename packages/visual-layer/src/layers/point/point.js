@@ -15,7 +15,8 @@ import {
     getLayerColor,
     positionPoints,
     getPlotMeasurement,
-    getIndividualClassName
+    getIndividualClassName,
+    getMarkId
 } from '../../helpers';
 
 import './styles.scss';
@@ -205,7 +206,7 @@ export default class PointLayer extends BaseLayer {
         containerSelection.classed(qualifiedClassName.join(' '), true).classed(className, true);
 
         this._points = this.generateDataPoints(normalizedData, keys);
-
+        const schema = this.data().getSchema();
         makeElement(container, 'g', this._points, null, {
             update: (group, points) => {
                 maxSize = Math.max(maxSize, ...points.map(d => d.size));
@@ -216,7 +217,7 @@ export default class PointLayer extends BaseLayer {
                     points,
                     className: seriesClassName,
                     transition,
-                    keyFn: d => d._id
+                    keyFn: v => getMarkId(v.source, schema)
                 });
             }
         }, data => data[0]._id);
