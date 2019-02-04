@@ -1,5 +1,5 @@
-/* eslint disable */
-let env = muze();
+/* eslint-disable */
+const env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
@@ -50,22 +50,18 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.calculateVariable({
-        name: 'date',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
-    }, ['Year', function (d) {
-        return d;
-    }]);
+    rootData = rootData.groupBy(["Origin", "Year"], {
+        Acceleration: "avg"
+    })
 
-    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-    const mountPoint = document.getElementById('chart');
-    window.canvas = env.canvas();
-    let rows = ['Cylinders', 'Horsepower'],
-        columns = ['Origin', 'Year'];
-    canvas = env.canvas().rows(rows).columns(columns).height(800).color('Maker').size('Maker').shape('Maker').width(750)
-    // {rows}
-    .mount(mountPoint);
+    env.canvas()
+        .data(rootData)
+        .rows(['Acceleration'])
+        .columns(["Year"])
+        .color("Origin")
+        .height(500)
+        .width(600)
+        .title("Year wise average car Acceleration")
+        .mount('#chart');
 });
 

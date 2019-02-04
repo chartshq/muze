@@ -1,6 +1,5 @@
 {
   "name": "muze",
-  "private": true,
   "version": "1.1.0",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://www.charts.com/muze",
@@ -39,7 +38,7 @@
       "email": "ujjal@charts.com"
     }
   ],
-  "main": "src/index.js",
+  "main": "dist/muze.js",
   "keywords": [
     "muze",
     "svg",
@@ -57,14 +56,5 @@
     "type": "git",
     "url": "https://github.com/chartshq/muze"
   },
-  "dependencies": {
-    "@chartshq/layout": "^1.0.0",
-    "@chartshq/muze-firebolt": "^1.0.0",
-    "@chartshq/muze-legend": "^1.0.0",
-    "muze-utils": "^1.0.0",
-    "@chartshq/visual-cell": "^1.0.0",
-    "@chartshq/visual-group": "^1.0.0",
-    "@chartshq/visual-layer": "^1.0.0",
-    "@chartshq/visual-unit": "^1.0.0"
-  }
+  "dependencies": {}
 }

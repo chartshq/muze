@@ -323,6 +323,6 @@ export default class SimpleLegend {
                 [fieldName]: data.range
             };
         }
-        return [[fieldName], [data.value]];
+        return [[fieldName], [data.rawVal]];
     }
 }
