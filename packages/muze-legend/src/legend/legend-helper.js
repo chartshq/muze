@@ -27,71 +27,37 @@ export const getScaleInfo = (scale) => {
 };
 
 /**
-  * Function to recompute the stops in array in case of Top and Bottom Alignment of legend.
-  *
-  * @param  {number} availableMaxWidth - max Available Space
-  * @param  {number} requiredWidth - required width
-  * @param  {Array} domainForLegend - array
-  * @param  {Object} smartLabelCalc - smartLabel manager
-  * @return {Array} - Recomputed Array
-  */
-const getHorizontalRecomputedArray = (availableMaxWidth, requiredWidth, domainForLegend, smartLabelCalc) => {
+ * Function to recompute the stops in array in case to left and right alignment of legend.
+ *
+ * @param  {string} param - parameter to measure
+ * @param  {Object} requiredMeasure - required measure parameters
+ * @param  {Object} availableMeasure - available meassure parameters
+ * @param  {Array} domainForLegend - array
+ * @param  {Object} smartLabelCalc - smartLabel Manager
+ * @return {Array} - Array
+ */
+const getcomputedArray = (param, requiredMeasure, availableMeasure, domainForLegend, smartLabelCalc) => {
     // declaring Current and Next Tick Value variable
     let currentTickValue;
     let nextTickValue;
     const upperBound = domainForLegend[domainForLegend.length - 1];
 
     // calculating pixel required per Tick Values
-    const pixelPerTick = (availableMaxWidth / upperBound);
+    const pixelPerTick = (availableMeasure[param] / upperBound);
 
     // checking if available max width is smaller than required width for legend.
-    if (availableMaxWidth >= requiredWidth) {
+    if (availableMeasure[param] >= requiredMeasure[param]) {
         return domainForLegend;
     }
 
-    currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[0])).width);
+    currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[0]))[param]);
     for (let i = 1; i < domainForLegend.length; i++) {
         nextTickValue = ((currentTickValue / pixelPerTick) + (currentTickValue / 2) + domainForLegend[i - 1]);
         if (domainForLegend[i] < nextTickValue) {
             domainForLegend.splice(i, 1);
             i -= 1;
         }
-        currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[i])).width);
-    }
-    return domainForLegend;
-};
-
-/**
- * Function to recompute the stops in array in case to left and right alignment of legend.
- *
- * @param  {number} availableMaxHeight - max Available Height
- * @param  {number} requiredHeight - required height
- * @param  {Array} domainForLegend - array
- * @param  {Object} smartLabelCalc - smartLabel Manager
- * @return {Array} - Recomputed Array
- */
-const getVerticalRecomputedArray = (availableMaxHeight, requiredHeight, domainForLegend, smartLabelCalc) => {
-    // declaring Current and Next Tick Value variable
-    let currentTickValue;
-    let nextTickValue;
-    const upperBound = domainForLegend[domainForLegend.length - 1];
-
-    // calculating pixel required per Tick Values
-    const pixelPerTick = (availableMaxHeight / upperBound);
-
-    // checking if available max width is smaller than required width for legend.
-    if (availableMaxHeight >= requiredHeight) {
-        return domainForLegend;
-    }
-
-    currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[0])).height);
-    for (let i = 1; i < domainForLegend.length; i++) {
-        nextTickValue = ((currentTickValue / pixelPerTick) + domainForLegend[i - 1]);
-        if (domainForLegend[i] < nextTickValue) {
-            domainForLegend.splice(i, 1);
-            i -= 1;
-        }
-        currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[i])).height);
+        currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[i]))[param]);
     }
     return domainForLegend;
 };
@@ -113,6 +79,9 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     let minTickDiff = (domainForLegend[1] - domainForLegend[0]);
     minTickDiff = minTickDiff < 1 ? 1 : minTickDiff;
 
+    // defining param for height/width selector
+    let measureParam;
+
     // gradient Alignment
     const { alignment } = scaleParams;
 
@@ -131,23 +100,34 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     // getting domain upperbound dimensions
     const { height: tickDimHeight, width: tickDimWidth } = smartLabelCalc.getOriSize((upperBound));
 
-    // Getting max Available width and Height
-    const { maxWidth: availableMaxWidth, maxHeight: availableMaxHeight } = availableSpace;
-
     // required width to render legend
     const requiredWidth = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
 
     // require height to render legend
     const requiredHeight = ((max - min) / Math.abs(minTickDiff)) * tickDimHeight;
 
-    // Checking the Alignment of the legend
+    // required Height and width to render
+    const requiredMeasure = {
+        height: requiredHeight,
+        width: requiredWidth
+    };
+
+    // max available spaces to render
+    const availableMeasure = {
+        height: availableSpace.maxHeight,
+        width: availableSpace.maxWidth
+    };
+
+    // checking the alignment of legend
     if (alignment === TOP || alignment === BOTTOM) {
-        domainForLegend = getHorizontalRecomputedArray(availableMaxWidth, requiredWidth,
-            domainForLegend, smartLabelCalc);
+        measureParam = WIDTH;
     } else {
-        domainForLegend = getVerticalRecomputedArray(availableMaxHeight, requiredHeight,
-        domainForLegend, smartLabelCalc);
+        measureParam = HEIGHT;
     }
+
+    // calculating computed array
+    domainForLegend = getcomputedArray(measureParam, requiredMeasure, availableMeasure,
+        domainForLegend, smartLabelCalc);
 
     return domainForLegend;
 };

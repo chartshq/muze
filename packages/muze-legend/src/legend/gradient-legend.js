@@ -57,9 +57,18 @@ export default class GradientLegend extends SimpleLegend {
      *
      * @memberof GradientLegend
      */
-    dataFromScale (scale, scaleParams) {
+    dataFromScale () {
         let domainForLegend = [];
+        const scale = this.scale();
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
+
+        // defining scaleParams
+        const scaleParams = {
+            smartLabel: this.labelManager(),
+            measures: this.measurement(),
+            alignment: this.config().position,
+            minTickDistance: this.minTickDistance()
+        };
 
         if (steps instanceof Array) {
             if (domain[0] < steps[0]) {
