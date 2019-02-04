@@ -14,6 +14,7 @@ import { getLayerColor, positionPoints, getIndividualClassName } from '../../hel
 const resolveDimByField = (type, axesInfo, config, data) => {
     const spaceType = type === 'x' ? 'width' : 'height';
     const [fieldType, axis] = [config[`${type}FieldType`], axesInfo[`${type}Axis`]];
+    const minDomVal = axis.domain()[0];
     const {
         transformType,
         sizeEncoding,
@@ -65,7 +66,7 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             enter = pos;
             enterSpace = space;
         } else {
-            const zeroPos = axis.getScaleValue(0);
+            const zeroPos = axis.getScaleValue(minDomVal);
             const axisType = axis.getScaleValue(data[type]);
             const axisType0 = axis.getScaleValue(data[`${type}0`]);
 

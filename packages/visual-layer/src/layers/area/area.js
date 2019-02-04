@@ -101,10 +101,11 @@ export default class AreaLayer extends LineLayer {
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
+        const minYVal = yAxis.getScaleValue(yAxis.domain()[0]);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
-            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : yAxis.getScaleValue(0);
+            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : minYVal;
             const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
                 colorEncoding, colorAxis, colorFieldIndex });
             const style = {};
@@ -119,8 +120,8 @@ export default class AreaLayer extends LineLayer {
             const point = {
                 enter: {
                     x: xPx,
-                    y: invalidY ? null : yAxis.getScaleValue(0),
-                    y0: invalidY0 ? null : yAxis.getScaleValue(0)
+                    y: invalidY ? null : minYVal,
+                    y0: invalidY0 ? null : minYVal
                 },
                 update: {
                     x: xPx,
