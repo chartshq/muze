@@ -95,9 +95,9 @@ export default class LegendComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
+        this.setParams(params);
         this.name(params.name);
         this.boundBox(params.config.measurement.legendSpace);
-        this.setParams(params);
         return this;
     }
 
