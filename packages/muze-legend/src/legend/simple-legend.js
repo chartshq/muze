@@ -186,15 +186,7 @@ export default class SimpleLegend {
         const effBorder = border * 2;
         const effMargin = margin * 2;
 
-        // defining scaleParams
-        const scaleParams = {
-            smartLabel: this.labelManager(),
-            measures: this.measurement(),
-            alignment: this.config().position,
-            minTickDistance: this.minTickDistance()
-        };
-
-        this.data(this.dataFromScale(this.scale(), scaleParams));
+        this.data(this.dataFromScale());
         // Get space occupied by title
         const titleSpace = this.getTitleSpace();
         const titleHeight = titleSpace.height > 0 ? titleSpace.height + effPadding : 0;

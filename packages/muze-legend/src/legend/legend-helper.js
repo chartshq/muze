@@ -36,11 +36,13 @@ export const getScaleInfo = (scale) => {
  * @param  {Object} smartLabelCalc - smartLabel Manager
  * @return {Array} - Array
  */
-const getcomputedArray = (param, requiredMeasure, availableMeasure, domainForLegend, smartLabelCalc) => {
+const getcomputedArray = (computationhelper, requiredMeasure, availableMeasure, domainForLegend) => {
     // declaring Current and Next Tick Value variable
     let currentTickValue;
     let nextTickValue;
     const upperBound = domainForLegend[domainForLegend.length - 1];
+    const param = computationhelper.measureParam;
+    const smartLabelCalc = computationhelper.smartLabelCalc;
 
     // calculating pixel required per Tick Values
     const pixelPerTick = (availableMeasure[param] / upperBound);
@@ -69,15 +71,11 @@ const getcomputedArray = (param, requiredMeasure, availableMeasure, domainForLeg
  * @return {Array} - modified Stops Array
  */
 export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
-    /* Checking if UpperBound of Domain is Floating or Not.
-     In case of floating constricting it to 2 decimals after point. */
+    // declaring the variable for upperbound
     let upperBound = domainForLegend[domainForLegend.length - 1];
-    if (!Number.isInteger(upperBound)) {
-        upperBound = ((upperBound).toFixed(2));
-    }
+
     // Initializing Minimum Tick Difference Variable and checking if it's less than 1 or not
     let minTickDiff = (domainForLegend[1] - domainForLegend[0]);
-    minTickDiff = minTickDiff < 1 ? 1 : minTickDiff;
 
     // defining param for height/width selector
     let measureParam;
@@ -85,26 +83,35 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     // gradient Alignment
     const { alignment } = scaleParams;
 
-    // scale Measurements (i.e MaxWidth and MaxHeight available)
-    const availableSpace = scaleParams.measures;
-
-    // getting minimum and Maximum values in domain
-    const [min, max] = [Math.min(...domainForLegend), Math.max(...domainForLegend)];
-
     // getting SmartLabel Manager to calculate tick Params
     const smartLabelCalc = scaleParams.smartLabel;
 
+    // scale Measurements (i.e MaxWidth and MaxHeight available)
+    const availableSpace = scaleParams.measures;
+
     // getting minimum Tick size (i.e height and width)
     const minimumTickSize = scaleParams.minTickDistance;
+
+    /* Checking if UpperBound of Domain is Floating or Not.
+    In case of floating constricting it to 2 decimals after point. */
+    if (!Number.isInteger(upperBound)) {
+        upperBound = ((upperBound).toFixed(2));
+    }
+
+    // Calculating minimum tick difference
+    minTickDiff = minTickDiff < 1 ? 1 : minTickDiff;
+
+    // calculating max tick difference
+    const maxTickDiff = (upperBound - domainForLegend[0]);
 
     // getting domain upperbound dimensions
     const { height: tickDimHeight, width: tickDimWidth } = smartLabelCalc.getOriSize((upperBound));
 
     // required width to render legend
-    const requiredWidth = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
+    const requiredWidth = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
 
     // require height to render legend
-    const requiredHeight = ((max - min) / Math.abs(minTickDiff)) * tickDimHeight;
+    const requiredHeight = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * tickDimHeight;
 
     // required Height and width to render
     const requiredMeasure = {
@@ -125,9 +132,15 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
         measureParam = HEIGHT;
     }
 
+    // computation helpers
+    const computationhelper = {
+        smartLabelCalc,
+        measureParam
+
+    };
+
     // calculating computed array
-    domainForLegend = getcomputedArray(measureParam, requiredMeasure, availableMeasure,
-        domainForLegend, smartLabelCalc);
+    domainForLegend = getcomputedArray(computationhelper, requiredMeasure, availableMeasure, domainForLegend);
 
     return domainForLegend;
 };
