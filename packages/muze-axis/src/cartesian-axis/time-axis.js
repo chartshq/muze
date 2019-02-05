@@ -121,9 +121,10 @@ export default class TimeAxis extends SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            setOffset(this);
             this.logicalSpace(calculateBandSpace(this));
         }
+        setOffset(this);
+
         return this.logicalSpace();
     }
 

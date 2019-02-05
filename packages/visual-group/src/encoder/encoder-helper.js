@@ -23,11 +23,11 @@ const getAxisConfig = (axisInfo, field, axesCreators, indices) => {
     // Change config object to a function if not already one
     const userAxisConfigFn = typeof rawUserAxisConfig !== 'function' ?
         () => rawUserAxisConfig : rawUserAxisConfig;
-    const userAxisConfig = userAxisConfigFn(field._oneVar, rowIndex, columnIndex);
+    const userAxisConfig = userAxisConfigFn(field.getMembers(), rowIndex, columnIndex);
 
     // If current config does not specifes config for an axis, retain old config
     if (!userAxisConfig) {
-        return false;
+        return {};
     }
 
     const {
@@ -140,7 +140,6 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo,
             axis = map.get(axisKey);
             axis._rotationLock = false;
             axis.config(axisConfig);
-            axisConfig && axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
         axis.valueParser(valueParser);
         currentAxes.push(axis);

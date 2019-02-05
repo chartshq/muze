@@ -299,9 +299,9 @@ export default class SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            setOffset(this);
             this.logicalSpace(calculateContinousSpace(this));
         }
+        setOffset(this);
 
         return this.logicalSpace();
     }

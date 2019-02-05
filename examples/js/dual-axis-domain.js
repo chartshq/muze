@@ -43,7 +43,7 @@
     
     canvas
         // .rows(['Acceleration'])
-        .rows(['Acceleration', 'Displacement'])
+        .rows(['Displacement', 'Acceleration'])
         .columns(['Cylinders'])
         .minUnitHeight(10)	
         .minUnitHeight(10)		
@@ -55,15 +55,16 @@
             axes: {
                 x: {
                     name: 'xAxis this is',
-                    padding: 0.7
+                    padding: 0.9
                 },
                 y: function (nameOfVar, rowIndex, columnIndex) {
-                    if (nameOfVar === 'Acceleration') {
+                    // nameOfVar - Array of all the fields of y-axis
+                    if (nameOfVar[0] === 'Acceleration') {
                         // Apply to only Acceleration axes
                         return {
                             tickFormat: (d) => `${d / 1000}M`,
                             domain: [0, 4000],
-                            name: 'update 1',
+                            // name: 'update 1',
                         };
                     }
                     // Apply to all y-axes
@@ -73,12 +74,15 @@
                     };
                 }
             }
-        })
+        });
     
         setTimeout(() => {
             canvas
                 .config({
                     axes: {
+                        x: {
+                            padding: 0.2
+                        },
                         y: function (nameOfVar, rowIndex, columnIndex) {
                             // Update only one axis
                             if (rowIndex === 1 && columnIndex === 0) {
@@ -91,6 +95,6 @@
                         },
                     }
                 });
-        }, 2000)
+        }, 2000);
     });
 })();
