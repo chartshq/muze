@@ -110,8 +110,12 @@ export default class BarLayer extends BaseLayer {
         const domain = super.calculateDomainFromData(data, encodingFieldInf, fieldsConfig);
         ['x', 'y'].forEach((d) => {
             if (encodingFieldInf[`${d}FieldType`] === MEASURE && domain[d]) {
-                encodingFieldInf[`${d}0Field}`] ? domain[d] = domain[d].sort((a, b) => a - b) :
-                    (domain[d][0] = Math.min(domain[d][0], 0));
+                if (encodingFieldInf[`${d}0Field`]) {
+                    domain[d] = domain[d].sort((a, b) => a - b);
+                } else {
+                    domain[d][0] = Math.min(domain[d][0], 0);
+                    domain[d][1] = Math.max(0, domain[d][1]);
+                }
             }
         });
         return domain;

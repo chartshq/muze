@@ -62,6 +62,7 @@ export default class AreaLayer extends LineLayer {
             const { [`${type}FieldType`]: fieldType } = encodingFieldsInf;
             if (fieldType === FieldType.MEASURE && domains[type] !== undefined) {
                 domains[type][0] = Math.min(domains[type][0], 0);
+                domains[type][1] = Math.max(0, domains[type][1]);
             }
         });
         return domains;
@@ -101,11 +102,12 @@ export default class AreaLayer extends LineLayer {
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
-        const minYVal = yAxis.getScaleValue(yAxis.domain()[0]);
+        const minYVal = yAxis.domain()[0];
+        const basePos = minYVal < 0 ? yAxis.getScaleValue(0) : yAxis.getScaleValue(minYVal);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
-            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : minYVal;
+            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : basePos;
             const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
                 colorEncoding, colorAxis, colorFieldIndex });
             const style = {};
@@ -120,8 +122,8 @@ export default class AreaLayer extends LineLayer {
             const point = {
                 enter: {
                     x: xPx,
-                    y: invalidY ? null : minYVal,
-                    y0: invalidY0 ? null : minYVal
+                    y: invalidY ? null : basePos,
+                    y0: invalidY0 ? null : basePos
                 },
                 update: {
                     x: xPx,

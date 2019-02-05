@@ -66,19 +66,21 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             enter = pos;
             enterSpace = space;
         } else {
-            const zeroPos = axis.getScaleValue(minDomVal);
+            const barBasePos = minDomVal < 0 ? axis.getScaleValue(0) : axis.getScaleValue(minDomVal);
             const axisType = axis.getScaleValue(data[type]);
             const axisType0 = axis.getScaleValue(data[`${type}0`]);
 
             enterSpace = 0;
             if (type === 'x') {
-                pos = data[type] < 0 || transformType === STACK ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? axisType : zeroPos)));
+                pos = data[type] < 0 || transformType === STACK ? axisType : barBasePos;
+                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? axisType :
+                    barBasePos)));
             } else {
-                pos = transformType === STACK || data[type] >= 0 ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? zeroPos : axisType)));
+                pos = transformType === STACK || data[type] >= 0 ? axisType : barBasePos;
+                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? barBasePos :
+                    axisType)));
             }
-            enter = zeroPos;
+            enter = barBasePos;
         }
     } else {
         pos = 0;
