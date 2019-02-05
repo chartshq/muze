@@ -252,8 +252,6 @@ export const computeLogicalSpace = (item = {}, config, maxMeasures) => {
             // Set logical space for first measure
             logicalSpace[firstMeasure] = Math.max(logicalSpace[firstMeasure], space[firstMeasure],
                 minMeasures[firstMeasure]);
-            // logicalSpace[secondMeasure] = Math.max(logicalSpace[secondMeasure], space[secondMeasure],
-            //     minMeasures[secondMeasure]);
 
             // Set logical space for second measure
             logicalSpace[secondMeasure] += +space[secondMeasure];
