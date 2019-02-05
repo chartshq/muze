@@ -257,12 +257,11 @@ export const calculateBandSpace = (context) => {
     } = getVerticalAxisSpace(context, axisDimensions, range);
 
     if (!height || height === 0) {
-        height = axisTicks.length * (largestDimHeight + context._minTickDistance.height) + largestDimHeight;
+        height = axisTicks.length * (largestDimHeight + context._minTickDistance.height);
     }
     if (show === false) {
         width = 0;
     }
-
     return {
         width,
         height

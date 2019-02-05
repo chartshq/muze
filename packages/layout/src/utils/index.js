@@ -209,8 +209,9 @@ export const getLogicalSpace = (item, measures, minMeasures, maxMeasure = []) =>
         valueArray.forEach((placeholder, colIndex) => {
             placeholder.setAvailableSpace();
             const space = placeholder.getLogicalSpace();
+            const minSecondMeasure = placeholder.getMinMeasures(minMeasures[secondMeasure]);
 
-            sMeasure = Math.max(sMeasure, +space[secondMeasure], minMeasures[secondMeasure]);
+            sMeasure = Math.max(sMeasure, +space[secondMeasure], minSecondMeasure);
             maxMeasure[colIndex] = Math.max(maxMeasure[colIndex] || 0, space[firstMeasure]);
             fMeasure += +maxMeasure[colIndex];
         });
@@ -241,6 +242,7 @@ export const computeLogicalSpace = (item = {}, config, maxMeasures) => {
     const { firstMeasure, secondMeasure } = getMeasureInfo(isTransposed);
     const { values } = item;
     const minMeasures = getMinMeasures(isTransposed, unitMeasures);
+
     if (values[0].key) {
         const logicalSpace = { [firstMeasure]: 0, [secondMeasure]: 0 };
 
@@ -250,12 +252,16 @@ export const computeLogicalSpace = (item = {}, config, maxMeasures) => {
             // Set logical space for first measure
             logicalSpace[firstMeasure] = Math.max(logicalSpace[firstMeasure], space[firstMeasure],
                 minMeasures[firstMeasure]);
+            // logicalSpace[secondMeasure] = Math.max(logicalSpace[secondMeasure], space[secondMeasure],
+            //     minMeasures[secondMeasure]);
+
             // Set logical space for second measure
             logicalSpace[secondMeasure] += +space[secondMeasure];
         });
         item.space = logicalSpace;
         return logicalSpace;
     }
+
     return getLogicalSpace(item, { firstMeasure, secondMeasure }, minMeasures, maxMeasures);
 };
 

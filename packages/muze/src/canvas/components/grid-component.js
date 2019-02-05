@@ -124,12 +124,12 @@ export default class GridComponent extends MuzeComponent {
 
                             // Scrolling horizontally
                             if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX);
+                                this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX / 30);
                             }
 
                             // Scrolling Vertically
                             if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY);
+                                this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY / 30);
                             }
                         });
         return this;

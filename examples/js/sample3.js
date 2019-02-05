@@ -49,31 +49,32 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    const rootData = new DataModel(jsonData, schema);
-    let rows = ['Origin'],
-        columns = ['Horsepower'];
-    canvas = env.data(rootData)
-        .canvas()
-        .rows(rows)
-        .columns(columns)
-        .height(400)
-        // .color('Y.ear')
-        .width(250)
-        .minUnitWidth(140)
-        // .config({
-        //     axes: {
-        //         x: {
-        //             tickFormat: (value, rawValue, i, ticks) => value
-        //         }
-        //     }
+    const dm = new DataModel(jsonData, schema);
+    // Create an environment for future rendering
+    // const env = muze();
+    // Create an instance of canvas which houses the visualization
+    const canvas = env.canvas();
+
+    canvas
+      .rows(['Origin', 'Cylinders', 'Horsepower']) // Year goes in X axis
+        .columns(['Acceleration']) // Acceleration goes in Y axis
+      .data(dm)
+        // .color({
+        //     field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+        //     stops: 3,   // 3 stops with interpolated value
+        //     range: ['#eaeaea', '#258e47'] // range could be either set of color or predefined palletes
         // })
         .config({
-            invalidValues: {
-                null: 'No Data Value is present in this particular tooltip'
+
+            autoGroupBy: { // Turn off internal grouping of data because data has order wich needs to be maintained
+                disabled: true
             }
+
         })
-        .subtitle('A Nice Chart')
-        .title('Horsepower-Year')
+        .width(600) // Set the chart width
+        .height(500) // Set the chart height
+        .title('Bar chart with gradient legend', { position: 'bottom', align: 'right' })
+        .subtitle('Change of acceleration over the years colored with Horsepower', { position: 'bottom', align: 'right' })
     .mount('#chart');
 });
 
