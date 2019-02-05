@@ -56,12 +56,13 @@ export default class DiscreteLegend extends SimpleLegend {
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;
+            const rawVal = domainForLegend[i];
             if (type === FieldType.MEASURE) {
                 value = (+domainForLegend[i]).toFixed(0);
                 const nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
                 range = [value, nextVal.toFixed(0)];
             } else {
-                let domainVal = domainForLegend[i];
+                let domainVal = rawVal;
                 if (subtype === DimensionSubtype.TEMPORAL) {
                     domainVal = formatTemporal(domainForLegend[i], field.minimumConsecutiveDifference());
                 }
@@ -72,7 +73,8 @@ export default class DiscreteLegend extends SimpleLegend {
                 [scaleType]: scale[scaleFn](ele),
                 value,
                 id: i,
-                range
+                range,
+                rawVal
             };
         }).filter(d => d.value !== null);
 
