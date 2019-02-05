@@ -164,7 +164,8 @@ const setFixedBaseline = (axisInstance) => {
     const {
         fixedBaseline
     } = axisInstance.config();
-    if (fixedBaseline) {
+    const domain = axisInstance.domain();
+    if (fixedBaseline && domain.length) {
         axisInstance.setFixedBaseline();
     }
 };
@@ -223,7 +224,6 @@ export function renderAxis (axisInstance) {
     const range = axisInstance.range();
     const axis = axisInstance.axis();
     const scale = axisInstance.scale();
-    const domain = axisInstance.domain() || [];
     const {
         _axisNameStyle: axisNameStyle,
         _tickLabelStyle: tickLabelStyle,
@@ -245,7 +245,8 @@ export function renderAxis (axisInstance) {
         showAxisName,
         labels
     } = renderConfig;
-    if (!show || !domain.length) {
+
+    if (!show) {
         return;
     }
 

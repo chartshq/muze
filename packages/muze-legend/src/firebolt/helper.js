@@ -21,7 +21,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
         propagationData = null;
     } else {
         const entrySet = selectionSet.mergedEnter;
-        let values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.value);
+        let values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.rawVal);
         if (type === STEP || (type === DISCRETE && fieldType === MEASURE)) {
             const field = Object.keys(payload.criteria || {})[0];
             values = data.filter(d => entrySet.uids.indexOf(d.id) !== -1).map(d => d.range);

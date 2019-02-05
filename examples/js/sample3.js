@@ -1,4 +1,4 @@
-/* eslint disable */
+/* eslint-disable */
 const env = muze();
 const DataModel = muze.DataModel;
 
@@ -49,47 +49,19 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    const rootData = new DataModel(jsonData, schema);
-    let rows = ['Horsepower'],
-        columns = ['Year'];
-    canvas = env.data(rootData).canvas().rows(rows).columns(columns).height(850).color('Maker').width(800).minUnitWidth(40)
-    .config({
-        axes: {
-            x: {
-                // show: false
-            }
-        },
-        legend: {
-            position: 'bottom'
-        },
-        invalidValues: {
-            null: 'No Data Value is present in this particular tooltip'
-        }
+    let rootData = new DataModel(jsonData, schema);
+    rootData = rootData.groupBy(["Origin", "Year"], {
+        Acceleration: "avg"
     })
-// {rows}
-.mount('#chart');
 
-    setTimeout(() => {
-        canvas.once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
-        // canvas.data(rootData)
-        // canvas.config({
-        //     axes: {
-        //         y: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}$`;
-        //             }
-        //         },
-        //         x: {
-        //             tickFormat: function tickFormat (val) {
-        //                 return `${val}%%`;
-        //             }
-        //         }
-        //     }
-        // })
-        // .width(400).height(300);
-    }, 2000);
+    env.canvas()
+        .data(rootData)
+        .rows(['Acceleration'])
+        .columns(["Year"])
+        .color("Origin")
+        .height(500)
+        .width(600)
+        .title("Year wise average car Acceleration")
+        .mount('#chart');
 });
 
