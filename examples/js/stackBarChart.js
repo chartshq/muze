@@ -54,9 +54,7 @@ d3.json('../data/cars.json', (data) => {
     canvas
         .rows(['Acceleration']) // Acceleration goes in y axis
         .columns(['Maker']) // Maker goes in x-axis
-        .color({
-            field: 'Origin'
-        })
+        .color('Origin')
         .data(rootData)
         .layers({ // Draw a bar plot, by default stack transform is used
             Acceleration: {
@@ -75,16 +73,12 @@ d3.json('../data/cars.json', (data) => {
         .mount('#chart'); // Set the chart mount point
 
     setTimeout(() => {
-        canvas.title('Updated Stacked Bar Chart')
-        .subtitle('Axis Changed')
+        canvas.title('')
+        .subtitle('')
         .height(700)
         .width(600)
+        .color('')
         .rows(['Maker']) // Maker goes in y axis
-        .columns(['Acceleration']) // Acceleration goes in x-axis
-        .config({
-            legend: {
-                position: 'bottom'
-            }
-        });
+        .columns(['Acceleration']); // Acceleration goes in x-axis
     }, 3000);
 });
