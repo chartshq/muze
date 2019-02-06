@@ -78,5 +78,10 @@ d3.json('../data/cars.json', (data) => {
       	.height(500)
   		.title('Stacked bar chart', { position: 'top', align: 'right' })
   		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
-      	.mount('#chart'); // Set the chart mount point
+          .mount('#chart'); // Set the chart mount point
+
+    setTimeout(() => {
+        canvas.title('Updated Title')
+              .subtitle('Updated Subtitle');
+    }, 2500);
 });
