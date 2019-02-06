@@ -236,7 +236,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     }
                 }
 
-                if (availHeight < tickDimWidth + tickSize) {
+                if (availHeight < axisNameHeight) {
                     context.renderConfig({ show: false });
                 }
                 return labelConfig;
