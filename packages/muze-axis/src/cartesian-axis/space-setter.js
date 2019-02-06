@@ -1,4 +1,38 @@
 import { BOTTOM, TOP } from '../enums/axis-orientation';
+import {
+    WIDTH_IS_LESS_THAN_AXIS_WIDTH,
+    HEIGHT_IS_LESS_THAN_AXIS_HEIGHT_WITH_ROTATED_LABELS,
+    HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT,
+    HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME,
+    HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES,
+    IS_USER_DEFINED_ROTATION
+} from '../enums/constants';
+
+const tickConditionGetter = (availableWidth, availableHeight, otherTickMeasures, config) => {
+    const {
+        totalTickWidth,
+        axisNameHeight,
+        tickDimensions,
+        tickSize,
+        namePadding
+    } = otherTickMeasures;
+    const {
+        labels
+    } = config;
+    const {
+        width: tickDimWidth
+    } = tickDimensions;
+
+    return {
+        [WIDTH_IS_LESS_THAN_AXIS_WIDTH]: availableWidth < totalTickWidth,
+        [HEIGHT_IS_LESS_THAN_AXIS_HEIGHT_WITH_ROTATED_LABELS]: availableHeight < tickDimWidth,
+        [HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT]: availableHeight < axisNameHeight,
+        [HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME]:
+            availableHeight - tickDimWidth - namePadding - tickSize > axisNameHeight,
+        [HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES]: availableHeight < tickDimWidth + tickSize,
+        [IS_USER_DEFINED_ROTATION]: labels.rotation !== null
+    };
+};
 
 const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
@@ -66,8 +100,7 @@ export const spaceSetter = (context, spaceConfig) => {
         tickSize
     } = context.getAxisDimensions();
     const {
-        height: tickDimHeight,
-        width: tickDimWidth
+        height: tickDimHeight
     } = tickDimensions;
     const namePadding = showAxisName ? axisNamePadding : 0;
     const labelConfig = { smartTicks: true, rotation: labels.rotation };
@@ -214,24 +247,43 @@ export const spaceSetter = (context, spaceConfig) => {
                 // Get Tick widths and available space
                 const totalTickWidth = allTickDimensions.length * (tickDimensions.width + minWidthBetweenTicks);
                 const availableWidth = range[1] - range[0];
-                const availHeightForTicks = availHeight - axisNameHeight - namePadding;
+
+                const tickConditions = tickConditionGetter(
+                    availableWidth,
+                    availHeight,
+                    {
+                        totalTickWidth,
+                        axisNameHeight,
+                        tickDimensions,
+                        tickSize,
+                        namePadding
+                    },
+                    {
+                        labels
+                    }
+                );
 
                  // Rotate labels if not enough width
-                if (availableWidth < totalTickWidth && labels.rotation === null) {
-                    labelConfig.rotation = -90;
-                    if (availHeightForTicks < tickDimensions.width) {
+                if (tickConditions[WIDTH_IS_LESS_THAN_AXIS_WIDTH] && !tickConditions[IS_USER_DEFINED_ROTATION]) {
+                    if (tickConditions[HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES]) {
                         labelConfig.rotation = null;
-                        if (availHeight >= tickDimensions.width) {
-                            labelConfig.rotation = -90;
-                            context.renderConfig({ showInnerTicks: true, showAxisName: false });
-                        }
+                        context.renderConfig({
+                            showInnerTicks: true,
+                            showAxisName: true
+                        });
+                    } else {
+                        labelConfig.rotation = -90;
+                        context.renderConfig({
+                            showInnerTicks: true,
+                            showAxisName: tickConditions[HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME]
+
+                        });
                     }
                 }
 
-                if (availHeight < axisNameHeight) {
+                if (tickConditions[HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT]) {
                     context.renderConfig({ show: false });
                 }
-
                 return labelConfig;
             },
             y: () => {

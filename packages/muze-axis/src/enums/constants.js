@@ -25,3 +25,10 @@ export const HEX = 'hex';
 export const HSLA = 'hsla';
 export const HSL = 'hsl';
 
+export const WIDTH_IS_LESS_THAN_AXIS_WIDTH = 'availWidthLessThanAxisWidth';
+export const HEIGHT_IS_LESS_THAN_AXIS_HEIGHT_WITH_ROTATED_LABELS = 'availHeightLessThanRotatedTicks';
+export const HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT = 'availHeightLessThanAxisNameHeight';
+export const HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME = 'availHeightCanShowRotatedLabelsWoAxisName';
+export const HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES = 'availHeightCanShowAxisNameWithLabelSkipping';
+export const IS_USER_DEFINED_ROTATION = 'userDefinedRotation';
+

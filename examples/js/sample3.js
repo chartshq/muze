@@ -54,13 +54,13 @@ d3.json('../../data/cars.json', (data) => {
         Acceleration: "avg"
     })
 
-    env.canvas()
+   window.canvas =  env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
         .columns(["Horsepower"])
         .color("Origin")
         .height(140)
-        .width(300)
+        .width(500)
         .config({
             axes:{
                 x:{
