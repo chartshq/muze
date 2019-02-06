@@ -53,8 +53,8 @@ const getcomputedArray = (computationhelper, requiredMeasure, availableMeasure, 
     }
 
     currentTickValue = (smartLabelCalc.getOriSize((domainForLegend[0]))[param]);
-    for (let i = 1; i < domainForLegend.length; i++) {
-        nextTickValue = ((currentTickValue / pixelPerTick) + (currentTickValue / 2) + domainForLegend[i - 1]);
+    for (let i = 1; i < domainForLegend.length - 1; i++) {
+        nextTickValue = Math.floor((currentTickValue / pixelPerTick) + domainForLegend[i - 1]);
         if (domainForLegend[i] < nextTickValue) {
             domainForLegend.splice(i, 1);
             i -= 1;
@@ -108,10 +108,14 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     const { height: tickDimHeight, width: tickDimWidth } = smartLabelCalc.getOriSize((upperBound));
 
     // required width to render legend
-    const requiredWidth = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
+    let requiredWidth = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
+
+    requiredWidth -= Math.abs(maxTickDiff);
 
     // require height to render legend
-    const requiredHeight = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * tickDimHeight;
+    let requiredHeight = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * tickDimHeight;
+
+    requiredHeight -= Math.abs(maxTickDiff);
 
     // required Height and width to render
     const requiredMeasure = {
