@@ -1,38 +1,4 @@
 import { BOTTOM, TOP } from '../enums/axis-orientation';
-import {
-    WIDTH_IS_LESS_THAN_AXIS_WIDTH,
-    HEIGHT_IS_LESS_THAN_AXIS_HEIGHT_WITH_ROTATED_LABELS,
-    HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT,
-    HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME,
-    HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES,
-    IS_USER_DEFINED_ROTATION
-} from '../enums/constants';
-
-const tickConditionGetter = (availableWidth, availableHeight, otherTickMeasures, config) => {
-    const {
-        totalTickWidth,
-        axisNameHeight,
-        tickDimensions,
-        tickSize,
-        namePadding
-    } = otherTickMeasures;
-    const {
-        labels
-    } = config;
-    const {
-        width: tickDimWidth
-    } = tickDimensions;
-
-    return {
-        [WIDTH_IS_LESS_THAN_AXIS_WIDTH]: availableWidth < totalTickWidth,
-        [HEIGHT_IS_LESS_THAN_AXIS_HEIGHT_WITH_ROTATED_LABELS]: availableHeight < tickDimWidth,
-        [HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT]: availableHeight < axisNameHeight,
-        [HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME]:
-            availableHeight - tickDimWidth - namePadding - tickSize > axisNameHeight,
-        [HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES]: availableHeight < tickDimWidth + tickSize,
-        [IS_USER_DEFINED_ROTATION]: labels.rotation !== null
-    };
-};
 
 const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
@@ -100,8 +66,10 @@ export const spaceSetter = (context, spaceConfig) => {
         tickSize
     } = context.getAxisDimensions();
     const {
-        height: tickDimHeight
+        height: tickDimHeight,
+        width: tickDimWidth
     } = tickDimensions;
+
     const namePadding = showAxisName ? axisNamePadding : 0;
     const labelConfig = { smartTicks: true, rotation: labels.rotation };
     const minTickDistance = context._minTickDistance;
@@ -118,8 +86,10 @@ export const spaceSetter = (context, spaceConfig) => {
             x: () => {
                 const noOfTicks = context.getTickValues().length;
 
+                // Get the Tick Interval
                 tickInterval = ((availWidth - (noOfTicks - 1) * (minWidthBetweenTicks)) / noOfTicks);
 
+                // Get height for ticks
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
 
                 if (tickInterval < minTickWidth && rotation !== 0) {
@@ -137,8 +107,8 @@ export const spaceSetter = (context, spaceConfig) => {
                     context.renderConfig({ show: false });
                 }
 
-                setAxisRange(context, 'y', adjustRange(minDiff,
-                    [0, availWidth - left - right], domain, orientation),
+                // set range for axis
+                setAxisRange(context, 'y', adjustRange(minDiff, [0, availWidth - left - right], domain, orientation),
                         isOffset ? availHeight : null);
 
                 context.maxTickSpaces({
@@ -235,7 +205,7 @@ export const spaceSetter = (context, spaceConfig) => {
         continous: {
             x: () => {
                 labelConfig.smartTicks = false;
-                const tickShifter = tickDimensions.width / 2;
+                const tickShifter = tickDimWidth / 2;
 
                 const baseline = fixedBaseline ? 0 : tickShifter;
 
@@ -245,27 +215,12 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick widths and available space
-                const totalTickWidth = allTickDimensions.length * (tickDimensions.width + minWidthBetweenTicks);
+                const totalTickWidth = allTickDimensions.length * (tickDimWidth + minWidthBetweenTicks);
                 const availableWidth = range[1] - range[0];
 
-                const tickConditions = tickConditionGetter(
-                    availableWidth,
-                    availHeight,
-                    {
-                        totalTickWidth,
-                        axisNameHeight,
-                        tickDimensions,
-                        tickSize,
-                        namePadding
-                    },
-                    {
-                        labels
-                    }
-                );
-
                  // Rotate labels if not enough width
-                if (tickConditions[WIDTH_IS_LESS_THAN_AXIS_WIDTH] && !tickConditions[IS_USER_DEFINED_ROTATION]) {
-                    if (tickConditions[HEIGHT_CAN_SHOW_AXIS_NAME_AND_SKIPPED_LABLES]) {
+                if (availableWidth < totalTickWidth && labels.rotation !== null) {
+                    if (availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight) {
                         labelConfig.rotation = null;
                         context.renderConfig({
                             showInnerTicks: true,
@@ -275,13 +230,13 @@ export const spaceSetter = (context, spaceConfig) => {
                         labelConfig.rotation = -90;
                         context.renderConfig({
                             showInnerTicks: true,
-                            showAxisName: tickConditions[HEIGHT_CAN_SHOW_ROTATED_LABELS_WITH_AXIS_NAME]
+                            showAxisName: availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight
 
                         });
                     }
                 }
 
-                if (tickConditions[HEIGHT_IS_LESS_THAN_AXIS_NAME_HEIGHT]) {
+                if (availHeight < tickDimWidth + tickSize) {
                     context.renderConfig({ show: false });
                 }
                 return labelConfig;
@@ -295,7 +250,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     isOffset ? availWidth : null);
 
                 // Remove display of ticks if no space is left
-                if (availWidth < tickDimensions.width + axisNameHeight + namePadding) {
+                if (availWidth < tickDimWidth + axisNameHeight + namePadding) {
                     context.renderConfig({ showInnerTicks: false });
                     if (availWidth < axisNameHeight) {
                         context.renderConfig({ show: false });

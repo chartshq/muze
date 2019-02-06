@@ -57,14 +57,14 @@ d3.json('../../data/cars.json', (data) => {
    window.canvas =  env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
-        .columns(["Horsepower"])
+        .columns(["Year"])
         .color("Origin")
-        .height(140)
-        .width(500)
+        .height(240)
+        .width(800)
         .config({
             axes:{
                 x:{
-                    tickFormat: (v, f)=>`${v}asduaoish`
+                    tickFormat: (v, f)=>`${f}`
                 }
             }
         })
