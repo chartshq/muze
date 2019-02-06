@@ -2,6 +2,11 @@ import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
 import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
+const positionRetriever = {
+    x: (xPx, isNegativeVal, barBasePos) => (isNegativeVal ? [xPx, barBasePos] : [barBasePos, xPx]),
+    y: (yPx, isNegativeVal, barBasePos) => (isNegativeVal ? [barBasePos, yPx] : [yPx, barBasePos])
+};
+
 /**
  *
  *
@@ -14,7 +19,6 @@ import { getLayerColor, positionPoints, getIndividualClassName } from '../../hel
 const resolveDimByField = (type, axesInfo, config, data) => {
     const spaceType = type === 'x' ? 'width' : 'height';
     const [fieldType, axis] = [config[`${type}FieldType`], axesInfo[`${type}Axis`]];
-    const minDomVal = axis.domain()[0];
     const {
         transformType,
         sizeEncoding,
@@ -66,20 +70,17 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             enter = pos;
             enterSpace = space;
         } else {
+            const minDomVal = axis.domain()[0];
             const barBasePos = minDomVal < 0 ? axis.getScaleValue(0) : axis.getScaleValue(minDomVal);
-            const axisType = axis.getScaleValue(data[type]);
-            const axisType0 = axis.getScaleValue(data[`${type}0`]);
+            pos = axis.getScaleValue(data[type]);
+            let endPos = axis.getScaleValue(data[`${type}0`]);
 
             enterSpace = 0;
-            if (type === 'x') {
-                pos = data[type] < 0 || transformType === STACK ? axisType : barBasePos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? axisType :
-                    barBasePos)));
-            } else {
-                pos = transformType === STACK || data[type] >= 0 ? axisType : barBasePos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? barBasePos :
-                    axisType)));
+            const isNegativeVal = data[type] < 0;
+            if (transformType !== STACK) {
+                [pos, endPos] = positionRetriever[type](pos, isNegativeVal, barBasePos);
             }
+            space = Math.abs(pos - endPos);
             enter = barBasePos;
         }
     } else {
