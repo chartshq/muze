@@ -73,11 +73,10 @@ d3.json('../data/cars.json', (data) => {
         .mount('#chart'); // Set the chart mount point
 
     setTimeout(() => {
-        canvas.title('')
-        .subtitle('')
+        canvas.title('Updated Title')
+        .subtitle('Updated Subtitle')
         .height(700)
         .width(600)
-        .color('')
         .rows(['Maker']) // Maker goes in y axis
         .columns(['Acceleration']); // Acceleration goes in x-axis
     }, 3000);
