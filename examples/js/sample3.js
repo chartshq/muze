@@ -57,10 +57,17 @@ d3.json('../../data/cars.json', (data) => {
     env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
-        .columns(["Year"])
+        .columns(["Horsepower"])
         .color("Origin")
-        .height(500)
-        .width(600)
+        .height(140)
+        .width(300)
+        .config({
+            axes:{
+                x:{
+                    tickFormat: (v, f)=>`${v}asduaoish`
+                }
+            }
+        })
         .title("Year wise average car Acceleration")
         .mount('#chart');
 });

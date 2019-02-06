@@ -76,35 +76,37 @@ export const spaceSetter = (context, spaceConfig) => {
     const minDiff = context._minDiff;
     const domain = context.domain();
     const axisNameHeight = axisNameDimensions.height;
+    const minWidthBetweenTicks = minTickDistance.width;
+    const minTickWidth = minTickSpace.width;
+    const minTickHeight = minTickSpace.height;
 
     return {
         time: {
             x: () => {
-                const tickShifter = tickDimWidth / 2;
+                const noOfTicks = context.getTickValues().length;
 
-                setAxisRange(context, 'y', adjustRange(minDiff,
-                    [tickShifter, availWidth - left - right - tickShifter], domain, orientation),
-                        isOffset ? availHeight : null);
+                tickInterval = ((availWidth - (noOfTicks - 1) * (minWidthBetweenTicks)) / noOfTicks);
 
-                tickInterval = ((availWidth) / context.getTickValues().length)
-                                     - minTickDistance.width;
+                heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
 
-                heightForTicks = availHeight - axisNameDimensions.availHeight - tickSize - namePadding;
-
-                if (tickInterval < minTickSpace.width && rotation !== 0) {
+                if (tickInterval < minTickWidth && rotation !== 0) {
                     // set smart ticks and rotation config
                     labelConfig.rotation = labels.rotation === null ? -90 : rotation;
 
                     // Remove ticks if not enough height
-                    if (tickInterval < minTickSpace.height) {
+                    if (tickInterval < minTickHeight) {
                         heightForTicks = availHeight;
-                        tickInterval = minTickSpace.height;
+                        tickInterval = minTickHeight;
                         context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                     }
                 }
                 if (availHeight < axisNameHeight) {
                     context.renderConfig({ show: false });
                 }
+
+                setAxisRange(context, 'y', adjustRange(minDiff,
+                    [0, availWidth - left - right], domain, orientation),
+                        isOffset ? availHeight : null);
 
                 context.maxTickSpaces({
                     width: tickInterval,
@@ -121,7 +123,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     [availHeight - top - bottom - tickShifter, tickShifter], domain, orientation),
                         isOffset ? availWidth : null);
 
-                if ((availWidth - axisNameHeight - namePadding) <= minTickDistance.width) {
+                if ((availWidth - axisNameHeight - namePadding) <= minWidthBetweenTicks) {
                     widthForTicks = 0;
                     context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                 }
@@ -143,27 +145,27 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick Interval
-                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minTickDistance.width;
+                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks;
 
                 // Get height available for ticks
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
 
-                if (tickInterval < minTickSpace.width && rotation !== 0) {
+                if (tickInterval < minTickWidth && rotation !== 0) {
                     // set smart ticks and rotation config
                     labelConfig.rotation = rotation === null ? -90 : rotation;
                     labelConfig.smartTicks = false;
 
                     // Ticks with overlapping height
-                    if (tickInterval < minTickSpace.height) {
+                    if (tickInterval < minTickHeight) {
                         heightForTicks = 0;
                         tickInterval = 0;
                         context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                        context.range([minTickSpace.height / 2, availWidth - minTickSpace.height / 2]);
+                        context.range([minTickHeight / 2, availWidth - minTickHeight / 2]);
                     }
                 } else if (tickValues) {
-                    const interval = (availWidth / domain.length) - minTickDistance.width;
-                    if (interval < minTickSpace.width) {
-                        context.range([minTickSpace.height / 2, availWidth - minTickSpace.height / 2]);
+                    const interval = (availWidth / domain.length) - minWidthBetweenTicks;
+                    if (interval < minTickWidth) {
+                        context.range([minTickHeight / 2, availWidth - minTickHeight / 2]);
                     }
                 }
                 if (availHeight < axisNameHeight) {
@@ -181,7 +183,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 setAxisRange(context, 'x', [availHeight - bottom, top], isOffset ? availWidth : null);
 
                 let widthForTicks = availWidth - axisNameHeight - tickSize - namePadding;
-                if (widthForTicks <= minTickDistance.width) {
+                if (widthForTicks <= minWidthBetweenTicks) {
                     widthForTicks = 0;
                     context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
                 }
@@ -201,6 +203,7 @@ export const spaceSetter = (context, spaceConfig) => {
             x: () => {
                 labelConfig.smartTicks = false;
                 const tickShifter = tickDimensions.width / 2;
+
                 const baseline = fixedBaseline ? 0 : tickShifter;
 
                 setAxisRange(context, 'y', [baseline + left, availWidth - right - tickShifter],
@@ -209,21 +212,26 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick widths and available space
-                const totalTickWidth = allTickDimensions.length * (tickDimensions.width + minTickDistance.width);
-                const availableSpace = range[1] - range[0];
+                const totalTickWidth = allTickDimensions.length * (tickDimensions.width + minWidthBetweenTicks);
+                const availableWidth = range[1] - range[0];
+                const availHeightForTicks = availHeight - axisNameHeight - namePadding;
 
                  // Rotate labels if not enough width
-                if (availableSpace < totalTickWidth && labels.rotation === null) {
+                if (availableWidth < totalTickWidth && labels.rotation === null) {
                     labelConfig.rotation = -90;
-                }
-
-                // Remove ticks if not enough height
-                if (availHeight - axisNameHeight - namePadding < tickDimensions.height) {
-                    context.renderConfig({ showInnerTicks: false });
-                    if (availHeight < axisNameHeight) {
-                        context.renderConfig({ show: false });
+                    if (availHeightForTicks < tickDimensions.width) {
+                        labelConfig.rotation = null;
+                        if (availHeight >= tickDimensions.width) {
+                            labelConfig.rotation = -90;
+                            context.renderConfig({ showInnerTicks: true, showAxisName: false });
+                        }
                     }
                 }
+
+                if (availHeight < axisNameHeight) {
+                    context.renderConfig({ show: false });
+                }
+
                 return labelConfig;
             },
             y: () => {

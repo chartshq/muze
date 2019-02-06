@@ -39,11 +39,7 @@ const rotateAxis = (instance, tickText, labelManager) => {
         let xShift;
         let datum = smartTicks[index] ? smartTicks[index].text : d;
 
-        const tickFormatter = axis.tickFormat() ? axis.tickFormat : null;
-
-        const temp = tickSize ? (tickFormatter ? tickFormatter()(d) : datum) : '';
-
-        datum = temp.toString();
+        datum = datum.toString();
 
         const tickLabelDim = labelManager.getOriSize(datum);
 
@@ -164,8 +160,11 @@ const setFixedBaseline = (axisInstance) => {
     const {
         fixedBaseline
     } = axisInstance.config();
+    const {
+        showInnerTicks
+    } = axisInstance.renderConfig();
     const domain = axisInstance.domain();
-    if (fixedBaseline && domain.length) {
+    if (fixedBaseline && domain.length && showInnerTicks) {
         axisInstance.setFixedBaseline();
     }
 };

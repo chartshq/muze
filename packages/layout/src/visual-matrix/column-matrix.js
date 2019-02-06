@@ -143,11 +143,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             heightDist = heightDist.map(() => 0);
         } else {
             conditions.forEach((e) => {
-                if (remainaingHeight / divider < maxHeights[e]) {
-                    heightDist[e] = 0;
-                } else {
-                    heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
-                }
+                heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
             });
         }
         return heightDist;
