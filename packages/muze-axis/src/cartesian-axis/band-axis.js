@@ -112,13 +112,17 @@ export default class BandAxis extends SimpleAxis {
         return this.axis().scale().domain();
     }
 
+    formatTickValue (val) {
+        return this.valueParser()(val);
+    }
+
     sanitizeTickFormatter (value) {
         const { tickFormat } = value;
 
         if (tickFormat) {
-            return ticks => (val, i) => tickFormat(val, val, i, ticks);
+            return ticks => (val, i) => tickFormat(this.formatTickValue(val), val, i, ticks);
         }
-        return () => val => this.valueParser()(val);
+        return () => val => this.formatTickValue(val);
     }
 
     /**
