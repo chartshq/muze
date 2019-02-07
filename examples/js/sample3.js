@@ -3,7 +3,7 @@ const env = muze();
 const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
-    const jsonData = data;
+    let jsonData = data;
     const schema = [{
         name: 'Name',
         type: 'dimension'
@@ -31,7 +31,8 @@ d3.json('../../data/cars.json', (data) => {
     },
     {
         name: 'Acceleration',
-        type: 'measure'
+        type: 'measure',
+        numberFormat: (val) => "$" + val 
     },
     {
         name: 'Origin',
@@ -49,10 +50,19 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
+    jsonData = [
+        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
+        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
+        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
+        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
+        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
+        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
+    ];
+
     let rootData = new DataModel(jsonData, schema);
     rootData = rootData.groupBy(["Origin", "Year"], {
         Acceleration: "avg"
-    })
+    });
 
     env.canvas()
         .data(rootData)
@@ -61,7 +71,28 @@ d3.json('../../data/cars.json', (data) => {
         .color("Origin")
         .height(500)
         .width(600)
+        .config({
+            axes: {
+                x: {
+                    tickFormat: (val, rawVal, i, ticks) => {
+                        console.log(val, rawVal, ticks);
+                        return val;
+                    }
+                },
+                y: {
+                    tickFormat: (val, rawVal) => {
+                        // console.log(val, rawVal);
+                        return val;
+                    },
+                }
+            }
+        })
         .title("Year wise average car Acceleration")
+        .layers([
+            {
+                mark: "line"
+            }
+        ])
         .mount('#chart');
 });
 

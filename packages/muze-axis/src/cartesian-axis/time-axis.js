@@ -61,16 +61,20 @@ export default class TimeAxis extends SimpleAxis {
         return null;
     }
 
+    formatTickValue (val) {
+        return this.scale().tickFormat()(val);
+    }
+
     sanitizeTickFormatter (value) {
         const { tickFormat } = value;
 
         if (tickFormat) {
             return (ticks) => {
                 const rawTicks = ticks.map(t => t.getTime());
-                return (val, i) => tickFormat(val, val.getTime(), i, rawTicks);
+                return (val, i) => tickFormat(this.formatTickValue(val), val.getTime(), i, rawTicks);
             };
         }
-        return () => text => this.scale().tickFormat()(text);
+        return () => val => this.formatTickValue(val);
     }
 
      /**
