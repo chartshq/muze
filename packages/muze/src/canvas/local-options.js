@@ -124,7 +124,7 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(title) => {
-                if (typeof title === 'string' || title === null || title === undefined) {
+                if (typeof title === 'string' || !title) {
                     const t = () => title;
                     return t;
                 }
@@ -142,7 +142,7 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(subtitle) => {
-                if (typeof subtitle === 'string' || subtitle === null || subtitle === undefined) {
+                if (typeof subtitle === 'string' || !subtitle) {
                     const sub = () => subtitle;
                     return sub;
                 }
