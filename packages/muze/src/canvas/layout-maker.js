@@ -208,6 +208,14 @@ export const renderLayout = (canvas, renderDetails) => {
     const gridWrapper = componentWrappers[grid];
     createScrollManager(componentWrappers, canvas);
 
+    componentWrappers.forEach((componentWrapper, index) => {
+        if (componentWrapper === null) {
+            const deleteElementName = Object.keys(componentIndexes).find(key => componentIndexes[key] === index);
+            const component = layoutManager.getComponent(deleteElementName);
+            const deleteElementId = component ? component.renderAt() : null;
+            layoutManager.removeComponent(deleteElementId);
+        }
+    });
     layoutManager.registerComponents(componentWrappers).compute();
     gridWrapper.attachScrollListener();
 };

@@ -33,7 +33,10 @@ export const drawComponent = (componentData) => {
 };
 
 export const removeElement = (elemID) => {
-    document.removeElement(document.getElementById(elemID));
+    if (elemID) {
+        const element = document.getElementById(elemID);
+        element.parentNode.removeChild(element);
+    }
 };
 
 export const resolveAligment = (context, componentData) => {
