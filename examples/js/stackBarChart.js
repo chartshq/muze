@@ -81,7 +81,7 @@ d3.json('../data/cars.json', (data) => {
           .mount('#chart'); // Set the chart mount point
 
     setTimeout(() => {
-        canvas.title('Updated Title')
-              .subtitle('Updated Subtitle');
-    }, 2500);
+        canvas.title('')
+        .subtitle('');
+    }, 5000);
 });
