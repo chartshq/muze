@@ -52,7 +52,7 @@ d3.json('../data/cars.json', (data) => {
         .columns(['Maker']) // Maker goes in x-axis
         .color({
             field: 'Acceleration',
-            stops: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 56, 73, 45, 67, 48, 120, 130, 110,
+            stops: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 40, 35, 38, 27, 56, 73, 45, 67, 48, 120, 130, 110,
                 115, 125, 567, 234, 123, 456, 67, 90, 150, 670, 700]
         })
         .data(rootData)
@@ -63,7 +63,7 @@ d3.json('../data/cars.json', (data) => {
         })
         .config({
             legend: {
-                position: 'bottom'
+                position: 'right'
             }
         })
         .width(600)

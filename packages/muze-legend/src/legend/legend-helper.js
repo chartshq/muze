@@ -71,14 +71,23 @@ const getcomputedArray = (computationhelper, requiredMeasure, availableMeasure, 
  * @return {Array} - modified Stops Array
  */
 export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
+    // defining param for height/width selector
+    let measureParam;
+
+    // declaring variable for required Width
+    let requiredWidth;
+
+    // declaring variable for required height
+    let requiredHeight;
+
     // declaring the variable for upperbound
     let upperBound = domainForLegend[domainForLegend.length - 1];
 
     // Initializing Minimum Tick Difference Variable and checking if it's less than 1 or not
-    let minTickDiff = (domainForLegend[1] - domainForLegend[0]);
+    let minTickDiff = Math.ceil(domainForLegend[1] - domainForLegend[0]);
 
-    // defining param for height/width selector
-    let measureParam;
+    // calculating max tick difference
+    const maxTickDiff = Math.ceil(upperBound - domainForLegend[0]);
 
     // gradient Alignment
     const { alignment } = scaleParams;
@@ -92,6 +101,9 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     // getting minimum Tick size (i.e height and width)
     const minimumTickSize = scaleParams.minTickDistance;
 
+    // getting domain upperbound dimensions
+    const { height: tickDimHeight, width: tickDimWidth } = smartLabelCalc.getOriSize((upperBound));
+
     /* Checking if UpperBound of Domain is Floating or Not.
     In case of floating constricting it to 2 decimals after point. */
     if (!Number.isInteger(upperBound)) {
@@ -101,33 +113,15 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     // Calculating minimum tick difference
     minTickDiff = minTickDiff < 1 ? 1 : minTickDiff;
 
-    // calculating max tick difference
-    const maxTickDiff = (upperBound - domainForLegend[0]);
-
-    // getting domain upperbound dimensions
-    const { height: tickDimHeight, width: tickDimWidth } = smartLabelCalc.getOriSize((upperBound));
-
     // required width to render legend
-    let requiredWidth = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
+    requiredWidth = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * (tickDimWidth + (minimumTickSize.width));
 
     requiredWidth -= Math.abs(maxTickDiff);
 
     // require height to render legend
-    let requiredHeight = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * tickDimHeight;
+    requiredHeight = (Math.abs(maxTickDiff) / Math.abs(minTickDiff)) * tickDimHeight;
 
     requiredHeight -= Math.abs(maxTickDiff);
-
-    // required Height and width to render
-    const requiredMeasure = {
-        height: requiredHeight,
-        width: requiredWidth
-    };
-
-    // max available spaces to render
-    const availableMeasure = {
-        height: availableSpace.maxHeight,
-        width: availableSpace.maxWidth
-    };
 
     // checking the alignment of legend
     if (alignment === TOP || alignment === BOTTOM) {
@@ -136,15 +130,17 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
         measureParam = HEIGHT;
     }
 
-    // computation helpers
-    const computationhelper = {
+    // calculating computed array
+    domainForLegend = getcomputedArray({
         smartLabelCalc,
         measureParam
-
-    };
-
-    // calculating computed array
-    domainForLegend = getcomputedArray(computationhelper, requiredMeasure, availableMeasure, domainForLegend);
+    }, {
+        height: requiredHeight,
+        width: requiredWidth
+    }, {
+        height: availableSpace.maxHeight,
+        width: availableSpace.maxWidth
+    }, domainForLegend);
 
     return domainForLegend;
 };
