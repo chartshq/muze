@@ -18,7 +18,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
     const curveInterpolatorFn = pathInterpolators[interpolate];
-    const selection = mount.selectAll('path').data([params.points]);
+    const selection = mount.selectAll('path').data(points.length ? [points[0].className] : []);
     const [enterAreaPath, updateAreaPath] = ['enter', 'update'].map(e => area().curve(curveInterpolatorFn)
                     .x(d => d[e].x)
                     .y1(d => d[e].y)
@@ -38,8 +38,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
                     .attr('d', updateAreaPath(filteredPoints))
                     .each(function (d) {
                         const element = selectElement(this);
-
-                        element.classed(d[0].className, true);
+                        element.attr('class', d);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
                     });
 };

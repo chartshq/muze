@@ -4,8 +4,8 @@ import {
     selectElement,
     makeElement,
     FieldType,
-    getObjProp,
-    InvalidAwareTypes
+    InvalidAwareTypes,
+    getObjProp
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawLine } from './renderer';
@@ -159,6 +159,11 @@ export default class LineLayer extends BaseLayer {
             return point;
         });
         points = positionPoints(this, points);
+
+        points = points.filter((point) => {
+            const { update } = point;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 
