@@ -1,3 +1,4 @@
+import { selectElement } from 'muze-utils';
 import { HTMLRenderer } from '../renderers/html-renderer';
 import { LayoutComponent } from '../layout-component';
 
@@ -34,8 +35,7 @@ export const drawComponent = (componentData) => {
 
 export const removeElement = (elemID) => {
     if (elemID) {
-        const element = document.getElementById(elemID);
-        element.parentNode.removeChild(element);
+        selectElement(`#${elemID}`).remove();
     }
 };
 
