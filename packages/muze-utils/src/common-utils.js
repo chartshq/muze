@@ -1547,24 +1547,25 @@ const getValueParser = config => (val) => {
 };
 
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
-    const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
-
-    const nearestReducers = defaultValue(
-        getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'), {});
-
     const filteredReducers = {};
-    const measures = dataModel.getFieldspace().getMeasure();
-    measureFieldNames.forEach((measureName) => {
-        if (nearestReducers[measureName]) {
-            filteredReducers[measureName] = nearestReducers[measureName];
-        } else {
-            const measureField = measures[measureName];
-            if (measureField) {
-                filteredReducers[measureName] = measureField.defAggFn();
-            }
-        }
-    });
+    if (dataModel instanceof DataModel) {
+        const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
+        const nearestReducers = defaultValue(
+            getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'), {});
 
+        const measures = dataModel.getFieldspace().getMeasure();
+        measureFieldNames = measureFieldNames.length ? measureFieldNames: Object.keys(measures);
+        measureFieldNames.forEach((measureName) => {
+            if (nearestReducers[measureName]) {
+                filteredReducers[measureName] = nearestReducers[measureName];
+            } else {
+                const measureField = measures[measureName];
+                if (measureField) {
+                    filteredReducers[measureName] = measureField.defAggFn();
+                }
+            }
+        });
+    }
     return filteredReducers;
 };
 

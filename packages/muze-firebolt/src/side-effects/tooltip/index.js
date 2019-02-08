@@ -95,6 +95,7 @@ export default class Tooltip extends SpawnableSideEffect {
             }
 
             let dt = dataModels[i];
+
             if (config.fields) {
                 dt = dt.project(config.fields, {
                     saveChild: false
@@ -119,6 +120,7 @@ export default class Tooltip extends SpawnableSideEffect {
             sourceInf.detailFields = context.detailFields();
             sourceInf.timeDiffs = context.timeDiffsByField();
             sourceInf.valueParser = context.valueParser();
+            sourceInf.selectionSet = selectionSet;
             tooltipInst.context(sourceInf);
             const strategy = strategies[options.strategy];
             tooltipInst.content(options.strategy || this._strategy, dt, {
