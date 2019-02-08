@@ -9,7 +9,9 @@ import {
     selectElement,
     getEvent,
     require,
-    DateTimeFormatter
+    DateTimeFormatter,
+    dataSelect,
+    DataObject
 } from 'muze-utils';
 
 import {
@@ -174,7 +176,9 @@ muze.utils = {
     makeElement,
     selectElement,
     DateTimeFormatter,
-    require
+    require,
+    dataSelect,
+    DataObject
 };
 
 export default muze;

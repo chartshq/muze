@@ -9,29 +9,13 @@ class Selection {
      * @param {Array<DataObject>} data Array of DataObjects.
      * @memberof Selection
      */
-    constructor () {
-        this._data = [];
-        // // map of id to data
-        this._idMap = {};
-        this._dataMap = {};
+    constructor (idGetter) {
+        this._dataObjects = new Map();
+        this._updatedata = new Map();
         this._mode = '';
-        // data.forEach((item, idx) => {
-        //     const index = item.id || idx;
-        //     this._idMap[index] = item;
-        // });
-        // // array to store data in enter phase
-        this._enterdata = [];
-        // // array to store data in exit phase
-        this._exitdata = [];
-    }
-    /**
-     *  Gets the object bound to a class
-     *
-     * @return {Object} current data set bound to the class
-     * @memberof Selection
-     */
-    getObjects () {
-        return Object.values(this._idMap);
+        this._enterdata = new Map();
+        this._exitdata = new Map();
+        this._idGetter = idGetter;
     }
 
     /**
@@ -42,61 +26,54 @@ class Selection {
      * @return {Selection} Modified selection.
      * @memberof Selection
      */
-    data (newData, idGetter) {
-        if (idGetter) {
-            this._data = [];
-            this._idGetter = idGetter;
-            const tempMap = {};
+    data (newData) {
+        const entryData = new Map();
+        const exitdata = new Map();
+        const tempMap = new Map();
+        const duplicateData = new Map();
 
-            newData.forEach((...params) => {
-                const index = idGetter(...params);
-                tempMap[index] = params[0];
-            });
-            // check if any data items have been removed
-            const purgedIds = [];
-
-            Object.keys(this._idMap).forEach((id) => {
-                if (!tempMap[id]) {
-                    purgedIds.push(id);
-                }
-            });
-
-            Object.keys(tempMap).forEach((id) => {
-                if (!this._idMap[id]) {
-                    this._enterdata.push(tempMap[id]);
-                } else {
-                    this._idMap[id] = tempMap[id];
-                    this._data.push(tempMap[id]);
-                }
-            });
-            // move the purged items to exit selection
-            purgedIds.forEach((id) => {
-                const purged = this._idMap[id];
-                this._exitdata.push(purged);
-                // this._data = this._data.slice(id, 1);
-                delete this._idMap[id];
-            });
-            // this._data = this._data.slice(temp, this._data.length);
-
-            return this;
-        }
-        // no id getter supplied so use indices
-        if (newData.length > this._data.length) {
-            const startIdx = this._data.length;
-            for (let i = startIdx; i < newData.length; i += 1) {
-                this._enterdata.push(newData[i]);
-            }
+        if (!this._idGetter) {
+           // when id-getter is not given
         } else {
-            // push to exit selection
-            const temp = newData.length;
-            for (let i = temp; i < this._data.length; i += 1) {
-                const purged = this._data[i];
-                delete this._idMap[purged.id];
-                this._exitdata.push(purged);
-            }
-            this._data = this._data.slice(temp, this._data.length);
+            newData.forEach((...params) => {
+                const key = this._idGetter(...params);
+                if (!tempMap.has(key)) {
+                    tempMap.set(key, params[0]);
+                } else {
+                    duplicateData.push(key, params[0]);
+                }
+            });
         }
-        return this;
+
+        let val;
+        // prepare enter data
+        let entries = tempMap.entries();
+        while (val = entries.next().value) {
+            if (!this._updatedata.has(val[0])) {
+                entryData.set(val[0], val[1]);
+            }
+        }
+        // prepare exit data
+        entries = this._updatedata.entries();
+        while (val = entries.next().value) {
+            if (!tempMap.has(val[0])) {
+                exitdata.set(val[0], val[1]);
+            }
+        }
+
+        // put duplicate data to exit list
+        entries = duplicateData.entries();
+        while (val = entries.next().value) {
+            exitdata.set(val[0], val[1]);
+        }
+
+        const newSelection = new Selection(this._idGetter);
+        newSelection._updatedata = this._updatedata;
+        newSelection._dataObjects = this._dataObjects;
+        newSelection._enterdata = entryData;
+        newSelection._exitdata = exitdata;
+
+        return newSelection;
     }
 
     /**
@@ -105,20 +82,42 @@ class Selection {
      *
      * @param {Function} callback Callback to execute on each item.
      * @return {Selection} New selection with data created using callback.
-     * @memberof EnterSelection
+     * @memberof Selection
      */
     append (callback) {
-        this[`_${this._mode}data`].forEach((...params) => {
-            const data = params[0];
-            const id = this._idGetter ? this._idGetter(...params) : (data.id || params[1]);
-            this._idMap[id] = callback(...params);
-            this._dataMap[id] = data;
-        });
+        let currentData;
+        let val;
+        const dataObjects = new Map();
+        const data = new Map();
+
+        // select the data to create object
+        switch (this._mode) {
+        case 'enter':
+            currentData = this._enterdata;
+            break;
+        case 'exit':
+            currentData = this._exitdata;
+            break;
+        default:
+            currentData = this._updatedata;
+        }
+
+        const entries = currentData.entries();
+
+        while (val = entries.next().value) {
+            dataObjects.set(val[0], callback(val[1]));
+            data.set(val[0], val[1]);
+        }
+
+        const newSelection = new Selection(this._idGetter);
+        newSelection._updatedata = data;
+        newSelection._dataObjects = dataObjects;
         this._mode = '';
-        return this;
+
+        return newSelection;
     }
 
-    /**
+     /**
      * This method returns an enter selection that
      * allows or update operations.
      *
@@ -127,39 +126,6 @@ class Selection {
      */
     enter () {
         this._mode = 'enter';
-        return this;
-        // return new EnterSelection(this._enterdata, this._idMap, this._idGetter);
-    }
-
-    /**
-     * This method is used to set key value pairs
-     * on data objects.
-     *
-     * @param {string} key Name of property.
-     * @param {any} value Value of property.
-     * @return {Selection} Modified selection.
-     * @memberof Selection
-     */
-    attr (key, value) {
-        this._data.forEach(item => item.attr(key, value));
-        return this;
-    }
-
-    /**
-     * This method merges the data of one selection with another.
-     *
-     * @param {Selection} selection Instance of selection.
-     * @return {Selection} Modified selection.
-     * @memberof Selection
-     */
-    merge (selection) {
-        selection._data.forEach((...params) => {
-            const id = this._idGetter ? this._idGetter(...params) : (params[0].id || params[1]);
-            this._idMap[id] = params[0];
-            this._data.push(params[0]);
-        });
-        // reset enter selection
-        this._enterdata = [];
         return this;
     }
 
@@ -171,43 +137,103 @@ class Selection {
      */
     exit () {
         this._mode = 'exit';
-        // const exitdata = this._exitdata;
-        // const exitSelection = new Selection(exitdata);
-        // this._exitdata = [];
         return this;
+    }
+
+     /**
+     * This method merges the data of one selection with another.
+     *
+     * @param {Selection} selection Instance of selection.
+     * @return {Selection} Modified selection.
+     * @memberof Selection
+     */
+    merge (target) {
+        const mergedObjects = new Map();
+        const mergedData = new Map();
+        let val;
+        let entries;
+
+        // merge Object and data present in this selection
+        entries = this._updatedata.entries();
+        while (val = entries.next().value) {
+            if (!this._exitdata.has(val[0])) {
+                mergedData.set(val[0], val[1]);
+                mergedObjects.set(val[0], this._dataObjects.get(val[0]));
+            }
+        }
+
+        // merge object from target selection
+        entries = target._updatedata.entries();
+        while (val = entries.next().value) {
+            if (!(mergedData.has(val[0]) || target._exitdata.has(val[0]))) {
+                mergedData.set(val[0], val[1]);
+                mergedObjects.set(val[0], target._dataObjects.get(val[0]));
+            }
+        }
+
+        const newSelection = new Selection(this._idGetter);
+        newSelection._updatedata = mergedData;
+        newSelection._dataObjects = mergedObjects;
+
+        return newSelection;
     }
 
     each (fn) {
-        Object.keys(this._idMap).forEach((e, i) => {
-            fn(this._idMap[e], this._dataMap[e], i);
-        });
-        return this;
+        let val;
+        const entries = this._dataObjects.entries();
+
+        while (val = entries.next().value) {
+            fn(val[1], this._updatedata.get(val[0]), val[0]);
+        }
     }
 
     map (fn) {
-        Object.keys(this._idMap).forEach((...params) => {
-            const key = params[0];
-            this._idMap[key] = fn(this._idMap[key], ...params, this._dataMap[key]);
-        });
+        const newdata = [];
+        let val;
+        const entries = this._dataObjects.entries();
+
+        while (val = entries.next().value) {
+            newdata.push(fn(val[1], this._updatedata.get(val[0]), val[0]));
+        }
+        return newdata;
+    }
+
+    remove () {
+        let currentData;
+
+        switch (this._mode) {
+        case 'enter':
+            currentData = this._enterdata;
+            break;
+        case 'exit':
+            currentData = this._exitdata;
+            break;
+        default:
+            currentData = this._updatedata;
+        }
+
+        currentData.clear();
+
         return this;
     }
 
     /**
-     * Executes the cleanup operation associated with data objets.
+     *  Gets the object bound to a class
      *
+     * @return {Object} current data set bound to the class
      * @memberof Selection
      */
-    remove () {
-        // do cleanup on DDO's
-        const data = this[`_${this._mode}data`];
+    getObjects () {
+        const objects = [];
+        let val;
+        const values = this._dataObjects.values();
 
-        data.forEach(item => item.remove());
-        if (this._mode === '') {
-            this.each(e => e.remove());
+        while (val = values.next().value) {
+            objects.push(val);
         }
-        this[`_${this._mode}data`] = [];
-        this._mode = '';
+        return objects;
     }
+
 }
 
 export default Selection;
