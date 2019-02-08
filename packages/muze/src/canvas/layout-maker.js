@@ -3,7 +3,18 @@ import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { componentWrapperMaker } from './component-wrapper-maker';
-import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TITLE,
+    SUB_TITLE,
+    LEGEND,
+    VERTICAL_SCROLL_BAR,
+    HORIZONTAL_SCROLL_BAR,
+    GRID
+} from '../constants';
 import { ScrollManager } from './scroll-manager';
 
 /**
@@ -156,12 +167,12 @@ const componentIndexes = {
 };
 
 const componentNames = {
-    0: 'title',
-    1: 'subtitle',
-    2: 'legend',
-    3: 'verticalScrollBar',
-    4: 'horizontalScrollBar',
-    5: 'grid'
+    0: TITLE,
+    1: SUB_TITLE,
+    2: LEGEND,
+    3: VERTICAL_SCROLL_BAR,
+    4: HORIZONTAL_SCROLL_BAR,
+    5: GRID
 };
 
 /**

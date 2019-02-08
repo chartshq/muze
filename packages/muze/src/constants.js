@@ -73,3 +73,6 @@ export const OVERFLOW_X = 'overflow-x';
 export const OVERFLOW_Y = 'overflow-y';
 export const AUTO = 'auto';
 export const VISIBLE = 'visible';
+export const VERTICAL_SCROLL_BAR = 'verticalScrollBar';
+export const HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
+export const GRID = 'grid';
