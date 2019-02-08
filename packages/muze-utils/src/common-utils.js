@@ -1549,8 +1549,8 @@ const getValueParser = config => (val) => {
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
 
-    const nearestReducers = defaultValue({},
-        getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'));
+    const nearestReducers = defaultValue(
+        getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'), {});
 
     const filteredReducers = {};
     const measures = dataModel.getFieldspace().getMeasure();
