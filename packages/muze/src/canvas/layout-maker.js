@@ -155,6 +155,15 @@ const componentIndexes = {
     grid: 5
 };
 
+const componentNames = {
+    0: 'title',
+    1: 'subtitle',
+    2: 'legend',
+    3: 'verticalScrollBar',
+    4: 'horizontalScrollBar',
+    5: 'grid'
+};
+
 /**
  * Responsible for creating a scroll manager that manages interactions between the grid
  * component and the scroll bar components
@@ -210,7 +219,7 @@ export const renderLayout = (canvas, renderDetails) => {
 
     componentWrappers.forEach((componentWrapper, index) => {
         if (componentWrapper === null) {
-            const deleteElementName = Object.keys(componentIndexes).find(key => componentIndexes[key] === index);
+            const deleteElementName = componentNames[index];
             const component = layoutManager.getComponent(deleteElementName);
             const deleteElementId = component ? component.renderAt() : null;
             layoutManager.removeComponent(deleteElementId);
