@@ -121,7 +121,7 @@ class Selection {
      * This method returns an enter selection that
      * allows or update operations.
      *
-     * @return {EnterSelection} Instance of enter selection.
+     * @return {Selection} Instance of enter selection.
      * @memberof Selection
      */
     enter () {
@@ -188,14 +188,17 @@ class Selection {
     }
 
     map (fn) {
-        const newdata = [];
+        const newdata = new Map();
         let val;
         const entries = this._dataObjects.entries();
 
         while (val = entries.next().value) {
-            newdata.push(fn(val[1], this._updatedata.get(val[0]), val[0]));
+            newdata.set(val[0], fn(val[1], this._updatedata.get(val[0]), val[0]));
         }
-        return newdata;
+        const newSelection = new Selection(this._idGetter);
+        newSelection._updatedata = this._updatedata;
+        newSelection._dataObjects = newdata;
+        return newSelection;
     }
 
     remove () {
