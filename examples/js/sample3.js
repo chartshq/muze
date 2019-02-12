@@ -115,29 +115,25 @@ d3.json('../../data/cars.json', (data) => {
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
     const mountPoint = document.getElementById('chart');
     window.canvas = env.canvas();
-    let rows = ['Cylinders', 'Horsepower'],
+    let rows = [[ 'Horsepower'], ['Acceleration']],
         columns = ['Origin', 'Year'];
     canvas = canvas
     .rows(rows)
     .columns(columns)
-    .height(400)
-    .width(400)
+    .height(800)
+    .width(800)
     .color('Origin')
     // {rows}
     .mount(mountPoint);
 
     setTimeout(() => {
-        canvas.once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
-        console.log('Updateing');
         canvas.config({
             axes: {
                 y: {
                     nice: false
                 }
             }
-        }).width(200).height(200);
+        })
+        // .width(200).height(200);
     }, 2000);
 });

@@ -198,6 +198,7 @@ class Selection {
         const newSelection = new Selection(this._idGetter);
         newSelection._updatedata = this._updatedata;
         newSelection._dataObjects = newdata;
+
         return newSelection;
     }
 
