@@ -937,7 +937,7 @@ const mergeRecursive = (source, sink) => {
  */
 const createSelection = (sel, appendObj, data, idFn) => {
     let selection = sel || dataSelect(idFn);
-    
+
     selection = selection.data(data);
 
     const enter = selection.enter().append(appendObj);

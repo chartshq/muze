@@ -128,7 +128,6 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
         const id = n.id + axisIndex;
         return e + id;
     }, '')).map((currObj, axis) => {
-        console.log(axis)
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
             const { orientation, show } = axisInst.config();
@@ -196,7 +195,7 @@ const axisPlaceholderGn = (context, selObj, cells) => {
  */
 const createTextCells = (selection, headers, cells, labelManager) => createSelection(selection,
     (label) => {
-        const textCell = new cells.TextCell({}, { labelManager })
+        const textCell = new cells.TextCell({}, { labelManager });
         textCell.source(label);
         return textCell;
     }, headers, (key, i) => key + i);
@@ -225,9 +224,7 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
 
     return selObjUpdater.map((keySet, data) => {
         let textCells = createTextCells(null, data, cells, labelManager);
-        textCells = textCells.map((cell, k) => {
-            return cell.source(k).config(facet);
-        });
+        textCells = textCells.map((cell, k) => cell.source(k).config(facet));
         return textCells;
     });
 };
@@ -402,7 +399,6 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
     // Compute right matrix using right headers and the axes on the rows
     const rightMatrix = rowSec.length ? rowSec.map((d, i) => [d, ...(rightFacets[i] || [])]) : (rightFacets.length ?
         rightFacets.map(d => [...d]) : []);
-
 
     const topMatrix = [];
     if (topHeaders) {
