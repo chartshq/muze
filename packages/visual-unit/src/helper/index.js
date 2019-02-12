@@ -103,51 +103,6 @@ export const resolveEncodingTransform = (layerInst, store) => {
     return depArr;
 };
 
-export const createLayers = (context, layerDefinitions) => {
-    const layersMap = context._layersMap;
-    const markSet = {};
-    const store = {
-        layers: {},
-        components: {
-            unit: context
-        }
-    };
-    let layerIndex = 0;
-    let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef, i) => {
-        const mark = layerDef.mark;
-        const definition = layerDef.def;
-        const markId = `${mark}-${i}`;
-        const defArr = toArray(definition);
-        defArr.forEach((def) => {
-            def.order = layerDef.order + layerIndex;
-        });
-        layerIndex += defArr.length;
-        const instances = getLayerFromDef(context, definition, layersMap[markId], i);
-        store.layers = Object.assign(store.layers, instances);
-        const instanceValues = Object.values(instances);
-        layersArr = layersArr.concat(...instanceValues);
-        layersMap[markId] = instanceValues;
-        markSet[markId] = markId;
-        return layersArr;
-    }, []);
-    store.unit = context;
-    const layerdeps = {};
-    layers.forEach((layer) => {
-        const depArr = resolveEncodingTransform(layer, store);
-        layerdeps[layer.alias()] = depArr;
-    });
-
-    const order = getDependencyOrder(layerdeps);
-    layers = order.map(name => store.layers[name]);
-    for (const key in layersMap) {
-        if (!(key in markSet)) {
-            layersMap[key].forEach(layer => layer.remove());
-            delete layersMap[key];
-        }
-    }
-    return layers;
-};
-
 export const sanitizeLayerDef = (layerDefs) => {
     const sanitizedDefs = [];
     layerDefs.forEach((layerDef, i) => {

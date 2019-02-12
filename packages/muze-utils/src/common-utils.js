@@ -943,7 +943,9 @@ const createSelection = (sel, appendObj, data, idFn) => {
     const enter = selection.enter().append(appendObj);
     const mergedSelection = enter.merge(selection);
 
-    selection.exit() && selection.exit().remove();
+    const exitSelection = selection.exit();
+    exitSelection.getObjects().forEach(inst => inst.remove());
+    exitSelection.remove();
     return mergedSelection;
 };
 
