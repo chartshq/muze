@@ -1,4 +1,4 @@
-import { DateTimeFormatter } from 'muze-utils';
+import { DateTimeFormatter, retrieveFieldDisplayName } from 'muze-utils';
 import Variable from './variable';
 
 /**
@@ -118,5 +118,17 @@ export default class SimpleVariable extends Variable {
      */
     equals (varInst) {
         return this.oneVar() === varInst.oneVar();
+    }
+
+    /**
+     * Returns the display name of the field, in case of composite-field it returns displayName for first field.
+     *
+     * @return {string} return the display name.
+     */
+    displayName () {
+        if (!this._displayName) {
+            this._displayName = retrieveFieldDisplayName(this.data(), this.oneVar());
+        }
+        return this._displayName;
     }
 }

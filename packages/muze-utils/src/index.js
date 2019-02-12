@@ -99,7 +99,8 @@ export {
     formatTemporal,
     createSelection,
     temporalFields,
-    retrieveNearestGroupByReducers
+    retrieveNearestGroupByReducers,
+    retrieveFieldDisplayName
 } from './common-utils';
 
 export {

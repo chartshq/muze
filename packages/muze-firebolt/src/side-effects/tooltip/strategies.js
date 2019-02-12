@@ -6,7 +6,8 @@ import {
     DimensionSubtype,
     MeasureSubtype,
     DataModel,
-    defaultValue
+    defaultValue,
+    retrieveFieldDisplayName
 } from 'muze-utils';
 
 const { InvalidAwareTypes } = DataModel;
@@ -106,7 +107,7 @@ const getRowContent = (fieldInf, context, dataInf, config) => {
                         formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
                     formattedValue = measureFormatter(value);
                     values.push([{
-                        value: `${measure}${separator}`,
+                        value: `${retrieveFieldDisplayName(context.data, measure)}${separator}`,
                         style: {
                             'margin-left': `${config.margin}px}`
                         },
@@ -141,7 +142,7 @@ const getRowContent = (fieldInf, context, dataInf, config) => {
             value = val;
             formattedValue = formatterFn(value);
             values.push([{
-                value: `${key}${separator}`,
+                value: `${retrieveFieldDisplayName(context.data, key)}${separator}`,
                 className: `${config.classPrefix}-tooltip-key`
             }, {
                 value: `${formattedValue}`,
@@ -224,7 +225,7 @@ export const strategies = {
         }, 'Items Selected']];
         const measureNames = measures.map(d => d.name);
         measureNames.forEach((measure) => {
-            values.push([`(${aggFns[measure].toUpperCase()})`, `${measure}`,
+            values.push([`(${aggFns[measure].toUpperCase()})`, `${retrieveFieldDisplayName(dm, measure)}`,
                 {
                     value: `${aggregatedModel.getData().data[0][fieldsConf[measure].index].toFixed(2)}`,
                     style: {
