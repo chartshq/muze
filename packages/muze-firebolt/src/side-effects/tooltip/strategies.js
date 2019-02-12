@@ -45,14 +45,120 @@ const getTabularData = (dataObj, context, defaultFormatter) => {
     return rows;
 };
 
+const getRowContent = (fieldInf, context, dataInf, config) => {
+    let value;
+    let formattedValue;
+    let measureIndex;
+
+    const {
+        valueParser,
+        axes,
+        dimensionMeasureMap,
+        timeDiffs
+    } = context;
+    const { subtype: type, name: field } = fieldInf;
+
+    const { fieldsConfig, defFormatter, data, fieldspace } = dataInf;
+    const { separator, classPrefix } = config;
+    const dataLen = data.length;
+    const values = [];
+    const index = fieldsConfig[field].index;
+    const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
+    const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type],
+        defFormatter);
+
+    let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
+        [...new Set(data.map(d => d[index]))];
+    uniqueVals = uniqueVals.filter(d => d !== '');
+    const colorAxis = axes.color[0];
+    const shapeAxis = axes.shape[0];
+    const sizeAxis = axes.size[0];
+    const isRetinalField = (colorAxis || shapeAxis || sizeAxis) && dataLen > 1 &&
+            type !== MeasureSubtype.CONTINUOUS;
+
+    uniqueVals.forEach((val, i) => {
+        let key;
+        let associatedMeasures = dimensionMeasureMap[field];
+
+        if (associatedMeasures instanceof Array && dataLen > 1) {
+            associatedMeasures = associatedMeasures.filter(d => d in fieldsConfig);
+            key = val;
+            let icon = {
+                value: ''
+            };
+
+            if (isRetinalField) {
+                icon = {
+                    type: 'icon',
+                    color: colorAxis.getColor(val),
+                    shape: shapeAxis.getShape(val),
+                    size: sizeAxis.getSize(val) * config.iconScale
+                };
+            }
+            if (associatedMeasures.length > 1) {
+                const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
+                values.push([icon, `${formattedKey}`]);
+                associatedMeasures.forEach((measure) => {
+                    measureIndex = fieldsConfig[measure].index;
+                    value = data[i][measureIndex];
+                    const numberFormat = fieldspace.fields[measureIndex].numberFormat();
+                    const measureFormatter = getDefaultTooltipFormatterFn(
+                        formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
+                    formattedValue = measureFormatter(value);
+                    values.push([{
+                        value: `${measure}${separator}`,
+                        style: {
+                            'margin-left': `${config.margin}px}`
+                        },
+                        className: `${classPrefix}-tooltip-key`
+                    }, {
+                        value: `${formattedValue}`,
+                        className: `${classPrefix}-tooltip-value`
+                    }]);
+                });
+            } else {
+                measureIndex = fieldsConfig[associatedMeasures[0]].index;
+                value = data[i][measureIndex];
+                const numberFormat = fieldspace.fields[measureIndex].numberFormat();
+                const measureFormatter = getDefaultTooltipFormatterFn(
+                    formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
+                formattedValue = measureFormatter(value);
+                const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
+                values.push([
+                    icon,
+                    {
+                        value: `${formattedKey}`,
+                        className: `${classPrefix}-tooltip-key`
+                    },
+                    {
+                        value: `${formattedValue}`,
+                        className: `${classPrefix}-tooltip-value`
+                    }
+                ]);
+            }
+        } else {
+            key = field;
+            value = val;
+            formattedValue = formatterFn(value);
+            values.push([{
+                value: `${key}${separator}`,
+                className: `${config.classPrefix}-tooltip-key`
+            }, {
+                value: `${formattedValue}`,
+                className: `${config.classPrefix}-tooltip-value`
+            }]);
+        }
+    });
+    return values;
+};
+
 export const buildTooltipData = (dataModel, config = {}, context) => {
     let fieldValues = [];
     const dataObj = dataModel.getData();
     const data = dataObj.data;
     const schema = dataObj.schema;
-    const separator = config.separator;
-    const fieldsConfig = dataModel.getFieldsConfig();
     const fieldspace = dataModel.getFieldspace();
+    const fieldsConfig = dataModel.getFieldsConfig();
     const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
@@ -60,108 +166,9 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const dataLen = data.length;
     const {
         valueParser,
-        axes,
-        dimensionMeasureMap,
-        timeDiffs
+        dimensionMeasureMap
     } = context;
     const defFormatter = formatters(null, null, valueParser)[DimensionSubtype.CATEGORICAL];
-    const getRowContent = (field, type) => {
-        let value;
-        let formattedValue;
-        let measureIndex;
-        const values = [];
-        const index = fieldsConfig[field].index;
-        const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
-        const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type],
-            defFormatter);
-
-        if (value !== null) {
-            let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
-                [...new Set(data.map(d => d[index]))];
-            uniqueVals = uniqueVals.filter(d => d !== '');
-            const colorAxis = axes.color[0];
-            const shapeAxis = axes.shape[0];
-            const sizeAxis = axes.size[0];
-            const isRetinalField = (colorAxis || shapeAxis || sizeAxis) && dataLen > 1 &&
-                    type !== MeasureSubtype.CONTINUOUS;
-
-            uniqueVals.forEach((val, i) => {
-                let key;
-                let associatedMeasures = dimensionMeasureMap[field];
-
-                if (associatedMeasures && associatedMeasures.length && dataLen > 1) {
-                    associatedMeasures = associatedMeasures.filter(d => d in fieldsConfig);
-                    key = val;
-                    let icon = {
-                        value: ''
-                    };
-
-                    if (isRetinalField) {
-                        icon = {
-                            type: 'icon',
-                            color: colorAxis.getColor(val),
-                            shape: shapeAxis.getShape(val),
-                            size: sizeAxis.getSize(val) * config.iconScale
-                        };
-                    }
-                    if (associatedMeasures.length > 1) {
-                        const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
-                        values.push([icon, `${formattedKey}`]);
-                        associatedMeasures.forEach((measure) => {
-                            measureIndex = fieldsConfig[measure].index;
-                            value = data[i][measureIndex];
-                            const numberFormat = fieldspace.fields[measureIndex].numberFormat();
-                            const measureFormatter = getDefaultTooltipFormatterFn(
-                                formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
-                            formattedValue = measureFormatter(value);
-                            values.push([{
-                                value: `${measure}${separator}`,
-                                style: {
-                                    'margin-left': `${config.margin}px}`
-                                },
-                                className: `${config.classPrefix}-tooltip-key`
-                            }, {
-                                value: `${formattedValue}`,
-                                className: `${config.classPrefix}-tooltip-value`
-                            }]);
-                        });
-                    } else {
-                        measureIndex = fieldsConfig[associatedMeasures[0]].index;
-                        value = data[i][measureIndex];
-                        const numberFormat = fieldspace.fields[measureIndex].numberFormat();
-                        const measureFormatter = getDefaultTooltipFormatterFn(
-                            formatters(numberFormat, interval, valueParser)[MeasureSubtype.CONTINUOUS]);
-                        formattedValue = measureFormatter(value);
-                        const formattedKey = type === DimensionSubtype.TEMPORAL ? formatterFn(key, interval) : key;
-                        values.push([
-                            icon,
-                            {
-                                value: `${formattedKey}`,
-                                className: `${config.classPrefix}-tooltip-key`
-                            },
-                            {
-                                value: `${formattedValue}`,
-                                className: `${config.classPrefix}-tooltip-value`
-                            }
-                        ]);
-                    }
-                } else {
-                    key = field;
-                    value = val;
-                    formattedValue = formatterFn(value);
-                    values.push([{
-                        value: `${key}${separator}`,
-                        className: `${config.classPrefix}-tooltip-key`
-                    }, {
-                        value: `${formattedValue}`,
-                        className: `${config.classPrefix}-tooltip-value`
-                    }]);
-                }
-            });
-        }
-        return values;
-    };
-    let displayFormat = 'keyValue';
 
     if (dataLen > 1 && containsDetailField) {
         fieldValues = getTabularData({
@@ -169,11 +176,14 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             schema,
             fieldspace
         }, context, defFormatter);
-        displayFormat = 'table';
     } else {
         dimensions.forEach((item) => {
-            const type = item.subtype ? item.subtype : item.type;
-            fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
+            fieldValues = [...fieldValues, ...getRowContent(item, context, {
+                fieldsConfig,
+                data,
+                defFormatter,
+                fieldspace
+            }, config)];
         });
 
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
@@ -181,15 +191,16 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             : measures;
 
         filteredMeasures.forEach((item) => {
-            const type = item.subtype ? item.subtype : item.type;
-            fieldValues = [...fieldValues, ...getRowContent(item.name, type)];
+            fieldValues = [...fieldValues, ...getRowContent(item, context, {
+                fieldsConfig,
+                data,
+                defFormatter,
+                fieldspace
+            }, config)];
         });
     }
 
-    return {
-        content: fieldValues,
-        displayFormat
-    };
+    return fieldValues;
 };
 
 export const strategies = {
