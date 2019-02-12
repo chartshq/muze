@@ -115,7 +115,7 @@ d3.json('../../data/cars.json', (data) => {
     env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
     const mountPoint = document.getElementById('chart');
     window.canvas = env.canvas();
-    let rows = [[ 'Horsepower'], ['Acceleration']],
+    let rows = [['Horsepower'], ['Acceleration']],
         columns = ['Origin', 'Year'];
     canvas = canvas
     .rows(rows)
@@ -133,7 +133,7 @@ d3.json('../../data/cars.json', (data) => {
                     nice: false
                 }
             }
-        })
+        });
         // .width(200).height(200);
     }, 2000);
 });
