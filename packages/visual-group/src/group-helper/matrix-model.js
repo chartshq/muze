@@ -248,6 +248,20 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         });
     }
 
+    const colFacetFormatters = colFacets.map(facetField => facetField.rawFormat());
+    columnKeys.forEach((rColumnKeys) => {
+        rColumnKeys.forEach((columnKey, idx) => {
+            rColumnKeys[idx] = colFacetFormatters[idx](columnKey);
+        });
+    });
+
+    const rowFacetFormatters = rowFacets.map(facetField => facetField.rawFormat());
+    rowKeys.forEach((rRowKeys) => {
+        rRowKeys.forEach((rowKey, idx) => {
+            rRowKeys[idx] = rowFacetFormatters[idx](rowKey);
+        });
+    });
+
     // Getting column keys
     const transposedColKeys = columnKeys.length > 0 ? columnKeys[0].map((col, i) =>
                     columnKeys.map(row => row[i])) : columnKeys;

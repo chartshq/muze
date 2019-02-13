@@ -51,46 +51,45 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
     jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
+        { Origin: "India", Year: "2018-02-22", Acceleration: 1000, Name: "A" },
+        { Origin: "India", Year: "2018-03-12", Acceleration: 2000, Name: "B" },
+        { Origin: "India", Year: "2018-04-01", Acceleration: 3000, Name: "C" },
+        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000, Name: "D" },
+        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000, Name: "A" },
+        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000, Name: "D" },
     ];
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
+    rootData = rootData.groupBy(["Name", "Origin", "Year"], {
         Acceleration: "avg"
     });
 
     env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Year"])
-        .color("Origin")
+        .rows(["Acceleration"])
+        .columns(["Year", "Name", "Origin"])
         .height(500)
-        .width(600)
-        .config({
-            axes: {
-                x: {
-                    tickFormat: (val, rawVal, i, ticks) => {
-                        console.log(val, rawVal, ticks);
-                        return val;
-                    }
-                },
-                y: {
-                    tickFormat: (val, rawVal) => {
-                        // console.log(val, rawVal);
-                        return val;
-                    },
-                }
-            }
-        })
+        .width(1500)
+        // .config({
+        //     axes: {
+        //         x: {
+        //             tickFormat: (val, rawVal, i, ticks) => {
+        //                 console.log(val, rawVal, ticks);
+        //                 return val;
+        //             }
+        //         },
+        //         y: {
+        //             tickFormat: (val, rawVal) => {
+        //                 // console.log(val, rawVal);
+        //                 return val;
+        //             },
+        //         }
+        //     }
+        // })
         .title("Year wise average car Acceleration")
         .layers([
             {
-                mark: "line"
+                mark: "bar"
             }
         ])
         .mount('#chart');
