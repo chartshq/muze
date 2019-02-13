@@ -32,18 +32,14 @@ class Selection {
         const tempMap = new Map();
         const duplicateData = new Map();
 
-        if (!this._idGetter) {
-           // when id-getter is not given
-        } else {
-            newData.forEach((...params) => {
-                const key = this._idGetter(...params);
-                if (!tempMap.has(key)) {
-                    tempMap.set(key, params[0]);
-                } else {
-                    duplicateData.push(key, params[0]);
-                }
-            });
-        }
+        newData.forEach((...params) => {
+            const key = this.idGetter ? this._idGetter(...params) : params[1];
+            if (!tempMap.has(key)) {
+                tempMap.set(key, params[0]);
+            } else {
+                duplicateData.push(key, params[0]);
+            }
+        });
 
         let val;
         // prepare enter data
