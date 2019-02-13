@@ -13,11 +13,11 @@ export default class SimpleVariable extends Variable {
     /**
      * Creates an instance of simple variable instance.
      *
-     * @param {string} text Field name.
+     * @param {string} name Field name.
      */
-    constructor (text) {
+    constructor (name) {
         super();
-        this.oneVar(text);
+        this.oneVar(name);
     }
 
     /**
@@ -121,14 +121,11 @@ export default class SimpleVariable extends Variable {
     }
 
     /**
-     * Returns the display name of the field, in case of composite-field it returns displayName for first field.
+     * Returns the display name of the field.
      *
-     * @return {string} return the display name.
+     * @return {string} returns the display name.
      */
     displayName () {
-        if (!this._displayName) {
-            this._displayName = retrieveFieldDisplayName(this.data(), this.oneVar());
-        }
-        return this._displayName;
+        return retrieveFieldDisplayName(this.data(), this.oneVar());
     }
 }
