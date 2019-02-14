@@ -49,13 +49,24 @@ export default class GridComponent extends MuzeComponent {
         let width = 0;
         const { viewMatricesInfo, layoutDimensions } = this.component.viewInfo();
         const scrollInfo = this.component.scrollInfo();
+        const {
+            viewHeight,
+            viewWidth,
+            unitHeights,
+            unitWidths
+        } = layoutDimensions;
 
         for (let i = 0; i < 3; i++) {
             if (!(this.gridComponents.length && this.gridComponents[i] instanceof Array)) {
                 this.gridComponents[i] = [];
             }
             for (let j = 0; j < 3; j++) {
-                const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
+                const matrixDim = {
+                    height: viewHeight[i],
+                    width: viewWidth[j],
+                    unitHeights,
+                    unitWidths
+                };
                 const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
                 const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
                 const matrixConfig = {

@@ -50,27 +50,25 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    ];
+ 
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
-        Acceleration: "avg"
-    });
+
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Year"])
+        .columns(['Acceleration'])
+        .rows(['Origin','Cylinders',"Year"])
         .color("Origin")
-        .height(500)
-        .width(600)
+        .height(5500)
+        .width(1600)
+        .config({
+            facet:{
+                rows:{
+                    verticalAlign: 'middle'
+                }
+            }
+        })
         .config({
             axes: {
                 x: {
@@ -94,5 +92,8 @@ d3.json('../../data/cars.json', (data) => {
             }
         ])
         .mount('#chart');
+        setTimeout(()=>{
+            // canvas.rows(['Origin', 'Cylinders', 'Year'])
+        }, 2000)
 });
 
