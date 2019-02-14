@@ -142,7 +142,8 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setTickConfig () {
         const {
-            tickValues
+            tickValues,
+            tickFormat
         } = this.config();
         const {
             showInnerTicks
@@ -158,8 +159,21 @@ export default class ContinousAxis extends SimpleAxis {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
             return this;
         }
-        axis.tickValues(this.getTickValues());
+        const newTickValues = this.getTickValues();
 
+        axis.tickValues(newTickValues);
+        const smartLabel = this.dependencies().labelManager;
+        smartLabel.setStyle(this._tickLabelStyle);
+
+        const smartTicks = newTickValues.map((e) => {
+            const text = tickFormat(e);
+            const tickSpace = smartLabel.getOriSize(text);
+
+            tickSpace.text = text;
+            return tickSpace;
+        });
+
+        this.smartTicks(smartTicks);
         return this;
     }
 
@@ -215,7 +229,9 @@ export default class ContinousAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const ticks = axis.scale().ticks();
-        const { width, height } = this.axisComponentDimensions().allTickDimensions[0];
+
+        const { width, height } = this.smartTicks()[0];
+
         axis.tickTransform((d) => {
             if (d === ticks[0]) {
                 if ((orientation === LEFT || orientation === RIGHT)) {

@@ -64,7 +64,7 @@ d3.json('../../data/cars.json', (data) => {
         Acceleration: "avg"
     });
 
-    env.canvas()
+   window.canvas =  env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
         .columns(["Year"])
@@ -75,7 +75,7 @@ d3.json('../../data/cars.json', (data) => {
             axes: {
                 x: {
                     tickFormat: (val, rawVal, i, ticks) => {
-                        console.log(val, rawVal, ticks);
+                   
                         return val;
                     }
                 },

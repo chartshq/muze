@@ -42,8 +42,13 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) =
     }
 
     numberOfValues = Math.min(numberOfTicks, Math.max(2, numberOfValues));
+    let tickValues = axis.scale().ticks(numberOfValues);
 
-    return axis.scale().ticks(numberOfValues);
+    if (numberOfValues === 2) {
+        tickValues = axis.scale().ticks(10);
+        tickValues = [tickValues[0], tickValues[tickValues.length - 1]];
+    }
+    return tickValues;
 };
 
 export const getAxisComponentDimensions = (context) => {
