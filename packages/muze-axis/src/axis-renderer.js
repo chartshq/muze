@@ -206,42 +206,6 @@ const setAxisNamePos = (textNode, orientation, measures) => {
     return textNode;
 };
 
-const optimumTickCount = (context, ticks, tickFormatter) => {
-    // const numberOfTicks = context.getTickValues().length;
-    let previousTick;
-    let currentTick;
-
-    const tickFormatterFn = tickFormatter(ticks);
-    const smartLabel = context.dependencies().labelManager;
-    const sizeOfPreviousTick = smartLabel.getOriSize(tickFormatterFn(ticks[0]));
-    let { width: previousTickWidth } = sizeOfPreviousTick;
-    let xPosPreviousTick = context.getScaleValue(ticks[0]);
-    let previousTickIndex = 0;
-
-    for (let i = 1; i < ticks.length - 1; i++) {
-        // const sizeOfNextTick = smartLabel.getOriSize(tickFormatterFn(ticks[ticks.indexOf(ticks[i]) + 1]));
-        const sizeOfCurrentTick = smartLabel.getOriSize(tickFormatterFn(ticks[i]));
-        const { width: currentTickWidth } = sizeOfCurrentTick;
-
-        const xPosCurrentTick = context.getScaleValue(ticks[i]);
-
-        previousTick = xPosPreviousTick + previousTickWidth / 2;
-        currentTick = xPosCurrentTick - currentTickWidth / 2;
-
-        if (previousTick > currentTick) {
-            ticks.splice(ticks.indexOf(ticks[previousTickIndex]), 1);
-            // i -= 1;
-            // i += 1;
-        }
-        previousTickIndex = i;
-        xPosPreviousTick = xPosCurrentTick;
-        previousTickWidth = currentTickWidth;
-    }
-    context.axis().tickValues(ticks);
-
-    return ticks;
-};
-
 /**
  * This method is used to render the axis inside an
  * svg container.
@@ -296,12 +260,9 @@ export function renderAxis (axisInstance) {
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    let ticksArray = tickValues || axis.tickValues() || labelFunc();
-    if (id === 'x-0-0') {
-        ticksArray = optimumTickCount(axisInstance, ticksArray, axisTickFormatter);
-    }
+    const ticks = tickValues || axis.tickValues() || labelFunc();
 
-    axis.tickFormat(axisTickFormatter(ticksArray));
+    axis.tickFormat(axisTickFormatter(ticks));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);

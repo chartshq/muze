@@ -78,6 +78,7 @@ export const getAxisComponentDimensions = (context) => {
         if (tickDimensions.width > largestTickDimensions.width) {
             largestTick = label;
             smartTick = context.smartTicks() ? context.smartTicks()[i] : {};
+            smartTick = smartTick || {};
             largestTickDimensions = tickDimensions;
         }
         return label;

@@ -129,6 +129,12 @@ export default class TimeAxis extends SimpleAxis {
             setContinousAxisDomain(this, domainValue);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
+
+            // Set available space on interaction
+            if (this.range().length) {
+                const { width, height, padding, isOffset } = this.availableSpace();
+                this.setAvailableSpace(width, height, padding, isOffset);
+            }
             return this;
         }
         return this._domain;

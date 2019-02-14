@@ -57,7 +57,7 @@ d3.csv('../data/sp500.csv', (data) => {
             .rows(['price'])
             .columns(['date'])
             .width(800)
-            .height(150)
+            .height(160)
             .config(chartConf)
             .layers([{
                 // mark: 'area',
