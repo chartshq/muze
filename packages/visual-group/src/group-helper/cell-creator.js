@@ -177,7 +177,9 @@ const axisPlaceholderGn = (context, selObj, cells) => {
                 });
             } else {
                 selObj.rowsPrimary = createAxisCells(selObj.rowPrime, axes.map(() => []), 0, cells);
+                selObj.rowsSecondary = createAxisCells(selObj.rowSec, axes.map(() => []), 0, cells);
                 selObj.columnsPrimary = createAxisCells(selObj.colPrime, axes[0], 0, cells);
+                selObj.columnsSecondary = createAxisCells(selObj.colSec, axes[0], 0, cells);
             }
         }
         return selObj;
