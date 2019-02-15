@@ -58,9 +58,9 @@ d3.json('../../data/cars.json', (data) => {
    window.canvas =  env.canvas()
         .data(rootData)
         .columns(['Acceleration'])
-        .rows(['Origin','Cylinders',"Year"])
+        .rows([ "Year"])
         .color("Origin")
-        .height(5500)
+        .height(200)
         .width(1600)
         .config({
             facet:{
@@ -72,12 +72,14 @@ d3.json('../../data/cars.json', (data) => {
         .config({
             axes: {
                 x: {
+                  
                     tickFormat: (val, rawVal, i, ticks) => {
                    
                         return val;
                     }
                 },
                 y: {
+                    name: 'akasndklasndoiansflkjasdnfoslkdnf',
                     tickFormat: (val, rawVal) => {
                         // console.log(val, rawVal);
                         return val;
@@ -92,8 +94,5 @@ d3.json('../../data/cars.json', (data) => {
             }
         ])
         .mount('#chart');
-        setTimeout(()=>{
-            // canvas.rows(['Origin', 'Cylinders', 'Year'])
-        }, 2000)
 });
 
