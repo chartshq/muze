@@ -374,8 +374,7 @@ export const resetTickInterval = (context) => {
         const tickInterval = ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks);
 
         context.maxTickSpaces({
-            width: tickInterval,
-            noWrap: true
+            width: tickInterval
         });
 
         context.setTickConfig();

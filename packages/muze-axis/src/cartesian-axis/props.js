@@ -61,7 +61,13 @@ export const PROPS = {
 
     smartTicks: {},
     tickSize: {},
-    maxTickSpaces: {},
+    maxTickSpaces: {
+        sanitization: (context, value) => {
+            const oldConfig = Object.assign({}, context._maxTickSpaces || {});
+            value = mergeRecursive(oldConfig, value);
+            return value;
+        }
+    },
     valueParser: {
         defaultValue: val => val
     }

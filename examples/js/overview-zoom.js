@@ -37,7 +37,10 @@ d3.csv('../data/sp500.csv', (data) => {
         axes: {
             x: {
                     nice: false,
-                    name: 'Date'
+                    name: 'Date',
+                    tickFormat: (a, val)=>{
+                        return `${new Date(val).getFullYear()}-akdnjaskjdn`
+                    }
             },
             y: {
                     name: 'Price'
@@ -48,7 +51,7 @@ d3.csv('../data/sp500.csv', (data) => {
     const detail = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(1500)
+            .width(500)
             .height(400)
             .config(chartConf)
             .layers([{
