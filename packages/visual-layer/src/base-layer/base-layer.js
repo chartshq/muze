@@ -483,6 +483,10 @@ export default class BaseLayer extends SimpleLayer {
         return identifiers;
     }
 
+    hasPlotSpan () {
+        return false;
+    }
+
     getPlotSpan () {
         return {
             x: 0,

@@ -300,4 +300,8 @@ export default class BarLayer extends BaseLayer {
     getPlotSpan () {
         return this._plotSpan;
     }
+
+    hasPlotSpan () {
+        return true;
+    }
 }

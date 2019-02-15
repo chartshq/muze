@@ -1,4 +1,22 @@
-import { BOTTOM, TOP } from '../enums/axis-orientation';
+import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
+
+const adjustHorizontalRange = (range, diff) => {
+    range[0] += diff;
+    range[1] -= diff;
+    return range;
+};
+const adjustVerticalRange = (range, diff) => {
+    range[0] -= diff;
+    range[1] += diff;
+    return range;
+};
+
+const rangeAdjustmentMap = {
+    [TOP]: adjustHorizontalRange,
+    [BOTTOM]: adjustHorizontalRange,
+    [LEFT]: adjustVerticalRange,
+    [RIGHT]: adjustVerticalRange
+};
 
 const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
@@ -6,9 +24,9 @@ const setAxisRange = (context, type, rangeBounds, offset) => {
 };
 
 const getAxisOffset = (timeDiff, range, domain) => {
-    const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
+    const avWidth = Math.abs(range[1] - range[0]);
+    const pvr = avWidth / (domain[1] - domain[0]);
     const width = (pvr * timeDiff);
-    const avWidth = (range[1] - range[0]);
     const bars = avWidth / width;
     const barWidth = avWidth / (bars + 1);
     const diff = avWidth - barWidth * bars;
@@ -16,15 +34,14 @@ const getAxisOffset = (timeDiff, range, domain) => {
     return diff / 2;
 };
 
-export const adjustRange = (minDiff, range, domain, orientation) => {
+export const getAdjustedRange = (minDiff, range, domain, config) => {
+    const {
+        orientation,
+        adjustRange
+    } = config;
     const diff = getAxisOffset(minDiff, range, domain);
-
-    if (orientation === TOP || orientation === BOTTOM) {
-        range[0] += diff;
-        range[1] -= diff;
-    } else {
-        range[0] -= diff;
-        range[1] += diff;
+    if (adjustRange) {
+        return rangeAdjustmentMap[orientation](range, diff);
     }
     return range;
 };
@@ -32,6 +49,7 @@ export const adjustRange = (minDiff, range, domain, orientation) => {
 export const spaceSetter = (context, spaceConfig) => {
     let tickInterval;
     let heightForTicks;
+    const config = context.config();
     const {
         width: availWidth,
         height: availHeight,
@@ -54,11 +72,10 @@ export const spaceSetter = (context, spaceConfig) => {
         rotation
     } = labels;
     const {
-        orientation,
         fixedBaseline,
         axisNamePadding,
         tickValues
-    } = context.config();
+    } = config;
     const {
         tickDimensions,
         allTickDimensions,
@@ -108,7 +125,8 @@ export const spaceSetter = (context, spaceConfig) => {
                 }
 
                 // set range for axis
-                setAxisRange(context, 'y', adjustRange(minDiff, [0, availWidth - left - right], domain, orientation),
+                setAxisRange(context, 'y', getAdjustedRange(minDiff, [tickInterval / 2,
+                    availWidth - left - right - tickInterval / 2], domain, config),
                         isOffset ? availHeight : null);
 
                 context.maxTickSpaces({
@@ -122,8 +140,8 @@ export const spaceSetter = (context, spaceConfig) => {
                 let widthForTicks = availWidth;
                 const tickShifter = tickDimHeight / 2;
 
-                setAxisRange(context, 'x', adjustRange(minDiff,
-                    [availHeight - top - bottom - tickShifter, tickShifter], domain, orientation),
+                setAxisRange(context, 'x', getAdjustedRange(minDiff,
+                    [availHeight - top - bottom - tickShifter, tickShifter], domain, config),
                         isOffset ? availWidth : null);
 
                 if ((availWidth - axisNameHeight - namePadding) <= minWidthBetweenTicks) {

@@ -2,7 +2,7 @@ import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset } from './helper';
+import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset, resetTickInterval } from './helper';
 import { spaceSetter } from './space-setter';
 
 /**
@@ -130,11 +130,7 @@ export default class TimeAxis extends SimpleAxis {
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
 
-            // Set available space on interaction
-            if (this.range().length) {
-                const { width, height, padding, isOffset } = this.availableSpace();
-                this.setAvailableSpace(width, height, padding, isOffset);
-            }
+            resetTickInterval(this);
             return this;
         }
         return this._domain;

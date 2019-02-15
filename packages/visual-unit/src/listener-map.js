@@ -63,6 +63,13 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 }
 
                 context.addLayer(layerDefs);
+                ['x', 'y'].forEach((type) => {
+                    context.axes[type] && context.axes[type].forEach((axis) => {
+                        axis.config({
+                            adjustRange: context.layers().some(inst => inst.hasPlotSpan())
+                        });
+                    });
+                });
                 context._lifeCycleManager.notify({
                     client: context.layers(),
                     action: 'initialized',

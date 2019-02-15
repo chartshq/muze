@@ -23,7 +23,14 @@ d3.csv('../data/sp500.csv', (data) => {
     let env = window.muze();
     const DataModel = window.muze.DataModel;
 
-    const rootData = new DataModel(data, schema);
+    const rootData = new DataModel(data, schema)
+    // .select(fields=>{
+    //     const date = new Date(fields.date.value);
+    //     const year = date.getFullYear();
+    //     const month = date.getMonth();
+    //     return year === 2002 && (month === 5 || month === 6);
+    //     // return fields.date.value >new Date('2002', 5, 1).getTime() && fields.date.value < new Date('2002', 6, 1).getTime()
+    // });
 
     env = env.data(rootData);
     const chartConf = {
@@ -41,7 +48,7 @@ d3.csv('../data/sp500.csv', (data) => {
     const detail = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(800)
+            .width(1500)
             .height(400)
             .config(chartConf)
             .layers([{
@@ -56,7 +63,7 @@ d3.csv('../data/sp500.csv', (data) => {
     const overview = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(800)
+            .width(750)
             .height(160)
             .config(chartConf)
             .layers([{
@@ -64,6 +71,13 @@ d3.csv('../data/sp500.csv', (data) => {
                 interpolate: 'catmullRom'
             }])
             .mount('#chart2');
+            overview.once('canvas.animationend').then(()=>{
+            // overview.firebolt().dispatchBehaviour('filter', {
+            //     criteria:{
+            //         date: [new Date('2002', 5, 1).getTime(),new Date('2002', 6, 1).getTime()]
+            //     }
+            // })
+        })
 
     muze.ActionModel
         .for(detail, overview).enableCrossInteractivity()

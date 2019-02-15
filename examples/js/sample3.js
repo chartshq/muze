@@ -70,7 +70,7 @@ d3.json('../../data/cars.json', (data) => {
         .columns(["Year"])
         .color("Origin")
         .height(500)
-        .width(600)
+        .width(500)
         .config({
             axes: {
                 x: {
@@ -94,5 +94,11 @@ d3.json('../../data/cars.json', (data) => {
             }
         ])
         .mount('#chart');
+
+        setTimeout(()=>{
+            canvas.rows(['Acceleration'])
+            canvas.columns(['Horsepower'])
+            canvas.detail(['Maker'])
+        }, 2000)
 });
 

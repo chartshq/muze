@@ -121,6 +121,7 @@ export default class CartesianEncoder extends VisualEncoder {
                     fieldArr.forEach((field, axisIndex) => {
                         const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
                         const dom = unitDomains[`${rIdx}${cIdx}`];
+
                         if (dom && Object.keys(dom).length !== 0) {
                             domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
                                 dom[`${field}`]], field.subtype());
@@ -151,6 +152,7 @@ export default class CartesianEncoder extends VisualEncoder {
                 axes.forEach((axis, index) => {
                     const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
                     domain = adjustedDomain[index] || domains[axisType][key];
+
                     domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
                     store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);

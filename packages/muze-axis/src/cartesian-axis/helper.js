@@ -360,3 +360,24 @@ export const hasAxesConfigChanged = (obj = {}, obj1 = {}, properties) => {
     }
     return properties.some(key => obj[key] !== obj1[key]);
 };
+
+export const resetTickInterval = (context) => {
+    const {
+        orientation
+    } = context.config();
+
+     // Set available space on interaction
+    if (context.range().length && (orientation === TOP || orientation === BOTTOM)) {
+        const noOfTicks = context.getTickValues().length;
+        const { width } = context.availableSpace();
+        // Get the Tick Interval
+        const tickInterval = ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks);
+
+        context.maxTickSpaces({
+            width: tickInterval,
+            noWrap: true
+        });
+
+        context.setTickConfig();
+    }
+};

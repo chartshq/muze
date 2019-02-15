@@ -7,6 +7,7 @@ import { CLASSPREFIX } from '../enums/constants';
  */
 export const defaultConfig = {
     id: getUniqueId(),
+    adjustRange: false,
     axisName: {
         defClassName: 'axis-name'
     },
