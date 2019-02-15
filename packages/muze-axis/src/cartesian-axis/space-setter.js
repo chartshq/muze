@@ -1,4 +1,5 @@
 import { BOTTOM, TOP } from '../enums/axis-orientation';
+import { TIME, LINEAR, BAND } from '../enums/scale-type';
 
 const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
@@ -82,7 +83,7 @@ export const spaceSetter = (context, spaceConfig) => {
     const minTickHeight = minTickSpace.height;
 
     return {
-        time: {
+        [TIME]: {
             x: () => {
                 const noOfTicks = context.getTickValues().length;
 
@@ -142,7 +143,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 return labelConfig;
             }
         },
-        band: {
+        [BAND]: {
             x: () => {
                 setAxisRange(context, 'y', [0, availWidth - left - right], isOffset ? availHeight : null);
                 const range = context.range();
@@ -202,7 +203,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 return labelConfig;
             }
         },
-        continous: {
+        [LINEAR]: {
             x: () => {
                 labelConfig.smartTicks = false;
                 const tickShifter = tickDimWidth / 2;

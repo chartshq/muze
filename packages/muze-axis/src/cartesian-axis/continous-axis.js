@@ -1,7 +1,6 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
-import { spaceSetter } from './space-setter';
 import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import {
@@ -110,25 +109,8 @@ export default class ContinousAxis extends SimpleAxis {
      * @param {number} height The height of SimpleCell.
      * @memberof AxisCell
      */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).continous.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).continous.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
+    setAvailableSpace (...params) {
+        super.setAvailableSpace(...params);
         this.getTickSize();
         return this;
     }

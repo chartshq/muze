@@ -1,8 +1,6 @@
 import SimpleAxis from './simple-axis';
 import { BAND } from '../enums/scale-type';
-import { TOP, BOTTOM } from '../enums/axis-orientation';
 import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
-import { spaceSetter } from './space-setter';
 
 export default class BandAxis extends SimpleAxis {
 
@@ -26,36 +24,6 @@ export default class BandAxis extends SimpleAxis {
      */
     static type () {
         return BAND;
-    }
-
-     /**
-     * This method is used to set the space availiable to render
-     * the SimpleCell.
-     *
-     * @param {number} width The width of SimpleCell.
-     * @param {number} height The height of SimpleCell.
-     * @memberof AxisCell
-     */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).band.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).band.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
-        return this;
     }
 
     /**

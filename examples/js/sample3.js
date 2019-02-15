@@ -44,30 +44,32 @@ d3.json('../../data/cars.json', (data) => {
     },
     {
         name: 'Year',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        type: 'dimension'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
  
 
-    let rootData = new DataModel(jsonData, schema);
+    let rootData = new DataModel(jsonData, schema)
+    .select(fields=>fields.Year.value === '1972-01-01');
 
 
    window.canvas =  env.canvas()
         .data(rootData)
         .columns(['Acceleration'])
-        .rows([ "Year"])
+        .rows([ 'Origin',"Year"])
         .color("Origin")
-        .height(200)
-        .width(1600)
+        .height(300)
+        .width(300)
         .config({
             facet:{
                 rows:{
                     verticalAlign: 'middle'
                 }
-            }
+            },
+          
         })
         .config({
             axes: {
@@ -85,7 +87,8 @@ d3.json('../../data/cars.json', (data) => {
                         return val;
                     },
                 }
-            }
+            },
+            pagination: 'holistic'
         })
         .title("Year wise average car Acceleration")
         .layers([
