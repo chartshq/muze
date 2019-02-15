@@ -100,18 +100,11 @@ class Selection {
             currentData = this._updatedata;
         }
 
-        let entries = currentData.entries();
+        const entries = currentData.entries();
 
         while (val = entries.next().value) {
             dataObjects.set(val[0], callback(val[1]));
             data.set(val[0], val[1]);
-        }
-
-        entries = this._updatedata.entries();
-        while (val = entries.next().value) {
-            if (!this._exitdata.has(val[0])) {
-                dataObjects.set(val[0], callback(val[1]));
-            }
         }
 
         const newSelection = new Selection(this._idGetter);

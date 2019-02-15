@@ -109,10 +109,23 @@ d3.json('../../data/cars.json', (data) => {
         }, 5000)
 
         setTimeout(()=>{
-            console.log('Updating 2...')
+            console.log('Updating 3...')
             canvas.rows(['Displacement','Miles_per_Gallon'])
             .columns(['Miles_per_Gallon','Displacement'])
             .color('Cylinders')
             .shape('Origin')
         }, 8000)
+
+        setTimeout(()=>{
+            console.log('Updating 4...')
+            canvas.rows(['Displacement','Miles_per_Gallon'])
+            .columns(['Year'])
+            .color('Origin')
+            .shape('Cylinders')
+            .layers([
+                {
+                    mark: "bar"
+                }
+            ])
+        }, 12000)
 });
