@@ -33,7 +33,7 @@ export default {
                     const cachedData = context.cachedData();
                     context.cachedData([...cachedData, data]);
                 } else {
-                    const oldData = context.data();
+                    const oldData = context.cachedData()[0];
                     oldData && oldData.unsubscribe('propagation');
                     context.cachedData([data]);
                 }

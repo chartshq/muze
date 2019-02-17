@@ -101,7 +101,7 @@ export default class PolarEncoder extends VisualEncoder {
                     Math.min(domainVal[key][1], domainProps[key][1])];
             }
         });
-        for (let key in domainProps) {
+        for (const key in domainProps) {
             store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${key}`, domainProps[key]);
         }
     }
