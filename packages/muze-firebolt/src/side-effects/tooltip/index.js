@@ -44,7 +44,8 @@ export default class Tooltip extends SpawnableSideEffect {
                 dataTransform: (dt, fields) => {
                     const fieldspace = dt.getFieldspace();
                     const dimensions = Object.keys(fieldspace.getDimension());
-                    const projectedFields = defaultValue(fields, [Object.keys(fieldspace.getMeasure())[0]]);
+                    const measures = Object.keys(fieldspace.getMeasure());
+                    const projectedFields = defaultValue(fields, measures.length ? [measures[0]] : []);
                     return dt.project([...dimensions, ...projectedFields], {
                         saveChild: false
                     });
