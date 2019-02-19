@@ -15,7 +15,8 @@ import {
     getFieldsFromSuppliedLayers,
     extractFields
 } from './group-utils';
-import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP, BOTTOM, PRIMARY, SECONDARY, X, Y } from '../enums/constants';
+import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
+    BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
 
 /**
  * Updates row and column cells with the geom cell corresponding to the facet keys
@@ -446,6 +447,11 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
     };
 };
 
+const sortDmTemporalFields = datamodel => datamodel.sort(datamodel
+                            .getSchema()
+                            .reduce((acc, field) =>
+                                (field.subtype && field.subtype === TEMPORAL ? [...acc, [field.name]] : acc), []));
+
 /**
  * Computes matrices for a group
  *
@@ -542,6 +548,8 @@ export const computeMatrices = (context, config) => {
         groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
+    // sort temporal fields if any in the given rows and columns
+    groupedModel = sortDmTemporalFields(groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
