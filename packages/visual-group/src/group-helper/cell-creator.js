@@ -446,11 +446,22 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         rowPriority
     };
 };
+const getAxisFields = (projections, fieldHolder = []) =>
+                            projections.reduce((acc, item) =>
+                                [...acc, ...item.reduce((ac, field) =>
+                                    [...ac, field.oneVar()], [])], fieldHolder);
 
-const sortDmTemporalFields = datamodel => datamodel.sort(datamodel
-                            .getSchema()
-                            .reduce((acc, field) =>
-                                (field.subtype && field.subtype === TEMPORAL ? [...acc, [field.name]] : acc), []));
+const sortDmTemporalFields = (resolver, datamodel) => {
+    let axisFields = [];
+    const projections = resolver.projections();
+    axisFields = getAxisFields(projections.colProjections, axisFields);
+    axisFields = getAxisFields(projections.rowProjections, axisFields);
+
+    const fieldConfig = datamodel.getFieldsConfig();
+    const temporalFields = axisFields.reduce((acc, field) =>
+                                    ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
+    return temporalFields.length ? datamodel.sort(temporalFields, { saveChild: true }) : datamodel;
+};
 
 /**
  * Computes matrices for a group
@@ -544,12 +555,12 @@ export const computeMatrices = (context, config) => {
         const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-
+        console.log(resolver.projections());
         groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
     // sort temporal fields if any in the given rows and columns
-    groupedModel = sortDmTemporalFields(groupedModel);
+    groupedModel = sortDmTemporalFields(resolver, groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
