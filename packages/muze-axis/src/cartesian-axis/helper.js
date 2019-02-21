@@ -1,5 +1,6 @@
 import { defaultValue } from 'muze-utils';
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
+import { setAxisRange, getAdjustedRange } from './space-setter';
 
 export const getRotatedSpaces = (rotation = 0, width, height) => {
     let rotatedHeight = height;
@@ -361,21 +362,33 @@ export const hasAxesConfigChanged = (obj = {}, obj1 = {}, properties) => {
     return properties.some(key => obj[key] !== obj1[key]);
 };
 
-export const resetTickInterval = (context) => {
+export const resetTickInterval = (context, domain) => {
     const {
-        orientation
+        orientation,
+        isOffset
     } = context.config();
+    const minDiff = context._minDiff;
 
      // Set available space on interaction
     if (context.range().length && (orientation === TOP || orientation === BOTTOM)) {
         const noOfTicks = context.getTickValues().length;
-        const { width } = context.availableSpace();
+        const { width, height, padding } = context.availableSpace();
+        const {
+
+            left,
+            right
+        } = padding;
         // Get the Tick Interval
         const tickInterval = ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks);
 
         context.maxTickSpaces({
             width: tickInterval
         });
+
+         // set range for axis
+        setAxisRange(context, 'y', getAdjustedRange(minDiff, [tickInterval / 2,
+            width - left - right - tickInterval / 2], domain, context.config()),
+                isOffset ? height : null);
 
         context.setTickConfig();
     }

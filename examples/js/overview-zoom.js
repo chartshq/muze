@@ -38,9 +38,9 @@ d3.csv('../data/sp500.csv', (data) => {
             x: {
                     nice: false,
                     name: 'Date',
-                    tickFormat: (a, val)=>{
-                        return `${new Date(val).getFullYear()}-akdnjaskjdn`
-                    }
+                    // tickFormat: (a, val)=>{
+                    //     return `${new Date(val).getFullYear()}-akdnjaskjdn`
+                    // }
             },
             y: {
                     name: 'Price'

@@ -18,7 +18,7 @@ const rangeAdjustmentMap = {
     [RIGHT]: adjustVerticalRange
 };
 
-const setAxisRange = (context, type, rangeBounds, offset) => {
+export const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
     offset && context.config({ [`${type}Offset`]: offset });
 };
