@@ -29,14 +29,16 @@ export const PROPS = {
                 show,
                 showInnerTicks,
                 showOuterTicks,
-                showAxisName
+                showAxisName,
+                tickValues
             } = value;
             context.renderConfig({
                 labels,
                 show,
                 showInnerTicks,
                 showOuterTicks,
-                showAxisName
+                showAxisName,
+                tickValues
             });
             return value;
         }

@@ -142,10 +142,10 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setTickConfig () {
         const {
-            tickValues,
             tickFormat
         } = this.config();
         const {
+            tickValues,
             showInnerTicks
         } = this.renderConfig();
         const axis = this.axis();

@@ -51,7 +51,7 @@ d3.csv('../data/sp500.csv', (data) => {
     const detail = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(500)
+            .width(200)
             .height(400)
             .config(chartConf)
             .layers([{
@@ -62,11 +62,11 @@ d3.csv('../data/sp500.csv', (data) => {
             }])
             .title('Select a range from the bottom chart to get a detailed view for that range')
             .mount('#chart1');
-
+window.detail = detail
     const overview = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(750)
+            .width(550)
             .height(160)
             .config(chartConf)
             .layers([{

@@ -70,7 +70,7 @@ d3.json('../../data/cars.json', (data) => {
         .columns(["Year"])
         .color("Origin")
         .height(500)
-        .width(500)
+        .width(1300)
         .config({
             axes: {
                 x: {

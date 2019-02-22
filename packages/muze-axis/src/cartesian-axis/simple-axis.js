@@ -123,7 +123,7 @@ export default class SimpleAxis {
             const domainValue = getValidDomain(this, domain[0]);
             this.scale().domain(domainValue);
             this._domain = this.scale().domain();
-            this.setAxisComponentDimensions();
+
             this.logicalSpace(null);
             return this;
         }
@@ -183,6 +183,7 @@ export default class SimpleAxis {
     resetLogicalSpace () {
         this.logicalSpace(null);
         this.range([]);
+
         const {
             labels,
             show,
@@ -220,6 +221,13 @@ export default class SimpleAxis {
             return axis;
         }
         return null;
+    }
+
+    setTickValues (tickValues) {
+        const renderConfig = this.renderConfig();
+        this.config({ ...renderConfig, tickValues });
+        this.tickValues = tickValues;
+        this.axis().tickValues(tickValues);
     }
 
     /**
@@ -298,8 +306,9 @@ export default class SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
+            this.setAxisComponentDimensions();
             this.logicalSpace(calculateContinousSpace(this));
-            this.logicalSpace();
+
             setOffset(this);
         }
 

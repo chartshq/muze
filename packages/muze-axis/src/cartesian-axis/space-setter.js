@@ -1,10 +1,29 @@
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
+import { getSkippedTicks } from './skip-ticks';
+
+export const applyTickSkipping = (context) => {
+    const minTickDistance = context._minTickDistance;
+    const minTickSpace = context._minTickSpace;
+    const minWidthBetweenTicks = minTickDistance.width;
+    const minTickWidth = minTickSpace.width;
+
+    const { width } = context.availableSpace();
+
+    const maxTicks = Math.floor((width + minWidthBetweenTicks) / (minTickWidth + minWidthBetweenTicks));
+
+    const ticks = context.scale().ticks(getSkippedTicks(context, maxTicks));
+
+    context.renderConfig({
+        tickValues: ticks
+    });
+};
 
 const adjustHorizontalRange = (range, diff) => {
     range[0] += diff;
     range[1] -= diff;
     return range;
 };
+
 const adjustVerticalRange = (range, diff) => {
     range[0] -= diff;
     range[1] += diff;
@@ -101,6 +120,7 @@ export const spaceSetter = (context, spaceConfig) => {
     return {
         time: {
             x: () => {
+                !tickValues && context.applyTickSkipping();
                 const noOfTicks = context.getTickValues().length;
 
                 // Get the Tick Interval

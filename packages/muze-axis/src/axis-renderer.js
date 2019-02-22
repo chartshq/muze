@@ -259,7 +259,8 @@ export function renderAxis (axisInstance) {
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    const ticks = tickValues || axis.tickValues() || labelFunc();
+    const ticks = axis.tickValues() || labelFunc();
+
 
     axis.tickFormat(axisTickFormatter(ticks));
 

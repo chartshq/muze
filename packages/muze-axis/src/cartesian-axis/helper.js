@@ -371,7 +371,9 @@ export const resetTickInterval = (context, domain) => {
 
      // Set available space on interaction
     if (context.range().length && (orientation === TOP || orientation === BOTTOM)) {
+        context.applyTickSkipping();
         const noOfTicks = context.getTickValues().length;
+
         const { width, height, padding } = context.availableSpace();
         const {
 

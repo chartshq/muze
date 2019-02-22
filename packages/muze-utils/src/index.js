@@ -122,6 +122,17 @@ export {
     hasTouch
 } from './renderer-utils';
 
+export {
+    timeMillisecond,
+    timeSecond,
+    timeMinute,
+    timeHour,
+    timeDay,
+    timeWeek,
+    timeMonth,
+    timeYear
+} from 'd3-time';
+
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
 
 export { dataSelect, DataObject } from './DataSystem';
