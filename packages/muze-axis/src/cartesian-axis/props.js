@@ -30,7 +30,9 @@ export const PROPS = {
                 showInnerTicks,
                 showOuterTicks,
                 showAxisName,
-                tickValues
+                tickValues,
+                xOffset,
+                yOffset
             } = value;
             context.renderConfig({
                 labels,
@@ -38,7 +40,9 @@ export const PROPS = {
                 showInnerTicks,
                 showOuterTicks,
                 showAxisName,
-                tickValues
+                tickValues,
+                xOffset,
+                yOffset
             });
             return value;
         }

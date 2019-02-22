@@ -39,7 +39,7 @@ const rangeAdjustmentMap = {
 
 export const setAxisRange = (context, type, rangeBounds, offset) => {
     context.range(rangeBounds);
-    offset && context.config({ [`${type}Offset`]: offset });
+    offset && context.renderConfig({ [`${type}Offset`]: offset });
 };
 
 const getAxisOffset = (timeDiff, range, domain) => {
@@ -59,6 +59,7 @@ export const getAdjustedRange = (minDiff, range, domain, config) => {
         adjustRange
     } = config;
     const diff = getAxisOffset(minDiff, range, domain);
+
     if (adjustRange) {
         return rangeAdjustmentMap[orientation](range, diff);
     }
@@ -143,9 +144,10 @@ export const spaceSetter = (context, spaceConfig) => {
                     context.renderConfig({ show: false });
                 }
 
+                const tickShifter = Math.min(tickInterval, tickDimWidth);
                 // set range for axis
-                setAxisRange(context, 'y', getAdjustedRange(minDiff, [tickInterval / 2,
-                    availWidth - left - right - tickInterval / 2], domain, config),
+                setAxisRange(context, 'y', getAdjustedRange(minDiff, [tickShifter / 2,
+                    availWidth - left - right - tickShifter / 2], domain, config),
                         isOffset ? availHeight : null);
 
                 context.maxTickSpaces({
@@ -153,6 +155,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     height: heightForTicks,
                     noWrap: rotation !== null
                 });
+                console.log(context.renderConfig().tickValues);
                 return labelConfig;
             },
             y: () => {
@@ -256,7 +259,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const availableWidth = range[1] - range[0];
 
                  // Rotate labels if not enough width
-                if (availableWidth < totalTickWidth && labels.rotation !== null) {
+                if (availableWidth < totalTickWidth && labels.rotation === null) {
                     if (availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight) {
                         labelConfig.rotation = null;
                         context.renderConfig({

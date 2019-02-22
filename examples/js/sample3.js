@@ -32,7 +32,7 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Acceleration',
         type: 'measure',
-        numberFormat: (val) => "$" + val 
+        // numberFormat: (val) => "$" + val 
     },
     {
         name: 'Origin',
@@ -50,14 +50,14 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    ];
+    // jsonData = [
+    //     { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
+    //     { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
+    //     { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
+    //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
+    // ];
 
     let rootData = new DataModel(jsonData, schema);
     // rootData = rootData.groupBy(["Origin", "Year"], {
@@ -66,33 +66,14 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Year"])
+        .columns(['Acceleration'])
+        .rows([["Horsepower"]])
         .color("Origin")
         .height(500)
-        .width(1300)
-        .config({
-            axes: {
-                x: {
-                    tickFormat: (val, rawVal, i, ticks) => {
-                   
-                        return val;
-                    }
-                },
-                y: {
-                    tickFormat: (val, rawVal) => {
-                        // console.log(val, rawVal);
-                        return val;
-                    },
-                }
-            }
-        })
+        .width(600)
+       
         .title("Year wise average car Acceleration")
-        .layers([
-            {
-                mark: "line"
-            }
-        ])
+
         .mount('#chart');
 
         setTimeout(()=>{

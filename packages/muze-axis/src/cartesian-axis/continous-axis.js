@@ -232,7 +232,7 @@ export default class ContinousAxis extends SimpleAxis {
             rotation
         } = labels;
         const axis = this.axis();
-        const ticks = axis.scale().ticks();
+        const ticks = axis.tickValues();
 
         const { width, height } = this.smartTicks()[0];
 
@@ -241,6 +241,7 @@ export default class ContinousAxis extends SimpleAxis {
                 if ((orientation === LEFT || orientation === RIGHT)) {
                     return `translate(0, -${(height) / 3}px)`;
                 }
+
                 if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
                     return `translate(${width / 2}px,  ${0}px)`;
                 }

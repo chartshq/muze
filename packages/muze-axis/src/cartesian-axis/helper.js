@@ -29,7 +29,7 @@ export const setOffset = (context) => {
     if (orientation === TOP) {
         y = yOffset === undefined ? logicalSpace.height : yOffset;
     }
-    context.config({ xOffset: x, yOffset: y });
+    context.renderConfig({ xOffset: x, yOffset: y });
 };
 
 export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) => {
@@ -246,8 +246,6 @@ export const calculateBandSpace = (context) => {
             width,
             height
         } = getHorizontalAxisSpace(context, axisDimensions, range);
-        console.log(width);
-        console.log(axisDimensions);
 
         if (!width || width === 0) {
             width = allTickDimensions.reduce((t, n) =>

@@ -189,14 +189,20 @@ export default class SimpleAxis {
             show,
             showInnerTicks,
             showOuterTicks,
-            showAxisName
+            showAxisName,
+            xOffset,
+            yOffset,
+            tickValues
         } = this.config();
         this.renderConfig({
             labels,
             show,
             showInnerTicks,
             showOuterTicks,
-            showAxisName
+            showAxisName,
+            xOffset,
+            yOffset,
+            tickValues
         });
     }
 

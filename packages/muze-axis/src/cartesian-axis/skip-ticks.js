@@ -51,6 +51,9 @@ const tickIntervals = [
     [3, 3 * durationMonth, 'quaterly', timeMonth.every(3), 'quarter'],
     [6, 6 * durationMonth, 'half yearly', timeMonth.every(6), 'halfYearly'],
     [1, durationYear, 'yearly', timeYear.every(1), 'year'],
+    [2, 2 * durationYear, '2 year', timeYear.every(2), 'year'],
+    [3, 3 * durationYear, '3 year', timeYear.every(3), 'year'],
+    [5, 5 * durationYear, '5 year', timeYear.every(5), 'year'],
     [10, 10 * durationYear, 'decade', timeYear.every(10), 'year'],
     [100, 100 * durationYear, 'century', timeYear.every(100), 'year'],
     [1000, 1000 * durationYear, 'millenium', timeYear.every(1000), 'year']

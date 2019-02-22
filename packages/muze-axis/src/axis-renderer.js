@@ -231,8 +231,7 @@ export function renderAxis (axisInstance) {
     const {
         orientation,
         name,
-        xOffset,
-        yOffset,
+
         axisNamePadding,
         className,
         id,
@@ -240,6 +239,8 @@ export function renderAxis (axisInstance) {
      } = config;
     const {
         show,
+        xOffset,
+        yOffset,
         showAxisName,
         labels
     } = renderConfig;
