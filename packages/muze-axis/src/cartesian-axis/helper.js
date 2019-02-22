@@ -84,8 +84,9 @@ export const getAxisComponentDimensions = (context) => {
         if (tickDimensions.width > largestTickDimensions.width) {
             largestTick = label;
             smartTick = context.smartTicks() ? context.smartTicks()[i] : {};
-            smartTick = smartTick || {};
+
             largestTickDimensions = tickDimensions;
+            smartTick = smartTick || tickDimensions;
         }
         return label;
     });
@@ -125,6 +126,7 @@ export const computeAxisDimensions = (context) => {
     if (domain.length === 0) {
         return null;
     }
+
     if (smartTicks) {
         tickDimensions = smartTick;
     } else {
@@ -180,6 +182,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, range) => {
     } else {
         height = tickDimHeight;
     }
+
     height += (showAxisName ? axisDimHeight + axisNamePadding : 0) + tickSize;
 
     return {
@@ -232,6 +235,7 @@ export const getVerticalAxisSpace = (context, axisDimensions) => {
 export const calculateBandSpace = (context) => {
     const range = context.range();
     const axisDimensions = context.getAxisDimensions();
+
     const { orientation } = context.config();
     const { show } = context.renderConfig();
     const { largestTickDimensions, axisTicks, allTickDimensions } = axisDimensions;
@@ -242,6 +246,8 @@ export const calculateBandSpace = (context) => {
             width,
             height
         } = getHorizontalAxisSpace(context, axisDimensions, range);
+        console.log(width);
+        console.log(axisDimensions);
 
         if (!width || width === 0) {
             width = allTickDimensions.reduce((t, n) =>

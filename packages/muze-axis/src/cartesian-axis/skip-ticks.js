@@ -22,7 +22,7 @@ const longestWord = {
     quarter: 'October',
     halfYearly: 'July',
     year: 9999,
-    day: 'Wed 31',
+    day: 'September',
     hour: '24 AM',
     mintues: '60:60',
     seconds: ':60',
@@ -46,12 +46,14 @@ const tickIntervals = [
     [6, 6 * durationHour, 'six hours', timeHour.every(6), 'hour'],
     [12, 12 * durationHour, 'twelve hours', timeHour.every(12), 'hour'],
     [1, durationDay, 'daily', timeDay.every(1), 'day'],
-    [2, 2 * durationDay, 'two days', timeDay.every(2), 'day'],
     [1, durationWeek, 'weekly', timeWeek.every(1), 'week'],
     [1, durationMonth, 'monthly', timeMonth.every(1), 'week'],
     [3, 3 * durationMonth, 'quaterly', timeMonth.every(3), 'quarter'],
     [6, 6 * durationMonth, 'half yearly', timeMonth.every(6), 'halfYearly'],
-    [1, durationYear, 'yearly', timeYear.every(1), 'year']
+    [1, durationYear, 'yearly', timeYear.every(1), 'year'],
+    [10, 10 * durationYear, 'decade', timeYear.every(10), 'year'],
+    [100, 100 * durationYear, 'century', timeYear.every(100), 'year'],
+    [1000, 1000 * durationYear, 'millenium', timeYear.every(1000), 'year']
 ];
 
 const getActualTickInterval = (context, noOfTicks) => {

@@ -142,6 +142,7 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setTickConfig () {
         const {
+
             tickFormat
         } = this.config();
         const {
@@ -186,9 +187,12 @@ export default class ContinousAxis extends SimpleAxis {
     getTickValues () {
         let labelDim = 0;
         const {
-            orientation,
-            tickValues
+            orientation
+
         } = this.config();
+        const {
+            tickValues
+        } = this.renderConfig();
         const range = this.range();
         const axis = this.axis();
 
@@ -205,7 +209,7 @@ export default class ContinousAxis extends SimpleAxis {
     }
 
     getMinTickDifference () {
-        return getSmallestDiff(this.config().tickValues);
+        return getSmallestDiff(this.renderConfig().tickValues);
     }
 
     /**

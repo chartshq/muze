@@ -226,8 +226,7 @@ export function renderAxis (axisInstance) {
     const {
         _axisNameStyle: axisNameStyle,
         _tickLabelStyle: tickLabelStyle,
-        _tickFormatter: axisTickFormatter,
-        tickValues
+        _tickFormatter: axisTickFormatter
      } = axisInstance;
     const {
         orientation,
@@ -260,7 +259,6 @@ export function renderAxis (axisInstance) {
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
     const ticks = axis.tickValues() || labelFunc();
-
 
     axis.tickFormat(axisTickFormatter(ticks));
 

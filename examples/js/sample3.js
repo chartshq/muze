@@ -60,9 +60,9 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
-        Acceleration: "avg"
-    });
+    // rootData = rootData.groupBy(["Origin", "Year"], {
+    //     Acceleration: "avg"
+    // });
 
    window.canvas =  env.canvas()
         .data(rootData)
@@ -96,9 +96,9 @@ d3.json('../../data/cars.json', (data) => {
         .mount('#chart');
 
         setTimeout(()=>{
-            canvas.rows(['Acceleration'])
-            canvas.columns(['Horsepower'])
-            canvas.detail(['Maker'])
+            // canvas.rows(['Acceleration'])
+            // canvas.columns(['Horsepower'])
+            // canvas.detail(['Maker'])
         }, 2000)
 });
 

@@ -132,7 +132,6 @@ export const spaceSetter = (context, spaceConfig) => {
                 if (tickInterval < minTickWidth && rotation !== 0) {
                     // set smart ticks and rotation config
                     labelConfig.rotation = labels.rotation === null ? -90 : rotation;
-
                     // Remove ticks if not enough height
                     if (tickInterval < minTickHeight) {
                         heightForTicks = availHeight;

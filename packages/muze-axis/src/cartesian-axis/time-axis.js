@@ -133,7 +133,7 @@ export default class TimeAxis extends SimpleAxis {
         if (domain.length) {
             const domainValue = getValidDomain(this, domain[0]);
             setContinousAxisDomain(this, domainValue);
-            // this.setAxisComponentDimensions();
+            this.setAxisComponentDimensions();
             this.logicalSpace(null);
 
             resetTickInterval(this, domainValue);
@@ -150,7 +150,6 @@ export default class TimeAxis extends SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            this.setAxisComponentDimensions();
             this.logicalSpace(calculateBandSpace(this));
             this.logicalSpace();
             setOffset(this);
