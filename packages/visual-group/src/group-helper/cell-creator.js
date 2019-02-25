@@ -17,6 +17,7 @@ import {
 } from './group-utils';
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
+import { SimpleVariable } from '../variable';
 
 /**
  * Updates row and column cells with the geom cell corresponding to the facet keys
@@ -449,7 +450,7 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
 const getAxisFields = (projections, fieldHolder = []) =>
                             projections.reduce((acc, item) =>
                                 [...acc, ...item.reduce((ac, field) =>
-                                    [...ac, field.oneVar()], [])], fieldHolder);
+                                   (field instanceof SimpleVariable ? [...ac, field.oneVar()] : ac), [])], fieldHolder);
 
 const sortDmTemporalFields = (resolver, datamodel) => {
     let axisFields = [];
@@ -555,7 +556,6 @@ export const computeMatrices = (context, config) => {
         const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-        console.log(resolver.projections());
         groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
