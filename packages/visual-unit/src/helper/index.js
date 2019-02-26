@@ -74,6 +74,7 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
     definition = toArray(definition);
     definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
+        instance.coord(context.coord());
         instance.config(def);
         instance.valueParser(context.valueParser());
         instance.dependencies(dependencies);
@@ -335,4 +336,40 @@ export const createRenderPromise = (unit) => {
         });
         createRenderPromise(unit);
     });
+};
+
+export const getRadiusRange = (width, height, config) => {
+    const {
+        minOuterRadius,
+        innerRadius,
+        outerRadius,
+        innerRadiusFixer
+    } = config;
+
+    return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
+        width) / 2];
+};
+
+export const setAxisRange = (context) => {
+    const { radius, angle } = context.axes();
+    if (radius) {
+        const unitConf = context.config();
+        const config = {
+            innerRadius: Math.max(...context.layers().map(d => d.config().innerRadius || 0)),
+            outerRadius: Math.max(...context.layers().map(d => d.config().outerRadius || 0)),
+            minOuterRadius: unitConf.minOuterRadius,
+            innerRadiusFixer: unitConf.innerRadiusFixer
+        };
+        radius[0].range(getRadiusRange(context.width(), context.height(), config));
+    }
+    if (angle) {
+        let startAngle = Infinity;
+        let endAngle = -Infinity;
+        context.layers().forEach((layer) => {
+            const config = layer.config();
+            startAngle = Math.min(startAngle, config.startAngle || Infinity);
+            endAngle = Math.max(endAngle, config.endAngle || -Infinity);
+        });
+        angle[0].range([startAngle === Infinity ? 0 : startAngle, endAngle === -Infinity ? 360 : endAngle]);
+    }
 };

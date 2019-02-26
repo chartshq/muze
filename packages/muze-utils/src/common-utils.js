@@ -816,6 +816,7 @@ const generateGetterSetters = (context, props) => {
         const typeChecker = propInfo[1].typeChecker;
         const defVal = propInfo[1].defaultValue;
         const sanitization = propInfo[1].sanitization;
+        const preset = propInfo[1].preset;
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
             if (defVal) {
@@ -826,6 +827,9 @@ const generateGetterSetters = (context, props) => {
                     let value = params[0];
                     if (sanitization) {
                         value = sanitization(context, params[0]);
+                    }
+                    if (preset) {
+                        preset(context, params[0]);
                     }
                     if (typeChecker && !typeChecker(value)) {
                         return context[`_${prop}`];

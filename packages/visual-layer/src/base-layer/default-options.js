@@ -1,6 +1,18 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, COORD_TYPES } from 'muze-utils';
 import * as PROPS from '../enums/props';
 
+const { POLAR, CARTESIAN } = COORD_TYPES;
+
+const configSanitizer = {
+    [POLAR]: (config) => {
+        const encoding = config.encoding;
+        if (!encoding.angle.field) {
+            encoding.angle.field = encoding.color.field;
+        }
+        return config;
+    },
+    [CARTESIAN]: config => config
+};
 export const defaultOptions = {
     [PROPS.CONFIG]: {
         value: null,
@@ -9,7 +21,8 @@ export const defaultOptions = {
                 context._customConfig = config;
                 const constructor = context.constructor;
                 const newConf = mergeRecursive({}, constructor.defaultConfig());
-                return constructor.defaultPolicy(newConf, config);
+
+                return constructor.defaultPolicy(configSanitizer[context.coord()](newConf), config);
             }
         }
     },
@@ -25,13 +38,4 @@ export const defaultOptions = {
             }
         }
     }
-    // [PROPS.MOUNT]: {
-    //     value: null
-    // },
-    // [PROPS.AXES]: {
-    //     value: null
-    // },
-    // [PROPS.MEASUREMENT]: {
-    //     value: null
-    // }
 };

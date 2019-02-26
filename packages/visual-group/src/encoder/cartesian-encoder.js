@@ -1,16 +1,19 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES, unionDomain, COORD_TYPES, toArray } from 'muze-utils';
 import {
     generateAxisFromMap,
     getDefaultMark,
     getIndex,
     getLayerConfFromFields,
-    getAdjustedDomain
+    getAdjustedDomain,
+    sanitizeIndividualLayerConfig
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
+
+const CARTESIAN = COORD_TYPES.CARTESIAN;
 
 /**
  *
@@ -39,7 +42,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    createAxis (axesCreators, fieldInfo, context) {
+    createAxis (axesCreators, fieldInfo, context, geomCell) {
         const geomCellAxes = {};
         const {
             axes
@@ -80,6 +83,7 @@ export default class CartesianEncoder extends VisualEncoder {
                 valueParser: context.resolver.valueParser()
             });
         });
+        geomCell.axes(geomCellAxes);
         return geomCellAxes;
     }
 
@@ -290,6 +294,16 @@ export default class CartesianEncoder extends VisualEncoder {
             serializedLayers.push(def);
         });
         return serializedLayers;
+    }
+
+    sanitizeLayerConfig (encodingConfigs, userLayerConfig) {
+        const layerConfig = [];
+        userLayerConfig.forEach((config) => {
+            const def = toArray(config.def);
+            sanitizeIndividualLayerConfig(encodingConfigs, def);
+            layerConfig.push(config);
+        });
+        return layerConfig;
     }
 
     /**

@@ -8,8 +8,8 @@ import { ANGLE, RADIUS, SIZE, COLOR } from '../../enums/constants';
  * @return {number} range value
  * @memberof ArcLayer
  */
-export const getRangeValue = (datum, range, domain, defaultRadius, sizeAxis) => {
-    let domainMultiplier = 1;
+export const getRangeValue = (datum, context) => {
+    const { size: sizeAxis, radius: radiusAxis } = context.axes();
     const {
         outerRadiusValue,
         sizeVal
@@ -17,9 +17,11 @@ export const getRangeValue = (datum, range, domain, defaultRadius, sizeAxis) => 
     const sizeAxisDomain = sizeAxis.domain();
     const sizeMultiplier = sizeAxis.getSize(sizeVal) / (sizeAxisDomain ? sizeAxis.range()[1] : sizeAxis.config().value);
 
-    domainMultiplier *= (range[1] - range[0]) / (domain[1] - domain[0]);
-    const rangeVal = (range[0] + (outerRadiusValue - domain[0]) * domainMultiplier);
-    return (rangeVal || defaultRadius) * sizeMultiplier;
+    const radiusVal = radiusAxis.getScaleValue(outerRadiusValue === undefined ? radiusAxis.domain()[1] :
+        outerRadiusValue);
+    // domainMultiplier *= (range[1] - range[0]) / (domain[1] - domain[0]);
+    // const rangeVal = (range[0] + (outerRadiusValue - domain[0]) * domainMultiplier);
+    return radiusVal * sizeMultiplier;
 };
 
 /**
@@ -38,6 +40,7 @@ export const getRadiusRange = (width, height, config) => {
     return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
         width) / 2];
 };
+
 export const getPreviousPoint = (prevData, currIndex, config) => {
     const prevArc = prevData[currIndex - 1];
     const nextArc = prevData[currIndex];
@@ -67,11 +70,11 @@ export const getPreviousPoint = (prevData, currIndex, config) => {
  *
  * @memberof ArcLayer
  */
-export const tweenPie = (path, rangeValueGetter, b) => {
+export const tweenPie = (path, b) => {
     const { datum } = b[0];
-    const outerRadius = rangeValueGetter(datum);
-    datum.outerRadius = outerRadius;
-    datum._previousInfo.outerRadius = datum._previousInfo.outerRadius || outerRadius;
+    // const outerRadius = rangeValueGetter(datum);
+    // datum.outerRadius = outerRadius;
+    // datum._previousInfo.outerRadius = datum._previousInfo.outerRadius || outerRadius;
     return function (t) {
         return path(interpolator()(datum._previousInfo, datum)(t));
     };
@@ -85,7 +88,7 @@ export const tweenPie = (path, rangeValueGetter, b) => {
  *
  * @memberof ArcLayer
  */
-export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, path) => {
+export const tweenExitPie = (consecutiveExits, transition, path) => {
     if (consecutiveExits.length > 0) {
         consecutiveExits.forEach((consecutiveExitArr) => {
             const startAngle = consecutiveExitArr[0].datum.startAngle;
@@ -101,12 +104,12 @@ export const tweenExitPie = (consecutiveExits, transition, rangeValueGetter, pat
                                     .transition()
                                     .duration(transition.duration)
                                     .attrTween('d', () => function (t) {
-                                        const outerRadius = rangeValueGetter(datum);
-                                        datum.outerRadius = outerRadius;
+                                        // const outerRadius = rangeValueGetter(datum);
+                                        // datum.outerRadius = outerRadius;
                                         return path(interpolator()(datum, {
                                             startAngle: mid,
                                             endAngle: mid,
-                                            outerRadius
+                                            outerRadius: datum.outerRadius
                                         })(t));
                                     })
                                     .remove();

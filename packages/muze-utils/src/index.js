@@ -12,7 +12,8 @@ export {
 
 export {
     ReservedFields,
-    CommonProps
+    CommonProps,
+    COORD_TYPES
 } from './enums';
 
 export { STATE_NAMESPACES };

@@ -1,4 +1,4 @@
-import { FieldType } from 'muze-utils';
+import { FieldType, getObjProp } from 'muze-utils';
 import { PointLayer } from '../point';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
@@ -6,75 +6,78 @@ import drawTicks from './renderer';
 import './styles.scss';
 import { getAxesScales, getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
 
-/**
- * This layer is used to create small lines. The orientation of the line is determined by the positional
- * encoding properties x0 and y0. The mark type of the layer is ```tick```.
- *
- * @public
- *
- * @class
- * @module TickLayer
- * @extends BaseLayer
- */
-export default class TickLayer extends PointLayer {
+const pointTranslators = {
+    polar: (data, encoding, config = {}, layerInst) => {
+        const axes = layerInst.axes();
+        let points = [];
+        const { radius: radiusAxis, angle: angleAxis } = axes;
+        const dm = layerInst.data();
+        const fieldsConfig = dm.getFieldsConfig();
+        const colorEncoding = encoding.color;
+        const colorField = colorEncoding && colorEncoding.field;
+        const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
+        const measurement = layerInst.measurement();
+        const radius0Field = getObjProp(encoding, 'radius0', 'field');
+        const angle0Field = getObjProp(encoding, 'angle0', 'field');
+        const angle0Index = getObjProp(fieldsConfig, angle0Field, 'index');
+        const radius0Index = getObjProp(fieldsConfig, radius0Field, 'index');
+        const colorAxis = axes.color;
+        for (let i = 0, len = data.length; i < len; i++) {
+            const d = data[i];
 
-    /**
-     *
-     *
-     * @staticg
-     *
-     * @memberof TickLayer
-     */
-    static defaultConfig () {
-        return defaultConfig;
-    }
+            const style = {};
+            const meta = {};
+            const { color, rawColor } = getLayerColor({ _data: d._data, index: i },
+                { colorEncoding, colorAxis, colorFieldIndex });
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof TickLayer
-     */
-    static formalName () {
-        return 'tick';
-    }
+            style.stroke = color;
+            meta.stateColor = {};
+            meta.originalColor = rawColor;
+            meta.colorTransform = {};
+            const { startAngle, endAngle } = angleAxis.getScaleValue(d.angle);
+            const angle = (startAngle + endAngle) / 2 - (Math.PI / 2);
+            let angle0 = angle;
+            if (angle0Index !== undefined) {
+                const { startAngle: startAngle0, endAngle: endAngle0 } = angleAxis.getScaleValue(d.angle0);
+                angle0 = angle0Index ? (startAngle0 + endAngle0) / 2 - (Math.PI / 2) : angle;
+            }
+            const r = radiusAxis.getScaleValue(d.radius);
+            const point = {
+                enter: {},
+                update: {
+                    radius: r,
+                    radius0: radius0Index !== undefined ? radiusAxis.getScaleValue(d.radius0) : r,
+                    angle,
+                    angle0
+                },
+                style,
+                source: d._data,
+                rowId: d.uid,
+                meta
+            };
+            point.className = getIndividualClassName({ _data: d }, i, data, layerInst);
+            points.push(point);
+        }
+        points = positionPoints(layerInst, points);
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof TickLayer
-     */
-    static drawFn () {
-        return drawTicks;
-    }
-
-    /**
-     *
-     *
-     *
-     * @memberof TickLayer
-     */
-    elemType () {
-        return 'path';
-    }
-
-    /**
-     * Generates an array of objects containing x, y, width and height of the points from the data
-     * @param  {Array.<Array>} data Data Array
-     * @param  {Object} encoding  Config
-     * @param  {Object} axes     Axes object
-     * @return {Array.<Object>}  Array of points
-     */
-    translatePoints (data, encoding, axes, config = {}) {
+        for (let i = 0, len = points.length; i < len; i++) {
+            const point = points[i];
+            const { angle, radius, radius0, angle0 } = point.update;
+            point.update.x = (radius * Math.cos(angle)) + (measurement.width / 2);
+            point.update.y = (radius * Math.sin(angle)) + (measurement.height / 2);
+            point.update.y0 = (radius0 * Math.sin(angle0)) + (measurement.height / 2);
+            point.update.x0 = (radius0 * Math.cos(angle0)) + (measurement.width / 2);
+        }
+        return points;
+    },
+    cartesian: (data, encoding, config = {}, layerInst) => {
+        const axes = layerInst.axes();
         let points = [];
         const {
                 xAxis,
                 yAxis
             } = getAxesScales(axes);
-        const fieldsConfig = this.data().getFieldsConfig();
+        const fieldsConfig = layerInst.data().getFieldsConfig();
         const {
                 xField,
                 yField,
@@ -82,14 +85,14 @@ export default class TickLayer extends PointLayer {
                 y0Field,
                 xFieldType,
                 yFieldType
-            } = this.encodingFieldsInf();
+            } = layerInst.encodingFieldsInf();
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
         const colorEncoding = encoding.color;
         const colorField = colorEncoding && colorEncoding.field;
         const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
-        const measurement = this.measurement();
+        const measurement = layerInst.measurement();
         const colorAxis = axes.color;
         const { x: offsetX, y: offsetY } = config.offset;
         const { x: xSpan, y: ySpan } = config.span;
@@ -161,13 +164,80 @@ export default class TickLayer extends PointLayer {
                     rowId: d._id,
                     meta
                 };
-                point.className = getIndividualClassName(d, i, data, this);
+                point.className = getIndividualClassName(d, i, data, layerInst);
                 points.push(point);
-                this.cachePoint(d[key], point);
+                layerInst.cachePoint(d[key], point);
             }
         }
-        points = positionPoints(this, points);
+        points = positionPoints(layerInst, points);
         return points;
+    }
+};
+
+/**
+ * This layer is used to create small lines. The orientation of the line is determined by the positional
+ * encoding properties x0 and y0. The mark type of the layer is ```tick```.
+ *
+ * @public
+ *
+ * @class
+ * @module TickLayer
+ * @extends BaseLayer
+ */
+export default class TickLayer extends PointLayer {
+
+    /**
+     *
+     *
+     * @staticg
+     *
+     * @memberof TickLayer
+     */
+    static defaultConfig () {
+        return defaultConfig;
+    }
+
+    /**
+     *
+     *
+     * @static
+     *
+     * @memberof TickLayer
+     */
+    static formalName () {
+        return 'tick';
+    }
+
+    /**
+     *
+     *
+     * @static
+     *
+     * @memberof TickLayer
+     */
+    static drawFn () {
+        return drawTicks;
+    }
+
+    /**
+     *
+     *
+     *
+     * @memberof TickLayer
+     */
+    elemType () {
+        return 'path';
+    }
+
+    /**
+     * Generates an array of objects containing x, y, width and height of the points from the data
+     * @param  {Array.<Array>} data Data Array
+     * @param  {Object} encoding  Config
+     * @param  {Object} axes     Axes object
+     * @return {Array.<Object>}  Array of points
+     */
+    translatePoints (data, encoding, axes, config = {}) {
+        return pointTranslators[this.coord()](data, encoding, config, this);
     }
 
     getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {

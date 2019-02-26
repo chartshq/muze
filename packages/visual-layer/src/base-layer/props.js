@@ -1,3 +1,6 @@
+import { COORD_TYPES } from 'muze-utils';
+
+const { CARTESIAN } = COORD_TYPES;
 export const props = {
     axes: {},
     mount: {},
@@ -7,5 +10,8 @@ export const props = {
     config: {},
     valueParser: {
         defaultValue: val => val
+    },
+    coord: {
+        defaultValue: CARTESIAN
     }
 };

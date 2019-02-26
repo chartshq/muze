@@ -13,7 +13,11 @@ export const ENCODING = {
     X: 'x',
     Y: 'y',
     X0: 'x0',
-    Y0: 'y0'
+    Y0: 'y0',
+    RADIUS: 'radius',
+    RADIUS0: 'radius0',
+    ANGLE: 'angle',
+    ANGLE0: 'angle0'
 };
 
 export const ASCENDING = 'asc';

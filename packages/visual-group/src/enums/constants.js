@@ -228,14 +228,6 @@ export const ARC = 'arc';
 /**
  * Field referring to object storing the transforms
  */
-export const CARTESIAN = 'cartesian';
-/**
- * Field referring to object storing the transforms
- */
-export const POLAR = 'polar';
-/**
- * Field referring to object storing the transforms
- */
 export const CATEGORICAL = 'categorical';
 /**
  * Field referring to object storing the transforms

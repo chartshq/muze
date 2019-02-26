@@ -3,7 +3,7 @@ import { AxisOrientation } from '@chartshq/muze-axis';
 import { scaleMaps } from '../enums/scale-maps';
 import { getAxisType, getAxisKey } from '../group-helper';
 import { dataTypeScaleMap } from '../data-type-scale-map';
-import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/constants';
+import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y, COLOR, SHAPE, SIZE } from '../enums/constants';
 
 /**
  *
@@ -141,6 +141,18 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
     }
 
     return currentAxes;
+};
+
+export const sanitizeIndividualLayerConfig = (encodingConfigs, def) => {
+    [COLOR, SHAPE, SIZE].forEach((axis) => {
+        if (encodingConfigs[axis] && encodingConfigs[axis].field) {
+            def.forEach((conf) => {
+                conf.encoding = conf.encoding || {};
+                !conf.encoding[axis] && (conf.encoding[axis] = {});
+                conf.encoding[axis].field = encodingConfigs[axis].field;
+            });
+        }
+    });
 };
 
 /**

@@ -1,4 +1,4 @@
-import { Store, FieldType } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -24,9 +24,10 @@ import {
     HEADER,
     FACET,
     X,
-    Y,
-    POLAR
+    Y
 } from '../enums/constants';
+
+const POLAR = COORD_TYPES.POLAR;
 
 /**
  * Creates an instance of a store which contains the arguments to make the class reactive
@@ -261,7 +262,7 @@ export const getEncoder = (layers) => {
 
     if (layers.length) {
         // Figuring out the kind of layers the group will have
-        encoder = layers.every(e => e.mark === 'arc') ? new PolarEncoder() : encoder;
+        encoder = layers.some(e => e.mark === 'arc') ? new PolarEncoder() : encoder;
     }
     return encoder;
 };

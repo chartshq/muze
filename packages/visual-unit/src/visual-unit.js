@@ -28,7 +28,8 @@ import {
     sanitizeLayerDef,
     createSideEffectGroup,
     resolveEncodingTransform,
-    createRenderPromise
+    createRenderPromise,
+    setAxisRange
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -215,6 +216,8 @@ export default class VisualUnit {
             height,
             class: qualifiedClassName.join(' ')
         });
+
+        setAxisRange(this);
         renderGridLineLayers(this, node);
         renderLayers(this, node, this.layers(), {
             width,

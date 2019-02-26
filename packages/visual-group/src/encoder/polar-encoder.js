@@ -1,7 +1,11 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES } from 'muze-utils';
+import { ThetaAxis, RadiusAxis } from '@chartshq/muze-axis';
+import { mergeRecursive, STATE_NAMESPACES, COORD_TYPES, toArray, getObjProp } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
-import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR, COLOR } from '../enums/constants';
+import { RADIUS, ANGLE, SIZE, MEASURE, ARC, COLOR } from '../enums/constants';
+import { sanitizeIndividualLayerConfig } from './encoder-helper';
+
+const POLAR = COORD_TYPES.POLAR;
 
 /**
  *
@@ -20,7 +24,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @memberof PolarEncoder
      */
-    createAxis (axesCreators, fieldInfo) {
+    createAxis (axesCreators, fieldInfo, context, geomCell) {
         const {
             axes
         } = axesCreators;
@@ -38,10 +42,22 @@ export default class PolarEncoder extends VisualEncoder {
         pieAxes[rowIndex] = pieAxes[rowIndex] || [];
         pieAxes[rowIndex][columnIndex] = [];
 
-        geomCellAxes.pie = pieAxes;
-        geomCellAxes.x = null;
-        geomCellAxes.y = null;
+        const radiusAxes = [new RadiusAxis()];
+        const angleAxes = [new ThetaAxis()];
 
+        geomCell.axes({
+            radius: radiusAxes,
+            angle: angleAxes,
+            color: geomCellAxes.color,
+            shape: geomCellAxes.shape,
+            size: geomCellAxes.size
+        });
+        const resolverAxes = context.resolver.axes();
+        !resolverAxes.radius[rowIndex] && (resolverAxes.radius[rowIndex] = []);
+        resolverAxes.radius[rowIndex][columnIndex] = radiusAxes;
+        !resolverAxes.angle[rowIndex] && (resolverAxes.angle[rowIndex] = []);
+        resolverAxes.angle[rowIndex][columnIndex] = angleAxes;
+        resolverAxes.pie = pieAxes;
         return geomCellAxes;
     }
 
@@ -90,18 +106,26 @@ export default class PolarEncoder extends VisualEncoder {
 
     unionUnitDomains (context) {
         const store = context.store();
-        const domains = [];
         const domainProps = {
-            radius: [Infinity, -Infinity]
+            radius: [],
+            angle: []
         };
-        context.matrixInstance().value.each(cell => domains.push(cell.valueOf().getDataDomain()));
-        Object.values(domains).forEach((domainVal) => {
-            for (const key in domainVal) {
-                domainProps[key] = [Math.min(domainVal[key][0], domainProps[key][0]),
-                    Math.min(domainVal[key][1], domainProps[key][1])];
+        const axes = context.resolver().axes();
+        context.matrixInstance().value.each((cell, rIdx, cIdx) => {
+            const domains = cell.valueOf().getDataDomain();
+            for (const key in domains) {
+                !domainProps[key][rIdx] && (domainProps[key][rIdx] = []);
+                domainProps[key][rIdx][cIdx] = domains[key];
             }
         });
+
         for (const key in domainProps) {
+            const specificAxes = axes[key];
+            specificAxes.forEach((axesArr, rIdx) => {
+                axesArr.forEach((axis, cIdx) => {
+                    axis[0].domain(domainProps[key][rIdx][cIdx]);
+                });
+            });
             store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${key}`, domainProps[key]);
         }
     }
@@ -209,6 +233,7 @@ export default class PolarEncoder extends VisualEncoder {
         }
         return domains;
     }
+
     /**
      *
      *
@@ -264,5 +289,26 @@ export default class PolarEncoder extends VisualEncoder {
             });
         });
         return serializedLayers;
+    }
+
+    sanitizeLayerConfig (encodingConfigs, userLayerConfig) {
+        const layerConfig = [];
+        userLayerConfig.forEach((config) => {
+            const def = toArray(config.def);
+            sanitizeIndividualLayerConfig(encodingConfigs, def);
+            def.forEach((conf) => {
+                const encoding = conf.encoding;
+                !encoding.angle && (encoding.angle = {});
+                const angleField = getObjProp(encoding.angle, 'field');
+                if (!angleField) {
+                    Object.assign(encoding.angle, {
+                        field: encodingConfigs.color && encodingConfigs.color.field
+                    });
+                }
+            });
+
+            layerConfig.push(config);
+        });
+        return layerConfig;
     }
 }

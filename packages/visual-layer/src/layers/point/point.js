@@ -215,6 +215,7 @@ export default class PointLayer extends BaseLayer {
                     layer: this,
                     container: group.node(),
                     points,
+                    interpolate: config.interpolate,
                     className: seriesClassName,
                     transition,
                     keyFn: v => getMarkId(v.source, schema)

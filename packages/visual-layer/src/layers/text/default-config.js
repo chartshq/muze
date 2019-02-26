@@ -27,6 +27,9 @@ export const defaultConfig = {
     },
     encoding: {
         color: {},
+        size: {},
+        radius: {},
+        angle: {},
         text: {
             value: '',
             formatter: (val, i, data, context) => {

@@ -7,13 +7,15 @@ import {
     DimensionSubtype,
     STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
-    getObjProp
+    getObjProp,
+    COORD_TYPES
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
 import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
+const { POLAR, CARTESIAN } = COORD_TYPES;
 
 export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colorFieldIndex }) => {
     let rawColor = '';
@@ -105,44 +107,48 @@ export const getAxesScales = (axes) => {
     };
 };
 
-/**
- *
- *
- * @param {*} encoding
- * @param {*} fieldsConfig
- *
- */
-export const getEncodingFieldInf = (encoding, fieldsConfig) => {
-    const [xField, yField, x0Field, y0Field, colorField, shapeField, sizeField] =
+export const encodingFieldInfRetriever = {
+    [POLAR]: (encoding, fieldsConfig) => {
+        const encodingInf = {};
+        [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE].forEach((e) => {
+            const field = getObjProp(encoding, e, 'field');
+            encodingInf[`${e}Field`] = field;
+            encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
+        });
+        return encodingInf;
+    },
+    [CARTESIAN]: (encoding, fieldsConfig) => {
+        const [xField, yField, x0Field, y0Field, colorField, shapeField, sizeField] =
         [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE].map(e => encoding[e] &&
-            encoding[e].field);
+                encoding[e].field);
 
-    const [xFieldType, yFieldType] = [xField, yField, x0Field, y0Field].map(e => fieldsConfig[e] &&
-        fieldsConfig[e].def.type);
+        const [xFieldType, yFieldType] = [xField, yField, x0Field, y0Field].map(e => fieldsConfig[e] &&
+            fieldsConfig[e].def.type);
 
-    const [xFieldSubType, yFieldSubType] = [xField, yField].map(e => fieldsConfig[e] && (fieldsConfig[e].def.subtype ||
-        fieldsConfig[e].def.type));
+        const [xFieldSubType, yFieldSubType] = [xField, yField].map(e => fieldsConfig[e] &&
+            (fieldsConfig[e].def.subtype || fieldsConfig[e].def.type));
 
-    const [xFieldIndex, yFieldIndex, x0FieldIndex, y0FieldIndex] = [xField, yField, x0Field, y0Field]
-        .map(e => fieldsConfig[e] && fieldsConfig[e].index);
+        const [xFieldIndex, yFieldIndex, x0FieldIndex, y0FieldIndex] = [xField, yField, x0Field, y0Field]
+            .map(e => fieldsConfig[e] && fieldsConfig[e].index);
 
-    return {
-        xField,
-        yField,
-        colorField,
-        shapeField,
-        sizeField,
-        x0Field,
-        y0Field,
-        xFieldType,
-        yFieldType,
-        xFieldSubType,
-        yFieldSubType,
-        xFieldIndex,
-        yFieldIndex,
-        x0FieldIndex,
-        y0FieldIndex
-    };
+        return {
+            xField,
+            yField,
+            colorField,
+            shapeField,
+            sizeField,
+            x0Field,
+            y0Field,
+            xFieldType,
+            yFieldType,
+            xFieldSubType,
+            yFieldSubType,
+            xFieldIndex,
+            yFieldIndex,
+            x0FieldIndex,
+            y0FieldIndex
+        };
+    }
 };
 
 /**
@@ -184,6 +190,92 @@ export const getIndividualClassName = (d, i, data, context) => {
     return classNameStr;
 };
 
+const dataNormalizers = {
+    [POLAR]: (transformedData, encodingFieldInf, fieldsConfig) => {
+        const {
+            radiusFieldIndex,
+            angleFieldIndex,
+            radius0FieldIndex,
+            angle0FieldIndex
+        } = encodingFieldInf;
+        const fieldsLen = Object.keys(fieldsConfig).length;
+
+        /**
+         * Returns normalized data from transformed data. It recursively traverses through
+         * the transformed data if there it is nested.
+         */
+        return transformedData.map(data => data.map((d) => {
+            const pointObj = {
+                radius: d[radiusFieldIndex],
+                angle: angleFieldIndex !== undefined ? d[angleFieldIndex] : 1,
+                radius0: d[radius0FieldIndex],
+                angle0: d[angle0FieldIndex]
+            };
+            pointObj._data = d;
+            pointObj._id = d[fieldsLen];
+            return pointObj;
+        })).filter(d => d.length);
+    },
+    [CARTESIAN]: (transformedData, encodingFieldInf, fieldsConfig, transformType) => {
+        const {
+            xFieldType,
+            xFieldIndex,
+            yFieldIndex,
+            x0FieldIndex,
+            y0FieldIndex
+        } = encodingFieldInf;
+        const fieldsLen = Object.keys(fieldsConfig).length;
+        /**
+         * Returns normalized data from transformed data. It recursively traverses through
+         * the transformed data if there it is nested.
+         */
+        return transformedData.map((data) => {
+            const values = transformType === GROUP ? data.values : data;
+            return values.map((d) => {
+                let pointObj = {};
+                let tuple;
+                if (transformType === STACK) {
+                    tuple = d.data || [];
+                    let y;
+                    let y0;
+                    let x;
+                    let x0;
+                    if (d[1] >= d[0]) {
+                        y = x0 = d[1];
+                        x = y0 = d[0];
+                    } else {
+                        y = x0 = d[0];
+                        x = y0 = d[1];
+                    }
+
+                    pointObj = xFieldType === FieldType.MEASURE ? {
+                        x,
+                        x0,
+                        y: tuple[yFieldIndex],
+                        y0: tuple[yFieldIndex]
+                    } : {
+                        x: tuple[xFieldIndex],
+                        x0: tuple[xFieldIndex],
+                        y,
+                        y0
+                    };
+                    pointObj._data = tuple;
+                    pointObj._id = tuple[fieldsLen];
+                } else {
+                    pointObj = {
+                        x: d[xFieldIndex],
+                        y: d[yFieldIndex],
+                        x0: d[x0FieldIndex],
+                        y0: d[y0FieldIndex]
+                    };
+                    pointObj._data = d;
+                    pointObj._id = d[fieldsLen];
+                }
+                return pointObj;
+            });
+        }).filter(d => d.length);
+    }
+};
 /*
  * This method resolves the x, y, x0 and y0 values from the transformed data.
  * It also checks the type of transformed data for example, if it is a stacked data
@@ -193,65 +285,12 @@ export const getIndividualClassName = (d, i, data, context) => {
  * @param {string} transformType type of transformed data - stack, group or identity.
  * @return {Array.<Object>} Normalized data
 */
-export const getNormalizedData = (transformedData, fieldsConfig, encodingFieldInf, transformType) => {
+export const getNormalizedData = (transformedData, context) => {
+    const transformType = context.transformType();
     const transformedDataArr = transformType === IDENTITY ? [transformedData] : transformedData;
-    const {
-        xFieldType,
-        xFieldIndex,
-        yFieldIndex,
-        x0FieldIndex,
-        y0FieldIndex
-    } = encodingFieldInf;
-    const fieldsLen = Object.keys(fieldsConfig).length;
-    /**
-     * Returns normalized data from transformed data. It recursively traverses through
-     * the transformed data if there it is nested.
-     */
-    return transformedDataArr.map((data) => {
-        const values = transformType === GROUP ? data.values : data;
-        return values.map((d) => {
-            let pointObj = {};
-            let tuple;
-            if (transformType === STACK) {
-                tuple = d.data || [];
-                let y;
-                let y0;
-                let x;
-                let x0;
-                if (d[1] >= d[0]) {
-                    y = x0 = d[1];
-                    x = y0 = d[0];
-                } else {
-                    y = x0 = d[0];
-                    x = y0 = d[1];
-                }
-
-                pointObj = xFieldType === FieldType.MEASURE ? {
-                    x,
-                    x0,
-                    y: tuple[yFieldIndex],
-                    y0: tuple[yFieldIndex]
-                } : {
-                    x: tuple[xFieldIndex],
-                    x0: tuple[xFieldIndex],
-                    y,
-                    y0
-                };
-                pointObj._data = tuple;
-                pointObj._id = tuple[fieldsLen];
-            } else {
-                pointObj = {
-                    x: d[xFieldIndex],
-                    y: d[yFieldIndex],
-                    x0: d[x0FieldIndex],
-                    y0: d[y0FieldIndex]
-                };
-                pointObj._data = d;
-                pointObj._id = d[fieldsLen];
-            }
-            return pointObj;
-        });
-    }).filter(d => d.length);
+    const encodingFieldInf = context.encodingFieldsInf();
+    const fieldsConfig = context.data().getFieldsConfig();
+    return dataNormalizers[context.coord()](transformedDataArr, encodingFieldInf, fieldsConfig, transformType);
 };
 
 export const calculateDomainFromData = (data, encodingFieldInf, transformType) => {
