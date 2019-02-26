@@ -9,7 +9,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y, CATEGORICAL } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 /**
@@ -121,9 +121,18 @@ export default class CartesianEncoder extends VisualEncoder {
                     fieldArr.forEach((field, axisIndex) => {
                         const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
                         const dom = unitDomains[`${rIdx}${cIdx}`];
+                        const typeOfField = field.subtype();
+                        const sortingDetails = field.data()._sortingDetails;
+                        const sortingDetailsFlattened = [].concat(...sortingDetails);
+
                         if (dom && Object.keys(dom).length !== 0) {
                             domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
-                                dom[`${field}`]], field.subtype());
+                                dom[`${field}`]], typeOfField);
+                            /* Sort categorical fields to ensure consistency across all rows
+                            only if field is categorical and is not explicitily sorted by user */
+                            if (typeOfField === CATEGORICAL && !sortingDetailsFlattened.includes(field.oneVar())) {
+                                domains[axisType][key] = domains[axisType][key].sort();
+                            }
                         }
                     });
                 });
