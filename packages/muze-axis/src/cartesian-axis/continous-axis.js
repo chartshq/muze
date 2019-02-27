@@ -158,7 +158,6 @@ export default class ContinousAxis extends SimpleAxis {
 
         if (tickValues) {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
-            return this;
         }
         const newTickValues = this.getTickValues();
 
@@ -201,7 +200,8 @@ export default class ContinousAxis extends SimpleAxis {
         const labelProps = this.axisComponentDimensions().largestTickDimensions;
 
         if (tickValues) {
-            return axis.scale().ticks(tickValues);
+            return tickValues;
+            // return axis.scale().ticks(tickValues);
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 
@@ -233,7 +233,7 @@ export default class ContinousAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const ticks = axis.tickValues();
-
+        debugger;
         const { width, height } = this.smartTicks()[0];
 
         axis.tickTransform((d) => {
