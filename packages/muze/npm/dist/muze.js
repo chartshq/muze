@@ -6881,7 +6881,6 @@ function (_SimpleAxis) {
 
       if (tickValues) {
         tickValues instanceof Array && this.axis().tickValues(tickValues);
-        return this;
       }
 
       var newTickValues = this.getTickValues();
@@ -6921,7 +6920,7 @@ function (_SimpleAxis) {
       var labelProps = this.axisComponentDimensions().largestTickDimensions;
 
       if (tickValues) {
-        return axis.scale().ticks(tickValues);
+        return tickValues; // return axis.scale().ticks(tickValues);
       }
 
       labelDim = labelProps[orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["BOTTOM"] || orientation === _enums_axis_orientation__WEBPACK_IMPORTED_MODULE_2__["TOP"] ? 'width' : 'height'];
@@ -6953,6 +6952,7 @@ function (_SimpleAxis) {
       var rotation = labels.rotation;
       var axis = this.axis();
       var ticks = axis.tickValues();
+      debugger;
       var _this$smartTicks$ = this.smartTicks()[0],
           width = _this$smartTicks$.width,
           height = _this$smartTicks$.height;
@@ -7027,7 +7027,7 @@ var defaultConfig = {
   },
   padding: 0.3,
   nice: true,
-  numberOfTicks: 10,
+  numberOfTicks: null,
   rotate: false,
   show: true,
   showAxisName: true,
@@ -7120,20 +7120,30 @@ var setOffset = function setOffset(context) {
   });
 };
 var getNumberOfTicks = function getNumberOfTicks(availableSpace, labelDim, axis, axisInstance) {
-  var ticks = axis.scale().ticks();
+  var numberOfValues = 0;
+  var tickValues = [];
 
   var _axisInstance$config = axisInstance.config(),
       numberOfTicks = _axisInstance$config.numberOfTicks;
 
+  var ticks = axis.scale().ticks();
   var tickLength = ticks.length;
-  var numberOfValues = tickLength;
+  var minTickDistance = axisInstance._minTickDistance.width;
+  numberOfValues = tickLength;
 
-  if (tickLength * (labelDim * 1.5) > availableSpace) {
-    numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
+  if (tickLength * (labelDim + minTickDistance) > availableSpace) {
+    numberOfValues = Math.floor(availableSpace / (labelDim + minTickDistance));
   }
 
+  numberOfTicks = numberOfTicks || numberOfValues;
   numberOfValues = Math.min(numberOfTicks, Math.max(2, numberOfValues));
-  var tickValues = axis.scale().ticks(numberOfValues);
+  tickValues = axis.scale().ticks(numberOfValues);
+
+  if (tickValues.length > numberOfValues) {
+    tickValues = tickValues.filter(function (e, i) {
+      return i % 2 === 0;
+    });
+  }
 
   if (numberOfValues === 2) {
     tickValues = axis.scale().ticks(10);
@@ -8807,7 +8817,7 @@ var spaceSetter = function spaceSetter(context, spaceConfig) {
         var totalTickWidth = allTickDimensions.length * (tickDimWidth + minWidthBetweenTicks);
         var availableWidth = range[1] - range[0]; // Rotate labels if not enough width
 
-        if (availableWidth < totalTickWidth && labels.rotation === null) {
+        if (availableWidth < totalTickWidth && labels.rotation !== null) {
           if (availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight) {
             labelConfig.rotation = null;
             context.renderConfig({

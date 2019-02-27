@@ -45,8 +45,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
@@ -66,18 +66,21 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .columns(['Acceleration'])
+        .columns(['Year'])
         .rows([["Horsepower"]])
-        .color("Origin")
+        // .color("Origin")
         .height(800)
         .width(900)
         .config({
             axes:{
-                x:{
-                    tickFormat: (val)=>`${val}pxasdasds`
-                }
+                // x:{
+                //     tickFormat: (val)=>`${val}pxasdasds`
+                // }
             }
         })
+        // .layers([{
+        //     mark: 'line'
+        // }])
        
         .title("Year wise average car Acceleration")
 

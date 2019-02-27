@@ -155,7 +155,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     height: heightForTicks,
                     noWrap: rotation !== null
                 });
-                console.log(context.renderConfig().tickValues);
+
                 return labelConfig;
             },
             y: () => {
@@ -188,7 +188,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick Interval
-                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks;
+                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks * 2;
 
                 // Get height available for ticks
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
