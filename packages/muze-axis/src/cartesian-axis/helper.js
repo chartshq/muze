@@ -33,17 +33,27 @@ export const setOffset = (context) => {
 };
 
 export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) => {
+    let numberOfValues = 0;
+    let tickValues = [];
+    let { numberOfTicks } = axisInstance.config();
     const ticks = axis.scale().ticks();
-    const { numberOfTicks } = axisInstance.config();
     const tickLength = ticks.length;
-    let numberOfValues = tickLength;
+    const minTickDistance = axisInstance._minTickDistance.width;
 
-    if (tickLength * (labelDim * 1.5) > availableSpace) {
-        numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
+    numberOfValues = tickLength;
+
+    if (tickLength * (labelDim + minTickDistance) > availableSpace) {
+        numberOfValues = Math.floor(availableSpace / (labelDim + minTickDistance));
     }
 
+    numberOfTicks = numberOfTicks || numberOfValues;
     numberOfValues = Math.min(numberOfTicks, Math.max(2, numberOfValues));
-    let tickValues = axis.scale().ticks(numberOfValues);
+
+    tickValues = axis.scale().ticks(numberOfValues);
+
+    if (tickValues.length > numberOfValues) {
+        tickValues = tickValues.filter((e, i) => i % 2 === 0);
+    }
 
     if (numberOfValues === 2) {
         tickValues = axis.scale().ticks(10);

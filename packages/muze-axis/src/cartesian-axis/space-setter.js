@@ -259,7 +259,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const availableWidth = range[1] - range[0];
 
                  // Rotate labels if not enough width
-                if (availableWidth < totalTickWidth && labels.rotation === null) {
+                if (availableWidth < totalTickWidth && labels.rotation !== null) {
                     if (availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight) {
                         labelConfig.rotation = null;
                         context.renderConfig({

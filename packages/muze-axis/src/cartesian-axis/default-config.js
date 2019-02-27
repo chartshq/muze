@@ -26,7 +26,7 @@ export const defaultConfig = {
     numberFormat: val => val,
     padding: 0.3,
     nice: true,
-    numberOfTicks: 10,
+    numberOfTicks: null,
     rotate: false,
     show: true,
     showAxisName: true,

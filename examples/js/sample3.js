@@ -69,8 +69,15 @@ d3.json('../../data/cars.json', (data) => {
         .columns(['Acceleration'])
         .rows([["Horsepower"]])
         .color("Origin")
-        .height(500)
-        .width(600)
+        .height(800)
+        .width(900)
+        .config({
+            axes:{
+                x:{
+                    tickFormat: (val)=>`${val}pxasdasds`
+                }
+            }
+        })
        
         .title("Year wise average car Acceleration")
 
