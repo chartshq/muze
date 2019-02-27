@@ -28,7 +28,9 @@ export default class RadiusAxis {
     }
 
     static defaultConfig () {
-        return {};
+        return {
+            padding: 1
+        };
     }
 
     config () {

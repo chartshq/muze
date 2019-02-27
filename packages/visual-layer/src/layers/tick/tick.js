@@ -10,7 +10,7 @@ const pointTranslators = {
     polar: (data, encoding, config = {}, layerInst) => {
         const axes = layerInst.axes();
         let points = [];
-        const { radius: radiusAxis, angle: angleAxis } = axes;
+        const { radius: radiusAxis, angle: angleAxis, angle0: angle0Axis } = axes;
         const dm = layerInst.data();
         const fieldsConfig = dm.getFieldsConfig();
         const colorEncoding = encoding.color;
@@ -35,10 +35,10 @@ const pointTranslators = {
             meta.originalColor = rawColor;
             meta.colorTransform = {};
             const { startAngle, endAngle } = angleAxis.getScaleValue(d.angle);
-            const angle = (startAngle + endAngle) / 2 - (Math.PI / 2);
+            const angle = startAngle - (Math.PI / 2);
             let angle0 = angle;
             if (angle0Index !== undefined) {
-                const { startAngle: startAngle0, endAngle: endAngle0 } = angleAxis.getScaleValue(d.angle0);
+                const { startAngle: startAngle0, endAngle: endAngle0 } = angle0Axis.getScaleValue(d.angle0);
                 angle0 = angle0Index ? (startAngle0 + endAngle0) / 2 - (Math.PI / 2) : angle;
             }
             const r = radiusAxis.getScaleValue(d.radius);

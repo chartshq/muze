@@ -221,6 +221,8 @@ export const RADIUS = 'radius';
  * Field referring to object storing the transforms
  */
 export const ANGLE = 'angle';
+
+export const ANGLE0 = 'angle0';
 /**
  * Field referring to object storing the transforms
  */

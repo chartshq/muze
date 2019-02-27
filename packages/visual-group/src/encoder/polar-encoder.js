@@ -1,8 +1,8 @@
-import { layerFactory } from '@chartshq/visual-layer';
 import { ThetaAxis, RadiusAxis } from '@chartshq/muze-axis';
+import { layerFactory } from '@chartshq/visual-layer';
 import { mergeRecursive, STATE_NAMESPACES, COORD_TYPES, toArray, getObjProp } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
-import { RADIUS, ANGLE, SIZE, MEASURE, ARC, COLOR } from '../enums/constants';
+import { RADIUS, ANGLE, SIZE, MEASURE, ARC, COLOR, ANGLE0 } from '../enums/constants';
 import { sanitizeIndividualLayerConfig } from './encoder-helper';
 
 const POLAR = COORD_TYPES.POLAR;
@@ -42,21 +42,28 @@ export default class PolarEncoder extends VisualEncoder {
         pieAxes[rowIndex] = pieAxes[rowIndex] || [];
         pieAxes[rowIndex][columnIndex] = [];
 
-        const radiusAxes = [new RadiusAxis()];
-        const angleAxes = [new ThetaAxis()];
+        const axesObj = {
+            radius: [new RadiusAxis()],
+            angle: [new ThetaAxis()],
+            angle0: [new ThetaAxis()]
+        };
 
         geomCell.axes({
-            radius: radiusAxes,
-            angle: angleAxes,
+            radius: axesObj.radius,
+            angle: axesObj.angle,
+            angle0: axesObj.angle0,
             color: geomCellAxes.color,
             shape: geomCellAxes.shape,
             size: geomCellAxes.size
         });
         const resolverAxes = context.resolver.axes();
-        !resolverAxes.radius[rowIndex] && (resolverAxes.radius[rowIndex] = []);
-        resolverAxes.radius[rowIndex][columnIndex] = radiusAxes;
-        !resolverAxes.angle[rowIndex] && (resolverAxes.angle[rowIndex] = []);
-        resolverAxes.angle[rowIndex][columnIndex] = angleAxes;
+        [RADIUS, ANGLE, ANGLE0].forEach((enc) => {
+            const axesArr = resolverAxes[enc];
+            if (!axesArr[rowIndex]) {
+                axesArr[rowIndex] = [];
+            }
+            axesArr[rowIndex][columnIndex] = axesObj[enc];
+        });
         resolverAxes.pie = pieAxes;
         return geomCellAxes;
     }
@@ -108,7 +115,8 @@ export default class PolarEncoder extends VisualEncoder {
         const store = context.store();
         const domainProps = {
             radius: [],
-            angle: []
+            angle: [],
+            angle0: []
         };
         const axes = context.resolver().axes();
         context.matrixInstance().value.each((cell, rIdx, cIdx) => {

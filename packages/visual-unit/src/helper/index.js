@@ -11,7 +11,8 @@ import {
     MeasureSubtype,
     getNearestValue
 } from 'muze-utils';
-import { layerFactory } from '@chartshq/visual-layer';
+import { layerFactory, ENCODING } from '@chartshq/visual-layer';
+import { ANGLE } from '@chartshq/visual-layer/src/enums/constants';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -192,7 +193,7 @@ export const attachAxisToLayers = (axes, layers, layerAxisIndex) => {
         objectIterator(axes, (key) => {
             const axisInf = layerAxisIndex[layerId];
             if (axisInf) {
-                axes[key] && (axesObj[key] = axes[key][axisInf[key] || 0]);
+                axes[key] && (axesObj[key] = defaultValue(axes[key][axisInf[key] || 0]));
             }
         });
         Object.keys(axesObj).length && layer.axes(axesObj);
@@ -219,6 +220,14 @@ export const getLayerAxisIndex = (layers, fields) => {
     return layerAxisIndex;
 };
 
+const getValidDomain = (domain, domain1, encodingType) => {
+    let unionedDomain = domain1;
+    if (encodingType === ANGLE || encodingType === 'angle0') {
+        unionedDomain = domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
+    }
+    return unionedDomain;
+};
+
 export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fieldsConfig) => {
     let domains = {};
     layers = layers.filter(layer => layer.getDataDomain() !== null);
@@ -238,11 +247,14 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
                 if (encodingType in axisFields) {
                     const fieldStr = `${axisFields[encodingType][axisIndex]}`;
                     fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
-                    fieldDomain[fieldStr] = unionDomain(([fieldDomain[fieldStr], domain[1]]),
+                    fieldDomain[fieldStr] = unionDomain([fieldDomain[fieldStr], domain[1]],
                         fieldsConfig[field].def.subtype ? fieldsConfig[field].def.subtype :
                                 fieldsConfig[field].def.type);
                 } else {
-                    fieldDomain[encodingType] = domain[1];
+                    fieldDomain[encodingType] = fieldDomain[encodingType] || [];
+                    fieldDomain[encodingType] = getValidDomain(fieldDomain[encodingType], domain[1], encodingType);
+                    // fieldDomain[encodingType] = unionDomain([fieldDomain[encodingType], domain[1],],
+                    //     encodingType === 'angle' ? 'categorical' : getObjProp(fieldsConfig[field], 'def', 'subtype'));
                 }
                 return fieldDomain;
             }, domains);
@@ -354,9 +366,10 @@ export const setAxisRange = (context) => {
     const { radius, angle } = context.axes();
     if (radius) {
         const unitConf = context.config();
+        const layers = context.layers();
         const config = {
-            innerRadius: Math.max(...context.layers().map(d => d.config().innerRadius || 0)),
-            outerRadius: Math.max(...context.layers().map(d => d.config().outerRadius || 0)),
+            innerRadius: Math.max(...layers.map(d => d.config().innerRadius || 0)),
+            outerRadius: Math.max(...layers.map(d => d.config().outerRadius || 0)),
             minOuterRadius: unitConf.minOuterRadius,
             innerRadiusFixer: unitConf.innerRadiusFixer
         };

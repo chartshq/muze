@@ -17,10 +17,7 @@ export const getRangeValue = (datum, context) => {
     const sizeAxisDomain = sizeAxis.domain();
     const sizeMultiplier = sizeAxis.getSize(sizeVal) / (sizeAxisDomain ? sizeAxis.range()[1] : sizeAxis.config().value);
 
-    const radiusVal = radiusAxis.getScaleValue(outerRadiusValue === undefined ? radiusAxis.domain()[1] :
-        outerRadiusValue);
-    // domainMultiplier *= (range[1] - range[0]) / (domain[1] - domain[0]);
-    // const rangeVal = (range[0] + (outerRadiusValue - domain[0]) * domainMultiplier);
+    const radiusVal = radiusAxis.getScaleValue(outerRadiusValue);
     return radiusVal * sizeMultiplier;
 };
 

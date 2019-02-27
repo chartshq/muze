@@ -21,7 +21,8 @@ import {
     getNormalizedData,
     applyInteractionStyle,
     initializeGlobalState,
-    getValidTransform
+    getValidTransform,
+    domainCalculator
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
@@ -298,7 +299,7 @@ export default class BaseLayer extends SimpleLayer {
         const isEmpty = this.data().isEmpty();
 
         if (!isEmpty) {
-            domains = calculateDomainFromData(data, this.encodingFieldsInf(), this.transformType());
+            domains = domainCalculator[this.coord()](data, this);
         }
         return domains;
     }

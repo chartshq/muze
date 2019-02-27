@@ -78,7 +78,8 @@ class VisualGroup extends SimpleGroup {
                 x: {},
                 y: {},
                 radius: {},
-                angle: {}
+                angle: {},
+                angle0: {}
             }
         }, {}];
     }

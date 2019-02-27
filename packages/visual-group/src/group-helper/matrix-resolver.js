@@ -46,7 +46,8 @@ export default class MatrixResolver {
             size: [],
             shape: [],
             radius: [],
-            angle: []
+            angle: [],
+            angle0: []
         };
         generateGetterSetters(this, RESOLVER_PROPS);
         this.cacheMaps(initializeCacheMaps());

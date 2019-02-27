@@ -36,24 +36,19 @@ const pointTranslators = {
 
             const { color, rawColor } = getLayerColor({ datum: { _data: source }, index: i },
                 { colorEncoding, colorAxis, colorFieldIndex });
-            const radiusVal = radiusAxis.getScaleValue(d.radius);
+            const radius = radiusAxis.getScaleValue(d.radius);
             const { startAngle, endAngle } = angleAxis.getScaleValue(d.angle);
 
-            const angleV = (((startAngle + endAngle) / 2) * 180 / Math.PI);
-            let rotateAngle = -90 + angleV;
-            if (angleV > 180) {
-                rotateAngle = angleV + 90;
-            }
+            const angle = (startAngle) - Math.PI / 2;
             const point = {
                 enter: {},
                 update: {
-                    angleVal: (startAngle + endAngle) / 2 - (Math.PI / 2),
-                    radiusVal
+                    angle,
+                    radius
                 },
                 text: textFormatter(textValue, i, data, layerInst),
                 color,
-                rotate: `rotate(${rotateAngle})`,
-                rotateAngle,
+                rotateAngle: 0,
                 background: {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, layerInst) : null,
                     padding: backgroundPadding
@@ -76,9 +71,9 @@ const pointTranslators = {
         const measurement = layerInst.measurement();
         for (let i = 0, len = points.length; i < len; i++) {
             const point = points[i];
-            const { angleVal, radiusVal } = point.update;
-            point.update.x = (radiusVal * Math.cos(angleVal)) + (measurement.width / 2);
-            point.update.y = (radiusVal * Math.sin(angleVal)) + (measurement.height / 2);
+            const { angle, radius } = point.update;
+            point.update.x = (radius * Math.cos(angle)) + (measurement.width / 2);
+            point.update.y = (radius * Math.sin(angle)) + (measurement.height / 2);
             point.rotate = `rotate(${point.rotateAngle}, ${point.update.x}, ${point.update.y})`;
         }
 

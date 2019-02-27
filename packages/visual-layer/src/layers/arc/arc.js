@@ -135,40 +135,6 @@ export default class ArcLayer extends BaseLayer {
     //     return this.data();
     // }
 
-    // /**
-    //  * Returns normalized data after transformation (it is the same in the case of pie layer)
-    //  *
-    //  * @param {Object} data transformed data
-    //  * @return {Object} normalized data
-    //  * @memberof ArcLayer
-    //  */
-    // getNormalizedData (data) {
-    //     return data;
-    // }
-
-    /**
-     *
-     *
-     * @param {Object} data
-     * @return {}
-     * @memberof ArcLayer
-     */
-    calculateDomainFromData (data) {
-        const config = this.config();
-        const { sort } = config;
-        const { angleFieldIndex, radiusField, colorFieldIndex } = this.encodingFieldsInf();
-        let angleValues = data[0];
-        if (sort) {
-            angleValues = angleValues.sort((a, b) => (sort === ASCENDING ? a.radius - b.radius : b.radius - a.radius));
-        }
-        angleValues = angleFieldIndex !== undefined ? angleValues.map(d => d.angle) : new Array(angleValues.length)
-                .fill().map((d, i) => angleValues[i]._data[colorFieldIndex]);
-        return {
-            radius: radiusField ? getDomainFromData(data, [ENCODING.RADIUS, ENCODING.RADIUS]) : [10, 120],
-            angle: angleValues
-        };
-    }
-
     /**
      *
      *
@@ -250,50 +216,32 @@ export default class ArcLayer extends BaseLayer {
      * @memberof ArcLayer
      */
     render (container) {
-        const {
-            height,
-            width
-        } = this.measurement();
+        const measurement = this.measurement();
         const {
             classPrefix,
             defClassName,
-            innerRadius,
             cornerRadius,
             padAngle,
             padRadius,
-            padding,
             transition
        } = this.config();
-        // const sizeAxis = this.axes().size;
-        const chartHeight = height - padding.top - padding.bottom;
-        const chartWidth = width - padding.left - padding.right;
+        const { radius: radiusAxis, color: colorAxis } = this.axes();
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
-        // Sets range for radius
-        // const range = getRadiusRange(chartWidth, chartHeight, {
-        //     minOuterRadius,
-        //     innerRadius,
-        //     outerRadius,
-        //     innerRadiusFixer
-        // });
-        const colorAxis = this.axes().color;
-        // const defaultRadius = outerRadius || Math.min(chartHeight, chartWidth) / 2;
-        // this.translatePoints();
-        // const radiusDomain = this.domain().radius;
-        // const rangeValueGetter = d => getRangeValue(d, range, radiusDomain, defaultRadius, sizeAxis);
         // This returns a function that generates the arc path based on the datum provided
+        const radiusRange = radiusAxis.range();
         const path = arc()
-                // .outerRadius(d => rangeValueGetter(d))
-                .innerRadius(innerRadius ? Math.min(chartHeight / 2, chartWidth / 2, innerRadius) : 0)
+                .innerRadius(radiusRange[0])
                 .cornerRadius(cornerRadius)
                 .padAngle(padAngle)
                 .padRadius(padRadius);
-        this._chartWidth = chartWidth;
-        this._chartHeight = chartHeight;
+
         this._points = this.translatePoints(this._normalizedData[0]);
+        const padding = radiusAxis.config().padding;
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
-                .attr('transform', `translate(${chartWidth / 2},${chartHeight / 2})`);
+                .attr('transform', `translate(${(measurement.width - padding) / 2},
+                    ${(measurement.height - padding) / 2})`);
         const tween = (elem) => {
             makeElement(elem, 'path', (d, i) => [{
                 datum: d,
@@ -370,10 +318,12 @@ export default class ArcLayer extends BaseLayer {
 
         const pieSliceInf = filteredPies[0];
         if (pieSliceInf) {
+            const measurement = this.measurement();
+            const padding = this.axes().radius.config().padding;
             const centroid = pieSliceInf.arcFn.centroid(pieSliceInf.datum);
             return [{
-                x: centroid[0] + this._chartWidth / 2,
-                y: centroid[1] + this._chartHeight / 2,
+                x: centroid[0] + (measurement.width - padding) / 2,
+                y: centroid[1] + (measurement.height - padding) / 2,
                 width: 2,
                 height: 2
             }];

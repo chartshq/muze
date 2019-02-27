@@ -12,7 +12,7 @@ import {
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCENDING } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
@@ -293,28 +293,47 @@ export const getNormalizedData = (transformedData, context) => {
     return dataNormalizers[context.coord()](transformedDataArr, encodingFieldInf, fieldsConfig, transformType);
 };
 
-export const calculateDomainFromData = (data, encodingFieldInf, transformType) => {
-    const {
-        xFieldSubType,
-        yFieldSubType,
-        xField,
-        yField,
-        x0Field,
-        y0Field
-    } = encodingFieldInf;
-    const domains = {};
-    const yEnc = ENCODING.Y;
-    const xEnc = ENCODING.X;
-    if (xField) {
-        domains.x = getDomainFromData(data, x0Field || transformType === STACK ? [xEnc, ENCODING.X0] : [xEnc, xEnc],
-            xFieldSubType);
-    }
-    if (yField) {
-        domains.y = getDomainFromData(data, y0Field || transformType === STACK ? [ENCODING.Y0, ENCODING.Y] :
-            [yEnc, yEnc], yFieldSubType);
-    }
+export const domainCalculator = {
+    [POLAR]: (data, layerInst) => {
+        const config = layerInst.config();
+        const { sort } = config;
+        let angleValues = data[0];
+        const radius0Field = getObjProp(config.encoding.radius0, 'field');
+        if (sort) {
+            angleValues = angleValues.sort((a, b) => (sort === ASCENDING ? a.radius - b.radius : b.radius - a.radius));
+        }
 
-    return domains;
+        return {
+            radius: getDomainFromData(data, [ENCODING.RADIUS, radius0Field ? ENCODING.RADIUS0 : ENCODING.RADIUS]),
+            angle: angleValues.map(d => d.angle),
+            angle0: angleValues.map(d => d.angle0)
+        };
+    },
+    [CARTESIAN]: (data, layerInst) => {
+        const transformType = layerInst.transformType();
+        const encodingFieldInf = layerInst.encodingFieldsInf();
+        const {
+            xFieldSubType,
+            yFieldSubType,
+            xField,
+            yField,
+            x0Field,
+            y0Field
+        } = encodingFieldInf;
+        const domains = {};
+        const yEnc = ENCODING.Y;
+        const xEnc = ENCODING.X;
+        if (xField) {
+            domains.x = getDomainFromData(data, x0Field || transformType === STACK ? [xEnc, ENCODING.X0] : [xEnc, xEnc],
+                xFieldSubType);
+        }
+        if (yField) {
+            domains.y = getDomainFromData(data, y0Field || transformType === STACK ? [ENCODING.Y0, ENCODING.Y] :
+                [yEnc, yEnc], yFieldSubType);
+        }
+
+        return domains;
+    }
 };
 
 export const attachDataToVoronoi = (voronoi, points) => {
