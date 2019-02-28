@@ -78,9 +78,9 @@ d3.json('../../data/cars.json', (data) => {
                 // }
             }
         })
-        .layers([{
-            mark: 'bar'
-        }])
+        // .layers([{
+        //     mark: 'bar'
+        // }])
        
         .title("Year wise average car Acceleration")
 

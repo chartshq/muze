@@ -66,7 +66,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 ['x', 'y'].forEach((type) => {
                     context.axes()[type] && context.axes()[type].forEach((axis) => {
                         axis.config({
-                            adjustRange: context.layers().some((inst) => inst.hasPlotSpan())
+                            adjustRange: context.layers().some(inst => inst.hasPlotSpan())
                         });
                     });
                 });

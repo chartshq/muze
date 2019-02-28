@@ -17,6 +17,7 @@ const durationWeek = durationDay * 7;
 const durationMonth = durationDay * 30;
 const durationYear = durationDay * 365;
 
+// Longest Word for each level based on which tick skipping is decided
 const longestWord = {
     month: 'September',
     quarter: 'October',
@@ -29,6 +30,10 @@ const longestWord = {
     week: 'Wed 31'
 };
 
+// These are the various levels of ticks that can be shown by Muze.
+// Each level is described as how frequently the ticks appear
+// The format is as follows:
+// [Frequency, Milliseconds, Name of Seconds, Tick Generator, Level Type]
 const tickIntervals = [
     [1, 1, 'milliseconds', timeMillisecond.every(1), 'seconds'],
     [1, durationSecond, 'seconds', timeSecond.every(1), 'seconds'],
@@ -58,7 +63,14 @@ const tickIntervals = [
     [100, 100 * durationYear, 'century', timeYear.every(100), 'year'],
     [1000, 1000 * durationYear, 'millenium', timeYear.every(1000), 'year']
 ];
-
+/**
+ * Get the actual tick interval based on the available width, number of ticks
+ * and the distance between two ticks
+ *
+ * @param {Object} context Axis Context
+ * @param {number} noOfTicks Number of Ticks based on which interval is calculated
+ * @return {number} The width for the tick interval
+ */
 const getActualTickInterval = (context, noOfTicks) => {
     const minTickDistance = context._minTickDistance;
     const minWidthBetweenTicks = minTickDistance.width;
@@ -69,6 +81,14 @@ const getActualTickInterval = (context, noOfTicks) => {
     return actualTickInterval;
 };
 
+/**
+ * Get the tick interval based on the current level of ticks. Levels are decided on
+ * the number of ticks that are possible to show
+ *
+ * @param {Object} context Axis Context
+ * @param {string} type Type of level (yearly, monthly, etc)
+ * @return {number} The width for the tick interval
+ */
 const getTickIntervalBasedOnCurrentLevel = (context, type) => {
     const labelManager = context._dependencies.labelManager;
     const longestWordType = longestWord[type];
@@ -80,6 +100,9 @@ const getTickIntervalBasedOnCurrentLevel = (context, type) => {
 const getTickIntervalFnBasedOnNumberOfTicks = (interval, count, context) => {
     let possibleTickLevelIndex = tickIntervals.length - 1;
     let maxPossibleTicks = 1;
+    let tickIntervalLevelInfo = null;
+
+    // Decide possible tick level based on min tick width (with ellipses)
     for (let i = tickIntervals.length - 1; i >= 0; i--) {
         const tickIntervalInfo = tickIntervals[i];
         const numOfPossibleTicks = Math.floor(interval / tickIntervalInfo[1]);
@@ -88,11 +111,17 @@ const getTickIntervalFnBasedOnNumberOfTicks = (interval, count, context) => {
             maxPossibleTicks = numOfPossibleTicks;
         }
     }
-    let tickIntervalLevelInfo = tickIntervals[possibleTickLevelIndex];
 
+    tickIntervalLevelInfo = tickIntervals[possibleTickLevelIndex];
+
+    // Get actual tick interval based on the level of ticks generated
     const actualTickInterval = getActualTickInterval(context, maxPossibleTicks);
+
+    // Maximum Possible tick Interval for a particular level based on a pre decided set of values
     const maxTickInterval = getTickIntervalBasedOnCurrentLevel(context, tickIntervalLevelInfo[4]);
 
+    // Display the next level involving tick skipping if current level does not meet the requirement
+    // for displaying max tick
     if (actualTickInterval < maxTickInterval && possibleTickLevelIndex < tickIntervals.length - 1) {
         tickIntervalLevelInfo = tickIntervals[possibleTickLevelIndex + 1];
     }
@@ -100,13 +129,15 @@ const getTickIntervalFnBasedOnNumberOfTicks = (interval, count, context) => {
 };
 
 export const getSkippedTicks = (context, maxPossibleTicks) => {
+    let actualNumberOfTicks = maxPossibleTicks;
     const domain = context.domain();
     const minDiff = context._minDiff;
-
-    let actualNumberOfTicks = maxPossibleTicks;
+    // Get the interval in ms from the domain
     const millisecondInterval = domain[1] - domain[0];
+    // Get number of ticks based on the minimum difference in the data
     const numOfTicksAccordingToMinDiff = Math.floor(millisecondInterval / minDiff);
 
+    // Show ticks according to min diff if possible
     if (maxPossibleTicks >= numOfTicksAccordingToMinDiff) {
         actualNumberOfTicks = numOfTicksAccordingToMinDiff;
     }

@@ -24,26 +24,7 @@ export const PROPS = {
 
             context._tickFormatter = ticks => tickFormatter(ticks);
 
-            const {
-                labels,
-                show,
-                showInnerTicks,
-                showOuterTicks,
-                showAxisName,
-                tickValues,
-                xOffset,
-                yOffset
-            } = value;
-            context.renderConfig({
-                labels,
-                show,
-                showInnerTicks,
-                showOuterTicks,
-                showAxisName,
-                tickValues,
-                xOffset,
-                yOffset
-            });
+            context.resetRenderConfig(value);
             return value;
         }
     },

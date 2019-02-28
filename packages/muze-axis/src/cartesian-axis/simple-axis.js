@@ -180,10 +180,7 @@ export default class SimpleAxis {
         return () => val => numberFormat(val);
     }
 
-    resetLogicalSpace () {
-        this.logicalSpace(null);
-        this.range([]);
-
+    resetRenderConfig (config) {
         const {
             labels,
             show,
@@ -193,7 +190,7 @@ export default class SimpleAxis {
             xOffset,
             yOffset,
             tickValues
-        } = this.config();
+        } = config;
         this.renderConfig({
             labels,
             show,
@@ -204,6 +201,14 @@ export default class SimpleAxis {
             yOffset,
             tickValues
         });
+        return this;
+    }
+
+    resetLogicalSpace () {
+        this.logicalSpace(null);
+        this.range([]);
+
+        this.resetRenderConfig(this.config());
     }
 
     getFormattedText (text, index, axisTicks) {
