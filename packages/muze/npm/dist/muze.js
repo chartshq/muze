@@ -8702,7 +8702,6 @@ var spaceSetter = function spaceSetter(context, spaceConfig) {
           height: heightForTicks,
           noWrap: rotation !== null
         });
-        console.log(context.renderConfig().tickValues);
         return labelConfig;
       },
       y: function y() {
@@ -8738,7 +8737,7 @@ var spaceSetter = function spaceSetter(context, spaceConfig) {
         setAxisRange(context, 'y', [0, availWidth - left - right], isOffset ? availHeight : null);
         var range = context.range(); // Get Tick Interval
 
-        tickInterval = (range[1] - range[0]) / (tickValues || domain).length - minWidthBetweenTicks; // Get height available for ticks
+        tickInterval = (range[1] - range[0]) / (tickValues || domain).length - minWidthBetweenTicks * 2; // Get height available for ticks
 
         heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
 

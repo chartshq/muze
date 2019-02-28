@@ -45,8 +45,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }
     ];
 
@@ -78,9 +78,9 @@ d3.json('../../data/cars.json', (data) => {
                 // }
             }
         })
-        // .layers([{
-        //     mark: 'line'
-        // }])
+        .layers([{
+            mark: 'bar'
+        }])
        
         .title("Year wise average car Acceleration")
 

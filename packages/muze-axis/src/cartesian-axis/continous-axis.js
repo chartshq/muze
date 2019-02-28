@@ -233,7 +233,7 @@ export default class ContinousAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const ticks = axis.tickValues();
-        debugger;
+
         const { width, height } = this.smartTicks()[0];
 
         axis.tickTransform((d) => {
