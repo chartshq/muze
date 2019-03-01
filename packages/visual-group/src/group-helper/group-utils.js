@@ -25,7 +25,8 @@ import {
     FACET,
     X,
     Y,
-    POLAR
+    POLAR,
+    CATEGORICAL
 } from '../enums/constants';
 
 /**
@@ -440,4 +441,19 @@ export const extractFields = (facetsAndProjections, layerFields) => {
         }));
     });
     return [].concat(...fields, ...layerFields);
+};
+
+/**
+ * This method sorts the facets fields inplace if field is of categorical type
+ * @param {Object} facet
+ * @param {Array} keys Array of the facet field values
+ */
+export const sortFacetFields = (facet, keys) => {
+    const field = facet.toString();
+    const subtype = facet.subtype();
+    const sortingDetails = facet.data()._sortingDetails;
+
+    if (subtype === CATEGORICAL && !sortingDetails.includes(field)) {
+        keys.sort();
+    }
 };

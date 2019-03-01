@@ -131,7 +131,7 @@ export default class CartesianEncoder extends VisualEncoder {
                             /* Sort categorical fields to ensure consistency across all rows
                             only if field is categorical and is not explicitily sorted by user */
                             if (typeOfField === CATEGORICAL && !sortingDetailsFlattened.includes(field.oneVar())) {
-                                domains[axisType][key] = domains[axisType][key].sort();
+                                domains[axisType][key].sort();
                             }
                         }
                     });

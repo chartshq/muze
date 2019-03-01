@@ -42,17 +42,20 @@
     const dm = new DataModel(jsonData, schema);
     const dm2 = dm.sort([
         ['Origin', 'desc'],
-        ['Year'],
     ]);
     const canvas = env.canvas();
     
     canvas
-        .data(dm2)
-        .width(900)
-        .height(900)
-        .rows(['Year', 'Origin'])
-        .columns(['Horsepower'])
-        .detail(['Name'])
+        .data(dm)
+        .width(550)
+        .height(500)
+        // .columns(['Horsepower', 'Origin', 'Maker'])
+        // .rows(['Origin', 'Year', 'Maker'])
+        .rows(['Origin', 'Year', 'Maker'])
+        // .rows(['Maker', 'Year'])
+        .columns(['Acceleration'])
+        // .detail(['Name'])
         .mount('#chart')
     });
 }());
+
