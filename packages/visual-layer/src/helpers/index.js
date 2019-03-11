@@ -12,23 +12,10 @@ import {
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
-import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCENDING } from '../enums/constants';
+import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCENDING, TEXT } from '../enums/constants';
 
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
-
-export const getLayerColor = ({ datum, index }, { colorEncoding, colorAxis, colorFieldIndex }) => {
-    let rawColor = '';
-    let color = '';
-    if (colorEncoding && colorEncoding.value instanceof Function) {
-        color = colorEncoding.value(datum, index);
-        rawColor = colorEncoding.value(datum, index);
-    } else {
-        rawColor = colorAxis.getRawColor(datum._data[colorFieldIndex]);
-        color = colorAxis.getHslString(rawColor);
-    }
-    return { color, rawColor };
-};
 
 const transfromColor = (colorAxis, datum, styleType, intensity) => {
     datum.meta.stateColor[styleType] = datum.meta.stateColor[styleType] || datum.meta.originalColor;
@@ -110,44 +97,25 @@ export const getAxesScales = (axes) => {
 export const encodingFieldInfRetriever = {
     [POLAR]: (encoding, fieldsConfig) => {
         const encodingInf = {};
-        [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE].forEach((e) => {
-            const field = getObjProp(encoding, e, 'field');
-            encodingInf[`${e}Field`] = field;
-            encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
-        });
+        [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE, TEXT]
+            .forEach((e) => {
+                const field = getObjProp(encoding, e, 'field');
+                encodingInf[`${e}Field`] = field;
+                encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
+            });
         return encodingInf;
     },
     [CARTESIAN]: (encoding, fieldsConfig) => {
-        const [xField, yField, x0Field, y0Field, colorField, shapeField, sizeField] =
-        [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE].map(e => encoding[e] &&
-                encoding[e].field);
+        const encodingInf = {};
+        [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE, TEXT].forEach((e) => {
+            const field = getObjProp(encoding, e, 'field');
+            encodingInf[`${e}Field`] = field;
+            encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
+            encodingInf[`${e}FieldType`] = getObjProp(fieldsConfig, field, 'def', 'type');
+            encodingInf[`${e}FieldSubType`] = getObjProp(fieldsConfig, field, 'def', 'subtype');
+        });
 
-        const [xFieldType, yFieldType] = [xField, yField, x0Field, y0Field].map(e => fieldsConfig[e] &&
-            fieldsConfig[e].def.type);
-
-        const [xFieldSubType, yFieldSubType] = [xField, yField].map(e => fieldsConfig[e] &&
-            (fieldsConfig[e].def.subtype || fieldsConfig[e].def.type));
-
-        const [xFieldIndex, yFieldIndex, x0FieldIndex, y0FieldIndex] = [xField, yField, x0Field, y0Field]
-            .map(e => fieldsConfig[e] && fieldsConfig[e].index);
-
-        return {
-            xField,
-            yField,
-            colorField,
-            shapeField,
-            sizeField,
-            x0Field,
-            y0Field,
-            xFieldType,
-            yFieldType,
-            xFieldSubType,
-            yFieldSubType,
-            xFieldIndex,
-            yFieldIndex,
-            x0FieldIndex,
-            y0FieldIndex
-        };
+        return encodingInf;
     }
 };
 
@@ -211,8 +179,11 @@ const dataNormalizers = {
                 radius0: d[radius0FieldIndex],
                 angle0: d[angle0FieldIndex]
             };
-            pointObj._data = d;
-            pointObj._id = d[fieldsLen];
+            [COLOR, SHAPE, SIZE, TEXT].forEach((enc) => {
+                pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
+            });
+            pointObj.source = d;
+            pointObj.rowId = d[fieldsLen];
             return pointObj;
         })).filter(d => d.length);
     },
@@ -259,8 +230,8 @@ const dataNormalizers = {
                         y,
                         y0
                     };
-                    pointObj._data = tuple;
-                    pointObj._id = tuple[fieldsLen];
+                    pointObj.source = tuple;
+                    pointObj.rowId = tuple[fieldsLen];
                 } else {
                     pointObj = {
                         x: d[xFieldIndex],
@@ -268,9 +239,12 @@ const dataNormalizers = {
                         x0: d[x0FieldIndex],
                         y0: d[y0FieldIndex]
                     };
-                    pointObj._data = d;
-                    pointObj._id = d[fieldsLen];
+                    pointObj.source = d;
+                    pointObj.rowId = d[fieldsLen];
                 }
+                [COLOR, SHAPE, SIZE, TEXT].forEach((enc) => {
+                    pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
+                });
                 return pointObj;
             });
         }).filter(d => d.length);
@@ -337,7 +311,7 @@ export const domainCalculator = {
 };
 
 export const attachDataToVoronoi = (voronoi, points) => {
-    voronoi.data([].concat(...points).filter(d => d._id !== undefined).map((d) => {
+    voronoi.data([].concat(...points).filter(d => d.rowId !== undefined).map((d) => {
         const point = d.update;
         return {
             x: point.x,
@@ -540,3 +514,42 @@ export const getValidTransformForAggFn = (context) => {
 
 export const getMarkId = (source, schema) => source.filter((val, i) => schema[i] &&
     schema[i].type === FieldType.DIMENSION).join();
+
+export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
+    const transformedValues = {};
+    const values = data.values;
+    const encoding = layerInst.config().encoding;
+    for (const key in values) {
+        const value = getObjProp(encoding[key], 'value');
+        if (value instanceof Function) {
+            transformedValues[key] = value(values, i, dataArr, layerInst);
+        } else {
+            transformedValues[key] = values[key];
+        }
+    }
+    return transformedValues;
+};
+
+export const getColorMetaInf = (color, colorAxis) => ({
+    originalColor: colorAxis.getHslArray(color),
+    stateColor: {},
+    colorTransform: {}
+});
+
+export const toCartesianCoordinates = (points, measurement, rangePlot = false) => {
+    const xOffset = measurement.width / 2;
+    const yOffset = measurement.height / 2;
+    for (let i = 0, len = points.length; i < len; i++) {
+        const point = points[i];
+        const { angle, radius, radius0, angle0 } = point.update;
+        const update = point.update = {
+            x: radius * Math.cos(angle) + xOffset,
+            y: radius * Math.sin(angle) + yOffset
+        };
+        if (rangePlot) {
+            update.x0 = radius0 * Math.cos(angle0) + xOffset;
+            update.y0 = radius0 * Math.sin(angle0) + yOffset;
+        }
+    }
+    return points;
+};

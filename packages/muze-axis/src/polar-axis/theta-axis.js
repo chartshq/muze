@@ -5,6 +5,7 @@
  */
 import { getUniqueId, Symbols } from 'muze-utils';
 import { createScale } from '../scale-creator';
+import { DEFAULT_ANGLE_DOMAIN } from '../enums/constants';
 
 const { pie } = Symbols;
 
@@ -47,7 +48,7 @@ export default class ThetaAxis {
     }
 
     getScaleValue (domainVal) {
-        return this._pieData.find(d => d.data === domainVal);
+        return this._pieData.filter(d => d.data === domainVal);
     }
 
     padAngle (angle) {
@@ -56,8 +57,12 @@ export default class ThetaAxis {
 
     domain (...domainVal) {
         if (domainVal.length) {
-            this._domain = domainVal[0];
+            this._domain = domainVal[0].length ? domainVal[0] : DEFAULT_ANGLE_DOMAIN;
             this._pieData = this._pie(this._domain);
+            this._pieData.forEach((v) => {
+                v.startAngle -= Math.PI / 2;
+                v.endAngle -= Math.PI / 2;
+            });
             return this;
         }
         return this._domain;
@@ -71,6 +76,10 @@ export default class ThetaAxis {
                     .startAngle((startAngle / 180) * Math.PI)
                     .endAngle(Math.PI * endAngle / 180);
             this._pieData = this._pie(this._domain);
+            this._pieData.forEach((v) => {
+                v.startAngle -= Math.PI / 2;
+                v.endAngle -= Math.PI / 2;
+            });
             return this;
         }
         return this._range;

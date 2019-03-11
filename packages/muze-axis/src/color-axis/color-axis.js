@@ -8,7 +8,7 @@ import { createScale, getScheme, getSchemeType } from '../scale-creator';
 import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
 import { strategyGetter } from './color-strategy';
 import { DEFAULT_CONFIG } from './defaults';
-import { PROPS, getHslString } from './props';
+import { PROPS, getHslString, getActualHslColor } from './props';
 
 /**
 * This class is used to instantiate a SimpleAxis.
@@ -196,6 +196,10 @@ export default class ColorAxis {
      */
     id () {
         return this._id;
+    }
+
+    getHslArray (color) {
+        return getActualHslColor(color);
     }
 
 }

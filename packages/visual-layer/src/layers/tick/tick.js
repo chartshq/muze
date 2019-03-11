@@ -1,73 +1,68 @@
-import { FieldType, getObjProp } from 'muze-utils';
+import { FieldType } from 'muze-utils';
 import { PointLayer } from '../point';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
-import { getAxesScales, getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
+import { getAxesScales, positionPoints, getIndividualClassName,
+    getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
 
 const pointTranslators = {
     polar: (data, encoding, config = {}, layerInst) => {
         const axes = layerInst.axes();
         let points = [];
         const { radius: radiusAxis, angle: angleAxis, angle0: angle0Axis } = axes;
-        const dm = layerInst.data();
-        const fieldsConfig = dm.getFieldsConfig();
-        const colorEncoding = encoding.color;
-        const colorField = colorEncoding && colorEncoding.field;
-        const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
         const measurement = layerInst.measurement();
-        const radius0Field = getObjProp(encoding, 'radius0', 'field');
-        const angle0Field = getObjProp(encoding, 'angle0', 'field');
-        const angle0Index = getObjProp(fieldsConfig, angle0Field, 'index');
-        const radius0Index = getObjProp(fieldsConfig, radius0Field, 'index');
+
         const colorAxis = axes.color;
+        const angleV = {};
+        const angle0V = {};
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
 
-            const style = {};
-            const meta = {};
-            const { color, rawColor } = getLayerColor({ _data: d._data, index: i },
-                { colorEncoding, colorAxis, colorFieldIndex });
-
-            style.stroke = color;
-            meta.stateColor = {};
-            meta.originalColor = rawColor;
-            meta.colorTransform = {};
-            const { startAngle, endAngle } = angleAxis.getScaleValue(d.angle);
-            const angle = startAngle - (Math.PI / 2);
-            let angle0 = angle;
-            if (angle0Index !== undefined) {
-                const { startAngle: startAngle0, endAngle: endAngle0 } = angle0Axis.getScaleValue(d.angle0);
-                angle0 = angle0Index ? (startAngle0 + endAngle0) / 2 - (Math.PI / 2) : angle;
-            }
-            const r = radiusAxis.getScaleValue(d.radius);
+            const color = colorAxis.getColor(d.color);
+            const angles = angleAxis.getScaleValue(d.angle);
+            !angleV[d.angle] && (angleV[d.angle] = 0);
+            const { startAngle, endAngle } = angles[angleV[d.angle]++];
+            const angles0 = angle0Axis.getScaleValue(d.angle0);
+            !angle0V[d.angle0] && (angle0V[d.angle0] = 0);
+            const { startAngle: startAngle0, endAngle: endAngle0 } = angles0[angle0V[d.angle0]++];
+            const radius = radiusAxis.getScaleValue(d.radius);
+            const angle = startAngle;
+            const angle0 = startAngle0;
+            const resolvedVal = resolveEncodingValues({
+                values: {
+                    radius,
+                    radius0: radiusAxis.getScaleValue(d.radius0),
+                    color,
+                    angle,
+                    angle0,
+                    startAngle,
+                    endAngle,
+                    startAngle0,
+                    endAngle0
+                },
+                data: d
+            }, i, data, layerInst);
             const point = {
                 enter: {},
                 update: {
-                    radius: r,
-                    radius0: radius0Index !== undefined ? radiusAxis.getScaleValue(d.radius0) : r,
-                    angle,
-                    angle0
+                    radius: resolvedVal.radius,
+                    radius0: resolvedVal.radius0,
+                    angle: resolvedVal.angle,
+                    angle0: resolvedVal.angle0
                 },
-                style,
-                source: d._data,
-                rowId: d.uid,
-                meta
+                style: {
+                    stroke: resolvedVal.color
+                },
+                source: d.source,
+                rowId: d.rowId,
+                meta: getColorMetaInf(resolvedVal.color, colorAxis)
             };
-            point.className = getIndividualClassName({ _data: d }, i, data, layerInst);
+            point.className = getIndividualClassName(d, i, data, layerInst);
             points.push(point);
         }
-        points = positionPoints(layerInst, points);
-
-        for (let i = 0, len = points.length; i < len; i++) {
-            const point = points[i];
-            const { angle, radius, radius0, angle0 } = point.update;
-            point.update.x = (radius * Math.cos(angle)) + (measurement.width / 2);
-            point.update.y = (radius * Math.sin(angle)) + (measurement.height / 2);
-            point.update.y0 = (radius0 * Math.sin(angle0)) + (measurement.height / 2);
-            point.update.x0 = (radius0 * Math.cos(angle0)) + (measurement.width / 2);
-        }
+        points = toCartesianCoordinates(positionPoints(layerInst, points), measurement, true);
         return points;
     },
     cartesian: (data, encoding, config = {}, layerInst) => {
@@ -77,7 +72,6 @@ const pointTranslators = {
                 xAxis,
                 yAxis
             } = getAxesScales(axes);
-        const fieldsConfig = layerInst.data().getFieldsConfig();
         const {
                 xField,
                 yField,
@@ -89,9 +83,6 @@ const pointTranslators = {
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
-        const colorEncoding = encoding.color;
-        const colorField = colorEncoding && colorEncoding.field;
-        const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
         const measurement = layerInst.measurement();
         const colorAxis = axes.color;
         const { x: offsetX, y: offsetY } = config.offset;
@@ -102,7 +93,7 @@ const pointTranslators = {
             let y0Px;
             let yPx;
             const d = data[i];
-            const row = d._data;
+            const row = d.source;
             if (xField) {
                 xPx = xAxis.getScaleValue(d.x) + offsetX;
                 x0Px = xPx + xSpan;
@@ -139,30 +130,33 @@ const pointTranslators = {
                 xPx += xSpan / 2;
                 x0Px -= xSpan / 2;
             }
-            const style = {};
-            const meta = {};
-            const { color, rawColor } = getLayerColor({ datum: d, index: i },
-                { colorEncoding, colorAxis, colorFieldIndex });
+            const color = colorAxis.getColor(d.color);
+            const resolvedEncodings = resolveEncodingValues({
+                values: {
+                    x: xPx,
+                    y: yPx,
+                    x0: x0Px,
+                    y0: y0Px,
+                    color
+                },
+                data: d
+            });
 
-            style.stroke = color;
-            meta.stateColor = {};
-            meta.originalColor = rawColor;
-            meta.colorTransform = {};
             if (!isNaN(xPx) && !isNaN(yPx)) {
                 const point = {
                     enter: {},
                     update: {
-                        x: xPx,
-                        y: yPx,
-                        x0: x0Px,
-                        y0: y0Px
+                        x: resolvedEncodings.x,
+                        y: resolvedEncodings.y,
+                        x0: resolvedEncodings.x0,
+                        y0: resolvedEncodings.y0
                     },
-                    style,
-                    _data: row,
-                    _id: d._id,
+                    style: {
+                        stroke: resolvedEncodings.color
+                    },
                     source: row,
-                    rowId: d._id,
-                    meta
+                    rowId: d.rowId,
+                    meta: getColorMetaInf(resolvedEncodings.color, colorAxis)
                 };
                 point.className = getIndividualClassName(d, i, data, layerInst);
                 points.push(point);

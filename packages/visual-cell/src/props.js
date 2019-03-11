@@ -17,9 +17,7 @@ const geomProps = {
     data: {},
     caption: {},
     config: {},
-    axes: {
-        sanitization: (context, value) => Object.assign(context._axes, value)
-    },
+    axes: {},
     facetByFields: {},
     fields: {},
     transform: {},

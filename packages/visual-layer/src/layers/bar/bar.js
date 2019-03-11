@@ -176,7 +176,7 @@ export default class BarLayer extends BaseLayer {
                     className: seriesClassName,
                     transition,
                     style: {},
-                    keyFn: d => dimensions.map(key => d._data[key]).join('-')
+                    keyFn: d => dimensions.map(key => d.source[key]).join('-')
                 });
             }
         });
@@ -286,9 +286,9 @@ export default class BarLayer extends BaseLayer {
             pointFound = null;
         }
 
-        const values = pointFound && pointFound._data;
+        const values = pointFound && pointFound.source;
         if (values) {
-            identifiers = this.getIdentifiersFromData(values, pointFound._id);
+            identifiers = this.getIdentifiersFromData(values, pointFound.rowId);
         }
         return pointFound ? {
             dimensions: [pointFound.update],

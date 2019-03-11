@@ -25,3 +25,5 @@ export const HEX = 'hex';
 export const HSLA = 'hsla';
 export const HSL = 'hsl';
 
+export const DEFAULT_ANGLE_DOMAIN = [1];
+

@@ -632,7 +632,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     getPlotElementsFromSet (set) {
         return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
-            (data ? set.indexOf(data._id) !== -1 : false));
+            (data ? set.indexOf(data.rowId) !== -1 : false));
     }
 
     /**

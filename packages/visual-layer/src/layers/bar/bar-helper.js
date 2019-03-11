@@ -1,6 +1,6 @@
 import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
-import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
+import { positionPoints, getIndividualClassName, getColorMetaInf, resolveEncodingValues } from '../../helpers';
 
 /**
  *
@@ -147,9 +147,6 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const encoding = context.config().encoding;
     const axes = context.axes();
     const colorAxis = axes.color;
-    const fieldsConfig = context.data().getFieldsConfig();
-    const colorEncoding = encoding.color;
-    const colorField = colorEncoding.field;
     const sizeEncoding = encoding.size || {};
     const {
             x0Field,
@@ -162,12 +159,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const isYDim = yFieldSubType === DimensionSubtype.CATEGORICAL || yFieldSubType === DimensionSubtype.TEMPORAL;
     const key = isXDim ? 'x' : (isYDim ? 'y' : null);
     const transformType = context.transformType();
-    const colorFieldIndex = colorField && fieldsConfig[colorField] && fieldsConfig[colorField].index;
 
     for (let i = 0, len = data.length; i < len; i++) {
         const d = data[i];
-        const style = {};
-        const meta = {};
         const dimensions = resolveDimensions(d, {
             xFieldType: xFieldSubType,
             yFieldType: yFieldSubType,
@@ -179,27 +173,36 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             sizeEncoding
         }, axes);
 
-        const { color, rawColor } = getLayerColor({ datum: d, index: i },
-            { colorEncoding, colorAxis, colorFieldIndex });
-
-        style.fill = color;
-        meta.stateColor = {};
-        meta.originalColor = rawColor;
-        meta.colorTransform = {};
+        let color = colorAxis.getColor(d.color);
 
         const update = dimensions.update;
-
-        if (!isNaN(update.x) && !isNaN(update.y) && d._id !== undefined) {
+        const resolvedEncodings = resolveEncodingValues({
+            values: {
+                x: update.x,
+                y: update.y,
+                width: update.width,
+                height: update.height,
+                color
+            },
+            data: d
+        });
+        color = resolvedEncodings.color;
+        if (!isNaN(update.x) && !isNaN(update.y) && d.rowId !== undefined) {
             let point = null;
             point = {
                 enter: dimensions.enter,
-                update,
-                style,
-                _data: d._data,
-                _id: d._id,
-                source: d._data,
-                rowId: d._id,
-                meta
+                update: {
+                    x: resolvedEncodings.x,
+                    y: resolvedEncodings.y,
+                    width: resolvedEncodings.width,
+                    height: resolvedEncodings.height
+                },
+                source: d.source,
+                rowId: d.rowId,
+                style: {
+                    fill: color
+                },
+                meta: getColorMetaInf(color, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);

@@ -6,13 +6,12 @@ import {
     Symbols,
     FieldType,
     ReservedFields,
-    getDomainFromData
+    getObjProp
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
-import { ASCENDING, ENCODING } from '../../enums/constants';
-import { getIndividualClassName } from '../../helpers';
-import { getRangeValue, tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint } from './arc-helper';
+import { getIndividualClassName, resolveEncodingValues, getColorMetaInf } from '../../helpers';
+import { tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint, getSizeMultiplier } from './arc-helper';
 import './styles.scss';
 
 const arc = Symbols.arc;
@@ -145,8 +144,8 @@ export default class ArcLayer extends BaseLayer {
      */
     getNearestPoint (x, y, config = {}) {
         const dataPoint = selectElement(config.event.target).data()[0];
-        if (isSimpleObject(dataPoint) && dataPoint.datum) {
-            const { source, rowId } = dataPoint.datum;
+        if (isSimpleObject(dataPoint)) {
+            const { source, rowId } = dataPoint;
             return {
                 id: this.getIdentifiersFromData(source, rowId),
                 layerId: this.id()
@@ -163,18 +162,18 @@ export default class ArcLayer extends BaseLayer {
      * @memberof ArcLayer
      */
     getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(d => set.indexOf(d.datum.rowId) !== -1);
+        return selectElement(this.mount()).selectAll(this.elemType()).filter(d => set.indexOf(d.rowId) !== -1);
     }
 
     translatePoints (data) {
         const config = this.config();
         const encoding = config.encoding;
         const fieldsConfig = this.data().getFieldsConfig();
-        const { angle } = this.axes();
+        const { angle, color: colorAxis, radius: radiusAxis } = this.axes();
         const {
-            sizeIndex,
-            colorIndex
+            sizeIndex
         } = getFieldIndices(encoding, fieldsConfig);
+        const radius0Field = getObjProp(encoding.radius0, 'field');
         this._prevPieData = {};
         const pieIndex = {};
         const prevData = this._points;
@@ -183,23 +182,41 @@ export default class ArcLayer extends BaseLayer {
             pieIndex[e.index] = e;
         });
         const sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
+        const sizeMultiplier = getSizeMultiplier(sizeVal, this);
         const points = [];
+        const angleV = {};
         data.forEach((d, i) => {
-            const { startAngle, endAngle } = angle.getScaleValue(d.angle);
-            const outerRadiusValue = d.radius;
+            const angles = angle.getScaleValue(d.angle);
+            !angleV[d.angle] && (angleV[d.angle] = 0);
+            const { startAngle, endAngle } = angles[angleV[d.angle]++];
 
-            const uid = d._id;
+            const uid = d.rowId;
+
+            const resolvedEncodings = resolveEncodingValues({
+                values: {
+                    radius: radiusAxis.getScaleValue(d.radius) * sizeMultiplier,
+                    radius0: radius0Field ? radiusAxis.getScaleValue(d.radius0) * sizeMultiplier :
+                        radiusAxis.range()[0],
+                    color: colorAxis.getColor(d.color),
+                    angle0: startAngle,
+                    angle: endAngle,
+                    startAngle,
+                    endAngle,
+                    startAngle0: startAngle,
+                    endAngle0: endAngle
+                },
+                data: d
+            }, i, data, this);
+            const color = resolvedEncodings.color;
             points.push({
-                startAngle,
-                endAngle,
-                source: d._data,
+                source: d.source,
                 index: i,
-                angleVal: d.angle,
-                outerRadius: getRangeValue({
-                    sizeVal,
-                    outerRadiusValue
-                }, this),
-                colorVal: d._data[colorIndex],
+                angle0: resolvedEncodings.angle0,
+                angle: resolvedEncodings.angle,
+                radius0: resolvedEncodings.radius0,
+                radius: resolvedEncodings.radius,
+                color,
+                meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
                 rowId: uid,
                 _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
                     getPreviousPoint(pieIndex, i, config)
@@ -225,15 +242,17 @@ export default class ArcLayer extends BaseLayer {
             padRadius,
             transition
        } = this.config();
-        const { radius: radiusAxis, color: colorAxis } = this.axes();
+        const { radius: radiusAxis } = this.axes();
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
         // This returns a function that generates the arc path based on the datum provided
-        const radiusRange = radiusAxis.range();
-        const path = arc()
-                .innerRadius(radiusRange[0])
+        const path = this._arcFn = arc()
                 .cornerRadius(cornerRadius)
+                .startAngle(d => d.angle0 + Math.PI / 2)
+                .endAngle(d => d.angle + Math.PI / 2)
                 .padAngle(padAngle)
-                .padRadius(padRadius);
+                .padRadius(padRadius)
+                .outerRadius(d => d.radius)
+                .innerRadius(d => d.radius0);
 
         this._points = this.translatePoints(this._normalizedData[0]);
         const padding = radiusAxis.config().padding;
@@ -243,17 +262,8 @@ export default class ArcLayer extends BaseLayer {
                 .attr('transform', `translate(${(measurement.width - padding) / 2},
                     ${(measurement.height - padding) / 2})`);
         const tween = (elem) => {
-            makeElement(elem, 'path', (d, i) => [{
-                datum: d,
-                index: i,
-                arcFn: path,
-                meta: {
-                    originalColor: colorAxis.getRawColor(d.colorVal),
-                    stateColor: {},
-                    colorTransform: {}
-                }
-            }], `${qualClassName[0]}-path`)
-                            .style('fill', d => colorAxis.getColor(d.datum.colorVal))
+            makeElement(elem, 'path', d => [d], `${qualClassName[0]}-path`)
+                            .style('fill', d => d.color)
                             .transition()
                             .duration(transition.duration)
                             .on('end', this.registerAnimationDoneHook())
@@ -306,7 +316,7 @@ export default class ArcLayer extends BaseLayer {
         const fieldsConfig = this.data().getFieldsConfig();
 
         const filteredPies = pieSlices.filter((tData) => {
-            const { source, rowId } = tData.datum;
+            const { source, rowId } = tData;
             return fieldNames.every((field, idx) => {
                 if (field in fieldsConfig && fieldsConfig[field].def.type === FieldType.DIMENSION) {
                     return values.findIndex(d => d[idx] === source[fieldsConfig[field].index]) !== -1;
@@ -320,7 +330,7 @@ export default class ArcLayer extends BaseLayer {
         if (pieSliceInf) {
             const measurement = this.measurement();
             const padding = this.axes().radius.config().padding;
-            const centroid = pieSliceInf.arcFn.centroid(pieSliceInf.datum);
+            const centroid = this._arcFn.centroid(pieSliceInf);
             return [{
                 x: centroid[0] + (measurement.width - padding) / 2,
                 y: centroid[1] + (measurement.height - padding) / 2,

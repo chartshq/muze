@@ -75,7 +75,8 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         entryCellMap,
         exitCellMap
     } = cacheMaps;
-    const layerConfigArr = encoder.getLayerConfig({ columnFields, rowFields }, suppliedLayers || []);
+    const layerConfigArr = encoder.getLayerConfig({ columnFields, rowFields }, suppliedLayers || [],
+        context.retinalConfig);
     const axesCreators = { config, labelManager, axes, cacheMaps };
 
     fieldInfo.normalizedColumns = verticalAxis.fields;
@@ -525,7 +526,12 @@ export const computeMatrices = (context, config) => {
         cell: cells.GeomCell,
         encoder: encoders.simpleEncoder,
         newCacheMap,
-        detailFields: config.detail
+        detailFields: config.detail,
+        retinalConfig: {
+            color: config.color,
+            size: config.size,
+            shape: config.shape
+        }
     };
     const fieldsConfig = datamodel.getFieldsConfig();
     let groupedModel = datamodel;

@@ -314,7 +314,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    getLayerConfig (fields, userLayerConfig) {
+    getLayerConfig (fields, userLayerConfig, retinalConfig) {
         const layerConfig = [];
         const {
             columnFields,
@@ -367,6 +367,7 @@ export default class CartesianEncoder extends VisualEncoder {
                 layerConfig.push(...configs);
             });
         });
-        return layerConfig;
+        const sanitizedConfig = this.sanitizeLayerConfig(retinalConfig, layerConfig);
+        return sanitizedConfig;
     }
 }

@@ -8,34 +8,11 @@ import { ANGLE, RADIUS, SIZE, COLOR } from '../../enums/constants';
  * @return {number} range value
  * @memberof ArcLayer
  */
-export const getRangeValue = (datum, context) => {
-    const { size: sizeAxis, radius: radiusAxis } = context.axes();
-    const {
-        outerRadiusValue,
-        sizeVal
-    } = datum;
+export const getSizeMultiplier = (sizeVal, context) => {
+    const { size: sizeAxis } = context.axes();
     const sizeAxisDomain = sizeAxis.domain();
     const sizeMultiplier = sizeAxis.getSize(sizeVal) / (sizeAxisDomain ? sizeAxis.range()[1] : sizeAxis.config().value);
-
-    const radiusVal = radiusAxis.getScaleValue(outerRadiusValue);
-    return radiusVal * sizeMultiplier;
-};
-
-/**
- *
- *
- * @memberof ArcLayer
- */
-export const getRadiusRange = (width, height, config) => {
-    const {
-        minOuterRadius,
-        innerRadius,
-        outerRadius,
-        innerRadiusFixer
-    } = config;
-
-    return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
-        width) / 2];
+    return sizeMultiplier;
 };
 
 export const getPreviousPoint = (prevData, currIndex, config) => {
@@ -68,7 +45,7 @@ export const getPreviousPoint = (prevData, currIndex, config) => {
  * @memberof ArcLayer
  */
 export const tweenPie = (path, b) => {
-    const { datum } = b[0];
+    const datum = b[0];
     // const outerRadius = rangeValueGetter(datum);
     // datum.outerRadius = outerRadius;
     // datum._previousInfo.outerRadius = datum._previousInfo.outerRadius || outerRadius;

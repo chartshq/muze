@@ -69,7 +69,7 @@ export default class Content {
         if (model instanceof Array) {
             data = model;
         } else {
-            data = formatter instanceof Function ? formatter(this._model, this._context) :
+            data = formatter instanceof Function ? formatter(this._model, this.config(), this._context) :
                 strategy[this._strategy](this._model, this.config(), this._context);
         }
 

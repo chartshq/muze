@@ -448,9 +448,9 @@ export default class MatrixResolver {
         const matrixLayers = this.matrixLayers();
 
         this.forEach(VALUE_MATRIX, (i, j, el) => {
-            el.axes(retinalAxes);
+            el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
-            el.layerDef(encoders.simpleEncoder.sanitizeLayerConfig(config, matrixLayers[i][j]));
+            el.layerDef(matrixLayers[i][j]);
             el.updateModel();
 
             units.push(el.source());

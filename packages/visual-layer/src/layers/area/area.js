@@ -7,9 +7,10 @@ import { STACK, ENCODING } from '../../enums/constants';
 import {
     getAxesScales,
     positionPoints,
-    getLayerColor,
     getIndividualClassName,
-    getValidTransformForAggFn
+    getValidTransformForAggFn,
+    getColorMetaInf,
+    resolveEncodingValues
 } from '../../helpers';
 
 /**
@@ -87,11 +88,7 @@ export default class AreaLayer extends LineLayer {
         const transformType = this.transformType();
         const colorAxis = axes.color;
         const config = this.config();
-        const encoding = config.encoding;
-        const colorEncoding = encoding.color;
-        const colorField = colorEncoding.field;
         const fieldsConfig = this.data().getFieldsConfig();
-        const colorFieldIndex = colorField && fieldsConfig[colorField].index;
         const { xField, yField, y0Field } = encodingFieldsInf;
         const {
             xAxis,
@@ -102,20 +99,23 @@ export default class AreaLayer extends LineLayer {
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
         points = data.map((d, i) => {
+            let color;
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
             const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : yAxis.getScaleValue(0);
-            const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
-                colorEncoding, colorAxis, colorFieldIndex });
-            const style = {};
-            const meta = {};
-            style.fill = color;
-            // style['fill-opacity'] = 0;
-            meta.stateColor = {};
-            meta.originalColor = rawColor;
-            meta.colorTransform = {};
+            color = colorAxis.getColor(d.color);
             const invalidY = d.y instanceof InvalidAwareTypes;
             const invalidY0 = d.y0 instanceof InvalidAwareTypes;
+            const resolvedValues = resolveEncodingValues({
+                values: {
+                    x: xPx,
+                    y: yPx,
+                    y0: y0Px,
+                    color
+                },
+                data: d
+            });
+            color = resolvedValues.color;
             const point = {
                 enter: {
                     x: xPx,
@@ -124,16 +124,16 @@ export default class AreaLayer extends LineLayer {
                 },
                 update: {
                     x: xPx,
-                    y: invalidY ? null : yPx,
-                    y0: invalidY0 ? null : y0Px
+                    y: invalidY ? null : resolvedValues.x,
+                    y0: invalidY0 ? null : resolvedValues.y
                 },
-                _id: d._id,
-                _data: d._data,
-                source: d._data,
-                rowId: d._id,
+                source: d.source,
+                rowId: d.rowId,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
-                style,
-                meta
+                style: {
+                    fill: color
+                },
+                meta: getColorMetaInf(color, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);

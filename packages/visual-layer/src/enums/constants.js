@@ -7,6 +7,7 @@ export const RADIUS = 'radius';
 export const SIZE = 'size';
 export const COLOR = 'color';
 export const SHAPE = 'shape';
+export const TEXT = 'text';
 export const OUTER_RADIUS_VALUE = 'outerRadiusValue';
 export const TEXT_ANCHOR_MIDDLE = 'middle';
 export const ENCODING = {

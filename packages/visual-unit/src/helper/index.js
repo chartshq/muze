@@ -12,7 +12,6 @@ import {
     getNearestValue
 } from 'muze-utils';
 import { layerFactory, ENCODING } from '@chartshq/visual-layer';
-import { ANGLE } from '@chartshq/visual-layer/src/enums/constants';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -200,15 +199,17 @@ export const attachAxisToLayers = (axes, layers, layerAxisIndex) => {
     });
 };
 
+const { X, Y, RADIUS, ANGLE, ANGLE0 } = ENCODING;
+
 export const getLayerAxisIndex = (layers, fields) => {
     const layerAxisIndex = {};
     layers.forEach((layer) => {
         const { axis, encoding } = layer.config();
         const id = layer.id();
-        ['x', 'y'].forEach((type) => {
+        [X, Y, ANGLE, ANGLE0, RADIUS].forEach((type) => {
             let index;
             const field = defaultValue(getObjProp(axis, type), encoding[type] && encoding[type].field);
-            if (fields[type]) {
+            if (fields[type] && fields[type].length) {
                 index = fields[type].findIndex(fieldInst => fieldInst.getMembers().indexOf(field) !== -1);
             } else {
                 index = 0;
@@ -220,10 +221,12 @@ export const getLayerAxisIndex = (layers, fields) => {
     return layerAxisIndex;
 };
 
-const getValidDomain = (domain, domain1, encodingType) => {
+const getValidDomain = (domain, domain1, encodingType, fieldType) => {
     let unionedDomain = domain1;
     if (encodingType === ANGLE || encodingType === 'angle0') {
         unionedDomain = domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
+    } else {
+        unionedDomain = unionDomain([domain, domain1], fieldType);
     }
     return unionedDomain;
 };
@@ -234,7 +237,7 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
     layers.forEach((layer) => {
         let domainValues = {};
         const config = layer.config();
-        const encoding = config.encoding;
+        // const encoding = config.encoding;
         const layerDomain = layer.getDataDomain();
         const layerId = layer.id();
 
@@ -242,19 +245,13 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
             domainValues = Object.entries(layerDomain);
             domains = domainValues.reduce((fieldDomain, domain) => {
                 const encodingType = domain[0];
-                const field = encoding[encodingType].field;
                 const axisIndex = layerAxisIndex[layerId][encodingType];
-                if (encodingType in axisFields) {
-                    const fieldStr = `${axisFields[encodingType][axisIndex]}`;
+                const field = getObjProp(axisFields, encodingType, axisIndex);
+                if (field) {
+                    const fieldStr = `${field}`;
                     fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
-                    fieldDomain[fieldStr] = unionDomain([fieldDomain[fieldStr], domain[1]],
-                        fieldsConfig[field].def.subtype ? fieldsConfig[field].def.subtype :
-                                fieldsConfig[field].def.type);
-                } else {
-                    fieldDomain[encodingType] = fieldDomain[encodingType] || [];
-                    fieldDomain[encodingType] = getValidDomain(fieldDomain[encodingType], domain[1], encodingType);
-                    // fieldDomain[encodingType] = unionDomain([fieldDomain[encodingType], domain[1],],
-                    //     encodingType === 'angle' ? 'categorical' : getObjProp(fieldsConfig[field], 'def', 'subtype'));
+                    fieldDomain[fieldStr] = getValidDomain(fieldDomain[fieldStr], domain[1], encodingType,
+                        fieldsConfig[field.getMembers()[0]].def.subtype);
                 }
                 return fieldDomain;
             }, domains);
@@ -352,37 +349,53 @@ export const createRenderPromise = (unit) => {
 
 export const getRadiusRange = (width, height, config) => {
     const {
-        minOuterRadius,
         innerRadius,
-        outerRadius,
-        innerRadiusFixer
+        outerRadius
     } = config;
 
-    return [Math.max((innerRadius + innerRadiusFixer || 0), minOuterRadius), outerRadius || Math.min(height,
+    return [innerRadius || 0, outerRadius || Math.min(height,
         width) / 2];
 };
 
 export const setAxisRange = (context) => {
-    const { radius, angle } = context.axes();
-    if (radius) {
-        const unitConf = context.config();
-        const layers = context.layers();
-        const config = {
-            innerRadius: Math.max(...layers.map(d => d.config().innerRadius || 0)),
-            outerRadius: Math.max(...layers.map(d => d.config().outerRadius || 0)),
-            minOuterRadius: unitConf.minOuterRadius,
-            innerRadiusFixer: unitConf.innerRadiusFixer
-        };
-        radius[0].range(getRadiusRange(context.width(), context.height(), config));
-    }
-    if (angle) {
-        let startAngle = Infinity;
-        let endAngle = -Infinity;
-        context.layers().forEach((layer) => {
-            const config = layer.config();
-            startAngle = Math.min(startAngle, config.startAngle || Infinity);
-            endAngle = Math.max(endAngle, config.endAngle || -Infinity);
+    const axes = context.axes();
+    const { radius: radiusAxes } = axes;
+    const fields = context.fields();
+    if (radiusAxes) {
+        radiusAxes.forEach((axis, i) => {
+            const field = fields.radius[i];
+            const encodingField = `${field}`;
+            let layers = [];
+            if (field) {
+                layers = context.layers().filter(layer => layer.config().encoding.radius.field === encodingField);
+            } else {
+                layers = context.layers().filter(layer => !layer.config().encoding.radius.field);
+            }
+            let config = {};
+            if (layers.length) {
+                config = {
+                    innerRadius: Math.max(...layers.map(d => d.config().innerRadius || 0)),
+                    outerRadius: Math.max(...layers.map(d => d.config().outerRadius || 0))
+                };
+            }
+
+            axis.range(getRadiusRange(context.width(), context.height(), config));
         });
-        angle[0].range([startAngle === Infinity ? 0 : startAngle, endAngle === -Infinity ? 360 : endAngle]);
     }
+    [ANGLE, ANGLE0].forEach((type) => {
+        const axisArr = axes[type] || [];
+        axisArr.forEach((axis, i) => {
+            let startAngle = Infinity;
+            let endAngle = -Infinity;
+            const encodingField = `${fields[type][i]}`;
+            const filteredLayers = context.layers()
+                .filter(layer => layer.config().encoding[type].field === encodingField);
+            filteredLayers.forEach((layer) => {
+                const config = layer.config();
+                startAngle = Math.min(startAngle, config.startAngle || Infinity);
+                endAngle = Math.max(endAngle, config.endAngle || -Infinity);
+            });
+            axis.range([startAngle === Infinity ? 0 : startAngle, endAngle === -Infinity ? 360 : endAngle]);
+        });
+    });
 };
