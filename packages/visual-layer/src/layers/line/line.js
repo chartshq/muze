@@ -113,7 +113,7 @@ export default class LineLayer extends BaseLayer {
                     color
                 },
                 data: d
-            });
+            }, i, data, this);
 
             const point = {
                 enter: {},
@@ -249,8 +249,8 @@ export default class LineLayer extends BaseLayer {
         const dimensions = getObjProp(point, 'data', 'data', 'update');
 
         if (point) {
-            const { _data, _id } = point.data.data;
-            const identifiers = this.getIdentifiersFromData(_data, _id);
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
             return {
                 id: identifiers,
                 dimensions: [{

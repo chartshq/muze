@@ -114,7 +114,7 @@ export default class AreaLayer extends LineLayer {
                     color
                 },
                 data: d
-            });
+            }, i, data, this);
             color = resolvedValues.color;
             const point = {
                 enter: {
@@ -124,8 +124,8 @@ export default class AreaLayer extends LineLayer {
                 },
                 update: {
                     x: xPx,
-                    y: invalidY ? null : resolvedValues.x,
-                    y0: invalidY0 ? null : resolvedValues.y
+                    y: invalidY ? null : resolvedValues.y,
+                    y0: invalidY0 ? null : resolvedValues.y0
                 },
                 source: d.source,
                 rowId: d.rowId,

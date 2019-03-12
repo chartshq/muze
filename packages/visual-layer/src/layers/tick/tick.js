@@ -140,7 +140,7 @@ const pointTranslators = {
                     color
                 },
                 data: d
-            });
+            }, i, data, layerInst);
 
             if (!isNaN(xPx) && !isNaN(yPx)) {
                 const point = {

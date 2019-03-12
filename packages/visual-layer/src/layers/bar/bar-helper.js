@@ -185,7 +185,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 color
             },
             data: d
-        });
+        }, i, data, context);
         color = resolvedEncodings.color;
         if (!isNaN(update.x) && !isNaN(update.y) && d.rowId !== undefined) {
             let point = null;

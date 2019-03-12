@@ -43,7 +43,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             return isNegativeDomain && data[orientation] === 0 ? zeroLineColor : gridLineColor;
         }
     };
-
+    const { color, shape, size } = context.axes();
     return {
         definition: {
             defClassName: `${defClassName}-${orientation}`,
@@ -63,7 +63,10 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             encoding
         },
         axes: {
-            [orientation]: axis
+            [orientation]: axis,
+            color: color[0],
+            shape: shape[0],
+            size: size[0]
         },
         interactive: false
     };

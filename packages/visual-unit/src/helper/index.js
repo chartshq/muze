@@ -223,7 +223,7 @@ export const getLayerAxisIndex = (layers, fields) => {
 
 const getValidDomain = (domain, domain1, encodingType, fieldType) => {
     let unionedDomain = domain1;
-    if (encodingType === ANGLE || encodingType === 'angle0') {
+    if (encodingType === ANGLE || encodingType === ANGLE0) {
         unionedDomain = domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
     } else {
         unionedDomain = unionDomain([domain, domain1], fieldType);

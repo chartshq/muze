@@ -96,7 +96,7 @@ export default class PolarEncoder extends VisualEncoder {
                 axesArr[rowIndex] = [];
             }
             axesArr[rowIndex][columnIndex] = axesObj[enc];
-            const axisConfig = context.config.axes[enc] || {};
+            const axisConfig = getObjProp(context.config.axes, enc) || {};
 
             axesObj[enc].forEach((axis, i) => {
                 let userConfig = axisConfig;

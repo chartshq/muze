@@ -109,7 +109,7 @@ const pointTranslators = {
                     color
                 },
                 data: d
-            });
+            }, i, data, layerInst);
             const point = {
                 enter: {},
                 update: {

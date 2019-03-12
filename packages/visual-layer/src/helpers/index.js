@@ -232,6 +232,9 @@ const dataNormalizers = {
                     };
                     pointObj.source = tuple;
                     pointObj.rowId = tuple[fieldsLen];
+                    [COLOR, SHAPE, SIZE, TEXT].forEach((enc) => {
+                        pointObj[enc] = tuple[encodingFieldInf[`${enc}FieldIndex`]];
+                    });
                 } else {
                     pointObj = {
                         x: d[xFieldIndex],
@@ -241,10 +244,10 @@ const dataNormalizers = {
                     };
                     pointObj.source = d;
                     pointObj.rowId = d[fieldsLen];
+                    [COLOR, SHAPE, SIZE, TEXT].forEach((enc) => {
+                        pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
+                    });
                 }
-                [COLOR, SHAPE, SIZE, TEXT].forEach((enc) => {
-                    pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
-                });
                 return pointObj;
             });
         }).filter(d => d.length);

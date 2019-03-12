@@ -127,7 +127,7 @@ export default class PointLayer extends BaseLayer {
                     data: d
                 },
                 data: d
-            });
+            }, i, data, this);
             color = resolvedEncodings.color;
             const style = {
                 fill: color,
@@ -244,8 +244,8 @@ export default class PointLayer extends BaseLayer {
         const radius = point ? Math.sqrt(point.data.data.size / Math.PI) : 0;
 
         if (point) {
-            const { _data, _id } = point.data.data;
-            const identifiers = this.getIdentifiersFromData(_data, _id);
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
             return {
                 id: identifiers,
                 dimensions: [{
