@@ -347,7 +347,7 @@ export const createRenderPromise = (unit) => {
     });
 };
 
-export const getRadiusRange = (width, height, config) => {
+export const getRadiusRange = (width, height, config = {}) => {
     const {
         innerRadius,
         outerRadius
@@ -360,42 +360,9 @@ export const getRadiusRange = (width, height, config) => {
 export const setAxisRange = (context) => {
     const axes = context.axes();
     const { radius: radiusAxes } = axes;
-    const fields = context.fields();
     if (radiusAxes) {
-        radiusAxes.forEach((axis, i) => {
-            const field = fields.radius[i];
-            const encodingField = `${field}`;
-            let layers = [];
-            if (field) {
-                layers = context.layers().filter(layer => layer.config().encoding.radius.field === encodingField);
-            } else {
-                layers = context.layers().filter(layer => !layer.config().encoding.radius.field);
-            }
-            let config = {};
-            if (layers.length) {
-                config = {
-                    innerRadius: Math.max(...layers.map(d => d.config().innerRadius || 0)),
-                    outerRadius: Math.max(...layers.map(d => d.config().outerRadius || 0))
-                };
-            }
-
-            axis.range(getRadiusRange(context.width(), context.height(), config));
+        radiusAxes.forEach((axis) => {
+            axis.range(getRadiusRange(context.width(), context.height()));
         });
     }
-    [ANGLE, ANGLE0].forEach((type) => {
-        const axisArr = axes[type] || [];
-        axisArr.forEach((axis, i) => {
-            let startAngle = Infinity;
-            let endAngle = -Infinity;
-            const encodingField = `${fields[type][i]}`;
-            const filteredLayers = context.layers()
-                .filter(layer => layer.config().encoding[type].field === encodingField);
-            filteredLayers.forEach((layer) => {
-                const config = layer.config();
-                startAngle = Math.min(startAngle, config.startAngle || Infinity);
-                endAngle = Math.max(endAngle, config.endAngle || -Infinity);
-            });
-            axis.range([startAngle === Infinity ? 0 : startAngle, endAngle === -Infinity ? 360 : endAngle]);
-        });
-    });
 };

@@ -829,7 +829,7 @@ const generateGetterSetters = (context, props) => {
                         value = sanitization(context, params[0]);
                     }
                     if (preset) {
-                        preset(context, params[0]);
+                        preset(context, value);
                     }
                     if (typeChecker && !typeChecker(value)) {
                         return context[`_${prop}`];

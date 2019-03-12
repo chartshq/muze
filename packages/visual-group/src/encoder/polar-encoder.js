@@ -96,6 +96,15 @@ export default class PolarEncoder extends VisualEncoder {
                 axesArr[rowIndex] = [];
             }
             axesArr[rowIndex][columnIndex] = axesObj[enc];
+            const axisConfig = context.config.axes[enc] || {};
+
+            axesObj[enc].forEach((axis, i) => {
+                let userConfig = axisConfig;
+                if (axisConfig instanceof Function) {
+                    userConfig = axisConfig(fieldInf[enc][i], rowIndex, columnIndex);
+                }
+                axis.config(userConfig);
+            });
         });
         geomCell.fields(Object.assign({}, varInstances, geomCell.fields()));
         resolverAxes.pie = pieAxes;

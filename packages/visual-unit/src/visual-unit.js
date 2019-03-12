@@ -386,7 +386,7 @@ export default class VisualUnit {
         store.unit = this;
         const layerdeps = {};
         const layersArr = [].concat(...Object.values(this._layersMap));
-
+        this._layerStore = store;
         layersArr.forEach((layer) => {
             const alias = layer.alias();
             store.layers[alias] = layer;

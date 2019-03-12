@@ -242,7 +242,6 @@ export default class ArcLayer extends BaseLayer {
             padRadius,
             transition
        } = this.config();
-        const { radius: radiusAxis } = this.axes();
         const qualClassName = getQualifiedClassName(defClassName, this.id(), classPrefix);
         // This returns a function that generates the arc path based on the datum provided
         const path = this._arcFn = arc()
@@ -255,12 +254,12 @@ export default class ArcLayer extends BaseLayer {
                 .innerRadius(d => d.radius0);
 
         this._points = this.translatePoints(this._normalizedData[0]);
-        const padding = radiusAxis.config().padding;
+
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
-                .attr('transform', `translate(${(measurement.width - padding) / 2},
-                    ${(measurement.height - padding) / 2})`);
+                .attr('transform', `translate(${measurement.width / 2},
+                    ${measurement.height / 2})`);
         const tween = (elem) => {
             makeElement(elem, 'path', d => [d], `${qualClassName[0]}-path`)
                             .style('fill', d => d.color)
@@ -329,11 +328,10 @@ export default class ArcLayer extends BaseLayer {
         const pieSliceInf = filteredPies[0];
         if (pieSliceInf) {
             const measurement = this.measurement();
-            const padding = this.axes().radius.config().padding;
             const centroid = this._arcFn.centroid(pieSliceInf);
             return [{
-                x: centroid[0] + (measurement.width - padding) / 2,
-                y: centroid[1] + (measurement.height - padding) / 2,
+                x: centroid[0] + measurement.width / 2,
+                y: centroid[1] + measurement.height / 2,
                 width: 2,
                 height: 2
             }];
