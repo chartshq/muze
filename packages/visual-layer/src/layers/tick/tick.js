@@ -27,13 +27,13 @@ const pointTranslators = {
             const angles0 = angle0Axis.getScaleValue(d.angle0);
             !angle0V[d.angle0] && (angle0V[d.angle0] = 0);
             const { startAngle: startAngle0, endAngle: endAngle0 } = angles0[angle0V[d.angle0]++];
-            const radius = radiusAxis.getScaleValue(d.radius);
-            const angle = startAngle;
-            const angle0 = startAngle0;
+            const radius = radiusAxis.getOuterRadius(d.radius);
+            const angle = (startAngle + endAngle) / 2;
+            const angle0 = (startAngle0 + endAngle0) / 2;
             const resolvedVal = resolveEncodingValues({
                 values: {
                     radius,
-                    radius0: radiusAxis.getScaleValue(d.radius0),
+                    radius0: radiusAxis.getInnerRadius(d.radius0),
                     color,
                     angle,
                     angle0,

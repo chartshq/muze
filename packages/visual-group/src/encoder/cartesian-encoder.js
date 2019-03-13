@@ -108,7 +108,6 @@ export default class CartesianEncoder extends VisualEncoder {
 
     unionUnitDomains (context) {
         const store = context.store();
-        const unitDomains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
         const resolver = context.resolver();
         const units = resolver.units();
         const domains = {
@@ -121,10 +120,11 @@ export default class CartesianEncoder extends VisualEncoder {
             for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
                 const unit = unitsArr[cIdx];
                 const axisFields = unit.fields();
+                const encodingDomains = unit.getDataDomain();
                 [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
                     fieldArr.forEach((field, axisIndex) => {
                         const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
-                        const dom = unitDomains[`${rIdx}${cIdx}`];
+                        const dom = encodingDomains[!axisType ? 'x' : 'y'];
                         if (dom && Object.keys(dom).length !== 0) {
                             domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
                                 dom[`${field}`]], field.subtype());

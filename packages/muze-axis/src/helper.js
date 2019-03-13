@@ -6,3 +6,15 @@ export const treatNullMeasures = (domainVal, scaledVal, minDomainScaledVal) => {
     }
     return scaledVal;
 };
+
+export const resolveAxisConfig = (propVal, defaultVal, key, context) => {
+    let resolvedVal;
+    if (propVal instanceof Function) {
+        resolvedVal = propVal(defaultVal, context);
+    } else if (propVal instanceof Array) {
+        resolvedVal = propVal;
+    } else {
+        resolvedVal = defaultVal;
+    }
+    return resolvedVal;
+};

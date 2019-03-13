@@ -7,32 +7,38 @@ import { getUniqueId, mergeRecursive, generateGetterSetters } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { LINEAR } from '../../../visual-group/src/enums/constants';
 import { PROPS } from './props';
+import { resolveAxisConfig } from '../helper';
 
 /**
-* This class is used to instantiate a SimpleAxis.
-* @class SimpleAxis
+* This class is used to instantiate a RadiusAxis.
+* @class RadiusAxis
 */
 export default class RadiusAxis {
 
     /**
-     * Creates an instance of SimpleAxis.
+     * Creates an instance of RadiusAxis.
      * @param {Object} config input parameters.
-     * @memberof SizeAxis
+     * @memberof RadiusAxis
      */
     constructor (config = {}) {
         this._id = getUniqueId();
         generateGetterSetters(this, PROPS);
         this._range = [];
+        this._radiusFactor = 1;
         this._config = mergeRecursive({}, this.constructor.defaultConfig());
         this.config(config);
-        this._scale = this.createScale({
+        this._innerRadiusScale = this.createScale({
+            scale: LINEAR
+        });
+        this._outerRadiusScale = this.createScale({
             scale: LINEAR
         });
     }
 
     static defaultConfig () {
         return {
-            padding: [0, 1]
+            padding: [0, 1],
+            minOuterRadius: 10
         };
     }
 
@@ -45,12 +51,6 @@ export default class RadiusAxis {
         return this._config;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof SizeAxis
-     */
     createScale (strategy) {
         return createScale({
             type: strategy.scale,
@@ -58,29 +58,46 @@ export default class RadiusAxis {
         });
     }
 
-    getScaleValue (domainVal) {
-        if (domainVal === undefined) {
-            return this.range()[1];
-        }
-        return this._scale(domainVal);
-    }
-
     domain (...domainVal) {
         if (domainVal.length) {
-            const { domain } = this.config();
-            this._domain = domain || domainVal[0];
-            return this._scale.domain(this._domain);
+            const { domain: customDomain } = this.config();
+            this._domain = resolveAxisConfig(customDomain, domainVal[0], this);
+            this._innerRadiusScale.domain(this._domain);
+            this._outerRadiusScale.domain(this._domain);
         }
         return this._domain;
     }
 
+    getInnerRadius (domainVal) {
+        if (domainVal === undefined) {
+            return this.range()[0][0];
+        }
+        return this._innerRadiusScale(domainVal);
+    }
+
+    getOuterRadius (domainVal) {
+        if (domainVal === undefined) {
+            return this.range()[1][1];
+        }
+        const radius = this._outerRadiusScale(domainVal) * this._radiusFactor;
+        return radius;
+    }
+
     range (...range) {
         if (range.length) {
-            const { padding, range: customRange } = this.config();
-            this._range = customRange || range[0].map((v, i) => v + (i ? -padding[i] : padding[i]));
-
-            return this._scale.range(this._range);
+            const { padding, range: customRange, minOuterRadius } = this.config();
+            const sanitizedRange = range[0].map((v, i) => v + (i ? -padding[i] : padding[i]));
+            const rangeVal = resolveAxisConfig(customRange, sanitizedRange, this);
+            this._innerRadiusRange = rangeVal;
+            this._innerRadiusScale.range(this._innerRadiusRange);
+            this._outerRadiusRange = [rangeVal[0] + minOuterRadius, rangeVal[1]];
+            this._outerRadiusScale.range(this._outerRadiusRange);
         }
-        return this._range;
+        return [this._innerRadiusRange, this._outerRadiusRange];
+    }
+
+    setRadiusFactor (val) {
+        this._radiusFactor = val;
+        return this;
     }
 }

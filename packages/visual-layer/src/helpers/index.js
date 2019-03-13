@@ -550,8 +550,10 @@ export const toCartesianCoordinates = (points, measurement, rangePlot = false) =
             y: radius * Math.sin(angle) + yOffset
         };
         if (rangePlot) {
-            update.x0 = radius0 * Math.cos(angle0) + xOffset;
-            update.y0 = radius0 * Math.sin(angle0) + yOffset;
+            update.x0 = radius * Math.cos(angle) + xOffset;
+            update.y0 = radius * Math.sin(angle) + yOffset;
+            update.x = radius0 * Math.cos(angle0) + xOffset;
+            update.y = radius0 * Math.sin(angle0) + yOffset;
         }
     }
     return points;

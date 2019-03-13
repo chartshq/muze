@@ -17,7 +17,6 @@ import * as PROPS from '../enums/props';
 import { props } from './props';
 import {
     transformData,
-    calculateDomainFromData,
     getNormalizedData,
     applyInteractionStyle,
     initializeGlobalState,

@@ -192,7 +192,9 @@ export const attachAxisToLayers = (axes, layers, layerAxisIndex) => {
         objectIterator(axes, (key) => {
             const axisInf = layerAxisIndex[layerId];
             if (axisInf) {
-                axes[key] && (axesObj[key] = defaultValue(axes[key][axisInf[key] || 0]));
+                const axisArr = axes[key] || [];
+                const axisIndex = axisInf[key] >= 0 ? axisInf[key] : axisArr.length - 1;
+                axes[key] && (axesObj[key] = defaultValue(axes[key][axisIndex]));
             }
         });
         Object.keys(axesObj).length && layer.axes(axesObj);
@@ -247,11 +249,13 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
                 const encodingType = domain[0];
                 const axisIndex = layerAxisIndex[layerId][encodingType];
                 const field = getObjProp(axisFields, encodingType, axisIndex);
+                !fieldDomain[encodingType] && (fieldDomain[encodingType] = {});
+                const encodingDomain = fieldDomain[encodingType];
                 if (field) {
                     const fieldStr = `${field}`;
-                    fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
-                    fieldDomain[fieldStr] = getValidDomain(fieldDomain[fieldStr], domain[1], encodingType,
-                        fieldsConfig[field.getMembers()[0]].def.subtype);
+                    encodingDomain[fieldStr] = encodingDomain[fieldStr] || [];
+                    encodingDomain[fieldStr] = getValidDomain(encodingDomain[fieldStr],
+                        domain[1], encodingType, fieldsConfig[field.getMembers()[0]].def.subtype);
                 }
                 return fieldDomain;
             }, domains);

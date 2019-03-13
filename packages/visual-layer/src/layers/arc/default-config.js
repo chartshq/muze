@@ -5,7 +5,6 @@ export const defaultConfig = {
     defClassName: 'layer-arc',
     padding: { top: 1, bottom: 1, left: 1, right: 1 },
     className: '',
-    minOuterRadius: 10,
     interaction: {
         highlight: [{
             type: 'fill',
@@ -23,11 +22,6 @@ export const defaultConfig = {
     height: 100,
     width: 100,
     sort: '',
-    cornerRadius: 0,
-    padAngle: 0,
-    padRadius: 0,
-    startAngle: 0,
-    endAngle: 360,
     colors: ['#F44336', 'blue', 'green', 'yellow', 'orange', 'purple'],
     transform: {
         type: 'identity'
@@ -58,7 +52,6 @@ export const defaultConfig = {
             value: '1'
         }
     },
-    innerRadiusFixer: 10,
     transition: {
         effect: 'cubic',
         duration: 500

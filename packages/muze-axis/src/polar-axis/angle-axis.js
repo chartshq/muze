@@ -7,19 +7,20 @@ import { getUniqueId, Symbols, mergeRecursive, generateGetterSetters } from 'muz
 import { createScale } from '../scale-creator';
 import { DEFAULT_ANGLE_DOMAIN } from '../enums/constants';
 import { PROPS } from './props';
+import { resolveAxisConfig } from '../helper';
 
 const { pie } = Symbols;
 
 /**
-* This class is used to instantiate a SimpleAxis.
-* @class SimpleAxis
+* This class is used to instantiate a AngleAxis.
+* @class AngleAxis
 */
-export default class ThetaAxis {
+export default class AngleAxis {
 
     /**
-     * Creates an instance of SimpleAxis.
+     * Creates an instance of AngleAxis.
      * @param {Object} config input parameters.
-     * @memberof SizeAxis
+     * @memberof AngleAxis
      */
     constructor (config = {}) {
         this._id = getUniqueId();
@@ -27,9 +28,10 @@ export default class ThetaAxis {
         this._config = mergeRecursive({}, this.constructor.defaultConfig());
         this.config(config);
         this._range = [0, 360];
-        this._pie = pie()
+        this._angleFn = pie()
                 .value(d => (typeof d === 'string' ? 1 : d))
                 .sortValues(null);
+        this._angleValues = {};
     }
 
     static defaultConfig () {
@@ -47,21 +49,29 @@ export default class ThetaAxis {
     }
 
     getScaleValue (domainVal) {
-        return this._pieData.filter(d => d.data === domainVal);
+        return this._angleValues[domainVal];
     }
 
     padAngle (angle) {
-        this._pie = this._pie.padAngle(angle);
+        this._angleFn = this._angleFn.padAngle(angle);
     }
 
     domain (...domainVal) {
         if (domainVal.length) {
-            this._domain = domainVal[0].length ? domainVal[0] : DEFAULT_ANGLE_DOMAIN;
-            this._pieData = this._pie(this._domain);
-            this._pieData.forEach((v) => {
+            const { domain: customDomain } = this.config();
+            const domain = domainVal[0].length ? domainVal[0] : DEFAULT_ANGLE_DOMAIN;
+            this._domain = resolveAxisConfig(customDomain, domain, this);
+            const angleData = this._angleFn(this._domain);
+            angleData.forEach((v) => {
                 v.startAngle -= Math.PI / 2;
                 v.endAngle -= Math.PI / 2;
             });
+            this._angleValues = angleData.reduce((values, d) => {
+                const key = d.data;
+                !values[key] && (values[key] = []);
+                values[key].push(d);
+                return values;
+            }, {});
             return this;
         }
         return this._domain;
@@ -70,18 +80,22 @@ export default class ThetaAxis {
     range (...range) {
         if (range.length) {
             const { range: customRange } = this.config();
-            this._range = customRange || range[0];
+            this._range = resolveAxisConfig(customRange, range[0], this);
             const domain = this.domain();
             const [startAngle, endAngle] = this._range;
-            this._pie
+            this._angleFn
                     .startAngle((startAngle / 180) * Math.PI)
                     .endAngle(Math.PI * endAngle / 180);
             if (domain && domain.length) {
-                this._pieData = this._pie(domain);
-                this._pieData.forEach((v) => {
+                const angleData = this._angleFn(domain);
+                angleData.forEach((v) => {
                     v.startAngle -= Math.PI / 2;
                     v.endAngle -= Math.PI / 2;
                 });
+                this._angleValues = angleData.reduce((values, d) => {
+                    values[d.data] = d;
+                    return values;
+                }, {});
             }
 
             return this;

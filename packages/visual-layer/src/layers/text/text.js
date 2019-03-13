@@ -30,7 +30,7 @@ const pointTranslators = {
             const text = d.text;
 
             const color = colorAxis.getColor(d.color);
-            const radius = radiusAxis.getScaleValue(d.radius);
+            const radius = radiusAxis.getOuterRadius(d.radius);
             const angles = angleAxis.getScaleValue(d.angle);
             !angleV[d.angle] && (angleV[d.angle] = 0);
             const { startAngle, endAngle } = angles[angleV[d.angle]++];

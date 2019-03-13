@@ -10,7 +10,6 @@ export { SimpleAxis, ContinousAxis, BandAxis, TimeAxis } from './cartesian-axis'
 export { ColorAxis } from './color-axis';
 export { SizeAxis } from './size-axis';
 export { ShapeAxis } from './shape-axis';
-export { default as RadiusAxis } from './polar-axis/radius-axis';
-export { default as ThetaAxis } from './polar-axis/theta-axis';
+export { RadiusAxis, AngleAxis } from './polar-axis';
 export { dataTypeScaleMap } from './data-type-scale-map';
 export { AxisOrientation, ScaleType };

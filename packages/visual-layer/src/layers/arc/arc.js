@@ -5,13 +5,12 @@ import {
     isSimpleObject,
     Symbols,
     FieldType,
-    ReservedFields,
-    getObjProp
+    ReservedFields
 } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { BaseLayer } from '../../base-layer';
 import { getIndividualClassName, resolveEncodingValues, getColorMetaInf } from '../../helpers';
-import { tweenPie, tweenExitPie, getFieldIndices, getPreviousPoint, getSizeMultiplier } from './arc-helper';
+import { tweenPie, tweenExitPie, getPreviousPoint } from './arc-helper';
 import './styles.scss';
 
 const arc = Symbols.arc;
@@ -43,96 +42,13 @@ export default class ArcLayer extends BaseLayer {
         return defaultConfig;
     }
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof ArcLayer
-     */
     static formalName () {
         return 'arc';
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof ArcLayer
-     */
     elemType () {
         return 'path';
     }
-
-    /**
-     * Transforms data in the appropriate data structure to be consumed by the layer for rendering
-     *
-     * @param {Object} data data model associated with the layer
-     * @param {Object} config configuration of the layer that contains encoding and other parameters
-     * @return {Object} Transformed pie data
-     * @memberof ArcLayer
-     */
-    // getTransformedData (dataModel, config) {
-    //     // let pieData = [];
-    //     // const pieIndex = {};
-    //     // const {
-    //     //     startAngle,
-    //     //     endAngle,
-    //     //     encoding,
-    //     //     sort,
-    //     //     minOuterRadius
-    //     // } = config;
-    //     // const prevData = this._transformedData || [];
-    //     // const fieldsConfig = this.data().getFieldsConfig();
-    //     // const {
-    //     //     angleIndex,
-    //     //     sizeIndex,
-    //     //     radiusIndex,
-    //     //     colorIndex
-    //     // } = getFieldIndices(encoding, fieldsConfig);
-    //     // const dataVal = dataModel.getData();
-    //     // const data = dataVal.data;
-    //     // const uids = dataVal.uids;
-
-    //     // this._prevPieData = {};
-
-    //     // prevData.forEach((e, index) => {
-    //     //     this._prevPieData[e.uid] = [e, index];
-    //     //     pieIndex[e.index] = e;
-    //     // });
-    //     // // Creating pie data using angle field provided. If the angle field is a dimension,
-    //     // // all the angles will be equal(360/number of dimensions)
-
-    //     // pieData = pie()
-    //     //     .startAngle((startAngle / 180) * Math.PI)
-    //     //     .endAngle(Math.PI * endAngle / 180)
-    //     //     .value(d => d[angleIndex] || 1)
-    //     //     .sortValues(null);
-
-    //     // sort.length && radiusIndex && pieData.sort((a, b) => {
-    //     //     if (sort === ASCENDING) {
-    //     //         return a[radiusIndex] - b[radiusIndex];
-    //     //     } return b[radiusIndex] - a[radiusIndex];
-    //     // });
-    //     // const sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
-
-    //     // // Adding the radius field values to each data point in pie data
-    //     // pieData = pieData(data).map((d, i) => {
-    //     //     d.outerRadiusValue = data[i][radiusIndex] || minOuterRadius;
-    //     //     d.innerRadius = config.innerRadius;
-    //     //     d.colorVal = data[i][colorIndex];
-    //     //     d.angleVal = data[i][angleIndex];
-    //     //     d.sizeVal = sizeVal;
-    //     //     d.uid = uids[i];
-    //     //     d.rowId = d.uid;
-    //     //     d.source = data[i];
-    //     //     d._previousInfo = this._prevPieData[d.uid] ? this._prevPieData[d.uid][0] :
-    //     //         getPreviousPoint(pieIndex, d.index, config);
-    //     //     return d;
-    //     // });
-    //     // return pieData;
-    //     return this.data();
-    // }
 
     /**
      *
@@ -166,23 +82,14 @@ export default class ArcLayer extends BaseLayer {
     }
 
     translatePoints (data) {
-        const config = this.config();
-        const encoding = config.encoding;
-        const fieldsConfig = this.data().getFieldsConfig();
         const { angle, color: colorAxis, radius: radiusAxis } = this.axes();
-        const {
-            sizeIndex
-        } = getFieldIndices(encoding, fieldsConfig);
-        const radius0Field = getObjProp(encoding.radius0, 'field');
         this._prevPieData = {};
         const pieIndex = {};
-        const prevData = this._points;
+        const prevData = this._points[0] || [];
         prevData.forEach((e, index) => {
             this._prevPieData[e.rowId] = [e, index];
             pieIndex[e.index] = e;
         });
-        const sizeVal = data.reduce((acc, d) => acc + (d[sizeIndex] || 0), 1);
-        const sizeMultiplier = getSizeMultiplier(sizeVal, this);
         const points = [];
         const angleV = {};
         data.forEach((d, i) => {
@@ -194,9 +101,8 @@ export default class ArcLayer extends BaseLayer {
 
             const resolvedEncodings = resolveEncodingValues({
                 values: {
-                    radius: radiusAxis.getScaleValue(d.radius) * sizeMultiplier,
-                    radius0: radius0Field ? radiusAxis.getScaleValue(d.radius0) * sizeMultiplier :
-                        radiusAxis.range()[0],
+                    radius: radiusAxis.getOuterRadius(d.radius),
+                    radius0: radiusAxis.getInnerRadius(d.radius0),
                     color: colorAxis.getColor(d.color),
                     angle0: startAngle,
                     angle: endAngle,
@@ -219,7 +125,7 @@ export default class ArcLayer extends BaseLayer {
                 meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
                 rowId: uid,
                 _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
-                    getPreviousPoint(pieIndex, i, config)
+                    getPreviousPoint(pieIndex, i, this)
             });
         });
         return points;
@@ -253,10 +159,10 @@ export default class ArcLayer extends BaseLayer {
                 .outerRadius(d => d.radius)
                 .innerRadius(d => d.radius0);
 
-        this._points = this.translatePoints(this._normalizedData[0]);
+        this._points = this._normalizedData.map(arr => this.translatePoints(arr));
 
         // Creating the group that holds all the arcs
-        const g = makeElement(selectElement(container), 'g', [1], `${qualClassName[0]}-group`)
+        const g = makeElement(selectElement(container), 'g', this._points, `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
                 .attr('transform', `translate(${measurement.width / 2},
                     ${measurement.height / 2})`);
@@ -288,7 +194,7 @@ export default class ArcLayer extends BaseLayer {
             consecutiveExits[oldExitCounter] = exitArr;
         };
         // Creating groups for all the arcs present individually
-        makeElement(g, 'g', this._points, `${qualClassName[0]}`,
+        makeElement(g, 'g', d => d, `${qualClassName[0]}`,
             {
                 update: tween,
                 exit: tweenExit
@@ -298,13 +204,6 @@ export default class ArcLayer extends BaseLayer {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} identifiers
-     *
-     * @memberof BaseLayer
-     */
     getPointsFromIdentifiers (identifiers) {
         if (!this.data()) {
             return [];

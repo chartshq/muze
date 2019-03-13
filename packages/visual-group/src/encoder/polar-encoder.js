@@ -1,4 +1,4 @@
-import { ThetaAxis, RadiusAxis } from '@chartshq/muze-axis';
+import { AngleAxis, RadiusAxis } from '@chartshq/muze-axis';
 import { layerFactory, ENCODING } from '@chartshq/visual-layer';
 import { mergeRecursive, STATE_NAMESPACES, COORD_TYPES, toArray, getObjProp, defaultValue } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
@@ -11,8 +11,26 @@ const { RADIUS, ANGLE, ANGLE0 } = ENCODING;
 
 const axesCls = {
     [RADIUS]: RadiusAxis,
-    [ANGLE]: ThetaAxis,
-    [ANGLE0]: ThetaAxis
+    [ANGLE]: AngleAxis,
+    [ANGLE0]: AngleAxis
+};
+
+const getSizeMultiplier = (sizeVal, sizeAxis) => {
+    const sizeAxisDomain = sizeAxis.domain();
+    const sizeMultiplier = sizeAxis.getSize(sizeVal) / (sizeAxisDomain ? sizeAxis.range()[1] : sizeAxis.config().value);
+    return sizeMultiplier;
+};
+
+const setRadiusFactor = (context) => {
+    const data = context.data();
+    const sizeField = context.retinalFields().size.field;
+    const { radius, size } = context.axes();
+    if (sizeField && radius[0]) {
+        const sizeFieldIndex = data.getFieldsConfig()[sizeField].index;
+        const sizeVal = data.getData().data.reduce((acc, val) => acc + val[sizeFieldIndex], 1);
+        const sizeMultiplier = getSizeMultiplier(sizeVal, size[0]);
+        radius[0].setRadiusFactor(sizeMultiplier);
+    }
 };
 
 /**
@@ -77,11 +95,8 @@ export default class PolarEncoder extends VisualEncoder {
                 varInstances[encType][i] = new SimpleVariable(field);
                 axesObj[encType][i] = new axesCls[encType]();
             });
-            if (!fieldInf[encType].length) {
-                axesObj[encType][0] = new axesCls[encType]();
-            }
+            axesObj[encType][axesObj[encType].length] = new axesCls[encType]();
         }
-
         geomCell.axes({
             radius: axesObj.radius,
             angle: axesObj.angle,
@@ -164,14 +179,16 @@ export default class PolarEncoder extends VisualEncoder {
         const axes = context.resolver().axes();
         context.matrixInstance().value.each((cell, rIdx, cIdx) => {
             const unit = cell.valueOf();
-            const domains = unit.getDataDomain();
+            const unitDomains = unit.getDataDomain();
             const fields = unit.fields();
+            setRadiusFactor(unit);
             [RADIUS, ANGLE, ANGLE0].forEach((encType) => {
                 const encodingFields = fields[encType];
+                const domains = unitDomains[encType] || {};
                 encodingFields.forEach((field, i) => {
                     !domainProps[encType][rIdx] && (domainProps[encType][rIdx] = []);
                     !domainProps[encType][rIdx][cIdx] && (domainProps[encType][rIdx][cIdx] = []);
-                    domainProps[encType][rIdx][cIdx][i] = domains[`${field}`];
+                    domainProps[encType][rIdx][cIdx][i] = domains[`${field}`] || [];
                 });
             });
         });

@@ -1144,13 +1144,11 @@ const hsvToRgb = (h, s, v, a = 1) => {
 };
 
 const hexToHsv = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
 
-    const r = parseInt(result[1], 16);
-    const g = parseInt(result[2], 16);
-    const b = parseInt(result[3], 16);
-    const a = result[4] ? parseInt(result[4], 16) : 1;
-    return rgbToHsv(r, g, b, a);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? rgbToHsv(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)) : '';
 };
 
 const detectColor = (col) => {
