@@ -3,40 +3,37 @@
   "private": true,
   "version": "1.1.0",
   "description": "Composable visualisation library for web with a data-first approach",
-  "homepage": "https://www.charts.com/muze",
+  "homepage": "https://muzejs.org",
   "license": "MIT",
-  "author": "Charts.com <support@charts.com>",
   "contributors": [
     {
       "name": "Akash Ghoswami",
-      "email": "akash@charts.com"
+      "email": "akashgoswami90s@gmail.com"
     },
     {
       "name": "Ranajit Banerjee",
-      "email": "ranajit.banerjee@charts.com",
+      "email": "ranajit.113124@gmail.com",
       "url": "https://github.com/ranajitbanerjee"
     },
     {
       "name": "Mridul Meharia",
-      "email": "mridul@charts.com",
+      "email": "mehariamridul@gmail.com",
       "url": "https://github.com/mridulmeh"
     },
     {
-      "name": "Subhash Haldar",
-      "email": "subhash@charts.com"
+      "name": "Subhash Haldar"
     },
     {
-      "name": "Sandeep Acharya",
-      "email": "sandeep@charts.com"
+      "name": "Sandeep Acharya"
     },
     {
       "name": "Rousan Ali",
-      "email": "rousan@charts.com",
+      "email": "rousanali786@gmail.com",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "ujjal@charts.com"
+      "email": "duttaujjalkumar@live.com"
     }
   ],
   "main": "src/index.js",

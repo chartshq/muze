@@ -1,6 +1,6 @@
 <!--
   Note: If the issue is about feature request, then please also create the same on our feedback website, with the issue id. We will prioritize the feature requests based on the upvotes on our feedback site. 
-  Visit at: https://feedback.muze.charts.com
+  Visit at: https://feedback.muzejs.org/
 -->
 
 **Do you want to request a *feature* or report a *bug*?**
