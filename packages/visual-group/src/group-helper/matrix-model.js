@@ -131,6 +131,20 @@ const pushToMatrix = (context, valueCellCreator) => {
 };
 
 /**
+ * Formats row or columns keys with the provided formatter.
+ *
+ * @param {Array} keys - The collection of row or column keys.
+ * @param {Array} formatterList - The list of corresponding formatter.
+ */
+const formatKeys = (keys, formatterList) => {
+    keys.forEach((rKeys) => {
+        rKeys.forEach((key, idx) => {
+            rKeys[idx] = formatterList[idx](key);
+        });
+    });
+};
+
+/**
  * Gets Matrixes for corresponding datamodel, facets and projections
  *
  * @param {Object} dataModel input datamodel
@@ -248,19 +262,8 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         });
     }
 
-    const colFacetFormatters = colFacets.map(facetField => facetField.rawFormat());
-    columnKeys.forEach((rColumnKeys) => {
-        rColumnKeys.forEach((columnKey, idx) => {
-            rColumnKeys[idx] = colFacetFormatters[idx](columnKey);
-        });
-    });
-
-    const rowFacetFormatters = rowFacets.map(facetField => facetField.rawFormat());
-    rowKeys.forEach((rRowKeys) => {
-        rRowKeys.forEach((rowKey, idx) => {
-            rRowKeys[idx] = rowFacetFormatters[idx](rowKey);
-        });
-    });
+    formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
+    formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
 
     // Getting column keys
     const transposedColKeys = columnKeys.length > 0 ? columnKeys[0].map((col, i) =>
