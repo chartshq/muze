@@ -1,4 +1,4 @@
-import { STATE_NAMESPACES, temporalFields } from 'muze-utils';
+import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -63,10 +63,12 @@ export const listenerMap = (context, namespace, metaInf) => ([
                 }
 
                 context.addLayer(layerDefs);
+                const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {
-                    context.axes()[type] && context.axes()[type].forEach((axis) => {
+                    const axisArr = defaultValue(getObjProp(context.axes(), type), []);
+                    axisArr.forEach((axis) => {
                         axis.config({
-                            adjustRange: context.layers().some(inst => inst.hasPlotSpan())
+                            adjustRange
                         });
                     });
                 });

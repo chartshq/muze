@@ -201,7 +201,6 @@ export default class ContinousAxis extends SimpleAxis {
 
         if (tickValues) {
             return tickValues;
-            // return axis.scale().ticks(tickValues);
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 

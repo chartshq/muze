@@ -71,6 +71,13 @@ d3.json('../../data/cars.json', (data) => {
         // .color("Origin")
         .height(800)
         .width(900)
+        .layers([{
+            mark: 'bar'
+        },{
+            mark: 'line'
+        },{
+            mark: 'point'
+        }])
         .config({
             axes:{
                 // x:{
