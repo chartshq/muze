@@ -107,7 +107,8 @@ const pointTranslators = {
                     x: xPx,
                     y: yPx,
                     text: textValue,
-                    color
+                    color,
+                    rotation: 0
                 },
                 data: d
             }, i, data, layerInst);
@@ -123,6 +124,7 @@ const pointTranslators = {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, layerInst) : null,
                     padding: backgroundPadding
                 },
+                rotation: resolvedEncodings.rotation,
                 meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
                 style: {},
                 source: d.source,

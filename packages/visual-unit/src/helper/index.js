@@ -201,7 +201,7 @@ export const attachAxisToLayers = (axes, layers, layerAxisIndex) => {
     });
 };
 
-const { X, Y, RADIUS, ANGLE, ANGLE0 } = ENCODING;
+const { X, Y, RADIUS, ANGLE, ANGLE0, RADIUS0 } = ENCODING;
 
 export const getLayerAxisIndex = (layers, fields) => {
     const layerAxisIndex = {};
@@ -210,7 +210,10 @@ export const getLayerAxisIndex = (layers, fields) => {
         const id = layer.id();
         [X, Y, ANGLE, ANGLE0, RADIUS].forEach((type) => {
             let index;
-            const field = defaultValue(getObjProp(axis, type), encoding[type] && encoding[type].field);
+            const specificField = getObjProp(encoding, type, 'field');
+            const encodingField = type === RADIUS ? defaultValue(specificField, getObjProp(encoding, RADIUS0, 'field'))
+                : getObjProp(encoding, type, 'field');
+            const field = defaultValue(getObjProp(axis, type), encodingField);
             if (fields[type] && fields[type].length) {
                 index = fields[type].findIndex(fieldInst => fieldInst.getMembers().indexOf(field) !== -1);
             } else {
