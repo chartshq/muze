@@ -1,4 +1,4 @@
-import { selectElement, Symbols, pathInterpolators } from 'muze-utils';
+import { selectElement, Symbols, pathInterpolators, linkHorizontal } from 'muze-utils';
 
 const line = Symbols.line;
 
@@ -19,7 +19,7 @@ export default /* istanbul ignore next */ (params) => {
         const enter = d.enter || {};
         Object.entries(enter).forEach(attr => (!isNaN(attr[1]) && selection.attr(attr[0], attr[1])));
     });
-
+    const path = linkHorizontal().x(d => d.x).y(d => d);
     ticks.exit().remove();
     return ticks.merge(ticksEnter)
                     .each(function (d) {

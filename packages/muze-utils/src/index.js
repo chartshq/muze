@@ -99,7 +99,8 @@ export {
     formatTemporal,
     createSelection,
     temporalFields,
-    retrieveNearestGroupByReducers
+    retrieveNearestGroupByReducers,
+    linkHorizontal
 } from './common-utils';
 
 export {

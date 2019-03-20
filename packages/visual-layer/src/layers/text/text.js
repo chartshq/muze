@@ -43,7 +43,8 @@ const pointTranslators = {
                     color,
                     text,
                     startAngle,
-                    endAngle
+                    endAngle,
+                    rotation: 0
                 },
                 data: d
             }, i, data, layerInst);
@@ -55,7 +56,7 @@ const pointTranslators = {
                 },
                 text: textFormatter ? textFormatter(text, i, data, layerInst) : resolvedVal.text,
                 color: resolvedVal.color,
-                rotateAngle: 0,
+                rotation: resolvedVal.rotation,
                 background: {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, layerInst) : null,
                     padding: backgroundPadding

@@ -279,9 +279,10 @@ export const domainCalculator = {
         if (sort) {
             angleValues = angleValues.sort((a, b) => (sort === ASCENDING ? a.radius - b.radius : b.radius - a.radius));
         }
-
+        const radiusDomain = getDomainFromData(data, [ENCODING.RADIUS, radius0Field ?
+            ENCODING.RADIUS0 : ENCODING.RADIUS]);
         return {
-            radius: getDomainFromData(data, [ENCODING.RADIUS, radius0Field ? ENCODING.RADIUS0 : ENCODING.RADIUS]),
+            radius: radiusDomain,
             angle: angleValues.map(d => d.angle),
             angle0: angleValues.map(d => d.angle0)
         };

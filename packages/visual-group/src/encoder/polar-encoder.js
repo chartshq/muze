@@ -25,11 +25,11 @@ const setRadiusFactor = (context) => {
     const data = context.data();
     const sizeField = context.retinalFields().size.field;
     const { radius, size } = context.axes();
-    if (sizeField && radius[0]) {
+    if (sizeField && radius && radius.length) {
         const sizeFieldIndex = data.getFieldsConfig()[sizeField].index;
         const sizeVal = data.getData().data.reduce((acc, val) => acc + val[sizeFieldIndex], 1);
         const sizeMultiplier = getSizeMultiplier(sizeVal, size[0]);
-        radius[0].setRadiusFactor(sizeMultiplier);
+        radius.forEach(axis => axis.setRadiusFactor(sizeMultiplier));
     }
 };
 
