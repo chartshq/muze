@@ -31,6 +31,7 @@ class Selection {
         const exitdata = new Map();
         const tempMap = new Map();
         const duplicateData = new Map();
+        const updatedData = this._updatedata;
 
         newData.forEach((...params) => {
             const key = this.idGetter ? this._idGetter(...params) : params[1];
@@ -45,14 +46,14 @@ class Selection {
         // prepare enter data
         let entries = tempMap.entries();
         while (val = entries.next().value) {
-            if (!this._updatedata.has(val[0])) {
+            if (!updatedData.has(val[0])) {
                 entryData.set(val[0], val[1]);
             } else {
-                this._updatedata.set(val[0], val[1]);
+                updatedData.set(val[0], val[1]);
             }
         }
         // prepare exit data
-        entries = this._updatedata.entries();
+        entries = updatedData.entries();
         while (val = entries.next().value) {
             if (!tempMap.has(val[0])) {
                 exitdata.set(val[0], val[1]);
@@ -66,7 +67,7 @@ class Selection {
         }
 
         const newSelection = new Selection(this._idGetter);
-        newSelection._updatedata = this._updatedata;
+        newSelection._updatedata = updatedData;
         newSelection._dataObjects = this._dataObjects;
         newSelection._enterdata = entryData;
         newSelection._exitdata = exitdata;
