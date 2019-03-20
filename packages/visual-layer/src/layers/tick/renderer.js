@@ -1,4 +1,4 @@
-import { selectElement, Symbols, pathInterpolators, linkHorizontal } from 'muze-utils';
+import { selectElement, Symbols, pathInterpolators } from 'muze-utils';
 
 const line = Symbols.line;
 
@@ -19,7 +19,7 @@ export default /* istanbul ignore next */ (params) => {
         const enter = d.enter || {};
         Object.entries(enter).forEach(attr => (!isNaN(attr[1]) && selection.attr(attr[0], attr[1])));
     });
-    const path = linkHorizontal().x(d => d.x).y(d => d);
+
     ticks.exit().remove();
     return ticks.merge(ticksEnter)
                     .each(function (d) {
@@ -33,7 +33,6 @@ export default /* istanbul ignore next */ (params) => {
                             .curve(curveInterpolatorFn)
                             .x(e => e[0])
                             .y(e => e[1]);
-                        // const path = `M ${update.x} ${update.y} L ${x0} ${y0}`;
                         d.className && selection.classed(d.className, true);
                         selection.attr('d', linepath([[update.x, update.y], [x0, y0]]));
                         Object.entries(updateStyle).forEach(styleObj => selection.style(styleObj[0], styleObj[1]));
