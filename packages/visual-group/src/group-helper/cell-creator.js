@@ -455,8 +455,7 @@ const getAxisFields = (projections, fieldHolder = []) =>
 const sortDmTemporalFields = (resolver, datamodel) => {
     let axisFields = [];
     const projections = resolver.projections();
-    axisFields = getAxisFields(projections.colProjections, axisFields);
-    axisFields = getAxisFields(projections.rowProjections, axisFields);
+    axisFields = getAxisFields(projections.rowProjections, getAxisFields(projections.colProjections));
 
     const fieldConfig = datamodel.getFieldsConfig();
     const temporalFields = axisFields.reduce((acc, field) =>
