@@ -69,8 +69,8 @@ export const getAxisComponentDimensions = (context) => {
     let axisTicks;
     const allTickDimensions = [];
     const scale = context.scale();
-    const { showAxisName } = context.renderConfig();
-    const { tickValues, name } = context.config();
+    const { tickValues, showAxisName } = context.renderConfig();
+    const { name } = context.config();
     const { labelManager } = context.dependencies();
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
@@ -381,30 +381,35 @@ export const resetTickInterval = (context, domain) => {
         orientation,
         isOffset
     } = context.config();
-    const minDiff = context._minDiff;
 
+    const minDiff = context._minDiff;
      // Set available space on interaction
     if (context.range().length && (orientation === TOP || orientation === BOTTOM)) {
         context.applyTickSkipping();
+        const {
+            largestTickDimensions
+        } = context.getAxisDimensions();
+
         const noOfTicks = context.getTickValues().length;
 
         const { width, height, padding } = context.availableSpace();
         const {
-
             left,
             right
         } = padding;
         // Get the Tick Interval
-        const tickInterval = ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks);
+        const tickInterval = Math.min(largestTickDimensions.width,
+            ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks));
 
         context.maxTickSpaces({
             width: tickInterval
         });
 
+        const adjustedRange = getAdjustedRange(minDiff, [tickInterval / 2,
+            width - left - right - tickInterval / 2], domain, context.config());
+
          // set range for axis
-        setAxisRange(context, 'y', getAdjustedRange(minDiff, [tickInterval / 2,
-            width - left - right - tickInterval / 2], domain, context.config()),
-                isOffset ? height : null);
+        setAxisRange(context, 'y', adjustedRange, isOffset ? height : null);
 
         context.setTickConfig();
     }

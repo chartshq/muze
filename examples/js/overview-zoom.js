@@ -51,7 +51,7 @@ d3.csv('../data/sp500.csv', (data) => {
     const detail = env.canvas()
             .rows(['price'])
             .columns(['date'])
-            .width(200)
+            .width(550)
             .height(400)
             .config(chartConf)
             .layers([{
@@ -65,6 +65,25 @@ d3.csv('../data/sp500.csv', (data) => {
 window.detail = detail
     const overview = env.canvas()
             .rows(['price'])
+            .columns(['date'])
+            .width(550)
+            .height(160)
+            .config(chartConf)
+            .layers([{
+                // mark: 'area',
+                interpolate: 'catmullRom'
+            }])
+            .mount('#chart2');
+            overview.once('canvas.animationend').then(()=>{
+            // overview.firebolt().dispatchBehaviour('filter', {
+            //     criteria:{
+            //         date: [new Date('2002', 5, 1).getTime(),new Date('2002', 6, 1).getTime()]
+            //     }
+            // })
+        })
+    const overview2= env.canvas()
+            .rows(['price'])
+            .data(rootData.select((f,i)=>i<=12))
             .columns(['date'])
             .width(550)
             .height(160)
