@@ -270,7 +270,7 @@ export const spaceSetter = (context, spaceConfig) => {
                         labelConfig.rotation = -90;
                         context.renderConfig({
                             showInnerTicks: true,
-                            showAxisName: availHeight - tickDimWidth - namePadding - tickSize > axisNameHeight
+                            showAxisName: false
 
                         });
                     }
