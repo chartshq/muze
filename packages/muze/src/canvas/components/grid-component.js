@@ -2,6 +2,7 @@ import { selectElement, getEvent } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
+import { WHEEL_DELTA_MODIFIER } from '../../enums/constants';
 
 /**
  * Based on the type of scroll, it changes the scrollLeft/scrollTop property of the specific
@@ -124,12 +125,14 @@ export default class GridComponent extends MuzeComponent {
 
                             // Scrolling horizontally
                             if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX);
+                                this.scrollBarManager()
+                                    .triggerScrollBarAction('horizontal', wheelDeltaX / WHEEL_DELTA_MODIFIER);
                             }
 
                             // Scrolling Vertically
                             if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY);
+                                this.scrollBarManager()
+                                    .triggerScrollBarAction('vertical', wheelDeltaY / WHEEL_DELTA_MODIFIER);
                             }
                         });
         return this;
