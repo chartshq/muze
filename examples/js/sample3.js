@@ -45,26 +45,26 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
-    jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    ];
+    // jsonData = [
+    //     { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
+    //     { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
+    //     { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
+    //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
+    // ];
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
-        Acceleration: "avg"
-    });
+    // rootData = rootData.groupBy(["Origin", "Year"], {
+    //     Acceleration: "avg"
+    // });
 
-    env.canvas()
+   window.canvas =  env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
         .columns(["Year"])
@@ -75,7 +75,7 @@ d3.json('../../data/cars.json', (data) => {
             axes: {
                 x: {
                     tickFormat: (val, rawVal, i, ticks) => {
-                        console.log(val, rawVal, ticks);
+                   
                         return val;
                     }
                 },
@@ -94,5 +94,38 @@ d3.json('../../data/cars.json', (data) => {
             }
         ])
         .mount('#chart');
-});
 
+        setTimeout(()=>{
+            console.log('Updating...')
+            canvas.rows(['Year'])
+            .columns(['Origin'])
+        }, 1000)
+
+        setTimeout(()=>{
+            console.log('Updating 2...')
+            canvas.rows(['Year','Miles_per_Gallon'])
+            .columns(['Origin'])
+            .color('Cylinders')
+        }, 5000)
+
+        setTimeout(()=>{
+            console.log('Updating 3...')
+            canvas.rows(['Displacement','Miles_per_Gallon'])
+            .columns(['Miles_per_Gallon','Displacement'])
+            .color('Cylinders')
+            .shape('Origin')
+        }, 8000)
+
+        setTimeout(()=>{
+            console.log('Updating 4...')
+            canvas.rows(['Displacement','Miles_per_Gallon'])
+            .columns(['Year'])
+            .color('Origin')
+            .shape('Cylinders')
+            .layers([
+                {
+                    mark: "bar"
+                }
+            ])
+        }, 12000)
+});

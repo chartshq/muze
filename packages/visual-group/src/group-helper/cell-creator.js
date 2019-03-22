@@ -127,7 +127,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
     createSelection(selection, axis => axis, axes, (item, i) => i + item.reduce((e, n) => {
         const id = n.id + axisIndex;
         return e + id;
-    }, '')).map((axis) => {
+    }, '')).map((currObj, axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
             const { orientation, show } = axisInst.config();
@@ -194,7 +194,11 @@ const axisPlaceholderGn = (context, selObj, cells) => {
  * @return {Object} return either set of header cells depending on the config
  */
 const createTextCells = (selection, headers, cells, labelManager) => createSelection(selection,
-    label => new cells.TextCell({}, { labelManager }).source(label), headers, (key, i) => key + i);
+    (label) => {
+        const textCell = new cells.TextCell({}, { labelManager });
+        textCell.source(label);
+        return textCell;
+    }, headers, (key, i) => key + i);
 
 /**
  *
@@ -215,10 +219,14 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const counter = axis.length / keys.length;
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
 
-    return createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
-        (keySet, i) => `${keySet.join(',')}-${i}`)
-                    .map(keySet => createTextCells(null, keySet, cells, labelManager)
-                                    .map((cell, k, i) => cell.source(keySet[i]).config(facet)));
+    const selObjUpdater = createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
+    (keySet, i) => `${keySet.join(',')}-${i}`);
+
+    return selObjUpdater.map((keySet, data) => {
+        let textCells = createTextCells(null, data, cells, labelManager);
+        textCells = textCells.map((cell, k) => cell.source(k).config(facet));
+        return textCells;
+    });
 };
 
 /**

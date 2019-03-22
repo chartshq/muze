@@ -125,7 +125,7 @@ export {
 
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
 
-export { dataSelect, DataObject } from './DataSystem';
+export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
 
