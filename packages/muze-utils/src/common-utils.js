@@ -1570,6 +1570,8 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     return filteredReducers;
 };
 
+const retrieveFieldDisplayName = (dm, fieldName) => dm.getFieldspace().fieldsObj()[fieldName].displayName();
+
 export {
     getValueParser,
     require,
@@ -1646,5 +1648,6 @@ export {
     retrieveNearestGroupByReducers,
     createSelection,
     formatTemporal,
-    temporalFields
+    temporalFields,
+    retrieveFieldDisplayName
 };

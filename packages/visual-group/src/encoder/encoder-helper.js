@@ -48,7 +48,7 @@ const getAxisConfig = (axisInfo, field, axesCreators, indices, facetFields) => {
     }
     const axisConfig = {
         id: `${axisType}-${index}-${axisIndex}`,
-        name: field.toString(),
+        name: field.displayName(),
         field: field.toString(),
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
