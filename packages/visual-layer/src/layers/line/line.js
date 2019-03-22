@@ -91,12 +91,13 @@ export default class LineLayer extends BaseLayer {
      * @param {number} seriesIndex index of series
      * @return {Array} Array of points
      */
-    translatePoints (data, encodingFieldsInf, axes) {
+    translatePoints (data) {
         let points = [];
+        const axes = this.axes();
         const xAxis = axes.x;
         const yAxis = axes.y;
         const colorAxis = axes.color;
-        const { xFieldType, yFieldType } = encodingFieldsInf;
+        const { xFieldType, yFieldType } = this.encodingFieldsInf();
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
@@ -190,7 +191,7 @@ export default class LineLayer extends BaseLayer {
                 });
             },
             update: (group, dataArr, i) => {
-                points = this.translatePoints(dataArr, this.encodingFieldsInf(), axes, i);
+                points = this.translatePoints(dataArr);
                 this._points.push(points);
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 

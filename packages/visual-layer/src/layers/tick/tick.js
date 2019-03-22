@@ -8,7 +8,7 @@ import { getAxesScales, positionPoints, getIndividualClassName,
     getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
 
 const pointTranslators = {
-    polar: (data, encoding, config = {}, layerInst) => {
+    polar: (data, config = {}, layerInst) => {
         const axes = layerInst.axes();
         let points = [];
         const { radius: radiusAxis, angle: angleAxis, angle0: angle0Axis } = axes;
@@ -65,7 +65,7 @@ const pointTranslators = {
         points = toCartesianCoordinates(positionPoints(layerInst, points), measurement, true);
         return points;
     },
-    cartesian: (data, encoding, config = {}, layerInst) => {
+    cartesian: (data, config = {}, layerInst) => {
         const axes = layerInst.axes();
         let points = [];
         const {
@@ -230,8 +230,8 @@ export default class TickLayer extends PointLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes, config = {}) {
-        return pointTranslators[this.coord()](data, encoding, config, this);
+    translatePoints (data, config) {
+        return pointTranslators[this.coord()](data, config, this);
     }
 
     getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {

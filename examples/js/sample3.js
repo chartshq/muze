@@ -70,11 +70,12 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .columns(['Acceleration'])
-        .rows([ 'Year',"Origin"])
+        .columns([])
+        .rows([])
+        .color('Origin')
         // .color("Origin")
-        .height(700)
-        .width(300)
+        .height(600)
+        .width(500)
         .config({
             facet:{
                 rows:{
@@ -83,30 +84,58 @@ d3.json('../../data/cars.json', (data) => {
             },
 
         })
-        // .config({
-        //     axes: {
-        //         x: {
-
-        //             tickFormat: (val, rawVal, i, ticks) => {
-
-        //                 return val;
-        //             }
-        //         },
-        //         y: {
-        //             name: 'akasndklasndoiansflkjasdnfoslkdnf',
-        //             tickFormat: (val, rawVal) => {
-        //                 // console.log(val, rawVal);
-        //                 return val;
-        //             },
-        //         }
-        //     },
-        //     pagination: 'holistic'
-        // })
         .title("Year wise average car Acceleration")
         .layers([
             {
-                mark: "bar"
+                mark: "arc",
+                encoding: {
+                    radius: 'Acceleration'
+                }
+            },
+            {
+                mark: 'text',
+                encoding: {
+                    text: 'Origin',
+                    radius: 'Acceleration',
+                    color: {
+                        value: () => '#000'
+                    }
+                }
             }
         ])
  .mount('#chart');
+
+//  window.canvas =  env.canvas()
+//         .data(rootData)
+//         .rows([])
+//         .columns(['Year'])
+//         .color('Origin')
+//         // .color("Origin")
+//         .height(600)
+//         .width(500)
+//         .config({
+//             facet:{
+//                 rows:{
+//                     verticalAlign: 'middle'
+//                 }
+//             },
+
+//         })
+//         .title("Year wise average car Acceleration")
+//         .layers([
+//             {
+//                 mark: "area"
+//             },
+//             {
+//                 mark: 'text',
+//                 encoding: {
+//                     text: 'Acceleration'
+//                 },
+//                 transform: {
+//                     type: 'stack',
+//                     groupBy: 'Origin'
+//                 }
+//             }
+//         ])
+//  .mount('#chart2');
 });

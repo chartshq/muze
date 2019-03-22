@@ -14,8 +14,9 @@ import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
 import './styles.scss';
 
 const pointTranslators = {
-    polar: (data, encoding, layerInst) => {
+    polar: (data, config, layerInst) => {
         let points = [];
+        const encoding = layerInst.config().encoding;
         const axes = layerInst.axes();
         const textEncoding = encoding.text;
         const { radius: radiusAxis, color: colorAxis, angle: angleAxis } = axes;
@@ -79,7 +80,8 @@ const pointTranslators = {
         });
         return points;
     },
-    cartesian: (data, encoding, layerInst) => {
+    cartesian: (data, config, layerInst) => {
+        const encoding = layerInst.config().encoding;
         let points = [];
         const axes = layerInst.axes();
         const colorAxis = axes.color;
@@ -101,7 +103,7 @@ const pointTranslators = {
             const [xPx, yPx] = [xEnc, yEnc].map(type => (axes[type] ? axes[type].getScaleValue(d[type]) +
                     axes[type].getUnitWidth() / 2 : 0));
 
-            const color = colorAxis.getColor(d, colorAxis);
+            const color = colorAxis.getColor(d.color, colorAxis);
             const resolvedEncodings = resolveEncodingValues({
                 values: {
                     x: xPx,
@@ -183,8 +185,8 @@ export default class TextLayer extends BaseLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes) {
-        return pointTranslators[this.coord()](data, encoding, axes, this);
+    translatePoints (data, config = {}) {
+        return pointTranslators[this.coord()](data, config, this);
     }
 
     /**
@@ -194,7 +196,6 @@ export default class TextLayer extends BaseLayer {
      */
     render (container) {
         const config = this.config();
-        const encoding = config.encoding;
         const normalizedData = this._normalizedData;
         const className = config.className;
         const qualifiedClassName = getQualifiedClassName(config.defClassName, this.id(), config.classPrefix);
@@ -208,7 +209,7 @@ export default class TextLayer extends BaseLayer {
             container,
             each: (dataArr, group) => {
                 const node = group.node();
-                const points = this.translatePoints(dataArr, encoding, this);
+                const points = this.translatePoints(dataArr, {}, this);
                 setStyles(node, {
                     'text-anchor': TEXT_ANCHOR_MIDDLE
                 });

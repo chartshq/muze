@@ -84,13 +84,14 @@ export default class AreaLayer extends LineLayer {
      * @param {Object} axes Contains the axis
      * @return {Array} Array of points
      */
-    translatePoints (data, encodingFieldsInf, axes) {
+    translatePoints (data) {
         let points = [];
         const transformType = this.transformType();
+        const axes = this.axes();
         const colorAxis = axes.color;
         const config = this.config();
         const fieldsConfig = this.data().getFieldsConfig();
-        const { xField, yField, y0Field } = encodingFieldsInf;
+        const { xField, yField, y0Field } = this.encodingFieldsInf();
         const {
             xAxis,
             yAxis

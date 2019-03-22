@@ -84,8 +84,10 @@ export default class PointLayer extends BaseLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes, config = {}) {
+    translatePoints (data, config = {}) {
         let points = [];
+        const encoding = this.config().encoding;
+        const axes = this.axes();
         const {
             x,
             y
@@ -201,15 +203,13 @@ export default class PointLayer extends BaseLayer {
     }
 
     generateDataPoints (normalizedData, keys) {
-        const encoding = this.config().encoding;
-        const axes = this.axes();
         const [widthMetrics, heightMetrics] = getPlotMeasurement(this, keys);
         const offsetXValues = widthMetrics.offsetValues || [];
         const offsetYValues = heightMetrics.offsetValues || [];
         return normalizedData.map((dataArr, i) => {
             const measurementConf = this.getMeasurementConfig(offsetXValues[i], offsetYValues[i], widthMetrics.span,
                 heightMetrics.span);
-            return this.translatePoints(dataArr, encoding, axes, measurementConf);
+            return this.translatePoints(dataArr, measurementConf);
         }).filter(d => d.length);
     }
 
