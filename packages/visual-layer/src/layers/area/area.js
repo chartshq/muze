@@ -143,6 +143,10 @@ export default class AreaLayer extends LineLayer {
             return point;
         });
         points = positionPoints(this, points);
+        points = points.filter((point) => {
+            const update = point.update;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 
