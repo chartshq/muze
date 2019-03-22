@@ -714,9 +714,8 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
             } else {
                 nameSpaceProp = prop;
             }
-            if (!store.prop(`${nameSpaceProp}`)) {
-                stateProps[prop] = conf.value;
-            }
+
+            stateProps[prop] = conf.value;
             if (addAsMethod !== false) {
                 holder[prop] = ((context, meta, nsProp) => (...params) => {
                     let val;
@@ -1548,18 +1547,10 @@ const getValueParser = config => (val) => {
 };
 
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
-    let nearestReducers = {};
-    let next = dataModel;
-    do {
-        const derivations = next.getDerivations();
-        if (derivations) {
-            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
-            if (groupDerivation) {
-                nearestReducers = groupDerivation.criteria || {};
-                break;
-            }
-        }
-    } while (next = next.getParent());
+    const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
+
+    const nearestReducers = defaultValue(
+        getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'), {});
 
     const filteredReducers = {};
     const measures = dataModel.getFieldspace().getMeasure();
