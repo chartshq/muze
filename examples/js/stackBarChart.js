@@ -56,19 +56,24 @@ d3.json('../data/cars.json', (data) => {
                 115, 125, 567, 234, 123, 456, 67, 90, 150, 670, 700]
         })
         .data(rootData)
-        .layers({ // Draw a bar plot, by default stack transform is used
-            Acceleration: {
-                mark: 'bar'
-            }
-        })
-        .config({
-            legend: {
-                position: 'right'
-            }
-        })
-        .width(600)
-        .height(500)
-        .title('Stacked bar chart', { position: 'top', align: 'right' })
-        .subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
-        .mount('#chart'); // Set the chart mount point
+  		.layers({ // Draw a bar plot, by default stack transform is used
+        	Acceleration: {
+            	mark: 'bar'
+        }
+  })
+                    .config({
+                        legend: {
+                            position: 'bottom'
+                        }
+                    })
+      	.width(1000)
+      	.height(500)
+  		.title('Stacked bar chart', { position: 'top', align: 'right' })
+  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right' })
+          .mount('#chart'); // Set the chart mount point
+
+    setTimeout(() => {
+        canvas.title('Updated Title')
+        .subtitle('Updated Subtitle');
+    }, 5000);
 });

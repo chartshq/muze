@@ -124,9 +124,8 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(title) => {
-                if (typeof title === 'string') {
+                if (typeof title === 'string' || !title) {
                     const t = () => title;
-                    t._sanitized = true;
                     return t;
                 }
                 return title;
@@ -143,9 +142,8 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(subtitle) => {
-                if (typeof subtitle === 'string') {
+                if (typeof subtitle === 'string' || !subtitle) {
                     const sub = () => subtitle;
-                    sub._sanitized = true;
                     return sub;
                 }
                 return subtitle;
