@@ -142,10 +142,11 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setTickConfig () {
         const {
-            tickValues,
+
             tickFormat
         } = this.config();
         const {
+            tickValues,
             showInnerTicks
         } = this.renderConfig();
         const axis = this.axis();
@@ -157,7 +158,6 @@ export default class ContinousAxis extends SimpleAxis {
 
         if (tickValues) {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
-            return this;
         }
         const newTickValues = this.getTickValues();
 
@@ -186,9 +186,12 @@ export default class ContinousAxis extends SimpleAxis {
     getTickValues () {
         let labelDim = 0;
         const {
-            orientation,
-            tickValues
+            orientation
+
         } = this.config();
+        const {
+            tickValues
+        } = this.renderConfig();
         const range = this.range();
         const axis = this.axis();
 
@@ -197,7 +200,7 @@ export default class ContinousAxis extends SimpleAxis {
         const labelProps = this.axisComponentDimensions().largestTickDimensions;
 
         if (tickValues) {
-            return axis.scale().ticks(tickValues);
+            return tickValues;
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 
@@ -205,7 +208,7 @@ export default class ContinousAxis extends SimpleAxis {
     }
 
     getMinTickDifference () {
-        return getSmallestDiff(this.config().tickValues);
+        return getSmallestDiff(this.renderConfig().tickValues);
     }
 
     /**
@@ -228,7 +231,7 @@ export default class ContinousAxis extends SimpleAxis {
             rotation
         } = labels;
         const axis = this.axis();
-        const ticks = axis.scale().ticks();
+        const ticks = axis.tickValues();
 
         const { width, height } = this.smartTicks()[0];
 
@@ -237,6 +240,7 @@ export default class ContinousAxis extends SimpleAxis {
                 if ((orientation === LEFT || orientation === RIGHT)) {
                     return `translate(0, -${(height) / 3}px)`;
                 }
+
                 if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
                     return `translate(${width / 2}px,  ${0}px)`;
                 }

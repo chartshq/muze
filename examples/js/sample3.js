@@ -63,47 +63,6 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-<<<<<<< HEAD
-
-
-    let rootData = new DataModel(jsonData, schema);
-
-
-    const canvas = env.canvas()
-        .data(rootData)
-        .columns(['Acceleration'])
-        .rows([ "Year"])
-        .color("Origin")
-        .height(200)
-        .width(1600)
-        .config({
-            facet:{
-                rows:{
-                    verticalAlign: 'middle'
-                }
-            }
-        })
-        .config({
-            axes: {
-                x: {
-
-                    tickFormat: (val, rawVal, i, ticks) => {
-
-                        return val;
-                    }
-                },
-                y: {
-                    name: 'akasndklasndoiansflkjasdnfoslkdnf',
-                    tickFormat: (val, rawVal) => {
-                        // console.log(val, rawVal);
-                        return val;
-                    },
-                }
-            }
-        })
-        .title("Year wise average car Acceleration")
-        .layers([
-=======
     // jsonData = [
     //     { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
     //     { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
@@ -119,8 +78,8 @@ d3.json('../../data/cars.json', (data) => {
     // });
 
    window.canvas =  env.canvas()
-   .rows(['Acceleration']) 
- .columns(['Year']) 
+   .rows(['Acceleration'])
+ .columns(['Year'])
  .data(rootData)
  .width(550)
  .height(500)
@@ -133,48 +92,10 @@ d3.json('../../data/cars.json', (data) => {
             {
                 mark: "bar"
             },
->>>>>>> d413deeadf6ca461c63b1c13663b597cf2f8dd58
             {
                 mark: "bar"
             }
         ])
-<<<<<<< HEAD
-        .mount('#chart');
-
-        setTimeout(()=>{
-            console.log('Updating...')
-            canvas.rows(['Year'])
-            .columns(['Origin'])
-        }, 1000)
-
-        setTimeout(()=>{
-            console.log('Updating 2...')
-            canvas.rows(['Year','Miles_per_Gallon'])
-            .columns(['Origin'])
-            .color('Cylinders')
-        }, 5000)
-
-        setTimeout(()=>{
-            console.log('Updating 3...')
-            canvas.rows(['Displacement','Miles_per_Gallon'])
-            .columns(['Miles_per_Gallon','Displacement'])
-            .color('Cylinders')
-            .shape('Origin')
-        }, 8000)
-
-        setTimeout(()=>{
-            console.log('Updating 4...')
-            canvas.rows(['Displacement','Miles_per_Gallon'])
-            .columns(['Year'])
-            .color('Origin')
-            .shape('Cylinders')
-            .layers([
-                {
-                    mark: "bar"
-                }
-            ])
-        }, 12000)
-=======
         .color('Origin')
  .mount('#chart');
         // .data(rootData)
@@ -187,7 +108,7 @@ d3.json('../../data/cars.json', (data) => {
         //     axes: {
         //         x: {
         //             tickFormat: (val, rawVal, i, ticks) => {
-                   
+
         //                 return val;
         //             }
         //         },
@@ -240,5 +161,4 @@ d3.json('../../data/cars.json', (data) => {
         //         }
         //     ])
         // }, 12000)
->>>>>>> d413deeadf6ca461c63b1c13663b597cf2f8dd58
 });

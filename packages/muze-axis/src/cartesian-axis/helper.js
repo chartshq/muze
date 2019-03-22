@@ -1,6 +1,7 @@
 import { defaultValue } from 'muze-utils';
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
 import { MIN_NO_OF_TICKS, DEFAULT_NO_OF_TICKS } from '../enums/constants';
+import { setAxisRange, getAdjustedRange } from './space-setter';
 
 export const getRotatedSpaces = (rotation = 0, width, height) => {
     let rotatedHeight = height;
@@ -29,21 +30,31 @@ export const setOffset = (context) => {
     if (orientation === TOP) {
         y = yOffset === undefined ? logicalSpace.height : yOffset;
     }
-    context.config({ xOffset: x, yOffset: y });
+    context.renderConfig({ xOffset: x, yOffset: y });
 };
 
 export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) => {
+    let numberOfValues = 0;
+    let tickValues = [];
+    let { numberOfTicks } = axisInstance.config();
     const ticks = axis.scale().ticks();
-    const { numberOfTicks } = axisInstance.config();
     const tickLength = ticks.length;
-    let numberOfValues = tickLength;
+    const minTickDistance = axisInstance._minTickDistance.width;
 
-    if (tickLength * (labelDim * 1.5) > availableSpace) {
-        numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
+    numberOfValues = tickLength;
+
+    if (tickLength * (labelDim + minTickDistance) > availableSpace) {
+        numberOfValues = Math.floor(availableSpace / (labelDim + minTickDistance));
     }
 
+    numberOfTicks = numberOfTicks || numberOfValues;
     numberOfValues = Math.min(numberOfTicks, Math.max(MIN_NO_OF_TICKS, numberOfValues));
-    let tickValues = axis.scale().ticks(numberOfValues);
+
+    tickValues = axis.scale().ticks(numberOfValues);
+
+    if (tickValues.length > numberOfValues) {
+        tickValues = tickValues.filter((e, i) => i % 2 === 0);
+    }
 
     if (numberOfValues === MIN_NO_OF_TICKS) {
         tickValues = axis.scale().ticks(DEFAULT_NO_OF_TICKS);
@@ -59,8 +70,8 @@ export const getAxisComponentDimensions = (context) => {
     let axisTicks;
     const allTickDimensions = [];
     const scale = context.scale();
-    const { showAxisName } = context.renderConfig();
-    const { tickValues, name } = context.config();
+    const { tickValues, showAxisName } = context.renderConfig();
+    const { name } = context.config();
     const { labelManager } = context.dependencies();
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
@@ -84,7 +95,9 @@ export const getAxisComponentDimensions = (context) => {
         if (tickDimensions.width > largestTickDimensions.width) {
             largestTick = label;
             smartTick = context.smartTicks() ? context.smartTicks()[i] : {};
+
             largestTickDimensions = tickDimensions;
+            smartTick = smartTick || tickDimensions;
         }
         return label;
     });
@@ -124,6 +137,7 @@ export const computeAxisDimensions = (context) => {
     if (domain.length === 0) {
         return null;
     }
+
     if (smartTicks) {
         tickDimensions = smartTick;
     } else {
@@ -179,6 +193,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, range) => {
     } else {
         height = tickDimHeight;
     }
+
     height += (showAxisName ? axisDimHeight + axisNamePadding : 0) + tickSize;
 
     return {
@@ -231,6 +246,7 @@ export const getVerticalAxisSpace = (context, axisDimensions) => {
 export const calculateBandSpace = (context) => {
     const range = context.range();
     const axisDimensions = context.getAxisDimensions();
+
     const { orientation } = context.config();
     const { show } = context.renderConfig();
     const { largestTickDimensions, axisTicks, allTickDimensions } = axisDimensions;
@@ -358,4 +374,43 @@ export const hasAxesConfigChanged = (obj = {}, obj1 = {}, properties) => {
         return false;
     }
     return properties.some(key => obj[key] !== obj1[key]);
+};
+
+export const resetTickInterval = (context, domain) => {
+    const {
+        orientation,
+        isOffset
+    } = context.config();
+
+    const minDiff = context._minDiff;
+     // Set available space on interaction
+    if (context.range().length && (orientation === TOP || orientation === BOTTOM)) {
+        context.applyTickSkipping();
+        const {
+            largestTickDimensions
+        } = context.getAxisDimensions();
+
+        const noOfTicks = context.getTickValues().length;
+
+        const { width, height, padding } = context.availableSpace();
+        const {
+            left,
+            right
+        } = padding;
+        // Get the Tick Interval
+        const tickInterval = Math.min(largestTickDimensions.width,
+            ((width - (noOfTicks - 1) * (context._minTickDistance.width)) / noOfTicks));
+
+        context.maxTickSpaces({
+            width: tickInterval
+        });
+
+        const adjustedRange = getAdjustedRange(minDiff, [tickInterval / 2,
+            width - left - right - tickInterval / 2], domain, context.config());
+
+         // set range for axis
+        setAxisRange(context, 'y', adjustedRange, isOffset ? height : null);
+
+        context.setTickConfig();
+    }
 };

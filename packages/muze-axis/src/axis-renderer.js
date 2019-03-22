@@ -114,7 +114,7 @@ const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
     const tickText = selectContainer.selectAll('.tick text');
     tickText.selectAll('tspan').remove();
 
-   // rotate labels if not enough space is available
+    // rotate labels if not enough space is available
     if (rotation && (orientation === TOP || orientation === BOTTOM)) {
         rotateAxis(axisInstance, tickText, labelManager);
     } else if (!rotation && !isSmartTicks) {
@@ -226,14 +226,12 @@ export function renderAxis (axisInstance) {
     const {
         _axisNameStyle: axisNameStyle,
         _tickLabelStyle: tickLabelStyle,
-        _tickFormatter: axisTickFormatter,
-        tickValues
+        _tickFormatter: axisTickFormatter
      } = axisInstance;
     const {
         orientation,
         name,
-        xOffset,
-        yOffset,
+
         axisNamePadding,
         className,
         id,
@@ -241,6 +239,8 @@ export function renderAxis (axisInstance) {
      } = config;
     const {
         show,
+        xOffset,
+        yOffset,
         showAxisName,
         labels
     } = renderConfig;
@@ -259,7 +259,9 @@ export function renderAxis (axisInstance) {
 
     const labelFunc = scale.ticks || scale.quantile || scale.domain;
 
-    axis.tickFormat(axisTickFormatter(tickValues || axis.tickValues() || labelFunc()));
+    const ticks = axis.tickValues() || labelFunc();
+
+    axis.tickFormat(axisTickFormatter(ticks));
 
     // Get range(length of range)
     const availableSpace = Math.abs(range[0] - range[1]);
@@ -297,7 +299,7 @@ export function renderAxis (axisInstance) {
     // Hide axis name if show is off
     textNode.classed(HIDDEN, !showAxisName);
 
-     // render labels based on orientation of axis
+    // render labels based on orientation of axis
     const labelOffset = availableSpace / 2;
 
     // Set style for axis name

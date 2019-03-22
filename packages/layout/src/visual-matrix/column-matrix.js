@@ -119,7 +119,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             height,
             maxHeights
         } = measures;
-        let remainaingHeight = height;
+        let remainingHeight = height;
         let heightDist = [];
         let conditions = [];
         let divider = 2;
@@ -136,14 +136,14 @@ export default class ColumnVisualMatrix extends VisualMatrix {
         maxHeights.forEach((heights, index) => {
             if (conditions.indexOf(index) === -1) {
                 heightDist[index] = heights;
-                remainaingHeight -= heights;
+                remainingHeight -= heights;
             }
         });
-        if (remainaingHeight < 0) {
+        if (remainingHeight < 0) {
             heightDist = heightDist.map(() => 0);
         } else {
             conditions.forEach((condition) => {
-                heightDist[condition] = Math.min(maxHeights[condition], (remainaingHeight) / divider);
+                heightDist[condition] = Math.min(maxHeights[condition], (remainingHeight) / divider);
             });
         }
         return heightDist;
