@@ -55,9 +55,9 @@ d3.json('../../data/cars.json', (data) => {
 
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Name", "Origin", "Year"], {
-        Acceleration: "avg"
-    });
+    // rootData = rootData.groupBy(["Name", "Origin", "Year"], {
+    //     Acceleration: "avg"
+    // });
 
     const canvas = env.canvas()
         .data(rootData)

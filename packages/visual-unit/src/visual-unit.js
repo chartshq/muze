@@ -475,6 +475,10 @@ export default class VisualUnit {
         };
     }
 
+    getDataDomain () {
+        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain.${this.metaInf().namespace}`);
+    }
+
     /**
      *
      *
