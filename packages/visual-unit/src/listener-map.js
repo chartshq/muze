@@ -14,7 +14,7 @@ const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
     const markSet = {};
     layerDefs.forEach((layerDef, i) => {
-        const id = `${layerDef.mark}-${i}`;
+        const id = defaultValue(layerDef.name, `${layerDef.mark}-${i}`);
         markSet[id] = true;
     });
 
