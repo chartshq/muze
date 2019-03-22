@@ -125,7 +125,7 @@ export default class PolarEncoder extends VisualEncoder {
                 let userConfig = axisConfig;
                 if (axisConfig instanceof Function) {
                     userConfig = axisConfig(rowIndex, columnIndex, {
-                        axisFields: fieldInf[enc][i],
+                        axisFields: [fieldInf[enc][i]],
                         facetFields
                     });
                 }
