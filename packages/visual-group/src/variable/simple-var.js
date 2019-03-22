@@ -1,4 +1,4 @@
-import { DateTimeFormatter, retrieveFieldDisplayName } from 'muze-utils';
+import { DateTimeFormatter, retrieveFieldDisplayName, DimensionSubtype } from 'muze-utils';
 import Variable from './variable';
 
 /**
@@ -66,6 +66,20 @@ export default class SimpleVariable extends Variable {
             values = values.map(e => dtFormat.getNativeDate(e));
         }
         return values;
+    }
+
+    /**
+     * Returns a formatter function which transforms the input value to its original form.
+     *
+     * @public
+     * @return {Function} Returns raw formatter function.
+     */
+    rawFormat () {
+        if (this.subtype() === DimensionSubtype.TEMPORAL) {
+            const dateFormat = this.data().getFieldspace().getDimension()[this.oneVar()].schema().format;
+            return val => DateTimeFormatter.formatAs(val, dateFormat);
+        }
+        return val => val;
     }
 
     /**
