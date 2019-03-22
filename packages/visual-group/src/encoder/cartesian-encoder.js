@@ -78,7 +78,7 @@ export default class CartesianEncoder extends VisualEncoder {
             geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
                 groupAxes: axis === X ? xAxes : yAxes,
                 valueParser: context.resolver.valueParser()
-            });
+            }, indices);
         });
         return geomCellAxes;
     }
