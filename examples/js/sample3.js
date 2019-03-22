@@ -42,8 +42,7 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Acceleration',
         type: 'measure',
-        numberFormat: (val) => "$" + val ,
-        displayName: "Acceleration2"
+        numberFormat: (val) => "$" + val
     },
     {
         name: 'Origin',
@@ -56,7 +55,7 @@ d3.json('../../data/cars.json', (data) => {
     },
     {
         name: 'Year',
-        type: 'dimension'
+        type: 'dimension',
         // subtype: 'temporal',
         // format: '%Y-%m-%d'
     }
@@ -70,11 +69,11 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .columns(['Acceleration'])
-        .rows([ 'Year',"Origin"])
-        // .color("Origin")
-        .height(700)
-        .width(300)
+        .rows(['Acceleration'])
+        .columns(["Cylinders"])
+        .color("Origin")
+        .height(500)
+        .width(600)
         .config({
             facet:{
                 rows:{

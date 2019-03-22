@@ -9,7 +9,8 @@ import {
     positionPoints,
     getLayerColor,
     getIndividualClassName,
-    getValidTransformForAggFn
+    getValidTransformForAggFn,
+    sortData
 } from '../../helpers';
 
 /**
@@ -104,6 +105,7 @@ export default class AreaLayer extends LineLayer {
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
         const minYVal = yAxis.domain()[0];
         const basePos = minYVal < 0 ? yAxis.getScaleValue(0) : yAxis.getScaleValue(minYVal);
+        sortData(data, axes);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
