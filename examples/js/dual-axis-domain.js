@@ -42,9 +42,8 @@
     const canvas = env.canvas();
     
     canvas
-        // .rows(['Acceleration'])
-        .rows(['Displacement', 'Acceleration'])
-        .columns(['Cylinders'])
+        .columns(['Displacement', 'Acceleration', 'Origin'])
+        .rows(['Cylinders'])
         .minUnitHeight(10)	
         .minUnitHeight(10)		
         .width(1000)
@@ -53,23 +52,16 @@
         .mount('#chart')
         .config({
             axes: {
-                x: {
-                    name: 'xAxis this is',
-                    padding: 0.9
-                },
-                y: function (nameOfVar, rowIndex, columnIndex) {
-                    // nameOfVar - Array of all the fields of y-axis
-                    if (nameOfVar[0] === 'Acceleration') {
-                        // Apply to only Acceleration axes
+                x: function (rowIndex, columnIndex, context) {
+                    console.log(context);
+                    if (context.facetFields[0][0] === 'Origin' && context.facetFields[1][0] === 'USA') {
                         return {
-                            tickFormat: (d) => `${d / 1000}M`,
-                            domain: [0, 4000],
-                            // name: 'update 1',
-                        };
+                            tickFormat: (d) => `${d}K`,
+                        }
                     }
                     // Apply to all y-axes
                     return {
-                        name: 'hello world',
+                        // name: 'hello world',
                         tickFormat: (d) => `${d / 1000}K`,
                     };
                 }
@@ -80,15 +72,15 @@
             canvas
                 .config({
                     axes: {
-                        x: {
-                            padding: 0.2
-                        },
-                        y: function (nameOfVar, rowIndex, columnIndex) {
+                        x: function (rowIndex, columnIndex, context) {
                             // Update only one axis
-                            if (rowIndex === 1 && columnIndex === 0) {
+                            // Using any of the below if statements
+                            // if (rowIndex === 1 && columnIndex === 0) {} OR
+                            if (context.axisFields[0] === 'Displacement' && context.facetFields[1][0] === 'USA') {
+                                console.log(context);
                                 return {
-                                    domain: [0, 20000],
-                                    name: 'update 2'
+                                    domain: [0, 14000],
+                                    name: 'New Name'
                                 };
                             }
                             return null;
