@@ -25,3 +25,6 @@ export const HEX = 'hex';
 export const HSLA = 'hsla';
 export const HSL = 'hsl';
 
+export const MIN_NO_OF_TICKS = 2;
+export const DEFAULT_NO_OF_TICKS = 10;
+

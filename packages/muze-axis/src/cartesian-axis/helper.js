@@ -1,5 +1,6 @@
 import { defaultValue } from 'muze-utils';
 import { TOP, LEFT, BOTTOM } from '../enums/axis-orientation';
+import { MIN_NO_OF_TICKS, DEFAULT_NO_OF_TICKS } from '../enums/constants';
 
 export const getRotatedSpaces = (rotation = 0, width, height) => {
     let rotatedHeight = height;
@@ -41,9 +42,14 @@ export const getNumberOfTicks = (availableSpace, labelDim, axis, axisInstance) =
         numberOfValues = Math.floor(availableSpace / (labelDim * 1.5));
     }
 
-    numberOfValues = Math.min(numberOfTicks, Math.max(2, numberOfValues));
+    numberOfValues = Math.min(numberOfTicks, Math.max(MIN_NO_OF_TICKS, numberOfValues));
+    let tickValues = axis.scale().ticks(numberOfValues);
 
-    return axis.scale().ticks(numberOfValues);
+    if (numberOfValues === MIN_NO_OF_TICKS) {
+        tickValues = axis.scale().ticks(DEFAULT_NO_OF_TICKS);
+        tickValues = [tickValues[0], tickValues[tickValues.length - 1]];
+    }
+    return tickValues;
 };
 
 export const getAxisComponentDimensions = (context) => {
