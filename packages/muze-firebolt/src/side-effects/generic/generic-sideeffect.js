@@ -124,8 +124,10 @@ export default class GenericSideEffect {
      *
      * @return {GenericSideEffect} Instance of side effect.
      */
-    addStrategy (name, fn) {
-        this._strategies[name] = fn;
+    setStrategy (name, fn) {
+        if (fn) {
+            this._strategies[name] = fn;
+        }
         return this;
     }
 }
