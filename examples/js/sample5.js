@@ -68,10 +68,26 @@ d3.json('../data/cars.json', (data) => {
     // line chart
     env.canvas()
         .rows(['CountVehicle'])
-        .columns(['Year'])
+        .columns(['Origin', 'Year'])
         .data(rootData)
         .width(450)
         .height(300)
+        .config({
+            axes: {
+                x: (r, c, context) => {
+                    const facetByFields = context.facetsFields;
+                    console.log(context);
+                    if (facetByFields[1][0] === 'USA') {
+                        return {
+                            name: 'USAAXIS'
+                        }
+                    }
+                    return  {
+                        name: 'axis'
+                    }
+                }
+            }
+        })
         .title('Line Chart')
         .mount('#chart');
 

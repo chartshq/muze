@@ -1,7 +1,6 @@
 import {
     FieldType,
-    DM_OPERATION_COUNT,
-    DM_OPERATION_SUM,
+    GROUP_BY_FUNCTIONS,
     formatTemporal,
     DimensionSubtype,
     MeasureSubtype,
@@ -9,6 +8,7 @@ import {
     defaultValue
 } from 'muze-utils';
 
+const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
 
 const formatters = (formatter, interval, valueParser) => ({
@@ -210,7 +210,7 @@ export const strategies = {
         const dataObj = dm.getData();
         const measures = dataObj.schema.filter(d => d.type === FieldType.MEASURE);
         const aggregatedModel = dm.groupBy([''], measures.reduce((acc, v) => {
-            acc[v.name] = aggFns[v.name] === DM_OPERATION_COUNT ? DM_OPERATION_SUM : aggFns[v.name];
+            acc[v.name] = aggFns[v.name] === COUNT ? SUM : aggFns[v.name];
             return acc;
         }, {
             saveChild: false

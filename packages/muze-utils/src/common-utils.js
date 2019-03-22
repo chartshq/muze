@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel, DM_DERIVATIVES } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -60,7 +60,6 @@ import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
-import { DM_OPERATION_GROUP } from './enums';
 
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
@@ -1553,7 +1552,7 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     if (dataModel instanceof DataModel) {
         const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
         const nearestReducers = defaultValue(
-            getObjProp(derivations.find(derv => derv.op === DM_OPERATION_GROUP), 'criteria'), {});
+            getObjProp(derivations.find(derv => derv.op === DM_DERIVATIVES.GROUPBY), 'criteria'), {});
 
         const measures = dataModel.getFieldspace().getMeasure();
         measureFieldNames = measureFieldNames.length ? measureFieldNames : Object.keys(measures);

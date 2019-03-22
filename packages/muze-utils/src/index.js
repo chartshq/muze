@@ -16,7 +16,6 @@ export {
 } from './enums';
 
 export { STATE_NAMESPACES };
-export { DM_OPERATION_GROUP, DM_OPERATION_SUM, DM_OPERATION_COUNT } from './enums';
 
 export {
     scales,
@@ -129,5 +128,12 @@ export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
 
-export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter } from 'datamodel';
+export {
+    DimensionSubtype,
+    FieldType,
+    MeasureSubtype,
+    DateTimeFormatter,
+    DM_DERIVATIVES,
+    GROUP_BY_FUNCTIONS
+} from 'datamodel';
 
