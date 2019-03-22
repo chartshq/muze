@@ -133,17 +133,17 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             conditions = priority === 0 ? [primaryMatrixLength - 1] : [primaryMatrixLength];
             divider = 1;
         }
-        maxHeights.forEach((e, i) => {
-            if (conditions.indexOf(i) === -1) {
-                heightDist[i] = e;
-                remainaingHeight -= e;
+        maxHeights.forEach((heights, index) => {
+            if (conditions.indexOf(index) === -1) {
+                heightDist[index] = heights;
+                remainaingHeight -= heights;
             }
         });
         if (remainaingHeight < 0) {
             heightDist = heightDist.map(() => 0);
         } else {
-            conditions.forEach((e) => {
-                heightDist[e] = Math.min(maxHeights[e], (remainaingHeight) / divider);
+            conditions.forEach((condition) => {
+                heightDist[condition] = Math.min(maxHeights[condition], (remainaingHeight) / divider);
             });
         }
         return heightDist;
