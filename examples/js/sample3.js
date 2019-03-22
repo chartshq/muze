@@ -56,36 +56,54 @@ d3.json('../../data/cars.json', (data) => {
     },
     {
         name: 'Year',
-        type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d',
-        displayName: "Year2"
+        type: 'dimension'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
-    // jsonData = [
-    //     { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-    //     { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-    //     { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-    //     { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-    //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-    //     { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    // ];
-    shuffleArray(jsonData);
-    let rootData = new DataModel(jsonData, schema);
-    // rootData = rootData.groupBy(["Origin", "Year"], {
-    //     Acceleration: "avg"
-    // });
+
+
+    let rootData = new DataModel(jsonData, schema)
+    .select(fields=>fields.Year.value === '1972-01-01');
+
 
    window.canvas =  env.canvas()
-   .rows(['Acceleration'])
- .columns(['Year'])
- .data(rootData)
- .width(550)
- .height(500)
-   .title('Acceleration by Cylinders by Origin')
-   .subtitle('For year 1970 - 1982')
-   .layers([
+        .data(rootData)
+        .columns(['Acceleration'])
+        .rows([ 'Origin',"Year"])
+        .color("Origin")
+        .height(300)
+        .width(300)
+        .config({
+            facet:{
+                rows:{
+                    verticalAlign: 'middle'
+                }
+            },
+
+        })
+        .config({
+            axes: {
+                x: {
+
+                    tickFormat: (val, rawVal, i, ticks) => {
+
+                        return val;
+                    }
+                },
+                y: {
+                    name: 'akasndklasndoiansflkjasdnfoslkdnf',
+                    tickFormat: (val, rawVal) => {
+                        // console.log(val, rawVal);
+                        return val;
+                    },
+                }
+            },
+            pagination: 'holistic'
+        })
+        .title("Year wise average car Acceleration")
+        .layers([
             {
                 mark: "area"
             },

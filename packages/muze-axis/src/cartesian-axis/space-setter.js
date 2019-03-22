@@ -1,5 +1,6 @@
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
 import { getSkippedTicks } from './skip-ticks';
+import { TIME, LINEAR, BAND } from '../enums/scale-type';
 
 export const applyTickSkipping = (context) => {
     const minTickDistance = context._minTickDistance;
@@ -119,7 +120,7 @@ export const spaceSetter = (context, spaceConfig) => {
     const minTickHeight = minTickSpace.height;
 
     return {
-        time: {
+        [TIME]: {
             x: () => {
                 !tickValues && context.applyTickSkipping();
                 const noOfTicks = context.getTickValues().length;
@@ -182,7 +183,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 return labelConfig;
             }
         },
-        band: {
+        [BAND]: {
             x: () => {
                 setAxisRange(context, 'y', [0, availWidth - left - right], isOffset ? availHeight : null);
                 const range = context.range();
@@ -242,7 +243,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 return labelConfig;
             }
         },
-        continous: {
+        [LINEAR]: {
             x: () => {
                 labelConfig.smartTicks = false;
                 const tickShifter = tickDimWidth / 2;

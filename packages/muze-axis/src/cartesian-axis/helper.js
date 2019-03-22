@@ -414,3 +414,11 @@ export const resetTickInterval = (context, domain) => {
         context.setTickConfig();
     }
 };
+
+export const getSmartAxisName = (name, width, labelManager) => {
+    const oriSize = labelManager.getOriSize(name);
+
+    labelManager.useEllipsesOnOverflow(true);
+
+    return labelManager.getSmartText(name, width, oriSize.height, true);
+};

@@ -183,6 +183,7 @@ const setAxisNamePos = (textNode, orientation, measures) => {
         labelOffset,
         availableSpace
     } = measures;
+
     switch (orientation) {
     case AxisOrientation.LEFT:
         textNode.attr('transform',
@@ -242,7 +243,8 @@ export function renderAxis (axisInstance) {
         xOffset,
         yOffset,
         showAxisName,
-        labels
+        labels,
+        smartAxisName
     } = renderConfig;
 
     if (!show) {
@@ -291,10 +293,10 @@ export function renderAxis (axisInstance) {
     changeTickOrientation(selectContainer, axisInstance, tickSize);
 
     // Create axis name
-    const textNode = makeElement(selectContainer, 'text', [name], `${classPrefix}-axis-name`)
+    const textNode = makeElement(selectContainer, 'text', [smartAxisName], `${classPrefix}-axis-name`)
                     .attr('text-anchor', 'middle')
                     .classed(`${classPrefix}-axis-name-${id}`, true)
-                    .text(d => d);
+                    .text(d => d.text);
 
     // Hide axis name if show is off
     textNode.classed(HIDDEN, !showAxisName);

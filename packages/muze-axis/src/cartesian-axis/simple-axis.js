@@ -15,7 +15,8 @@ import {
     computeAxisDimensions,
     calculateContinousSpace,
     setOffset,
-    getValidDomain
+    getValidDomain,
+    getSmartAxisName
 } from './helper';
 import { PROPS } from './props';
 
@@ -189,7 +190,8 @@ export default class SimpleAxis {
             showAxisName,
             xOffset,
             yOffset,
-            tickValues
+            tickValues,
+            smartAxisName
         } = config;
         this.renderConfig({
             labels,
@@ -199,7 +201,8 @@ export default class SimpleAxis {
             showAxisName,
             xOffset,
             yOffset,
-            tickValues
+            tickValues,
+            smartAxisName
         });
         return this;
     }
@@ -256,11 +259,12 @@ export default class SimpleAxis {
        } = this.config();
 
         this.availableSpace({ width, height, padding });
+        const type = this.constructor.type();
 
         if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).continous.x();
+            labelConfig = spaceSetter(this, { isOffset })[type].x();
         } else {
-            labelConfig = spaceSetter(this, { isOffset }).continous.y();
+            labelConfig = spaceSetter(this, { isOffset })[type].y();
         }
 
         // Set config
@@ -268,7 +272,19 @@ export default class SimpleAxis {
             labels: labelConfig
         });
         this.setTickConfig();
-        this.getTickSize();
+        this.setSmartAxisName();
+        return this;
+    }
+
+    setSmartAxisName () {
+        const { orientation, name } = this.config();
+        const dimType = (orientation === TOP || orientation === BOTTOM) ? 'width' : 'height';
+        const widthDim = this.availableSpace()[dimType];
+        const labelManager = this.dependencies().labelManager;
+        labelManager.setStyle(this._axisNameStyle);
+        this.renderConfig({
+            smartAxisName: getSmartAxisName(name, widthDim, labelManager)
+        });
         return this;
     }
 

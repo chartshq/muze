@@ -1,10 +1,9 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
-import { BOTTOM, TOP } from '../enums/axis-orientation';
 import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset,
     resetTickInterval } from './helper';
-import { spaceSetter, applyTickSkipping } from './space-setter';
+import { applyTickSkipping } from './space-setter';
 
 /**
  *
@@ -151,25 +150,8 @@ export default class TimeAxis extends SimpleAxis {
      * @param {number} height The height of SimpleCell.
      * @memberof AxisCell
      */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).time.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).time.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
+    setAvailableSpace (...params) {
+        super.setAvailableSpace(...params);
         this.getTickSize();
         return this;
     }
