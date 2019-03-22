@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -60,7 +60,6 @@ import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
-import { DM_OPERATION_GROUP } from './enums';
 
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
@@ -1553,7 +1552,7 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     do {
         const derivations = next.getDerivations();
         if (derivations) {
-            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
+            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_DERIVATIVES.GROUPBY);
             if (groupDerivation) {
                 nearestReducers = groupDerivation.criteria || {};
                 break;
@@ -1575,6 +1574,19 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
     });
 
     return filteredReducers;
+};
+
+/**
+ * Fetches the nearest sort operation details by traversing the chain of parent DataModels
+ * @param {Object} dataModel Instance of DataModel
+ *
+ * @return {Array|null} sort criteria, null if no sort operation found
+ */
+const nearestSortingDetails = (dataModel) => {
+    const allDerivations = [...dataModel.getAncestorDerivations(), ...dataModel.getDerivations()];
+    const nearestSortDerivation = allDerivations.reverse().find(derivation => derivation.op === DM_DERIVATIVES.SORT);
+
+    return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
 export {
@@ -1651,6 +1663,7 @@ export {
     getSmallestDiff,
     getNearestValue,
     retrieveNearestGroupByReducers,
+    nearestSortingDetails,
     createSelection,
     formatTemporal,
     temporalFields

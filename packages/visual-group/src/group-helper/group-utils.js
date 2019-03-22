@@ -1,4 +1,4 @@
-import { Store, FieldType } from 'muze-utils';
+import { Store, FieldType, nearestSortingDetails } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -449,11 +449,10 @@ export const extractFields = (facetsAndProjections, layerFields) => {
  * @param {Array} keys Array of the facet field values
  */
 export const sortFacetFields = (facet, keys) => {
-    const field = facet.toString();
     const subtype = facet.subtype();
-    const sortingDetails = facet.data()._sortingDetails;
+    const sortingDetails = nearestSortingDetails(facet.data());
 
-    if (subtype === CATEGORICAL && !sortingDetails.includes(field)) {
+    if (subtype === CATEGORICAL && !sortingDetails) {
         keys.sort();
     }
 };

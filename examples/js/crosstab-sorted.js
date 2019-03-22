@@ -51,7 +51,7 @@
         .height(500)
         // .columns(['Horsepower', 'Origin', 'Maker'])
         // .rows(['Origin', 'Year', 'Maker'])
-        .rows(['Origin', 'Year', 'Maker'])
+        .rows(['Origin', 'Year', 'Cylinders'])
         // .rows(['Maker', 'Year'])
         .columns(['Acceleration'])
         // .detail(['Name'])

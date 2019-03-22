@@ -1,5 +1,6 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES, unionDomain, nearestSortingDetails } from 'muze-utils';
+import { ScaleType } from '@chartshq/muze-axis';
 import {
     generateAxisFromMap,
     getDefaultMark,
@@ -9,7 +10,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y, CATEGORICAL } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 /**
@@ -111,6 +112,7 @@ export default class CartesianEncoder extends VisualEncoder {
             0: {},
             1: {}
         };
+        const sortingDetails = nearestSortingDetails(context.getGroupByData());
 
         for (let rIdx = 0, len = units.length; rIdx < len; rIdx++) {
             const unitsArr = units[rIdx];
@@ -122,17 +124,10 @@ export default class CartesianEncoder extends VisualEncoder {
                         const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
                         const dom = unitDomains[`${rIdx}${cIdx}`];
                         const typeOfField = field.subtype();
-                        const sortingDetails = field.data()._sortingDetails;
-                        const sortingDetailsFlattened = [].concat(...sortingDetails);
 
                         if (dom && Object.keys(dom).length !== 0) {
                             domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
                                 dom[`${field}`]], typeOfField);
-                            /* Sort categorical fields to ensure consistency across all rows
-                            only if field is categorical and is not explicitily sorted by user */
-                            if (typeOfField === CATEGORICAL && !sortingDetailsFlattened.includes(field.oneVar())) {
-                                domains[axisType][key].sort();
-                            }
                         }
                     });
                 });
@@ -143,22 +138,30 @@ export default class CartesianEncoder extends VisualEncoder {
         store.model.lock();
         [xAxes, yAxes].forEach((axesArr, axisType) => {
             axesArr.forEach((axes, idx) => {
-                const min = [];
-                const max = [];
+                let key;
                 let domain = [];
                 let adjustedDomain = [];
-                if (axes.length > 1 && axes[0].constructor.type() === 'linear' && axes[0].config().alignZeroLine) {
+                const min = [];
+                const max = [];
+                const typeOfAxis = axes[0].constructor.type();
+
+                if (axes.length > 1 && typeOfAxis === ScaleType.LINEAR && axes[0].config().alignZeroLine) {
                     axes.forEach((axis, i) => {
-                        const key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
+                        key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
                         domain = domains[axisType][key];
                         min[i] = domain[0];
                         max[i] = domain[1];
                     });
                     adjustedDomain = getAdjustedDomain(max, min);
+                } else if (typeOfAxis === ScaleType.BAND && !sortingDetails) {
+                    /* Sort categorical fields to ensure consistency across all rows
+                    only if field is categorical and is not explicitily sorted by user */
+                    key = !axisType ? `0${idx}0` : `${idx}00`;
+                    domains[axisType][key].sort();
                 }
 
                 axes.forEach((axis, index) => {
-                    const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
+                    key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
                     domain = adjustedDomain[index] || domains[axisType][key];
                     axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
