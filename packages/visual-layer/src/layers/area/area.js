@@ -9,7 +9,8 @@ import {
     positionPoints,
     getLayerColor,
     getIndividualClassName,
-    getValidTransformForAggFn
+    getValidTransformForAggFn,
+    sortData
 } from '../../helpers';
 
 /**
@@ -101,6 +102,7 @@ export default class AreaLayer extends LineLayer {
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
+        sortData(data, axes);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);

@@ -32,7 +32,7 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Acceleration',
         type: 'measure',
-        numberFormat: (val) => "$" + val 
+        numberFormat: (val) => "$" + val
     },
     {
         name: 'Origin',
@@ -45,8 +45,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
@@ -67,7 +67,7 @@ d3.json('../../data/cars.json', (data) => {
     env.canvas()
         .data(rootData)
         .rows(['Acceleration'])
-        .columns(["Year"])
+        .columns(["Cylinders"])
         .color("Origin")
         .height(500)
         .width(600)

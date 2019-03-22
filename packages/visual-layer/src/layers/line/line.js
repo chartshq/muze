@@ -16,7 +16,8 @@ import {
     animateGroup,
     getLayerColor,
     positionPoints,
-    getIndividualClassName
+    getIndividualClassName,
+    sortData
 } from '../../helpers';
 
 import './styles.scss';
@@ -128,7 +129,7 @@ export default class LineLayer extends BaseLayer {
         const colorFieldIndex = colorField && fieldsConfig[colorField].index;
         const style = {};
         const meta = {};
-
+        sortData(data, axes);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y) + yAxis.getUnitWidth() / 2;

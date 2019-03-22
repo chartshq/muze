@@ -67,11 +67,14 @@ d3.json('../data/cars.json', (data) => {
 
     // line chart
     env.canvas()
-        .rows(['CountVehicle'])
-        .columns(['Year'])
+        .rows(['Origin', 'Cylinders'])
+        .columns(['Horsepower'])
         .data(rootData)
         .width(450)
         .height(300)
+        .layers([{
+            mark: 'line'
+        }])
         .title('Line Chart')
         .mount('#chart');
 
