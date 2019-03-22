@@ -96,6 +96,7 @@ export {
     getSmallestDiff,
     require,
     formatTemporal,
+    nearestSortingDetails,
     createSelection,
     temporalFields,
     retrieveNearestGroupByReducers,

@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel, DM_DERIVATIVES } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -1571,6 +1571,18 @@ const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
 };
 
 const retrieveFieldDisplayName = (dm, fieldName) => dm.getFieldspace().fieldsObj()[fieldName].displayName();
+/**
+ * Fetches the nearest sort operation details by traversing the chain of parent DataModels
+ * @param {Object} dataModel Instance of DataModel
+ *
+ * @return {Array|null} sort criteria, null if no sort operation found
+ */
+const nearestSortingDetails = (dataModel) => {
+    const allDerivations = [...dataModel.getAncestorDerivations(), ...dataModel.getDerivations()];
+    const nearestSortDerivation = allDerivations.reverse().find(derivation => derivation.op === DM_DERIVATIVES.SORT);
+
+    return nearestSortDerivation ? nearestSortDerivation.criteria : null;
+};
 
 export {
     getValueParser,
@@ -1646,6 +1658,7 @@ export {
     getSmallestDiff,
     getNearestValue,
     retrieveNearestGroupByReducers,
+    nearestSortingDetails,
     createSelection,
     formatTemporal,
     temporalFields,
