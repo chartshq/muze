@@ -25,7 +25,7 @@ const getAxisConfig = (axisInfo, field, axesCreators, indices, facetFields) => {
     () => rawUserAxisConfig : rawUserAxisConfig;
     const userAxisConfig = userAxisConfigFn(rowIndex, columnIndex, {
         axisFields: field.getMembers(),
-        facetsFields: facetFields
+        facetFields
     });
 
     // If current config does not specifes config for an axis, retain old config
