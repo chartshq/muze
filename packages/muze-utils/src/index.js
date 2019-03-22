@@ -128,5 +128,12 @@ export { dataSelect, DataObject } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
 
-export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter } from 'datamodel';
+export {
+    DimensionSubtype,
+    FieldType,
+    MeasureSubtype,
+    DateTimeFormatter,
+    DM_DERIVATIVES,
+    GROUP_BY_FUNCTIONS
+} from 'datamodel';
 

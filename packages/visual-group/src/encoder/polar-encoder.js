@@ -1,5 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES } from 'muze-utils';
+import { mergeRecursive, STATE_NAMESPACES, GROUP_BY_FUNCTIONS } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
 import { RADIUS, ANGLE, SIZE, MEASURE, ARC, POLAR, COLOR } from '../enums/constants';
 /**
@@ -195,7 +195,7 @@ export default class PolarEncoder extends VisualEncoder {
 
         if (sizeField) {
             domains[sizeField] = dataModel.groupBy(facetFields, {
-                [sizeField]: 'sum'
+                [sizeField]: GROUP_BY_FUNCTIONS.SUM
             }).getFieldspace().fieldsObj()[sizeField].domain();
         }
 
