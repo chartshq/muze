@@ -81,7 +81,13 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     fieldInfo.normalizedColumns = verticalAxis.fields;
     fieldInfo.normalizedRows = horizontalAxis.fields;
 
-    const groupAxes = encoder.createAxis(axesCreators, fieldInfo, context);
+    const allFacets = [
+        [...facets.rowFacets[0], ...facets.colFacets[0]],
+        [...facets.rowFacets[1], ...facets.colFacets[1]]
+    ];
+    const facetFields = allFacets.slice();
+    facetFields[0] = facetFields[0].map(facetField => facetField.oneVar());
+    const groupAxes = encoder.createAxis(axesCreators, fieldInfo, context, facetFields);
 
     matrixLayers[rowIndex] = matrixLayers[rowIndex] ? matrixLayers[rowIndex] : [];
     matrixLayers[rowIndex][columnIndex] = layerConfigArr;
@@ -93,10 +99,6 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         x: columnFields
     };
 
-    const allFacets = [
-        [...facets.rowFacets[0], ...facets.colFacets[0]],
-        [...facets.rowFacets[1], ...facets.colFacets[1]]
-    ];
     const geomCell = !exitCellMap.has(geomCellKey) ? new GeomCell() : exitCellMap.get(geomCellKey);
 
     geomCell.data(datamodel)

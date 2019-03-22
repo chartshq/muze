@@ -13,7 +13,7 @@ import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/const
  * @param {*} axesCreators
  *
  */
-const getAxisConfig = (axisInfo, field, axesCreators, indices) => {
+const getAxisConfig = (axisInfo, field, axesCreators, indices, facetFields) => {
     let axisOrientation;
     const { index, axisIndex, axisType } = axisInfo;
     const { config, position } = axesCreators;
@@ -22,8 +22,11 @@ const getAxisConfig = (axisInfo, field, axesCreators, indices) => {
 
     // Change config object to a function if not already one
     const userAxisConfigFn = typeof rawUserAxisConfig !== 'function' ?
-        () => rawUserAxisConfig : rawUserAxisConfig;
-    const userAxisConfig = userAxisConfigFn(field.getMembers(), rowIndex, columnIndex);
+    () => rawUserAxisConfig : rawUserAxisConfig;
+    const userAxisConfig = userAxisConfigFn(rowIndex, columnIndex, {
+        axisFields: field.getMembers(),
+        facetsFields: facetFields
+    });
 
     // If current config does not specifes config for an axis, retain old config
     if (!userAxisConfig) {
@@ -120,7 +123,7 @@ export const getAdjustedDomain = (max, min) => {
  * @param {*} groupAxes
  *
  */
-export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo, indices) => {
+export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo, indices, facetFields) => {
     let axisKey;
     const { groupAxes, valueParser } = axesInfo;
     const currentAxes = [];
@@ -131,7 +134,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo,
     const commonAxisKey = getAxisKey(axisType, index);
     fields.forEach((field, axisIndex) => {
         axisKey = getAxisKey(axisType, index, axisIndex, dataTypeScaleMap[field.subtype()]);
-        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators, indices);
+        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators, indices, facetFields);
 
         let axis;
         if (!map.has(axisKey)) {
