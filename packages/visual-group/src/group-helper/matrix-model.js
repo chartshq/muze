@@ -1,6 +1,5 @@
 import { DataModel } from 'muze-utils';
-
-import { retriveDomainFromData } from './group-utils';
+import { retriveDomainFromData, sortFacetFields } from './group-utils';
 
 /**
  * Gets name of fields form the variables
@@ -48,7 +47,7 @@ const uniqueKeyGenerator = (keyArray, context, depth = 0, val = []) => {
             const newContext = {
                 facets,
                 dataModel: newDm,
-                uniqueValues: nextDepthUniqueValues
+                uniqueValues: nextDepthUniqueValues.sort()
             };
 
             uniqueKeyGenerator(keyArray, newContext, depth + 1, [...val, value]);
@@ -179,6 +178,8 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = rowFacets[0].toString();
         const firstLevelRowKeys = retriveDomainFromData(dataModel, field);
 
+        sortFacetFields(rowFacets[0], firstLevelRowKeys);
+
         // Get unique keys in the form of an array of arrays for each row
         uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
 
@@ -210,6 +211,8 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         // Get unique values for the root level of facet
         const field = colFacetNames[0];
         const firstLevelColumnKeys = retriveDomainFromData(dataModel, field);
+
+        sortFacetFields(colFacets[0], firstLevelColumnKeys);
 
         // Get unique keys to create faceted datamodels: this time for columns
         uniqueKeyGenerator(columnKeys, {

@@ -1,4 +1,4 @@
-import { Store, FieldType, COORD_TYPES, getObjProp } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp, nearestSortingDetails } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -27,7 +27,8 @@ import {
     Y,
     ARC,
     RADIUS,
-    ANGLE
+    ANGLE,
+    CATEGORICAL
 } from '../enums/constants';
 
 const POLAR = COORD_TYPES.POLAR;
@@ -449,4 +450,18 @@ export const extractFields = (facetsAndProjections, layerFields) => {
         }));
     });
     return [].concat(...fields, ...layerFields);
+};
+
+/**
+ * This method sorts the facets fields inplace if field is of categorical type
+ * @param {Object} facet
+ * @param {Array} keys Array of the facet field values
+ */
+export const sortFacetFields = (facet, keys) => {
+    const subtype = facet.subtype();
+    const sortingDetails = nearestSortingDetails(facet.data());
+
+    if (subtype === CATEGORICAL && !sortingDetails) {
+        keys.sort();
+    }
 };

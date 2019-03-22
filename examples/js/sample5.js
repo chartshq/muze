@@ -75,7 +75,7 @@ d3.json('../data/cars.json', (data) => {
         .config({
             axes: {
                 x: (r, c, context) => {
-                    const facetByFields = context.facetsFields;
+                    const facetByFields = context.facetFields;
                     console.log(context);
                     if (facetByFields[1][0] === 'USA') {
                         return {
