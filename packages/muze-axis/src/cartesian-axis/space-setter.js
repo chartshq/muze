@@ -6,9 +6,9 @@ const setAxisRange = (context, type, rangeBounds, offset) => {
 };
 
 const getAxisOffset = (timeDiff, range, domain) => {
-    const pvr = Math.abs(range[1] - range[0]) / (domain[1] - domain[0]);
+    const avWidth = Math.abs(range[1] - range[0]);
+    const pvr = avWidth / (domain[1] - domain[0]);
     const width = (pvr * timeDiff);
-    const avWidth = (range[1] - range[0]);
     const bars = avWidth / width;
     const barWidth = avWidth / (bars + 1);
     const diff = avWidth - barWidth * bars;

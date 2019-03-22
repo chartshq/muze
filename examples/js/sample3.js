@@ -54,33 +54,42 @@ d3.json('../../data/cars.json', (data) => {
     ];
 
 
+
     let rootData = new DataModel(jsonData, schema);
-    // rootData = rootData.groupBy(["Name", "Origin", "Year"], {
-    //     Acceleration: "avg"
-    // });
+
 
     const canvas = env.canvas()
         .data(rootData)
-        .rows(["Acceleration"])
-        .columns(["Year", "Name", "Origin"])
-        .height(500)
-        .width(1500)
-        // .config({
-        //     axes: {
-        //         x: {
-        //             tickFormat: (val, rawVal, i, ticks) => {
-        //                 console.log(val, rawVal, ticks);
-        //                 return val;
-        //             }
-        //         },
-        //         y: {
-        //             tickFormat: (val, rawVal) => {
-        //                 // console.log(val, rawVal);
-        //                 return val;
-        //             },
-        //         }
-        //     }
-        // })
+        .columns(['Acceleration'])
+        .rows([ "Year"])
+        .color("Origin")
+        .height(200)
+        .width(1600)
+        .config({
+            facet:{
+                rows:{
+                    verticalAlign: 'middle'
+                }
+            }
+        })
+        .config({
+            axes: {
+                x: {
+
+                    tickFormat: (val, rawVal, i, ticks) => {
+
+                        return val;
+                    }
+                },
+                y: {
+                    name: 'akasndklasndoiansflkjasdnfoslkdnf',
+                    tickFormat: (val, rawVal) => {
+                        // console.log(val, rawVal);
+                        return val;
+                    },
+                }
+            }
+        })
         .title("Year wise average car Acceleration")
         .layers([
             {
