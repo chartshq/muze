@@ -13,16 +13,21 @@ export default class LogInterpolator {
     }
 
     getScaleValue (domainVal) {
+        const scale = this._scale;
         if (domainVal <= 0) {
-            return 1;
+            return scale(scale.domain()[0]);
         }
 
-        return this._scale(domainVal) + 0.5;
+        return scale(domainVal) + 0.5;
     }
 
     sanitizeDomain (domain) {
         if (domain[0] <= 0) {
-            return [Math.max(1, domain[0]), Math.max(1, domain[1])];
-        } return domain;
+            domain[0] = Math.max(1, domain[0]);
+        }
+        if (domain[1] <= 0) {
+            domain[1] = Math.max(1, domain[1]);
+        }
+        return domain;
     }
 }

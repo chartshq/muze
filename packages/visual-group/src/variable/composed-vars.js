@@ -15,11 +15,11 @@ class ComposedVars extends Variable {
     /**
      * Creates an instance of ComposeVars.
      *
-     * @param {Array} texts Array of field names
+     * @param {Array} vars Array of SimpleVars.
      */
-    constructor (...texts) {
-        super(...texts);
-        this.vars(texts);
+    constructor (...vars) {
+        super();
+        this.vars(vars);
     }
 
     vars (...params) {
@@ -33,6 +33,7 @@ class ComposedVars extends Variable {
     data (...dm) {
         if (dm.length) {
             this.vars().forEach(d => d.data(dm[0]));
+            this._data = dm[0];
             return this;
         }
         return this._data;
@@ -93,6 +94,15 @@ class ComposedVars extends Variable {
      */
     getMinDiff () {
         return this.vars()[0].getMinDiff();
+    }
+
+    /**
+     * Returns the display name of the fields.
+     *
+     * @return {string} returns the display name.
+     */
+    displayName () {
+        return this.vars().map(d => d.displayName()).join(',');
     }
 }
 

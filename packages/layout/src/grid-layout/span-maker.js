@@ -226,21 +226,28 @@ export function cellSpanMaker (matrix, type, index) {
     return { viewMatrix, spans };
 }
 
-const spaceAllocationDueToSpan = (span, placeholder, borderWidth) => {
+const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
     const height = placeholder.availHeight();
     const width = placeholder.availWidth();
+    const borderWidth = config.border.width;
+    const { unitWidths } = config.dimensions;
+    const { col } = index;
 
     return {
         [ROW_SPAN] () {
-            selectElement(this).style('height', `${height + borderWidth}px`);
-            if (span > 1) {
-                selectElement(this).style('height', `${height * span + borderWidth * (span)}px`);
-                placeholder.setAvailableSpace(width, height * span);
-            }
+            // selectElement(this).style('height', `${height + borderWidth}px`);
+            // if (span > 1) {
+            // selectElement(this).style('height', `${height * span + borderWidth * (span)}px`);
+            placeholder.setAvailableSpace(width, height * span);
+            // }
         },
         [COL_SPAN] () {
             if (span > 1) {
-                placeholder.setAvailableSpace(width * span + borderWidth * (span - 1), height);
+                let cumulativeWidth = 0;
+                for (let i = col; i < col + span; i++) {
+                    cumulativeWidth += unitWidths.primary[i] - borderWidth;
+                }
+                placeholder.setAvailableSpace(cumulativeWidth + borderWidth, height);
             }
             selectElement(this).style('height', `${height}px`);
         }
@@ -248,13 +255,17 @@ const spaceAllocationDueToSpan = (span, placeholder, borderWidth) => {
 };
 
 const spanApplier = (cells, spans, config, type) => {
-    const borderWidth = config.border.width;
-
+    let cellCounter = 0;
     cells.attr(type, function (cell, colIndex) {
         const span = spans[cell.rowIndex][colIndex];
         const placeholder = cell.placeholder;
+        const index = {
+            row: cell.rowIndex,
+            col: cellCounter
+        };
 
-        spaceAllocationDueToSpan(span, placeholder, borderWidth)[type].bind(this)();
+        spaceAllocationDueToSpan(span, placeholder, config, index)[type].bind(this)();
+        cellCounter += span;
         return span;
     });
 };

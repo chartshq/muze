@@ -2,7 +2,7 @@
 
 import { expect } from 'chai';
 import { DataModel } from 'muze-utils';
-import { strategy } from './strategy';
+import { strategies } from './strategies';
 
 describe('#tooltipstrategy', () => {
     it('Should not throw error when sub type is incorrect', () => {
@@ -20,7 +20,7 @@ describe('#tooltipstrategy', () => {
             name: 'measure',
             type: 'measure'
         }]);
-
+        const strategy = strategies.highlightSummary;
         expect(() => strategy.keyValue(dm, {}, {
             dimensionMeasureMap: {},
             axes: {

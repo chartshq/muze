@@ -47,7 +47,8 @@ export default class DiscreteLegend extends SimpleLegend {
      *
      * @memberof DiscreteLegend
      */
-    dataFromScale (scale) {
+    dataFromScale () {
+        const scale = this.scale();
         const { scaleType, domain, scaleFn } = getScaleInfo(scale);
         let domainForLegend = [...new Set(domain)];
         const field = this.metaData().getFieldspace().fields[0];

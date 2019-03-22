@@ -100,7 +100,7 @@ export {
     createSelection,
     temporalFields,
     retrieveNearestGroupByReducers,
-    linkHorizontal
+    retrieveFieldDisplayName
 } from './common-utils';
 
 export {
@@ -124,11 +124,29 @@ export {
     hasTouch
 } from './renderer-utils';
 
+export {
+    timeMillisecond,
+    timeSecond,
+    timeMinute,
+    timeHour,
+    timeDay,
+    timeWeek,
+    timeMonth,
+    timeYear
+} from 'd3-time';
+
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
 
-export { dataSelect, DataObject } from './DataSystem';
+export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
 
-export { DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter } from 'datamodel';
+export {
+    DimensionSubtype,
+    FieldType,
+    MeasureSubtype,
+    DateTimeFormatter,
+    DM_DERIVATIVES,
+    GROUP_BY_FUNCTIONS
+} from 'datamodel';
 

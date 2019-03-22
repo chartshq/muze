@@ -84,8 +84,8 @@ export default class VisualUnit {
 
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
-        this._gridLinesSelection = {};
-        this._gridBandsSelection = {};
+        this._gridLinesSelection = null;
+        this._gridBandsSelection = null;
         this._gridLines = [];
         this._gridBands = [];
         this._layerNamespaces = {};

@@ -24,20 +24,7 @@ export const PROPS = {
 
             context._tickFormatter = ticks => tickFormatter(ticks);
 
-            const {
-                labels,
-                show,
-                showInnerTicks,
-                showOuterTicks,
-                showAxisName
-            } = value;
-            context.renderConfig({
-                labels,
-                show,
-                showInnerTicks,
-                showOuterTicks,
-                showAxisName
-            });
+            context.resetRenderConfig(value);
             return value;
         }
     },
@@ -61,7 +48,13 @@ export const PROPS = {
 
     smartTicks: {},
     tickSize: {},
-    maxTickSpaces: {},
+    maxTickSpaces: {
+        sanitization: (context, value) => {
+            const oldConfig = Object.assign({}, context._maxTickSpaces || {});
+            value = mergeRecursive(oldConfig, value);
+            return value;
+        }
+    },
     valueParser: {
         defaultValue: val => val
     }

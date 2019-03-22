@@ -13,11 +13,26 @@ import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y, COLOR, SHAPE, SIZE } 
  * @param {*} axesCreators
  *
  */
-const getAxisConfig = (axisInfo, field, axesCreators) => {
+const getAxisConfig = (axisInfo, field, axesCreators, indices, facetFields) => {
     let axisOrientation;
     const { index, axisIndex, axisType } = axisInfo;
     const { config, position } = axesCreators;
-    const userAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+    const { rowIndex, columnIndex } = indices;
+    const rawUserAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+
+    // Change config object to a function if not already one
+    const userAxisConfigFn = typeof rawUserAxisConfig !== 'function' ?
+    () => rawUserAxisConfig : rawUserAxisConfig;
+    const userAxisConfig = userAxisConfigFn(rowIndex, columnIndex, {
+        axisFields: field.getMembers(),
+        facetFields
+    });
+
+    // If current config does not specifes config for an axis, retain old config
+    if (!userAxisConfig) {
+        return {};
+    }
+
     const {
         LEFT,
         RIGHT,
@@ -33,7 +48,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
     }
     const axisConfig = {
         id: `${axisType}-${index}-${axisIndex}`,
-        name: field.toString(),
+        name: field.displayName(),
         field: field.toString(),
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
@@ -108,7 +123,7 @@ export const getAdjustedDomain = (max, min) => {
  * @param {*} groupAxes
  *
  */
-export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo) => {
+export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo, indices, facetFields) => {
     let axisKey;
     const { groupAxes, valueParser } = axesInfo;
     const currentAxes = [];
@@ -119,7 +134,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
     const commonAxisKey = getAxisKey(axisType, index);
     fields.forEach((field, axisIndex) => {
         axisKey = getAxisKey(axisType, index, axisIndex, dataTypeScaleMap[field.subtype()]);
-        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators);
+        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators, indices, facetFields);
 
         let axis;
         if (!map.has(axisKey)) {
@@ -128,7 +143,6 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
             axis = map.get(axisKey);
             axis._rotationLock = false;
             axis.config(axisConfig);
-            axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
         axis.valueParser(valueParser);
         currentAxes.push(axis);

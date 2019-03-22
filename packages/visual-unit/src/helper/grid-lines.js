@@ -1,4 +1,4 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel, createSelection } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { layerFactory, LAYER_TYPES } from '@chartshq/visual-layer';
 import {
@@ -135,27 +135,6 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
     return gridData;
 };
 
-// @todo Use dataSelect method to reuse instances when the method is fixed. #110
-export const createGridLines = (instances = {}, createFn, definitions, iteratorFn) => {
-    const map = {};
-    definitions.forEach((def) => {
-        const name = def.definition.name;
-        let instance = instances[name];
-        if (!instance) {
-            instances[name] = instance = createFn(def);
-        }
-        iteratorFn(instance, def, name);
-        map[name] = 1;
-    });
-    for (const key in instances) {
-        if (!(key in map)) {
-            instances[key].remove();
-            delete instances[key];
-        }
-    }
-    return instances;
-};
-
 export const createGridLineLayer = (context) => {
     const vuConf = context.config();
     const metaInf = context.metaInf();
@@ -174,18 +153,20 @@ export const createGridLineLayer = (context) => {
         const definitions = getGridLayerDefinitions(context, config, type);
 
         const sel = `_${type}Selection`;
-        context[sel] = createGridLines(context[sel], () => {
+        context[sel] = createSelection(context[sel], () => {
             const inst = layerFactory.getLayerInstance({ mark });
             inst.dependencies(context._layerDeps);
             return inst;
-        }, definitions, (layer, atomicDef, key) => {
+        }, definitions, atomicDef => atomicDef.definition.name);
+        context[sel].each((layer, atomicDef) => {
             const definition = atomicDef.definition;
+            const name = definition.name;
             const sConf = layerFactory.getSerializedConf(mark, definition);
             const axesObj = atomicDef.axes;
             layer.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${type}${key}`
+                namespace: `${metaInf.namespace}${type}${name}`
             })
                 .store(store)
                 .config(sConf)
@@ -194,7 +175,7 @@ export const createGridLineLayer = (context) => {
                 })
                 .axes(axesObj);
         });
-        context[`_${type}`] = Object.values(context[sel]);
+        context[`_${type}`] = context[sel].getObjects();
     });
 };
 

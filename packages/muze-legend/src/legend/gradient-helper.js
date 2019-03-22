@@ -149,8 +149,8 @@ export const renderGradient = (context, container) => {
     } = context.measurement();
     const gradientDimensions = {};
 
-    gradHeight = Math.floor(height - (titleSpaces.height + 2 * margin + 2 * border));
-    gradWidth = Math.floor(width - (margin * 2 + border * 2));
+    gradHeight = Math.floor(Math.min(height, maxHeight) - (titleSpaces.height + 2 * margin + 2 * border));
+    gradWidth = Math.floor(Math.min(width, maxWidth) - (margin * 2 + border * 2));
 
     if (align === ALIGN.HORIZONTAL) {
         gradientDimensions.height = item.icon.height;
@@ -158,7 +158,6 @@ export const renderGradient = (context, container) => {
         linearGradient.attr('x2', '100%').attr('y1', '0%');
         legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
-        legendContainer.classed(`${classPrefix}-overflow-x`, width > maxWidth);
 
         applyStyle(legendContainer, {
             height: `${maxItemSpaces.height + border + padding}px`,
@@ -174,10 +173,10 @@ export const renderGradient = (context, container) => {
         linearGradient.attr('x2', '0%').attr('y1', '100%');
         legendGradCont.attr('transform', `translate(0 ${labelDim.height / 2})`);
         renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
-        legendContainer.classed(`${classPrefix}-overflow-y`, height > maxHeight);
+
         applyStyle(legendContainer, {
             height: `${Math.min(height, maxHeight)}px`,
-            width: `${width}px`,
+            width: `${maxWidth}px`,
             padding: `${padding}px`
         });
         legendRect.attr('height', gradientDimensions.height - labelDim.height / 2);

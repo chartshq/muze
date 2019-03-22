@@ -1,7 +1,6 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { BOTTOM, TOP, LEFT, RIGHT } from '../enums/axis-orientation';
-import { spaceSetter } from './space-setter';
 import { LINEAR, LOG, POW } from '../enums/scale-type';
 import { LogInterpolator, PowInterpolator, LinearInterpolator } from './interpolators';
 import {
@@ -110,25 +109,8 @@ export default class ContinousAxis extends SimpleAxis {
      * @param {number} height The height of SimpleCell.
      * @memberof AxisCell
      */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).continous.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).continous.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
+    setAvailableSpace (...params) {
+        super.setAvailableSpace(...params);
         this.getTickSize();
         return this;
     }
@@ -142,9 +124,11 @@ export default class ContinousAxis extends SimpleAxis {
      */
     setTickConfig () {
         const {
-            tickValues
+
+            tickFormat
         } = this.config();
         const {
+            tickValues,
             showInnerTicks
         } = this.renderConfig();
         const axis = this.axis();
@@ -156,10 +140,22 @@ export default class ContinousAxis extends SimpleAxis {
 
         if (tickValues) {
             tickValues instanceof Array && this.axis().tickValues(tickValues);
-            return this;
         }
-        axis.tickValues(this.getTickValues());
+        const newTickValues = this.getTickValues();
 
+        axis.tickValues(newTickValues);
+        const smartLabel = this.dependencies().labelManager;
+        smartLabel.setStyle(this._tickLabelStyle);
+
+        const smartTicks = newTickValues.map((val) => {
+            const text = tickFormat(val);
+            const tickSpace = smartLabel.getOriSize(text);
+
+            tickSpace.text = text;
+            return tickSpace;
+        });
+
+        this.smartTicks(smartTicks);
         return this;
     }
 
@@ -172,9 +168,12 @@ export default class ContinousAxis extends SimpleAxis {
     getTickValues () {
         let labelDim = 0;
         const {
-            orientation,
-            tickValues
+            orientation
+
         } = this.config();
+        const {
+            tickValues
+        } = this.renderConfig();
         const range = this.range();
         const axis = this.axis();
 
@@ -183,7 +182,7 @@ export default class ContinousAxis extends SimpleAxis {
         const labelProps = this.axisComponentDimensions().largestTickDimensions;
 
         if (tickValues) {
-            return axis.scale().ticks(tickValues);
+            return tickValues;
         }
         labelDim = labelProps[orientation === BOTTOM || orientation === TOP ? 'width' : 'height'];
 
@@ -191,7 +190,7 @@ export default class ContinousAxis extends SimpleAxis {
     }
 
     getMinTickDifference () {
-        return getSmallestDiff(this.config().tickValues);
+        return getSmallestDiff(this.renderConfig().tickValues);
     }
 
     /**
@@ -214,13 +213,16 @@ export default class ContinousAxis extends SimpleAxis {
             rotation
         } = labels;
         const axis = this.axis();
-        const ticks = axis.scale().ticks();
-        const { width, height } = this.axisComponentDimensions().allTickDimensions[0];
+        const ticks = axis.tickValues();
+
+        const { width, height } = this.smartTicks()[0];
+
         axis.tickTransform((d) => {
             if (d === ticks[0]) {
                 if ((orientation === LEFT || orientation === RIGHT)) {
                     return `translate(0, -${(height) / 3}px)`;
                 }
+
                 if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
                     return `translate(${width / 2}px,  ${0}px)`;
                 }

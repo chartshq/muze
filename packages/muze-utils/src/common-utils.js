@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel, DM_DERIVATIVES } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -60,7 +60,6 @@ import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
-import { DM_OPERATION_GROUP } from './enums';
 
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
@@ -714,9 +713,8 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
             } else {
                 nameSpaceProp = prop;
             }
-            if (!store.prop(`${nameSpaceProp}`)) {
-                stateProps[prop] = conf.value;
-            }
+
+            stateProps[prop] = conf.value;
             if (addAsMethod !== false) {
                 holder[prop] = ((context, meta, nsProp) => (...params) => {
                     let val;
@@ -940,14 +938,16 @@ const mergeRecursive = (source, sink) => {
  * @return {Selection} Merged selection
  */
 const createSelection = (sel, appendObj, data, idFn) => {
-    let selection = sel || dataSelect([]);
+    let selection = sel || dataSelect(idFn);
 
-    selection = selection.data(data, idFn);
+    selection = selection.data(data);
 
     const enter = selection.enter().append(appendObj);
     const mergedSelection = enter.merge(selection);
 
-    selection.exit() && selection.exit().remove();
+    const exitSelection = selection.exit();
+    exitSelection.getObjects().forEach(inst => inst.remove());
+    exitSelection.remove();
     return mergedSelection;
 };
 
@@ -1550,34 +1550,29 @@ const getValueParser = config => (val) => {
 };
 
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
-    let nearestReducers = {};
-    let next = dataModel;
-    do {
-        const derivations = next.getDerivations();
-        if (derivations) {
-            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
-            if (groupDerivation) {
-                nearestReducers = groupDerivation.criteria || {};
-                break;
-            }
-        }
-    } while (next = next.getParent());
-
     const filteredReducers = {};
-    const measures = dataModel.getFieldspace().getMeasure();
-    measureFieldNames.forEach((measureName) => {
-        if (nearestReducers[measureName]) {
-            filteredReducers[measureName] = nearestReducers[measureName];
-        } else {
-            const measureField = measures[measureName];
-            if (measureField) {
-                filteredReducers[measureName] = measureField.defAggFn();
-            }
-        }
-    });
+    if (dataModel instanceof DataModel) {
+        const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
+        const nearestReducers = defaultValue(
+            getObjProp(derivations.find(derv => derv.op === DM_DERIVATIVES.GROUPBY), 'criteria'), {});
 
+        const measures = dataModel.getFieldspace().getMeasure();
+        measureFieldNames = measureFieldNames.length ? measureFieldNames : Object.keys(measures);
+        measureFieldNames.forEach((measureName) => {
+            if (nearestReducers[measureName]) {
+                filteredReducers[measureName] = nearestReducers[measureName];
+            } else {
+                const measureField = measures[measureName];
+                if (measureField) {
+                    filteredReducers[measureName] = measureField.defAggFn();
+                }
+            }
+        });
+    }
     return filteredReducers;
 };
+
+const retrieveFieldDisplayName = (dm, fieldName) => dm.getFieldspace().fieldsObj()[fieldName].displayName();
 
 export {
     getValueParser,
@@ -1655,5 +1650,6 @@ export {
     retrieveNearestGroupByReducers,
     createSelection,
     formatTemporal,
-    temporalFields
+    temporalFields,
+    retrieveFieldDisplayName
 };

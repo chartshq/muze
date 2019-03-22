@@ -42,7 +42,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    createAxis (axesCreators, fieldInfo, context, geomCell) {
+    createAxis (axesCreators, fieldInfo, context, geomCell, facetFields) {
         const geomCellAxes = {};
         const {
             axes
@@ -81,7 +81,7 @@ export default class CartesianEncoder extends VisualEncoder {
             geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
                 groupAxes: axis === X ? xAxes : yAxes,
                 valueParser: context.resolver.valueParser()
-            });
+            }, indices, facetFields);
         });
         geomCell.axes(geomCellAxes);
         return geomCellAxes;
@@ -155,7 +155,8 @@ export default class CartesianEncoder extends VisualEncoder {
                 axes.forEach((axis, index) => {
                     const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
                     domain = adjustedDomain[index] || domains[axisType][key];
-                    axis.domain(domain);
+
+                    domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
                     store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
                 });

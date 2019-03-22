@@ -2,6 +2,11 @@ import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
 import { positionPoints, getIndividualClassName, getColorMetaInf, resolveEncodingValues } from '../../helpers';
 
+const positionRetriever = {
+    x: (xPx, isNegativeVal, barBasePos) => (isNegativeVal ? [xPx, barBasePos] : [barBasePos, xPx]),
+    y: (yPx, isNegativeVal, barBasePos) => (isNegativeVal ? [barBasePos, yPx] : [yPx, barBasePos])
+};
+
 /**
  *
  *
@@ -65,19 +70,18 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             enter = pos;
             enterSpace = space;
         } else {
-            const zeroPos = axis.getScaleValue(0);
-            const axisType = axis.getScaleValue(data[type]);
-            const axisType0 = axis.getScaleValue(data[`${type}0`]);
+            const minDomVal = axis.domain()[0];
+            const barBasePos = minDomVal < 0 ? axis.getScaleValue(0) : axis.getScaleValue(minDomVal);
+            pos = axis.getScaleValue(data[type]);
+            let endPos = axis.getScaleValue(data[`${type}0`]);
 
             enterSpace = 0;
-            if (type === 'x') {
-                pos = data[type] < 0 || transformType === STACK ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? axisType : zeroPos)));
-            } else {
-                pos = transformType === STACK || data[type] >= 0 ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? zeroPos : axisType)));
+            const isNegativeVal = data[type] < 0;
+            if (transformType !== STACK) {
+                [pos, endPos] = positionRetriever[type](pos, isNegativeVal, barBasePos);
             }
-            enter = zeroPos;
+            space = Math.abs(pos - endPos);
+            enter = barBasePos;
         }
     } else {
         pos = 0;

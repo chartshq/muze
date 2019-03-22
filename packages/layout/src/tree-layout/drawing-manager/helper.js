@@ -1,3 +1,4 @@
+import { selectElement } from 'muze-utils';
 import { HTMLRenderer } from '../renderers/html-renderer';
 import { LayoutComponent } from '../layout-component';
 
@@ -33,7 +34,9 @@ export const drawComponent = (componentData) => {
 };
 
 export const removeElement = (elemID) => {
-    document.removeElement(document.getElementById(elemID));
+    if (elemID) {
+        selectElement(`#${elemID}`).remove();
+    }
 };
 
 export const resolveAligment = (context, componentData) => {

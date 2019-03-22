@@ -10,7 +10,7 @@ export const behaviourEffectMap = {
     [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
         name: 'tooltip',
         options: {
-            strategy: 'showSelectedItems',
+            strategy: 'selectionSummary',
             order: 0,
             filter: context => context.config().mode === 'fragmented'
         }

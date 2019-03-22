@@ -8,6 +8,7 @@ import {
 } from '../constants/defaults';
 
 import { DrawingManager } from '../drawing-manager';
+import { removeElement } from '../drawing-manager/helper';
 import { Utils } from '../utils';
 import { LayoutDef } from './layout-def';
 import { calLayOutDef } from './helper';
@@ -137,6 +138,10 @@ export default class LayoutManager {
 
     getComponent (componentName) {
         return this._layoutDef.componentMap().get(componentName);
+    }
+
+    removeComponent (id) {
+        return removeElement(id);
     }
 
     renderAt (mount) {

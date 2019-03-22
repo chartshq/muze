@@ -1,6 +1,14 @@
 import { AngleAxis, RadiusAxis } from '@chartshq/muze-axis';
 import { layerFactory, ENCODING } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, COORD_TYPES, toArray, getObjProp, defaultValue } from 'muze-utils';
+import {
+    mergeRecursive,
+    STATE_NAMESPACES,
+    GROUP_BY_FUNCTIONS,
+    COORD_TYPES,
+    toArray,
+    getObjProp,
+    defaultValue
+} from 'muze-utils';
 import VisualEncoder from './visual-encoder';
 import { SIZE, MEASURE, ARC, COLOR } from '../enums/constants';
 import { sanitizeIndividualLayerConfig } from './encoder-helper';
@@ -50,7 +58,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @memberof PolarEncoder
      */
-    createAxis (axesCreators, fieldInfo, context, geomCell) {
+    createAxis (axesCreators, fieldInfo, context, geomCell, facetFields) {
         const {
             axes
         } = axesCreators;
@@ -116,7 +124,10 @@ export default class PolarEncoder extends VisualEncoder {
             axesObj[enc].forEach((axis, i) => {
                 let userConfig = axisConfig;
                 if (axisConfig instanceof Function) {
-                    userConfig = axisConfig(fieldInf[enc][i], rowIndex, columnIndex);
+                    userConfig = axisConfig(rowIndex, columnIndex, {
+                        axisFields: fieldInf[enc][i],
+                        facetFields
+                    });
                 }
                 axis.config(userConfig);
             });
@@ -299,7 +310,7 @@ export default class PolarEncoder extends VisualEncoder {
 
         if (sizeField) {
             domains[sizeField] = dataModel.groupBy(facetFields, {
-                [sizeField]: 'sum'
+                [sizeField]: GROUP_BY_FUNCTIONS.SUM
             }).getFieldspace().fieldsObj()[sizeField].domain();
         }
 
