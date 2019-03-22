@@ -63,7 +63,7 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
         const existingComponent = layoutManager.getComponent(headerType);
         if (existingComponent) {
             wrapper = existingComponent
-                      .updateWrapper(wrapperParams);
+                        .updateWrapper(wrapperParams);
         } else {
             wrapper = new HeaderComponent(wrapperParams);
         }
