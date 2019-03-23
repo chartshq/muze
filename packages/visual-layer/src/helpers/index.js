@@ -559,3 +559,22 @@ export const toCartesianCoordinates = (points, measurement, rangePlot = false) =
     }
     return points;
 };
+
+export const sortData = (data, axes) => {
+    const { x: xAxis, y: yAxis } = axes;
+    const axisArr = [xAxis, yAxis];
+    for (let i = 0, len = axisArr.length; i < len; i++) {
+        const axis = axisArr[i];
+        if (axis.constructor.type() === BAND) {
+            const key = i ? 'y' : 'x';
+            const dom = axis.domain();
+            const indices = dom.reduce((acc, v, idx) => {
+                acc[v] = idx;
+                return acc;
+            }, {});
+            data.sort((a, b) => indices[a[key]] - indices[b[key]]);
+            break;
+        }
+    }
+    return data;
+};

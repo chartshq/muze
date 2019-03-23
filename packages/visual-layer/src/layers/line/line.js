@@ -17,7 +17,8 @@ import {
     positionPoints,
     getIndividualClassName,
     getColorMetaInf,
-    resolveEncodingValues
+    resolveEncodingValues,
+    sortData
 } from '../../helpers';
 
 import './styles.scss';
@@ -101,7 +102,7 @@ export default class LineLayer extends BaseLayer {
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
-
+        sortData(data, axes);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y) + yAxis.getUnitWidth() / 2;
