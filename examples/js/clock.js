@@ -25,6 +25,47 @@ const makeZeroSixty = (val) => {
     } return val;
 };
 
+const tickMap = {
+    hours: {
+        low: {
+            stroke: 'white',
+            width: '2px'
+        },
+        middle: {
+            stroke: 'red',
+            width: '4px'
+        },
+        high: {
+            stroke: 'white',
+            width: '8px'
+        }
+    }
+};
+
+const generateTick = (type, tickType, source) => {
+    const tick = tickMap[type][tickType];
+    return {
+        mark: 'tick',
+        source,
+        encoding: {
+            angle: 'name',
+            color: {
+                value: () => tick.stroke
+            }
+        },
+        interpolate: 'catmullRom',
+        encodingTransform: (points) => {
+            points.forEach((point) => {
+                point.update.radius0 = point.update.radius - 40 - 60;
+                point.update.radius = 0;
+                point.style['stroke-width'] = tick.width;
+                point.style['stroke-linecap'] = 'round';
+            });
+            return points;
+        }
+    };
+};
+
 window.canvas = env.canvas()
         .data(rootData)
         .rows([])
@@ -64,9 +105,10 @@ window.canvas = env.canvas()
                                 return val / 5;
                             } return '';
                         }
+
                     },
                     color: {
-                        value: () => '#000'
+                        value: () => 'white'
                     }
                 },
                 encodingTransform: (points) => {
@@ -82,7 +124,7 @@ window.canvas = env.canvas()
                 encoding: {
                     angle: 'name',
                     color: {
-                        value: () => 'black'
+                        value: () => 'white'
                     }
                 },
                 interpolate: 'catmullRom',
@@ -93,13 +135,14 @@ window.canvas = env.canvas()
                     return points;
                 }
             },
+
             {
                 mark: 'tick',
                 source: 'smallTicks',
                 encoding: {
                     angle: 'name',
                     color: {
-                        value: () => 'black'
+                        value: () => 'white'
                     }
                 },
                 interpolate: 'catmullRom',
@@ -110,25 +153,9 @@ window.canvas = env.canvas()
                     return points;
                 }
             },
-            {
-                mark: 'tick',
-                source: 'tickHours',
-                encoding: {
-                    angle: 'name',
-                    color: {
-                        value: () => 'black'
-                    }
-                },
-                interpolate: 'catmullRom',
-                encodingTransform: (points) => {
-                    points.forEach((point) => {
-                        point.update.radius0 = point.update.radius - 40 - 60;
-                        point.update.radius = 0;
-                        point.style['stroke-width'] = '4px';
-                    });
-                    return points;
-                }
-            },
+            generateTick('hours', 'low', 'tickHours'),
+            generateTick('hours', 'middle', 'tickHours'),
+            generateTick('hours', 'high', 'tickHours'),
             {
                 mark: 'tick',
                 source: 'tickMinutes',
@@ -136,7 +163,7 @@ window.canvas = env.canvas()
                     angle: 'name',
 
                     color: {
-                        value: () => 'black'
+                        value: () => 'white'
                     }
                 },
                 interpolate: 'catmullRom',
@@ -156,7 +183,7 @@ window.canvas = env.canvas()
                     angle: 'name',
 
                     color: {
-                        value: () => 'black'
+                        value: () => 'white'
                     }
                 },
                 interpolate: 'catmullRom',
@@ -172,12 +199,12 @@ window.canvas = env.canvas()
         .mount('#chart');
 
 setInterval(() => {
-    canvas.transform({
-        bigTicks: dm => dm.select(fields => fields.name.value % 5 === 0),
-        smallTicks: dm => dm.select(fields => fields.name.value % 5 !== 0),
-        tickHours: dm => dm.select(fields => fields.name.value === `${(new Date().getHours() % 12 * 5)}`),
-        tickMinutes: dm => dm.select(fields => fields.name.value === `${makeZeroSixty(new Date().getMinutes())}`),
-        tickSeconds: dm => dm.select(fields => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
-    });
+    // canvas.transform({
+    //     bigTicks: dm => dm.select(fields => fields.name.value % 5 === 0),
+    //     smallTicks: dm => dm.select(fields => fields.name.value % 5 !== 0),
+    //     tickHours: dm => dm.select(fields => fields.name.value === `${(new Date().getHours() % 12 * 5)}`),
+    //     tickMinutes: dm => dm.select(fields => fields.name.value === `${makeZeroSixty(new Date().getMinutes())}`),
+    //     tickSeconds: dm => dm.select(fields => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
+    // });
 }, 500);
 
