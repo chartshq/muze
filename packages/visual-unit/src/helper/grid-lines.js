@@ -6,7 +6,8 @@ import {
     GRID_LINE,
     GRID_BAND_PARENT_GROUP_CLASS,
     GRID_LINE_PARENT_GROUP_CLASS,
-    GRID_PARENT_GROUP
+    GRID_PARENT_GROUP,
+    TEMPORAL
 } from '../enums/constants';
 
 const { BAR_LAYER, TICK_LAYER } = LAYER_TYPES;
@@ -90,8 +91,11 @@ export const getGridLayerDefinitions = (context, config, type) => ['x', 'y'].map
     return show ? getLayerDefinition(context, axes, type, axisType) : null;
 }).filter(d => d !== null);
 
+const getValidSubtype = subtype => (!DimensionSubtype[subtype] ? DimensionSubtype.CATEGORICAL : subtype);
+
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
     const gridData = {};
+
     ['x', 'y'].forEach((type) => {
         let ticks = axes[type][0].getTickValues();
         const subtype = getObjProp(fieldsConfig, getObjProp(fields, type, 0).getMembers()[0], 'def', 'subtype');
@@ -113,11 +117,11 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
             }, {
                 name: 'xdim',
                 type: 'dimension',
-                subtype
+                subtype: getValidSubtype(subtype)
             }, {
                 name: 'ydim',
                 type: 'dimension',
-                subtype
+                subtype: getValidSubtype(subtype)
             }
         ];
         const len = Math.max(ticks.length);
