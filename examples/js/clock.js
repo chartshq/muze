@@ -101,6 +101,17 @@ d3.json('../../data/cars.json', (data) => {
             tickMinutes: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getMinutes())}`),
             tickSeconds: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
         })
+        .config({
+            axes: {
+                radius: () => {
+                    return {
+                        range: (defRange) => {
+                            return [defRange[0], defRange[1] - 140]
+                        }
+                    }
+                }
+            }
+        })
         // .size('Displacement')
         .title("Maker wise average car Acceleration")
         .layers([
@@ -142,8 +153,7 @@ d3.json('../../data/cars.json', (data) => {
                         value: () => 'black'
                     }
                 },
-                outerRadius: 140,
-                interpolate: 'catmullRom',
+                // outerRadius: 140,
                 encodingTransform: (points) => {
                     points.forEach((point) => {
                         point.update.radius0 += 40;
@@ -164,7 +174,7 @@ d3.json('../../data/cars.json', (data) => {
                         value: () => 'black'
                     }
                 },
-                outerRadius: 140,
+                // outerRadius: 140,
                 interpolate: 'catmullRom',
                 encodingTransform: (points) => {
                     points.forEach((point) => {

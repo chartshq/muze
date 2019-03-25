@@ -62,7 +62,7 @@ const drawText = (container, data, config, smartLabel) => {
         dataObj.className && textEl.classed(dataObj.className, true);
         setAttrs(textNode, update);
         textEl.attr('text-anchor', textanchor);
-        textEl.attr('alignment-baseline', dataObj['alignement-baseline']);
+        textEl.attr('alignment-baseline', dataObj['alignment-baseline']);
         textEl.attr('transform', `rotate(${dataObj.rotation} ${update.x} ${update.y})`);
     });
     selection.exit().remove();
