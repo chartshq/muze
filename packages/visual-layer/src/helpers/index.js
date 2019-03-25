@@ -540,21 +540,23 @@ export const getColorMetaInf = (color, colorAxis) => ({
     colorTransform: {}
 });
 
+const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;
+const coordValueGetter = (radius, angle, xOffset, yOffset) => ({
+    x: getCoordValue(radius, 'cos', angle, xOffset),
+    y: getCoordValue(radius, 'sin', angle, yOffset)
+});
 export const toCartesianCoordinates = (points, measurement, rangePlot = false) => {
     const xOffset = measurement.width / 2;
     const yOffset = measurement.height / 2;
     for (let i = 0, len = points.length; i < len; i++) {
         const point = points[i];
         const { angle, radius, radius0, angle0 } = point.update;
-        const update = point.update = {
-            x: radius * Math.cos(angle) + xOffset,
-            y: radius * Math.sin(angle) + yOffset
-        };
+        point.update = coordValueGetter(radius, angle, xOffset, yOffset);
         if (rangePlot) {
-            update.x0 = radius * Math.cos(angle) + xOffset;
-            update.y0 = radius * Math.sin(angle) + yOffset;
-            update.x = radius0 * Math.cos(angle0) + xOffset;
-            update.y = radius0 * Math.sin(angle0) + yOffset;
+            const update = point.update = coordValueGetter(radius0, angle0, xOffset, yOffset);
+            const { x: x0, y: y0 } = coordValueGetter(radius, angle, xOffset, yOffset);
+            update.x0 = x0;
+            update.y0 = y0;
         }
     }
     return points;

@@ -104,17 +104,12 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             [PADDING, BORDER, MARGIN].forEach((e) => {
                 legendMeasures[e] = config[e];
             });
-            const metaData = legend.metaData();
-            if (metaData) {
-                metaData.dispose();
-            }
-            const data = canvas.composition().visualGroup.getGroupByData().project([fieldName]);
             legend.scale(scale)
                             .valueParser(parser)
                             .title(title)
                             .fieldName(fieldName)
                             .config(config)
-                            .metaData(data)
+                            .metaData(canvas.composition().visualGroup.getGroupByData())
                             .measurement(legendMeasures)
                             .canvasAlias(canvas.alias())
                             .setLegendMeasures();

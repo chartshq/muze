@@ -11,6 +11,20 @@ import { resolveAxisConfig } from '../helper';
 
 const { pie } = Symbols;
 
+const createAngleValues = (context) => {
+    const angleData = context._angleFn(context._domain);
+    angleData.forEach((v) => {
+        v.startAngle -= Math.PI / 2;
+        v.endAngle -= Math.PI / 2;
+    });
+    context._angleValues = angleData.reduce((values, d) => {
+        const key = d.data;
+        !values[key] && (values[key] = []);
+        values[key].push(d);
+        return values;
+    }, {});
+};
+
 /**
 * This class is used to instantiate a AngleAxis.
 * @class AngleAxis
@@ -61,17 +75,7 @@ export default class AngleAxis {
             const { domain: customDomain } = this.config();
             const domain = domainVal[0].length ? domainVal[0] : DEFAULT_ANGLE_DOMAIN;
             this._domain = resolveAxisConfig(customDomain, domain, this);
-            const angleData = this._angleFn(this._domain);
-            angleData.forEach((v) => {
-                v.startAngle -= Math.PI / 2;
-                v.endAngle -= Math.PI / 2;
-            });
-            this._angleValues = angleData.reduce((values, d) => {
-                const key = d.data;
-                !values[key] && (values[key] = []);
-                values[key].push(d);
-                return values;
-            }, {});
+            createAngleValues(this);
             return this;
         }
         return this._domain;
@@ -87,17 +91,8 @@ export default class AngleAxis {
                     .startAngle((startAngle / 180) * Math.PI)
                     .endAngle(Math.PI * endAngle / 180);
             if (domain && domain.length) {
-                const angleData = this._angleFn(domain);
-                angleData.forEach((v) => {
-                    v.startAngle -= Math.PI / 2;
-                    v.endAngle -= Math.PI / 2;
-                });
-                this._angleValues = angleData.reduce((values, d) => {
-                    values[d.data] = d;
-                    return values;
-                }, {});
+                createAngleValues(this);
             }
-
             return this;
         }
         return this._range;

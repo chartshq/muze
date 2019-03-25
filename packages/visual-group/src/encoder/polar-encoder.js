@@ -11,7 +11,7 @@ import {
 } from 'muze-utils';
 import VisualEncoder from './visual-encoder';
 import { SIZE, MEASURE, ARC, COLOR } from '../enums/constants';
-import { sanitizeIndividualLayerConfig } from './encoder-helper';
+import { sanitizeIndividualLayerConfig, resolveAxisConfig } from './encoder-helper';
 import { SimpleVariable } from '../variable';
 
 const POLAR = COORD_TYPES.POLAR;
@@ -33,6 +33,7 @@ const setRadiusFactor = (context) => {
     const data = context.data();
     const sizeField = context.retinalFields().size.field;
     const { radius, size } = context.axes();
+
     if (sizeField && radius && radius.length) {
         const sizeFieldIndex = data.getFieldsConfig()[sizeField].index;
         const sizeVal = data.getData().data.reduce((acc, val) => acc + val[sizeFieldIndex], 1);
@@ -58,7 +59,7 @@ export default class PolarEncoder extends VisualEncoder {
      *
      * @memberof PolarEncoder
      */
-    createAxis (axesCreators, fieldInfo, context, geomCell, facetFields) {
+    createAxis (axesCreators, fieldInfo, context) {
         const {
             axes
         } = axesCreators;
@@ -77,8 +78,9 @@ export default class PolarEncoder extends VisualEncoder {
         pieAxes[rowIndex][columnIndex] = [];
 
         const axesObj = {};
-        const layers = context.resolver.matrixLayers();
-        const resolverAxes = context.resolver.axes();
+        const { geomCell, resolver } = context;
+        const layers = resolver.matrixLayers();
+        const resolverAxes = resolver.axes();
         const cellLayers = layers[rowIndex][columnIndex];
         const fields = {
             radius: {},
@@ -95,6 +97,7 @@ export default class PolarEncoder extends VisualEncoder {
         });
         const fieldInf = {};
         const varInstances = {};
+
         for (const encType in fields) {
             fieldInf[encType] = Object.keys(fields[encType]);
             axesObj[encType] = [];
@@ -105,34 +108,13 @@ export default class PolarEncoder extends VisualEncoder {
             });
             axesObj[encType][axesObj[encType].length] = new axesCls[encType]();
         }
-        geomCell.axes({
-            radius: axesObj.radius,
-            angle: axesObj.angle,
-            angle0: axesObj.angle0,
-            color: geomCellAxes.color,
-            shape: geomCellAxes.shape,
-            size: geomCellAxes.size
+        resolveAxisConfig(context, fieldInf, {
+            axesObj,
+            rowIndex,
+            columnIndex
         });
-        [RADIUS, ANGLE, ANGLE0].forEach((enc) => {
-            const axesArr = resolverAxes[enc];
-            if (!axesArr[rowIndex]) {
-                axesArr[rowIndex] = [];
-            }
-            axesArr[rowIndex][columnIndex] = axesObj[enc];
-            const axisConfig = getObjProp(context.config.axes, enc) || {};
-
-            axesObj[enc].forEach((axis, i) => {
-                let userConfig = axisConfig;
-                if (axisConfig instanceof Function) {
-                    userConfig = axisConfig(rowIndex, columnIndex, {
-                        axisFields: [fieldInf[enc][i]],
-                        facetFields
-                    });
-                }
-                axis.config(userConfig);
-            });
-        });
-        geomCell.fields(Object.assign({}, varInstances, geomCell.fields()));
+        geomCell.axes(axesObj)
+            .fields(Object.assign({}, varInstances, geomCell.fields()));
         resolverAxes.pie = pieAxes;
         return geomCellAxes;
     }
@@ -380,6 +362,7 @@ export default class PolarEncoder extends VisualEncoder {
 
     sanitizeLayerConfig (encodingConfigs, userLayerConfig) {
         const layerConfig = [];
+
         userLayerConfig.forEach((config) => {
             const def = toArray(config.def);
             sanitizeIndividualLayerConfig(encodingConfigs, def);

@@ -83,22 +83,21 @@ export default class ArcLayer extends BaseLayer {
 
     translatePoints (data) {
         const { angle, color: colorAxis, radius: radiusAxis } = this.axes();
-        this._prevPieData = {};
         const pieIndex = {};
         const prevData = this._points[0] || [];
+        const points = [];
+        const angleV = {};
+
+        this._prevPieData = {};
         prevData.forEach((e, index) => {
             this._prevPieData[e.rowId] = [e, index];
             pieIndex[e.index] = e;
         });
-        const points = [];
-        const angleV = {};
         data.forEach((d, i) => {
             const angles = angle.getScaleValue(d.angle);
             !angleV[d.angle] && (angleV[d.angle] = 0);
             const { startAngle, endAngle } = angles[angleV[d.angle]++];
-
             const uid = d.rowId;
-
             const resolvedEncodings = resolveEncodingValues({
                 values: {
                     radius: radiusAxis.getOuterRadius(d.radius),

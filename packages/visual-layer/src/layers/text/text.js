@@ -13,11 +13,15 @@ import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
 
 import './styles.scss';
 
+const defaultEncoding = defaultConfig.encoding;
+const alignmentBaseLine = defaultEncoding['alignment-baseline'].value;
+const defRotation = defaultEncoding.rotation.value;
+
 const pointTranslators = {
     polar: (data, config, layerInst) => {
         let points = [];
-        const encoding = layerInst.config().encoding;
         const axes = layerInst.axes();
+        const encoding = layerInst.config().encoding;
         const textEncoding = encoding.text;
         const { radius: radiusAxis, color: colorAxis, angle: angleAxis } = axes;
         const { formatter: textFormatter } = textEncoding;
@@ -45,7 +49,8 @@ const pointTranslators = {
                     text,
                     startAngle,
                     endAngle,
-                    rotation: 0
+                    rotation: defRotation,
+                    'alignment-baseline': alignmentBaseLine
                 },
                 data: d
             }, i, data, layerInst);
@@ -62,6 +67,7 @@ const pointTranslators = {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, layerInst) : null,
                     padding: backgroundPadding
                 },
+                'alignment-baseline': resolvedVal['alignment-baseline'],
                 meta: getColorMetaInf(resolvedVal.color, colorAxis),
                 style: {},
                 source,
@@ -81,10 +87,10 @@ const pointTranslators = {
         return points;
     },
     cartesian: (data, config, layerInst) => {
-        const encoding = layerInst.config().encoding;
         let points = [];
         const axes = layerInst.axes();
         const colorAxis = axes.color;
+        const encoding = layerInst.config().encoding;
         const textEncoding = encoding.text;
         const { field: textField, value, formatter: textFormatter } = textEncoding;
         const fieldsConfig = layerInst.data().getFieldsConfig();
@@ -110,7 +116,8 @@ const pointTranslators = {
                     y: yPx,
                     text: textValue,
                     color,
-                    rotation: 0
+                    rotation: defRotation,
+                    'alignment-baseline': alignmentBaseLine
                 },
                 data: d
             }, i, data, layerInst);
@@ -126,6 +133,7 @@ const pointTranslators = {
                     value: backgroundValue instanceof Function ? backgroundValue(d, i, data, layerInst) : null,
                     padding: backgroundPadding
                 },
+                'alignment-baseline': resolvedEncodings['alignment-baseline'],
                 rotation: resolvedEncodings.rotation,
                 meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
                 style: {},

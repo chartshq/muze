@@ -50,7 +50,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    createAxis (axesCreators, fieldInfo, context, geomCell, facetFields) {
+    createAxis (axesCreators, fieldInfo, context) {
         const geomCellAxes = {};
         const {
             axes
@@ -74,6 +74,7 @@ export default class CartesianEncoder extends VisualEncoder {
             fields: columnFields,
             index: columnIndex
         }];
+        const { resolver, facetFields, geomCell } = context;
         const xAxes = axes.x || [];
         const yAxes = axes.y || [];
 
@@ -88,7 +89,7 @@ export default class CartesianEncoder extends VisualEncoder {
             }
             geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
                 groupAxes: axis === X ? xAxes : yAxes,
-                valueParser: context.resolver.valueParser()
+                valueParser: resolver.valueParser()
             }, indices, facetFields);
         });
         geomCell.axes(geomCellAxes);
@@ -130,15 +131,16 @@ export default class CartesianEncoder extends VisualEncoder {
                 const unit = unitsArr[cIdx];
                 const axisFields = unit.fields();
                 const encodingDomains = unit.getDataDomain();
-                [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
+                ['x', 'y'].forEach((axisType, axisTypeIndex) => {
+                    const fieldArr = axisFields[axisType];
                     fieldArr.forEach((field, axisIndex) => {
-                        const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
-                        const dom = encodingDomains[!axisType ? 'x' : 'y'];
+                        const key = !axisTypeIndex ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
+                        const dom = encodingDomains[axisType];
                         const typeOfField = field.subtype();
 
                         if (dom && Object.keys(dom).length !== 0) {
-                            domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
-                                dom[`${field}`]], typeOfField);
+                            domains[axisTypeIndex][key] = unionDomain([(domains[axisTypeIndex] &&
+                                domains[axisTypeIndex][key]) || [], dom[`${field}`]], typeOfField);
                         }
                     });
                 });
@@ -387,7 +389,6 @@ export default class CartesianEncoder extends VisualEncoder {
                 layerConfig.push(...configs);
             });
         });
-        const sanitizedConfig = this.sanitizeLayerConfig(retinalConfig, layerConfig);
-        return sanitizedConfig;
+        return this.sanitizeLayerConfig(retinalConfig, layerConfig);
     }
 }

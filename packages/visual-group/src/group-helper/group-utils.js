@@ -269,9 +269,7 @@ export const getEncoder = (layers) => {
 
     if (layers.length) {
         // Figuring out the kind of layers the group will have
-        for (let i = 0, len = layers.length; i < len; i++) {
-            encoder = layers.some(layerConf => hasPolarEncodings(layerConf)) ? new PolarEncoder() : encoder;
-        }
+        encoder = layers.some(layerConf => hasPolarEncodings(layerConf)) ? new PolarEncoder() : encoder;
     }
     return encoder;
 };

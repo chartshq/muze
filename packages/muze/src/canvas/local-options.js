@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, DataModel } from 'muze-utils';
 import {
     ROWS,
     COLUMNS,
@@ -45,6 +45,17 @@ export const localOptions = {
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Array'
+        }
+    },
+    data: {
+        value: null,
+        meta: {
+            typeCheck: d => d instanceof DataModel,
+            sanitization: (dm, prevDm) => {
+                prevDm && prevDm.dispose();
+                const sanitizedDm = dm.project(dm.getSchema().map(d => d.name));
+                return sanitizedDm;
+            }
         }
     },
     [COLOR]: {

@@ -191,15 +191,16 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             data: d
         }, i, data, context);
         color = resolvedEncodings.color;
-        if (!isNaN(update.x) && !isNaN(update.y) && d.rowId !== undefined) {
+        const { x, y, width, height } = resolvedEncodings;
+        if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
             point = {
                 enter: dimensions.enter,
                 update: {
-                    x: resolvedEncodings.x,
-                    y: resolvedEncodings.y,
-                    width: resolvedEncodings.width,
-                    height: resolvedEncodings.height
+                    x,
+                    y,
+                    width,
+                    height
                 },
                 source: d.source,
                 rowId: d.rowId,

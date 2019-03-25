@@ -1,4 +1,4 @@
-import { InvalidAwareTypes } from 'muze-utils';
+import { InvalidAwareTypes, getObjProp } from 'muze-utils';
 
 export const treatNullMeasures = (domainVal, scaledVal, minDomainScaledVal) => {
     if (domainVal instanceof InvalidAwareTypes) {
@@ -7,14 +7,14 @@ export const treatNullMeasures = (domainVal, scaledVal, minDomainScaledVal) => {
     return scaledVal;
 };
 
-export const resolveAxisConfig = (propVal, defaultVal, key, context) => {
-    let resolvedVal;
-    if (propVal instanceof Function) {
-        resolvedVal = propVal(defaultVal, context);
-    } else if (propVal instanceof Array) {
-        resolvedVal = propVal;
-    } else {
-        resolvedVal = defaultVal;
+export const resolveAxisConfig = (propVal, defaultVal, context) => {
+    const constructor = getObjProp(propVal, 'constructor');
+    switch (constructor) {
+    case Function:
+        return propVal(defaultVal, context);
+    case Array:
+        return propVal;
+    default:
+        return defaultVal;
     }
-    return resolvedVal;
 };

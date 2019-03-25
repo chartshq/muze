@@ -69,7 +69,6 @@ d3.json('../data/cars.json', (data) => {
     window.canvas = env.canvas()
         .columns(['Origin', 'Year'])
         .rows(['Horsepower'])
-        .data(rootData)
         .width(450)
         .height(300)
         // .layers([{
@@ -80,18 +79,50 @@ d3.json('../data/cars.json', (data) => {
 
     // stacked bar chart
     env.canvas()
-        .rows(['CountVehicle'])
-        .columns(['Year'])
-        .data(rootData)
+        .rows([])
+        .columns([])
         .width(600)
         .color('Origin')
         .layers([{
-            mark: 'bar',
+            mark: 'arc',
+            encoding: {
+                angle: 'Maker',
+                radius: 'Acceleration'
+            },
             transform: {
                 type: 'stack'
             }
+        }, {
+            mark: 'text',
+            encoding: {
+                angle: 'Maker',
+                radius: 'Acceleration',
+                text: {
+                    field: 'Acceleration',
+                    formatter: (d) => d.toFixed(2)
+                },
+                rotation: {
+                    value: () => 40
+                }
+            }
+        }, {
+            mark: 'tick',
+            encoding: {
+                angle: 'Maker',
+                radius0: {
+                    value: (d) => d.radius + 20
+                },
+                radius: 'Acceleration',
+                text: {
+                    field: 'Acceleration',
+                    formatter: (d) => d.toFixed(2)
+                },
+                rotation: {
+                    value: () => 40
+                }
+            }
         }])
-        .height(300)
+        .height(500)
         .title('Stacked Bar Chart')
         .mount('#chart2');
 
@@ -99,7 +130,6 @@ d3.json('../data/cars.json', (data) => {
     env.canvas()
         .rows(['Miles_per_Gallon'])
         .columns(['Year'])
-        .data(rootData)
         .width(1050)
         .color('Origin')
         .layers([{

@@ -329,7 +329,7 @@ export default class MatrixResolver {
                     namespace
                 });
                 unit.store(store);
-                unit.coord(config.coord);
+                unit.coord(coord);
                 el.source(unit);
             }
             !units[i] && (units[i] = []);

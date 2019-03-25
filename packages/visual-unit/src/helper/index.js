@@ -182,13 +182,10 @@ export const getLayerAxisIndex = (layers, fields) => {
 };
 
 const getValidDomain = (domain, domain1, encodingType, fieldType) => {
-    let unionedDomain = domain1;
     if (encodingType === ANGLE || encodingType === ANGLE0) {
-        unionedDomain = domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
-    } else {
-        unionedDomain = unionDomain([domain, domain1], fieldType);
+        return domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
     }
-    return unionedDomain;
+    return unionDomain([domain, domain1], fieldType);
 };
 
 export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fieldsConfig) => {

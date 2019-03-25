@@ -5,8 +5,7 @@ import {
     STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     mergeRecursive,
-    createSelection,
-    DataModel
+    createSelection
 } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
@@ -110,7 +109,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
                     .detailFields(detailFields)
                     .facetByFields(allFacets);
 
-    encoder.createAxis(axesCreators, fieldInfo, context, geomCell, facetFields);
+    encoder.createAxis(axesCreators, fieldInfo, Object.assign({}, context, { geomCell, facetFields }));
     entryCellMap.set(geomCellKey, geomCell);
     exitCellMap.delete(geomCellKey);
 
@@ -563,14 +562,7 @@ export const computeMatrices = (context, config) => {
         }
     };
     const fieldsConfig = datamodel.getFieldsConfig();
-    const resolvedDataModel = resolver.datamodel();
-    // Dispose previous datamodel to reduce datamodel dag size. Previously, the more number of times the chart used to
-    // get updated, more the datamodel propagation slowed down.
-    if (resolvedDataModel instanceof DataModel) {
-        resolvedDataModel.dispose();
-    }
-    let groupedModel = datamodel.project(datamodel.getSchema().map(d => d.name));
-    resolver.datamodel(groupedModel);
+    let groupedModel = datamodel;
     if (!groupBy.disabled) {
         const fields = getFieldsFromSuppliedLayers(valueCellContext.suppliedLayers, datamodel.getFieldsConfig());
         const allFields = extractFields(facetsAndProjections, fields);
@@ -581,7 +573,7 @@ export const computeMatrices = (context, config) => {
         const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
+        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
     // sort temporal fields if any in the given rows and columns

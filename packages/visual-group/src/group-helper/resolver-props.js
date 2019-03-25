@@ -10,6 +10,5 @@ export const RESOLVER_PROPS = {
     columnMatrix: {},
     valueMatrix: {},
     encoder: {},
-    valueParser: {},
-    datamodel: {}
+    valueParser: {}
 };

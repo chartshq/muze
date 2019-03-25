@@ -19,7 +19,6 @@ const pointTranslators = {
         const angle0V = {};
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
-
             const color = colorAxis.getColor(d.color);
             const angles = angleAxis.getScaleValue(d.angle);
             !angleV[d.angle] && (angleV[d.angle] = 0);

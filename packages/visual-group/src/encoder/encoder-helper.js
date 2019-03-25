@@ -1,9 +1,10 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, getObjProp } from 'muze-utils';
 import { AxisOrientation } from '@chartshq/muze-axis';
+import { ENCODING } from '@chartshq/visual-layer';
 import { scaleMaps } from '../enums/scale-maps';
 import { getAxisType, getAxisKey } from '../group-helper';
 import { dataTypeScaleMap } from '../data-type-scale-map';
-import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y, COLOR, SHAPE, SIZE } from '../enums/constants';
+import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y, COLOR, SHAPE, SIZE, ANGLE0 } from '../enums/constants';
 
 /**
  *
@@ -291,3 +292,29 @@ export const getLayerConfFromFields = (colFields, rowFields, userLayerConfig) =>
     }
     return colFieldExist || rowFieldExist;
 });
+
+export const resolveAxisConfig = (context, fieldInf, axisInfo) => {
+    const { rowIndex, columnIndex, axesObj } = axisInfo;
+    const { config, facetFields, resolver } = context;
+    const resolverAxes = resolver.axes();
+    const { RADIUS, ANGLE } = ENCODING;
+    [RADIUS, ANGLE, ANGLE0].forEach((enc) => {
+        const axesArr = resolverAxes[enc];
+        if (!axesArr[rowIndex]) {
+            axesArr[rowIndex] = [];
+        }
+        axesArr[rowIndex][columnIndex] = axesObj[enc];
+        const axisConfig = getObjProp(config.axes, enc) || {};
+
+        axesObj[enc].forEach((axis, i) => {
+            let userConfig = axisConfig;
+            if (axisConfig instanceof Function) {
+                userConfig = axisConfig(rowIndex, columnIndex, {
+                    axisFields: [fieldInf[enc][i]],
+                    facetFields
+                });
+            }
+            axis.config(userConfig);
+        });
+    });
+};
