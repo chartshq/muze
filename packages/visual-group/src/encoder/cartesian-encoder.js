@@ -175,18 +175,14 @@ export default class CartesianEncoder extends VisualEncoder {
                     /* Sort categorical fields to ensure consistency across all rows
                     only if field is categorical and is not explicitily sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
-                    console.log(fieldsObj);
-                    console.log(config);
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
                     const sortingOrder = config.sort[currentFieldName];
                     const isSortingDisabled = config.sort.disabled;
 
                     if (!isSortingDisabled && sortingOrder) {
                         if (sortingOrder === ASCENDING) {
-                            console.log('object');
                             domains[axisType][key].sort();
                         } else if (sortingOrder === DESCENDING) {
-                            console.log('object1');
                             domains[axisType][key].sort().reverse();
                         }
                     }
