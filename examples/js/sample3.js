@@ -69,38 +69,39 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Cylinders"])
-        .color("Origin")
+        .rows([])
+        .columns([])
+        .color("Year")
         .height(500)
         .width(600)
-        .config({
-            facet:{
-                rows:{
-                    verticalAlign: 'middle'
-                }
-            },
-
-        })
-        .title("Year wise average car Acceleration")
-        .layers([
-            {
-                mark: "arc",
-                encoding: {
-                    radius: 'Acceleration'
-                }
-            },
-            {
-                mark: 'text',
-                encoding: {
-                    text: 'Origin',
-                    radius: 'Acceleration',
-                    color: {
-                        value: () => '#000'
-                    }
-                }
+        .layers([{
+            mark: 'arc',
+            encoding:{
+                angle: 'Acceleration',
+                radius: 'Origin'
             }
-        ])
+        }])
+        // .config({
+        //     axes: {
+        //         x: {
+
+        //             tickFormat: (val, rawVal, i, ticks) => {
+
+        //                 return val;
+        //             }
+        //         },
+        //         y: {
+        //             name: 'akasndklasndoiansflkjasdnfoslkdnf',
+        //             tickFormat: (val, rawVal) => {
+        //                 // console.log(val, rawVal);
+        //                 return val;
+        //             },
+        //         }
+        //     },
+        //     pagination: 'holistic'
+        // })
+        .title("Year wise average car Acceleration")
+
  .mount('#chart');
 
 //  window.canvas =  env.canvas()
