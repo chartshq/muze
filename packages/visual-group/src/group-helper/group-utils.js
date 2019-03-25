@@ -462,7 +462,7 @@ export const sortFacetFields = (facet, keys, config) => {
         if (config.sort[facetName] === 'asc') {
             keys.sort((a, b) => a - b);
         } else {
-            keys.sort((a, b) => a - b).reverse();
+            keys.sort((a, b) => b - a);
         }
     }
 };
