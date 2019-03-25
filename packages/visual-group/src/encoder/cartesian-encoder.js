@@ -4,8 +4,7 @@ import {
     STATE_NAMESPACES,
     unionDomain,
     COORD_TYPES,
-    toArray,
-    nearestSortingDetails
+    toArray
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import {
@@ -18,7 +17,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, ASCENDING, DESCENDING } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 const CARTESIAN = COORD_TYPES.CARTESIAN;
@@ -123,7 +122,12 @@ export default class CartesianEncoder extends VisualEncoder {
             0: {},
             1: {}
         };
-        const sortingDetails = nearestSortingDetails(context.getGroupByData());
+        // const sortingDetails = nearestSortingDetails(context.getGroupByData());
+        const config = context.config();
+        const fieldsObj = {
+            0: {},
+            1: {}
+        };
 
         for (let rIdx = 0, len = units.length; rIdx < len; rIdx++) {
             const unitsArr = units[rIdx];
@@ -137,6 +141,7 @@ export default class CartesianEncoder extends VisualEncoder {
                         const key = !axisTypeIndex ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
                         const dom = encodingDomains[axisType];
                         const typeOfField = field.subtype();
+                        fieldsObj[axisTypeIndex][key] = field;
 
                         if (dom && Object.keys(dom).length !== 0) {
                             domains[axisTypeIndex][key] = unionDomain([(domains[axisTypeIndex] &&
@@ -166,11 +171,21 @@ export default class CartesianEncoder extends VisualEncoder {
                         max[i] = domain[1];
                     });
                     adjustedDomain = getAdjustedDomain(max, min);
-                } else if (typeOfAxis === ScaleType.BAND && !sortingDetails) {
+                } else if (typeOfAxis === ScaleType.BAND) {
                     /* Sort categorical fields to ensure consistency across all rows
                     only if field is categorical and is not explicitily sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
-                    domains[axisType][key].sort();
+                    const currentFieldName = fieldsObj[axisType][key].oneVar();
+                    const sortingOrder = config.sort[currentFieldName];
+                    const isSortingDisabled = config.sort.disabled;
+
+                    if (!isSortingDisabled && sortingOrder) {
+                        if (sortingOrder === ASCENDING) {
+                            domains[axisType][key].sort();
+                        } else if (sortingOrder === DESCENDING) {
+                            domains[axisType][key].sort().reverse();
+                        }
+                    }
                 }
 
                 axes.forEach((axis, index) => {

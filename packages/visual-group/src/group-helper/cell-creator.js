@@ -581,7 +581,7 @@ export const computeMatrices = (context, config) => {
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
-    const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator);
+    const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator, globalConfig);
 
     resolver.cacheMaps().exitCellMap.forEach((placeholder) => {
         placeholder.remove();
