@@ -123,6 +123,10 @@ class SimpleCell {
         throw new Error(ERROR_MSG.INTERFACE_IMPL);
     }
 
+    getMinMeasures (providedMinMeasure = 0) {
+        return providedMinMeasure;
+    }
+
 }
 
 export default SimpleCell;

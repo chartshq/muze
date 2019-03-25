@@ -1,9 +1,10 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, getObjProp } from 'muze-utils';
 import { AxisOrientation } from '@chartshq/muze-axis';
+import { ENCODING } from '@chartshq/visual-layer';
 import { scaleMaps } from '../enums/scale-maps';
 import { getAxisType, getAxisKey } from '../group-helper';
 import { dataTypeScaleMap } from '../data-type-scale-map';
-import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/constants';
+import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y, COLOR, SHAPE, SIZE, ANGLE0 } from '../enums/constants';
 
 /**
  *
@@ -13,11 +14,26 @@ import { CATEGORICAL, TEMPORAL, BAR, LINE, POINT, BOTH, Y } from '../enums/const
  * @param {*} axesCreators
  *
  */
-const getAxisConfig = (axisInfo, field, axesCreators) => {
+const getAxisConfig = (axisInfo, field, axesCreators, indices, facetFields) => {
     let axisOrientation;
     const { index, axisIndex, axisType } = axisInfo;
     const { config, position } = axesCreators;
-    const userAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+    const { rowIndex, columnIndex } = indices;
+    const rawUserAxisConfig = config.axes ? (config.axes[axisType] || {}) : {};
+
+    // Change config object to a function if not already one
+    const userAxisConfigFn = typeof rawUserAxisConfig !== 'function' ?
+    () => rawUserAxisConfig : rawUserAxisConfig;
+    const userAxisConfig = userAxisConfigFn(rowIndex, columnIndex, {
+        axisFields: field.getMembers(),
+        facetFields
+    });
+
+    // If current config does not specifes config for an axis, retain old config
+    if (!userAxisConfig) {
+        return {};
+    }
+
     const {
         LEFT,
         RIGHT,
@@ -33,7 +49,7 @@ const getAxisConfig = (axisInfo, field, axesCreators) => {
     }
     const axisConfig = {
         id: `${axisType}-${index}-${axisIndex}`,
-        name: field.toString(),
+        name: field.displayName(),
         field: field.toString(),
         numberFormat: field.numberFormat(),
         orientation: axisOrientation,
@@ -108,7 +124,7 @@ export const getAdjustedDomain = (max, min) => {
  * @param {*} groupAxes
  *
  */
-export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo) => {
+export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo, indices, facetFields) => {
     let axisKey;
     const { groupAxes, valueParser } = axesInfo;
     const currentAxes = [];
@@ -119,7 +135,7 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
     const commonAxisKey = getAxisKey(axisType, index);
     fields.forEach((field, axisIndex) => {
         axisKey = getAxisKey(axisType, index, axisIndex, dataTypeScaleMap[field.subtype()]);
-        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators);
+        const axisConfig = getAxisConfig({ index, axisIndex, axisType }, field, axesCreators, indices, facetFields);
 
         let axis;
         if (!map.has(axisKey)) {
@@ -128,7 +144,6 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
             axis = map.get(axisKey);
             axis._rotationLock = false;
             axis.config(axisConfig);
-            axisConfig.domain ? axis.domain(axisConfig.domain) : axis.resetDomain();
         }
         axis.valueParser(valueParser);
         currentAxes.push(axis);
@@ -141,6 +156,18 @@ export const generateAxisFromMap = (axisType, fieldInfo, axesCreators, axesInfo)
     }
 
     return currentAxes;
+};
+
+export const sanitizeIndividualLayerConfig = (encodingConfigs, def) => {
+    [COLOR, SHAPE, SIZE].forEach((axis) => {
+        if (encodingConfigs[axis] && encodingConfigs[axis].field) {
+            def.forEach((conf) => {
+                conf.encoding = conf.encoding || {};
+                !conf.encoding[axis] && (conf.encoding[axis] = {});
+                conf.encoding[axis].field = encodingConfigs[axis].field;
+            });
+        }
+    });
 };
 
 /**
@@ -265,3 +292,29 @@ export const getLayerConfFromFields = (colFields, rowFields, userLayerConfig) =>
     }
     return colFieldExist || rowFieldExist;
 });
+
+export const resolveAxisConfig = (context, fieldInf, axisInfo) => {
+    const { rowIndex, columnIndex, axesObj } = axisInfo;
+    const { config, facetFields, resolver } = context;
+    const resolverAxes = resolver.axes();
+    const { RADIUS, ANGLE } = ENCODING;
+    [RADIUS, ANGLE, ANGLE0].forEach((enc) => {
+        const axesArr = resolverAxes[enc];
+        if (!axesArr[rowIndex]) {
+            axesArr[rowIndex] = [];
+        }
+        axesArr[rowIndex][columnIndex] = axesObj[enc];
+        const axisConfig = getObjProp(config.axes, enc) || {};
+
+        axesObj[enc].forEach((axis, i) => {
+            let userConfig = axisConfig;
+            if (axisConfig instanceof Function) {
+                userConfig = axisConfig(rowIndex, columnIndex, {
+                    axisFields: [fieldInf[enc][i]],
+                    facetFields
+                });
+            }
+            axis.config(userConfig);
+        });
+    });
+};

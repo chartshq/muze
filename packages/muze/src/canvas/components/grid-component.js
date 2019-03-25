@@ -2,6 +2,7 @@ import { selectElement, getEvent } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 import MatrixComponent from './matrix-component';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX } from '../../../../layout/src/enums/constants';
+import { WHEEL_DELTA_MODIFIER } from '../../enums/constants';
 
 /**
  * Based on the type of scroll, it changes the scrollLeft/scrollTop property of the specific
@@ -49,13 +50,24 @@ export default class GridComponent extends MuzeComponent {
         let width = 0;
         const { viewMatricesInfo, layoutDimensions } = this.component.viewInfo();
         const scrollInfo = this.component.scrollInfo();
+        const {
+            viewHeight,
+            viewWidth,
+            unitHeights,
+            unitWidths
+        } = layoutDimensions;
 
         for (let i = 0; i < 3; i++) {
             if (!(this.gridComponents.length && this.gridComponents[i] instanceof Array)) {
                 this.gridComponents[i] = [];
             }
             for (let j = 0; j < 3; j++) {
-                const matrixDim = { height: layoutDimensions.viewHeight[i], width: layoutDimensions.viewWidth[j] };
+                const matrixDim = {
+                    height: viewHeight[i],
+                    width: viewWidth[j],
+                    unitHeights,
+                    unitWidths
+                };
                 const matrix = viewMatricesInfo.matrices[`${ROW_MATRIX_INDEX[i]}`][j];
                 const matrixName = `${ROW_MATRIX_INDEX[i]}-${COLUMN_MATRIX_INDEX[j]}`;
                 const matrixConfig = {
@@ -124,12 +136,14 @@ export default class GridComponent extends MuzeComponent {
 
                             // Scrolling horizontally
                             if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('horizontal', wheelDeltaX);
+                                this.scrollBarManager()
+                                    .triggerScrollBarAction('horizontal', wheelDeltaX / WHEEL_DELTA_MODIFIER);
                             }
 
                             // Scrolling Vertically
                             if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager().triggerScrollBarAction('vertical', wheelDeltaY);
+                                this.scrollBarManager()
+                                    .triggerScrollBarAction('vertical', wheelDeltaY / WHEEL_DELTA_MODIFIER);
                             }
                         });
         return this;

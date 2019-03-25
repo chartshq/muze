@@ -15,7 +15,9 @@ import {
     getFieldsFromSuppliedLayers,
     extractFields
 } from './group-utils';
-import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP, BOTTOM, PRIMARY, SECONDARY, X, Y } from '../enums/constants';
+import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
+    BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
+import { SimpleVariable } from '../variable';
 
 /**
  * Updates row and column cells with the geom cell corresponding to the facet keys
@@ -75,13 +77,19 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         entryCellMap,
         exitCellMap
     } = cacheMaps;
-    const layerConfigArr = encoder.getLayerConfig({ columnFields, rowFields }, suppliedLayers || []);
+    const layerConfigArr = encoder.getLayerConfig({ columnFields, rowFields }, suppliedLayers || [],
+        context.retinalConfig);
     const axesCreators = { config, labelManager, axes, cacheMaps };
 
     fieldInfo.normalizedColumns = verticalAxis.fields;
     fieldInfo.normalizedRows = horizontalAxis.fields;
 
-    const groupAxes = encoder.createAxis(axesCreators, fieldInfo, context);
+    const allFacets = [
+        [...facets.rowFacets[0], ...facets.colFacets[0]],
+        [...facets.rowFacets[1], ...facets.colFacets[1]]
+    ];
+    const facetFields = allFacets.slice();
+    facetFields[0] = facetFields[0].map(facetField => facetField.oneVar());
 
     matrixLayers[rowIndex] = matrixLayers[rowIndex] ? matrixLayers[rowIndex] : [];
     matrixLayers[rowIndex][columnIndex] = layerConfigArr;
@@ -93,18 +101,15 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
         x: columnFields
     };
 
-    const allFacets = [
-        [...facets.rowFacets[0], ...facets.colFacets[0]],
-        [...facets.rowFacets[1], ...facets.colFacets[1]]
-    ];
     const geomCell = !exitCellMap.has(geomCellKey) ? new GeomCell() : exitCellMap.get(geomCellKey);
 
     geomCell.data(datamodel)
-                    .axes(groupAxes)
                     .fields(fields)
                     .transform(datamodelTransform)
                     .detailFields(detailFields)
                     .facetByFields(allFacets);
+
+    encoder.createAxis(axesCreators, fieldInfo, Object.assign({}, context, { geomCell, facetFields }));
     entryCellMap.set(geomCellKey, geomCell);
     exitCellMap.delete(geomCellKey);
 
@@ -127,7 +132,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
     createSelection(selection, axis => axis, axes, (item, i) => i + item.reduce((e, n) => {
         const id = n.id + axisIndex;
         return e + id;
-    }, '')).map((axis) => {
+    }, '')).map((currObj, axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
             const { orientation, show } = axisInst.config();
@@ -177,7 +182,9 @@ const axisPlaceholderGn = (context, selObj, cells) => {
                 });
             } else {
                 selObj.rowsPrimary = createAxisCells(selObj.rowPrime, axes.map(() => []), 0, cells);
+                selObj.rowsSecondary = createAxisCells(selObj.rowSec, axes.map(() => []), 0, cells);
                 selObj.columnsPrimary = createAxisCells(selObj.colPrime, axes[0], 0, cells);
+                selObj.columnsSecondary = createAxisCells(selObj.colSec, axes[0], 0, cells);
             }
         }
         return selObj;
@@ -194,7 +201,11 @@ const axisPlaceholderGn = (context, selObj, cells) => {
  * @return {Object} return either set of header cells depending on the config
  */
 const createTextCells = (selection, headers, cells, labelManager) => createSelection(selection,
-    label => new cells.TextCell({}, { labelManager }).source(label), headers, (key, i) => key + i);
+    (label) => {
+        const textCell = new cells.TextCell({}, { labelManager });
+        textCell.source(label);
+        return textCell;
+    }, headers, (key, i) => key + i);
 
 /**
  *
@@ -215,10 +226,14 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const counter = axis.length / keys.length;
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
 
-    return createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
-        (keySet, i) => `${keySet.join(',')}-${i}`)
-                    .map(keySet => createTextCells(null, keySet, cells, labelManager)
-                                    .map((cell, k, i) => cell.source(keySet[i]).config(facet)));
+    const selObjUpdater = createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
+    (keySet, i) => `${keySet.join(',')}-${i}`);
+
+    return selObjUpdater.map((keySet, data) => {
+        let textCells = createTextCells(null, data, cells, labelManager);
+        textCells = textCells.map((cell, k) => cell.source(k).config(facet));
+        return textCells;
+    });
 };
 
 /**
@@ -445,6 +460,21 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         rowPriority
     };
 };
+const getAxisFields = (projections, fieldHolder = []) =>
+                            projections.reduce((acc, item) =>
+                                [...acc, ...item.reduce((ac, field) =>
+                                   (field instanceof SimpleVariable ? [...ac, field.oneVar()] : ac), [])], fieldHolder);
+
+const sortDmTemporalFields = (resolver, datamodel) => {
+    let axisFields = [];
+    const projections = resolver.projections();
+    axisFields = getAxisFields(projections.rowProjections, getAxisFields(projections.colProjections));
+
+    const fieldConfig = datamodel.getFieldsConfig();
+    const temporalFields = axisFields.reduce((acc, field) =>
+                                    ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
+    return temporalFields.length ? datamodel.sort(temporalFields, { saveChild: true }) : datamodel;
+};
 
 /**
  * Computes matrices for a group
@@ -524,7 +554,12 @@ export const computeMatrices = (context, config) => {
         cell: cells.GeomCell,
         encoder: encoders.simpleEncoder,
         newCacheMap,
-        detailFields: config.detail
+        detailFields: config.detail,
+        retinalConfig: {
+            color: config.color,
+            size: config.size,
+            shape: config.shape
+        }
     };
     const fieldsConfig = datamodel.getFieldsConfig();
     let groupedModel = datamodel;
@@ -538,10 +573,11 @@ export const computeMatrices = (context, config) => {
         const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-
         groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
     }
 
+    // sort temporal fields if any in the given rows and columns
+    groupedModel = sortDmTemporalFields(resolver, groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs

@@ -26,12 +26,17 @@ export const defaultConfig = {
         effect: 'cubic',
         duration: 1000
     },
+    interpolate: 'linear',
     encoding: {
         color: { },
         x: {},
         y: {},
         x0: {},
         y0: {},
+        radius: {},
+        radius0: {},
+        angle: {},
+        angle0: {},
         strokeOpacity: {
             value: 0.5
         },

@@ -12,11 +12,12 @@ import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import {
     attachDataToVoronoi,
-    getLayerColor,
     positionPoints,
     getPlotMeasurement,
     getIndividualClassName,
-    getMarkId
+    getMarkId,
+    getColorMetaInf,
+    resolveEncodingValues
 } from '../../helpers';
 
 import './styles.scss';
@@ -44,12 +45,6 @@ export default class PointLayer extends BaseLayer {
         this._bandScale = Scales.band();
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof PointLayer
-     */
     elemType () {
         return 'g';
     }
@@ -74,24 +69,10 @@ export default class PointLayer extends BaseLayer {
         return config;
     }
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof PointLayer
-     */
     static formalName () {
         return 'point';
     }
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof PointLayer
-     */
     static drawFn () {
         return drawSymbols;
     }
@@ -103,18 +84,14 @@ export default class PointLayer extends BaseLayer {
      * @param  {Object} axes     Axes object
      * @return {Array.<Object>}  Array of points
      */
-    translatePoints (data, encoding, axes, config = {}) {
+    translatePoints (data, config = {}) {
         let points = [];
+        const encoding = this.config().encoding;
+        const axes = this.axes();
         const {
-            size: sizeEncoding,
-            shape: shapeEncoding,
-            color: colorEncoding,
             x,
             y
         } = encoding;
-        const sizeField = sizeEncoding.field;
-        const sizeValue = sizeEncoding.value;
-        const shapeField = shapeEncoding.field;
         const xField = x.field;
         const yField = y.field;
         const { size: sizeAxis, shape: shapeAxis } = axes;
@@ -122,19 +99,14 @@ export default class PointLayer extends BaseLayer {
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
-        const colorField = colorEncoding && colorEncoding.field;
-        const colorFieldIndex = fieldsConfig[colorField] && fieldsConfig[colorField].index;
         const measurement = this.measurement();
-        const shapeFieldIndex = fieldsConfig[shapeField] && fieldsConfig[shapeField].index;
-        const sizeFieldIndex = fieldsConfig[sizeField] && fieldsConfig[sizeField].index;
         const colorAxis = axes.color;
         const { x: offsetX, y: offsetY } = config.offset;
 
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
-            const row = d._data;
-            const size = sizeValue instanceof Function ? sizeValue(d, i) : sizeAxis.getSize(row[sizeFieldIndex]);
-            const shape = shapeAxis.getShape(row[shapeFieldIndex]);
+            const size = sizeAxis.getSize(d.size);
+            const shape = shapeAxis.getShape(d.shape);
 
             let [xPx, yPx] = [ENCODING.X, ENCODING.Y].map((type) => {
                 const value = d[type] === null ? undefined : d[type];
@@ -145,36 +117,39 @@ export default class PointLayer extends BaseLayer {
             xPx += offsetX;
             yPx += offsetY;
 
-            const { color, rawColor } = getLayerColor({ datum: d, index: i },
-                { colorEncoding, colorAxis, colorFieldIndex });
+            let color = colorAxis.getColor(d.color);
 
+            const resolvedEncodings = resolveEncodingValues({
+                values: {
+                    x: xPx,
+                    y: yPx,
+                    color,
+                    shape,
+                    size,
+                    data: d
+                },
+                data: d
+            }, i, data, this);
+            color = resolvedEncodings.color;
             const style = {
                 fill: color,
                 stroke: color
             };
+            const pos = {
+                x: resolvedEncodings.x,
+                y: resolvedEncodings.y
+            };
 
             if (!isNaN(xPx) && !isNaN(yPx)) {
                 const point = {
-                    enter: {
-                        x: xPx,
-                        y: yPx
-                    },
-                    update: {
-                        x: xPx,
-                        y: yPx
-                    },
-                    shape,
-                    size: Math.abs(size),
-                    meta: {
-                        stateColor: {},
-                        originalColor: rawColor,
-                        colorTransform: {}
-                    },
+                    enter: pos,
+                    update: pos,
+                    shape: resolvedEncodings.shape,
+                    size: Math.abs(resolvedEncodings.size),
+                    meta: getColorMetaInf(color, colorAxis),
                     style,
-                    _data: row,
-                    _id: d._id,
-                    source: d._data,
-                    rowId: d._id
+                    source: d.source,
+                    rowId: d.rowId
                 };
                 point.className = getIndividualClassName(d, i, data, this);
                 points.push(point);
@@ -215,27 +190,26 @@ export default class PointLayer extends BaseLayer {
                     layer: this,
                     container: group.node(),
                     points,
+                    interpolate: config.interpolate,
                     className: seriesClassName,
                     transition,
                     keyFn: v => getMarkId(v.source, schema)
                 });
             }
-        }, data => data[0]._id);
+        }, data => data[0].rowId);
         this._maxSize = Math.sqrt(maxSize / Math.PI) * 2;
         attachDataToVoronoi(this._voronoi, this._points);
         return this;
     }
 
     generateDataPoints (normalizedData, keys) {
-        const encoding = this.config().encoding;
-        const axes = this.axes();
         const [widthMetrics, heightMetrics] = getPlotMeasurement(this, keys);
         const offsetXValues = widthMetrics.offsetValues || [];
         const offsetYValues = heightMetrics.offsetValues || [];
         return normalizedData.map((dataArr, i) => {
             const measurementConf = this.getMeasurementConfig(offsetXValues[i], offsetYValues[i], widthMetrics.span,
                 heightMetrics.span);
-            return this.translatePoints(dataArr, encoding, axes, measurementConf);
+            return this.translatePoints(dataArr, measurementConf);
         }).filter(d => d.length);
     }
 
@@ -270,8 +244,8 @@ export default class PointLayer extends BaseLayer {
         const radius = point ? Math.sqrt(point.data.data.size / Math.PI) : 0;
 
         if (point) {
-            const { _data, _id } = point.data.data;
-            const identifiers = this.getIdentifiersFromData(_data, _id);
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
             return {
                 id: identifiers,
                 dimensions: [{

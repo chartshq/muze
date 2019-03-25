@@ -6,7 +6,7 @@ import Selection from './selection';
  * @param {Array} [data=[]] The data array to be observed.
  * @return {Selection} Instance of a selection.
  */
-export default function dataSelect (data = []) {
-    return new Selection(data);
+export default function dataSelect (idFn) {
+    return new Selection(idFn);
 }
 

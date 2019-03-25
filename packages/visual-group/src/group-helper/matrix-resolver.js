@@ -44,7 +44,10 @@ export default class MatrixResolver {
             y: {},
             color: [],
             size: [],
-            shape: []
+            shape: [],
+            radius: [],
+            angle: [],
+            angle0: []
         };
         generateGetterSetters(this, RESOLVER_PROPS);
         this.cacheMaps(initializeCacheMaps());
@@ -289,7 +292,8 @@ export default class MatrixResolver {
     createUnits (componentRegistry, config) {
         const {
             globalConfig,
-            alias
+            alias,
+            coord
         } = config;
         const {
             layerRegistry,
@@ -325,12 +329,14 @@ export default class MatrixResolver {
                     namespace
                 });
                 unit.store(store);
+                unit.coord(coord);
                 el.source(unit);
             }
             !units[i] && (units[i] = []);
             units[i][j] = unit;
-            unit.parentAlias(alias);
-            unit.valueParser(this.valueParser());
+            unit.parentAlias(alias)
+                .valueParser(this.valueParser())
+                .coord(coord);
             el.config(unitConfig);
         });
 
@@ -442,9 +448,9 @@ export default class MatrixResolver {
         const matrixLayers = this.matrixLayers();
 
         this.forEach(VALUE_MATRIX, (i, j, el) => {
-            el.axes(retinalAxes);
+            el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
-            el.layerDef(encoders.retinalEncoder.getLayerConfig(config, matrixLayers[i][j]));
+            el.layerDef(matrixLayers[i][j]);
             el.updateModel();
 
             units.push(el.source());

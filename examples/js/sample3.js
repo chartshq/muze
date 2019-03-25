@@ -2,6 +2,16 @@
 const env = muze();
 const DataModel = muze.DataModel;
 
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+
 d3.json('../../data/cars.json', (data) => {
     let jsonData = data;
     const schema = [{
@@ -32,11 +42,12 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Acceleration',
         type: 'measure',
-        numberFormat: (val) => "$" + val 
+        numberFormat: (val) => "$" + val
     },
     {
         name: 'Origin',
-        type: 'dimension'
+        type: 'dimension',
+        displayName: "Origin2"
     },
     {
         name: 'Cylinders',
@@ -45,54 +56,85 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
-    jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    ];
 
-    let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
-        Acceleration: "avg"
-    });
 
-    env.canvas()
+    let rootData = new DataModel(jsonData, schema)
+    // .select(fields=>fields.Year.value === '1972-01-01');
+
+
+   window.canvas =  env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Year"])
-        .color("Origin")
+        .rows([])
+        .columns([])
+        .color("Year")
         .height(500)
         .width(600)
-        .config({
-            axes: {
-                x: {
-                    tickFormat: (val, rawVal, i, ticks) => {
-                        console.log(val, rawVal, ticks);
-                        return val;
-                    }
-                },
-                y: {
-                    tickFormat: (val, rawVal) => {
-                        // console.log(val, rawVal);
-                        return val;
-                    },
-                }
+        .layers([{
+            mark: 'arc',
+            encoding:{
+                angle: 'Acceleration',
+                radius: 'Origin'
             }
-        })
-        .title("Year wise average car Acceleration")
-        .layers([
-            {
-                mark: "line"
-            }
-        ])
-        .mount('#chart');
-});
+        }])
+        // .config({
+        //     axes: {
+        //         x: {
 
+        //             tickFormat: (val, rawVal, i, ticks) => {
+
+        //                 return val;
+        //             }
+        //         },
+        //         y: {
+        //             name: 'akasndklasndoiansflkjasdnfoslkdnf',
+        //             tickFormat: (val, rawVal) => {
+        //                 // console.log(val, rawVal);
+        //                 return val;
+        //             },
+        //         }
+        //     },
+        //     pagination: 'holistic'
+        // })
+        .title("Year wise average car Acceleration")
+
+ .mount('#chart');
+
+//  window.canvas =  env.canvas()
+//         .data(rootData)
+//         .rows([])
+//         .columns(['Year'])
+//         .color('Origin')
+//         // .color("Origin")
+//         .height(600)
+//         .width(500)
+//         .config({
+//             facet:{
+//                 rows:{
+//                     verticalAlign: 'middle'
+//                 }
+//             },
+
+//         })
+//         .title("Year wise average car Acceleration")
+//         .layers([
+//             {
+//                 mark: "area"
+//             },
+//             {
+//                 mark: 'text',
+//                 encoding: {
+//                     text: 'Acceleration'
+//                 },
+//                 transform: {
+//                     type: 'stack',
+//                     groupBy: 'Origin'
+//                 }
+//             }
+//         ])
+//  .mount('#chart2');
+});

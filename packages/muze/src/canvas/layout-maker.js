@@ -3,7 +3,18 @@ import { arrangeComponents } from './component-resolver';
 import { createHeaders } from './title-maker';
 import { createLegend, getLegendSpace } from './legend-maker';
 import { componentWrapperMaker } from './component-wrapper-maker';
-import { TOP, BOTTOM, LEFT, RIGHT } from '../constants';
+import {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TITLE,
+    SUB_TITLE,
+    LEGEND,
+    VERTICAL_SCROLL_BAR,
+    HORIZONTAL_SCROLL_BAR,
+    GRID
+} from '../constants';
 import { ScrollManager } from './scroll-manager';
 
 /**
@@ -155,6 +166,15 @@ const componentIndexes = {
     grid: 5
 };
 
+const componentNames = {
+    0: TITLE,
+    1: SUB_TITLE,
+    2: LEGEND,
+    3: VERTICAL_SCROLL_BAR,
+    4: HORIZONTAL_SCROLL_BAR,
+    5: GRID
+};
+
 /**
  * Responsible for creating a scroll manager that manages interactions between the grid
  * component and the scroll bar components
@@ -208,6 +228,14 @@ export const renderLayout = (canvas, renderDetails) => {
     const gridWrapper = componentWrappers[grid];
     createScrollManager(componentWrappers, canvas);
 
+    componentWrappers.forEach((componentWrapper, index) => {
+        if (componentWrapper === null) {
+            const deleteElementName = componentNames[index];
+            const component = layoutManager.getComponent(deleteElementName);
+            const deleteElementId = component ? component.renderAt() : null;
+            layoutManager.removeComponent(deleteElementId);
+        }
+    });
     layoutManager.registerComponents(componentWrappers).compute();
     gridWrapper.attachScrollListener();
 };

@@ -67,7 +67,7 @@ function generateDate (interval, points) {
     };
     // Object.keys(timeDurations).forEach(e=>{
 
-    window.rootData = new DataModel(generateDate('year',Math.floor(Math.random() * 100)+1), schema)
+    window.rootData = new DataModel(generateDate('year',Math.floor(Math.random()* 10000)+1), schema)
 
    const canvas  = env.canvas().data(rootData)
             .rows(['profit'])

@@ -71,18 +71,19 @@ export const applyRectClick = (scrollMaker, moverRect) => {
 const applyMoverDrag = (scrollMaker, moverRect) => {
     let startPos = {};
     let moverStartPos = 0;
+    let rectStartPos = 0;
     let endPos = {};
     const {
         mover,
         rect
     } = moverRect;
-    const rectStartPos = rect.node().getBoundingClientRect();
 
     mover.call(d3Drag()
                     .on('start', () => {
                         const event = getEvent();
 
                         moverStartPos = mover.node().getBoundingClientRect();
+                        rectStartPos = rect.node().getBoundingClientRect();
                         startPos = {
                             x: event.x,
                             y: event.y

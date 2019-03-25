@@ -1,94 +1,70 @@
-/* global muze, d3 */
-
-let env = muze();
-const SpawnableSideEffect = muze.SideEffects.standards.SpawnableSideEffect;
+/* eslint-disable */
+const env = muze();
 const DataModel = muze.DataModel;
 
-d3.json('../data/cars.json', (data) => {
-    const jsonData = data;
-    const schema = [
-        {
-            name: 'Name',
-            type: 'dimension'
-        },
-        {
-            name: 'Maker',
-            type: 'dimension'
-        },
-        {
-            name: 'Miles_per_Gallon',
-            type: 'measure',
-            defAggFn: 'avg'
-        }];
+d3.json('../../data/cars.json', (data) => {
+    let jsonData = data;
+    const schema = [{
+        name: 'Name',
+        type: 'dimension'
+    },
+    {
+        name: 'Maker',
+        type: 'dimension'
+    },
+    {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    },
 
-    const dm = new DataModel(res, schema);
-    canvas
-                .data(dm)
-                .width(600)
-                .height(400)
-                .config({
-                    axes: { y: { name: 'Value in percentage' } }
-                })
-                .rows(['value']) /* Plots against y-axis + provides panel split */
-                .columns(['Year'])  /* Plots against x-axis */
-                .color({
-                    field: 'Media',
-                    range: ['red', 'orange', 'yellow', '#33b5e91', '#31a6ea', 'grey', 'red', 'green']
-                })
-                .layers([
-                    {
-                        mark: 'line',
-                        connectNullData: true
-                    },
-        { mark: 'point' }
-                ])
-                .title('Shifts of teenagers in social media usage')
-                .mount('#chart-container');
+    {
+        name: 'Displacement',
+        type: 'measure'
+    },
+    {
+        name: 'Horsepower',
+        type: 'measure'
+    },
+    {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    },
+    {
+        name: 'Acceleration',
+        type: 'measure',
+        // numberFormat: (val) => "$" + val 
+    },
+    {
+        name: 'Origin',
+        type: 'dimension'
+    },
+    {
+        name: 'Cylinders',
+        type: 'dimension'
+    },
+    {
+        name: 'Year',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
+    }
+    ];
 
-  // Create a new variable which will keep count of cars per cylinder for a particular origin
-    const rootData = dataModel.calculateVariable(
-        {
-            name: 'CountVehicle',
-            type: 'measure',
-            defAggFn: 'count', // When ever aggregation happens, it counts the number of elements in the bin
-            numberFormat: val => parseInt(val, 10)
-        },
-    ['Name', () => 1]
-  );
+    // jsonData = [
+    //     { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
+    //     { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
+    //     { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
+    //     { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
+    //     { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
+    // ];
 
-    env = env
-    .data(rootData)
-    .minUnitHeight(10)
-    .minUnitWidth(10);
+    let rootData = new DataModel(jsonData, schema);
+    // rootData = rootData.groupBy(["Origin", "Year"], {
+    //     Acceleration: "avg"
+    // });
 
-    const canvas = env
-    .canvas();
-    window.canvas = canvas
-  	.data(rootData)
-  	.minUnitHeight(30)
-  	.minUnitWidth(10)
-  	.width(1200)
-  	.height(800)
-                    .rows(['Origin'])
-      /* Year is a temporal field */
-                    .title('asdsd')
-                    .subtitle('asdasd')
-                    // .config({
-                    //     gridLines: {
-                    //         show: false
-                    //     }
-                    // })
-                    .layers([{
-                        mark: 'arc',
-                        encoding: {
-                            angle: 'Year',
-                            radius: 'Acceleration'
-                        }
-                    }])
-                    .color('Origin')
-                    .size('Horsepower')
-                    // .detail(['Maker'])
-
-      .columns(['Cylinders']) /* Attaching the canvas to DOM element */
-      .mount('#chart2');
+    canvas = env.canvas().data(rootData).rows(['Acceleration']).columns([['Year'], ['Year']]).data(rootData).height(400).width(400).color('Origin').config({
+        legend: { position: 'bottom' }}).mount('#chart')
 });
+

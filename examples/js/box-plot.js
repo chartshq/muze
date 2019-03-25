@@ -1,157 +1,157 @@
-/* eslint disable */
-
-const DataModel = window.muze.DataModel;
-
-const share = window.muze.Operators.share;
-const layerFactory = window.muze.layerFactory;
-
-const schema = [{
-    name: 'organ',
-    type: 'dimension'
-},
-{
-    name: 'minValue',
-    type: 'measure'
-},
-{
-    name: 'meanValue',
-    type: 'measure'
-},
-{
-    name: 'maxValue',
-    type: 'measure'
-},
-{
-    name: 'quarter',
-    type: 'measure'
-},
-{
-    name: 'thirdQuarter',
-    type: 'measure'
-}
-];
-
-layerFactory.composeLayers('boxMark', [
-    {
-        name: 'leftTick',
-        className: 'leftTick',
-        mark: 'tick',
-        encoding: {
-            x: 'boxMark.encoding.quarter',
-            x0: 'boxMark.encoding.minValue'
+/* eslint-disable */
+d3.json('../data/iris.cleared.json', function (data) {
+    // load data and schema from url
+    var schema = [
+        {
+            "name": "organ",
+            "type": "dimension",
+            displayName: "organ2"
         },
-        interactive: false
-    },
-    {
-        name: 'lowerBand',
-        mark: 'bar',
-        className: 'lowerBand',
-        encoding: {
-            x0: 'boxMark.encoding.meanValue',
-            x: 'boxMark.encoding.quarter'
-        },
-        transform: {
-            type: 'identity'
-        },
-        transition: {
-            disabled: true
+        {
+            "name": "minValue",
+            "type": "measure",
+            displayName: "minValue2"
+        }, {
+            "name": "meanValue",
+            "type": "measure",
+            displayName: "meanValue2"
+        }, {
+            "name": "maxValue",
+            "type": "measure",
+            displayName: "maxValue2"
+        }, {
+            "name": "quarter",
+            "type": "measure",
+            displayName: "quarter2"
+        }, {
+            "name": "thirdQuarter",
+            "type": "measure",
+            displayName: "thirdQuarter2"
         }
-    },
-    {
-        name: 'upperBand',
-        mark: 'bar',
-        className: 'upperBand',
-        encoding: {
-            x: 'boxMark.encoding.thirdQuarter',
-            x0: 'boxMark.encoding.meanValue'
-        },
-        transform: {
-            type: 'identity'
-        },
-
-        transition: {
-            disabled: true
-        }
-    },
-    {
-        name: 'rightTick',
-        mark: 'tick',
-        className: 'boxTicks',
-        encoding: {
-            x: 'boxMark.encoding.maxValue',
-            x0: 'boxMark.encoding.thirdQuarter'
-        },
-        interactive: false
-    },
-    {
-        name: 'minTick',
-        mark: 'tick',
-        className: 'boxTicks',
-        encoding: {
-            x: 'boxMark.encoding.minValue',
-            y: 'boxMark.encoding.y',
-            shape: {
-                value: 'line'
+    ];
+    var layers = [
+        {
+            "name": "maxTick",
+            "mark": "tick",
+            "className": "boxTicks",
+            "encoding": {
+                "y": "boxMark.encoding.maxValue",
+                "x": "boxMark.encoding.x"
+            },
+            "interactive": false
+        }, {
+            "name": "upperTick",
+            "className": "upper-tick",
+            "mark": "tick",
+            "encoding": {
+                "y": "boxMark.encoding.quarter",
+                "x": "boxMark.encoding.x",
+                "y0": "boxMark.encoding.minValue"
+            },
+            "interactive": false
+        }, {
+            "name": "upperBand",
+            "mark": "bar",
+            "className": "upperBand",
+            "encoding": {
+                "y": "boxMark.encoding.thirdQuarter",
+                "x": "boxMark.encoding.x",
+                "y0": "boxMark.encoding.meanValue",
+                "color": "boxMark.encoding.color"
+            },
+            "transform": {
+                "type": "identity"
             }
-        },
-        interactive: false
-    },
-    {
-        name: 'maxTick',
-        mark: 'tick',
-        className: 'boxTicks',
-        encoding: {
-            x: 'boxMark.encoding.maxValue',
-            y: 'boxMark.encoding.y'
-        },
-        interactive: false
-    },
-    {
-        name: 'meanTick',
-        mark: 'tick',
-        className: 'boxTicks',
-        encoding: {
-            x: 'boxMark.encoding.meanValue',
-            y: 'boxMark.encoding.y'
-        },
-        interactive: false
-    }
-]);
+        }, {
+            "name": "meanTick",
+            "mark": "tick",
+            "className": "boxTicks",
+            "encoding": {
+                "y": "boxMark.encoding.meanValue",
+                "x": "boxMark.encoding.x"
+            },
+            "interactive": false
+        }, {
+            "name": "lowerBand",
+            "mark": "bar",
+            "className": "lowerBand",
+            "encoding": {
+                "y0": "boxMark.encoding.meanValue",
+                "x": "boxMark.encoding.x",
+                "y": "boxMark.encoding.quarter",
+                "color": "boxMark.encoding.color"
+            },
+            "transform": {
+                "type": "identity"
+            }
+        }, {
+            "name": "lowerTick",
+            "mark": "tick",
+            "className": "boxTicks",
+            "encoding": {
+                "y": "boxMark.encoding.maxValue",
+                "x": "boxMark.encoding.x",
+                "y0": "boxMark.encoding.thirdQuarter"
+            },
+            "interactive": false
+        }, {
+            "name": "minTick",
+            "mark": "tick",
+            "className": "boxTicks",
+            "encoding": {
+                "y": "boxMark.encoding.minValue",
+                "x": "boxMark.encoding.x"
+            },
+            "interactive": false
+        }];
 
-let sharedField;
-const columns = [sharedField = share('minValue', 'meanValue', 'maxValue', 'quarter', 'thirdQuarter')];
-const rows = ['organ'];
+    var DataModel = window.muze.DataModel;
+    var rootData = new DataModel(data, schema);
+    // Registry for user defined layers
+    var layerFactory = muze.layerFactory;
+    // Compose share operator for plotting multiple variable in one Y-axis
+    var share = muze.Operators.share;
 
-// Create a muze instance
-let env = window.muze();
+    var html = window.muze.Operators.html;
 
-d3.json('../data/iris.cleared.json', (data) => {
-    const dt = new DataModel(data, schema);
-	// Specify some global chart configurations
-    env = env.width(800)
-		.height(600)
-		.data(dt);
+    // Create a global environment to share common configs across charts 
+    var env = window.muze();
+    // Set height, width and data to env, so that every instance of canvas which gets created from the environment
+    // receives this
+    env.width(600).height(600).data(rootData);
 
-    let canvas = env.canvas();
+    var canvas = env.canvas();
 
-	// Takes the rest of the config from global renderer
-    canvas = canvas
-		.rows(rows)
-		.columns(columns)
-		.layers([{
-    mark: 'boxMark',
-    encoding: {
-        minValue: 'minValue',
-        meanValue: 'meanValue',
-        y: 'organ',
-        maxValue: 'maxValue',
-        quarter: 'quarter',
-        thirdQuarter: 'thirdQuarter'
-    },
-    transform: {
-        type: 'identity'
-    }
-}])
-.color('organ')
-        .mount(document.getElementById('chart'));
+    // Use the custom layer definition to register a new layer and name it boxMark
+    layerFactory.composeLayers('boxMark', layers);
+    var sharedField = void 0;
+    // Create a combined field which gets plotted in the Y-axis. Value of all those variables will be passed
+    // to layers
+    var columns = [sharedField = share('minValue', 'meanValue', 'maxValue', 'quarter', 'thirdQuarter')];
+    var rows = ['organ'];
+
+    canvas.rows(columns).columns(rows).color('organ').config({
+        axes: {
+            y: {
+                showAxisName: true,
+                name: 'Measure'
+            }
+        }
+    }).layers([{
+        mark: 'boxMark',
+        encoding: { // Map the encoding with variables. These custom encodings are used in the composite layers.
+            minValue: 'minValue',
+            meanValue: 'meanValue',
+            x: 'organ',
+            maxValue: 'maxValue',
+            quarter: 'quarter',
+            thirdQuarter: 'thirdQuarter'
+        }
+    }]).mount(document.getElementById('chart'));
+
+    canvas.once('canvas.animationend').then(function (client) {
+
+        var element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
 });

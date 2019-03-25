@@ -1,17 +1,26 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import {
+    mergeRecursive,
+    STATE_NAMESPACES,
+    unionDomain,
+    COORD_TYPES,
+    toArray
+} from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import {
     generateAxisFromMap,
     getDefaultMark,
     getIndex,
     getLayerConfFromFields,
-    getAdjustedDomain
+    getAdjustedDomain,
+    sanitizeIndividualLayerConfig
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
 import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, ASCENDING, DESCENDING } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
+
+const CARTESIAN = COORD_TYPES.CARTESIAN;
 
 /**
  *
@@ -64,6 +73,7 @@ export default class CartesianEncoder extends VisualEncoder {
             fields: columnFields,
             index: columnIndex
         }];
+        const { resolver, facetFields, geomCell } = context;
         const xAxes = axes.x || [];
         const yAxes = axes.y || [];
 
@@ -78,9 +88,10 @@ export default class CartesianEncoder extends VisualEncoder {
             }
             geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
                 groupAxes: axis === X ? xAxes : yAxes,
-                valueParser: context.resolver.valueParser()
-            });
+                valueParser: resolver.valueParser()
+            }, indices, facetFields);
         });
+        geomCell.axes(geomCellAxes);
         return geomCellAxes;
     }
 
@@ -105,7 +116,6 @@ export default class CartesianEncoder extends VisualEncoder {
 
     unionUnitDomains (context) {
         const store = context.store();
-        const unitDomains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
         const resolver = context.resolver();
         const units = resolver.units();
         const domains = {
@@ -124,16 +134,18 @@ export default class CartesianEncoder extends VisualEncoder {
             for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
                 const unit = unitsArr[cIdx];
                 const axisFields = unit.fields();
-                [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
+                const encodingDomains = unit.getDataDomain();
+                ['x', 'y'].forEach((axisType, axisTypeIndex) => {
+                    const fieldArr = axisFields[axisType];
                     fieldArr.forEach((field, axisIndex) => {
-                        const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
-                        const dom = unitDomains[`${rIdx}${cIdx}`];
+                        const key = !axisTypeIndex ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
+                        const dom = encodingDomains[axisType];
                         const typeOfField = field.subtype();
                         fieldsObj[axisTypeIndex][key] = field;
 
                         if (dom && Object.keys(dom).length !== 0) {
-                            domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
-                                dom[`${field}`]], typeOfField);
+                            domains[axisTypeIndex][key] = unionDomain([(domains[axisTypeIndex] &&
+                                domains[axisTypeIndex][key]) || [], dom[`${field}`]], typeOfField);
                         }
                     });
                 });
@@ -183,7 +195,8 @@ export default class CartesianEncoder extends VisualEncoder {
                 axes.forEach((axis, index) => {
                     key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
                     domain = adjustedDomain[index] || domains[axisType][key];
-                    axis.domain(domain);
+
+                    domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
                     store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
                 });
@@ -324,6 +337,16 @@ export default class CartesianEncoder extends VisualEncoder {
         return serializedLayers;
     }
 
+    sanitizeLayerConfig (encodingConfigs, userLayerConfig) {
+        const layerConfig = [];
+        userLayerConfig.forEach((config) => {
+            const def = toArray(config.def);
+            sanitizeIndividualLayerConfig(encodingConfigs, def);
+            layerConfig.push(config);
+        });
+        return layerConfig;
+    }
+
     /**
      *
      *
@@ -332,7 +355,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    getLayerConfig (fields, userLayerConfig) {
+    getLayerConfig (fields, userLayerConfig, retinalConfig) {
         const layerConfig = [];
         const {
             columnFields,
@@ -385,6 +408,6 @@ export default class CartesianEncoder extends VisualEncoder {
                 layerConfig.push(...configs);
             });
         });
-        return layerConfig;
+        return this.sanitizeLayerConfig(retinalConfig, layerConfig);
     }
 }
