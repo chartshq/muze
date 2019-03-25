@@ -142,9 +142,9 @@ export default class ContinousAxis extends SimpleAxis {
         axis.tickValues(newTickValues);
         const smartLabel = this.dependencies().labelManager;
         smartLabel.setStyle(this._tickLabelStyle);
-        const formatter = this._tickFormatter;
-        const smartTicks = newTickValues.map((val) => {
-            const text = formatter(val);
+        const formatter = this._tickFormatter(newTickValues);
+        const smartTicks = newTickValues.map((val, i) => {
+            const text = formatter(val, i);
             const tickSpace = smartLabel.getOriSize(text);
 
             tickSpace.text = text;

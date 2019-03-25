@@ -2,9 +2,9 @@ const env = muze();
 const DataModel = muze.DataModel;
 
 const jsonData = [];
-for (let i = 0; i <= 60; i++) {
+for (let i = 1; i <= 60; i++) {
     jsonData.push({
-        name: i === 0 ? 60 : i
+        name: i === 60 ? 60 : i
     });
 }
 const schema2 = [{
@@ -29,15 +29,41 @@ const tickMap = {
     hours: {
         low: {
             stroke: 'white',
-            width: '2px'
+            width: '4px',
+            inner: 0,
+            outer: -120
         },
         middle: {
-            stroke: 'red',
-            width: '4px'
+            stroke: '#c41400',
+            width: '8px',
+            inner: 30,
+            outer: -120
         },
         high: {
             stroke: 'white',
-            width: '8px'
+            width: '12px',
+            inner: 30,
+            outer: -120
+        }
+    },
+    minutes: {
+        low: {
+            stroke: 'white',
+            width: '4px',
+            inner: 0,
+            outer: -70
+        },
+        middle: {
+            stroke: '#c41400',
+            width: '8px',
+            inner: 30,
+            outer: -70
+        },
+        high: {
+            stroke: 'white',
+            width: '12px',
+            inner: 30,
+            outer: -70
         }
     }
 };
@@ -53,13 +79,15 @@ const generateTick = (type, tickType, source) => {
                 value: () => tick.stroke
             }
         },
+        interactive: false,
         interpolate: 'catmullRom',
         encodingTransform: (points) => {
             points.forEach((point) => {
-                point.update.radius0 = point.update.radius - 40 - 60;
-                point.update.radius = 0;
+                point.update.radius0 = point.update.radius + tick.outer;
+                point.update.radius = tick.inner;
                 point.style['stroke-width'] = tick.width;
                 point.style['stroke-linecap'] = 'round';
+                point.style['stroke-opacity'] = '1';
             });
             return points;
         }
@@ -102,7 +130,7 @@ window.canvas = env.canvas()
                         field: 'name',
                         formatter: (val) => {
                             if (val % 5 === 0) {
-                                return val / 5;
+                                // return val / 5;
                             } return '';
                         }
 
@@ -118,6 +146,7 @@ window.canvas = env.canvas()
                     return points;
                 }
             },
+
             {
                 mark: 'tick',
                 source: 'bigTicks',
@@ -131,51 +160,37 @@ window.canvas = env.canvas()
                 encodingTransform: (points) => {
                     points.forEach((point) => {
                         point.update.radius0 = point.update.radius - 40;
+                        point.style['stroke-width'] = '4px';
+                        point.style['stroke-linecap'] = 'round';
                     });
                     return points;
                 }
             },
 
-            {
-                mark: 'tick',
-                source: 'smallTicks',
-                encoding: {
-                    angle: 'name',
-                    color: {
-                        value: () => 'white'
-                    }
-                },
-                interpolate: 'catmullRom',
-                encodingTransform: (points) => {
-                    points.forEach((point) => {
-                        point.update.radius0 = point.update.radius - 20;
-                    });
-                    return points;
-                }
-            },
+            // {
+            //     mark: 'tick',
+            //     source: 'smallTicks',
+            //     encoding: {
+            //         angle: 'name',
+            //         color: {
+            //             value: () => 'white'
+            //         }
+            //     },
+            //     interpolate: 'catmullRom',
+            //     encodingTransform: (points) => {
+            //         points.forEach((point) => {
+            //             point.update.radius0 = point.update.radius - 20;
+            //         });
+            //         return points;
+            //     }
+            // },
             generateTick('hours', 'low', 'tickHours'),
-            generateTick('hours', 'middle', 'tickHours'),
             generateTick('hours', 'high', 'tickHours'),
-            {
-                mark: 'tick',
-                source: 'tickMinutes',
-                encoding: {
-                    angle: 'name',
+            generateTick('hours', 'middle', 'tickHours'),
+            generateTick('minutes', 'low', 'tickMinutes'),
+            generateTick('minutes', 'high', 'tickMinutes'),
+            generateTick('minutes', 'middle', 'tickMinutes'),
 
-                    color: {
-                        value: () => 'white'
-                    }
-                },
-                interpolate: 'catmullRom',
-                encodingTransform: (points) => {
-                    points.forEach((point) => {
-                        point.update.radius0 = point.update.radius - 40 - 30;
-                        point.update.radius = 0;
-                        point.style['stroke-width'] = '2px';
-                    });
-                    return points;
-                }
-            },
             {
                 mark: 'tick',
                 source: 'tickSeconds',
@@ -194,7 +209,66 @@ window.canvas = env.canvas()
                     });
                     return points;
                 }
+            },
+            {
+                mark: 'arc',
+                source: dt => dt.select((e, i) => i === 0),
+                encoding: {
+                    radius: {
+                        value: () => 8
+                    },
+                    color: {
+                        value: () => 'white'
+                    }
+                },
+                encodingTransform: (points) => {
+                    points.forEach((point) => {
+                        point.update.radius = 0;
+                    });
+                    return points;
+                }
+            },
+            {
+                mark: 'arc',
+                source: dt => dt.select((e, i) => i === 0),
+                encoding: {
+                    radius: {
+                        value: () => 6
+                    },
+                    color: {
+                        value: () => '#c41400'
+                    }
+                },
+                encodingTransform: (points) => {
+                    points.forEach((point) => {
+                        point.update.radius = 0;
+                    });
+                    return points;
+                }
+            },
+            {
+                mark: 'arc',
+                source: dt => dt.select((e, i) => i === 0),
+                encoding: {
+                    radius: {
+                        value: () => 226
+                    },
+                    radius0: {
+                        value: () => 226 - 40
+                    },
+                    color: {
+                        value: () => '#ffffff11'
+                    }
+                },
+                interactive: false,
+                encodingTransform: (points) => {
+                    points.forEach((point) => {
+                        point.radius = 0;
+                    });
+                    return points;
+                }
             }
+
         ])
         .mount('#chart');
 
