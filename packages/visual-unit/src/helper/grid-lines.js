@@ -6,8 +6,7 @@ import {
     GRID_LINE,
     GRID_BAND_PARENT_GROUP_CLASS,
     GRID_LINE_PARENT_GROUP_CLASS,
-    GRID_PARENT_GROUP,
-    TEMPORAL
+    GRID_PARENT_GROUP
 } from '../enums/constants';
 
 const { BAR_LAYER, TICK_LAYER } = LAYER_TYPES;
