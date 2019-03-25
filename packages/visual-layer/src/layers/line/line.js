@@ -4,8 +4,8 @@ import {
     selectElement,
     makeElement,
     FieldType,
-    getObjProp,
-    InvalidAwareTypes
+    InvalidAwareTypes,
+    getObjProp
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawLine } from './renderer';
@@ -14,9 +14,11 @@ import { ENCODING } from '../../enums/constants';
 import {
     attachDataToVoronoi,
     animateGroup,
-    getLayerColor,
     positionPoints,
-    getIndividualClassName
+    getIndividualClassName,
+    getColorMetaInf,
+    resolveEncodingValues,
+    sortData
 } from '../../helpers';
 
 import './styles.scss';
@@ -42,23 +44,10 @@ export default class LineLayer extends BaseLayer {
         this._voronoi = new Voronoi();
     }
 
-    /**
-     *
-     *
-     * @static
-     *
-     * @memberof LineLayer
-     */
     static formalName () {
         return 'line';
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof LineLayer
-     */
     elemType () {
         return 'path';
     }
@@ -71,15 +60,6 @@ export default class LineLayer extends BaseLayer {
         return defaultConfig;
     }
 
-    /**
-     *
-     *
-     * @static
-     * @param {*} conf
-     * @param {*} userConf
-     *
-     * @memberof LineLayer
-     */
     static defaultPolicy (conf, userConf) {
         const config = BaseLayer.defaultPolicy(conf, userConf);
         const encoding = config.encoding;
@@ -112,53 +92,55 @@ export default class LineLayer extends BaseLayer {
      * @param {number} seriesIndex index of series
      * @return {Array} Array of points
      */
-    translatePoints (data, encodingFieldsInf, axes) {
+    translatePoints (data) {
         let points = [];
+        const axes = this.axes();
         const xAxis = axes.x;
         const yAxis = axes.y;
         const colorAxis = axes.color;
-        const encoding = this.config().encoding;
-        const { xFieldType, yFieldType } = encodingFieldsInf;
+        const { xFieldType, yFieldType } = this.encodingFieldsInf();
         const isXDim = xFieldType === FieldType.DIMENSION;
         const isYDim = yFieldType === FieldType.DIMENSION;
         const key = isXDim ? ENCODING.X : (isYDim ? ENCODING.Y : null);
-        const colorEncoding = encoding.color;
-        const colorField = colorEncoding.field;
-        const fieldsConfig = this.data().getFieldsConfig();
-        const colorFieldIndex = colorField && fieldsConfig[colorField].index;
-        const style = {};
-        const meta = {};
-
+        sortData(data, axes);
         points = data.map((d, i) => {
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y) + yAxis.getUnitWidth() / 2;
-            const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
-                colorEncoding, colorAxis, colorFieldIndex });
+            const color = colorAxis.getColor(d.color);
 
-            style.stroke = color;
-            style['fill-opacity'] = 0;
-            meta.stateColor = {};
-            meta.originalColor = rawColor;
-            meta.colorTransform = {};
+            const resolvedEncodings = resolveEncodingValues({
+                values: {
+                    x: xPx,
+                    y: yPx,
+                    color
+                },
+                data: d
+            }, i, data, this);
 
             const point = {
                 enter: {},
                 update: {
-                    x: d.x instanceof InvalidAwareTypes ? null : xPx,
-                    y: d.y instanceof InvalidAwareTypes ? null : yPx
+                    x: d.x instanceof InvalidAwareTypes ? null : resolvedEncodings.x,
+                    y: d.y instanceof InvalidAwareTypes ? null : resolvedEncodings.y
                 },
-                style,
-                _data: d._data,
-                _id: d._id,
-                rowId: d._id,
-                source: d._data,
-                meta
+                style: {
+                    stroke: resolvedEncodings.color,
+                    'fill-opacity': 0
+                },
+                rowId: d.rowId,
+                source: d.source,
+                meta: getColorMetaInf(resolvedEncodings.color, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
             return point;
         });
         points = positionPoints(this, points);
+
+        points = points.filter((point) => {
+            const { update } = point;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 
@@ -210,19 +192,19 @@ export default class LineLayer extends BaseLayer {
                 });
             },
             update: (group, dataArr, i) => {
-                points = this.translatePoints(dataArr, this.encodingFieldsInf(), axes, i);
+                points = this.translatePoints(dataArr);
                 this._points.push(points);
                 seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
 
                 let color;
                 const colorValFn = encoding.color.value;
-                const colorVal = points.find(d => d._data[colorFieldIndex] !== null &&
-                        d._data[colorFieldIndex] !== undefined);
+                const colorVal = points.find(d => d.source[colorFieldIndex] !== null &&
+                        d.source[colorFieldIndex] !== undefined);
 
                 if (colorValFn) {
                     color = colorValFn(dataArr, i, normalizedData);
                 } else {
-                    color = axes.color.getColor(colorVal && colorVal._data[colorFieldIndex]);
+                    color = axes.color.getColor(colorVal && colorVal.source[colorFieldIndex]);
                 }
 
                 style = this.getPathStyle(color);
@@ -237,7 +219,7 @@ export default class LineLayer extends BaseLayer {
                     connectNullData: config.connectNullData
                 });
             }
-        }, d => d[0]._data[colorFieldIndex] || d[0]._id);
+        }, d => d[0].source[colorFieldIndex] || d[0].rowId);
 
         attachDataToVoronoi(this._voronoi, this._points);
         return this;
@@ -274,8 +256,8 @@ export default class LineLayer extends BaseLayer {
         const dimensions = getObjProp(point, 'data', 'data', 'update');
 
         if (point) {
-            const { _data, _id } = point.data.data;
-            const identifiers = this.getIdentifiersFromData(_data, _id);
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
             return {
                 id: identifiers,
                 dimensions: [{

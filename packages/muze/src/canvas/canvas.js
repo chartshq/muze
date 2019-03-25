@@ -62,13 +62,9 @@ export default class Canvas extends TransactionSupport {
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
-        const [, store] = transactor(this, options, this._store.model, {
-            namespace
-        });
-        transactor(this, localOptions, store, {
-            namespace
-        });
-        transactor(this, canvasOptions, store, {
+        const allOptions = Object.assign({}, options, localOptions, canvasOptions);
+
+        transactor(this, allOptions, this._store.model, {
             namespace
         });
 

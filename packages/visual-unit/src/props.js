@@ -21,5 +21,6 @@ export const PROPS = {
     parentContainerInf: {},
     valueParser: {
         defaultValue: val => val
-    }
+    },
+    coord: {}
 };

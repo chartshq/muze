@@ -90,7 +90,7 @@ export const createHeaders = (context, canvasHeight, canvasWidth) => {
     canvasHeight >= 200 && canvasWidth >= 200 && ['title', 'subtitle'].forEach((type) => {
         const headerOptions = context[type]();
         const content = resolveTitleSubTitleContent(headerOptions[0]);
-        if (content.length) {
+        if (content) {
             const config = headerOptions[1];
 
             config.width = context.width();

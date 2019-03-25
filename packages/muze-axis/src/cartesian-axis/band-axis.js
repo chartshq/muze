@@ -1,22 +1,8 @@
 import SimpleAxis from './simple-axis';
 import { BAND } from '../enums/scale-type';
-import { TOP, BOTTOM } from '../enums/axis-orientation';
 import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
-import { spaceSetter } from './space-setter';
 
 export default class BandAxis extends SimpleAxis {
-
-    /**
-     *
-     *
-     * @param {*} config axes configuration
-     *
-     * @memberof BandAxis
-     */
-    createScale (config) {
-        return super.createScale(config);
-    }
-
     /**
      *
      *
@@ -26,36 +12,6 @@ export default class BandAxis extends SimpleAxis {
      */
     static type () {
         return BAND;
-    }
-
-     /**
-     * This method is used to set the space availiable to render
-     * the SimpleCell.
-     *
-     * @param {number} width The width of SimpleCell.
-     * @param {number} height The height of SimpleCell.
-     * @memberof AxisCell
-     */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).band.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).band.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
-        return this;
     }
 
     /**
@@ -69,8 +25,8 @@ export default class BandAxis extends SimpleAxis {
         let smartlabel;
         const domain = this.domain();
         const { labelManager } = this._dependencies;
-        const { tickValues, padding } = this.config();
-        const { labels } = this.renderConfig();
+        const { padding } = this.config();
+        const { labels, tickValues } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { width, height } = getRotatedSpaces(labels.rotation, availWidth, availHeight);
 
@@ -81,8 +37,9 @@ export default class BandAxis extends SimpleAxis {
         labelManager.setStyle(this._tickLabelStyle);
 
         // Update padding between plots
-        if (typeof padding === 'number' && padding >= 0 && padding <= 1) {
-            this.scale().padding(padding);
+        if (typeof padding === 'number') {
+            const paddingNormalized = Math.min(1, Math.max(0, padding));
+            this.scale().padding(paddingNormalized);
         }
 
         if (domain && domain.length) {
@@ -108,9 +65,9 @@ export default class BandAxis extends SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateBandSpace(this));
-            setOffset(this);
-            this.logicalSpace();
         }
+        setOffset(this);
+
         return this.logicalSpace();
     }
 

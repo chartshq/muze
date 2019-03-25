@@ -11,7 +11,7 @@ import {
     MeasureSubtype,
     getNearestValue
 } from 'muze-utils';
-import { layerFactory } from '@chartshq/visual-layer';
+import { layerFactory, ENCODING } from '@chartshq/visual-layer';
 
 export const getDimensionMeasureMap = (layers, fieldsConfig) => {
     const retinalEncodingsAndMeasures = {};
@@ -74,6 +74,7 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
     definition = toArray(definition);
     definition.reduce((acc, def, idx) => {
         const instance = instanceArr[idx];
+        instance.coord(context.coord());
         instance.config(def);
         instance.valueParser(context.valueParser());
         instance.dependencies(dependencies);
@@ -101,51 +102,6 @@ export const resolveEncodingTransform = (layerInst, store) => {
         layerInst.encodingTransform(encodingTransform);
     }
     return depArr;
-};
-
-export const createLayers = (context, layerDefinitions) => {
-    const layersMap = context._layersMap;
-    const markSet = {};
-    const store = {
-        layers: {},
-        components: {
-            unit: context
-        }
-    };
-    let layerIndex = 0;
-    let layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef, i) => {
-        const mark = layerDef.mark;
-        const definition = layerDef.def;
-        const markId = `${mark}-${i}`;
-        const defArr = toArray(definition);
-        defArr.forEach((def) => {
-            def.order = layerDef.order + layerIndex;
-        });
-        layerIndex += defArr.length;
-        const instances = getLayerFromDef(context, definition, layersMap[markId], i);
-        store.layers = Object.assign(store.layers, instances);
-        const instanceValues = Object.values(instances);
-        layersArr = layersArr.concat(...instanceValues);
-        layersMap[markId] = instanceValues;
-        markSet[markId] = markId;
-        return layersArr;
-    }, []);
-    store.unit = context;
-    const layerdeps = {};
-    layers.forEach((layer) => {
-        const depArr = resolveEncodingTransform(layer, store);
-        layerdeps[layer.alias()] = depArr;
-    });
-
-    const order = getDependencyOrder(layerdeps);
-    layers = order.map(name => store.layers[name]);
-    for (const key in layersMap) {
-        if (!(key in markSet)) {
-            layersMap[key].forEach(layer => layer.remove());
-            delete layersMap[key];
-        }
-    }
-    return layers;
 };
 
 export const sanitizeLayerDef = (layerDefs) => {
@@ -191,22 +147,29 @@ export const attachAxisToLayers = (axes, layers, layerAxisIndex) => {
         objectIterator(axes, (key) => {
             const axisInf = layerAxisIndex[layerId];
             if (axisInf) {
-                axes[key] && (axesObj[key] = axes[key][axisInf[key] || 0]);
+                const axisArr = axes[key] || [];
+                const axisIndex = axisInf[key] >= 0 ? axisInf[key] : axisArr.length - 1;
+                axes[key] && (axesObj[key] = defaultValue(axes[key][axisIndex]));
             }
         });
         Object.keys(axesObj).length && layer.axes(axesObj);
     });
 };
 
+const { X, Y, RADIUS, ANGLE, ANGLE0, RADIUS0 } = ENCODING;
+
 export const getLayerAxisIndex = (layers, fields) => {
     const layerAxisIndex = {};
     layers.forEach((layer) => {
         const { axis, encoding } = layer.config();
         const id = layer.id();
-        ['x', 'y'].forEach((type) => {
+        [X, Y, ANGLE, ANGLE0, RADIUS].forEach((type) => {
             let index;
-            const field = defaultValue(getObjProp(axis, type), encoding[type] && encoding[type].field);
-            if (fields[type]) {
+            const specificField = getObjProp(encoding, type, 'field');
+            const encodingField = type === RADIUS ? defaultValue(specificField, getObjProp(encoding, RADIUS0, 'field'))
+                : getObjProp(encoding, type, 'field');
+            const field = defaultValue(getObjProp(axis, type), encodingField);
+            if (fields[type] && fields[type].length) {
                 index = fields[type].findIndex(fieldInst => fieldInst.getMembers().indexOf(field) !== -1);
             } else {
                 index = 0;
@@ -218,13 +181,20 @@ export const getLayerAxisIndex = (layers, fields) => {
     return layerAxisIndex;
 };
 
+const getValidDomain = (domain, domain1, encodingType, fieldType) => {
+    if (encodingType === ANGLE || encodingType === ANGLE0) {
+        return domain.concat(domain1.filter(d => domain.indexOf(d) === -1));
+    }
+    return unionDomain([domain, domain1], fieldType);
+};
+
 export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fieldsConfig) => {
     let domains = {};
     layers = layers.filter(layer => layer.getDataDomain() !== null);
     layers.forEach((layer) => {
         let domainValues = {};
         const config = layer.config();
-        const encoding = config.encoding;
+        // const encoding = config.encoding;
         const layerDomain = layer.getDataDomain();
         const layerId = layer.id();
 
@@ -232,16 +202,15 @@ export const unionDomainFromLayers = (layers, axisFields, layerAxisIndex, fields
             domainValues = Object.entries(layerDomain);
             domains = domainValues.reduce((fieldDomain, domain) => {
                 const encodingType = domain[0];
-                const field = encoding[encodingType].field;
                 const axisIndex = layerAxisIndex[layerId][encodingType];
-                if (encodingType in axisFields) {
-                    const fieldStr = `${axisFields[encodingType][axisIndex]}`;
-                    fieldDomain[fieldStr] = fieldDomain[fieldStr] || [];
-                    fieldDomain[fieldStr] = unionDomain(([fieldDomain[fieldStr], domain[1]]),
-                        fieldsConfig[field].def.subtype ? fieldsConfig[field].def.subtype :
-                                fieldsConfig[field].def.type);
-                } else {
-                    fieldDomain[encodingType] = domain[1];
+                const field = getObjProp(axisFields, encodingType, axisIndex);
+                !fieldDomain[encodingType] && (fieldDomain[encodingType] = {});
+                const encodingDomain = fieldDomain[encodingType];
+                if (field) {
+                    const fieldStr = `${field}`;
+                    encodingDomain[fieldStr] = encodingDomain[fieldStr] || [];
+                    encodingDomain[fieldStr] = getValidDomain(encodingDomain[fieldStr],
+                        domain[1], encodingType, fieldsConfig[field.getMembers()[0]].def.subtype);
                 }
                 return fieldDomain;
             }, domains);
@@ -335,4 +304,24 @@ export const createRenderPromise = (unit) => {
         });
         createRenderPromise(unit);
     });
+};
+
+export const getRadiusRange = (width, height, config = {}) => {
+    const {
+        innerRadius,
+        outerRadius
+    } = config;
+
+    return [innerRadius || 0, outerRadius || Math.min(height,
+        width) / 2];
+};
+
+export const setAxisRange = (context) => {
+    const axes = context.axes();
+    const { radius: radiusAxes } = axes;
+    if (radiusAxes) {
+        radiusAxes.forEach((axis) => {
+            axis.range(getRadiusRange(context.width(), context.height()));
+        });
+    }
 };

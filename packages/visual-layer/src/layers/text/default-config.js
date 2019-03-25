@@ -27,6 +27,9 @@ export const defaultConfig = {
     },
     encoding: {
         color: {},
+        size: {},
+        radius: {},
+        angle: {},
         text: {
             value: '',
             formatter: (val, i, data, context) => {
@@ -36,6 +39,12 @@ export const defaultConfig = {
             background: {
                 padding: 10
             }
+        },
+        rotation: {
+            value: 0
+        },
+        'alignment-baseline': {
+            value: 'middle'
         }
     },
     states: {

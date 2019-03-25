@@ -1,54 +1,57 @@
 /* global describe, it */
 import { expect } from 'chai';
-import { dataSelect, DataObject } from './index';
+import { dataSelect } from './index';
 
 describe('Data system Methods Test', () => {
     it('tests datasystem functionality', () => {
-        /**
-         * Current class from which selection is teseted
-         * @class MyObject
-         * @extends {DataObject} class
-         */
-        class MyObject extends DataObject {
-            /**
-             * Creates an instance of MyObject.
-             * @param {any} number class property
-             * @memberof MyObject
-             */
-            constructor (number) {
-                super();
-                this.preciousNumber = number;
+        const createSelection = (sel, appendObj, data, idFn) => {
+            let selection = sel || dataSelect(idFn);
+
+            // data = [{ val: 0 }, { val: 1} ];
+            selection = selection.data(data);
+
+            const enter = selection.enter().append(appendObj);
+            const mergedSelection = enter.merge(selection);
+
+            selection.exit() && selection.exit().remove();
+            return mergedSelection;
+        };
+
+        class Layer {
+            constructor (d) {
+                this.data = d;
+            }
+
+            remove () {
+
             }
         }
-        const source = [];
 
-        let selection = dataSelect(source);
+        it('should return entry set data', () => {
+            let sel = null;
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 1 }], d => d.val);
+            expect(sel.getObjects().map(d => d.data)).to.equal([{ val: 0 }, { val: 1 }]);
+        });
 
-        const data = [1, 2, 3, 4];
+        it('should return update set data excluding exit set', () => {
+            let sel = null;
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 1 }], d => d.val);
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 2 }], d => d.val);
+            expect(sel.getObjects().map(d => d.data)).to.equal([{ val: 0 }, { val: 2 }]);
+        });
 
-        selection = selection.data(data);
+        it('should return all data', () => {
+            let sel = null;
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 1 }], d => d.val);
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 1 }, { val: 2 }], d => d.val);
+            expect(sel.getObjects().map(d => d.data)).to.equal([{ val: 0 }, { val: 1 }, { val: 2 }]);
+        });
 
-        let enter = selection.enter().append(d => new MyObject(d));
-        enter = enter.attr('preciousNumber', 10);
-
-        const merge = enter.merge(selection);
-
-        const objects = enter.getObjects();
-        expect(
-            objects.length === 4
-        ).to.be.true;
-        // update the number of elements in array to get fewer elements
-        let fewerSelections = merge.data([1, 2]);
-        // remove exit data
-        fewerSelections.exit().remove();
-
-        fewerSelections = fewerSelections
-                        .enter()
-                        .append(d => new MyObject(d))
-                        .merge(fewerSelections);
-        const fewerObjects = fewerSelections.getObjects();
-        expect(
-            fewerObjects.length === 2
-        ).to.be.true;
+        it('should return updated data', () => {
+            let sel = null;
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }, { val: 1 }], d => d.val);
+            sel = createSelection(sel, d => new Layer(d), [{ val: 0 }], d => d.val);
+            expect(sel.getObjects().map(d => d.data)).to.equal([{ val: 0 }]);
+        });
     });
 });

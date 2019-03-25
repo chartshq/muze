@@ -61,8 +61,9 @@ export default class Crossline extends SpawnableSideEffect {
                 const value = dataArr[0];
                 bandWidth = axis.getUnitWidth() || 0;
                 px = axis.getScaleValue(value) + bandWidth / 2 + drawingInf.xOffset;
-                const plotWidth = Math.max(...this.firebolt.context.layers().map(layer => layer.getPlotSpan()[type]));
-                const pad = Math.max(...this.firebolt.context.layers().map(layer => layer.getPlotPadding()[type]));
+                const layers = this.firebolt.context.layers();
+                const plotWidth = Math.max(...layers.map(layer => layer.getPlotSpan()[type]));
+                const pad = Math.max(...layers.map(layer => layer.getPlotPadding()[type]));
                 height = drawingInf.height;
                 width = drawingInf.width;
                 const startPx = px - plotWidth / 2 - pad / 2;
@@ -74,7 +75,7 @@ export default class Crossline extends SpawnableSideEffect {
                     dataPoint.d = `M ${startPx} 0 L ${endPx} 0 L ${endPx} ${height} L ${startPx} ${height} Z`;
                 }
                 dataPoint.className = plotWidth ? bandClass : lineClass;
-                elemData.push(dataPoint);
+                !isNaN(px) && elemData.push(dataPoint);
             }
         });
         if (elemData.length) {

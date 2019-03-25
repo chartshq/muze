@@ -1,5 +1,5 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
-import { getValueParser } from 'muze-utils';
+import { getValueParser, retrieveFieldDisplayName } from 'muze-utils';
 import {
     VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, MARGIN
 } from '../constants';
@@ -29,7 +29,14 @@ export const legendCreator = (canvas) => {
 
             const stepMapper = typeof step === 'boolean' ? step : false;
             LegendCls = LEGEND_TYPE_MAP[`${type}-${stepMapper}-${scaleType}`];
-            dataset.push({ scale, canvas, fieldName: scaleProps.field, LegendCls, scaleType });
+            dataset.push({
+                scale,
+                canvas,
+                fieldName: scaleProps.field,
+                title: retrieveFieldDisplayName(canvas.data(), scaleProps.field),
+                LegendCls,
+                scaleType
+            });
         }
     });
 
@@ -69,11 +76,12 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                 LegendCls,
                 scale,
                 fieldName,
+                title: titleText,
                 scaleType
             } = dataInfo;
         const config = legendConfig[scaleType] || {};
         const title = config.title || {};
-        title.text = title.text || fieldName;
+        title.text = title.text || titleText;
         if (config.show) {
             config.position = position;
             config.align = align;
@@ -96,7 +104,6 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             [PADDING, BORDER, MARGIN].forEach((e) => {
                 legendMeasures[e] = config[e];
             });
-
             legend.scale(scale)
                             .valueParser(parser)
                             .title(title)

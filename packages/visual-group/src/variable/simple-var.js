@@ -1,4 +1,4 @@
-import { DateTimeFormatter } from 'muze-utils';
+import { DateTimeFormatter, retrieveFieldDisplayName, DimensionSubtype } from 'muze-utils';
 import Variable from './variable';
 
 /**
@@ -13,11 +13,11 @@ export default class SimpleVariable extends Variable {
     /**
      * Creates an instance of simple variable instance.
      *
-     * @param {string} text Field name.
+     * @param {string} name Field name.
      */
-    constructor (text) {
+    constructor (name) {
         super();
-        this.oneVar(text);
+        this.oneVar(name);
     }
 
     /**
@@ -66,6 +66,20 @@ export default class SimpleVariable extends Variable {
             values = values.map(e => dtFormat.getNativeDate(e));
         }
         return values;
+    }
+
+    /**
+     * Returns a formatter function which transforms the input value to its original form.
+     *
+     * @public
+     * @return {Function} Returns raw formatter function.
+     */
+    rawFormat () {
+        if (this.subtype() === DimensionSubtype.TEMPORAL) {
+            const dateFormat = this.data().getFieldspace().getDimension()[this.oneVar()].schema().format;
+            return val => DateTimeFormatter.formatAs(val, dateFormat);
+        }
+        return val => val;
     }
 
     /**
@@ -118,5 +132,14 @@ export default class SimpleVariable extends Variable {
      */
     equals (varInst) {
         return this.oneVar() === varInst.oneVar();
+    }
+
+    /**
+     * Returns the display name of the field.
+     *
+     * @return {string} returns the display name.
+     */
+    displayName () {
+        return retrieveFieldDisplayName(this.data(), this.oneVar());
     }
 }

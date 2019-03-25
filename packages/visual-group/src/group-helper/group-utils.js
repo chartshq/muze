@@ -1,4 +1,4 @@
-import { Store, FieldType } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -25,8 +25,12 @@ import {
     FACET,
     X,
     Y,
-    POLAR
+    ARC,
+    RADIUS,
+    ANGLE
 } from '../enums/constants';
+
+const POLAR = COORD_TYPES.POLAR;
 
 /**
  * Creates an instance of a store which contains the arguments to make the class reactive
@@ -250,6 +254,9 @@ export const mutateAxesFromMap = (cacheMaps, axes) => {
     };
 };
 
+const hasPolarEncodings = layerConf => layerConf.mark === ARC || [RADIUS, ANGLE].some(field =>
+        getObjProp(layerConf.encoding, field));
+
 /**
  *
  *
@@ -261,7 +268,7 @@ export const getEncoder = (layers) => {
 
     if (layers.length) {
         // Figuring out the kind of layers the group will have
-        encoder = layers.every(e => e.mark === 'arc') ? new PolarEncoder() : encoder;
+        encoder = layers.some(layerConf => hasPolarEncodings(layerConf)) ? new PolarEncoder() : encoder;
     }
     return encoder;
 };
@@ -440,4 +447,22 @@ export const extractFields = (facetsAndProjections, layerFields) => {
         }));
     });
     return [].concat(...fields, ...layerFields);
+};
+
+/**
+ * This method sorts the facets fields inplace if field is of categorical type
+ * @param {Object} facet
+ * @param {Array} keys Array of the facet field values
+ */
+export const sortFacetFields = (facet, keys, config) => {
+    const facetName = `${facet}`;
+    const type = facet.type();
+
+    if (type === DIMENSION && config.sort[facetName]) {
+        if (config.sort[facetName] === 'asc') {
+            keys.sort((a, b) => a - b);
+        } else {
+            keys.sort((a, b) => b - a);
+        }
+    }
 };

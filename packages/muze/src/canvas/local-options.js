@@ -1,4 +1,4 @@
-import { mergeRecursive } from 'muze-utils';
+import { mergeRecursive, DataModel } from 'muze-utils';
 import {
     ROWS,
     COLUMNS,
@@ -47,13 +47,27 @@ export const localOptions = {
             typeExpected: 'Array'
         }
     },
+    data: {
+        value: null,
+        meta: {
+            typeCheck: d => d instanceof DataModel,
+            sanitization: (dm, prevDm) => {
+                prevDm && prevDm.dispose();
+                let sanitizedDm = dm;
+                if (dm instanceof DataModel) {
+                    sanitizedDm = dm.project(dm.getSchema().map(d => d.name));
+                }
+                return sanitizedDm;
+            }
+        }
+    },
     [COLOR]: {
         value: null,
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string' || config === null) {
+                if (typeof config === 'string' || !config) {
                     return {
                         field: config
                     };
@@ -68,7 +82,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string' || config === null) {
+                if (typeof config === 'string' || !config) {
                     return {
                         field: config
                     };
@@ -83,7 +97,7 @@ export const localOptions = {
             typeCheck: 'constructor',
             typeExpected: 'Object',
             sanitization: (config) => {
-                if (typeof config === 'string' || config === null) {
+                if (typeof config === 'string' || !config) {
                     return {
                         field: config
                     };
@@ -124,9 +138,8 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(title) => {
-                if (typeof title === 'string') {
+                if (typeof title === 'string' || !title) {
                     const t = () => title;
-                    t._sanitized = true;
                     return t;
                 }
                 return title;
@@ -143,9 +156,8 @@ export const canvasOptions = {
             typeExpected: ['Function', 'Object'],
             spreadParams: true,
             sanitization: [(subtitle) => {
-                if (typeof subtitle === 'string') {
+                if (typeof subtitle === 'string' || !subtitle) {
                     const sub = () => subtitle;
-                    sub._sanitized = true;
                     return sub;
                 }
                 return subtitle;

@@ -45,6 +45,9 @@ export default class SimpleLegend {
         this._measurement = Object.assign({}, this.constructor.defaultMeasurement());
         this._config = mergeRecursive({}, this.constructor.defaultConfig());
 
+        const dist = dependencies.labelManager.getOriSize('w');
+        this._minTickDistance = { width: dist.width * 3 / 4, height: dist.height / 2 };
+
         generateGetterSetters(this, PROPS);
         this._computedStyle = getSmartComputedStyle(selectElement('body'),
             `${this.config().classPrefix}-legend-item-info`);
@@ -183,7 +186,7 @@ export default class SimpleLegend {
         const effBorder = border * 2;
         const effMargin = margin * 2;
 
-        this.data(this.dataFromScale(this.scale()));
+        this.data(this.dataFromScale());
         // Get space occupied by title
         const titleSpace = this.getTitleSpace();
         const titleHeight = titleSpace.height > 0 ? titleSpace.height + effPadding : 0;
