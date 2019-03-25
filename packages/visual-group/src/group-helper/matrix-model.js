@@ -47,7 +47,7 @@ const uniqueKeyGenerator = (keyArray, context, depth = 0, val = []) => {
             const newContext = {
                 facets,
                 dataModel: newDm,
-                uniqueValues: nextDepthUniqueValues.sort()
+                uniqueValues: nextDepthUniqueValues
             };
 
             uniqueKeyGenerator(keyArray, newContext, depth + 1, [...val, value]);
@@ -133,12 +133,13 @@ const pushToMatrix = (context, valueCellCreator) => {
  * Gets Matrixes for corresponding datamodel, facets and projections
  *
  * @param {Object} dataModel input datamodel
- * @param {Object} fieldMap corresponding fieldmap
  * @param {Array} facetsAndProjections contains the set of facets and projections for the matrices
  * @param {Function} valueCellCreator Callback executed after datamodels are prepared after sel/proj
+ * @param {Object} globalConfig global config
+ *
  * @return {Object} set of matrices with the corresponding row and column keys
  */
-export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator) => {
+export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator, globalConfig) => {
     let rowDataModels = [];
     const rowKeys = [];
     const columnKeys = [];
@@ -164,7 +165,7 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = rowFacets[0].toString();
         const firstLevelRowKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(rowFacets[0], firstLevelRowKeys);
+        sortFacetFields(rowFacets[0], firstLevelRowKeys, globalConfig);
 
         // Get unique keys in the form of an array of arrays for each row
         uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
@@ -198,7 +199,7 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = colFacetNames[0];
         const firstLevelColumnKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(colFacets[0], firstLevelColumnKeys);
+        sortFacetFields(colFacets[0], firstLevelColumnKeys, globalConfig);
 
         // Get unique keys to create faceted datamodels: this time for columns
         uniqueKeyGenerator(columnKeys, {

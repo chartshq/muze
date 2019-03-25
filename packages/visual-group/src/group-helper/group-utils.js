@@ -448,11 +448,15 @@ export const extractFields = (facetsAndProjections, layerFields) => {
  * @param {Object} facet
  * @param {Array} keys Array of the facet field values
  */
-export const sortFacetFields = (facet, keys) => {
-    const subtype = facet.subtype();
-    const sortingDetails = nearestSortingDetails(facet.data());
+export const sortFacetFields = (facet, keys, config) => {
+    const facetName = `${facet}`;
+    const type = facet.type();
 
-    if (subtype === CATEGORICAL && !sortingDetails) {
-        keys.sort();
+    if (type === DIMENSION && config.sort[facetName]) {
+        if (config.sort[facetName] === 'asc') {
+            keys.sort();
+        } else {
+            keys.sort().reverse();
+        }
     }
 };
