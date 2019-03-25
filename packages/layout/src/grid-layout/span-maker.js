@@ -235,11 +235,7 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
 
     return {
         [ROW_SPAN] () {
-            // selectElement(this).style('height', `${height + borderWidth}px`);
-            // if (span > 1) {
-            // selectElement(this).style('height', `${height * span + borderWidth * (span)}px`);
             placeholder.setAvailableSpace(width, height * span);
-            // }
         },
         [COL_SPAN] () {
             if (span > 1) {

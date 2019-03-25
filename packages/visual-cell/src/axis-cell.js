@@ -4,7 +4,7 @@
  * @module VisualCell
  */
 import { selectElement, makeElement, generateGetterSetters } from 'muze-utils';
-import { CLASSPREFIX, HEIGHT, WIDTH, AXIS_CELL } from './enums/constants';
+import { CLASSPREFIX, HEIGHT, WIDTH, AXIS_CELL, BOTTOM, TOP } from './enums/constants';
 import SimpleCell from './simple-cell';
 import { DEFAULT_CONFIG } from './enums/defaults';
 import { AXIS } from './enums/cell-type';
@@ -172,6 +172,8 @@ class AxisCell extends SimpleCell {
         if (!mount) {
             return this;
         }
+        let actualWidth = 0;
+        let actualHeight = 0;
         const axis = this.source();
         const availHeight = this.availHeight();
         const availWidth = this.availWidth();
@@ -199,8 +201,14 @@ class AxisCell extends SimpleCell {
         if (!availHeight) {
             selection.attr(HEIGHT, `${0}px`);
         }
-        wrapperDiv.style(WIDTH, `${show ? Math.floor(availWidth) : 0}px`)
-                        .style(HEIGHT, `${show ? Math.floor(availHeight) : 0}px`)
+        actualWidth = availWidth;
+        actualHeight = availHeight;
+        if (!show) {
+            actualWidth = (orientation === TOP || orientation === BOTTOM) ? availWidth : 0;
+            actualHeight = (orientation === TOP || orientation === BOTTOM) ? 0 : availHeight;
+        }
+        wrapperDiv.style(WIDTH, `${actualWidth}px`)
+                        .style(HEIGHT, `${actualHeight}px`)
                         .style('margin-top', top)
                         .style('margin-bottom', bottom)
                         .style('margin-left', left)
