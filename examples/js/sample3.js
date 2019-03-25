@@ -69,18 +69,12 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .rows([])
-        .columns([])
+        .rows(['Acceleration'])
+        .columns(['Displacement'])
         .color("Year")
         .height(500)
         .width(600)
-        .layers([{
-            mark: 'arc',
-            encoding:{
-                angle: 'Acceleration',
-                radius: 'Origin'
-            }
-        }])
+      
         // .config({
         //     axes: {
         //         x: {
