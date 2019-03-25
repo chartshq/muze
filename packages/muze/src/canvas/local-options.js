@@ -53,7 +53,10 @@ export const localOptions = {
             typeCheck: d => d instanceof DataModel,
             sanitization: (dm, prevDm) => {
                 prevDm && prevDm.dispose();
-                const sanitizedDm = dm.project(dm.getSchema().map(d => d.name));
+                let sanitizedDm = dm;
+                if (dm instanceof DataModel) {
+                    sanitizedDm = dm.project(dm.getSchema().map(d => d.name));
+                }
                 return sanitizedDm;
             }
         }
