@@ -7,18 +7,24 @@ export const getPreviousPoint = (prevData, currIndex, context) => {
     const [startAngle, endAngle] = context.axes().angle.range();
     if (prevArc && nextArc) {
         return {
-            angle0: prevArc.angle,
-            angle: nextArc.angle0
+            update: {
+                angle0: getObjProp(prevArc, 'update', 'angle'),
+                angle: getObjProp(nextArc, 'update', 'angle0')
+            }
         };
     } else if (!nextArc) {
         return {
-            angle0: (endAngle - 90) * Math.PI * 2 / 360,
-            angle: (endAngle - 90) * Math.PI * 2 / 360
+            update: {
+                angle0: (endAngle - 90) * Math.PI * 2 / 360,
+                angle: (endAngle - 90) * Math.PI * 2 / 360
+            }
         };
     }
     return {
-        angle0: (startAngle - 90) * Math.PI * 2 / 360,
-        angle: (startAngle - 90) * Math.PI * 2 / 360
+        update: {
+            angle0: (startAngle - 90) * Math.PI * 2 / 360,
+            angle: (startAngle - 90) * Math.PI * 2 / 360
+        }
     };
 };
 
@@ -32,8 +38,8 @@ export const tweenPie = (path, b) => {
 export const tweenExitPie = (consecutiveExits, transition, path) => {
     if (consecutiveExits.length > 0) {
         consecutiveExits.forEach((consecutiveExitArr) => {
-            const startAngle = consecutiveExitArr[0].datum.angle0;
-            const endAngle = consecutiveExitArr[consecutiveExitArr.length - 1].datum.angle;
+            const startAngle = consecutiveExitArr[0].datum.update.angle0;
+            const endAngle = consecutiveExitArr[consecutiveExitArr.length - 1].datum.update.angle;
             const mid = (Math.PI * 2 * startAngle) / ((Math.PI * 2) + startAngle - endAngle);
 
             consecutiveExitArr.forEach((e) => {

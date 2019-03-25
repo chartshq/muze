@@ -116,10 +116,13 @@ export default class ArcLayer extends BaseLayer {
             points.push({
                 source: d.source,
                 index: i,
-                angle0: resolvedEncodings.angle0,
-                angle: resolvedEncodings.angle,
-                radius0: resolvedEncodings.radius0,
-                radius: resolvedEncodings.radius,
+                enter: {},
+                update: {
+                    angle0: resolvedEncodings.angle0,
+                    angle: resolvedEncodings.angle,
+                    radius0: resolvedEncodings.radius0,
+                    radius: resolvedEncodings.radius
+                },
                 color,
                 meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
                 rowId: uid,
@@ -151,12 +154,12 @@ export default class ArcLayer extends BaseLayer {
         // This returns a function that generates the arc path based on the datum provided
         const path = this._arcFn = arc()
                 .cornerRadius(cornerRadius)
-                .startAngle(d => d.angle0 + Math.PI / 2)
-                .endAngle(d => d.angle + Math.PI / 2)
+                .startAngle(d => d.update.angle0 + Math.PI / 2)
+                .endAngle(d => d.update.angle + Math.PI / 2)
                 .padAngle(padAngle)
                 .padRadius(padRadius)
-                .outerRadius(d => d.radius)
-                .innerRadius(d => d.radius0);
+                .outerRadius(d => d.update.radius)
+                .innerRadius(d => d.update.radius0);
 
         this._points = this._normalizedData.map(arr => this.translatePoints(arr));
 
