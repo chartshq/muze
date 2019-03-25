@@ -367,7 +367,7 @@ export default class PolarEncoder extends VisualEncoder {
             const def = toArray(config.def);
             sanitizeIndividualLayerConfig(encodingConfigs, def);
             def.forEach((conf) => {
-                const encoding = conf.encoding;
+                const encoding = conf.encoding || (conf.encoding = {});
                 !encoding.angle && (encoding.angle = {});
                 const angleField = getObjProp(encoding.angle, 'field');
                 const angle0Field = getObjProp(encoding.angle0, 'field');
