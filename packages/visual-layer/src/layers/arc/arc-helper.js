@@ -52,9 +52,12 @@ export const tweenExitPie = (consecutiveExits, transition, path) => {
                                     .duration(transition.duration)
                                     .attrTween('d', () => function (t) {
                                         return path(interpolator()(datum, {
-                                            startAngle: mid,
-                                            endAngle: mid,
-                                            outerRadius: datum.outerRadius
+                                            update: {
+                                                angle0: mid,
+                                                angle: mid,
+                                                radius: datum.radius,
+                                                radius0: datum.radius0
+                                            }
                                         })(t));
                                     })
                                     .remove();

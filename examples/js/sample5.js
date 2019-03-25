@@ -110,7 +110,9 @@ d3.json('../data/cars.json', (data) => {
             encoding: {
                 angle: 'Maker',
                 radius0: {
-                    value: (d) => d.radius + 20
+                    value: (d) => {
+                        return d.radius + 20;
+                    }
                 },
                 radius: 'Acceleration',
                 text: {

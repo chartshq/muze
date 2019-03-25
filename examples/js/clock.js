@@ -25,6 +25,74 @@ const makeZeroSixty = (val) => {
     } return val;
 };
 
+const tickMap = {
+    hours: {
+        low: {
+            stroke: 'black',
+            width: '2px',
+            inner: 0,
+            outer: -100
+        },
+        middle: {
+            stroke: '#c41400',
+            width: '6px',
+            inner: 20,
+            outer: -100
+        },
+        high: {
+            stroke: 'black',
+            width: '10px',
+            inner: 20,
+            outer: -100
+        }
+    },
+    minutes: {
+        low: {
+            stroke: 'black',
+            width: '2px',
+            inner: 0,
+            outer: -70
+        },
+        middle: {
+            stroke: '#c41400',
+            width: '6px',
+            inner: 20,
+            outer: -70
+        },
+        high: {
+            stroke: 'black',
+            width: '10px',
+            inner: 20,
+            outer: -70
+        }
+    }
+};
+
+const generateTick = (type, tickType, source) => {
+    const tick = tickMap[type][tickType];
+    return {
+        mark: 'tick',
+        source,
+        encoding: {
+            angle: 'name',
+            color: {
+                value: () => tick.stroke
+            }
+        },
+        interpolate: 'catmullRom',
+        encodingTransform: (points) => {
+            points.forEach((point) => {
+                point.update.radius0 = point.update.radius - 40 - 60;
+                point.update.radius = tick.inner;
+                point.style['stroke-width'] = tick.width;
+                point.style['stroke-linecap'] = 'round';
+                point.style['stroke-opacity'] = '1';
+            });
+            return points;
+        }
+    };
+};
+
 window.canvas = env.canvas()
         .data(rootData)
         .rows([])
@@ -64,9 +132,10 @@ window.canvas = env.canvas()
                                 return val / 5;
                             } return '';
                         }
+
                     },
                     color: {
-                        value: () => '#000'
+                        value: () => 'black'
                     }
                 },
                 encodingTransform: (points) => {
@@ -93,6 +162,7 @@ window.canvas = env.canvas()
                     return points;
                 }
             },
+
             {
                 mark: 'tick',
                 source: 'smallTicks',
@@ -110,45 +180,32 @@ window.canvas = env.canvas()
                     return points;
                 }
             },
-            {
-                mark: 'tick',
-                source: 'tickHours',
-                encoding: {
-                    angle: 'name',
-                    color: {
-                        value: () => 'black'
-                    }
-                },
-                interpolate: 'catmullRom',
-                encodingTransform: (points) => {
-                    points.forEach((point) => {
-                        point.update.radius0 = point.update.radius - 40 - 60;
-                        point.update.radius = 0;
-                        point.style['stroke-width'] = '4px';
-                    });
-                    return points;
-                }
-            },
-            {
-                mark: 'tick',
-                source: 'tickMinutes',
-                encoding: {
-                    angle: 'name',
+            generateTick('hours', 'low', 'tickHours'),
+            generateTick('hours', 'high', 'tickHours'),
+            generateTick('hours', 'middle', 'tickHours'),
+            generateTick('minutes', 'low', 'tickMinutes'),
+            generateTick('minutes', 'high', 'tickMinutes'),
+            generateTick('minutes', 'middle', 'tickMinutes'),
+            // {
+            //     mark: 'tick',
+            //     source: 'tickMinutes',
+            //     encoding: {
+            //         angle: 'name',
 
-                    color: {
-                        value: () => 'black'
-                    }
-                },
-                interpolate: 'catmullRom',
-                encodingTransform: (points) => {
-                    points.forEach((point) => {
-                        point.update.radius0 = point.update.radius - 40 - 30;
-                        point.update.radius = 0;
-                        point.style['stroke-width'] = '2px';
-                    });
-                    return points;
-                }
-            },
+            //         color: {
+            //             value: () => 'black'
+            //         }
+            //     },
+            //     interpolate: 'catmullRom',
+            //     encodingTransform: (points) => {
+            //         points.forEach((point) => {
+            //             point.update.radius0 = point.update.radius - 40 - 30;
+            //             point.update.radius = 0;
+            //             point.style['stroke-width'] = '2px';
+            //         });
+            //         return points;
+            //     }
+            // },
             {
                 mark: 'tick',
                 source: 'tickSeconds',
@@ -180,4 +237,3 @@ setInterval(() => {
         tickSeconds: dm => dm.select(fields => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
     });
 }, 500);
-
