@@ -39,10 +39,10 @@
         subtype: 'temporal',
         format: '%Y-%m-%d'
     }];
-    const dm = new DataModel(jsonData, schema);
-    const dm2 = dm.sort([
-        ['Origin', 'desc'],
-    ]);
+    window.dm = new DataModel(jsonData, schema);
+    // const dm2 = dm.sort([
+    //     ['Origin', 'desc'],
+    // ]);
     const canvas = env.canvas();
     
     canvas
@@ -51,11 +51,23 @@
         .height(500)
         // .columns(['Horsepower', 'Origin', 'Maker'])
         // .rows(['Origin', 'Year', 'Maker'])
-        .rows(['Origin', 'Year', 'Cylinders'])
+        .rows(['Year', 'Origin'])
         // .rows(['Maker', 'Year'])
-        .columns(['Acceleration'])
+        .columns(['Horsepower'])
         // .detail(['Name'])
         .mount('#chart')
+        .config({
+            showHeaders: true,
+            sort: {
+                Year: 'desc',
+                Origin: 'desc'
+            },
+            axes: {
+                x: {
+                    name: 'aaa'
+                }
+            }
+        })
     });
 }());
 
