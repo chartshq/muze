@@ -94,6 +94,13 @@ d3.json('../../data/cars.json', (data) => {
         // .color('name')
         .height(500)
         .width(1200)
+        .config({
+            axes:{
+                radius: {
+                    range: (range)=>[range[0], range[1]-15]
+                }
+            }
+        })
         .transform({
             bigTicks: (dm) => dm.select((fields) => fields.name.value %5 == 0),
             smallTicks: (dm) => dm.select((fields) => fields.name.value %5 !== 0),
@@ -106,7 +113,7 @@ d3.json('../../data/cars.json', (data) => {
                 radius: () => {
                     return {
                         range: (defRange) => {
-                            return [defRange[0], defRange[1] - 140]
+                            return [defRange[0], defRange[1] - 20]
                         }
                     }
                 }
@@ -135,7 +142,7 @@ d3.json('../../data/cars.json', (data) => {
                 },
                 encodingTransform: (points) => {
                     points.forEach((point) => {
-                        point.update.radius += 55;
+                        point.update.radius += 10;
                     });
                     return points;
                 }
@@ -154,39 +161,37 @@ d3.json('../../data/cars.json', (data) => {
                     }
                 },
                 // outerRadius: 140,
+                interpolate: 'catmullRom',
                 encodingTransform: (points) => {
                     points.forEach((point) => {
-                        point.update.radius0 += 40;
+                        // point.update.radius0 = 210;
+                        // point.update.radius = 240;
+                        point.update.radius0 =  point.update.radius - 40;
+                        // point.update.radius =  point.update.radius - 10;
                     });
                     return points;
                 }
             },
             {
                 mark: "tick",
-                // name: 'smallTicks',
                 source: 'smallTicks',
                 encoding: {
                     angle: 'name',
-                    // radius: {
-                    //     field: 'Horsepower'
-                    // },
                     color: {
                         value: () => 'black'
                     }
                 },
-                // outerRadius: 140,
                 interpolate: 'catmullRom',
                 encodingTransform: (points) => {
                     points.forEach((point) => {
-                        point.update.radius0 += 40;
-                        point.update.radius += 20;
+                        point.update.radius0 =  point.update.radius - 20;
+                   
                     });
                     return points;
                 }
             },
             {
                 mark: "tick",
-                // name: 'hourTick',
                 source: 'tickHours',
                 encoding: {
                     angle: 'name',
@@ -253,13 +258,13 @@ d3.json('../../data/cars.json', (data) => {
         ])
         .mount('#chart');
 
-        setInterval(() => {
-            canvas.transform({
-                bigTicks: (dm) => dm.select((fields) => fields.name.value %5 === 0),
-                smallTicks: (dm) => dm.select((fields) => fields.name.value %5 !== 0),
-                tickHours: (dm) => dm.select((fields) => fields.name.value === `${(new Date().getHours()%12 * 5)}`),
-                tickMinutes: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getMinutes())}`),
-                tickSeconds: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
-            })
-        }, 500);
+        // setInterval(() => {
+        //     canvas.transform({
+        //         bigTicks: (dm) => dm.select((fields) => fields.name.value %5 === 0),
+        //         smallTicks: (dm) => dm.select((fields) => fields.name.value %5 !== 0),
+        //         tickHours: (dm) => dm.select((fields) => fields.name.value === `${(new Date().getHours()%12 * 5)}`),
+        //         tickMinutes: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getMinutes())}`),
+        //         tickSeconds: (dm) => dm.select((fields) => fields.name.value === `${makeZeroSixty(new Date().getSeconds())}`)
+        //     })
+        // }, 500);
     });
