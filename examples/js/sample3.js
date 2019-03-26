@@ -75,93 +75,12 @@ d3.json('../../data/cars.json', (data) => {
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-   window.canvas =  env.canvas()
-        .data(rootData)
-        .rows([])
-        .columns([])
-        .layers([{
-            mark: 'arc',
-            encoding: {
-                radius: {
-                    // field: 'Horsepower'
-                }
-            },
-            sort: 'asc'
-
-        }]).data(rootData).color({
-            field: 'Horsepower',
-            interpolate: false,
-            steps: 4
-        }).width(600).height(500).config({
-            legend: {
-                position: 'bottom'
-            }
-        })
-        // .config({
-        //     axes: {
-        //         x: {
-
-    var rows = [],
-    columns = [];
-canvas = canvas.rows(columns).columns(rows).layers([{
-    mark: 'arc',
-    encoding: {
-        radius: {
-            field: 'Displacement'
-        }
-    },
-    // sort: 'asc'
-
-}]).data(rootData).color({
-    field: 'Horsepower',
-    interpolate: true
-}).width(600).height(500).legend({
-    'position': 'right'
-}).mount('#chart').once('canvas.animationend').then(function (client) {
-    var element = document.getElementById('chart');
-    element.classList.add('animateon');
-});
-
-    // invert configuration after 3s
-    //    setTimeout(() => {
-    //     canvas.rows(['Horsepower']).columns(['Origin', 'Year']);
-    //   // invert inverted confog after 3s
-    //   setTimeout(() => {
-    //   canvas.rows(['Origin','Year']).columns(['Horsepower']);
-    //   }, 3000)
-    // }, 3000)
-
-//  window.canvas =  env.canvas()
-//         .data(rootData)
-//         .rows([])
-//         .columns(['Year'])
-//         .color('Origin')
-//         // .color("Origin")
-//         .height(600)
-//         .width(500)
-//         .config({
-//             facet:{
-//                 rows:{
-//                     verticalAlign: 'middle'
-//                 }
-//             },
-
-//         })
-//         .title("Year wise average car Acceleration")
-//         .layers([
-//             {
-//                 mark: "area"
-//             },
-//             {
-//                 mark: 'text',
-//                 encoding: {
-//                     text: 'Acceleration'
-//                 },
-//                 transform: {
-//                     type: 'stack',
-//                     groupBy: 'Origin'
-//                 }
-//             }
-//         ])
-//  .mount('#chart2');
+    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
+            columns = rows.reverse();
+        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+            field: 'Origin'
+        }).mount('#chart').once('canvas.animationend').then(function (client) {
+            var element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
 });
