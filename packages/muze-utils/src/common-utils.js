@@ -1299,6 +1299,11 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                 saveChild: false,
                 mode
             });
+        } else {
+            filteredDataModel = dataModel.select(() => false, {
+                saveChild: false,
+                mode
+            });
         }
     } else {
         filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);

@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { getUniqueId, mergeRecursive, generateGetterSetters } from 'muze-utils';
+import { getUniqueId, mergeRecursive, generateGetterSetters, sanitizeDomainWhenEqual } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { LINEAR } from '../../../visual-group/src/enums/constants';
 import { PROPS } from './props';
@@ -69,10 +69,8 @@ export default class RadiusAxis {
     domain (...domainVal) {
         if (domainVal.length) {
             const { domain: customDomain } = this.config();
-            const domain = resolveAxisConfig(customDomain, domainVal[0], this);
-            if (domain[0] === domain[1]) {
-                domain[0] = domain[1] / 2;
-            }
+            let domain = resolveAxisConfig(customDomain, domainVal[0], this);
+            domain = sanitizeDomainWhenEqual(domain);
             this._scale.domain(domain);
             this._domain = domain;
             adjustDomain(this);

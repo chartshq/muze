@@ -57,56 +57,55 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }
     ];
 
-
-
+    // function shuffleArray(array) {
+    //     for (var i = array.length - 1; i > 0; i--) {
+    //         var j = Math.floor(Math.random() * (i + 1));
+    //         var temp = array[i];
+    //         array[i] = array[j];
+    //         array[j] = temp;
+    //     }
+    // }
+    // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-   window.canvas =  env.canvas()
-        .data(rootData)
-        .rows(['Acceleration'])
-        .columns(['Displacement'])
-        .color({
-            field: "Displacement",
-            // step: true
-        })
-        .height(500)
-        .width(600)
-        
-      .layers([{
-        //   mark: 'arc',
-          encoding: {
-            //   angle: 'Origin'
-          }
-      }])
-        // .config({
-        //     axes: {
-        //         x: {
+    let canvas = env.canvas();
 
-        //             tickFormat: (val, rawVal, i, ticks) => {
+    var rows = [],
+    columns = [];
+canvas = canvas.rows(columns).columns(rows).layers([{
+    mark: 'arc',
+    encoding: {
+        radius: {
+            field: 'Displacement'
+        }
+    },
+    // sort: 'asc'
 
-        //                 return val;
-        //             }
-        //         },
-        //         y: {
-        //             name: 'akasndklasndoiansflkjasdnfoslkdnf',
-        //             tickFormat: (val, rawVal) => {
-        //                 // console.log(val, rawVal);
-        //                 return val;
-        //             },
-        //         }
-        //     },
-        //     pagination: 'holistic'
-        // })
-        .title("Year wise average car Acceleration")
+}]).data(rootData).color({
+    field: 'Horsepower',
+    interpolate: true
+}).width(600).height(500).legend({
+    'position': 'right'
+}).mount('#chart').once('canvas.animationend').then(function (client) {
+    var element = document.getElementById('chart');
+    element.classList.add('animateon');
+});
 
- .mount('#chart');
+    // invert configuration after 3s
+    //    setTimeout(() => {
+    //     canvas.rows(['Horsepower']).columns(['Origin', 'Year']);
+    //   // invert inverted confog after 3s
+    //   setTimeout(() => {
+    //   canvas.rows(['Origin','Year']).columns(['Horsepower']);
+    //   }, 3000)
+    // }, 3000)
 
 //  window.canvas =  env.canvas()
 //         .data(rootData)

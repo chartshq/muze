@@ -1,5 +1,5 @@
-import { scaleMap } from '../../scale-creator';
 import { sanitizeDomainWhenEqual } from 'muze-utils';
+import { scaleMap } from '../../scale-creator';
 
 export default class LinearInterpolator {
 
