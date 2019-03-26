@@ -60,7 +60,7 @@ export const createAxis = (context) => {
         tickValues: data.map(d => d.value),
         fixedBaseline: false,
         labels: {
-            rotation: 0
+            rotation: null
         }
     }, { labelManager: context._labelManager });
 
