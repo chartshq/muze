@@ -29,7 +29,8 @@ d3.json('../../data/cars.json', (data) => {
 
     {
         name: 'Displacement',
-        type: 'measure'
+        type: 'measure',
+        defAggFn: 'min'
     },
     {
         name: 'Horsepower',
@@ -71,10 +72,19 @@ d3.json('../../data/cars.json', (data) => {
         .data(rootData)
         .rows(['Acceleration'])
         .columns(['Displacement'])
-        .color("Year")
+        .color({
+            field: "Displacement",
+            // step: true
+        })
         .height(500)
         .width(600)
-      
+        
+      .layers([{
+        //   mark: 'arc',
+          encoding: {
+            //   angle: 'Origin'
+          }
+      }])
         // .config({
         //     axes: {
         //         x: {

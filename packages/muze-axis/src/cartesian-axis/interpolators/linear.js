@@ -1,4 +1,5 @@
 import { scaleMap } from '../../scale-creator';
+import { sanitizeDomainWhenEqual } from 'muze-utils';
 
 export default class LinearInterpolator {
 
@@ -16,8 +17,8 @@ export default class LinearInterpolator {
     }
 
     sanitizeDomain (domain) {
-        if (domain.length && domain[0] === domain[1]) {
-            domain = [0, +domain[0] * 2];
+        if (domain.length) {
+            domain = sanitizeDomainWhenEqual(domain);
         }
         return domain;
     }
