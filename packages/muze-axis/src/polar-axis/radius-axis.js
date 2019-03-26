@@ -70,6 +70,9 @@ export default class RadiusAxis {
         if (domainVal.length) {
             const { domain: customDomain } = this.config();
             const domain = resolveAxisConfig(customDomain, domainVal[0], this);
+            if (domain[0] === domain[1]) {
+                domain[0] = domain[1] / 2;
+            }
             this._scale.domain(domain);
             this._domain = domain;
             adjustDomain(this);
