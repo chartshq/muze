@@ -137,11 +137,11 @@ You can find detailed tutorials, concepts and API references at [muzejs.org/docs
 
 ## Support
 
-Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or contact us at [muze@charts.com](mailto:muze@charts.com).
+Please raise a Github issue [here](https://github.com/chartshq/muze/issues/new).
 
 ## Roadmap
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muze.charts.com)
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muzejs.org)
 
 ## Contributing
 
