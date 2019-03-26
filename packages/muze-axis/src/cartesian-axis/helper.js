@@ -346,7 +346,7 @@ export const getValidDomain = (context, domain) => {
     const { domain: userDom } = context.config();
 
     if (userDom) {
-        domain = userDom;
+        domain = userDom instanceof Function ? userDom(domain, context) : userDom;
     }
 
     return defaultValue(domain, []);
