@@ -190,6 +190,14 @@ const getDomainFromData = (data, fields, fieldType) => {
     return domain;
 };
 
+const sanitizeDomainWhenEqual = (domain) => {
+    if (domain[0] === domain[1]) {
+        domain[0] = domain[0] > 0 ? 0 : domain[0];
+        domain[1] = domain[1] > 0 ? domain[1] : 0;
+    }
+    return domain;
+};
+
 /**
  * Union Domain values
  * @param {Array.<Array>} domains Array of domain values
@@ -1291,6 +1299,11 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                 saveChild: false,
                 mode
             });
+        } else {
+            filteredDataModel = dataModel.select(() => false, {
+                saveChild: false,
+                mode
+            });
         }
     } else {
         filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
@@ -1664,5 +1677,6 @@ export {
     createSelection,
     formatTemporal,
     temporalFields,
-    retrieveFieldDisplayName
+    retrieveFieldDisplayName,
+    sanitizeDomainWhenEqual
 };

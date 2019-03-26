@@ -90,7 +90,11 @@ export const getGridLayerDefinitions = (context, config, type) => ['x', 'y'].map
     return show ? getLayerDefinition(context, axes, type, axisType) : null;
 }).filter(d => d !== null);
 
-const getValidSubtype = subtype => (!DimensionSubtype[subtype] ? DimensionSubtype.CATEGORICAL : subtype);
+const dimensionSubTypes = Object.values(DimensionSubtype).reduce((acc, v) => {
+    acc[v] = 1;
+    return acc;
+}, {});
+const getValidSubtype = subtype => (!dimensionSubTypes[subtype] ? DimensionSubtype.CATEGORICAL : subtype);
 
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
     const gridData = {};

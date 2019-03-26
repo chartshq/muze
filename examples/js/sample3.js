@@ -29,7 +29,8 @@ d3.json('../../data/cars.json', (data) => {
 
     {
         name: 'Displacement',
-        type: 'measure'
+        type: 'measure',
+        defAggFn: 'min'
     },
     {
         name: 'Horsepower',
@@ -61,8 +62,15 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-
-
+    // function shuffleArray(array) {
+    //     for (var i = array.length - 1; i > 0; i--) {
+    //         var j = Math.floor(Math.random() * (i + 1));
+    //         var temp = array[i];
+    //         array[i] = array[j];
+    //         array[j] = temp;
+    //     }
+    // }
+    // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
     // .select(fields=>fields.Year.value === '1972-01-01');
 
