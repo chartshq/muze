@@ -56,8 +56,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }
     ];
 
@@ -67,68 +67,12 @@ d3.json('../../data/cars.json', (data) => {
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-   window.canvas =  env.canvas()
-        .data(rootData)
-        .rows(['Acceleration'])
-        .columns(['Displacement'])
-        .color("Year")
-        .height(500)
-        .width(600)
-      
-        // .config({
-        //     axes: {
-        //         x: {
-
-        //             tickFormat: (val, rawVal, i, ticks) => {
-
-        //                 return val;
-        //             }
-        //         },
-        //         y: {
-        //             name: 'akasndklasndoiansflkjasdnfoslkdnf',
-        //             tickFormat: (val, rawVal) => {
-        //                 // console.log(val, rawVal);
-        //                 return val;
-        //             },
-        //         }
-        //     },
-        //     pagination: 'holistic'
-        // })
-        .title("Year wise average car Acceleration")
-
- .mount('#chart');
-
-//  window.canvas =  env.canvas()
-//         .data(rootData)
-//         .rows([])
-//         .columns(['Year'])
-//         .color('Origin')
-//         // .color("Origin")
-//         .height(600)
-//         .width(500)
-//         .config({
-//             facet:{
-//                 rows:{
-//                     verticalAlign: 'middle'
-//                 }
-//             },
-
-//         })
-//         .title("Year wise average car Acceleration")
-//         .layers([
-//             {
-//                 mark: "area"
-//             },
-//             {
-//                 mark: 'text',
-//                 encoding: {
-//                     text: 'Acceleration'
-//                 },
-//                 transform: {
-//                     type: 'stack',
-//                     groupBy: 'Origin'
-//                 }
-//             }
-//         ])
-//  .mount('#chart2');
+    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
+            columns = rows.reverse();
+        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+            field: 'Origin'
+        }).mount('#chart').once('canvas.animationend').then(function (client) {
+            var element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
 });

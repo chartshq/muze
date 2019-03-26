@@ -210,20 +210,23 @@ export default class ContinousAxis extends SimpleAxis {
         } = labels;
         const axis = this.axis();
         const ticks = axis.tickValues();
+        const smartTicks = this.smartTicks();
 
-        const { width, height } = this.smartTicks()[0];
+        if (smartTicks && smartTicks.length) {
+            const { width, height } = this.smartTicks()[0];
 
-        axis.tickTransform((d) => {
-            if (d === ticks[0]) {
-                if ((orientation === LEFT || orientation === RIGHT)) {
-                    return `translate(0, -${(height) / 3}px)`;
-                }
+            axis.tickTransform((d) => {
+                if (d === ticks[0]) {
+                    if ((orientation === LEFT || orientation === RIGHT)) {
+                        return `translate(0, -${(height) / 3}px)`;
+                    }
 
-                if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
-                    return `translate(${width / 2}px,  ${0}px)`;
-                }
-            } return '';
-        });
+                    if ((orientation === TOP || orientation === BOTTOM) && !rotation) {
+                        return `translate(${width / 2}px,  ${0}px)`;
+                    }
+                } return '';
+            });
+        }
         return tickText;
     }
 
