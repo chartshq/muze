@@ -4,6 +4,7 @@
   "version": "1.1.0",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://muzejs.org",
+  "author": "Muzejs.org (https://muzejs.org/)",
   "license": "MIT",
   "contributors": [
     {

@@ -4,6 +4,7 @@
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://muzejs.org",
   "license": "MIT",
+  "author": "Muzejs.org (https://muzejs.org/)",
   "contributors": [
     {
       "name": "Akash Ghoswami",
