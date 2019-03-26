@@ -9,6 +9,7 @@ export const defaultConfig = {
     defClassName: 'visual-unit',
     className: '',
     trackerClassName: 'visual-unit-tracker',
+    minOuterRadius: 10,
     gridLines: {
         defClassName: 'axis-grid-lines',
         className: '',

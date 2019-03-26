@@ -2,21 +2,20 @@
     "name": "@chartshq/muze-legend",
     "version": "1.0.0",
     "description": "The legend module for MuzeJS",
-    "homepage": "https://www.charts.com/muze",
+    "homepage": "https://muzejs.org",
     "license": "MIT",
-    "author": "Charts.com <support@charts.com>",
     "contributors": [
         {
             "name": "Akash Ghoswami",
-            "email": "akash@charts.com"
+            "email": "akashgoswami90s@gmail.com"
         },
         {
             "name": "Ujjal Kumar Dutta",
-            "email": "ujjal@charts.com"
+            "email": "duttaujjalkumar@live.com"
         },
         {
             "name": "Rousan Ali",
-            "email": "rousan@charts.com",
+            "email": "rousanali786@gmail.com",
             "url": "https://rousan.io"
         }
     ],

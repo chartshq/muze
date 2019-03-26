@@ -221,18 +221,12 @@ export const RADIUS = 'radius';
  * Field referring to object storing the transforms
  */
 export const ANGLE = 'angle';
+
+export const ANGLE0 = 'angle0';
 /**
  * Field referring to object storing the transforms
  */
 export const ARC = 'arc';
-/**
- * Field referring to object storing the transforms
- */
-export const CARTESIAN = 'cartesian';
-/**
- * Field referring to object storing the transforms
- */
-export const POLAR = 'polar';
 /**
  * Field referring to object storing the transforms
  */
@@ -285,4 +279,11 @@ export const HEADER = 'header';
  * Field referring to object storing the transforms
  */
 export const FACET = 'facet';
-
+/**
+ * Ordering type
+ */
+export const ASCENDING = 'asc';
+/**
+ * Ordering type
+ */
+export const DESCENDING = 'desc';

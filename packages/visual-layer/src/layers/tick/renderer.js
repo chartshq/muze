@@ -1,4 +1,6 @@
-import { selectElement } from 'muze-utils';
+import { selectElement, Symbols, pathInterpolators } from 'muze-utils';
+
+const line = Symbols.line;
 
 /**
  * Draws ticks by using d3 selection
@@ -6,7 +8,7 @@ import { selectElement } from 'muze-utils';
  * @return {Selection} Ticks Selection
  */
 export default /* istanbul ignore next */ (params) => {
-    const { points, container, keyFn, className } = params;
+    const { points, container, keyFn, className, interpolate } = params;
     const mount = selectElement(container);
     const ticks = mount.selectAll('path').data(points, keyFn);
     const ticksEnter = ticks.enter().append('path');
@@ -26,9 +28,13 @@ export default /* istanbul ignore next */ (params) => {
                         const updateStyle = d.style || {};
                         const x0 = update.x0 !== undefined ? update.x0 : update.x;
                         const y0 = update.y0 !== undefined ? update.y0 : update.y;
-                        const path = `M ${update.x} ${update.y} L ${x0} ${y0}`;
+                        const curveInterpolatorFn = pathInterpolators[interpolate];
+                        const linepath = line()
+                            .curve(curveInterpolatorFn)
+                            .x(e => e[0])
+                            .y(e => e[1]);
                         d.className && selection.classed(d.className, true);
-                        selection.attr('d', path);
+                        selection.attr('d', linepath([[update.x, update.y], [x0, y0]]));
                         Object.entries(updateStyle).forEach(styleObj => selection.style(styleObj[0], styleObj[1]));
                     });
 };

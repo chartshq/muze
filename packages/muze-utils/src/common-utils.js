@@ -1,5 +1,5 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
-import { FieldType, DimensionSubtype, DateTimeFormatter, default as DataModel } from 'datamodel';
+import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
 import {
     axisLeft,
     axisRight,
@@ -60,7 +60,6 @@ import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
 import * as STACK_CONFIG from './enums/stack-config';
-import { DM_OPERATION_GROUP } from './enums';
 
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
@@ -187,6 +186,14 @@ const getDomainFromData = (data, fields, fieldType) => {
         }
         domain = domArr.length ? [Math.min(...domArr.map(d => d[0])), Math.max(...domArr.map(d => d[1]))] : [];
         break;
+    }
+    return domain;
+};
+
+const sanitizeDomainWhenEqual = (domain) => {
+    if (domain[0] === domain[1]) {
+        domain[0] = domain[0] > 0 ? 0 : domain[0];
+        domain[1] = domain[1] > 0 ? domain[1] : 0;
     }
     return domain;
 };
@@ -714,9 +721,8 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
             } else {
                 nameSpaceProp = prop;
             }
-            if (!store.prop(`${nameSpaceProp}`)) {
-                stateProps[prop] = conf.value;
-            }
+
+            stateProps[prop] = conf.value;
             if (addAsMethod !== false) {
                 holder[prop] = ((context, meta, nsProp) => (...params) => {
                     let val;
@@ -816,6 +822,7 @@ const generateGetterSetters = (context, props) => {
         const typeChecker = propInfo[1].typeChecker;
         const defVal = propInfo[1].defaultValue;
         const sanitization = propInfo[1].sanitization;
+        const preset = propInfo[1].preset;
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
             if (defVal) {
@@ -826,6 +833,9 @@ const generateGetterSetters = (context, props) => {
                     let value = params[0];
                     if (sanitization) {
                         value = sanitization(context, params[0]);
+                    }
+                    if (preset) {
+                        preset(context, value);
                     }
                     if (typeChecker && !typeChecker(value)) {
                         return context[`_${prop}`];
@@ -936,14 +946,16 @@ const mergeRecursive = (source, sink) => {
  * @return {Selection} Merged selection
  */
 const createSelection = (sel, appendObj, data, idFn) => {
-    let selection = sel || dataSelect([]);
+    let selection = sel || dataSelect(idFn);
 
-    selection = selection.data(data, idFn);
+    selection = selection.data(data);
 
     const enter = selection.enter().append(appendObj);
     const mergedSelection = enter.merge(selection);
 
-    selection.exit() && selection.exit().remove();
+    const exitSelection = selection.exit();
+    exitSelection.getObjects().forEach(inst => inst.remove());
+    exitSelection.remove();
     return mergedSelection;
 };
 
@@ -1140,13 +1152,11 @@ const hsvToRgb = (h, s, v, a = 1) => {
 };
 
 const hexToHsv = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
 
-    const r = parseInt(result[1], 16);
-    const g = parseInt(result[2], 16);
-    const b = parseInt(result[3], 16);
-    const a = result[4] ? parseInt(result[4], 16) : 1;
-    return rgbToHsv(r, g, b, a);
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? rgbToHsv(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)) : '';
 };
 
 const detectColor = (col) => {
@@ -1157,7 +1167,7 @@ const detectColor = (col) => {
      // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
      // eslint-disable-next-line
-    const matchHsla = /^hsla\((0|360|35\d|3[0-4]\d|[12]\d\d|0?\d?\d),(0|100|\d{1,2})%,(0|100|\d{1,2})%,(0?\.\d|1(\.0)?)\)$/;
+    const matchHsla = /^hsla\((\d.+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
     if (matchRgb.test(col) || matchRgba.test(col)) {
@@ -1286,6 +1296,11 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
                 });
                 return include;
             }, {
+                saveChild: false,
+                mode
+            });
+        } else {
+            filteredDataModel = dataModel.select(() => false, {
                 saveChild: false,
                 mode
             });
@@ -1548,33 +1563,40 @@ const getValueParser = config => (val) => {
 };
 
 const retrieveNearestGroupByReducers = (dataModel, ...measureFieldNames) => {
-    let nearestReducers = {};
-    let next = dataModel;
-    do {
-        const derivations = next.getDerivations();
-        if (derivations) {
-            const groupDerivation = derivations.reverse().find(derivation => derivation.op === DM_OPERATION_GROUP);
-            if (groupDerivation) {
-                nearestReducers = groupDerivation.criteria || {};
-                break;
-            }
-        }
-    } while (next = next.getParent());
-
     const filteredReducers = {};
-    const measures = dataModel.getFieldspace().getMeasure();
-    measureFieldNames.forEach((measureName) => {
-        if (nearestReducers[measureName]) {
-            filteredReducers[measureName] = nearestReducers[measureName];
-        } else {
-            const measureField = measures[measureName];
-            if (measureField) {
-                filteredReducers[measureName] = measureField.defAggFn();
-            }
-        }
-    });
+    if (dataModel instanceof DataModel) {
+        const derivations = [...dataModel.getDerivations().reverse(), ...dataModel.getAncestorDerivations().reverse()];
+        const nearestReducers = defaultValue(
+            getObjProp(derivations.find(derv => derv.op === DM_DERIVATIVES.GROUPBY), 'criteria'), {});
 
+        const measures = dataModel.getFieldspace().getMeasure();
+        measureFieldNames = measureFieldNames.length ? measureFieldNames : Object.keys(measures);
+        measureFieldNames.forEach((measureName) => {
+            if (nearestReducers[measureName]) {
+                filteredReducers[measureName] = nearestReducers[measureName];
+            } else {
+                const measureField = measures[measureName];
+                if (measureField) {
+                    filteredReducers[measureName] = measureField.defAggFn();
+                }
+            }
+        });
+    }
     return filteredReducers;
+};
+
+const retrieveFieldDisplayName = (dm, fieldName) => dm.getFieldspace().fieldsObj()[fieldName].displayName();
+/**
+ * Fetches the nearest sort operation details by traversing the chain of parent DataModels
+ * @param {Object} dataModel Instance of DataModel
+ *
+ * @return {Array|null} sort criteria, null if no sort operation found
+ */
+const nearestSortingDetails = (dataModel) => {
+    const allDerivations = [...dataModel.getAncestorDerivations(), ...dataModel.getDerivations()];
+    const nearestSortDerivation = allDerivations.reverse().find(derivation => derivation.op === DM_DERIVATIVES.SORT);
+
+    return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
 export {
@@ -1651,7 +1673,10 @@ export {
     getSmallestDiff,
     getNearestValue,
     retrieveNearestGroupByReducers,
+    nearestSortingDetails,
     createSelection,
     formatTemporal,
-    temporalFields
+    temporalFields,
+    retrieveFieldDisplayName,
+    sanitizeDomainWhenEqual
 };

@@ -17,11 +17,10 @@ const mycroftProtocol = 'http';
 const mycroftHost = 'sherlock.charts.com';
 const mycroftPort = '3001';
 const mollyProtocol = 'http';
-const mollyHost = '192.168.102.171';
-const mollyPort = '8084';
+const mollyHost = 'sherlock.charts.com';
+const mollyPort = '80';
 const currentPrintStream = process.stdout;
 const initiateStatusInterval = 1000;
-let autotestDone = false;
 let cursorRelYPos = 0;
 
 program
@@ -78,31 +77,15 @@ const uploadBuild = async (tag) => {
     return uploadRes;
 };
 
-const makeAutoTestRequest = (reqId, tag, doneCallback) => {
+const initiateAutoTest = async (tag) => {
+    const reqId = uuid();
     const testcaseInitiateURL = `${mycroftProtocol}://${mycroftHost}:${mycroftPort}/api/v1/autotest/initiate`;
     const payload = {
         requestId: reqId,
         libVersion: tag,
         all: true
     };
-
-    axios.post(testcaseInitiateURL, payload)
-        .then((resp) => {
-            if (resp.status !== HttpStatus.OK) {
-                doneCallback(null, new Error(`${resp.status}, ${resp.statusText}`));
-                return;
-            }
-
-            doneCallback(resp.data, null);
-        })
-        .catch((err) => {
-            doneCallback(null, err);
-        });
-};
-
-const initiateAutoTest = async (tag, doneCallback) => {
-    const reqId = uuid();
-    makeAutoTestRequest(reqId, tag, doneCallback);
+    await axios.post(testcaseInitiateURL, payload);
     return reqId;
 };
 
@@ -117,23 +100,16 @@ const fetchAndUpdateAutotestStatus = (reqId, onUpdateCallback) => new Promise((r
         const encReqId = encodeURIComponent(reqId);
         const testcaseInitiateStatusURL = `${mycroftProtocol}://${mycroftHost}:${mycroftPort}/api/v1/autotest/initiate/status?requestId=${encReqId}`;
         axios.get(testcaseInitiateStatusURL)
-            .then((resp) => {
-                if (autotestDone) {
+            .then(({ data }) => {
+                onUpdateCallback(data);
+                if (data.done) {
+                    res();
                     return;
                 }
-                onUpdateCallback(resp.data);
                 setTimeout(fn, initiateStatusInterval);
             })
             .catch((err) => {
-                if (autotestDone) {
-                    return;
-                }
-                onUpdateCallback({
-                    total: 0,
-                    passed: 0,
-                    failed: 0
-                });
-                setTimeout(fn, initiateStatusInterval);
+                rej(err);
             });
     }, initiateStatusInterval);
 });
@@ -238,18 +214,7 @@ const run = async () => {
 
     spinner = ora('Initiating autotest').start();
     try {
-        reqId = await initiateAutoTest(tag, (finalStatus, err) => {
-            autotestDone = true;
-            if (err) {
-                log(err.message);
-                return;
-            }
-            printStatus(finalStatus);
-            printAutotestSummery(tag)
-                .catch((err2) => {
-                    log(err2.message);
-                });
-        });
+        reqId = await initiateAutoTest(tag);
         spinner.succeed('Initiated autotest');
     } catch (err) {
         spinner.fail();
@@ -258,9 +223,20 @@ const run = async () => {
     }
 
     out('\n');
-    await fetchAndUpdateAutotestStatus(reqId, (newStatus) => {
-        printStatus(newStatus);
-    });
+    try {
+        await fetchAndUpdateAutotestStatus(reqId, (newStatus) => {
+            printStatus(newStatus);
+        });
+    } catch (err) {
+        out(`${chalk.red('Error')}: ${err.message || String(err)}`);
+    }
+
+    out('\n');
+    try {
+        await printAutotestSummery(tag);
+    } catch (err) {
+        out(`${chalk.red('Error')}: ${err.message || String(err)}`);
+    }
 };
 
 run()

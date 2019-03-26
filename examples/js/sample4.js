@@ -27,7 +27,7 @@
       const canvas = env
           .canvas()
           .data(rootData)
-          .rows(['Acceleration'])
+          .rows([['Acceleration']])
           .columns(['Year'])
           .color("Origin")
           .width(600)

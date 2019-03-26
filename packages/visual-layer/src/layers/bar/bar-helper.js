@@ -1,6 +1,11 @@
 import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
-import { getLayerColor, positionPoints, getIndividualClassName } from '../../helpers';
+import { positionPoints, getIndividualClassName, getColorMetaInf, resolveEncodingValues } from '../../helpers';
+
+const positionRetriever = {
+    x: (xPx, isNegativeVal, barBasePos) => (isNegativeVal ? [xPx, barBasePos] : [barBasePos, xPx]),
+    y: (yPx, isNegativeVal, barBasePos) => (isNegativeVal ? [barBasePos, yPx] : [yPx, barBasePos])
+};
 
 /**
  *
@@ -65,19 +70,18 @@ const resolveDimByField = (type, axesInfo, config, data) => {
             enter = pos;
             enterSpace = space;
         } else {
-            const zeroPos = axis.getScaleValue(0);
-            const axisType = axis.getScaleValue(data[type]);
-            const axisType0 = axis.getScaleValue(data[`${type}0`]);
+            const minDomVal = axis.domain()[0];
+            const barBasePos = minDomVal < 0 ? axis.getScaleValue(0) : axis.getScaleValue(minDomVal);
+            pos = axis.getScaleValue(data[type]);
+            let endPos = axis.getScaleValue(data[`${type}0`]);
 
             enterSpace = 0;
-            if (type === 'x') {
-                pos = data[type] < 0 || transformType === STACK ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? axisType : zeroPos)));
-            } else {
-                pos = transformType === STACK || data[type] >= 0 ? axisType : zeroPos;
-                space = Math.abs(pos - (transformType === STACK ? axisType0 : (data[type] >= 0 ? zeroPos : axisType)));
+            const isNegativeVal = data[type] < 0;
+            if (transformType !== STACK) {
+                [pos, endPos] = positionRetriever[type](pos, isNegativeVal, barBasePos);
             }
-            enter = zeroPos;
+            space = Math.abs(pos - endPos);
+            enter = barBasePos;
         }
     } else {
         pos = 0;
@@ -147,9 +151,6 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const encoding = context.config().encoding;
     const axes = context.axes();
     const colorAxis = axes.color;
-    const fieldsConfig = context.data().getFieldsConfig();
-    const colorEncoding = encoding.color;
-    const colorField = colorEncoding.field;
     const sizeEncoding = encoding.size || {};
     const {
             x0Field,
@@ -162,12 +163,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const isYDim = yFieldSubType === DimensionSubtype.CATEGORICAL || yFieldSubType === DimensionSubtype.TEMPORAL;
     const key = isXDim ? 'x' : (isYDim ? 'y' : null);
     const transformType = context.transformType();
-    const colorFieldIndex = colorField && fieldsConfig[colorField] && fieldsConfig[colorField].index;
 
     for (let i = 0, len = data.length; i < len; i++) {
         const d = data[i];
-        const style = {};
-        const meta = {};
         const dimensions = resolveDimensions(d, {
             xFieldType: xFieldSubType,
             yFieldType: yFieldSubType,
@@ -179,27 +177,37 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             sizeEncoding
         }, axes);
 
-        const { color, rawColor } = getLayerColor({ datum: d, index: i },
-            { colorEncoding, colorAxis, colorFieldIndex });
-
-        style.fill = color;
-        meta.stateColor = {};
-        meta.originalColor = rawColor;
-        meta.colorTransform = {};
+        let color = colorAxis.getColor(d.color);
 
         const update = dimensions.update;
-
-        if (!isNaN(update.x) && !isNaN(update.y) && d._id !== undefined) {
+        const resolvedEncodings = resolveEncodingValues({
+            values: {
+                x: update.x,
+                y: update.y,
+                width: update.width,
+                height: update.height,
+                color
+            },
+            data: d
+        }, i, data, context);
+        color = resolvedEncodings.color;
+        const { x, y, width, height } = resolvedEncodings;
+        if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
             point = {
                 enter: dimensions.enter,
-                update,
-                style,
-                _data: d._data,
-                _id: d._id,
-                source: d._data,
-                rowId: d._id,
-                meta
+                update: {
+                    x,
+                    y,
+                    width,
+                    height
+                },
+                source: d.source,
+                rowId: d.rowId,
+                style: {
+                    fill: color
+                },
+                meta: getColorMetaInf(color, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);

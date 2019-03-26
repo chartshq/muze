@@ -51,13 +51,22 @@ export default class StepLegend extends SimpleLegend {
      *
      * @memberof StepLegend
      */
-    dataFromScale (scale) {
+    dataFromScale () {
         let domainLeg = [];
+        const scale = this.scale();
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
 
         const { formatter } = this.config();
         const domainBounds = {
             lower: null, upper: null
+        };
+
+        // defining scaleParams
+        const scaleParams = {
+            smartLabel: this.labelManager(),
+            measures: this.measurement(),
+            alignment: this.config().position,
+            minTickDistance: this.minTickDistance()
         };
 
         if (steps instanceof Array) {
@@ -69,7 +78,7 @@ export default class StepLegend extends SimpleLegend {
                 domainBounds.upper = [`${formatter.bounds.upper} ${steps[steps.length - 1]}`];
             }
         } else {
-            domainLeg = getInterpolatedData(domain, steps);
+            domainLeg = getInterpolatedData(domain, steps, scaleParams);
         }
 
         domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
@@ -77,6 +86,8 @@ export default class StepLegend extends SimpleLegend {
             let value = null;
             if (i < domainLeg.length - 1) {
                 value = `${(ele.toFixed(1))} - ${(+domainLeg[i + 1].toFixed(1))}`;
+            } else if (domainLeg.length === 1) {
+                value = ele.toFixed(1);
             }
             return {
                 [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele),
@@ -96,6 +107,7 @@ export default class StepLegend extends SimpleLegend {
             { domain, steps, domainBounds, domainLeg });
             domainLeg = [...domainLeg, upperBounds];
         }
+
         return domainLeg;
     }
 

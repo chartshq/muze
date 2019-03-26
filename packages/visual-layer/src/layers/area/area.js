@@ -7,9 +7,11 @@ import { STACK, ENCODING } from '../../enums/constants';
 import {
     getAxesScales,
     positionPoints,
-    getLayerColor,
     getIndividualClassName,
-    getValidTransformForAggFn
+    getValidTransformForAggFn,
+    getColorMetaInf,
+    resolveEncodingValues,
+    sortData
 } from '../../helpers';
 
 /**
@@ -62,6 +64,7 @@ export default class AreaLayer extends LineLayer {
             const { [`${type}FieldType`]: fieldType } = encodingFieldsInf;
             if (fieldType === FieldType.MEASURE && domains[type] !== undefined) {
                 domains[type][0] = Math.min(domains[type][0], 0);
+                domains[type][1] = Math.max(0, domains[type][1]);
             }
         });
         return domains;
@@ -82,17 +85,14 @@ export default class AreaLayer extends LineLayer {
      * @param {Object} axes Contains the axis
      * @return {Array} Array of points
      */
-    translatePoints (data, encodingFieldsInf, axes) {
+    translatePoints (data) {
         let points = [];
         const transformType = this.transformType();
+        const axes = this.axes();
         const colorAxis = axes.color;
         const config = this.config();
-        const encoding = config.encoding;
-        const colorEncoding = encoding.color;
-        const colorField = colorEncoding.field;
         const fieldsConfig = this.data().getFieldsConfig();
-        const colorFieldIndex = colorField && fieldsConfig[colorField].index;
-        const { xField, yField, y0Field } = encodingFieldsInf;
+        const { xField, yField, y0Field } = this.encodingFieldsInf();
         const {
             xAxis,
             yAxis
@@ -101,45 +101,55 @@ export default class AreaLayer extends LineLayer {
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
         const key = isXDim ? 'x' : (isYDim ? 'y' : null);
+        const minYVal = yAxis.domain()[0];
+        const basePos = minYVal < 0 ? yAxis.getScaleValue(0) : yAxis.getScaleValue(minYVal);
+        sortData(data, axes);
         points = data.map((d, i) => {
+            let color;
             const xPx = xAxis.getScaleValue(d.x) + xAxis.getUnitWidth() / 2;
             const yPx = yAxis.getScaleValue(d.y);
-            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : yAxis.getScaleValue(0);
-            const { color, rawColor } = getLayerColor({ datum: d, index: i }, {
-                colorEncoding, colorAxis, colorFieldIndex });
-            const style = {};
-            const meta = {};
-            style.fill = color;
-            // style['fill-opacity'] = 0;
-            meta.stateColor = {};
-            meta.originalColor = rawColor;
-            meta.colorTransform = {};
+            const y0Px = (y0Field || transformType === STACK) ? yAxis.getScaleValue(d.y0) : basePos;
+            color = colorAxis.getColor(d.color);
             const invalidY = d.y instanceof InvalidAwareTypes;
             const invalidY0 = d.y0 instanceof InvalidAwareTypes;
+            const resolvedValues = resolveEncodingValues({
+                values: {
+                    x: xPx,
+                    y: yPx,
+                    y0: y0Px,
+                    color
+                },
+                data: d
+            }, i, data, this);
+            color = resolvedValues.color;
             const point = {
                 enter: {
                     x: xPx,
-                    y: invalidY ? null : yAxis.getScaleValue(0),
-                    y0: invalidY0 ? null : yAxis.getScaleValue(0)
+                    y: invalidY ? null : basePos,
+                    y0: invalidY0 ? null : basePos
                 },
                 update: {
                     x: xPx,
-                    y: invalidY ? null : yPx,
-                    y0: invalidY0 ? null : y0Px
+                    y: invalidY ? null : resolvedValues.y,
+                    y0: invalidY0 ? null : resolvedValues.y0
                 },
-                _id: d._id,
-                _data: d._data,
-                source: d._data,
-                rowId: d._id,
+                source: d.source,
+                rowId: d.rowId,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
-                style,
-                meta
+                style: {
+                    fill: color
+                },
+                meta: getColorMetaInf(color, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
             return point;
         });
         points = positionPoints(this, points);
+        points = points.filter((point) => {
+            const update = point.update;
+            return !isNaN(update.x) && !isNaN(update.y);
+        });
         return points;
     }
 

@@ -36,8 +36,8 @@ Muze uses an in-browser [DataModel](https://github.com/chartshq/datamodel) to st
 Insert the muze build and the required CSS into the `<head>`:
 
 ```html
-<link href="https://cdn.charts.com/lib/muze/core/latest/themes/muze.css" rel="stylesheet">
-<script src="https://cdn.charts.com/lib/muze/core/latest/muze.js" type="text/javascript"></script>
+<link href="https://cdn.muzejs.org/lib/muze/core/latest/themes/muze.css" rel="stylesheet">
+<script src="https://cdn.muzejs.org/lib/muze/core/latest/muze.js" type="text/javascript"></script>
 ```
 
 ### NPM
@@ -127,21 +127,21 @@ canvas
   .mount("#chart"); // Specify an element to mount on using a CSS selector
 ```
 
-See [charts.com/muze/docs](https://www.charts.com/muze/docs) for more documentation!
+See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
 
 You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
 
 ## Documentation
 
-You can find detailed tutorials, concepts and API references at [charts.com/muze/docs](https://www.charts.com/muze/docs).
+You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs).
 
 ## Support
 
-Please raise a [Github issue](https://github.com/chartshq/muze/issues/new), or contact us at [muze@charts.com](mailto:muze@charts.com).
+Please raise a Github issue [here](https://github.com/chartshq/muze/issues/new).
 
 ## Roadmap
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muze.charts.com)
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muzejs.org)
 
 ## Contributing
 

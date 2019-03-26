@@ -1,4 +1,4 @@
-import { numberInterpolator, piecewiseInterpolator, hslInterpolator } from 'muze-utils';
+import { numberInterpolator, piecewiseInterpolator, hslInterpolator, sanitizeDomainWhenEqual } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
@@ -87,7 +87,7 @@ const steppedDomain = (domain, stops, range) => {
 };
 
 const continousSteppedDomain = (domain, stops, range) => {
-    const { domain: uniqueVals, newStops } = getStops(domain, range.length - 1);
+    const { domain: uniqueVals, newStops } = getStops(sanitizeDomainWhenEqual(domain), range.length - 1);
     const hslRange = range.map(e => getHslString(e));
     return { uniqueVals, domain: newStops, nice: true, range: hslRange };
 };
@@ -177,5 +177,5 @@ const strategies = () => ({
  * @param {*} schemeType
  * @param {*} stops
  */
-export const strategyGetter = (domainType, rangeType, schemeType, stops) =>
-     strategies(stops)[`${domainType}-${rangeType}-${schemeType || ''}`];
+export const strategyGetter = (domainType, rangeType, schemeType) =>
+    strategies()[`${domainType}-${rangeType}-${schemeType || ''}`];

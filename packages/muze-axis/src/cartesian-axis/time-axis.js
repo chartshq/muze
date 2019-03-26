@@ -1,9 +1,9 @@
 import { getSmallestDiff } from 'muze-utils';
 import SimpleAxis from './simple-axis';
 import { TIME } from '../enums/scale-type';
-import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
-import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset } from './helper';
-import { spaceSetter } from './space-setter';
+import { calculateBandSpace, getRotatedSpaces, getValidDomain, setContinousAxisDomain, setOffset,
+    resetTickInterval } from './helper';
+import { applyTickSkipping } from './space-setter';
 
 /**
  *
@@ -44,21 +44,8 @@ export default class TimeAxis extends SimpleAxis {
         return TIME;
     }
 
-    /**
-     *
-     *
-     * @returns
-     * @memberof SimpleAxis
-     */
-    createAxis (config) {
-        const { orientation } = config;
-        const axisClass = axisOrientationMap[orientation];
-
-        if (axisClass) {
-            const axis = axisClass(this.scale());
-            return axis;
-        }
-        return null;
+    formatTickValue (val) {
+        return this.scale().tickFormat()(val);
     }
 
     sanitizeTickFormatter (value) {
@@ -67,10 +54,10 @@ export default class TimeAxis extends SimpleAxis {
         if (tickFormat) {
             return (ticks) => {
                 const rawTicks = ticks.map(t => t.getTime());
-                return (val, i) => tickFormat(val, val.getTime(), i, rawTicks);
+                return (val, i) => tickFormat(this.formatTickValue(val), val.getTime(), i, rawTicks);
             };
         }
-        return () => text => this.scale().tickFormat()(text);
+        return () => val => this.formatTickValue(val);
     }
 
      /**
@@ -97,7 +84,7 @@ export default class TimeAxis extends SimpleAxis {
      * @memberof TimeAxis
      */
     getTickValues () {
-        return this.config().tickValues || this.scale().ticks();
+        return this.renderConfig().tickValues || this.scale().ticks();
     }
 
     /**
@@ -110,6 +97,10 @@ export default class TimeAxis extends SimpleAxis {
     minDiff (diff) {
         this._minDiff = Math.min(this._minDiff, diff);
         return this;
+    }
+
+    applyTickSkipping () {
+        applyTickSkipping(this);
     }
 
     /**
@@ -125,6 +116,8 @@ export default class TimeAxis extends SimpleAxis {
             setContinousAxisDomain(this, domainValue);
             this.setAxisComponentDimensions();
             this.logicalSpace(null);
+
+            resetTickInterval(this, domainValue);
             return this;
         }
         return this._domain;
@@ -139,9 +132,9 @@ export default class TimeAxis extends SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateBandSpace(this));
-            this.logicalSpace();
-            setOffset(this);
         }
+        setOffset(this);
+
         return this.logicalSpace();
     }
 
@@ -157,25 +150,8 @@ export default class TimeAxis extends SimpleAxis {
      * @param {number} height The height of SimpleCell.
      * @memberof AxisCell
      */
-    setAvailableSpace (width = 0, height, padding, isOffset) {
-        let labelConfig = {};
-        const {
-           orientation
-       } = this.config();
-
-        this.availableSpace({ width, height, padding });
-
-        if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).time.x();
-        } else {
-            labelConfig = spaceSetter(this, { isOffset }).time.y();
-        }
-
-        // Set config
-        this.renderConfig({
-            labels: labelConfig
-        });
-        this.setTickConfig();
+    setAvailableSpace (...params) {
+        super.setAvailableSpace(...params);
         this.getTickSize();
         return this;
     }
@@ -189,8 +165,8 @@ export default class TimeAxis extends SimpleAxis {
     setTickConfig () {
         let smartTicks;
         let smartlabel;
-        const { tickValues } = this.config();
-        const { labels } = this.renderConfig();
+
+        const { labels, tickValues } = this.renderConfig();
         const { height: availHeight, width: availWidth, noWrap } = this.maxTickSpaces();
         const { labelManager } = this._dependencies;
         const domain = this.getTickValues();
@@ -214,6 +190,7 @@ export default class TimeAxis extends SimpleAxis {
                 return labelManager.constructor.textToLines(smartlabel);
             });
         }
+
         this.smartTicks(smartTicks);
         return this;
     }
