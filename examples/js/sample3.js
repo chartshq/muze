@@ -70,21 +70,26 @@ d3.json('../../data/cars.json', (data) => {
 
    window.canvas =  env.canvas()
         .data(rootData)
-        .rows(['Acceleration'])
-        .columns(['Displacement'])
-        .color({
-            field: "Displacement",
-            // step: true
+        .rows([])
+        .columns([])
+        .layers([{
+            mark: 'arc',
+            encoding: {
+                radius: {
+                    // field: 'Horsepower'
+                }
+            },
+            sort: 'asc'
+
+        }]).data(rootData).color({
+            field: 'Horsepower',
+            interpolate: false,
+            steps: 4
+        }).width(600).height(500).config({
+            legend: {
+                position: 'bottom'
+            }
         })
-        .height(500)
-        .width(600)
-        
-      .layers([{
-        //   mark: 'arc',
-          encoding: {
-            //   angle: 'Origin'
-          }
-      }])
         // .config({
         //     axes: {
         //         x: {
