@@ -170,13 +170,14 @@ export const getHorizontalAxisSpace = (context, axisDimensions, range) => {
     let width;
     let height;
     const domain = context.domain();
+    const minTickDistance = context._minTickDistance.width;
     const { tickSize, tickDimensions, axisNameDimensions } = axisDimensions;
     const { axisNamePadding, tickValues } = context.config();
     const { showAxisName } = context.renderConfig();
     const { height: axisDimHeight } = axisNameDimensions;
     const { height: tickDimHeight, width: tickDimWidth } = tickDimensions;
 
-    width = range && range.length ? range[1] - range[0] : 0;
+    width = range && range.length ? range[1] - range[0] : ((tickDimWidth + minTickDistance) * 3);
 
     height = 0;
     if (tickValues) {
