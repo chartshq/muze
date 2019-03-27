@@ -95,40 +95,43 @@ export default class ArcLayer extends BaseLayer {
         });
         data.forEach((d, i) => {
             const angles = angle.getScaleValue(d.angle);
-            !angleV[d.angle] && (angleV[d.angle] = 0);
-            const { startAngle, endAngle } = angles[angleV[d.angle]++];
-            const uid = d.rowId;
-            const resolvedEncodings = resolveEncodingValues({
-                values: {
-                    radius: radiusAxis.getOuterRadius(d.radius),
-                    radius0: radiusAxis.getInnerRadius(d.radius0),
-                    color: colorAxis.getColor(d.color),
-                    angle0: startAngle,
-                    angle: endAngle,
-                    startAngle,
-                    endAngle,
-                    startAngle0: startAngle,
-                    endAngle0: endAngle
-                },
-                data: d
-            }, i, data, this);
-            const color = resolvedEncodings.color;
-            points.push({
-                source: d.source,
-                index: i,
-                enter: {},
-                update: {
-                    angle0: resolvedEncodings.angle0,
-                    angle: resolvedEncodings.angle,
-                    radius0: resolvedEncodings.radius0,
-                    radius: resolvedEncodings.radius
-                },
-                color,
-                meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
-                rowId: uid,
-                _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
-                    getPreviousPoint(pieIndex, i, this)
-            });
+            if (angles) {
+                !angleV[d.angle] && (angleV[d.angle] = 0);
+                const { startAngle, endAngle } = angles[angleV[d.angle]++];
+                const uid = d.rowId;
+                const resolvedEncodings = resolveEncodingValues({
+                    values: {
+                        radius: radiusAxis.getOuterRadius(d.radius),
+                        radius0: radiusAxis.getInnerRadius(d.radius0),
+                        color: colorAxis.getColor(d.color),
+                        angle0: startAngle,
+                        angle: endAngle,
+                        startAngle,
+                        endAngle,
+                        startAngle0: startAngle,
+                        endAngle0: endAngle
+                    },
+                    data: d
+                }, i, data, this);
+                const color = resolvedEncodings.color;
+                points.push({
+                    source: d.source,
+                    index: i,
+                    enter: {},
+                    update: {
+                        angle0: resolvedEncodings.angle0,
+                        angle: resolvedEncodings.angle,
+                        radius0: resolvedEncodings.radius0,
+                        radius: resolvedEncodings.radius
+                    },
+                    color,
+                    meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
+                    rowId: uid,
+                    _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
+                        getPreviousPoint(pieIndex, i, this)
+                });
+            }
+
         });
         return points;
     }
