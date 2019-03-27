@@ -9,6 +9,7 @@ import {
     retrieveFieldDisplayName
 } from 'muze-utils';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
+
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
 
