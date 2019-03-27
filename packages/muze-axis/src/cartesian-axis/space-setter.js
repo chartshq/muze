@@ -133,7 +133,7 @@ export const spaceSetter = (context, spaceConfig) => {
 
                 if (tickInterval < minTickWidth && rotation !== 0) {
                     // set smart ticks and rotation config
-                    labelConfig.rotation = labels.rotation === null ? -90 : rotation;
+                    labelConfig.rotation = rotation;
                     // Remove ticks if not enough height
                     if (tickInterval < minTickHeight) {
                         heightForTicks = availHeight;
@@ -189,7 +189,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick Interval
-                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks * 2;
+                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks;
 
                 // Get height available for ticks
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
