@@ -8,7 +8,7 @@ import {
     defaultValue,
     retrieveFieldDisplayName
 } from 'muze-utils';
-
+import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
 
@@ -205,7 +205,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
 };
 
 export const strategies = {
-    selectionSummary: (dm, config, context) => {
+    [SELECTION_SUMMARY]: (dm, config, context) => {
         const { selectionSet } = context;
         const aggFns = selectionSet.mergedEnter.aggFns;
         const dataObj = dm.getData();
@@ -238,7 +238,7 @@ export const strategies = {
         }
         return values;
     },
-    highlightSummary: (data, config, context) => {
+    [HIGHLIGHT_SUMMARY]: (data, config, context) => {
         const values = buildTooltipData(data, config, context);
         return values;
     }

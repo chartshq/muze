@@ -6,9 +6,10 @@ import { FRAGMENTED } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
+import { HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 
 const configResolvers = {
-    highlightSummary: (specificConf, config) => defaultValue(specificConf, config),
+    [HIGHLIGHT_SUMMARY]: (specificConf, config) => defaultValue(specificConf, config),
     default: specificConf => defaultValue(specificConf, {})
 };
 
@@ -26,7 +27,7 @@ export default class Tooltip extends SpawnableSideEffect {
         super(...params);
         this._tooltips = {};
         this._strategies = mergeRecursive({}, strategies);
-        this._strategy = 'highlightSummary';
+        this._strategy = HIGHLIGHT_SUMMARY;
     }
 
     static defaultConfig () {
