@@ -75,12 +75,24 @@ d3.json('../../data/cars.json', (data) => {
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
+    var rows = ['Acceleration'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+        const canvas = env.canvas().columns(['Year'])
+        .rows(columns).data(rootData).height(600).width(300)
+        .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
+        .config({
+            axes:{
+                x:{
+                    // tickFormat: (val)=>`${val}oaisjdalksndakls`
+                }
+            }
+        })
+        .color({
             field: 'Origin'
-        }).mount('#chart').once('canvas.animationend').then(function (client) {
+        }).mount('#chart');
+        canvas.once('canvas.animationend').then(function (client) {
             var element = document.getElementById('chart');
             element.classList.add('animateon');
         });
+        window.canvas = canvas
 });

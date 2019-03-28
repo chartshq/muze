@@ -199,13 +199,16 @@ export const spaceSetter = (context, spaceConfig) => {
                     labelConfig.rotation = rotation === null ? -90 : rotation;
                     labelConfig.smartTicks = false;
 
+                    tickInterval = heightForTicks;
+                    // heightForTicks = minTickWidth;
+
                     // Ticks with overlapping height
-                    if (tickInterval < minTickHeight) {
-                        heightForTicks = 0;
-                        tickInterval = 0;
-                        context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                        context.range([minTickHeight / 2, availWidth - minTickHeight / 2]);
-                    }
+                    // if (tickInterval < minTickHeight) {
+                    //     heightForTicks = 0;
+                    //     tickInterval = 0;
+                    //     context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
+                    //     context.range([minTickHeight / 2, availWidth - minTickHeight / 2]);
+                    // }
                 } else if (tickValues) {
                     const interval = (availWidth / domain.length) - minWidthBetweenTicks;
                     if (interval < minTickWidth) {
@@ -213,7 +216,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     }
                 }
                 if (availHeight < axisNameHeight) {
-                    context.renderConfig({ show: false, showInnerTicks: false, showOuterTicks: false });
+                    context.renderConfig({ show: false });
                 }
 
                 context.maxTickSpaces({
