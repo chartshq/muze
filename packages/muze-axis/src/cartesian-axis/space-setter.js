@@ -199,7 +199,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     labelConfig.rotation = rotation === null ? -90 : rotation;
                     labelConfig.smartTicks = false;
 
-                    tickInterval = heightForTicks;
+                    tickInterval = Math.max(heightForTicks, minTickWidth);
                 } else if (tickValues) {
                     const interval = (availWidth / domain.length) - minWidthBetweenTicks;
                     if (interval < minTickWidth) {

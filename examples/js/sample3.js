@@ -76,9 +76,9 @@ d3.json('../../data/cars.json', (data) => {
 
 
     var rows = ['Horsepower'],
-            columns = rows.reverse();
-        const canvas = env.canvas().columns(['Cylinders', 'Origin', 'Year'])
-        .rows(columns).data(rootData).height(500).width(2200)
+            columns = ['Cylinders','Year','Origin']
+        const canvas = env.canvas().columns(columns)
+        .rows(rows).data(rootData).height(600).width(5200)
         .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
         .config({
             axes:{
