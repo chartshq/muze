@@ -263,6 +263,7 @@ export const calculateBandSpace = (context) => {
             width = allTickDimensions.reduce((t, n) =>
                 t + Math.min(n.width, n.height) + minTickWidth, 0);
         }
+
         if (show === false) {
             height = 0;
             width = 0;
