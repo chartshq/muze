@@ -5,7 +5,8 @@ import {
     STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     mergeRecursive,
-    createSelection
+    createSelection,
+    DataModel
 } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
@@ -463,6 +464,7 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         rowPriority
     };
 };
+
 const getAxisFields = (projections, fieldHolder = []) =>
                             projections.reduce((acc, item) =>
                                 [...acc, ...item.reduce((ac, field) =>
@@ -475,8 +477,38 @@ const sortDmTemporalFields = (resolver, datamodel) => {
 
     const fieldConfig = datamodel.getFieldsConfig();
     const temporalFields = axisFields.reduce((acc, field) =>
-                                    ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
+        ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
     return temporalFields.length ? datamodel.sort(temporalFields, { saveChild: true }) : datamodel;
+};
+
+const transformDataModel = (dataModel, config, resolver) => {
+    let groupedModel;
+
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const resolvedData = resolver.data();
+    const { groupBy, suppliedLayers, facetsAndProjections } = config;
+
+    if (resolvedData instanceof DataModel) {
+        resolvedData.dispose();
+    }
+    groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
+    resolver.data(groupedModel);
+    if (!groupBy.disabled) {
+        const fields = getFieldsFromSuppliedLayers(suppliedLayers, groupedModel.getFieldsConfig());
+        const allFields = extractFields(facetsAndProjections, fields);
+        const dimensions = allFields.filter(field =>
+            getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+        const aggregationFns = groupBy.measures;
+        const measureNames = Object.keys(groupedModel.getFieldspace().getMeasure());
+        const nearestAggFns = retrieveNearestGroupByReducers(groupedModel, ...measureNames);
+        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
+
+        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns)
+                                            .project(allFields);
+    }
+                                    // sort temporal fields if any in the given rows and columns
+    groupedModel = sortDmTemporalFields(resolver, groupedModel);
+    return groupedModel;
 };
 
 /**
@@ -564,23 +596,13 @@ export const computeMatrices = (context, config) => {
             shape: config.shape
         }
     };
-    const fieldsConfig = datamodel.getFieldsConfig();
-    let groupedModel = datamodel;
-    if (!groupBy.disabled) {
-        const fields = getFieldsFromSuppliedLayers(valueCellContext.suppliedLayers, datamodel.getFieldsConfig());
-        const allFields = extractFields(facetsAndProjections, fields);
 
-        const dimensions = allFields.filter(field =>
-            fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
-        const aggregationFns = groupBy.measures;
-        const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
-        const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
-        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
-    }
+    const groupedModel = transformDataModel(datamodel, {
+        facetsAndProjections,
+        suppliedLayers: valueCellContext.suppliedLayers,
+        groupBy
+    }, resolver);
 
-    // sort temporal fields if any in the given rows and columns
-    groupedModel = sortDmTemporalFields(resolver, groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
