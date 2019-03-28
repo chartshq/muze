@@ -238,12 +238,15 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
             placeholder.setAvailableSpace(width, height * span);
         },
         [COL_SPAN] () {
+            const primaryUnitWidth = unitWidths.primary[col];
             if (span > 1) {
                 let cumulativeWidth = 0;
                 for (let i = col; i < col + span; i++) {
                     cumulativeWidth += unitWidths.primary[i] - borderWidth;
                 }
                 placeholder.setAvailableSpace(cumulativeWidth + borderWidth, height);
+            } else if (primaryUnitWidth) {
+                placeholder.setAvailableSpace(primaryUnitWidth - borderWidth, height);
             }
             selectElement(this).style('height', `${height}px`);
         }

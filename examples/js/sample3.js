@@ -57,8 +57,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
@@ -75,10 +75,10 @@ d3.json('../../data/cars.json', (data) => {
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-    var rows = ['Acceleration'],
+    var rows = ['Horsepower'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Maker'])
-        .rows(columns).data(rootData).height(600).width(300)
+        const canvas = env.canvas().columns(['Cylinders', 'Origin', 'Year'])
+        .rows(columns).data(rootData).height(500).width(2200)
         .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
         .config({
             axes:{
