@@ -45,8 +45,8 @@ d3.json('../data/cars.json', (data) => {
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
 
@@ -67,10 +67,11 @@ d3.json('../data/cars.json', (data) => {
 
     // line chart
     window.canvas = env.canvas()
-        .columns(['Origin', 'Year'])
+        .columns(['Cylinders', 'Origin', 'Year'])
         .rows(['Horsepower'])
-        .width(450)
-        .height(300)
+        .width(1200)
+        .height(500)
+        .data(rootData)
         // .layers([{
         //     mark: 'line'
         // }])

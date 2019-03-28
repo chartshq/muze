@@ -127,11 +127,10 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
  * @param {Object} cells Contains a collection of the cells
  * @return {Object} return either set of axis/blank cells depending on the config
  */
-
 const createAxisCells = (selection, axes, axisIndex, cells) =>
     createSelection(selection, axis => axis, axes, (item, i) => i + item.reduce((e, n) => {
         const id = n.id + axisIndex;
-        return e + id;
+        return `${e}-${id}`;
     }, '')).map((currObj, axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
@@ -143,6 +142,10 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
             });
         }
         return new cells.BlankCell().config({ show: false });
+    }).sort((a, b) => {
+        const ai = getObjProp(a[0].match(/^[0-9]*?(?=-)/g), 0);
+        const bi = getObjProp(b[0].match(/^[0-9]*?(?=-)/g), 0);
+        return ai - bi;
     });
 
 /**

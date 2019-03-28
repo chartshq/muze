@@ -1,3 +1,10 @@
+const sortSelection = (dataObjects, updateData, sortFn) =>
+    (a, b) => {
+        const kA = a[0];
+        const kB = b[0];
+        return sortFn([a[0], dataObjects.get(kA), updateData.get(kA)], [kB, dataObjects.get(kB), updateData.get(kB)]);
+    };
+
 /**
  * This class represents a selection applied on a data array.
  *
@@ -34,7 +41,7 @@ class Selection {
         const updatedData = this._updatedata;
 
         newData.forEach((...params) => {
-            const key = this.idGetter ? this._idGetter(...params) : params[1];
+            const key = this._idGetter ? this._idGetter(...params) : params[1];
             if (!tempMap.has(key)) {
                 tempMap.set(key, params[0]);
             } else {
@@ -217,6 +224,15 @@ class Selection {
 
         currentData.clear();
 
+        return this;
+    }
+
+    sort (sortFn) {
+        const updateData = this._updatedata;
+        const dataObjects = this._dataObjects;
+
+        this._updatedata = new Map([...updateData.entries()].sort(sortSelection(dataObjects, updateData, sortFn)));
+        this._dataObjects = new Map([...dataObjects.entries()].sort(sortSelection(dataObjects, updateData, sortFn)));
         return this;
     }
 
