@@ -57,8 +57,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }
     ];
 
@@ -75,24 +75,14 @@ d3.json('../../data/cars.json', (data) => {
     // .select(fields=>fields.Year.value === '1972-01-01');
 
 
-    var rows = ['Horsepower'],
-            columns = ['Cylinders','Year','Origin']
-        const canvas = env.canvas().columns(columns)
-        .rows(rows).data(rootData).height(600).width(5200)
-        .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
-        .config({
-            axes:{
-                x:{
-                    // tickFormat: (val)=>`${val}oaisjdalksndakls`
-                }
-            }
-        })
-        .color({
-            field: 'Origin'
-        }).mount('#chart');
-        canvas.once('canvas.animationend').then(function (client) {
-            var element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+   const canvas = env.canvas()
+    .width(1600)
+    .minUnitHeight(30)
+    .data(rootData)
+    .height(700)
+    .rows([[ 'Acceleration']])
+    .columns(['Maker', 'Year'])
+    .config({ axisFrom:{ row: 'right' } })
+    .mount('#chart')
         window.canvas = canvas
 });

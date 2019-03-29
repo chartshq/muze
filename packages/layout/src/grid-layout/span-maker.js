@@ -236,6 +236,9 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
     return {
         [ROW_SPAN] () {
             placeholder.setAvailableSpace(width, height * span);
+            if (span === 1) {
+                selectElement(this).style('height', `${height * span + borderWidth}px`);
+            }
         },
         [COL_SPAN] () {
             const primaryUnitWidth = unitWidths.primary[col];
