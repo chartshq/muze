@@ -136,11 +136,14 @@ const pushToMatrix = (context, valueCellCreator) => {
  * @param {Array} formatterList - The list of corresponding formatter.
  */
 const formatKeys = (keys, formatterList) => {
-    keys.forEach((rKeys) => {
+    const formattedKeys = [];
+    keys.forEach((rKeys, rIdx) => {
+        formattedKeys[rIdx] = [];
         rKeys.forEach((key, idx) => {
-            rKeys[idx] = formatterList[idx](key);
+            formattedKeys[rIdx][idx] = formatterList[idx](key);
         });
     });
+    return formattedKeys;
 };
 
 /**
@@ -266,12 +269,12 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         });
     }
 
-    formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
-    formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
+    const formattedColKeys = formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
+    const formattedRowKeys = formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
 
     // Getting column keys
-    const transposedColKeys = columnKeys.length > 0 ? columnKeys[0].map((col, i) =>
-                    columnKeys.map(row => row[i])) : columnKeys;
+    const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>
+                    formattedColKeys.map(row => row[i])) : formattedColKeys;
 
-    return { matrix, rowKeys, columnKeys: transposedColKeys };
+    return { matrix, rowKeys: formattedRowKeys, columnKeys: transposedColKeys };
 };

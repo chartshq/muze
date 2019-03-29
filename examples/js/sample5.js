@@ -63,11 +63,21 @@ d3.json('../data/cars.json', (data) => {
         },
         ['Name', () => 1]
     );
+    rootData = rootData.calculateVariable(
+        {
+            name: 'date',
+            type: 'dimension',
+            subtype: 'temporal',
+            format: "%Y-%m-%d"
+        },
+        ['Year', (d) => d]
+    );
+
     env.data(rootData);
 
     // line chart
     window.canvas = env.canvas()
-        .columns(['Cylinders', 'Origin', 'Year'])
+        .columns(['Year', 'Cylinders', 'Origin'])
         .rows(['Horsepower'])
         .width(1200)
         .height(500)

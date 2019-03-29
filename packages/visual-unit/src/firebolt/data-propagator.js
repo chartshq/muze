@@ -7,7 +7,8 @@ const getModelWithFacetData = (dm, data) => {
     const jsonData = [];
     const schema2 = data[0].map(d => ({
         name: `${d}`,
-        type: FieldType.DIMENSION
+        type: FieldType.DIMENSION,
+        subtype: d.subtype()
     }));
     const data2 = data[1];
 
