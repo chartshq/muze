@@ -131,7 +131,6 @@ export default class ArcLayer extends BaseLayer {
                         getPreviousPoint(pieIndex, i, this)
                 });
             }
-
         });
         return points;
     }
