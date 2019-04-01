@@ -205,11 +205,11 @@ const axisPlaceholderGn = (context, selObj, cells) => {
  * @return {Object} return either set of header cells depending on the config
  */
 const createTextCells = (selection, headers, cells, labelManager) => createSelection(selection,
-    (label) => {
-        const textCell = new cells.TextCell({}, { labelManager });
-        textCell.source(label);
-        return textCell;
-    }, headers, (key, i) => key + i);
+        (label) => {
+            const textCell = new cells.TextCell({}, { labelManager });
+            textCell.source(label);
+            return textCell;
+        }, headers, (key, i) => key + i);
 
 /**
  *
@@ -231,7 +231,12 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
 
     const selObjUpdater = createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
-    (keySet, i) => `${keySet.join(',')}-${i}`);
+    (keySet, i) => `${keySet.join(',')}-${i}`)
+        .sort((a, b) => {
+            const ai = a[0].split('-').pop();
+            const bi = b[0].split('-').pop();
+            return ai - bi;
+        });
 
     return selObjUpdater.map((keySet, data) => {
         let textCells = createTextCells(null, data, cells, labelManager);
