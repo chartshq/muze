@@ -26,15 +26,11 @@ let cursorRelYPos = 0;
 
 program
     .option('-m, --mode <mode>', 'muze build mode')
-    .option('-e, --export', 'whether to export testing result or not')
     .parse(process.argv);
 
-let { mode, export: isExport } = program;
+let { mode } = program;
 if (!mode) {
     mode = 'production';
-}
-if (!isExport) {
-    isExport = false;
 }
 
 const out = (text) => {
