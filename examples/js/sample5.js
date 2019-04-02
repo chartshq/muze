@@ -77,11 +77,11 @@ d3.json('../data/cars.json', (data) => {
 
     // line chart
     window.canvas = env.canvas()
-        .columns(['Year', 'Cylinders', 'Origin'])
-        .rows(['Horsepower'])
+        .columns(['Year'])
+        .rows(['Cylinders', 'Horsepower'])
         .width(1200)
         .height(500)
-        .data(rootData)
+        .data(rootData.select((fields) => fields.Cylinders.value === '6' || fields.Cylinders.value === '5'))
         // .layers([{
         //     mark: 'line'
         // }])

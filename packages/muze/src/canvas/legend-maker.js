@@ -182,5 +182,5 @@ export const createLegend = (context, headerHeight, height, width) => {
 
     legend.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
     legend.align = align;
-    return legendInitializer(legend, context, measurement, context._composition.legend || {});
+    return legendInitializer(legend, context, measurement, context.composition().legend || {});
 };

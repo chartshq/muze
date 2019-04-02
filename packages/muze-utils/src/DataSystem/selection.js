@@ -39,9 +39,10 @@ class Selection {
         const tempMap = new Map();
         const duplicateData = new Map();
         const updatedData = this._updatedata;
+        const idGetter = this._idGetter;
 
         newData.forEach((...params) => {
-            const key = this._idGetter ? this._idGetter(...params) : params[1];
+            const key = idGetter ? idGetter(...params) : params[1];
             if (!tempMap.has(key)) {
                 tempMap.set(key, params[0]);
             } else {
@@ -230,9 +231,10 @@ class Selection {
     sort (sortFn) {
         const updateData = this._updatedata;
         const dataObjects = this._dataObjects;
+        const sortSel = sortSelection(dataObjects, updateData, sortFn);
 
-        this._updatedata = new Map([...updateData.entries()].sort(sortSelection(dataObjects, updateData, sortFn)));
-        this._dataObjects = new Map([...dataObjects.entries()].sort(sortSelection(dataObjects, updateData, sortFn)));
+        this._updatedata = new Map([...updateData.entries()].sort(sortSel));
+        this._dataObjects = new Map([...dataObjects.entries()].sort(sortSel));
         return this;
     }
 

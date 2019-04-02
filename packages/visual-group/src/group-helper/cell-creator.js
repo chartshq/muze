@@ -119,6 +119,8 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     return entryCellMap.get(geomCellKey);
 };
 
+const extractAxisIndex = id => getObjProp(id.match(/^[0-9]*?(?=-)/g), 0);
+
 /**
  * Creates axis cells based on the set of axes
  *
@@ -143,11 +145,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
             });
         }
         return new cells.BlankCell().config({ show: false });
-    }).sort((a, b) => {
-        const ai = getObjProp(a[0].match(/^[0-9]*?(?=-)/g), 0);
-        const bi = getObjProp(b[0].match(/^[0-9]*?(?=-)/g), 0);
-        return ai - bi;
-    });
+    }).sort((a, b) => extractAxisIndex(a[0]) - extractAxisIndex(b[0]));
 
 /**
  *
@@ -211,6 +209,8 @@ const createTextCells = (selection, headers, cells, labelManager) => createSelec
             return textCell;
         }, headers, (key, i) => key + i);
 
+const extractFacetIndex = id => id.split('-').pop();
+
 /**
  *
  *
@@ -232,11 +232,7 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
 
     const selObjUpdater = createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
     (keySet, i) => `${keySet.join(',')}-${i}`)
-        .sort((a, b) => {
-            const ai = a[0].split('-').pop();
-            const bi = b[0].split('-').pop();
-            return ai - bi;
-        });
+        .sort((a, b) => extractFacetIndex(a[0]) - extractFacetIndex(b[0]));
 
     return selObjUpdater.map((keySet, data) => {
         let textCells = createTextCells(null, data, cells, labelManager);
@@ -511,7 +507,7 @@ const transformDataModel = (dataModel, config, resolver) => {
         groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns)
                                             .project(allFields);
     }
-                                    // sort temporal fields if any in the given rows and columns
+    // sort temporal fields if any in the given rows and columns
     groupedModel = sortDmTemporalFields(resolver, groupedModel);
     return groupedModel;
 };
