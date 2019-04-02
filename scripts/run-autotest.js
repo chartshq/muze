@@ -14,10 +14,10 @@ const FormData = require('form-data');
 const axios = require('axios');
 
 const mycroftProtocol = 'http';
-const mycroftHost = 'sherlock.charts.com';
+const mycroftHost = 'sherlock.muzejs.org';
 const mycroftPort = '3001';
 const mollyProtocol = 'http';
-const mollyHost = 'sherlock.charts.com';
+const mollyHost = 'sherlock.muzejs.org';
 const mollyPort = '80';
 const currentPrintStream = process.stdout;
 const initiateStatusInterval = 1000;
