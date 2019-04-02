@@ -259,6 +259,9 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
 const spanApplier = (cells, spans, config, type) => {
     let cellCounter = 0;
     cells.attr(type, function (cell, colIndex) {
+        if (colIndex === 0) {
+            cellCounter = 0;
+        }
         const span = spans[cell.rowIndex][colIndex];
         const placeholder = cell.placeholder;
         const index = {
