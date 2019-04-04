@@ -179,19 +179,17 @@ const setFixedBaseline = (axisInstance) => {
 const setAxisNamePos = (textNode, orientation, measures) => {
     const {
         axisNameHeight,
-        yOffset,
-        labelOffset,
         availableSpace
     } = measures;
 
     switch (orientation) {
     case AxisOrientation.LEFT:
         textNode.attr('transform',
-            `translate(${-(availableSpace.width - axisNameHeight)},${yOffset + labelOffset})rotate(-90)`);
+            `translate(${-(availableSpace.width - axisNameHeight)},${availableSpace.height / 2})rotate(-90)`);
         break;
     case AxisOrientation.RIGHT:
         textNode.attr('transform',
-             `translate(${(availableSpace.width - axisNameHeight)},${yOffset + labelOffset})rotate(90)`);
+             `translate(${(availableSpace.width - axisNameHeight)},${availableSpace.height / 2})rotate(90)`);
         break;
     case AxisOrientation.TOP:
         textNode.attr('transform',
