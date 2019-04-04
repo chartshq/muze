@@ -27,7 +27,9 @@ import {
     Y,
     ARC,
     RADIUS,
-    ANGLE
+    ANGLE,
+    ASCENDING,
+    DESCENDING
 } from '../enums/constants';
 
 const POLAR = COORD_TYPES.POLAR;
@@ -451,17 +453,19 @@ export const extractFields = (facetsAndProjections, layerFields) => {
 
 /**
  * This method sorts the facets fields inplace if field is of categorical type
- * @param {Object} facet
+ * @param {Object} facet facet field
  * @param {Array} keys Array of the facet field values
+ * @param {Object} config configuration object
  */
 export const sortFacetFields = (facet, keys, config) => {
     const facetName = `${facet}`;
+    const facetSortOrder = config.sort[facetName];
     const type = facet.type();
 
-    if (type === DIMENSION && config.sort[facetName]) {
-        if (config.sort[facetName] === 'asc') {
+    if (type === DIMENSION && facetSortOrder) {
+        if (facetSortOrder === ASCENDING) {
             keys.sort((a, b) => a - b);
-        } else {
+        } else if (facetSortOrder === DESCENDING) {
             keys.sort((a, b) => b - a);
         }
     }

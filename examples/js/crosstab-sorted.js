@@ -60,7 +60,7 @@
             showHeaders: true,
             sort: {
                 Year: 'desc',
-                Origin: 'desc'
+                Origin: 'asc'
             },
             axes: {
                 x: {

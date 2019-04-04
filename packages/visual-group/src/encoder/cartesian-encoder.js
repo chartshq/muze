@@ -181,9 +181,9 @@ export default class CartesianEncoder extends VisualEncoder {
 
                     if (!isSortingDisabled && sortingOrder) {
                         if (sortingOrder === ASCENDING) {
-                            domains[axisType][key].sort();
+                            domains[axisType][key].sort((a, b) => a.localeCompare(b));
                         } else if (sortingOrder === DESCENDING) {
-                            domains[axisType][key].sort().reverse();
+                            domains[axisType][key].sort((a, b) => b.localeCompare(a));
                         }
                     }
                 }
