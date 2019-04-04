@@ -149,39 +149,29 @@ const spanGenerator = viewMatrix => ({
                     .filter(col => col !== 1))
 });
 
-const getOrder = isReverse => ({
-    row: (matrix) => {
-        if (isReverse) {
-            return orderMaker(matrix[0]).reverse();
-        }
-        return orderMaker(matrix[0]);
-    },
-    column: (matrix) => {
-        if (isReverse) {
-            return orderMaker(matrix).reverse();
-        }
-        return orderMaker(matrix);
-    }
+const getOrder = () => ({
+    row: matrix => orderMaker(matrix[0]),
+    column: matrix => orderMaker(matrix)
 });
 
 const matrixSpanGeneratorMap = {
     [`${TOP}-1`]: {
-        orderGetter: getOrder(false)[COLUMN],
+        orderGetter: getOrder()[COLUMN],
         viewMatrixMaker: (...params) => maskCreator(...params)[COLUMN],
         spanMaker: (...params) => spanGenerator(...params)[COLUMN]
     },
     [`${BOTTOM}-1`]: {
-        orderGetter: getOrder(true)[COLUMN],
+        orderGetter: getOrder()[COLUMN],
         viewMatrixMaker: (...params) => maskCreator(...params)[COLUMN],
         spanMaker: (...params) => spanGenerator(...params)[COLUMN]
     },
     [`${CENTER}-0`]: {
-        orderGetter: getOrder(false)[ROW],
+        orderGetter: getOrder()[ROW],
         viewMatrixMaker: (...params) => maskCreator(...params)[ROW],
         spanMaker: (...params) => spanGenerator(...params)[ROW]
     },
     [`${CENTER}-2`]: {
-        orderGetter: getOrder(true)[ROW],
+        orderGetter: getOrder()[ROW],
         viewMatrixMaker: (...params) => maskCreator(...params)[ROW],
         spanMaker: (...params) => spanGenerator(...params)[ROW]
     }
