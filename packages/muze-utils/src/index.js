@@ -102,7 +102,8 @@ export {
     temporalFields,
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    getSelectionRejectionModel
 } from './common-utils';
 
 export {

@@ -67,19 +67,16 @@ export const getSourceFields = (propagationInf, criteria = {}) => {
 };
 
 const conditionsMap = {
-    newEntry: [SELECTION.SELECTION_NEW_ENTRY],
-    oldEntry: [SELECTION.SELECTION_OLD_ENTRY],
     mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
-    newExit: [SELECTION.SELECTION_NEW_EXIT],
-    oldExit: [SELECTION.SELECTION_OLD_EXIT],
     mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
     complete: []
 };
 
 export const getModelFromSet = (type, model, set) => {
-    if (model) {
+    const conditions = conditionsMap[type];
+    if (model && conditions) {
         return model.select((fields, i) =>
-           (conditionsMap[type].some(condition => set[i] === condition)), {
+           (conditions.some(condition => set[i] === condition)), {
                saveChild: false
            });
     }
@@ -93,7 +90,7 @@ export const getSetInfo = (type, set, config) => {
     if (!config.propagationData) {
         if (selectionSet.resetted()) {
             model = null;
-        } else {
+        } else if (type === 'mergedEnter') {
             model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
         }
     } else if (filteredDataModel) {

@@ -70,17 +70,6 @@ export default class ArcLayer extends BaseLayer {
         return null;
     }
 
-    /**
-     *
-     *
-     * @param {*} set
-     *
-     * @memberof ArcLayer
-     */
-    getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(d => set.indexOf(d.rowId) !== -1);
-    }
-
     translatePoints (data) {
         const { angle, color: colorAxis, radius: radiusAxis } = this.axes();
         const pieIndex = {};
@@ -162,7 +151,7 @@ export default class ArcLayer extends BaseLayer {
                 .innerRadius(d => d.update.radius0);
 
         this._points = this._normalizedData.map(arr => this.translatePoints(arr));
-
+        const graphicElems = this._graphicElems = {};
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', this._points, `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
@@ -170,16 +159,19 @@ export default class ArcLayer extends BaseLayer {
                     ${measurement.height / 2})`);
         const tween = (elem) => {
             makeElement(elem, 'path', d => [d], `${qualClassName[0]}-path`)
-                            .style('fill', d => d.color)
-                            .transition()
-                            .duration(transition.duration)
-                            .on('end', this.registerAnimationDoneHook())
-                            .attrTween('d', (...params) => tweenPie(path, params))
-                            .attr('class', (d, i) => {
-                                const individualClass = getIndividualClassName(d, i, this._points, this);
-                                return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
-                                    ${individualClass}`;
-                            });
+                .style('fill', d => d.color)
+                .each(function (d) {
+                    graphicElems[d.rowId] = selectElement(this);
+                })
+                .transition()
+                .duration(transition.duration)
+                .on('end', this.registerAnimationDoneHook())
+                .attrTween('d', (...params) => tweenPie(path, params))
+                .attr('class', (d, i) => {
+                    const individualClass = getIndividualClassName(d, i, this._points, this);
+                    return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
+                        ${individualClass}`;
+                });
         };
         const consecutiveExits = [];
         let exitCounter = 0;

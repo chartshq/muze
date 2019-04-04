@@ -74,7 +74,7 @@ const createShape = function (d, groupElement) {
     const { layer, container, points, transition, className } = params;
     const { duration, effect, disabled } = transition;
     const mount = selectElement(container);
-
+    const graphicElems = layer._graphicElems;
     mount.attr('class', className);
     return makeElement(mount, 'g', points, null, {
         enter: (group, d) => {
@@ -83,6 +83,7 @@ const createShape = function (d, groupElement) {
         },
         update: (group, d) => {
             createShape(d, group);
+            graphicElems[d.rowId] = group;
             const { update, style } = d;
             objectIterator(style, key => group.style(key, style[key]));
             group.attr('class', className);

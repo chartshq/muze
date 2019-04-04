@@ -1186,28 +1186,41 @@ const detectColor = (col) => {
  * @param {*} propModel
  *
  */
-const filterPropagationModel = (model, propModel, measures) => {
+const getSelectionRejectionModel = (model, propModel, measures) => {
     const { data, schema } = propModel.getData();
-    let filteredModel;
+    let rejectionModel;
+    const entryRowIds = [];
+    const exitRowIds = [];
     if (schema.length) {
         const fieldMap = model.getFieldsConfig();
-        filteredModel = model.select((fields) => {
-            const include = data.some(row => schema.every((propField, idx) => {
-                if (!measures && (!(propField.name in fieldMap) ||
-                        fieldMap[propField.name].def.type === FieldType.MEASURE)) {
-                    return true;
-                }
-                return row[idx] === fields[propField.name].valueOf();
-            }));
-            return include;
+        const valuesMap = {};
+        const filteredSchema = measures ? schema : schema.filter(d => d.type === FieldType.DIMENSION);
+        data.forEach((row) => {
+            const key = `${filteredSchema.map((d) => {
+                return row[fieldMap[d.name].index];
+            })}`;
+            valuesMap[key] = 1;
+        });
+        rejectionModel = model.select((fields, i) => {
+            const key = `${filteredSchema.map(d => fields[d.name].value)}`;
+            if (valuesMap[key]) {
+                entryRowIds.push(i);
+                return false;
+            }
+            exitRowIds.push(i);
+            return true;
         }, {
             saveChild: false
         });
     } else {
-        filteredModel = propModel;
+        rejectionModel = propModel;
     }
 
-    return filteredModel;
+    return {
+        model: [propModel, rejectionModel],
+        entryRowIds,
+        exitRowIds
+    };
 };
 
 const assembleModelFromIdentifiers = (model, identifiers) => {
@@ -1629,7 +1642,6 @@ export {
     ERROR_MSG,
     reqAnimFrame,
     nextAnimFrame,
-    filterPropagationModel,
     transposeArray,
     cancelAnimFrame,
     getMax,
@@ -1678,5 +1690,6 @@ export {
     formatTemporal,
     temporalFields,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    getSelectionRejectionModel
 };

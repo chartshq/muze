@@ -80,6 +80,7 @@ export default class BaseLayer extends SimpleLayer {
         this._id = getUniqueId();
         this._measurement = {};
         this._animationDonePromises = [];
+        this._graphicElems = {};
         this._customConfig = null;
     }
 
@@ -456,7 +457,7 @@ export default class BaseLayer extends SimpleLayer {
      * @memberof BaseLayer
      */
     getIdentifiersFromData (data) {
-        const schema = this.data().getData().schema;
+        const schema = this.data().getSchema();
         const fieldsConfig = this.data().getFieldsConfig();
         const identifiers = [[], []];
         const {
@@ -620,7 +621,7 @@ export default class BaseLayer extends SimpleLayer {
             });
         });
 
-        return [transformedData, this.data().getData().schema];
+        return [transformedData, this.data().getSchema()];
     }
 
     /**
@@ -634,8 +635,15 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Selection} D3 Selection of dom elements.
      */
     getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
-            (data ? set.indexOf(data.rowId) !== -1 : false));
+        const graphicElems = this._graphicElems;
+        const elems = [];
+        for (let i = 0, len = set.length; i < len; i++) {
+            const elem = graphicElems[set[i]];
+            if (elem) {
+                elems.push(elem);
+            }
+        }
+        return elems;
     }
 
     /**
