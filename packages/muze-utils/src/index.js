@@ -77,7 +77,6 @@ export {
     isEqual,
     isSimpleObject,
     nextFrame,
-    filterPropagationModel,
     getObjProp,
     getDataModelFromIdentifiers,
     getDataModelFromRange,
@@ -102,8 +101,7 @@ export {
     temporalFields,
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual,
-    getSelectionRejectionModel
+    sanitizeDomainWhenEqual
 } from './common-utils';
 
 export {

@@ -1,4 +1,4 @@
-import { CommonProps, FieldType } from 'muze-utils';
+import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { DATA } from '../enums/reactive-props';
 
@@ -63,9 +63,3 @@ export const registerListeners = (firebolt) => {
         });
 };
 
-export const isXandYMeasures = (context) => {
-    const { x: xFields, y: yFields } = context.fields();
-    const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
-    const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
-    return xMeasures && yMeasures;
-};

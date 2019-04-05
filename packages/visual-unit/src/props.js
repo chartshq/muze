@@ -1,5 +1,5 @@
-import { FACET_BY_FIELDS, RETINAL_FIELDS, PARENT_ALIAS, LAYERS, CACHED_DATA } from './enums/constants';
 import { mergeRecursive } from 'muze-utils';
+import { FACET_BY_FIELDS, RETINAL_FIELDS, PARENT_ALIAS, LAYERS, CACHED_DATA } from './enums/constants';
 
 export const PROPS = {
     [FACET_BY_FIELDS]: {},
@@ -19,12 +19,10 @@ export const PROPS = {
             x: [],
             y: []
         },
-        sanitization: (context, value) => {
-            return mergeRecursive({
-                x: [],
-                y: []
-            }, value);
-        }
+        sanitization: (context, value) => mergeRecursive({
+            x: [],
+            y: []
+        }, value)
     },
     metaInf: {},
     registry: {},

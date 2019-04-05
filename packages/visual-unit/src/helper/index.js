@@ -325,3 +325,69 @@ export const setAxisRange = (context) => {
         });
     }
 };
+
+export const isXandYMeasures = (context) => {
+    const { x: xFields, y: yFields } = context.fields();
+    const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
+    const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
+    return xMeasures && yMeasures;
+};
+
+const getKey = (arr, row) => {
+    let key = row[arr[0]];
+    for (let i = 1, len = arr.length; i < len; i++) {
+        key = `${key},${row[arr[i]]}`;
+    }
+    return key;
+};
+
+export const getValuesMap = (model, context) => {
+    const valuesMap = {};
+    const { data: dataArr, schema, uids } = model.getData();
+    const fieldsConfig = model.getFieldsConfig();
+    const fieldIndices = isXandYMeasures(context) ? schema.map((d, i) => i) :
+                            Object.keys(model.getFieldspace().getDimension()).map(d => fieldsConfig[d].index);
+    dataArr.forEach((row, i) => {
+        const key = getKey(fieldIndices, row);
+        valuesMap[key] = uids[i];
+    });
+    return valuesMap;
+};
+
+export const getSelectionRejectionModel = (model, propModel, measures, propValuesMap) => {
+    const { data, schema } = propModel.getData();
+    let rejectionModel;
+    const entryRowIds = [];
+    const exitRowIds = [];
+    if (schema.length) {
+        const fieldMap = model.getFieldsConfig();
+        const rowIdsObj = {};
+        const filteredSchema = measures ? schema.map((d, idx) => idx) :
+            Object.keys(model.getFieldspace().getDimension()).map(d => fieldMap[d].index);
+        data.forEach((row) => {
+            const key = getKey(filteredSchema, row);
+            const id = propValuesMap[key];
+            if (key in propValuesMap) {
+                entryRowIds.push(id);
+                rowIdsObj[id] = 1;
+            }
+        });
+        rejectionModel = model.select((fields, i) => {
+            if (!rowIdsObj[i]) {
+                exitRowIds.push(i);
+                return true;
+            }
+            return false;
+        }, {
+            saveChild: false
+        });
+    } else {
+        rejectionModel = propModel;
+    }
+
+    return {
+        model: [propModel, rejectionModel],
+        entryRowIds,
+        exitRowIds
+    };
+};

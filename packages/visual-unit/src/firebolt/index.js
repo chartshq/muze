@@ -1,6 +1,7 @@
-import { FieldType, getSelectionRejectionModel, filterPropagationModel } from 'muze-utils';
+import { FieldType } from 'muze-utils';
 import { Firebolt } from '@chartshq/muze-firebolt';
-import { registerListeners, isXandYMeasures } from './helper';
+import { registerListeners } from './helper';
+import { isXandYMeasures, getSelectionRejectionModel } from '../helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
 
@@ -72,7 +73,7 @@ export default class UnitFireBolt extends Firebolt {
                 model: propagationData,
                 entryRowIds,
                 exitRowIds
-            } = getSelectionRejectionModel(context.data(), data, isXandYMeasures(context));
+            } = getSelectionRejectionModel(context.data(), data, isXandYMeasures(context), context._cachedValuesMap());
             const propPayload = config.payload;
             const sourceIdentifiers = config.sourceIdentifiers;
             const enabledFn = config.enabled;

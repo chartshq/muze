@@ -1179,50 +1179,6 @@ const detectColor = (col) => {
     } return col;
 };
 
-/**
- *
- *
- * @param {*} model
- * @param {*} propModel
- *
- */
-const getSelectionRejectionModel = (model, propModel, measures) => {
-    const { data, schema } = propModel.getData();
-    let rejectionModel;
-    const entryRowIds = [];
-    const exitRowIds = [];
-    if (schema.length) {
-        const fieldMap = model.getFieldsConfig();
-        const valuesMap = {};
-        const filteredSchema = measures ? schema : schema.filter(d => d.type === FieldType.DIMENSION);
-        data.forEach((row) => {
-            const key = `${filteredSchema.map((d) => {
-                return row[fieldMap[d.name].index];
-            })}`;
-            valuesMap[key] = 1;
-        });
-        rejectionModel = model.select((fields, i) => {
-            const key = `${filteredSchema.map(d => fields[d.name].value)}`;
-            if (valuesMap[key]) {
-                entryRowIds.push(i);
-                return false;
-            }
-            exitRowIds.push(i);
-            return true;
-        }, {
-            saveChild: false
-        });
-    } else {
-        rejectionModel = propModel;
-    }
-
-    return {
-        model: [propModel, rejectionModel],
-        entryRowIds,
-        exitRowIds
-    };
-};
-
 const assembleModelFromIdentifiers = (model, identifiers) => {
     let schema = [];
     let data;
@@ -1690,6 +1646,5 @@ export {
     formatTemporal,
     temporalFields,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual,
-    getSelectionRejectionModel
+    sanitizeDomainWhenEqual
 };
