@@ -110,8 +110,12 @@ export default class BarLayer extends BaseLayer {
         const domain = super.calculateDomainFromData(data, encodingFieldInf, fieldsConfig);
         ['x', 'y'].forEach((d) => {
             if (encodingFieldInf[`${d}FieldType`] === MEASURE && domain[d]) {
-                encodingFieldInf[`${d}0Field}`] ? domain[d] = domain[d].sort((a, b) => a - b) :
-                    (domain[d][0] = Math.min(domain[d][0], 0));
+                if (encodingFieldInf[`${d}0Field`]) {
+                    domain[d] = domain[d].sort((a, b) => a - b);
+                } else {
+                    domain[d][0] = Math.min(domain[d][0], 0);
+                    domain[d][1] = Math.max(0, domain[d][1]);
+                }
             }
         });
         return domain;
@@ -176,7 +180,7 @@ export default class BarLayer extends BaseLayer {
                     className: seriesClassName,
                     transition,
                     style: {},
-                    keyFn: d => dimensions.map(key => d._data[key]).join('-')
+                    keyFn: d => dimensions.map(key => d.source[key]).join('-')
                 });
             }
         });
@@ -286,9 +290,9 @@ export default class BarLayer extends BaseLayer {
             pointFound = null;
         }
 
-        const values = pointFound && pointFound._data;
+        const values = pointFound && pointFound.source;
         if (values) {
-            identifiers = this.getIdentifiersFromData(values, pointFound._id);
+            identifiers = this.getIdentifiersFromData(values, pointFound.rowId);
         }
         return pointFound ? {
             dimensions: [pointFound.update],
@@ -299,5 +303,9 @@ export default class BarLayer extends BaseLayer {
 
     getPlotSpan () {
         return this._plotSpan;
+    }
+
+    hasPlotSpan () {
+        return true;
     }
 }

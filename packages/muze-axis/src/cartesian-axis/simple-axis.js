@@ -15,7 +15,8 @@ import {
     computeAxisDimensions,
     calculateContinousSpace,
     setOffset,
-    getValidDomain
+    getValidDomain,
+    getSmartAxisName
 } from './helper';
 import { PROPS } from './props';
 
@@ -180,23 +181,37 @@ export default class SimpleAxis {
         return () => val => numberFormat(val);
     }
 
-    resetLogicalSpace () {
-        this.logicalSpace(null);
-        this.range([]);
+    resetRenderConfig (config) {
         const {
             labels,
             show,
             showInnerTicks,
             showOuterTicks,
-            showAxisName
-        } = this.config();
+            showAxisName,
+            xOffset,
+            yOffset,
+            tickValues,
+            smartAxisName
+        } = config;
         this.renderConfig({
             labels,
             show,
             showInnerTicks,
             showOuterTicks,
-            showAxisName
+            showAxisName,
+            xOffset,
+            yOffset,
+            tickValues,
+            smartAxisName
         });
+        return this;
+    }
+
+    resetLogicalSpace () {
+        this.logicalSpace(null);
+        this.range([]);
+
+        this.resetRenderConfig(this.config());
     }
 
     getFormattedText (text, index, axisTicks) {
@@ -222,6 +237,13 @@ export default class SimpleAxis {
         return null;
     }
 
+    setTickValues (tickValues) {
+        const renderConfig = this.renderConfig();
+        this.config({ ...renderConfig, tickValues });
+        this.tickValues = tickValues;
+        this.axis().tickValues(tickValues);
+    }
+
     /**
      * This method is used to set the space availiable to render
      * the SimpleCell.
@@ -237,11 +259,12 @@ export default class SimpleAxis {
        } = this.config();
 
         this.availableSpace({ width, height, padding });
+        const type = this.constructor.type();
 
         if (orientation === TOP || orientation === BOTTOM) {
-            labelConfig = spaceSetter(this, { isOffset }).continous.x();
+            labelConfig = spaceSetter(this, { isOffset })[type].x();
         } else {
-            labelConfig = spaceSetter(this, { isOffset }).continous.y();
+            labelConfig = spaceSetter(this, { isOffset })[type].y();
         }
 
         // Set config
@@ -249,7 +272,19 @@ export default class SimpleAxis {
             labels: labelConfig
         });
         this.setTickConfig();
-        this.getTickSize();
+        this.setSmartAxisName();
+        return this;
+    }
+
+    setSmartAxisName () {
+        const { orientation, name } = this.config();
+        const dimType = (orientation === TOP || orientation === BOTTOM) ? 'width' : 'height';
+        const widthDim = this.availableSpace()[dimType];
+        const labelManager = this.dependencies().labelManager;
+        labelManager.setStyle(this._axisNameStyle);
+        this.renderConfig({
+            smartAxisName: getSmartAxisName(name, widthDim, labelManager)
+        });
         return this;
     }
 
@@ -299,9 +334,8 @@ export default class SimpleAxis {
     getLogicalSpace () {
         if (!this.logicalSpace()) {
             this.logicalSpace(calculateContinousSpace(this));
-            this.logicalSpace();
-            setOffset(this);
         }
+        setOffset(this);
 
         return this.logicalSpace();
     }

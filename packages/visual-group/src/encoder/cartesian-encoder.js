@@ -1,16 +1,26 @@
 import { layerFactory } from '@chartshq/visual-layer';
-import { mergeRecursive, STATE_NAMESPACES, unionDomain } from 'muze-utils';
+import {
+    mergeRecursive,
+    STATE_NAMESPACES,
+    unionDomain,
+    COORD_TYPES,
+    toArray
+} from 'muze-utils';
+import { ScaleType } from '@chartshq/muze-axis';
 import {
     generateAxisFromMap,
     getDefaultMark,
     getIndex,
     getLayerConfFromFields,
-    getAdjustedDomain
+    getAdjustedDomain,
+    sanitizeIndividualLayerConfig
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, CARTESIAN, MEASURE, BOTH, X, Y } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, ASCENDING, DESCENDING } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
+
+const CARTESIAN = COORD_TYPES.CARTESIAN;
 
 /**
  *
@@ -63,6 +73,7 @@ export default class CartesianEncoder extends VisualEncoder {
             fields: columnFields,
             index: columnIndex
         }];
+        const { resolver, facetFields, geomCell } = context;
         const xAxes = axes.x || [];
         const yAxes = axes.y || [];
 
@@ -77,9 +88,10 @@ export default class CartesianEncoder extends VisualEncoder {
             }
             geomCellAxes[axis] = generateAxisFromMap(axis, axisFields[i], axesCreators, {
                 groupAxes: axis === X ? xAxes : yAxes,
-                valueParser: context.resolver.valueParser()
-            });
+                valueParser: resolver.valueParser()
+            }, indices, facetFields);
         });
+        geomCell.axes(geomCellAxes);
         return geomCellAxes;
     }
 
@@ -104,10 +116,15 @@ export default class CartesianEncoder extends VisualEncoder {
 
     unionUnitDomains (context) {
         const store = context.store();
-        const unitDomains = store.get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`);
         const resolver = context.resolver();
         const units = resolver.units();
         const domains = {
+            0: {},
+            1: {}
+        };
+        // const sortingDetails = nearestSortingDetails(context.getGroupByData());
+        const config = context.config();
+        const fieldsObj = {
             0: {},
             1: {}
         };
@@ -117,13 +134,18 @@ export default class CartesianEncoder extends VisualEncoder {
             for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
                 const unit = unitsArr[cIdx];
                 const axisFields = unit.fields();
-                [axisFields.x, axisFields.y].forEach((fieldArr, axisType) => {
+                const encodingDomains = unit.getDataDomain();
+                ['x', 'y'].forEach((axisType, axisTypeIndex) => {
+                    const fieldArr = axisFields[axisType];
                     fieldArr.forEach((field, axisIndex) => {
-                        const key = !axisType ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
-                        const dom = unitDomains[`${rIdx}${cIdx}`];
+                        const key = !axisTypeIndex ? `0${cIdx}${axisIndex}` : `${rIdx}0${axisIndex}`;
+                        const dom = encodingDomains[axisType];
+                        const typeOfField = field.subtype();
+                        fieldsObj[axisTypeIndex][key] = field;
+
                         if (dom && Object.keys(dom).length !== 0) {
-                            domains[axisType][key] = unionDomain([(domains[axisType] && domains[axisType][key]) || [],
-                                dom[`${field}`]], field.subtype());
+                            domains[axisTypeIndex][key] = unionDomain([(domains[axisTypeIndex] &&
+                                domains[axisTypeIndex][key]) || [], dom[`${field}`]], typeOfField);
                         }
                     });
                 });
@@ -134,24 +156,43 @@ export default class CartesianEncoder extends VisualEncoder {
         store.model.lock();
         [xAxes, yAxes].forEach((axesArr, axisType) => {
             axesArr.forEach((axes, idx) => {
-                const min = [];
-                const max = [];
+                let key;
                 let domain = [];
                 let adjustedDomain = [];
-                if (axes.length > 1 && axes[0].constructor.type() === 'linear' && axes[0].config().alignZeroLine) {
+                const min = [];
+                const max = [];
+                const typeOfAxis = axes[0].constructor.type();
+
+                if (axes.length > 1 && typeOfAxis === ScaleType.LINEAR && axes[0].config().alignZeroLine) {
                     axes.forEach((axis, i) => {
-                        const key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
+                        key = !axisType ? `0${idx}${i}` : `${idx}0${i}`;
                         domain = domains[axisType][key];
                         min[i] = domain[0];
                         max[i] = domain[1];
                     });
                     adjustedDomain = getAdjustedDomain(max, min);
+                } else if (typeOfAxis === ScaleType.BAND) {
+                    /* Sort categorical fields to ensure consistency across all rows
+                    only if field is categorical and is not explicitily sorted by user */
+                    key = !axisType ? `0${idx}0` : `${idx}00`;
+                    const currentFieldName = fieldsObj[axisType][key].oneVar();
+                    const sortingOrder = config.sort[currentFieldName];
+                    const isSortingDisabled = config.sort.disabled;
+
+                    if (!isSortingDisabled && sortingOrder) {
+                        if (sortingOrder === ASCENDING) {
+                            domains[axisType][key].sort();
+                        } else if (sortingOrder === DESCENDING) {
+                            domains[axisType][key].sort().reverse();
+                        }
+                    }
                 }
 
                 axes.forEach((axis, index) => {
-                    const key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
+                    key = !axisType ? `0${idx}${index}` : `${idx}0${index}`;
                     domain = adjustedDomain[index] || domains[axisType][key];
-                    axis.domain(domain);
+
+                    domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
                     store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
                 });
@@ -292,6 +333,16 @@ export default class CartesianEncoder extends VisualEncoder {
         return serializedLayers;
     }
 
+    sanitizeLayerConfig (encodingConfigs, userLayerConfig) {
+        const layerConfig = [];
+        userLayerConfig.forEach((config) => {
+            const def = toArray(config.def);
+            sanitizeIndividualLayerConfig(encodingConfigs, def);
+            layerConfig.push(config);
+        });
+        return layerConfig;
+    }
+
     /**
      *
      *
@@ -300,7 +351,7 @@ export default class CartesianEncoder extends VisualEncoder {
      *
      * @memberof CartesianEncoder
      */
-    getLayerConfig (fields, userLayerConfig) {
+    getLayerConfig (fields, userLayerConfig, retinalConfig) {
         const layerConfig = [];
         const {
             columnFields,
@@ -353,6 +404,6 @@ export default class CartesianEncoder extends VisualEncoder {
                 layerConfig.push(...configs);
             });
         });
-        return layerConfig;
+        return this.sanitizeLayerConfig(retinalConfig, layerConfig);
     }
 }

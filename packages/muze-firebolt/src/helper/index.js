@@ -1,4 +1,4 @@
-import { clone } from 'muze-utils';
+import { clone, retrieveNearestGroupByReducers } from 'muze-utils';
 import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
@@ -134,15 +134,18 @@ export const unionSets = (context, behaviours) => {
             ['mergedEnter', 'mergedExit'].forEach((type) => {
                 const model = entryExitSet[type].model;
                 let existingModel = models[type];
+                let aggFns = retrieveNearestGroupByReducers(model);
                 if (!existingModel) {
                     existingModel = models[type] = model;
                 } else if (`${model.getSchema().map(d => d.name).sort()}` ===
                     `${existingModel.getSchema().map(d => d.name).sort()}`) {
+                    aggFns = Object.assign({}, retrieveNearestGroupByReducers(existingModel));
                     existingModel = models[type] = model.union(existingModel);
                 } else {
                     existingModel = model;
                 }
                 combinedSet[type].model = existingModel;
+                combinedSet[type].aggFns = aggFns;
             });
         }
     });

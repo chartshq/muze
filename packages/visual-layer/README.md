@@ -10,7 +10,7 @@ $ npm install --save @chartshq/visual-layer
 
 ## Docs
 
-Please refer to [this](https://www.charts.com/muze/docs) for detailed documentation.
+Please refer to [this](https://muzejs.org/docs) for detailed documentation.
 
 ## Contributing
 

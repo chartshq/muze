@@ -9,18 +9,19 @@ import {
     DataModel,
     clone,
     generateGetterSetters,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    COORD_TYPES
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
 import { props } from './props';
 import {
     transformData,
-    calculateDomainFromData,
     getNormalizedData,
     applyInteractionStyle,
     initializeGlobalState,
-    getValidTransform
+    getValidTransform,
+    domainCalculator
 } from '../helpers';
 import { listenerMap } from './listener-map';
 import { defaultOptions } from './default-options';
@@ -297,7 +298,7 @@ export default class BaseLayer extends SimpleLayer {
         const isEmpty = this.data().isEmpty();
 
         if (!isEmpty) {
-            domains = calculateDomainFromData(data, this.encodingFieldsInf(), this.transformType());
+            domains = domainCalculator[this.coord()](data, this);
         }
         return domains;
     }
@@ -324,8 +325,8 @@ export default class BaseLayer extends SimpleLayer {
      * @param {string} encodingType type of encoding x, y, etc.
      * @return {Object} Axis domains
      */
-    getNormalizedData (transformedData, fieldsConfig) {
-        return getNormalizedData(transformedData, fieldsConfig, this.encodingFieldsInf(), this.transformType());
+    getNormalizedData (transformedData) {
+        return getNormalizedData(transformedData, this);
     }
 
     /**
@@ -483,6 +484,10 @@ export default class BaseLayer extends SimpleLayer {
         return identifiers;
     }
 
+    hasPlotSpan () {
+        return false;
+    }
+
     getPlotSpan () {
         return {
             x: 0,
@@ -539,13 +544,13 @@ export default class BaseLayer extends SimpleLayer {
         const fieldsConfig = this.data().getFieldsConfig();
 
         const filteredPoints = [].concat(...points).filter((point) => {
-            const { _data, _id } = point;
+            const { source, rowId } = point;
 
             return fieldNames.every((field, idx) => {
                 if (field in fieldsConfig && fieldsConfig[field].def.type === FieldType.DIMENSION) {
-                    return values.findIndex(d => d[idx] === _data[fieldsConfig[field].index]) !== -1;
+                    return values.findIndex(d => d[idx] === source[fieldsConfig[field].index]) !== -1;
                 } else if (field === ReservedFields.ROW_ID) {
-                    return values.findIndex(d => d[idx] === _id) !== -1;
+                    return values.findIndex(d => d[idx] === rowId) !== -1;
                 } return true;
             });
         });
@@ -596,12 +601,12 @@ export default class BaseLayer extends SimpleLayer {
         const transformedData = [];
         normalizedData.forEach((dataArr) => {
             dataArr.forEach((dataObj) => {
-                const tupleArr = dataObj._data;
+                const tupleArr = dataObj.source;
                 const exist = identifierSchema.every((obj, i) =>
                     identifierData.findIndex(d => tupleArr[fieldsConfig[obj.name].index] === d[i]) !== -1);
                 if (exist) {
                     const transformedVal = dataObj[enc];
-                    const row = dataObj._data;
+                    const row = dataObj.source;
                     const tuple = {};
                     for (const key in fieldsConfig) {
                         const index = fieldsConfig[key].index;
@@ -630,7 +635,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     getPlotElementsFromSet (set) {
         return selectElement(this.mount()).selectAll(this.elemType()).filter(data =>
-            (data ? set.indexOf(data._id) !== -1 : false));
+            (data ? set.indexOf(data.rowId) !== -1 : false));
     }
 
     /**
@@ -657,6 +662,9 @@ export default class BaseLayer extends SimpleLayer {
 
     getRenderProps () {
         const metaInf = this.metaInf();
+        if (this.coord() === COORD_TYPES.POLAR) {
+            return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
+        }
         return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}0`,
             `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.unitColIndex}0`];
     }

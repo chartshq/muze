@@ -60,8 +60,8 @@ d3.json('../data/cars.json', (data) => {
         .width(600)
         .height(400)
         // @preamble_end
-        // DataModel instance is created from https://www.charts.com/static/cars.json data,
-        // https://www.charts.com/static/cars-schema.json schema and assigned to variable dm.
+        // DataModel instance is created from https://muzejs.org/static/cars.json data,
+        // https://muzejs.org/static/cars-schema.json schema and assigned to variable dm.
         // This is part view of the whole code. Click on copy icon to copy the whole code.
         .data(dm)
         .layers([

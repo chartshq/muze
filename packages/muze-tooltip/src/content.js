@@ -7,7 +7,6 @@ import {
     getSymbol,
     isSimpleObject
 } from 'muze-utils';
-import { DEFAULT_STRATEGY, strategy } from './strategy';
 import { defaultConfig } from './default-config';
 
 /**
@@ -19,7 +18,6 @@ export default class Content {
      */
     constructor () {
         this._model = null;
-        this._strategy = DEFAULT_STRATEGY;
         this._formatter = null;
         this._config = this.constructor.defaultConfig();
     }
@@ -47,7 +45,6 @@ export default class Content {
     */
     update (item) {
         this._model = item.model;
-        this._strategy = item.strategy !== undefined ? item.strategy : DEFAULT_STRATEGY;
         this._formatter = item.formatter;
         return this;
     }
@@ -69,8 +66,7 @@ export default class Content {
         if (model instanceof Array) {
             data = model;
         } else {
-            data = formatter instanceof Function ? formatter(this._model, this._context) :
-                strategy[this._strategy](this._model, this.config(), this._context);
+            data = formatter(this._model, this.config(), this._context);
         }
 
         if (data instanceof Function) {

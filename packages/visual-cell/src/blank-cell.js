@@ -154,5 +154,9 @@ class BlankCell extends SimpleCell {
         this.mount() && this.mount().remove();
         return this;
     }
+
+    getMinMeasures () {
+        return 0;
+    }
  }
 export default BlankCell;

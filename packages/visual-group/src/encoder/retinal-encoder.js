@@ -42,39 +42,6 @@ export default class RetinalEncoder extends VisualEncoder {
     /**
      *
      *
-     * @param {*} fields
-     * @param {*} userLayerConfig
-     *
-     * @memberof RetinalEncoder
-     */
-    getLayerConfig (encodingConfigs, userLayerConfig) {
-        const layerConfig = [];
-        userLayerConfig.forEach((e) => {
-            const config = e;
-            [COLOR, SHAPE, SIZE].forEach((axis) => {
-                if (encodingConfigs[axis] && encodingConfigs[axis].field) {
-                    const def = config.def;
-                    if (config.def instanceof Array) {
-                        def.forEach((conf) => {
-                            conf.encoding = conf.encoding || {};
-                            !conf.encoding[axis] && (conf.encoding[axis] = {});
-                            conf.encoding[axis].field = encodingConfigs[axis].field;
-                        });
-                    } else {
-                        def.encoding = def.encoding || {};
-                        !def.encoding[axis] && (def.encoding[axis] = {});
-                        def.encoding[axis].field = encodingConfigs[axis].field;
-                    }
-                }
-            });
-            layerConfig.push(config);
-        });
-        return layerConfig;
-    }
-
-    /**
-     *
-     *
      * @param {*} context
      *
      * @memberof RetinalEncoder

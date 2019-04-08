@@ -110,8 +110,8 @@ export default class RowVisualMatrix extends VisualMatrix {
     }
 
     getPriorityDistribution (measures) {
-        let remainaingAvailWidth;
-        let remainaingWidth;
+        let remainingAvailWidth;
+        let remainingWidth;
         let cWidths = [];
         let conditions = [];
         let maxPrioritySpace = 0;
@@ -127,8 +127,8 @@ export default class RowVisualMatrix extends VisualMatrix {
 
         const dist = [];
 
-        remainaingAvailWidth = availableWidth;
-        remainaingWidth = currentWidth;
+        remainingAvailWidth = availableWidth;
+        remainingWidth = currentWidth;
 
         if (priority === 2) {
             conditions = [primaryMatrixLength - 1, primaryMatrixLength];
@@ -140,12 +140,12 @@ export default class RowVisualMatrix extends VisualMatrix {
         conditions.forEach((i) => {
             dist[i] = maxWidths[i];
             maxPrioritySpace += maxWidths[i];
-            remainaingAvailWidth -= dist[i];
-            remainaingWidth -= dist[i];
+            remainingAvailWidth -= dist[i];
+            remainingWidth -= dist[i];
         });
         matrix[0].forEach((e, i) => {
             if (conditions.indexOf(i) === -1) {
-                dist[i] = remainaingAvailWidth * (maxWidths[i] / remainaingWidth);
+                dist[i] = remainingAvailWidth * (maxWidths[i] / remainingWidth);
             }
         });
         matrix.forEach(row => row.forEach((col, cIdx) => {

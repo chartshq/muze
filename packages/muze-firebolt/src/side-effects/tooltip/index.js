@@ -1,5 +1,5 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType } from 'muze-utils';
+import { FieldType, mergeRecursive, defaultValue } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
@@ -7,12 +7,26 @@ import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
 
+const configResolvers = {
+    highlightSummary: (specificConf, config) => defaultValue(specificConf, config),
+    default: specificConf => defaultValue(specificConf, {})
+};
+
+const sanitizeConfig = (config, context) => {
+    const strategyObj = context._strategies;
+    const sanitizedConf = Object.assign({}, config);
+    for (const key in strategyObj) {
+        sanitizedConf[key] = defaultValue(configResolvers[key], configResolvers.default)(config[key], config);
+    }
+    return sanitizedConf;
+};
+
 export default class Tooltip extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._tooltips = {};
         this._strategies = strategies;
-        this._strategy = 'default';
+        this._strategy = 'highlightSummary';
     }
 
     static defaultConfig () {
@@ -21,12 +35,40 @@ export default class Tooltip extends SpawnableSideEffect {
             offset: {
                 x: 0,
                 y: 0
+            },
+            highlightSummary: {
+                dataTransform: (dt, fields) => (fields ? dt.project(fields, { saveChild: false }) : dt
+                )
+            },
+            selectionSummary: {
+                dataTransform: (dt, fields) => {
+                    const fieldspace = dt.getFieldspace();
+                    const dimensions = Object.keys(fieldspace.getDimension());
+                    const measures = Object.keys(fieldspace.getMeasure());
+                    const projectedFields = defaultValue(fields, measures.length ? [measures[0]] : []);
+                    return dt.project([...dimensions, ...projectedFields], {
+                        saveChild: false
+                    });
+                }
             }
         };
     }
 
     static formalName () {
         return 'tooltip';
+    }
+
+    config (...params) {
+        if (params.length) {
+            const config = this._config = mergeRecursive(this._config, sanitizeConfig(params[0], this));
+            const strategyObj = this._strategies;
+            for (const key in strategyObj) {
+                const formatter = config[key].formatter;
+                this.setStrategy(key, formatter);
+            }
+            return this;
+        }
+        return this._config;
     }
 
     apply (selectionSet, payload, options = {}) {
@@ -84,6 +126,9 @@ export default class Tooltip extends SpawnableSideEffect {
             getBBox: true
         });
 
+        const strategy = defaultValue(options.strategy, this._strategy);
+        const strategyConf = config[strategy];
+        const { dataTransform, fields: projectFields } = strategyConf;
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];
@@ -94,15 +139,7 @@ export default class Tooltip extends SpawnableSideEffect {
                 plotDim = plotDim && plotDim[0];
             }
 
-            let dt = dataModels[i];
-            if (config.fields) {
-                dt = dt.project(config.fields, {
-                    saveChild: false
-                });
-            }
-            if (config.dataTransform) {
-                dt = config.dataTransform(dt, i);
-            }
+            const dt = dataTransform(dataModels[i], projectFields, this);
 
             enter[i] = true;
             const { parentContainer: layoutContainer, parentContainerDimensions } = drawingInf;
@@ -119,10 +156,11 @@ export default class Tooltip extends SpawnableSideEffect {
             sourceInf.detailFields = context.detailFields();
             sourceInf.timeDiffs = context.timeDiffsByField();
             sourceInf.valueParser = context.valueParser();
+            sourceInf.selectionSet = selectionSet;
             tooltipInst.context(sourceInf);
-            const strategy = strategies[options.strategy];
-            tooltipInst.content(options.strategy || this._strategy, dt, {
-                formatter: strategy,
+            const strategyFn = strategies[strategy];
+            tooltipInst.content(strategy, dt, {
+                formatter: strategyFn,
                 order: options.order
             })
                             .config(this.config())

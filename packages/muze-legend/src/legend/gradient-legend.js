@@ -1,5 +1,5 @@
 import SimpleLegend from './simple-legend';
-import { getScaleInfo, getInterpolatedData } from './legend-helper';
+import { getScaleInfo, getInterpolatedData, getInterpolatedArrayData } from './legend-helper';
 import { GRADIENT, LEFT, SIZE } from '../enums/constants';
 import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
@@ -57,9 +57,18 @@ export default class GradientLegend extends SimpleLegend {
      *
      * @memberof GradientLegend
      */
-    dataFromScale (scale) {
+    dataFromScale () {
         let domainForLegend = [];
+        const scale = this.scale();
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
+
+        // defining scaleParams
+        const scaleParams = {
+            smartLabel: this.labelManager(),
+            measures: this.measurement(),
+            alignment: this.config().position,
+            minTickDistance: this.minTickDistance()
+        };
 
         if (steps instanceof Array) {
             if (domain[0] < steps[0]) {
@@ -69,8 +78,12 @@ export default class GradientLegend extends SimpleLegend {
             if (domain[domain.length - 1] > steps[steps.length - 1]) {
                 domainForLegend.push(domain[1]);
             }
+            // Sorting the domain Array
+            domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
+
+            domainForLegend = getInterpolatedArrayData(domainForLegend, scaleParams);
         } else {
-            domainForLegend = getInterpolatedData(domain, steps - 1);
+            domainForLegend = getInterpolatedData(domain, steps - 1, scaleParams);
         }
         domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
 

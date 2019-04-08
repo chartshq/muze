@@ -100,6 +100,7 @@ export const createMatrices = (context) => {
     const encoders = {};
     encoders.retinalEncoder = new RetinalEncoder();
     encoders.simpleEncoder = getEncoder(layers);
+    matrixConfig.coord = encoders.simpleEncoder.constructor.type();
     resolver.encoder(encoders.simpleEncoder);
 
     // Set the group type

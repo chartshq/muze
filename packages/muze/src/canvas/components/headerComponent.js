@@ -40,6 +40,7 @@ export default class HeaderComponent extends MuzeComponent {
     }
 
     updateWrapper (params) {
+        this.setParams(params);
         this.name(params.name);
         this.boundBox(params.component.getLogicalSpace());
         return this;

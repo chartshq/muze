@@ -1,4 +1,4 @@
-import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel } from 'muze-utils';
+import { getObjProp, defaultValue, makeElement, DimensionSubtype, DataModel, createSelection } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { layerFactory, LAYER_TYPES } from '@chartshq/visual-layer';
 import {
@@ -43,7 +43,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             return isNegativeDomain && data[orientation] === 0 ? zeroLineColor : gridLineColor;
         }
     };
-
+    const { color, shape, size } = context.axes();
     return {
         definition: {
             defClassName: `${defClassName}-${orientation}`,
@@ -63,7 +63,10 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             encoding
         },
         axes: {
-            [orientation]: axis
+            [orientation]: axis,
+            color: color[0],
+            shape: shape[0],
+            size: size[0]
         },
         interactive: false
     };
@@ -87,8 +90,15 @@ export const getGridLayerDefinitions = (context, config, type) => ['x', 'y'].map
     return show ? getLayerDefinition(context, axes, type, axisType) : null;
 }).filter(d => d !== null);
 
+const dimensionSubTypes = Object.values(DimensionSubtype).reduce((acc, v) => {
+    acc[v] = 1;
+    return acc;
+}, {});
+const getValidSubtype = subtype => (!dimensionSubTypes[subtype] ? DimensionSubtype.CATEGORICAL : subtype);
+
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
     const gridData = {};
+
     ['x', 'y'].forEach((type) => {
         let ticks = axes[type][0].getTickValues();
         const subtype = getObjProp(fieldsConfig, getObjProp(fields, type, 0).getMembers()[0], 'def', 'subtype');
@@ -110,11 +120,11 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
             }, {
                 name: 'xdim',
                 type: 'dimension',
-                subtype
+                subtype: getValidSubtype(subtype)
             }, {
                 name: 'ydim',
                 type: 'dimension',
-                subtype
+                subtype: getValidSubtype(subtype)
             }
         ];
         const len = Math.max(ticks.length);
@@ -130,27 +140,6 @@ export const getGridLayerData = (axes, fields, fieldsConfig) => {
         gridData[type] = new DataModel(jsonData, schema);
     });
     return gridData;
-};
-
-// @todo Use dataSelect method to reuse instances when the method is fixed. #110
-export const createGridLines = (instances = {}, createFn, definitions, iteratorFn) => {
-    const map = {};
-    definitions.forEach((def) => {
-        const name = def.definition.name;
-        let instance = instances[name];
-        if (!instance) {
-            instances[name] = instance = createFn(def);
-        }
-        iteratorFn(instance, def, name);
-        map[name] = 1;
-    });
-    for (const key in instances) {
-        if (!(key in map)) {
-            instances[key].remove();
-            delete instances[key];
-        }
-    }
-    return instances;
 };
 
 export const createGridLineLayer = (context) => {
@@ -171,18 +160,20 @@ export const createGridLineLayer = (context) => {
         const definitions = getGridLayerDefinitions(context, config, type);
 
         const sel = `_${type}Selection`;
-        context[sel] = createGridLines(context[sel], () => {
+        context[sel] = createSelection(context[sel], () => {
             const inst = layerFactory.getLayerInstance({ mark });
             inst.dependencies(context._layerDeps);
             return inst;
-        }, definitions, (layer, atomicDef, key) => {
+        }, definitions, atomicDef => atomicDef.definition.name);
+        context[sel].each((layer, atomicDef) => {
             const definition = atomicDef.definition;
+            const name = definition.name;
             const sConf = layerFactory.getSerializedConf(mark, definition);
             const axesObj = atomicDef.axes;
             layer.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${type}${key}`
+                namespace: `${metaInf.namespace}${type}${name}`
             })
                 .store(store)
                 .config(sConf)
@@ -191,7 +182,7 @@ export const createGridLineLayer = (context) => {
                 })
                 .axes(axesObj);
         });
-        context[`_${type}`] = Object.values(context[sel]);
+        context[`_${type}`] = context[sel].getObjects();
     });
 };
 

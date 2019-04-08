@@ -103,7 +103,7 @@
     window.canvas = env.canvas();
     canvas
       .rows(['value'])
-      .columns(['quarterYear', 'date'])
+      .columns([[],[ 'date', 'quarterYear']])
       .data(rootData.select((fields) => fields.quarter.value === 'Q4'))
       .width(850)
       .height(600)
@@ -183,6 +183,10 @@
               show: false
           }
         },
+        border:{
+          color: 'rgb(239, 239, 239)',
+          width: 1
+        },
         axes: {
           x: { show: false },
           y: {
@@ -221,10 +225,6 @@
       .title('Q4 comparison from 2010 until 2019', { position: "top", align: "center", color: 'white' })
       .mount(mountPoint);
 
-      // setTimeout(() => {
-      //     canvas.data(rootData.select((fields) => fields.quarter.value === 'Q2'))
-      //     .title('Q2 comparison from 2010 until 2019', { position: "top", align: "center", color: 'white' });
-      // }, 5000);
       async function wait(ms) {
         return new Promise(resolve => {
           setTimeout(resolve, ms);

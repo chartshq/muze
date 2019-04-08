@@ -2,6 +2,16 @@
 const env = muze();
 const DataModel = muze.DataModel;
 
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+
 d3.json('../../data/cars.json', (data) => {
     let jsonData = data;
     const schema = [{
@@ -19,7 +29,8 @@ d3.json('../../data/cars.json', (data) => {
 
     {
         name: 'Displacement',
-        type: 'measure'
+        type: 'measure',
+        defAggFn: 'min'
     },
     {
         name: 'Horsepower',
@@ -32,11 +43,12 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Acceleration',
         type: 'measure',
-        numberFormat: (val) => "$" + val 
+        numberFormat: (val) => "$" + val
     },
     {
         name: 'Origin',
-        type: 'dimension'
+        type: 'dimension',
+        displayName: "Origin2"
     },
     {
         name: 'Cylinders',
@@ -50,49 +62,25 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    jsonData = [
-        { Origin: "India", Year: "2018-02-22", Acceleration: 1000 },
-        { Origin: "India", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "India", Year: "2018-04-01", Acceleration: 3000 },
-        { Origin: "Japan", Year: "2018-02-22", Acceleration: 4000 },
-        { Origin: "Japan", Year: "2018-03-12", Acceleration: 2000 },
-        { Origin: "Japan", Year: "2018-04-01", Acceleration: 4000 },
-    ];
+    // function shuffleArray(array) {
+    //     for (var i = array.length - 1; i > 0; i--) {
+    //         var j = Math.floor(Math.random() * (i + 1));
+    //         var temp = array[i];
+    //         array[i] = array[j];
+    //         array[j] = temp;
+    //     }
+    // }
+    // shuffleArray(jsonData)
+    let rootData = new DataModel(jsonData, schema)
+    // .select(fields=>fields.Year.value === '1972-01-01');
 
-    let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.groupBy(["Origin", "Year"], {
-        Acceleration: "avg"
-    });
 
-    env.canvas()
-        .data(rootData)
-        .rows(['Acceleration'])
-        .columns(["Year"])
-        .color("Origin")
-        .height(500)
-        .width(600)
-        .config({
-            axes: {
-                x: {
-                    tickFormat: (val, rawVal, i, ticks) => {
-                        console.log(val, rawVal, ticks);
-                        return val;
-                    }
-                },
-                y: {
-                    tickFormat: (val, rawVal) => {
-                        // console.log(val, rawVal);
-                        return val;
-                    },
-                }
-            }
-        })
-        .title("Year wise average car Acceleration")
-        .layers([
-            {
-                mark: "line"
-            }
-        ])
-        .mount('#chart');
+    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
+            columns = rows.reverse();
+        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+            field: 'Origin'
+        }).mount('#chart').once('canvas.animationend').then(function (client) {
+            var element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
 });
-

@@ -28,7 +28,8 @@ import {
     sanitizeLayerDef,
     createSideEffectGroup,
     resolveEncodingTransform,
-    createRenderPromise
+    createRenderPromise,
+    setAxisRange
 } from './helper';
 import { renderGridLineLayers } from './helper/grid-lines';
 import localOptions from './local-options';
@@ -83,8 +84,8 @@ export default class VisualUnit {
 
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
-        this._gridLinesSelection = {};
-        this._gridBandsSelection = {};
+        this._gridLinesSelection = null;
+        this._gridBandsSelection = null;
         this._gridLines = [];
         this._gridBands = [];
         this._layerNamespaces = {};
@@ -215,6 +216,8 @@ export default class VisualUnit {
             height,
             class: qualifiedClassName.join(' ')
         });
+
+        setAxisRange(this);
         renderGridLineLayers(this, node);
         renderLayers(this, node, this.layers(), {
             width,
@@ -383,7 +386,6 @@ export default class VisualUnit {
         store.unit = this;
         const layerdeps = {};
         const layersArr = [].concat(...Object.values(this._layersMap));
-
         layersArr.forEach((layer) => {
             const alias = layer.alias();
             store.layers[alias] = layer;
@@ -473,6 +475,10 @@ export default class VisualUnit {
             data: this.data(),
             axes: this.axes()
         };
+    }
+
+    getDataDomain () {
+        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain.${this.metaInf().namespace}`);
     }
 
     /**
