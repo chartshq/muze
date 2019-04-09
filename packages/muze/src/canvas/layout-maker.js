@@ -226,17 +226,15 @@ export const renderLayout = (canvas, renderDetails) => {
     const compWrappers = componentWrapperMaker(layoutManager, gridLayout, renderDetails);
     const componentWrappers = Object.keys(componentIndexes).map(e => compWrappers[e]);
     const gridWrapper = componentWrappers[grid];
-    createScrollManager(componentWrappers, canvas);
+    // createScrollManager(componentWrappers, canvas);
 
     componentWrappers.forEach((componentWrapper, index) => {
-        if (componentWrapper === null) {
+        if (!componentWrapper) {
             const deleteElementName = componentNames[index];
-            const component = layoutManager.getComponent(deleteElementName);
-            const deleteElementId = component ? component.renderAt() : null;
-            layoutManager.removeComponent(deleteElementId);
+            layoutManager.removeComponent(deleteElementName);
         }
     });
     layoutManager.registerComponents(componentWrappers).compute();
-    gridWrapper.attachScrollListener();
+    // gridWrapper.attachScrollListener();
 };
 

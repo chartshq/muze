@@ -28,7 +28,7 @@ export const fixScrollBarConfig = (config) => {
 
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
-    const boundBox = layoutManager.getComponent('grid').getBoundBox();
+    const boundBox = layoutManager.getComponent('grid') && layoutManager.getComponent('grid').getBoundBox();
     const valueMatrix = context.composition().visualGroup.matrixInstance().value;
     const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
     valueMatrix.each((cell) => {
@@ -158,12 +158,21 @@ export const setupChangeListener = (context) => {
     const nameSpaceProps = [...allOptions, ...Object.keys(canvasOptions)].map(prop =>
         `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
     store.registerChangeListener(nameSpaceProps, (...params) => {
-        let updateProps = equalityChecker(props, params);
-        updateProps = updateChecker(props, params);
-
+        const equalityProps = equalityChecker(props, params);
+        const updateProps = updateChecker(props, params);
         // inform attached board to rerender
-        if (updateProps && context.mount()) {
+        if (equalityProps && updateProps && context.mount()) {
             dispatchProps(context);
+            context.render();
+        } else if (equalityProps && !updateProps && context.mount()) {
+            context.composition().visualGroup.remove();
+            console.log('yoloooooo', context);
+            context.layout().resetViewInformation();
+            const visGroup = context.composition().visualGroup;
+            const info = visGroup.placeholderInfo();
+            info.rows = null;
+            info.columns = null;
+            info.values = null;
             context.render();
         }
         notifyAnimationEnd(context);

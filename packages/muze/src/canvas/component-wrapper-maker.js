@@ -236,6 +236,7 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
     if (existingComponent) {
         gridWrapper = existingComponent
                     .updateWrapper(wrapperParams);
+        gridWrapper = null;
     } else {
         gridWrapper = new GridComponent(wrapperParams);
     }
@@ -258,6 +259,6 @@ export const componentWrapperMaker = (layoutManager, grid, renderDetails) => ({
     subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
     legend: createLegendWrapper(layoutManager, renderDetails),
     grid: gridLayoutWrapper(layoutManager, renderDetails, grid),
-    verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),
-    horizontalScrollBar: createScrollBarWrapper(HORIZONTAL, layoutManager, renderDetails, grid)
+    // verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),
+    // horizontalScrollBar: createScrollBarWrapper(HORIZONTAL, layoutManager, renderDetails, grid)
 });

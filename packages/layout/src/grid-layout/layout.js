@@ -30,7 +30,7 @@ export default class GridLayout extends GenericLayout {
         this.matrices(matrices);
         this.config(this.constructor.defaultConfig());
         this._layoutId = getUniqueId();
-        this._viewInfo = this.constructor.defaultViewInfo();
+        this.resetViewInformation();
         this._scrollInfo = { horizontal: false, vertical: false };
     }
 
@@ -173,5 +173,14 @@ export default class GridLayout extends GenericLayout {
             layoutDimensions
         });
         return this;
+    }
+
+    /**
+     *
+     *
+     * @memberof GridLayout
+     */
+    resetViewInformation () {
+        this._viewInfo = this.constructor.defaultViewInfo();
     }
 }

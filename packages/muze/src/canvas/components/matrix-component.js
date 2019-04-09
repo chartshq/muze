@@ -68,6 +68,8 @@ export default class MatrixComponent extends MuzeComponent {
         applySpans(cells, spans, { dimensions, border }, `${row}-${column}`);
         renderPlaceholders(cells);
 
+        this.setCells(cells);
+
         cells.exit().each((cell) => {
             cell.placeholder.remove();
         });
@@ -103,4 +105,15 @@ export default class MatrixComponent extends MuzeComponent {
         this.position(TOP);
         this.className(params.config.className);
     }
+
+    setCells (cells) {
+        this.cells = cells;
+    }
+
+    remove () {
+        this.cells.each((cell) => {
+            cell.placeholder.remove();
+        });
+    }
+
 }

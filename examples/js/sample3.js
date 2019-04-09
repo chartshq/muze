@@ -1,17 +1,4 @@
 /* eslint-disable */
-const env = muze();
-const DataModel = muze.DataModel;
-
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-}
-
-
 d3.json('../../data/cars.json', (data) => {
     let jsonData = data;
     const schema = [{
@@ -61,26 +48,31 @@ d3.json('../../data/cars.json', (data) => {
         format: '%Y-%m-%d'
     }
     ];
+    let DataModel = muze.DataModel;
+    let rootData = new DataModel(data, schema);
+    let env = muze(); 
+    let canvas = env.canvas();
 
-    // function shuffleArray(array) {
-    //     for (var i = array.length - 1; i > 0; i--) {
-    //         var j = Math.floor(Math.random() * (i + 1));
-    //         var temp = array[i];
-    //         array[i] = array[j];
-    //         array[j] = temp;
-    //     }
-    // }
-    // shuffleArray(jsonData)
-    let rootData = new DataModel(jsonData, schema)
-    // .select(fields=>fields.Year.value === '1972-01-01');
-
-
-    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
-            columns = rows.reverse();
-        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
-            field: 'Origin'
-        }).mount('#chart').once('canvas.animationend').then(function (client) {
-            var element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+    canvas
+        .rows(['Origin', 'Acceleration']) 
+        .columns(['Cylinders']) 
+        .data(rootData)
+        .width(550)
+        .height(500)
+        .title('Acceleration by Cylinders by Origin')
+        .subtitle('For year 1970 - 1982')
+        .mount('#chart');
+        
+      setTimeout(() => {
+        const filtered = rootData.select((tuples) => {
+          return tuples.Origin.value === 'DoesNotExist';
+      });
+      const filteredObj = filtered.getData();
+      // the are no rows selected
+      //if (!filteredObj.data.length) {
+      console.log(filtered)
+          canvas.title("nothing should be rendering").data(filtered)
+            //	}
+    
+    }, 4000);  
 });

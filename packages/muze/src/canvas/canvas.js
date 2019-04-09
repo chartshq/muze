@@ -295,6 +295,7 @@ export default class Canvas extends TransactionSupport {
         const lifeCycleManager = this.dependencies().lifeCycleManager;
         // Get render details including arrangement and measurement
         const renderDetails = getRenderDetails(this, mount);
+        console.log(renderDetails);
         lifeCycleManager.notify({ client: this, action: 'beforedraw' });
         // Prepare the layout by triggering the matrix calculation
         prepareLayout(this.layout(), renderDetails);
