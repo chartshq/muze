@@ -27,6 +27,7 @@ export const listenerMap = (context, ns) => [
                 const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
                     context.data().getFieldsConfig());
                 context._domain = domain;
+                // console.log('layerData', context.metaInf().namespace);
                 !context._updateLock && context.domain(domain);
             }
         },
@@ -35,17 +36,17 @@ export const listenerMap = (context, ns) => [
     {
         props: [`${ns.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
-            const calculateDomain = config.calculateDomain;
+            // const calculateDomain = config.calculateDomain;
             const props = context.getRenderProps();
             const store = context.store();
             const namespaceInf = {
-                namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,
+                namespace: context.metaInf().namespace,
                 key: 'renderListener'
             };
             store.unsubscribe(namespaceInf);
-            if (calculateDomain === false) {
-                props.push(`${ns.local}.${PROPS.DATA}`);
-            }
+            // if (calculateDomain === false) {
+            //     props.push(`${ns.local}.${PROPS.DATA}`);
+            // }
             store.registerChangeListener(props,
                 () => {
                     renderLayer(context);

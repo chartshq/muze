@@ -104,9 +104,12 @@ export default class VisualUnit {
     static getState () {
         return [
             {
-                domain: {}
+                domain: null
             },
-            localOptions
+            Object.keys(localOptions).reduce((acc, v) => {
+                acc[v] = localOptions[v].value;
+                return acc;
+            }, {})
         ];
     }
 
@@ -114,20 +117,14 @@ export default class VisualUnit {
         if (params.length) {
             this._store = params[0];
             const metaInf = this.metaInf();
-            this.store().append(`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`, {
-                [`${metaInf.namespace}`]: null
-            });
-            const localNs = `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`;
-            transactor(this, localOptions, this.store().model, {
-                namespace: localNs
+            transactor(this, localOptions, this.store(), {
+                namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+                subNamespace: metaInf.namespace
             });
             registerListeners(this, listenerMap, {
-                local: localNs,
+                local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
                 global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
-            }, {
-                rowIndex: metaInf.rowIndex,
-                colIndex: metaInf.colIndex
-            });
+            }, metaInf);
             this.firebolt(new UnitFireBolt(this, {
                 physical: physicalActions,
                 behavioural: behaviouralActions,
@@ -368,7 +365,7 @@ export default class VisualUnit {
                 if (!layersMap[markId]) {
                     startIndex++;
                     if (definition.calculateDomain !== false) {
-                        props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
+                        props[namespace] = true;
                     }
                 }
                 namespaces.push(namespace);
@@ -402,13 +399,13 @@ export default class VisualUnit {
 
         stateStore.unsubscribe({
             key: 'calculateDomainListener',
-            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
+            namespace: Object.keys(props)
         });
-        stateStore.registerImmediateListener(Object.keys(props), calculateDomainListener(this, metaInf.namespace),
-            false, {
-                key: 'calculateDomainListener',
-                namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
-            });
+
+        stateStore.registerImmediateListener([`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
+            calculateDomainListener(this, metaInf.namespace), false, {
+                namespace: Object.keys(props)
+        });
         this.layers(layersArr);
         return layers;
     }
@@ -478,7 +475,7 @@ export default class VisualUnit {
     }
 
     getDataDomain () {
-        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain.${this.metaInf().namespace}`);
+        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`, this.metaInf().namespace);
     }
 
     /**

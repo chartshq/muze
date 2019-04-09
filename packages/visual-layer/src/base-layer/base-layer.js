@@ -87,12 +87,12 @@ export default class BaseLayer extends SimpleLayer {
     static getState () {
         return [
             {
-                domain: {}
+                domain: null
             },
-            {
-                config: {},
-                data: {}
-            }
+            Object.keys(defaultOptions).reduce((acc, v) => {
+                acc[v] = defaultOptions[v].value;
+                return acc;
+            }, {})
         ];
     }
 
@@ -100,35 +100,29 @@ export default class BaseLayer extends SimpleLayer {
         if (params.length) {
             this._store = params[0];
             const metaInf = this.metaInf();
-            const localNs = `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${metaInf.namespace}`;
-            initializeGlobalState(this);
+            // initializeGlobalState(this);
             const store = this.store();
-            store.append(`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}`, {
-                [metaInf.namespace]: null
-            });
 
-            transactor(this, defaultOptions, store.model, {
-                namespace: localNs
+            transactor(this, defaultOptions, store, {
+                namespace: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
+                subNamespace: metaInf.namespace
             });
             registerListeners(this, listenerMap, {
-                local: localNs,
+                local: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
                 global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
-            }, {
-                unitRowIndex: metaInf.unitRowIndex,
-                unitColIndex: metaInf.unitColIndex
-            });
+            }, metaInf);
             return this;
         }
         return this._store;
     }
 
     domain (...dom) {
-        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`;
+        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`;
         if (dom.length) {
-            this.store().commit(prop, dom[0]);
+            this.store().commit(prop, dom[0], this.metaInf().namespace);
             return this;
         }
-        return this.store().get(prop);
+        return this.store().get(prop, this.metaInf().namespace);
     }
 
     /**
@@ -316,7 +310,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     getDataDomain (encodingType) {
         const domains = this.store()
-            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().namespace}`);
+            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, this.metaInf().namespace);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
@@ -669,11 +663,10 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     getRenderProps () {
-        const metaInf = this.metaInf();
         if (this.coord() === COORD_TYPES.POLAR) {
             return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
         }
-        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.unitRowIndex}0`,
-            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.unitColIndex}0`];
+        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`];
     }
 }

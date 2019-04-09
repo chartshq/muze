@@ -29,7 +29,7 @@ const removeExitLayers = (layerDefs, context) => {
 export const calculateDomainListener = (context, namespace) => () => {
     const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
         context.data().getFieldsConfig());
-    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${namespace}`, domain);
+    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, domain, namespace);
 };
 
 export const listenerMap = (context, namespace, metaInf) => ([
@@ -37,6 +37,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
         type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
+            // console.log('UNITS-config', context.metaInf().namespace);
             config && context.firebolt().config(config.interaction);
         }
     },
@@ -45,6 +46,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
         props: [`${namespace.local}.${PROPS.LAYERDEFS}`],
         listener: ([, layerDefs]) => {
             const fieldsVal = context.fields();
+            // console.log('UNITS-LDF', context.metaInf().namespace);
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
                 const axes = context.axes();
@@ -53,7 +55,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
                         `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.colIndex}0`];
                     const store = context.store();
                     const listenerInf = {
-                        namespace: namespace.local,
+                        // namespace: metaInf.namespace,
                         key: 'gridLineListener'
                     };
                     store.unsubscribe(listenerInf);
@@ -84,6 +86,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
         type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.DATA}`],
         listener: ([, dataModel]) => {
+            // console.log('UNITS-DATA', context.metaInf().namespace);
             const axesObj = context.axes();
             const timeDiffs = {};
             const timeDiffsByField = {};
@@ -111,6 +114,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
         props: [`${namespace.local}.${PROPS.CONFIG}`],
         listener: () => {
             createGridLineLayer(context);
+            // console.log('UNITS-CONFIG2', context.metaInf().namespace);
         }
     },
     {
@@ -120,7 +124,8 @@ export const listenerMap = (context, namespace, metaInf) => ([
         listener: ([, dataModel], [, transform]) => {
             if (dataModel) {
                 const dataModels = transformDataModels(transform, dataModel);
-                context.store().commit(`${namespace.local}.${PROPS.TRANSFORMEDDATA}`, dataModels);
+                // console.log('UNITS-TRANSFROM-AND-DATA', context.metaInf().namespace);
+                context.store().commit(`${namespace.local}.${PROPS.TRANSFORMEDDATA}`, dataModels, metaInf.namespace);
             }
         }
     },
@@ -133,6 +138,7 @@ export const listenerMap = (context, namespace, metaInf) => ([
             const axesVal = context.axes();
             const dataModel = context.data();
             if (transformedData && layers && axesVal && layerAxisIndexVal) {
+                // console.log('UNITS--LAYERS-TRNSFORM', context.metaInf().namespace);
                 context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
                 const model = context.store().model;
                 layers.forEach(lyr => lyr.disableUpdate());

@@ -64,7 +64,7 @@ export default class Canvas extends TransactionSupport {
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
         const allOptions = Object.assign({}, options, localOptions, canvasOptions);
 
-        transactor(this, allOptions, this._store.model, {
+        transactor(this, allOptions, this._store, {
             namespace
         });
 

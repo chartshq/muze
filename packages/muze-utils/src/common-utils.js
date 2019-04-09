@@ -545,6 +545,17 @@ const getObjProp = (obj, ...fields) => {
     return retObj;
 };
 
+const setObjProp = (obj, props, value) => {
+    const len = props.length;
+    for (let i = 0; i < len - 1; i++) {
+        const name = props[i];
+        !obj[name] && (obj[name] = {});
+        obj = obj[name];
+    }
+    obj[props[len - 1]] = value;
+    return obj;
+};
+
 /**
  * Methods to handle changes to table configuration and reactivity are handled by this
  * class.
@@ -564,6 +575,8 @@ class Store {
         // create reactive model
         this.model = Model.create(config);
         this._listeners = {};
+        this._changeListeners = {};
+        this._immediateListeners = {};
     }
 
     /**
@@ -584,9 +597,24 @@ class Store {
      * @param {number} value The new value of the property.
      * @memberof Store
      */
-    commit (propName, value) {
+    commit (propName, value, namespace) {
+        let sanitizedVal = value;
+        if (namespace) {
+            const changeListeners = getObjProp(this._changeListeners, propName, namespace);
+            const immediateListeners = getObjProp(this._immediateListeners, propName, namespace);
+            if (changeListeners) {
+                changeListeners.changed = true;
+                changeListeners.fns = changeListeners.oriFns.slice();
+            }
+            if (immediateListeners) {
+                immediateListeners.changed = true;
+                immediateListeners.fns = immediateListeners.oriFns.slice();
+            }
+            sanitizedVal = defaultValue(this.model.prop(propName), {});
+            sanitizedVal[namespace] = value;
+        }
         // check if appropriate enum has been used
-        this.model.prop(propName, value);
+        this.model.prop(propName, sanitizedVal);
     }
 
     /**
@@ -602,7 +630,35 @@ class Store {
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        const fn = this.model.next(props, callBack, instantCall);
+        const changeListeners = this._changeListeners;
+        const callbackFn = ((names, namespaceVal) => (...params) => {
+            let call = true;
+            names.forEach((name) => {
+                const listenerObj = getObjProp(changeListeners, name, namespaceVal);
+                if (listenerObj) {
+                    call = listenerObj.changed || call;
+                    listenerObj.fns.pop();
+                    if (!listenerObj.fns.length) {
+                        setObjProp(changeListeners, [name, namespaceInf.namespace, 'changed'], false);
+                    }
+                }
+            });
+            call && callBack(...params);
+        })(props, namespaceInf.namespace);
+        if (namespaceInf.namespace) {
+            props.forEach((name) => {
+                const fns = defaultValue(getObjProp(changeListeners, name, namespaceInf.namespace, 'fns'), []);
+                const oriFns = defaultValue(getObjProp(changeListeners, name, namespaceInf.namespace, 'oriFns'), []);
+                fns.push(callBack);
+                oriFns.push(callBack);
+                setObjProp(changeListeners, [name, namespaceInf.namespace], {
+                    fns,
+                    oriFns,
+                    changed: false
+                });
+            });
+        }
+        const fn = this.model.next(props, callbackFn, instantCall);
         addListenerToNamespace(namespaceInf, fn, this);
         return this;
     }
@@ -619,7 +675,56 @@ class Store {
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        const fn = this.model.on(props, callBack, instantCall);
+        const immediateListeners = this._immediateListeners;
+        let ns;
+        if (namespaceInf.namespace) {
+            ns = namespaceInf.namespace instanceof Array ? namespaceInf.namespace : [namespaceInf.namespace];
+        }
+
+        const callbackFn = ((names, namespaceVal) => (...params) => {
+            let call = namespaceVal ? false : true;
+            names.forEach((name) => {
+                if (namespaceVal) {
+                    namespaceVal.forEach((namespace) => {
+                        const listenerObj = getObjProp(immediateListeners, name, namespace);
+                        if (listenerObj) {
+                            call = listenerObj.changed || call;
+                            listenerObj.fns.pop();
+                            if (!listenerObj.fns.length) {
+                                setObjProp(immediateListeners, [name, namespace, 'changed'], false);
+                            }
+                        }
+                    });
+                }
+            });
+            let values = params;
+            if (namespaceVal) {
+                values = [].concat(...params.map((param) => {
+                    return namespaceVal.map((namespace) => {
+                        return [param[0] !== null ? param[0][namespace] : param[0],
+                            param[1] !== null ? param[1][namespace] : param[1]];
+                    });
+                }));
+            }
+            call && callBack(...values);
+        })(props, ns);
+
+        const fn = this.model.on(props, callbackFn, instantCall);
+        if (ns) {
+            props.forEach((name) => {
+                ns.forEach((namespace) => {
+                    const fns = defaultValue(getObjProp(immediateListeners, name, namespace, 'fns'), []);
+                    fns.push(callBack);
+                    const oriFns = defaultValue(getObjProp(immediateListeners, name, namespace, 'oriFns'), []);
+                    oriFns.push(callBack);
+                    setObjProp(immediateListeners, [name, namespace], {
+                        fns,
+                        oriFns,
+                        changed: false
+                    });
+                });
+            });
+        }
         addListenerToNamespace(namespaceInf, fn, this);
         return this;
     }
@@ -631,8 +736,9 @@ class Store {
      * @return {any} The value of the field.
      * @memberof Store
      */
-    get (propName) {
-        return this.model.prop(propName);
+    get (propName, subNamespace) {
+        const value = this.model.prop(propName);
+        return subNamespace ? value[subNamespace] : value;
     }
 
     /**
@@ -647,8 +753,8 @@ class Store {
         return this.model.calculatedProp(propName, callBack);
     }
 
-    append (propName, value) {
-        this.model.append(propName, value);
+    append (...params) {
+        this.model.append(...params);
         return this;
     }
 
@@ -708,27 +814,33 @@ const intSanitizer = (val) => {
  */
 const transactor = (holder, options, model, namespaceInf = {}) => {
     let conf;
-    const store = model && model instanceof Model ? model : Model.create({});
+    const store = model instanceof Store ? model : new Store({});
     const stateProps = {};
+    const { namespace, subNamespace } = namespaceInf;
     for (const prop in options) {
         if ({}.hasOwnProperty.call(options, prop)) {
             conf = options[prop];
             const addAsMethod = conf.meta ? conf.meta.addAsMethod : true;
             let nameSpaceProp;
-            const namespace = namespaceInf.namespace;
             if (namespace) {
                 nameSpaceProp = `${namespace}.${prop}`;
             } else {
                 nameSpaceProp = prop;
             }
+            if (subNamespace) {
+                const value = defaultValue(store.get(nameSpaceProp), {});
+                value[subNamespace] = conf.value;
+                stateProps[nameSpaceProp] = value;
+            } else {
+                stateProps[prop] = conf.value;
+            }
 
-            stateProps[prop] = conf.value;
             if (addAsMethod !== false) {
                 holder[prop] = ((context, meta, nsProp) => (...params) => {
                     let val;
                     let compareTo;
                     const paramsLen = params.length;
-                    const prevVal = store.prop(nsProp);
+                    const prevVal = context.get(nsProp, subNamespace);
                     if (paramsLen) {
                         // If parameters are passed then it's a setter
                         const spreadParams = meta && meta.spreadParams;
@@ -778,7 +890,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                 }
                             }
                             const preset = meta.preset;
-                            const oldValues = context.prop(nsProp);
+                            const oldValues = context.get(nsProp, subNamespace);
                             preset && preset(values[0], holder);
                             if (spreadParams) {
                                 oldValues.forEach((value, i) => {
@@ -787,23 +899,26 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                     }
                                 });
                             }
-                            values.length && context.prop(nsProp, spreadParams ? values : values[0]);
+                            values.length && context.commit(nsProp, spreadParams ? values : values[0], subNamespace);
                         } else {
-                            context.prop(nsProp, spreadParams ? val : val[0]);
+                            context.commit(nsProp, spreadParams ? val : val[0], subNamespace);
                         }
                         return holder;
                     }
-                // No parameters are passed hence its a getter
-                    return context.prop(nsProp);
-                })(store, conf.meta, nameSpaceProp);
+                    // No parameters are passed hence its a getter
+                    return context.get(nsProp, subNamespace);
+                })(store, conf.meta, nameSpaceProp, subNamespace);
             }
         }
     }
 
-    if (namespaceInf.namespace === undefined) {
+    if (subNamespace) {
+        for (const key in stateProps) {
+            store.commit(key, stateProps[key]);
+        }
+    } else if (namespace === undefined) {
         store.append(stateProps);
     } else {
-        const namespace = namespaceInf.namespace;
         store.append(namespace, stateProps);
     }
 
@@ -902,7 +1017,8 @@ const isEqual = type => (oldVal, newVal) => {
  * @return {any} @todo
  */
 const enableChainedTransaction = (transactionModel, transactionEndpoint, transactionItems) =>
-    transactionItems.forEach(item => transactionModel.on(item, ([, newVal]) => transactionEndpoint[item](newVal)));
+    transactionItems.forEach(item => transactionModel
+        .registerImmediateListener(item, ([, newVal]) => transactionEndpoint[item](newVal)));
 
 /**
  * Chceks if the element is istanceof HTMLElement
@@ -1290,10 +1406,10 @@ const registerListeners = (context, listenerMap, ...params) => {
     const propListenerMap = listenerMap(context, ...params);
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
-            const namespace = params[0];
+            const { namespace } = params[1];
             let ns = null;
             if (namespace) {
-                ns = namespace.local;
+                ns = namespace;
             }
             const mapObj = propListenerMap[key];
             const propType = mapObj.type;

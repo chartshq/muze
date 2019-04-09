@@ -7,9 +7,10 @@ import { registerDomainChangeListener, unsubscribeChangeListeners } from './chan
 import ValueMatrix from './value-matrix';
 
 export const createUnitState = (context) => {
-    const [globalState] = VisualUnit.getState();
+    const [globalState, localState] = VisualUnit.getState();
     const store = context.store();
-    store.append(STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, globalState);
+    store.append(STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, globalState)
+        .append(STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE, localState);
 };
 
 export const initializeGlobalState = (context) => {
@@ -19,8 +20,9 @@ export const initializeGlobalState = (context) => {
 };
 
 export const createLayerState = (context) => {
-    const [globalState] = BaseLayer.getState();
-    context.store().append(STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, globalState);
+    const [globalState, localState] = BaseLayer.getState();
+    context.store().append(STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, globalState)
+        .append(STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE, localState);
 };
 
 const sanitizeRetinalConfig = (retinalConf) => {

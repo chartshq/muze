@@ -36,7 +36,7 @@ export const registerListeners = (firebolt) => {
     const context = firebolt.context;
     const store = context.store();
 
-    store.registerImmediateListener([`local.units.${context.metaInf().namespace}.${DATA}`], (dataModel) => {
+    store.registerImmediateListener([`local.units.${DATA}`], (dataModel) => {
         const dm = dataModel[1];
 
         if (dm) {
@@ -45,14 +45,14 @@ export const registerListeners = (firebolt) => {
             const originalData = firebolt.context.cachedData()[0];
             firebolt.attachPropagationListener(originalData);
         }
-    });
+    }, false, context.metaInf());
 
-    store.registerChangeListener([`local.units.${context.metaInf().namespace}.${DATA}`], () => {
+    store.registerChangeListener([`local.units.${DATA}`], () => {
         if (!firebolt.context.mount()) {
             const originalData = firebolt.context.cachedData()[0];
             originalData.unsubscribe('propagation');
         }
-    });
+    }, false, context.metaInf());
 
     context._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW],
         ([, onlayerdraw]) => {

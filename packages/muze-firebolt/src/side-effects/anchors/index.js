@@ -71,13 +71,12 @@ export default class AnchorEffect extends SpawnableSideEffect {
 
     addAnchorLayers () {
         const context = this.firebolt.context;
-        const metaInf = context.metaInf();
         const layerRegistry = context.registry().layerRegistry;
         const layerDefsVal = context.layerDef();
         context.store().registerImmediateListener(
-            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}.layerDef`, ([, layerDefs]) => {
+            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.layerDef`, ([, layerDefs]) => {
                 this._layers = addLayer(layerDefs, layerRegistry, context, this);
-            });
+            }, false, context.metaInf());
         this._layers = addLayer(layerDefsVal, layerRegistry, context, this);
         return this;
     }
