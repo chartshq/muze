@@ -178,6 +178,15 @@ const componentNames = {
     6: MESSAGE
 };
 
+const componentNames = {
+    0: TITLE,
+    1: SUB_TITLE,
+    2: LEGEND,
+    3: VERTICAL_SCROLL_BAR,
+    4: HORIZONTAL_SCROLL_BAR,
+    5: GRID
+};
+
 /**
  * Responsible for creating a scroll manager that manages interactions between the grid
  * component and the scroll bar components
