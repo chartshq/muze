@@ -302,15 +302,11 @@ export function renderAxis (axisInstance) {
     // render labels based on orientation of axis
     const labelOffset = availableSpace / 2;
 
-    // Set style for axis name
-    labelManager.setStyle(axisNameStyle);
-    const axisNameSpace = labelManager.getOriSize(name);
     const measures = {
         labelProps,
         tickSize,
         axisNamePadding,
-        axisNameHeight: axisNameSpace.height,
-        axisNameWidth: axisNameSpace.width,
+        axisNameHeight: smartAxisName.height,
         yOffset,
         xOffset,
         labelOffset,
