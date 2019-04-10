@@ -14,7 +14,7 @@ import {
     VERTICAL_SCROLL_BAR,
     HORIZONTAL_SCROLL_BAR,
     GRID,
-    NODATA
+    MESSAGE
 } from '../constants';
 import { ScrollManager } from './scroll-manager';
 
@@ -165,7 +165,7 @@ const componentIndexes = {
     verticalScrollBar: 3,
     horizontalScrollBar: 4,
     grid: 5,
-    noData: 6
+    message: 6
 };
 
 const componentNames = {
@@ -175,7 +175,7 @@ const componentNames = {
     3: VERTICAL_SCROLL_BAR,
     4: HORIZONTAL_SCROLL_BAR,
     5: GRID,
-    6: NODATA
+    6: MESSAGE
 };
 
 /**

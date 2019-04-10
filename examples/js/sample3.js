@@ -75,15 +75,15 @@ d3.json('../../data/cars.json', (data) => {
             //	}
     
     }, 4000); 
-    // setTimeout(() => {
-    // canvas.rows(['Origin', 'Acceleration']) 
-    // .columns(['Cylinders']) 
-    // .data(rootData)
-    // .width(550)
-    // .height(500)
-    // .title('Acceleration by Cylinders by Origin')
-    // .subtitle('For year 1970 - 1982')
-    //         //	}
+    setTimeout(() => {
+    canvas.rows(['Origin', 'Acceleration']) 
+    .columns(['Cylinders']) 
+    .data(rootData)
+    .width(550)
+    .height(500)
+    .title('Acceleration by Cylinders by Origin')
+    .subtitle('For year 1970 - 1982')
+            //	}
     
-    // }, 8000); 
+    }, 8000); 
 });

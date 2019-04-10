@@ -559,4 +559,12 @@ export default class MatrixResolver {
         }
         return this._store;
     }
+
+    clear () {
+        const cacheMaps = this._cacheMaps;
+        for (const key in cacheMaps) {
+            cacheMaps[key].clear();
+        }
+    }
+
 }

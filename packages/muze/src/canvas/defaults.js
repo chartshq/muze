@@ -17,7 +17,7 @@ export const SUB_TITLE_CONFIG = {
 
 export const GRID = 'grid';
 
-export const NODATA = 'noData';
+export const MESSAGE = 'message';
 
 export const CANVAS = 'canvas';
 

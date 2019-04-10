@@ -253,6 +253,7 @@ class VisualGroup extends SimpleGroup {
 
     remove () {
         this.matrixInstance().value.clear();
+        this.resolver().clear();
     }
 }
 

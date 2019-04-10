@@ -165,14 +165,13 @@ export const setupChangeListener = (context) => {
             dispatchProps(context);
             context.render();
         } else if (equalityProps && !updateProps && context.mount()) {
-            // context.composition().visualGroup.remove();
-            // context.layout().resetViewInformation();
+            context.composition().visualGroup.remove();
+            context.layout().resetViewInformation();
             const visGroup = context.composition().visualGroup;
             const info = visGroup.placeholderInfo();
-            // info.rows = null;
-            // info.columns = null;
-            // info.values = null;
-            info.isNoData = null;
+            info.rows = null;
+            info.columns = null;
+            info.values = null;
             context.render();
         }
         notifyAnimationEnd(context);

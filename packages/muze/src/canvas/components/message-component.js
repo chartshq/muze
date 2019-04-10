@@ -1,17 +1,18 @@
 import { selectElement, makeElement, applyStyle } from 'muze-utils';
 import MuzeComponent from './muze-chart-component';
 
-export default class NoDataComponent extends MuzeComponent {
+export default class MessageComponent extends MuzeComponent {
     constructor (params) {
-        super(params.name, params.config.dimensions, 0);
+        super(params.name, params.config.dimensions, params.config.message, 0);
         this.setParams(params);
     }
 
-    renderNoData (container) {
+    renderMessageComponent (container) {
         const parent = selectElement(container);
         const node = makeElement(parent, 'div', [1])
                         .style('background-color', 'rgb(241,241,241)');
         const { height, width } = this.params.config.dimensions;
+        const { message } = this.params.config;
         applyStyle(node, {
             width: `${width}px`,
             height: `${height}px`,
@@ -31,11 +32,11 @@ export default class NoDataComponent extends MuzeComponent {
         });
 
         const textElement = makeElement(child, 'text', [1]);
-        textElement.html('No data to display');
+        textElement.html(message);
     }
 
     draw (container) {
-        this.renderNoData(container || document.getElementById(this.renderAt()));
+        this.renderMessageComponent(container || document.getElementById(this.renderAt()));
     }
 
     updateWrapper (params) {
