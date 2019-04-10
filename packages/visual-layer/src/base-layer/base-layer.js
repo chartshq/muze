@@ -4,13 +4,13 @@ import {
     FieldType,
     selectElement,
     ReservedFields,
-    registerListeners,
-    transactor,
+    // transactor,
     DataModel,
     clone,
     generateGetterSetters,
     STATE_NAMESPACES,
-    COORD_TYPES
+    COORD_TYPES,
+    CommonProps
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
@@ -19,12 +19,18 @@ import {
     transformData,
     getNormalizedData,
     applyInteractionStyle,
-    initializeGlobalState,
     getValidTransform,
     domainCalculator
 } from '../helpers';
-import { listenerMap } from './listener-map';
-import { defaultOptions } from './default-options';
+// import { defaultOptions } from './default-options';
+
+const renderLayer = (context) => {
+    const mount = context.mount();
+    if (mount) {
+        context.render(mount);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+    }
+};
 
 /**
  * An abstract class which gives definition of common layer functionality like
@@ -89,35 +95,42 @@ export default class BaseLayer extends SimpleLayer {
             {
                 domain: null
             },
-            Object.keys(defaultOptions).reduce((acc, v) => {
-                acc[v] = defaultOptions[v].value;
-                return acc;
-            }, {})
+            {}
         ];
     }
 
     store (...params) {
         if (params.length) {
-            this._store = params[0];
-            const metaInf = this.metaInf();
-            // initializeGlobalState(this);
-            const store = this.store();
+            const store = this._store = params[0];
+            // const metaInf = this.metaInf();
 
-            transactor(this, defaultOptions, store, {
-                namespace: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
-                subNamespace: metaInf.namespace
-            });
-            registerListeners(this, listenerMap, {
-                local: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
-                global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
-            }, metaInf);
+            // transactor(this, defaultOptions, store, {
+            //     namespace: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
+            //     subNamespace: metaInf.namespace
+            // });
+            // registerListeners(this, listenerMap, {
+            //     local: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
+            //     global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
+            // }, metaInf);
+            const props = this.getRenderProps();
+            // const { unitRowIndex, unitColIndex } = this.metaInf();
+            // const namespaceInf = {
+            //     namespace: [`${unitRowIndex}0`, `${unitColIndex}0`]
+            // };
+            // if (calculateDomain === false) {
+            //     props.push(`${ns.local}.${PROPS.DATA}`);
+            // }
+            store.registerChangeListener(props,
+                () => {
+                    renderLayer(this);
+                }, false);
             return this;
         }
         return this._store;
     }
 
     domain (...dom) {
-        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`;
+        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().parentNamespace}`;
         if (dom.length) {
             this.store().commit(prop, dom[0], this.metaInf().namespace);
             return this;
@@ -310,7 +323,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     getDataDomain (encodingType) {
         const domains = this.store()
-            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, this.metaInf().namespace);
+            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().parentNamespace}`, this.metaInf().namespace);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
@@ -666,7 +679,8 @@ export default class BaseLayer extends SimpleLayer {
         if (this.coord() === COORD_TYPES.POLAR) {
             return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
         }
-        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`,
-            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`];
+        const { unitRowIndex: rowIndex, unitColIndex: colIndex } = this.metaInf();
+        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${rowIndex}0`,
+            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${colIndex}0`];
     }
 }

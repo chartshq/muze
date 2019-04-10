@@ -8,23 +8,7 @@ import {
     unionDomainFromLayers
 } from './helper';
 
-import { createGridLineLayer, attachDataToGridLineLayers } from './helper/grid-lines';
-
-const removeExitLayers = (layerDefs, context) => {
-    const layersMap = context._layersMap;
-    const markSet = {};
-    layerDefs.forEach((layerDef, i) => {
-        const id = defaultValue(layerDef.name, `${layerDef.mark}-${i}`);
-        markSet[id] = true;
-    });
-
-    for (const key in layersMap) {
-        if (!(key in markSet)) {
-            layersMap[key].forEach(layer => layer.remove());
-            delete layersMap[key];
-        }
-    }
-};
+import { createGridLineLayer } from './helper/grid-lines';
 
 export const calculateDomainListener = (context, namespace) => () => {
     const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
@@ -37,7 +21,6 @@ export const listenerMap = (context, namespace, metaInf) => ([
         type: 'registerImmediateListener',
         props: [`${namespace.local}.${PROPS.CONFIG}`],
         listener: ([, config]) => {
-            // console.log('UNITS-config', context.metaInf().namespace);
             config && context.firebolt().config(config.interaction);
         }
     },
@@ -49,21 +32,6 @@ export const listenerMap = (context, namespace, metaInf) => ([
             // console.log('UNITS-LDF', context.metaInf().namespace);
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
-                const axes = context.axes();
-                if (axes.x || axes.y) {
-                    const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${metaInf.rowIndex}0`,
-                        `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${metaInf.colIndex}0`];
-                    const store = context.store();
-                    const listenerInf = {
-                        // namespace: metaInf.namespace,
-                        key: 'gridLineListener'
-                    };
-                    store.unsubscribe(listenerInf);
-                    store.registerChangeListener(props, () => {
-                        attachDataToGridLineLayers(context);
-                    }, false, listenerInf);
-                }
-
                 context.addLayer(layerDefs);
                 const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {
@@ -114,7 +82,6 @@ export const listenerMap = (context, namespace, metaInf) => ([
         props: [`${namespace.local}.${PROPS.CONFIG}`],
         listener: () => {
             createGridLineLayer(context);
-            // console.log('UNITS-CONFIG2', context.metaInf().namespace);
         }
     },
     {
@@ -138,16 +105,15 @@ export const listenerMap = (context, namespace, metaInf) => ([
             const axesVal = context.axes();
             const dataModel = context.data();
             if (transformedData && layers && axesVal && layerAxisIndexVal) {
-                // console.log('UNITS--LAYERS-TRNSFORM', context.metaInf().namespace);
                 context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
-                const model = context.store().model;
-                layers.forEach(lyr => lyr.disableUpdate());
+                // const model = context.store().model;
+                // layers.forEach(lyr => lyr.disableUpdate());
                 attachDataToLayers(layers, dataModel, transformedData);
-                model.lock();
-                layers.forEach((lyr) => {
-                    lyr.enableUpdate().domain(lyr._domain);
-                });
-                model.unlock();
+                // model.lock();
+                // layers.forEach((lyr) => {
+                //     lyr..domain(lyr._domain);
+                // });
+                // model.unlock();
                 context._dimensionMeasureMap = getDimensionMeasureMap(layers,
                     dataModel.getFieldsConfig(), context.retinalFields());
                 attachAxisToLayers(axesVal, layers, layerAxisIndexVal);

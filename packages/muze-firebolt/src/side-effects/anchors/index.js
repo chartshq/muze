@@ -52,7 +52,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._layersMap = {};
-        this.addAnchorLayers();
+        // this.addAnchorLayers();
     }
 
     static target () {

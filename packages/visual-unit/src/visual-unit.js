@@ -29,14 +29,11 @@ import {
     createSideEffectGroup,
     resolveEncodingTransform,
     createRenderPromise,
-    setAxisRange
+    setAxisRange,
+    updateProps
 } from './helper';
-import { renderGridLineLayers } from './helper/grid-lines';
-import localOptions from './local-options';
-import { listenerMap, calculateDomainListener } from './listener-map';
-import {
-    DOMAIN
-} from './enums/reactive-props';
+import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
+import { calculateDomainListener } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
 import { initSideEffects } from './firebolt/helper';
@@ -106,25 +103,31 @@ export default class VisualUnit {
             {
                 domain: null
             },
-            Object.keys(localOptions).reduce((acc, v) => {
-                acc[v] = localOptions[v].value;
-                return acc;
-            }, {})
+            {}
         ];
     }
 
     store (...params) {
         if (params.length) {
-            this._store = params[0];
+            const store = this._store = params[0];
             const metaInf = this.metaInf();
-            transactor(this, localOptions, this.store(), {
-                namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
-                subNamespace: metaInf.namespace
+            // transactor(this, localOptions, store, {
+            //     namespace: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+            //     subNamespace: metaInf.namespace
+            // });
+            // registerListeners(this, listenerMap, {
+            //     local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
+            //     global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
+            // }, metaInf);
+            store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`, {
+                [metaInf.namespace]: null
             });
-            registerListeners(this, listenerMap, {
-                local: STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE,
-                global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
-            }, metaInf);
+            const { rowIndex, colIndex } = metaInf;
+            const props = [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${rowIndex}0`,
+                `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${colIndex}0`];
+            store.registerChangeListener(props, () => {
+                attachDataToGridLineLayers(this);
+            }, false);
             this.firebolt(new UnitFireBolt(this, {
                 physical: physicalActions,
                 behavioural: behaviouralActions,
@@ -175,12 +178,13 @@ export default class VisualUnit {
     }
 
     lockModel () {
-        this._store.model.lock();
+        // this._store.model.lock();
         return this;
     }
 
     unlockModel () {
-        this._store.model.unlock();
+        // this._store.model.unlock();
+        updateProps(this);
         return this;
     }
 
@@ -402,7 +406,7 @@ export default class VisualUnit {
             namespace: Object.keys(props)
         });
 
-        stateStore.registerImmediateListener([`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
+        stateStore.registerImmediateListener([`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain.${this.metaInf().namespace}`],
             calculateDomainListener(this, metaInf.namespace), false, {
                 namespace: Object.keys(props)
         });

@@ -439,7 +439,7 @@ export default class MatrixResolver {
 
         const units = [];
         const matrixLayers = this.matrixLayers();
-
+        // this.store().model.lock();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -448,7 +448,7 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-
+        // this.store().model.unlock();
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }

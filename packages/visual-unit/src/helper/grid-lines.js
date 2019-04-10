@@ -173,7 +173,8 @@ export const createGridLineLayer = (context) => {
             layer.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${type}${name}`
+                namespace: `${metaInf.namespace}${type}${name}`,
+                parentNamespace: metaInf.namespace
             })
                 .store(store)
                 .config(sConf)

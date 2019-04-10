@@ -556,6 +556,63 @@ const setObjProp = (obj, props, value) => {
     return obj;
 };
 
+const registerListener = (context, type, config) => {
+    const { callBack, instantCall, namespaceInf, props, listeners } = config;
+    let ns;
+    if (namespaceInf.namespace) {
+        ns = namespaceInf.namespace instanceof Array ? namespaceInf.namespace : [namespaceInf.namespace];
+    }
+
+    const callbackFn = ((names, namespaceVal) => {
+        const retCallBack = (...params) => {
+            let call = namespaceVal ? false : true;
+            names.forEach((name) => {
+                if (namespaceVal) {
+                    namespaceVal.forEach((namespace) => {
+                        const listenerObj = getObjProp(listeners, name, namespace);
+                        if (listenerObj) {
+                            call = listenerObj.changed || call;
+                            listenerObj.fns.pop();
+                            if (!listenerObj.fns.length) {
+                                setObjProp(listeners, [name, namespace, 'changed'], false);
+                            }
+                        }
+                    });
+                }
+            });
+            let values = params;
+            if (namespaceVal) {
+                values = [].concat(...params.map((param) => {
+                    return namespaceVal.map((namespace) => {
+                        return [param[0] !== null ? param[0][namespace] : param[0],
+                            param[1] !== null ? param[1][namespace] : param[1]];
+                    });
+                }));
+            }
+            call && callBack(...values);
+        };
+        return retCallBack;
+    })(props, ns);
+
+    const fn = context.model[type](props, callbackFn, instantCall);
+    if (ns) {
+        props.forEach((name) => {
+            ns.forEach((namespace) => {
+                const fns = defaultValue(getObjProp(listeners, name, namespace, 'fns'), []);
+                fns.push(callBack);
+                const oriFns = defaultValue(getObjProp(listeners, name, namespace, 'oriFns'), []);
+                oriFns.push(callBack);
+                setObjProp(listeners, [name, namespace], {
+                    fns,
+                    oriFns,
+                    changed: false
+                });
+            });
+        });
+    }
+    addListenerToNamespace(namespaceInf, fn, context);
+};
+
 /**
  * Methods to handle changes to table configuration and reactivity are handled by this
  * class.
@@ -610,7 +667,7 @@ class Store {
                 immediateListeners.changed = true;
                 immediateListeners.fns = immediateListeners.oriFns.slice();
             }
-            sanitizedVal = defaultValue(this.model.prop(propName), {});
+            sanitizedVal = defaultValue(this.get(propName), {});
             sanitizedVal[namespace] = value;
         }
         // check if appropriate enum has been used
@@ -630,36 +687,13 @@ class Store {
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        const changeListeners = this._changeListeners;
-        const callbackFn = ((names, namespaceVal) => (...params) => {
-            let call = true;
-            names.forEach((name) => {
-                const listenerObj = getObjProp(changeListeners, name, namespaceVal);
-                if (listenerObj) {
-                    call = listenerObj.changed || call;
-                    listenerObj.fns.pop();
-                    if (!listenerObj.fns.length) {
-                        setObjProp(changeListeners, [name, namespaceInf.namespace, 'changed'], false);
-                    }
-                }
-            });
-            call && callBack(...params);
-        })(props, namespaceInf.namespace);
-        if (namespaceInf.namespace) {
-            props.forEach((name) => {
-                const fns = defaultValue(getObjProp(changeListeners, name, namespaceInf.namespace, 'fns'), []);
-                const oriFns = defaultValue(getObjProp(changeListeners, name, namespaceInf.namespace, 'oriFns'), []);
-                fns.push(callBack);
-                oriFns.push(callBack);
-                setObjProp(changeListeners, [name, namespaceInf.namespace], {
-                    fns,
-                    oriFns,
-                    changed: false
-                });
-            });
-        }
-        const fn = this.model.next(props, callbackFn, instantCall);
-        addListenerToNamespace(namespaceInf, fn, this);
+        registerListener(this, 'next', {
+            namespaceInf,
+            listeners: this._changeListeners,
+            callBack,
+            instantCall,
+            props
+        });
         return this;
     }
     /**
@@ -675,58 +709,14 @@ class Store {
         if (!Array.isArray(propNames)) {
             props = [propNames];
         }
-        const immediateListeners = this._immediateListeners;
-        let ns;
-        if (namespaceInf.namespace) {
-            ns = namespaceInf.namespace instanceof Array ? namespaceInf.namespace : [namespaceInf.namespace];
-        }
+        registerListener(this, 'on', {
+            namespaceInf,
+            listeners: this._immediateListeners,
+            props,
+            callBack,
+            instantCall
+        });
 
-        const callbackFn = ((names, namespaceVal) => (...params) => {
-            let call = namespaceVal ? false : true;
-            names.forEach((name) => {
-                if (namespaceVal) {
-                    namespaceVal.forEach((namespace) => {
-                        const listenerObj = getObjProp(immediateListeners, name, namespace);
-                        if (listenerObj) {
-                            call = listenerObj.changed || call;
-                            listenerObj.fns.pop();
-                            if (!listenerObj.fns.length) {
-                                setObjProp(immediateListeners, [name, namespace, 'changed'], false);
-                            }
-                        }
-                    });
-                }
-            });
-            let values = params;
-            if (namespaceVal) {
-                values = [].concat(...params.map((param) => {
-                    return namespaceVal.map((namespace) => {
-                        return [param[0] !== null ? param[0][namespace] : param[0],
-                            param[1] !== null ? param[1][namespace] : param[1]];
-                    });
-                }));
-            }
-            call && callBack(...values);
-        })(props, ns);
-
-        const fn = this.model.on(props, callbackFn, instantCall);
-        if (ns) {
-            props.forEach((name) => {
-                ns.forEach((namespace) => {
-                    const fns = defaultValue(getObjProp(immediateListeners, name, namespace, 'fns'), []);
-                    fns.push(callBack);
-                    const oriFns = defaultValue(getObjProp(immediateListeners, name, namespace, 'oriFns'), []);
-                    oriFns.push(callBack);
-                    setObjProp(immediateListeners, [name, namespace], {
-                        fns,
-                        oriFns,
-                        changed: false
-                    });
-                });
-            });
-        }
-        addListenerToNamespace(namespaceInf, fn, this);
-        return this;
     }
     /**
      * This method is used to get the name of the property
@@ -936,8 +926,7 @@ const generateGetterSetters = (context, props) => {
         const prop = propInfo[0];
         const typeChecker = propInfo[1].typeChecker;
         const defVal = propInfo[1].defaultValue;
-        const sanitization = propInfo[1].sanitization;
-        const preset = propInfo[1].preset;
+        const { sanitization, preset, onset } = propInfo[1];
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
             if (defVal) {
@@ -947,7 +936,7 @@ const generateGetterSetters = (context, props) => {
                 if (params.length) {
                     let value = params[0];
                     if (sanitization) {
-                        value = sanitization(context, params[0]);
+                        value = sanitization(context, params[0], context[`_${prop}`]);
                     }
                     if (preset) {
                         preset(context, value);
@@ -956,6 +945,9 @@ const generateGetterSetters = (context, props) => {
                         return context[`_${prop}`];
                     }
                     context[`_${prop}`] = value;
+                    if (onset) {
+                        onset(context, value);
+                    }
                     return context;
                 } return context[`_${prop}`];
             };
