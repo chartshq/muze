@@ -177,9 +177,8 @@ export default class CartesianEncoder extends VisualEncoder {
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
                     const sortingOrder = config.sort[currentFieldName];
-                    const isSortingDisabled = config.sort.disabled;
 
-                    if (!isSortingDisabled && sortingOrder) {
+                    if (sortingOrder) {
                         if (sortingOrder === ASCENDING) {
                             domains[axisType][key].sort((a, b) => a.localeCompare(b));
                         } else if (sortingOrder === DESCENDING) {

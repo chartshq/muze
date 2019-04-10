@@ -182,10 +182,10 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = rowFacets[0].toString();
         const firstLevelRowKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(rowFacets[0], firstLevelRowKeys, globalConfig);
-
         // Get unique keys in the form of an array of arrays for each row
         uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
+
+        sortFacetFields(rowFacets, rowKeys, globalConfig);
 
         // Apply selection -> projection -> row datamodels
         rowKeys.forEach((val) => {
@@ -216,14 +216,15 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = colFacetNames[0];
         const firstLevelColumnKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(colFacets[0], firstLevelColumnKeys, globalConfig);
-
         // Get unique keys to create faceted datamodels: this time for columns
         uniqueKeyGenerator(columnKeys, {
             facets: colFacetNames,
             dataModel,
             uniqueValues: firstLevelColumnKeys
         });
+
+        sortFacetFields(colFacets, columnKeys, globalConfig);
+
         // For each row in the datamodel, apply selection -> projection -> push the projection to matri
         rowDataModels.forEach((dme, rIndex) => {
             facetInfo[rIndex] = facetInfo[rIndex] || [[], []];

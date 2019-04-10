@@ -41,17 +41,18 @@
     }];
     window.dm = new DataModel(jsonData, schema);
     // const dm2 = dm.sort([
-    //     ['Origin', 'desc'],
+    //     ['Year', 'desc'],
+    //     ['Origin', 'asc']
     // ]);
     const canvas = env.canvas();
     
     canvas
         .data(dm)
-        .width(550)
-        .height(500)
+        .width(850)
+        .height(550)
         // .columns(['Horsepower', 'Origin', 'Maker'])
         // .rows(['Origin', 'Year', 'Maker'])
-        .rows(['Year', 'Origin'])
+        .rows(['Horsepower', 'Origin', 'Year', 'Cylinders'])
         // .rows(['Maker', 'Year'])
         .columns(['Horsepower'])
         // .detail(['Name'])
@@ -59,8 +60,9 @@
         .config({
             showHeaders: true,
             sort: {
-                Year: 'desc',
-                Origin: 'asc'
+                Cylinders: 'asc',
+                Year: (a, b) => b - a,
+                Origin: 'asc',
             },
             axes: {
                 x: {

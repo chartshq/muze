@@ -1,4 +1,4 @@
-import { Store, FieldType, COORD_TYPES, getObjProp } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp, sortFieldByType } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -27,9 +27,7 @@ import {
     Y,
     ARC,
     RADIUS,
-    ANGLE,
-    ASCENDING,
-    DESCENDING
+    ANGLE
 } from '../enums/constants';
 
 const POLAR = COORD_TYPES.POLAR;
@@ -453,20 +451,19 @@ export const extractFields = (facetsAndProjections, layerFields) => {
 
 /**
  * This method sorts the facets fields inplace if field is of categorical type
- * @param {Object} facet facet field
+ * @param {Object} facets Array of facets
  * @param {Array} keys Array of the facet field values
  * @param {Object} config configuration object
  */
-export const sortFacetFields = (facet, keys, config) => {
-    const facetName = `${facet}`;
-    const facetSortOrder = config.sort[facetName];
-    const type = facet.type();
+export const sortFacetFields = (facets, keys, config) => {
+    const fieldsSorted = Object.keys(config.sort);
 
-    if (type === DIMENSION && facetSortOrder) {
-        if (facetSortOrder === ASCENDING) {
-            keys.sort((a, b) => a - b);
-        } else if (facetSortOrder === DESCENDING) {
-            keys.sort((a, b) => b - a);
-        }
-    }
+    fieldsSorted.forEach((facetName) => {
+        const facetField = facets.find(facet => `${facet}` === facetName);
+        const facetSortOrder = config.sort[facetName];
+        const subType = facetField.subtype();
+        const index = facets.indexOf(facetField);
+
+        facetSortOrder && keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a[index], b[index]));
+    });
 };

@@ -1599,6 +1599,48 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+/**
+ * Returns the sort function based on the type of field
+ * @param {number|string} a first value
+ * @param {number|string} b second value
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
+ * @param {string} subType Field subtype
+ * @return {Function} Sort function
+ */
+const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
+    if (typeof sortOrder === 'function') {
+        return sortOrder(a, b);
+    }
+    if (subType === DimensionSubtype.TEMPORAL) {
+        return sortOrder === STACK_CONFIG.ORDER_ASCENDING_ABBR ? a - b : b - a;
+    }
+    return sortOrder === STACK_CONFIG.ORDER_ASCENDING_ABBR ? a.localeCompare(b) : b.localeCompare(a);
+};
+
+/**
+ * Sort field based on it's subtype and sorting order
+ * @param {string} subType Field subtype
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
+ * @param {Array} firstVal First sort parameter
+ * @param {number} secondVal Second sort parameter
+ * @return {Function|null} Sorting function
+*/
+const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
+    const sortOrderType = typeof sortOrder;
+
+    if (sortOrderType !== 'string' && sortOrderType !== 'function') {
+        return null;
+    }
+    if (sortOrderType === 'string' &&
+        sortOrder !== STACK_CONFIG.ORDER_ASCENDING_ABBR &&
+        sortOrder !== STACK_CONFIG.ORDER_DESCENDING_ABBR) {
+        return null;
+    }
+    if (subType === DimensionSubtype.TEMPORAL || subType === DimensionSubtype.CATEGORICAL) {
+        return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
+    }
+};
+
 export {
     getValueParser,
     require,
@@ -1678,5 +1720,6 @@ export {
     formatTemporal,
     temporalFields,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortFieldByType
 };
