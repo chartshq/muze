@@ -76,3 +76,4 @@ export const VISIBLE = 'visible';
 export const VERTICAL_SCROLL_BAR = 'verticalScrollBar';
 export const HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
 export const GRID = 'grid';
+export const NODATA = 'noData';

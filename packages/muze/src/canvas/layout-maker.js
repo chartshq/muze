@@ -13,7 +13,8 @@ import {
     LEGEND,
     VERTICAL_SCROLL_BAR,
     HORIZONTAL_SCROLL_BAR,
-    GRID
+    GRID,
+    NODATA
 } from '../constants';
 import { ScrollManager } from './scroll-manager';
 
@@ -163,7 +164,8 @@ const componentIndexes = {
     legend: 2,
     verticalScrollBar: 3,
     horizontalScrollBar: 4,
-    grid: 5
+    grid: 5,
+    noData: 6
 };
 
 const componentNames = {
@@ -172,7 +174,8 @@ const componentNames = {
     2: LEGEND,
     3: VERTICAL_SCROLL_BAR,
     4: HORIZONTAL_SCROLL_BAR,
-    5: GRID
+    5: GRID,
+    6: NODATA
 };
 
 /**

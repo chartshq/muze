@@ -1,8 +1,9 @@
-import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT, RIGHT } from '../constants';
+import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT, RIGHT, NODATA } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
+import NoDataComponent from './components/no-data-component';
 import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
 
@@ -69,6 +70,33 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
         }
     }
     return wrapper;
+};
+
+/**
+ * Creates the wrapper for the grid layout to be used in the tree layout
+ *
+ *
+ * @param {LayoutManager} layoutManager instance of Layout Manager which manages the layouting of the components
+ * @param {Object} renderDetails Extra details required for rendering the headers
+ * @param {GridLayout} grid Instance of the grid layout
+ * @return {Instance} Returns the respective wrappers
+ */
+const createNoDataWrapper = (layoutManager, renderDetails) => {
+    const target = { target: CANVAS };
+    const { layoutConfig } = renderDetails;
+    const { height, width } = layoutManager.getComponent('grid').getBoundBox();
+    const config = {
+        ...target,
+        pagination: layoutConfig.pagination,
+        classPrefix: layoutConfig.classPrefix,
+        dimensions: { height, width }
+    };
+    const wrapperParams = {
+        name: NODATA,
+        component: null,
+        config
+    };
+    return new NoDataComponent(wrapperParams);
 };
 
 // Mapping between types of scrollBars and their required configs for wrapper creation
@@ -254,11 +282,21 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
  * @param {Object} renderDetails Extra details required for rendering the headers
  * @return {Instance} Returns the respective wrappers for each component
  */
-export const componentWrapperMaker = (layoutManager, grid, renderDetails) => ({
-    title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
-    subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
-    legend: createLegendWrapper(layoutManager, renderDetails),
-    grid: gridLayoutWrapper(layoutManager, renderDetails, grid),
-    // verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),
-    // horizontalScrollBar: createScrollBarWrapper(HORIZONTAL, layoutManager, renderDetails, grid)
-});
+export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
+    const { rows, columns, values } = renderDetails.components;
+    if (!rows && !columns && !values) {
+        return {
+            title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
+            subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
+            noData: createNoDataWrapper(layoutManager, renderDetails)
+        };
+    }
+    return {
+        title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
+        subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
+        legend: createLegendWrapper(layoutManager, renderDetails),
+        grid: gridLayoutWrapper(layoutManager, renderDetails, grid),
+        verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),
+        horizontalScrollBar: createScrollBarWrapper(HORIZONTAL, layoutManager, renderDetails, grid)
+    };
+};

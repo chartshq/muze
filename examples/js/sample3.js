@@ -74,5 +74,16 @@ d3.json('../../data/cars.json', (data) => {
           canvas.title("nothing should be rendering").data(filtered)
             //	}
     
-    }, 4000);  
+    }, 4000); 
+    // setTimeout(() => {
+    // canvas.rows(['Origin', 'Acceleration']) 
+    // .columns(['Cylinders']) 
+    // .data(rootData)
+    // .width(550)
+    // .height(500)
+    // .title('Acceleration by Cylinders by Origin')
+    // .subtitle('For year 1970 - 1982')
+    //         //	}
+    
+    // }, 8000); 
 });

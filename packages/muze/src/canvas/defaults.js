@@ -17,6 +17,8 @@ export const SUB_TITLE_CONFIG = {
 
 export const GRID = 'grid';
 
+export const NODATA = 'noData';
+
 export const CANVAS = 'canvas';
 
 export const LAYOUT_ALIGN = {

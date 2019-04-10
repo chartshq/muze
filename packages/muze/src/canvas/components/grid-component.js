@@ -181,7 +181,4 @@ export default class GridComponent extends MuzeComponent {
         this.sanitizeGrid();
         return this;
     }
-    remove () {
-        console.log(this);
-    }
 }
