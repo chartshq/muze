@@ -178,15 +178,6 @@ const componentNames = {
     6: MESSAGE
 };
 
-const componentNames = {
-    0: TITLE,
-    1: SUB_TITLE,
-    2: LEGEND,
-    3: VERTICAL_SCROLL_BAR,
-    4: HORIZONTAL_SCROLL_BAR,
-    5: GRID
-};
-
 /**
  * Responsible for creating a scroll manager that manages interactions between the grid
  * component and the scroll bar components
@@ -238,7 +229,9 @@ export const renderLayout = (canvas, renderDetails) => {
     const compWrappers = componentWrapperMaker(layoutManager, gridLayout, renderDetails);
     const componentWrappers = Object.keys(componentIndexes).map(e => compWrappers[e]);
     const gridWrapper = componentWrappers[grid];
-    // createScrollManager(componentWrappers, canvas);
+    if (gridWrapper) {
+        createScrollManager(componentWrappers, canvas);
+    }
 
     componentWrappers.forEach((componentWrapper, index) => {
         if (!componentWrapper) {
@@ -247,6 +240,8 @@ export const renderLayout = (canvas, renderDetails) => {
         }
     });
     layoutManager.registerComponents(componentWrappers).compute();
-    // gridWrapper.attachScrollListener();
+    if (gridWrapper) {
+        gridWrapper.attachScrollListener();
+    }
 };
 
