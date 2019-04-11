@@ -1,10 +1,23 @@
-import { TITLE, SUB_TITLE, LEGEND, VERTICAL, HORIZONTAL, WIDTH, HEIGHT, TOP, LEFT, RIGHT, MESSAGE } from '../constants';
+import {
+    TITLE,
+    SUB_TITLE,
+    LEGEND, VERTICAL,
+    HORIZONTAL,
+    WIDTH,
+    HEIGHT,
+    TOP,
+    LEFT,
+    RIGHT,
+    MESSAGE,
+    GRID,
+    NO_DATA_MESSAGE
+} from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import MessageComponent from './components/message-component';
-import { TITLE_CONFIG, SUB_TITLE_CONFIG, GRID, CANVAS, LAYOUT_ALIGN } from './defaults';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG, CANVAS, LAYOUT_ALIGN } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
 
 // Mapping between types of headers and their required configs for wrapper creation
@@ -81,24 +94,28 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  * @param {GridLayout} grid Instance of the grid layout
  * @return {Instance} Returns the respective wrappers
  */
-const createMessageWrapper = (layoutManager, renderDetails, message) => {
+const createMessageWrapper = (layoutManager, params) => {
+    let messageWrapper = null;
     const target = { target: CANVAS };
-    const { layoutConfig } = renderDetails;
-    const { height, width } = layoutManager.getComponent('grid').getBoundBox();
+    const { height, width, message } = params;
     const config = {
         ...target,
-        pagination: layoutConfig.pagination,
-        classPrefix: layoutConfig.classPrefix,
         dimensions: { height, width },
         message
     };
-    console.log(config);
     const wrapperParams = {
         name: MESSAGE,
         component: null,
         config
     };
-    return new MessageComponent(wrapperParams);
+    const existingComponent = layoutManager.getComponent(MESSAGE);
+    if (existingComponent) {
+        messageWrapper = existingComponent
+                                .updateWrapper(wrapperParams);
+    } else {
+        messageWrapper = new MessageComponent(wrapperParams);
+    }
+    return messageWrapper;
 };
 
 // Mapping between types of scrollBars and their required configs for wrapper creation
@@ -287,10 +304,13 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
 export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
     const { rows, columns, values } = renderDetails.components;
     if (!rows && !columns && !values) {
+        const { height, width } = layoutManager.getComponent(GRID).getBoundBox();
+        const params = { height, width, message: NO_DATA_MESSAGE };
+
         return {
             title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
             subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
-            message: createMessageWrapper(layoutManager, renderDetails, 'No Data to Display')
+            message: createMessageWrapper(layoutManager, params)
         };
     }
     return {

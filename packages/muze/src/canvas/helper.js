@@ -166,7 +166,6 @@ export const setupChangeListener = (context) => {
             context.render();
         } else if (equalityProps && !updateProps && context.mount()) {
             context.composition().visualGroup.remove();
-            context.layout().resetViewInformation();
             const visGroup = context.composition().visualGroup;
             const info = visGroup.placeholderInfo();
             info.rows = null;

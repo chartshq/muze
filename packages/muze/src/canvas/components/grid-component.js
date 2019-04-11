@@ -181,4 +181,10 @@ export default class GridComponent extends MuzeComponent {
         this.sanitizeGrid();
         return this;
     }
+
+    attachListener () {
+        console.log('Hi i am grid');
+        this.attachScrollListener();
+        return this;
+    }
 }

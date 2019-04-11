@@ -77,3 +77,5 @@ export const VERTICAL_SCROLL_BAR = 'verticalScrollBar';
 export const HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
 export const GRID = 'grid';
 export const MESSAGE = 'message';
+export const NO_DATA_MESSAGE = 'No data to display';
+

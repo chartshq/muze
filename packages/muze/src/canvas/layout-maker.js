@@ -178,6 +178,14 @@ const componentNames = {
     6: MESSAGE
 };
 
+const attachListeners = (componentWrappers) => {
+    componentWrappers.forEach((componentWrapper) => {
+        if (componentWrapper) {
+            componentWrapper.attachListener();
+        }
+    });
+};
+
 /**
  * Responsible for creating a scroll manager that manages interactions between the grid
  * component and the scroll bar components
@@ -240,8 +248,5 @@ export const renderLayout = (canvas, renderDetails) => {
         }
     });
     layoutManager.registerComponents(componentWrappers).compute();
-    if (gridWrapper) {
-        gridWrapper.attachScrollListener();
-    }
+    attachListeners(componentWrappers);
 };
-
