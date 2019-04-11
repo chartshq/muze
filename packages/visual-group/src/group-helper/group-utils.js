@@ -456,7 +456,14 @@ export const extractFields = (facetsAndProjections, layerFields) => {
  * @param {Object} config configuration object
  */
 export const sortFacetFields = (facets, keys, config) => {
+    /**
+     * Check if the facet sorted by the user is plotted
+     * If an incorrect field is sorted, return the keys as is
+     */
     const fieldsSorted = Object.keys(config.sort);
+    const allFacetsFields = facets.map(facet => `${facet}`);
+    const isFacetFound = fieldsSorted.some(field => allFacetsFields.includes(field));
+    if (!isFacetFound) return;
 
     fieldsSorted.forEach((facetName) => {
         const facetField = facets.find(facet => `${facet}` === facetName);
