@@ -1,6 +1,6 @@
 import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID }
     from '../constants';
 import { canvasOptions } from './local-options';
 import { LayoutManager } from '../../../layout/src/tree-layout';
@@ -28,7 +28,7 @@ export const fixScrollBarConfig = (config) => {
 
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
-    const boundBox = layoutManager.getComponent('grid') && layoutManager.getComponent('grid').getBoundBox();
+    const boundBox = layoutManager.getComponent(GRID) && layoutManager.getComponent(GRID).getBoundBox();
     const valueMatrix = context.composition().visualGroup.matrixInstance().value;
     const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
     valueMatrix.each((cell) => {

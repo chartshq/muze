@@ -302,19 +302,21 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
  */
 export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
     const { rows, columns, values } = renderDetails.components;
+    const headers = {
+        title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
+        subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails)
+    };
     if (!rows && !columns && !values) {
         const { height, width } = layoutManager.getComponent(GRID).getBoundBox();
         const params = { height, width, message: NO_DATA_MESSAGE };
 
         return {
-            title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
-            subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
+            ...headers,
             message: createMessageWrapper(layoutManager, params)
         };
     }
     return {
-        title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
-        subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
+        ...headers,
         legend: createLegendWrapper(layoutManager, renderDetails),
         grid: gridLayoutWrapper(layoutManager, renderDetails, grid),
         verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),

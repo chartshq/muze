@@ -61,18 +61,14 @@ d3.json('../../data/cars.json', (data) => {
         format: '%Y-%m-%d'
     }
     ];
-    let DataModel = muze.DataModel;
-    let rootData = new DataModel(data, schema);
-    let env = muze();
-    let canvas = env.canvas();
 
     // function shuffleArray(array) {
-    // for (var i = array.length - 1; i > 0; i--) {
-    // var j = Math.floor(Math.random() * (i + 1));
-    // var temp = array[i];
-    // array[i] = array[j];
-    // array[j] = temp;
-    // }
+    //     for (var i = array.length - 1; i > 0; i--) {
+    //         var j = Math.floor(Math.random() * (i + 1));
+    //         var temp = array[i];
+    //         array[i] = array[j];
+    //         array[j] = temp;
+    //     }
     // }
     // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
@@ -80,11 +76,11 @@ d3.json('../../data/cars.json', (data) => {
 
 
     var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
-        columns = rows.reverse();
-    const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
-        field: 'Origin'
-    }).mount('#chart').once('canvas.animationend').then(function (client) {
-        var element = document.getElementById('chart');
-        element.classList.add('animateon');
-    });
+            columns = rows.reverse();
+        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+            field: 'Origin'
+        }).mount('#chart').once('canvas.animationend').then(function (client) {
+            var element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
 });

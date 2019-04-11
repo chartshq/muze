@@ -15,10 +15,6 @@ export const SUB_TITLE_CONFIG = {
     className: `${MUZE_PREFIX}-subtitle-container`
 };
 
-export const GRID = 'grid';
-
-export const MESSAGE = 'message';
-
 export const CANVAS = 'canvas';
 
 export const LAYOUT_ALIGN = {
