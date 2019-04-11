@@ -183,7 +183,6 @@ export default class GridComponent extends MuzeComponent {
     }
 
     attachListener () {
-        console.log('Hi i am grid');
         this.attachScrollListener();
         return this;
     }

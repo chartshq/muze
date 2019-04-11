@@ -283,7 +283,6 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
     if (existingComponent) {
         gridWrapper = existingComponent
                     .updateWrapper(wrapperParams);
-        gridWrapper = null;
     } else {
         gridWrapper = new GridComponent(wrapperParams);
     }
