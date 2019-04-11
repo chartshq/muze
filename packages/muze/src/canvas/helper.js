@@ -161,17 +161,19 @@ export const setupChangeListener = (context) => {
         const equalityProps = equalityChecker(props, params);
         const updateProps = updateChecker(props, params);
         // inform attached board to rerender
-        if (equalityProps && updateProps && context.mount()) {
-            dispatchProps(context);
-            context.render();
-        } else if (equalityProps && !updateProps && context.mount()) {
-            context.composition().visualGroup.remove();
-            const visGroup = context.composition().visualGroup;
-            const info = visGroup.placeholderInfo();
-            info.rows = null;
-            info.columns = null;
-            info.values = null;
-            context.render();
+        if (equalityProps && context.mount()) {
+            if (updateProps) {
+                dispatchProps(context);
+                context.render();
+            } else {
+                context.composition().visualGroup.remove();
+                const visGroup = context.composition().visualGroup;
+                const info = visGroup.placeholderInfo();
+                info.rows = null;
+                info.columns = null;
+                info.values = null;
+                context.render();
+            }
         }
         notifyAnimationEnd(context);
     }, true);
