@@ -90,8 +90,7 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  *
  *
  * @param {LayoutManager} layoutManager instance of Layout Manager which manages the layouting of the components
- * @param {Object} renderDetails Extra details required for rendering the headers
- * @param {GridLayout} grid Instance of the grid layout
+ * @param {GridLayout} params Dimensions of the layout
  * @return {Instance} Returns the respective wrappers
  */
 const createMessageWrapper = (layoutManager, params) => {
@@ -300,14 +299,17 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
  * @param {Object} renderDetails Extra details required for rendering the headers
  * @return {Instance} Returns the respective wrappers for each component
  */
-export const componentWrapperMaker = (layoutManager, grid, renderDetails) => {
+export const componentWrapperMaker = (canvas, grid, renderDetails) => {
     const { rows, columns, values } = renderDetails.components;
+    const layoutManager = canvas._layoutManager;
     const headers = {
         title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
         subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails)
     };
     if (!rows && !columns && !values) {
-        const { height, width } = layoutManager.getComponent(GRID).getBoundBox();
+        const defaultDimensions = { height: canvas.height(), width: canvas.width() };
+        const gridComponent = layoutManager.getComponent(GRID);
+        const { height, width } = (gridComponent && gridComponent.getBoundBox()) || defaultDimensions;
         const params = { height, width, message: NO_DATA_MESSAGE };
 
         return {

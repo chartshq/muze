@@ -110,7 +110,8 @@ const updateChecker = (props, params) => props.every((option, i) => {
 });
 
 export const notifyAnimationEnd = (context) => {
-    const centerMatrix = context.layout().viewInfo().viewMatricesInfo.matrices.center[1] || [];
+    const viewInfo = context.layout().viewInfo();
+    const centerMatrix = viewInfo && viewInfo.viewMatricesInfo.matrices.center[1] || [];
     const promises = [];
     centerMatrix.forEach((cellArr) => {
         cellArr.forEach((cell) => {

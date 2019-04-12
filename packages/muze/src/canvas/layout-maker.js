@@ -234,7 +234,7 @@ export const renderLayout = (canvas, renderDetails) => {
     } = componentIndexes;
 
     // Get the component wrappers
-    const compWrappers = componentWrapperMaker(layoutManager, gridLayout, renderDetails);
+    const compWrappers = componentWrapperMaker(canvas, gridLayout, renderDetails);
     const componentWrappers = Object.keys(componentIndexes).map(e => compWrappers[e]);
     const gridWrapper = componentWrappers[grid];
     if (gridWrapper) {
