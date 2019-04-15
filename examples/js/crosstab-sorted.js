@@ -65,12 +65,15 @@
             .config({
                 showHeaders: true,
                 sort: {
+					Origin: function Origin(a, b) {
+						return a.localeCompare(b);
+					},
+					Cylinders: "asc",
+					Year: function Year(a, b) {
+						return b - a;
+					},
 					Somefield: 'desc',
         			AnotherField: (a, b) => b - a,
-					// Cylinders: "desc",
-					'Origin': 'asc'
-                    // Year: (a, b) => b - a,
-                    // Name: (a, b) => b.localeCompare(a)
                 },
                 axes: {
                     x: {

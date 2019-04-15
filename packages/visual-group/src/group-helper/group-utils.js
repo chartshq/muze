@@ -462,10 +462,10 @@ export const sortFacetFields = (facets, keys, config) => {
      */
     const fieldsSorted = Object.keys(config.sort);
     const allFacetsFields = facets.map(facet => `${facet}`);
-    const isFacetFound = fieldsSorted.some(field => allFacetsFields.includes(field));
-    if (!isFacetFound) return;
+    const validFacets = fieldsSorted.filter(field => allFacetsFields.includes(field));
+    if (!validFacets.length) return;
 
-    fieldsSorted.forEach((facetName) => {
+    validFacets.forEach((facetName) => {
         const facetField = facets.find(facet => `${facet}` === facetName);
         const facetSortOrder = config.sort[facetName];
         const subType = facetField.subtype();
