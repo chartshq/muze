@@ -7,7 +7,7 @@ export default class MessageComponent extends MuzeComponent {
         this.setParams(params);
     }
 
-    renderMessageComponent (container) {
+    render (container) {
         const parent = selectElement(container);
         const node = makeElement(parent, 'div', [1])
                         .style('background-color', 'rgb(241,241,241)');
@@ -36,7 +36,7 @@ export default class MessageComponent extends MuzeComponent {
     }
 
     draw (container) {
-        this.renderMessageComponent(container || document.getElementById(this.renderAt()));
+        this.render(container || document.getElementById(this.renderAt()));
     }
 
     updateWrapper (params) {

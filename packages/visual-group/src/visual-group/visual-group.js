@@ -254,6 +254,10 @@ class VisualGroup extends SimpleGroup {
     remove () {
         this.matrixInstance().value.clear();
         this.resolver().clear();
+        const info = this.placeholderInfo();
+        info.rows = null;
+        info.columns = null;
+        info.values = null;
     }
 }
 
