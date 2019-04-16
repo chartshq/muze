@@ -143,17 +143,9 @@ export default class LayoutManager {
     removeComponent (name) {
         const component = this.getComponent(name);
         if (component) {
-            if (name === 'grid') {
-                component.component.map(comp => comp.map((co) => {
-                    this._layoutDef.componentMap().delete(co.name());
-                    const deleteElementId = co.renderAt();
-                    return removeElement(deleteElementId);
-                }));
-            } else {
-                this._layoutDef.componentMap().delete(name);
-                const deleteElementId = component.renderAt();
-                return removeElement(deleteElementId);
-            }
+            this._layoutDef.componentMap().delete(name);
+            const deleteElementId = component.renderAt();
+            return removeElement(deleteElementId);
         }
         return this;
     }

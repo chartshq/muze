@@ -17,7 +17,7 @@ import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import MessageComponent from './components/message-component';
-import { TITLE_CONFIG, SUB_TITLE_CONFIG, CANVAS, LAYOUT_ALIGN } from './defaults';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG, CANVAS, LAYOUT_ALIGN, MESSAGE_CONFIG } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
 
 // Mapping between types of headers and their required configs for wrapper creation
@@ -100,7 +100,8 @@ const createMessageWrapper = (layoutManager, params) => {
     const config = {
         ...target,
         dimensions: { height, width },
-        message
+        message,
+        classPrefix: MESSAGE_CONFIG
     };
     const wrapperParams = {
         name: MESSAGE,

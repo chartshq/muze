@@ -3,34 +3,18 @@ import MuzeComponent from './muze-chart-component';
 
 export default class MessageComponent extends MuzeComponent {
     constructor (params) {
-        super(params.name, params.config.dimensions, params.config.message, 0);
+        super(params.name, params.config.dimensions, 0);
         this.setParams(params);
     }
 
     render (container) {
         const parent = selectElement(container);
-        const node = makeElement(parent, 'div', [1])
-                        .style('background-color', 'rgb(241,241,241)');
+        const { className } = this.params.config.classPrefix;
+        const node = makeElement(parent, 'div', [1], className);
         const { height, width } = this.params.config.dimensions;
         const { message } = this.params.config;
-        applyStyle(node, {
-            width: `${width}px`,
-            height: `${height}px`,
-            display: 'table',
-            backgroundColor: 'rgb(241,241,241)',
-            border: '1px solid #c3c9d0'
-        });
-
-        const child = makeElement(node, 'div', [1])
-                          .style('vertical-align', 'middle')
-                          .style('text-align', 'center')
-                          .style('font-size', '18px');
-
-        applyStyle(child, {
-            color: 'rgb(140, 141, 142)',
-            display: 'table-cell'
-        });
-
+        applyStyle(node, { width: `${width}px`, height: `${height}px` });
+        const child = makeElement(node, 'div', [1], `${className}-child`);
         const textElement = makeElement(child, 'text', [1]);
         textElement.html(message);
     }
@@ -49,8 +33,9 @@ export default class MessageComponent extends MuzeComponent {
     setParams (params) {
         this.component = params.component;
         this.params = params;
-        this.target(params.config.target);
-        this.className(params.config.className);
+        const { target, className } = params.config;
+        this.target(target);
+        this.className(className);
         return this;
     }
 }
