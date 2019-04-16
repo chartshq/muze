@@ -59,6 +59,7 @@ import {
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
+import { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
 const { InvalidAwareTypes } = DataModel;
@@ -1612,9 +1613,9 @@ const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
         return sortOrder(a, b);
     }
     if (subType === DimensionSubtype.TEMPORAL) {
-        return sortOrder === STACK_CONFIG.ORDER_ASCENDING_ABBR ? a - b : b - a;
+        return sortOrder === SORT_ORDER_ASCENDING ? a - b : b - a;
     }
-    return sortOrder === STACK_CONFIG.ORDER_ASCENDING_ABBR ? a.localeCompare(b) : b.localeCompare(a);
+    return sortOrder === SORT_ORDER_ASCENDING ? a.localeCompare(b) : b.localeCompare(a);
 };
 
 /**
@@ -1632,13 +1633,14 @@ const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
         return null;
     }
     if (sortOrderType === 'string' &&
-        sortOrder !== STACK_CONFIG.ORDER_ASCENDING_ABBR &&
-        sortOrder !== STACK_CONFIG.ORDER_DESCENDING_ABBR) {
+        sortOrder !== SORT_ORDER_ASCENDING &&
+        sortOrder !== SORT_ORDER_DESCENDING) {
         return null;
     }
     if (subType === DimensionSubtype.TEMPORAL || subType === DimensionSubtype.CATEGORICAL) {
         return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
     }
+    return null;
 };
 
 export {
