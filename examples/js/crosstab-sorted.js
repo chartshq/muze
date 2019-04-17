@@ -56,30 +56,24 @@
             .data(dm)
             .width(850)
             .height(550)
-            .rows(["Acceleration", "Year"])
-            .columns(["Origin"])
+            .rows(["Acceleration", 'Horsepower'])
+            .columns(["Year", "Origin"])
             .mount("#chart")
             // .layers([{
             //   mark: 'area'
             // }])
             .config({
                 showHeaders: true,
-                sort: {
-					Origin: function Origin(a, b) {
-						return a.localeCompare(b);
-					},
+				sort: {
+					Origin: 'asc',
 					Cylinders: "asc",
 					Year: function Year(a, b) {
-						return b - a;
+						return a - b;
 					},
 					Somefield: 'desc',
-        			AnotherField: (a, b) => b - a,
-                },
-                axes: {
-                    x: {
-                        name: "aaa"
-                    }
-                }
+					AnotherField: (a, b) => b - a,
+				},
             });
 	})
 })()
+

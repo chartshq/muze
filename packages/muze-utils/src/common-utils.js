@@ -59,7 +59,7 @@ import {
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
-import { SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
+import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
 const { InvalidAwareTypes } = DataModel;
@@ -762,7 +762,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                         if (typeCheck(val) === compareTo) {
                                             values.push(val);
                                         }
-                                    } else if (typeof typeCheck === 'string') {
+                                    } else if (typeof typeCheck === DATA_TYPE.STRING) {
                                         if (typeCheck === 'constructor') {
                                             const typeExpected = spreadParams ? meta.typeExpected[i] :
                                                 meta.typeExpected;
@@ -1259,7 +1259,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     const selFn = fields => selFields.every((field) => {
         const val = fields[field].value;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-        if (typeof range[0] === 'string') {
+        if (typeof range[0] === DATA_TYPE.STRING) {
             return range.find(d => d === val) !== undefined;
         }
         return range ? val >= range[0] && val <= range[1] : true;
@@ -1609,7 +1609,7 @@ const nearestSortingDetails = (dataModel) => {
  * @return {Function} Sort function
  */
 const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
-    if (typeof sortOrder === 'function') {
+    if (typeof sortOrder === DATA_TYPE.FUNCTION) {
         return sortOrder(a, b);
     }
     if (subType === DimensionSubtype.TEMPORAL) {
@@ -1629,10 +1629,10 @@ const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
 const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
 
-    if (sortOrderType !== 'string' && sortOrderType !== 'function') {
+    if (sortOrderType !== DATA_TYPE.STRING && sortOrderType !== DATA_TYPE.FUNCTION) {
         return null;
     }
-    if (sortOrderType === 'string' &&
+    if (sortOrderType === DATA_TYPE.STRING &&
         sortOrder !== SORT_ORDER_ASCENDING &&
         sortOrder !== SORT_ORDER_DESCENDING) {
         return null;

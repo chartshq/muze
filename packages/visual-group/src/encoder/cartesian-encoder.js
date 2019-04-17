@@ -4,7 +4,8 @@ import {
     STATE_NAMESPACES,
     unionDomain,
     COORD_TYPES,
-    toArray
+    toArray,
+    sortFieldByType
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import {
@@ -17,7 +18,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, ASCENDING, DESCENDING } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 const CARTESIAN = COORD_TYPES.CARTESIAN;
@@ -177,13 +178,10 @@ export default class CartesianEncoder extends VisualEncoder {
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
                     const sortingOrder = config.sort && config.sort[currentFieldName];
+                    const subType = fieldsObj[axisType][key].subtype();
 
                     if (sortingOrder) {
-                        if (sortingOrder === ASCENDING) {
-                            domains[axisType][key].sort((a, b) => a.localeCompare(b));
-                        } else if (sortingOrder === DESCENDING) {
-                            domains[axisType][key].sort((a, b) => b.localeCompare(a));
-                        }
+                        domains[axisType][key].sort((a, b) => sortFieldByType(subType, sortingOrder, a, b));
                     }
                 }
 

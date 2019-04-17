@@ -64,5 +64,6 @@ export const DEFAULT_CONFIG = {
     autoGroupBy: {
         disabled: false
     },
-    invalidValues: {}
+    invalidValues: {},
+    sort: {}
 };
