@@ -336,7 +336,6 @@ export default class MatrixResolver {
                 .coord(coord);
             el.config(unitConfig);
         });
-
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
     }
@@ -439,7 +438,10 @@ export default class MatrixResolver {
 
         const units = [];
         const matrixLayers = this.matrixLayers();
-        // this.store().model.lock();
+        const props = [`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`,
+            `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`];
+        const store = this.store();
+        store.lockCommits(props);
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -448,7 +450,7 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-        // this.store().model.unlock();
+        store.unlockCommits(props);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }

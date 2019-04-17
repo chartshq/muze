@@ -67,9 +67,6 @@ export default {
         }
     },
     [TRANSFORMEDDATA]: {
-        value: null,
-        meta: {
-            addAsMethod: false
-        }
+        value: null
     }
 };

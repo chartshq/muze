@@ -2,7 +2,6 @@ import { AxisOrientation } from '@chartshq/muze-axis';
 import {
     getObjProp,
     FieldType,
-    STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     mergeRecursive,
     createSelection
@@ -595,18 +594,7 @@ export const computeMatrices = (context, config) => {
         x: xAxes,
         y: yAxes
     });
-    const store = resolver.store();
 
-    [xAxes, yAxes].forEach((axesArr, type) => {
-        const stateProps = {};
-        axesArr = axesArr || [];
-        axesArr.forEach((axes, idx) => {
-            axes.forEach((axis, axisIndex) => {
-                stateProps[`${idx}${axisIndex}`] = null;
-            });
-        });
-        store.append(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type ? 'y' : 'x'}`, stateProps);
-    });
     resolver.createUnits(componentRegistry, config);
 
     const matrices = {

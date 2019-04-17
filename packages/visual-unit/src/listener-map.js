@@ -10,29 +10,44 @@ import {
 
 import { createGridLineLayer } from './helper/grid-lines';
 
-export const calculateDomainListener = (context, namespace) => () => {
+const removeExitLayers = (layerDefs, context) => {
+    const layersMap = context._layersMap;
+    const markSet = {};
+    layerDefs.forEach((layerDef, i) => {
+        const id = defaultValue(layerDef.name, `${layerDef.mark}-${i}`);
+        markSet[id] = true;
+    });
+
+    for (const key in layersMap) {
+        if (!(key in markSet)) {
+            layersMap[key].forEach(layer => layer.remove());
+            delete layersMap[key];
+        }
+    }
+};
+
+export const calculateDomainListener = (context) => {
+    const { namespace } = context.metaInf();
     const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
         context.data().getFieldsConfig());
     context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, domain, namespace);
 };
 
-export const listenerMap = (context, namespace, metaInf) => ([
+export const listenerMap = [
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.CONFIG}`],
-        listener: ([, config]) => {
-            config && context.firebolt().config(config.interaction);
-        }
-    },
-    {
-        type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.LAYERDEFS}`],
-        listener: ([, layerDefs]) => {
+        props: [PROPS.LAYERDEFS],
+        listener: (context, [, layerDefs]) => {
             const fieldsVal = context.fields();
-            // console.log('UNITS-LDF', context.metaInf().namespace);
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
-                context.addLayer(layerDefs);
+                const queuedLayerDefs = context._queuedLayerDefs;
+                let layerDefArr = layerDefs;
+                queuedLayerDefs.forEach((defFn) => {
+                    layerDefArr = [...layerDefArr, ...defFn(layerDefs)];
+                });
+                context.addLayer(layerDefArr);
+                context._queuedLayerDefs.length = 0;
                 const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {
                     const axisArr = defaultValue(getObjProp(context.axes(), type), []);
@@ -52,68 +67,68 @@ export const listenerMap = (context, namespace, metaInf) => ([
     },
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.DATA}`],
-        listener: ([, dataModel]) => {
-            // console.log('UNITS-DATA', context.metaInf().namespace);
-            const axesObj = context.axes();
-            const timeDiffs = {};
-            const timeDiffsByField = {};
-
-            Object.entries(temporalFields(dataModel)).forEach(([fieldName, fieldObj]) => {
-                timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
-            });
-
-            Object.entries(context.fields()).forEach(([type, [field]]) => {
-                if (field) {
-                    const timeDiff = timeDiffsByField[`${field}`];
-                    if (timeDiff) {
-                        timeDiffs[type] = timeDiff;
-                        axesObj[type].forEach(axis => axis.minDiff(timeDiff));
-                    }
-                }
-            });
-
-            context._timeDiffsByField = timeDiffsByField;
-            context._timeDiffs = timeDiffs;
-        }
-    },
-    {
-        type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.CONFIG}`],
-        listener: () => {
-            createGridLineLayer(context);
-        }
-    },
-    {
-        type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.DATA}`,
-            `${namespace.local}.${PROPS.TRANSFORM}`],
-        listener: ([, dataModel], [, transform]) => {
+        props: [PROPS.DATA],
+        listener: (context, [, dataModel]) => {
             if (dataModel) {
-                const dataModels = transformDataModels(transform, dataModel);
-                // console.log('UNITS-TRANSFROM-AND-DATA', context.metaInf().namespace);
-                context.store().commit(`${namespace.local}.${PROPS.TRANSFORMEDDATA}`, dataModels, metaInf.namespace);
+                const axesObj = context.axes();
+                const timeDiffs = {};
+                const timeDiffsByField = {};
+
+                Object.entries(temporalFields(dataModel)).forEach(([fieldName, fieldObj]) => {
+                    timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
+                });
+
+                Object.entries(context.fields()).forEach(([type, [field]]) => {
+                    if (field) {
+                        const timeDiff = timeDiffsByField[`${field}`];
+                        if (timeDiff) {
+                            timeDiffs[type] = timeDiff;
+                            axesObj[type].forEach(axis => axis.minDiff(timeDiff));
+                        }
+                    }
+                });
+
+                context._timeDiffsByField = timeDiffsByField;
+                context._timeDiffs = timeDiffs;
+                const firebolt = context.firebolt();
+                const originalData = context.cachedData()[0];
+                firebolt.createSelectionSet(context.data().getUids());
+                firebolt.attachPropagationListener(originalData);
             }
         }
     },
     {
         type: 'registerImmediateListener',
-        props: [`${namespace.local}.${PROPS.TRANSFORMEDDATA}`,
-            `${namespace.local}.${PROPS.LAYERS}`],
-        listener: ([, transformedData], [, layers]) => {
+        props: [PROPS.CONFIG],
+        listener: (context, [, config]) => {
+            if (config) {
+                context.firebolt().config(config.interaction);
+                createGridLineLayer(context);
+            }
+        }
+    },
+    {
+        type: 'registerImmediateListener',
+        props: [PROPS.DATA, PROPS.TRANSFORM],
+        listener: (context, [, dataModel], [, transform]) => {
+            if (dataModel) {
+                const dataModels = transformDataModels(transform, dataModel);
+                const metaInf = context.metaInf();
+                context.store().commit(`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${PROPS.TRANSFORMEDDATA}`,
+                    dataModels, metaInf.namespace);
+            }
+        }
+    },
+    {
+        type: 'registerImmediateListener',
+        props: [PROPS.TRANSFORMEDDATA, PROPS.LAYERS],
+        listener: (context, [, transformedData], [, layers]) => {
             const layerAxisIndexVal = context._layerAxisIndex;
             const axesVal = context.axes();
             const dataModel = context.data();
             if (transformedData && layers && axesVal && layerAxisIndexVal) {
                 context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
-                // const model = context.store().model;
-                // layers.forEach(lyr => lyr.disableUpdate());
                 attachDataToLayers(layers, dataModel, transformedData);
-                // model.lock();
-                // layers.forEach((lyr) => {
-                //     lyr..domain(lyr._domain);
-                // });
-                // model.unlock();
                 context._dimensionMeasureMap = getDimensionMeasureMap(layers,
                     dataModel.getFieldsConfig(), context.retinalFields());
                 attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
@@ -121,4 +136,4 @@ export const listenerMap = (context, namespace, metaInf) => ([
             }
         }
     }
-]);
+];

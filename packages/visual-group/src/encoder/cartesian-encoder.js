@@ -135,7 +135,7 @@ export default class CartesianEncoder extends VisualEncoder {
         }
 
         const { x: xAxes, y: yAxes } = resolver.axes();
-        store.model.lock();
+        store.lockModel();
         [xAxes, yAxes].forEach((axesArr, axisType) => {
             axesArr.forEach((axes, idx) => {
                 let key;
@@ -176,11 +176,11 @@ export default class CartesianEncoder extends VisualEncoder {
 
                     domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
-                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
+                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`, domain, `${idx}${index}`);
                 });
             });
         });
-        store.model.unlock();
+        store.unlockModel();
     }
 
     /**

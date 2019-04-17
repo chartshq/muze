@@ -49,6 +49,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             defClassName: `${defClassName}-${orientation}`,
             className: config.className,
             name: orientation,
+            calculateDomain: false,
             individualClassName: (data, i) => {
                 let className;
                 const isNegativeDomain = isLinearScale && axis.domain()[0] < 0;
@@ -197,7 +198,7 @@ export const attachDataToGridLineLayers = (context) => {
     const gridBands = context._gridBands;
     const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
     [].concat(...gridBands, ...gridLines).forEach((inst) => {
-        inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y).measurement(measurement);
+        inst.measurement(measurement).data(inst.axes().x ? gridLayerData.x : gridLayerData.y);
     });
 };
 

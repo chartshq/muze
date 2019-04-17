@@ -8,7 +8,8 @@ import {
     STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     getObjProp,
-    COORD_TYPES
+    COORD_TYPES,
+    CommonProps
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -463,6 +464,14 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
     });
 };
 
+
+export const renderLayer = (context) => {
+    const mount = context.mount();
+    if (mount) {
+        context.render(mount);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+    }
+};
 export const initializeGlobalState = (context) => {
     const store = context.store();
     const globalState = context.constructor.getState()[0];

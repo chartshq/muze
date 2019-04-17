@@ -74,7 +74,7 @@ export default class BarLayer extends BaseLayer {
      * @return {Object} Default configuration of the bar layer
      */
     static defaultConfig () {
-        return defaultConfig;
+        return defaultConfig();
     }
 
     /**

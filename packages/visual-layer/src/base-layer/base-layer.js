@@ -4,13 +4,14 @@ import {
     FieldType,
     selectElement,
     ReservedFields,
-    // transactor,
     DataModel,
     clone,
     generateGetterSetters,
     STATE_NAMESPACES,
     COORD_TYPES,
-    CommonProps
+    transactor,
+    defaultValue,
+    getObjProp
 } from 'muze-utils';
 import { SimpleLayer } from '../simple-layer';
 import * as PROPS from '../enums/props';
@@ -20,17 +21,11 @@ import {
     getNormalizedData,
     applyInteractionStyle,
     getValidTransform,
-    domainCalculator
+    domainCalculator,
+    renderLayer
 } from '../helpers';
-// import { defaultOptions } from './default-options';
-
-const renderLayer = (context) => {
-    const mount = context.mount();
-    if (mount) {
-        context.render(mount);
-        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
-    }
-};
+import { localOptions } from './local-options';
+import { listenerMap } from './listener-map';
 
 /**
  * An abstract class which gives definition of common layer functionality like
@@ -76,9 +71,9 @@ export default class BaseLayer extends SimpleLayer {
         super();
 
         generateGetterSetters(this, props);
-        this.data(data);
+        // this.data(data);
         this.axes(axes);
-        this.config(config);
+        // this.config(config);
         this.alias(this.constructor.formalName() + getUniqueId());
         this.dependencies(dependencies);
         this._points = [];
@@ -95,44 +90,57 @@ export default class BaseLayer extends SimpleLayer {
             {
                 domain: null
             },
-            {}
+            Object.keys(localOptions).reduce((acc, v) => {
+                acc[v] = localOptions[v].value;
+                return acc;
+            }, {})
         ];
+    }
+
+    static getListeners () {
+        return [...listenerMap, {
+            type: 'registerChangeListener',
+            props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`,
+                ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
+            listener: (context, [, data]) => {
+                if (data) {
+                    renderLayer(context);
+                }
+            },
+            subNamespace: (context) => {
+                const { unitRowIndex, unitColIndex, namespace } = context.metaInf();
+                return {
+                    [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`]: namespace,
+                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${unitColIndex}0`,
+                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${unitRowIndex}0`
+                };
+            }
+        }];
     }
 
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
-            // const metaInf = this.metaInf();
+            const { namespace } = this.metaInf();
+            store.registerComponent(namespace, 'layer', this);
 
-            // transactor(this, defaultOptions, store, {
-            //     namespace: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
-            //     subNamespace: metaInf.namespace
-            // });
-            // registerListeners(this, listenerMap, {
-            //     local: STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE,
-            //     global: STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE
-            // }, metaInf);
-            const props = this.getRenderProps();
-            // const { unitRowIndex, unitColIndex } = this.metaInf();
-            // const namespaceInf = {
-            //     namespace: [`${unitRowIndex}0`, `${unitColIndex}0`]
-            // };
-            // if (calculateDomain === false) {
-            //     props.push(`${ns.local}.${PROPS.DATA}`);
-            // }
-            store.registerChangeListener(props,
-                () => {
-                    renderLayer(this);
-                }, false);
+            transactor(this, localOptions, store, {
+                subNamespace: namespace,
+                namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}`
+            });
             return this;
         }
         return this._store;
     }
 
     domain (...dom) {
-        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().parentNamespace}`;
+        const prop = `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`;
+        const store = this.store();
         if (dom.length) {
-            this.store().commit(prop, dom[0], this.metaInf().namespace);
+            const { parentNamespace, namespace } = this.metaInf();
+            const domain = defaultValue(store.get(prop, parentNamespace), {});
+            domain[namespace] = dom[0];
+            this.store().commit(prop, domain, parentNamespace);
             return this;
         }
         return this.store().get(prop, this.metaInf().namespace);
@@ -157,11 +165,11 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Default configuration
      */
     static defaultConfig () {
-        return {
+        return (() => ({
             transform: {
                 type: 'identity'
             }
-        };
+        }))();
     }
 
     /**
@@ -322,8 +330,9 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Axis domains
      */
     getDataDomain (encodingType) {
-        const domains = this.store()
-            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}.${this.metaInf().parentNamespace}`, this.metaInf().namespace);
+        const { parentNamespace, namespace } = this.metaInf();
+        const domains = getObjProp(this.store()
+            .get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, parentNamespace), namespace);
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 

@@ -54,7 +54,7 @@ export default class PointLayer extends BaseLayer {
      * @return {Object} Default configuration of the point layer
      */
     static defaultConfig () {
-        return defaultConfig;
+        return defaultConfig();
     }
 
     static defaultPolicy (conf, userConf) {

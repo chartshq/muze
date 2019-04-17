@@ -511,26 +511,21 @@ const objectIterator = (obj, fn) => {
 
 const addListenerToNamespace = (namespaceInf, fn, context) => {
     let key = namespaceInf.key;
-    const namespace = namespaceInf.namespace;
+    const namespace = namespaceInf.id;
     if (namespace) {
-        !context._listeners[namespace] && (context._listeners[namespace] = []);
+        !context._listeners.get(namespace) && (context._listeners.set(namespace, new Map()));
+        const listeners = context._listeners.get(namespace);
+
         if (!key) {
-            key = Object.keys(context._listeners[namespace]).length;
+            key = listeners.size;
         }
-        context._listeners[namespace][key] = fn;
+        listeners.set(key, fn);
     } else {
-        key = Object.keys(context._listeners).length;
-        context._listeners[key] = fn;
+        key = context._listeners.size;
+        context._listeners.set(key, fn);
     }
 };
 
-/**
- *
- *
- * @param {*} obj
- * @param {*} fields
- *
- */
 const getObjProp = (obj, ...fields) => {
     if (obj === undefined || obj === null) {
         return obj;
@@ -545,74 +540,100 @@ const getObjProp = (obj, ...fields) => {
     return retObj;
 };
 
-const setObjProp = (obj, props, value) => {
-    const len = props.length;
-    for (let i = 0; i < len - 1; i++) {
-        const name = props[i];
-        !obj[name] && (obj[name] = {});
-        obj = obj[name];
-    }
-    obj[props[len - 1]] = value;
-    return obj;
+const initObject = (obj, props) => {
+    props.forEach((prop) => {
+        if (!obj[prop]) {
+            obj[prop] = {};
+        }
+        obj = obj[prop];
+    });
 };
 
 const registerListener = (context, type, config) => {
-    const { callBack, instantCall, namespaceInf, props, listeners } = config;
-    let ns;
-    if (namespaceInf.namespace) {
-        ns = namespaceInf.namespace instanceof Array ? namespaceInf.namespace : [namespaceInf.namespace];
-    }
-
-    const callbackFn = ((names, namespaceVal) => {
+    const registeredListeners = context._registeredListeners;
+    const { callBack, instantCall, namespaceInf, props } = config;
+    const { namespace: ns, subNamespace } = namespaceInf;
+    const callbackFn = ((propNames, namespaceVal) => {
         const retCallBack = (...params) => {
-            let call = namespaceVal ? false : true;
-            names.forEach((name) => {
-                if (namespaceVal) {
-                    namespaceVal.forEach((namespace) => {
-                        const listenerObj = getObjProp(listeners, name, namespace);
-                        if (listenerObj) {
-                            call = listenerObj.changed || call;
-                            listenerObj.fns.pop();
-                            if (!listenerObj.fns.length) {
-                                setObjProp(listeners, [name, namespace, 'changed'], false);
-                            }
-                        }
-                    });
-                }
-            });
             let values = params;
             if (namespaceVal) {
-                values = [].concat(...params.map((param) => {
-                    return namespaceVal.map((namespace) => {
-                        return [param[0] !== null ? param[0][namespace] : param[0],
-                            param[1] !== null ? param[1][namespace] : param[1]];
+                const listenersObj = context._registeredListeners[namespaceVal];
+                const commits = context._savedCommits;
+                const contextMap = context._contextMap[namespaceVal];
+                const propListenerMap = context._propListenerMap;
+                const contextsObj = {};
+                propNames.forEach((prop) => {
+                    const commitsObj = defaultValue(getObjProp(commits, prop, type), {});
+                    const listeners = listenersObj[prop];
+                    for (const nm in commitsObj) {
+                        const fnInf = propListenerMap[prop][type][nm];
+                        if (fnInf.fns > 0) {
+                            const propObj = listeners[nm];
+                            for (const key in propObj) {
+                                const contextInst = contextMap[key];
+                                contextsObj[key] = {
+                                    context: contextInst,
+                                    deps: propObj[key].depProps
+                                };
+                            }
+                        }
+                        fnInf.fns--;
+                        if (fnInf.fns <= 0) {
+                            delete commitsObj[nm];
+                        }
+                    }
+                });
+                for (const key in contextsObj) {
+                    const { deps, context: contextInst } = contextsObj[key];
+                    values = params.map((param, i) => {
+                        const prop = propNames[i];
+                        return [param[0] !== null ? param[0][deps[prop]] : param[0], param[1] !== null ?
+                            param[1][deps[prop]] : param[1]];
                     });
-                }));
+                    callBack(contextInst, ...values);
+                }
+            } else {
+                callBack(...values);
             }
-            call && callBack(...values);
         };
+        retCallBack.__callBack = callBack;
         return retCallBack;
-    })(props, ns);
+    })(props, ns, type);
 
     const fn = context.model[type](props, callbackFn, instantCall);
+    const propListenerMap = context._propListenerMap;
     if (ns) {
-        props.forEach((name) => {
-            ns.forEach((namespace) => {
-                const fns = defaultValue(getObjProp(listeners, name, namespace, 'fns'), []);
-                fns.push(callBack);
-                const oriFns = defaultValue(getObjProp(listeners, name, namespace, 'oriFns'), []);
-                oriFns.push(callBack);
-                setObjProp(listeners, [name, namespace], {
-                    fns,
-                    oriFns,
-                    changed: false
-                });
-            });
+        initObject(registeredListeners, [ns]);
+        props.forEach((prop) => {
+            const subNamespaces = defaultValue(getObjProp(registeredListeners, ns, prop, 'subNamespace'), []);
+            subNamespace && subNamespaces.push(subNamespace);
+            registeredListeners[ns][prop] = {
+                subNamespace: subNamespaces,
+                allProps: props
+            };
+
+            let fns = defaultValue(getObjProp(propListenerMap, prop, type, 'fns'), 0);
+            fns++;
+            initObject(propListenerMap, [prop, type]);
+            propListenerMap[prop][type] = {
+                fns,
+                oriFns: fns
+            };
         });
     }
     addListenerToNamespace(namespaceInf, fn, context);
 };
 
+const retrieveNamespaces = (names, key, context) => {
+    if (names instanceof Object) {
+        return [names[key]];
+    } else if (names instanceof Array) {
+        return names;
+    }
+    return [names];
+};
+
+const types = ['next', 'on'];
 /**
  * Methods to handle changes to table configuration and reactivity are handled by this
  * class.
@@ -631,9 +652,26 @@ class Store {
     constructor (config) {
         // create reactive model
         this.model = Model.create(config);
-        this._listeners = {};
-        this._changeListeners = {};
-        this._immediateListeners = {};
+        this._listeners = new Map();
+        this._registeredListeners = {};
+        this._contextMap = {};
+        this._commits = {};
+        this._savedCommits = {};
+        this._lockCommit = {};
+        this._queuedProps = {};
+        this._propListenerMap = {};
+    }
+
+    lockModel () {
+        this.model.lock();
+        this._modelLocked = true;
+        return this;
+    }
+
+    unlockModel () {
+        this._modelLocked = false;
+        this.model.unlock();
+        return this;
     }
 
     /**
@@ -647,6 +685,98 @@ class Store {
         return this.model.serialize();
     }
 
+    lockCommits (props) {
+        props.forEach((prop) => {
+            this._lockCommit[prop] = true;
+        });
+        return this;
+    }
+
+    unlockCommits (props) {
+        this.model.lock();
+        this._modelLocked = true;
+        props.forEach((prop) => {
+            this._lockCommit[prop] = false;
+            const queuedProps = {};
+            const commitsMap = this._commits;
+            for (const key in commitsMap) {
+                const commits = commitsMap[key];
+                commits.forEach((params) => {
+                    const [propName, value, namespace] = params;
+                    if (namespace) {
+                        !queuedProps[propName] && (queuedProps[propName] = {});
+                        !queuedProps[propName][namespace] && (queuedProps[propName][namespace] = {});
+                        Object.assign(queuedProps[propName][namespace], value);
+                    }
+                });
+                commits.forEach((params) => {
+                    const [propName, value, namespace] = params;
+                    if (propName in queuedProps) {
+                        this.commit(propName, queuedProps[propName][namespace], namespace);
+                    } else {
+                        this.commit(propName, value, namespace);
+                    }
+                });
+            }
+        });
+
+        this._modelLocked = false;
+        this.model.unlock();
+        return this;
+    }
+
+    registerComponent (sns, namespace, context) {
+        // Get all the listeners registered by the component
+        const listeners = this._registeredListeners[namespace];
+        const propListenerMap = this._propListenerMap;
+        initObject(this._contextMap, [namespace]);
+        this._contextMap[namespace][sns] = context;
+        for (const key in listeners) {
+            const obj = listeners[key];
+            const propObj = propListenerMap[key];
+            const propFns = types.reduce((acc, type) => {
+                acc[type] = defaultValue(getObjProp(propObj, type, 'fns'), 0);
+                return acc;
+            }, {});
+            let { subNamespace } = obj;
+            const { allProps } = obj;
+            if (subNamespace instanceof Array) {
+                subNamespace = subNamespace.length ? subNamespace : [sns];
+                subNamespace.forEach((ns) => {
+                    let names = [ns];
+                    let depProps = allProps.reduce((acc, prop) => {
+                        acc[prop] = ns;
+                        return acc;
+                    }, {});
+                    if (ns instanceof Function) {
+                        const nsObj = ns(context);
+                        names = retrieveNamespaces(nsObj, key);
+                        depProps = allProps.reduce((acc, prop) => {
+                            acc[prop] = nsObj[prop];
+                            return acc;
+                        }, {});
+                    }
+
+                    names.forEach((nm) => {
+                        !obj[nm] && (obj[nm] = {});
+                        obj[nm][sns] = {
+                            depProps
+                        };
+                        types.forEach((type) => {
+                            initObject(propObj, [type, nm]);
+                            const fns = propObj[type][nm].fns !== undefined ? propObj[type][nm].fns + 1 : propFns[type];
+                            propObj[type][nm] = {
+                                fns,
+                                oriFns: fns
+                            };
+                        });
+                    });
+                });
+            }
+        }
+        return this;
+    }
+
     /**
      * This method is used to update the value of a property in the state store.
      *
@@ -655,21 +785,32 @@ class Store {
      * @memberof Store
      */
     commit (propName, value, namespace) {
-        let sanitizedVal = value;
-        if (namespace) {
-            const changeListeners = getObjProp(this._changeListeners, propName, namespace);
-            const immediateListeners = getObjProp(this._immediateListeners, propName, namespace);
-            if (changeListeners) {
-                changeListeners.changed = true;
-                changeListeners.fns = changeListeners.oriFns.slice();
-            }
-            if (immediateListeners) {
-                immediateListeners.changed = true;
-                immediateListeners.fns = immediateListeners.oriFns.slice();
-            }
-            sanitizedVal = defaultValue(this.get(propName), {});
-            sanitizedVal[namespace] = value;
+        if (this._lockCommit[propName]) {
+            !this._commits[propName] && (this._commits[propName] = []);
+            this._commits[propName].push([propName, value, namespace]);
+            return this;
         }
+        let sanitizedVal = value;
+        const propListenerMap = this._propListenerMap[propName];
+        if (namespace) {
+            if (this._modelLocked) {
+                !this._queuedProps[propName] && (this._queuedProps[propName] = {});
+                this._queuedProps[propName][namespace] = value;
+                sanitizedVal = this._queuedProps[propName];
+            } else {
+                sanitizedVal = defaultValue(this.get(propName), {});
+                sanitizedVal[namespace] = value;
+            }
+            if (propListenerMap) {
+                types.forEach((type) => {
+                    propListenerMap[type][namespace].fns = propListenerMap[type][namespace].oriFns;
+                });
+            }
+        }
+        initObject(this._savedCommits, [propName, 'next']);
+        initObject(this._savedCommits, [propName, 'on']);
+        this._savedCommits[propName].next[namespace] = true;
+        this._savedCommits[propName].on[namespace] = true;
         // check if appropriate enum has been used
         this.model.prop(propName, sanitizedVal);
     }
@@ -689,7 +830,6 @@ class Store {
         }
         registerListener(this, 'next', {
             namespaceInf,
-            listeners: this._changeListeners,
             callBack,
             instantCall,
             props
@@ -711,13 +851,12 @@ class Store {
         }
         registerListener(this, 'on', {
             namespaceInf,
-            listeners: this._immediateListeners,
             props,
             callBack,
             instantCall
         });
-
     }
+
     /**
      * This method is used to get the name of the property
      * from the state store.
@@ -728,7 +867,7 @@ class Store {
      */
     get (propName, subNamespace) {
         const value = this.model.prop(propName);
-        return subNamespace ? value[subNamespace] : value;
+        return subNamespace ? value && value[subNamespace] : value;
     }
 
     /**
@@ -754,14 +893,16 @@ class Store {
     }
 
     unsubscribe (namespaceInf = {}) {
-        const { namespace, key } = namespaceInf;
-        const listeners = this._listeners[namespace];
+        const { id, key } = namespaceInf;
+        const listeners = this._listeners.get(id);
         if (key) {
-            const fn = getObjProp(listeners, key);
+            const fn = this._listeners.get(key);
             fn && fn();
         } else {
-            Object.values(listeners).forEach(fn => fn());
-            this._listeners[namespace] = [];
+            for (const fn of listeners.values()) {
+                fn();
+            }
+            this._listeners.set(id, []);
         }
         return this;
     }
@@ -904,7 +1045,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
 
     if (subNamespace) {
         for (const key in stateProps) {
-            store.commit(key, stateProps[key]);
+            store.commit(key, stateProps[key][subNamespace], subNamespace);
         }
     } else if (namespace === undefined) {
         store.append(stateProps);

@@ -1,58 +1,58 @@
-import { DataModel, STATE_NAMESPACES, getObjProp } from 'muze-utils';
+import { DataModel, getObjProp } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
 
-const addLayer = (layerDefs, layerRegistry, context, sideEffect) => {
-    const layers = [];
-    if (layerDefs) {
-        layerDefs.forEach((layerDef) => {
-            const mark = layerDef.mark;
-            const layerCls = layerRegistry[mark];
-            if (layerCls && layerCls.shouldDrawAnchors()) {
-                const depLayerEncoding = layerDef.def.encoding;
-                const encoding = {
-                    x: getObjProp(depLayerEncoding, 'x', 'field'),
-                    y: getObjProp(depLayerEncoding, 'y', 'field'),
-                    color: getObjProp(depLayerEncoding, 'color', 'field'),
-                    size: {
-                        field: getObjProp(depLayerEncoding, 'size', 'field'),
-                        value: sideEffect.defaultSizeValue()
-                    }
-                };
-                const name = `${layerDef.def.name}-${sideEffect.constructor.formalName()}`;
-                const layerObj = {
-                    instances: context.addLayer({
+const addLayer = (layerRegistry, context, sideEffect) => {
+    context.addLayer((layerDefs) => {
+        const layers = [];
+        if (layerDefs) {
+            layerDefs.forEach((layerDef) => {
+                const mark = layerDef.mark;
+                const layerCls = layerRegistry[mark];
+                if (layerCls && layerCls.shouldDrawAnchors()) {
+                    const depLayerEncoding = layerDef.def.encoding;
+                    const encoding = {
+                        x: getObjProp(depLayerEncoding, 'x', 'field'),
+                        y: getObjProp(depLayerEncoding, 'y', 'field'),
+                        color: getObjProp(depLayerEncoding, 'color', 'field'),
+                        size: {
+                            field: getObjProp(depLayerEncoding, 'size', 'field'),
+                            value: sideEffect.defaultSizeValue()
+                        }
+                    };
+                    const commonName = sideEffect.constructor.formalName();
+                    const name = `${layerDef.def.name}-${commonName}`;
+                    layers.push({
                         name,
                         mark: 'point',
+                        groupId: commonName,
                         className: sideEffect.constructor.defaultConfig().className,
                         encoding,
                         transform: {
                             type: 'identity'
                         },
-                        transition: sideEffect.getTransitionConfig(),
                         calculateDomain: false,
+                        transition: sideEffect.getTransitionConfig(),
                         source: dm => dm.select(() => false, {
                             saveChild: false
                         }),
                         interactive: false,
-                        render: false
-                    }),
-                    linkedLayer: layerDef.def.name
-                };
-                layers.push(layerObj);
-            }
-        });
-    }
-    return layers;
+                        owner: layerDef.def.name
+                    });
+                }
+            });
+        }
+        return layers;
+    });
 };
 
 export default class AnchorEffect extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._layersMap = {};
-        // this.addAnchorLayers();
+        this.addAnchorLayers();
     }
 
     static target () {
@@ -72,12 +72,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
     addAnchorLayers () {
         const context = this.firebolt.context;
         const layerRegistry = context.registry().layerRegistry;
-        const layerDefsVal = context.layerDef();
-        context.store().registerImmediateListener(
-            `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.layerDef`, ([, layerDefs]) => {
-                this._layers = addLayer(layerDefs, layerRegistry, context, this);
-            }, false, context.metaInf());
-        this._layers = addLayer(layerDefsVal, layerRegistry, context, this);
+        addLayer(layerRegistry, context, this);
         return this;
     }
 
@@ -96,24 +91,16 @@ export default class AnchorEffect extends SpawnableSideEffect {
     }
 
     apply (selectionSet) {
-        const self = this;
         const dataModel = selectionSet.mergedEnter.model;
+        const formalName = this.constructor.formalName();
         if (selectionSet.isSourceFieldPresent !== false) {
-            const drawingInf = this.drawingContext();
-            const sideEffectGroup = drawingInf.sideEffectGroup;
-            const className = `${this.config().className}`;
-            const layers = this._layers;
-            const parentGroup = this.createElement(sideEffectGroup, 'g', [1], `${className}-container`);
-            const anchorGroups = this.createElement(parentGroup, 'g', Object.values(layers));
-            anchorGroups.each(function (layer) {
-                const instances = layer.instances;
-                const elems = self.createElement(this, 'g', instances, className);
-                const linkedLayer = self.firebolt.context.getLayerByName(layer.linkedLayer);
+            const layers = this.firebolt.context.layers().filter(layer => layer.config().groupId === formalName);
+            layers.forEach((layer) => {
+                const linkedLayer = this.firebolt.context.getLayerByName(layer.config().owner);
                 const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
                 const transformedDataModel = new DataModel(transformedData, schema);
-                elems.each(function (d, i) {
-                    instances[i].data(transformedDataModel).mount(this);
-                });
+                console.log(transformedDataModel.getData().data);
+                layer.data(transformedDataModel);
             });
         }
         return this;

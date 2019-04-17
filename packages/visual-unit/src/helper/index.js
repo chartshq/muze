@@ -393,18 +393,3 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
     };
 };
 
-export const updateProps = (context) => {
-    const layerAxisIndexVal = context._layerAxisIndex;
-    const axesVal = context.axes();
-    const dataModel = context.data();
-    const layers = context.layers();
-    const transformedData = context.transformedData();
-    if (transformedData && layers && axesVal && layerAxisIndexVal) {
-        context._lifeCycleManager.notify({ client: layers, action: 'beforeupdate', formalName: 'layer' });
-        attachDataToLayers(layers, dataModel, transformedData);
-        context._dimensionMeasureMap = getDimensionMeasureMap(layers,
-            dataModel.getFieldsConfig(), context.retinalFields());
-        attachAxisToLayers(axesVal, layers, layerAxisIndexVal);
-        context._lifeCycleManager.notify({ client: layers, action: 'updated', formalName: 'layer' });
-    }
-};
