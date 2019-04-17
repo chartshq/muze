@@ -31,6 +31,21 @@ const headerMap = {
         configType: SUB_TITLE_CONFIG
     }
 };
+/**
+ * returns if message Component is needed or not
+ *
+ *
+ * @param {Object} renderDetails Extra details required for rendering the headers
+ * @param {Object} canvas canvas instance
+ * @return {Instance} Returns the respective wrappers
+ */
+const isGridPresent = (renderDetails) => {
+    const { rows, columns, values } = renderDetails.components;
+    if (!rows && !columns && !values) {
+        return false;
+    }
+    return true;
+};
 
 /**
  * Creates the wrapper for the header, i.e., title and subtitle to be used in the tree layout
@@ -90,32 +105,37 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  *
  *
  * @param {LayoutManager} layoutManager instance of Layout Manager which manages the layouting of the components
- * @param {GridLayout} params Dimensions of the layout
+ * @param {GridLayout} canvas canvas instance
  * @return {Instance} Returns the respective wrappers
  */
-const createMessageWrapper = (layoutManager, params) => {
-    let messageWrapper = null;
-    const target = { target: CANVAS };
-    const { height, width, message } = params;
-    const config = {
-        ...target,
-        dimensions: { height, width },
-        message,
-        classPrefix: MESSAGE_CONFIG
-    };
-    const wrapperParams = {
-        name: MESSAGE,
-        component: null,
-        config
-    };
-    const existingComponent = layoutManager.getComponent(MESSAGE);
-    if (existingComponent) {
-        messageWrapper = existingComponent
-                                .updateWrapper(wrapperParams);
-    } else {
-        messageWrapper = new MessageComponent(wrapperParams);
+const createMessageWrapper = (layoutManager, canvas, renderDetails) => {
+    if (!isGridPresent(renderDetails)) {
+        const defaultDimensions = { height: canvas.height(), width: canvas.width() };
+        const gridComponent = layoutManager.getComponent(GRID);
+        const { height, width } = (gridComponent && gridComponent.getBoundBox()) || defaultDimensions;
+        let messageWrapper = null;
+        const target = { target: CANVAS };
+        const config = {
+            ...target,
+            dimensions: { height, width },
+            message: NO_DATA_MESSAGE,
+            classPrefix: MESSAGE_CONFIG
+        };
+        const wrapperParams = {
+            name: MESSAGE,
+            component: null,
+            config
+        };
+        const existingComponent = layoutManager.getComponent(MESSAGE);
+        if (existingComponent) {
+            messageWrapper = existingComponent
+                                    .updateWrapper(wrapperParams);
+        } else {
+            messageWrapper = new MessageComponent(wrapperParams);
+        }
+        return messageWrapper;
     }
-    return messageWrapper;
+    return null;
 };
 
 // Mapping between types of scrollBars and their required configs for wrapper creation
@@ -155,70 +175,73 @@ const scrollBarMap = config => ({
  * @return {Instance} Returns the respective wrappers
  */
 const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, grid) => {
-    let scrollBarWrapper = null;
-    const { layoutConfig } = renderDetails;
-    const target = { target: CANVAS };
-    const { scrollBar } = layoutConfig;
-    const { layoutDimensions } = grid.viewInfo();
-    const {
-        actualCenterMeasures,
-        unitHeights,
-        unitWidths
-    } = layoutDimensions;
-    const {
-        componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
-        viewMeasure, position, alignment
-    } = scrollBarMap(scrollBar[scrollBarType])[scrollBarType];
-    const dimensions = {
-        thickness: scrollBar.thickness,
-        layoutBasedMeasure: layoutDimensions[viewMeasure][1]
-    };
-    const isScroll = grid.scrollInfo()[scrollBarType];
-    const totalLength = actualCenterMeasures[layoutBasedMeasure];
-    const viewLength = layoutDimensions[viewMeasure][1];
-
-    const scrollConfig = Object.assign({}, {
-        classPrefix: layoutConfig.classPrefix,
-        ...target,
-        scrollBarComponentConfig: {
-            ...scrollBar,
-            classPrefix: layoutConfig.classPrefix
-        },
-
-        type: scrollBarType,
-        alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
-        alignment,
-        position
-    });
-
-    const wrapperParams = {
-        name: componentName,
-        config: scrollConfig,
-        dimensions: {
-            width: dimensions[width],
-            height: dimensions[height],
-            totalLength,
-            viewLength,
+    if (isGridPresent(renderDetails)) {
+        let scrollBarWrapper = null;
+        const { layoutConfig } = renderDetails;
+        const target = { target: CANVAS };
+        const { scrollBar } = layoutConfig;
+        const { layoutDimensions } = grid.viewInfo();
+        const {
+            actualCenterMeasures,
             unitHeights,
             unitWidths
+        } = layoutDimensions;
+        const {
+            componentName, layoutBasedMeasure, width, height, rowAlign, colAlign,
+            viewMeasure, position, alignment
+        } = scrollBarMap(scrollBar[scrollBarType])[scrollBarType];
+        const dimensions = {
+            thickness: scrollBar.thickness,
+            layoutBasedMeasure: layoutDimensions[viewMeasure][1]
+        };
+        const isScroll = grid.scrollInfo()[scrollBarType];
+        const totalLength = actualCenterMeasures[layoutBasedMeasure];
+        const viewLength = layoutDimensions[viewMeasure][1];
+
+        const scrollConfig = Object.assign({}, {
+            classPrefix: layoutConfig.classPrefix,
+            ...target,
+            scrollBarComponentConfig: {
+                ...scrollBar,
+                classPrefix: layoutConfig.classPrefix
+            },
+
+            type: scrollBarType,
+            alignWith: `${ROW_MATRIX_INDEX[rowAlign]}-${COLUMN_MATRIX_INDEX[colAlign]}`,
+            alignment,
+            position
+        });
+
+        const wrapperParams = {
+            name: componentName,
+            config: scrollConfig,
+            dimensions: {
+                width: dimensions[width],
+                height: dimensions[height],
+                totalLength,
+                viewLength,
+                unitHeights,
+                unitWidths
+            }
+        };
+
+        const existingComponent = layoutManager.getComponent(componentName);
+
+        if (!isScroll) {
+            existingComponent && existingComponent.remove();
+            return null;
         }
-    };
 
-    const existingComponent = layoutManager.getComponent(componentName);
+        if (existingComponent) {
+            scrollBarWrapper = existingComponent
+                                    .updateWrapper(wrapperParams);
+        } else {
+            scrollBarWrapper = new ScrollComponent(wrapperParams);
+        }
 
-    if (!isScroll) {
-        existingComponent && existingComponent.remove();
-        return null;
+        return scrollBarWrapper;
     }
-
-    if (existingComponent) {
-        scrollBarWrapper = existingComponent
-                                .updateWrapper(wrapperParams);
-    } else {
-        scrollBarWrapper = new ScrollComponent(wrapperParams);
-    }
-
-    return scrollBarWrapper;
+    return null;
 };
 
 /**
@@ -230,28 +253,31 @@ const createScrollBarWrapper = (scrollBarType, layoutManager, renderDetails, gri
  * @return {Instance} Returns the respective wrappers
  */
 const createLegendWrapper = (layoutManager, renderDetails) => {
-    let legendWrapper = null;
-    const { components, layoutConfig, measurement } = renderDetails;
-    const target = { target: CANVAS };
+    if (isGridPresent(renderDetails)) {
+        let legendWrapper = null;
+        const { components, layoutConfig, measurement } = renderDetails;
+        const target = { target: CANVAS };
 
-    if (components.legends && components.legends.length) {
-        const legendConfig = { ...layoutConfig.legend, ...target, measurement };
-        const wrapperParams = {
-            name: LEGEND,
-            component: components.legends,
-            config: legendConfig
-        };
+        if (components.legends && components.legends.length) {
+            const legendConfig = { ...layoutConfig.legend, ...target, measurement };
+            const wrapperParams = {
+                name: LEGEND,
+                component: components.legends,
+                config: legendConfig
+            };
 
-        const existingComponent = layoutManager.getComponent(LEGEND);
+            const existingComponent = layoutManager.getComponent(LEGEND);
 
-        if (existingComponent) {
-            legendWrapper = existingComponent
-                       .updateWrapper(wrapperParams);
-        } else {
-            legendWrapper = new LegendComponent(wrapperParams);
+            if (existingComponent) {
+                legendWrapper = existingComponent
+                        .updateWrapper(wrapperParams);
+            } else {
+                legendWrapper = new LegendComponent(wrapperParams);
+            }
         }
+        return legendWrapper;
     }
-    return legendWrapper;
+    return null;
 };
 
 /**
@@ -264,31 +290,33 @@ const createLegendWrapper = (layoutManager, renderDetails) => {
  * @return {Instance} Returns the respective wrappers
  */
 const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
-    let gridWrapper = null;
-    const target = { target: CANVAS };
-    const { layoutConfig } = renderDetails;
+    if (isGridPresent(renderDetails)) {
+        let gridWrapper = null;
+        const target = { target: CANVAS };
+        const { layoutConfig } = renderDetails;
 
-    const config = {
-        ...target,
-        pagination: layoutConfig.pagination,
-        classPrefix: layoutConfig.classPrefix,
-        dimensions: { height: 0, width: 0 }
-    };
-    const wrapperParams = {
-        name: GRID,
-        component: grid,
-        config
-    };
-    const existingComponent = layoutManager.getComponent(GRID);
-    if (existingComponent) {
-        gridWrapper = existingComponent
-                    .updateWrapper(wrapperParams);
-    } else {
-        gridWrapper = new GridComponent(wrapperParams);
+        const config = {
+            ...target,
+            pagination: layoutConfig.pagination,
+            classPrefix: layoutConfig.classPrefix,
+            dimensions: { height: 0, width: 0 }
+        };
+        const wrapperParams = {
+            name: GRID,
+            component: grid,
+            config
+        };
+        const existingComponent = layoutManager.getComponent(GRID);
+        if (existingComponent) {
+            gridWrapper = existingComponent
+                        .updateWrapper(wrapperParams);
+        } else {
+            gridWrapper = new GridComponent(wrapperParams);
+        }
+        return gridWrapper;
     }
-    return gridWrapper;
+    return null;
 };
-
 /**
  * Responsible for providing the wrapper creators for every component in Muze.
  * This function, when called, returns the set of components and their respective wrappers.
@@ -301,25 +329,11 @@ const gridLayoutWrapper = (layoutManager, renderDetails, grid) => {
  * @return {Instance} Returns the respective wrappers for each component
  */
 export const componentWrapperMaker = (canvas, grid, renderDetails) => {
-    const { rows, columns, values } = renderDetails.components;
     const layoutManager = canvas._layoutManager;
-    const headers = {
-        title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
-        subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails)
-    };
-    if (!rows && !columns && !values) {
-        const defaultDimensions = { height: canvas.height(), width: canvas.width() };
-        const gridComponent = layoutManager.getComponent(GRID);
-        const { height, width } = (gridComponent && gridComponent.getBoundBox()) || defaultDimensions;
-        const params = { height, width, message: NO_DATA_MESSAGE };
-
-        return {
-            ...headers,
-            message: createMessageWrapper(layoutManager, params)
-        };
-    }
     return {
-        ...headers,
+        title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
+        subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
+        message: createMessageWrapper(layoutManager, canvas, renderDetails),
         legend: createLegendWrapper(layoutManager, renderDetails),
         grid: gridLayoutWrapper(layoutManager, renderDetails, grid),
         verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid),

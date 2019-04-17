@@ -28,7 +28,8 @@ export const fixScrollBarConfig = (config) => {
 
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
-    const boundBox = layoutManager.getComponent(GRID) && layoutManager.getComponent(GRID).getBoundBox();
+    const gridLayout = layoutManager.getComponent(GRID);
+    const boundBox = gridLayout && gridLayout.getBoundBox();
     const valueMatrix = context.composition().visualGroup.matrixInstance().value;
     const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
     valueMatrix.each((cell) => {
