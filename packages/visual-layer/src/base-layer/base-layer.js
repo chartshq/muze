@@ -98,7 +98,7 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     static getListeners () {
-        return [...listenerMap, {
+        return [...listenerMap.slice(), {
             type: 'registerChangeListener',
             props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`,
                 ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],

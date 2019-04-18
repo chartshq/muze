@@ -59,6 +59,7 @@ import {
 import { voronoi } from 'd3-voronoi';
 import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
+import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
 const { InvalidAwareTypes } = DataModel;
@@ -1050,7 +1051,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                         if (typeCheck(val) === compareTo) {
                                             values.push(val);
                                         }
-                                    } else if (typeof typeCheck === 'string') {
+                                    } else if (typeof typeCheck === DATA_TYPE.STRING) {
                                         if (typeCheck === 'constructor') {
                                             const typeExpected = spreadParams ? meta.typeExpected[i] :
                                                 meta.typeExpected;
@@ -1522,7 +1523,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     const selFn = fields => selFields.every((field) => {
         const val = fields[field].value;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-        if (typeof range[0] === 'string') {
+        if (typeof range[0] === DATA_TYPE.STRING) {
             return range.find(d => d === val) !== undefined;
         }
         return range ? val >= range[0] && val <= range[1] : true;
@@ -1863,6 +1864,49 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+/**
+ * Returns the sort function based on the type of field
+ * @param {number|string} a first value
+ * @param {number|string} b second value
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
+ * @param {string} subType Field subtype
+ * @return {Function} Sort function
+ */
+const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
+    if (typeof sortOrder === DATA_TYPE.FUNCTION) {
+        return sortOrder(a, b);
+    }
+    if (subType === DimensionSubtype.TEMPORAL) {
+        return sortOrder === SORT_ORDER_ASCENDING ? a - b : b - a;
+    }
+    return sortOrder === SORT_ORDER_ASCENDING ? a.localeCompare(b) : b.localeCompare(a);
+};
+
+/**
+ * Sort field based on it's subtype and sorting order
+ * @param {string} subType Field subtype
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
+ * @param {Array} firstVal First sort parameter
+ * @param {number} secondVal Second sort parameter
+ * @return {Function|null} Sorting function
+*/
+const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
+    const sortOrderType = typeof sortOrder;
+
+    if (sortOrderType !== DATA_TYPE.STRING && sortOrderType !== DATA_TYPE.FUNCTION) {
+        return null;
+    }
+    if (sortOrderType === DATA_TYPE.STRING &&
+        sortOrder !== SORT_ORDER_ASCENDING &&
+        sortOrder !== SORT_ORDER_DESCENDING) {
+        return null;
+    }
+    if (subType === DimensionSubtype.TEMPORAL || subType === DimensionSubtype.CATEGORICAL) {
+        return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
+    }
+    return null;
+};
+
 export {
     getValueParser,
     require,
@@ -1941,5 +1985,6 @@ export {
     formatTemporal,
     temporalFields,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortFieldByType
 };

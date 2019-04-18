@@ -45,8 +45,8 @@ d3.json('../data/cars.json', (data) => {
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
     ];
 
@@ -66,41 +66,34 @@ d3.json('../data/cars.json', (data) => {
     };
 
     let rootData = new DataModel(jsonData, schema);
-    // rootData = rootData.calculateVariable(
-    //     {
-    //         name: 'CountVehicle',
-    //         type: 'measure',
-    //         defAggFn: 'count',
-    //         numberFormat: val => parseInt(val, 10)
-    //     },
-    //     ['Name', () => 1]
-    // );
-    // rootData = rootData.calculateVariable(
-    //     {
-    //         name: 'month',
-    //         type: 'dimension',
-    //         subtype: 'temporal'
-    //     },
-    //     ['Year', (d) => {
-    //         const dt = new Date(d);
-    //         return new Date(dt.getFullYear(), dt.getMonth(), 1);
-    //     }]
-    // );
+    rootData = rootData.calculateVariable(
+        {
+            name: 'CountVehicle',
+            type: 'measure',
+            defAggFn: 'count',
+            numberFormat: val => parseInt(val, 10)
+        },
+        ['Name', () => 1]
+    );
+    rootData = rootData.calculateVariable(
+        {
+            name: 'date',
+            type: 'dimension',
+            subtype: 'temporal',
+            format: "%Y-%m-%d"
+        },
+        ['Year', (d) => d]
+    );
 
     env.data(rootData);
 
     // line chart
     window.canvas = env.canvas()
-    .rows(['Horsepower'])
-    .columns(['Year'])
-    .data(rootData)
-      .minUnitHeight(100)
-    .minUnitWidth(100)
-      .height(600)
-    .width(600)
-    .color('Origin')
-    //   .detail(['Name']) // Show all the data point
-    //   .color('Cylinders')
+        .columns(['Year'])
+        .rows(['Cylinders', 'Horsepower'])
+        .width(1200)
+        .height(500)
+        .data(rootData.select((fields) => fields.Cylinders.value === '6' || fields.Cylinders.value === '5'))
         // .layers([{
         //     mark: 'line'
         // }])

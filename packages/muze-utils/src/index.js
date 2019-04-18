@@ -101,7 +101,8 @@ export {
     temporalFields,
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortFieldByType
 } from './common-utils';
 
 export {

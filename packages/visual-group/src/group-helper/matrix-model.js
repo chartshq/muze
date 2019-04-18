@@ -136,11 +136,14 @@ const pushToMatrix = (context, valueCellCreator) => {
  * @param {Array} formatterList - The list of corresponding formatter.
  */
 const formatKeys = (keys, formatterList) => {
-    keys.forEach((rKeys) => {
+    const formattedKeys = [];
+    keys.forEach((rKeys, rIdx) => {
+        formattedKeys[rIdx] = [];
         rKeys.forEach((key, idx) => {
-            rKeys[idx] = formatterList[idx](key);
+            formattedKeys[rIdx][idx] = formatterList[idx](key);
         });
     });
+    return formattedKeys;
 };
 
 /**
@@ -179,10 +182,10 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = rowFacets[0].toString();
         const firstLevelRowKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(rowFacets[0], firstLevelRowKeys, globalConfig);
-
         // Get unique keys in the form of an array of arrays for each row
         uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
+
+        sortFacetFields(rowFacets, rowKeys, globalConfig);
 
         // Apply selection -> projection -> row datamodels
         rowKeys.forEach((val) => {
@@ -213,14 +216,15 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         const field = colFacetNames[0];
         const firstLevelColumnKeys = retriveDomainFromData(dataModel, field);
 
-        sortFacetFields(colFacets[0], firstLevelColumnKeys, globalConfig);
-
         // Get unique keys to create faceted datamodels: this time for columns
         uniqueKeyGenerator(columnKeys, {
             facets: colFacetNames,
             dataModel,
             uniqueValues: firstLevelColumnKeys
         });
+
+        sortFacetFields(colFacets, columnKeys, globalConfig);
+
         // For each row in the datamodel, apply selection -> projection -> push the projection to matri
         rowDataModels.forEach((dme, rIndex) => {
             facetInfo[rIndex] = facetInfo[rIndex] || [[], []];
@@ -266,12 +270,12 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         });
     }
 
-    formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
-    formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
+    const formattedColKeys = formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
+    const formattedRowKeys = formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
 
     // Getting column keys
-    const transposedColKeys = columnKeys.length > 0 ? columnKeys[0].map((col, i) =>
-                    columnKeys.map(row => row[i])) : columnKeys;
+    const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>
+                    formattedColKeys.map(row => row[i])) : formattedColKeys;
 
-    return { matrix, rowKeys, columnKeys: transposedColKeys };
+    return { matrix, rowKeys: formattedRowKeys, columnKeys: transposedColKeys };
 };

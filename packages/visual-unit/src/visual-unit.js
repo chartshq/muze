@@ -111,8 +111,9 @@ export default class VisualUnit {
 
     static getListeners () {
         return [...listenerMap.map((d) => {
-            d.props = d.props.map(d => `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${d}`);
-            return d;
+            const o = Object.assign({}, d);
+            o.props = o.props.map(prop => `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${prop}`);
+            return o;
         }), {
             type: 'registerImmediateListener',
             props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
