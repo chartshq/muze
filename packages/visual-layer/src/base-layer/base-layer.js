@@ -425,9 +425,8 @@ export default class BaseLayer extends SimpleLayer {
      * @return {BaseLayer} Instance of layer.
      */
     remove () {
-        this.store().unsubscribe({
-            namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
-        });
+        const { namespace } = this.metaInf();
+        this.store().removeFromNamespace(namespace, 'layer');
         selectElement(this.mount()).remove();
         return this;
     }

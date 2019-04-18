@@ -430,14 +430,12 @@ export default class VisualUnit {
     remove () {
         const lifeCycleManager = this._dependencies.lifeCycleManager;
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().unsubscribe({
-            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
-        });
+        this.store().removeFromNamespace(this.metaInf().namespace, this.constructor.formalName());
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers
         lifeCycleManager.notify({ client: this.layers(), action: 'beforeremove', formalName: 'layer' });
-        this.layers().forEach(layer => layer.remove());
+        [...this.layers(), ...this._gridLines, ...this._gridBands].forEach((layer) => layer.remove());
         lifeCycleManager.notify({ client: this.layers(), action: 'removed', formalName: 'layer' });
         lifeCycleManager.notify({ client: this, action: 'removed', formalName: 'unit' });
         return this;

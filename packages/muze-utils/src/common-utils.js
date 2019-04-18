@@ -521,7 +521,7 @@ const addListenerToNamespace = (namespaceInf, fn, context) => {
         }
         listeners.set(key, fn);
     } else {
-        key = context._listeners.size;
+        key = key || context._listeners.size;
         context._listeners.set(key, fn);
     }
 };
@@ -569,15 +569,16 @@ const registerListener = (context, type, config) => {
                         const fnInf = propListenerMap[prop][type][nm];
                         if (fnInf.fns > 0) {
                             const propObj = listeners[nm];
-                            for (const key in propObj) {
+                            for (const key of propObj.keys()) {
                                 const contextInst = contextMap[key];
                                 contextsObj[key] = {
                                     context: contextInst,
-                                    deps: propObj[key].depProps
+                                    deps: propObj.get(key).depProps
                                 };
+                                fnInf.fns--;
                             }
                         }
-                        fnInf.fns--;
+
                         if (fnInf.fns <= 0) {
                             delete commitsObj[nm];
                         }
@@ -624,7 +625,7 @@ const registerListener = (context, type, config) => {
     addListenerToNamespace(namespaceInf, fn, context);
 };
 
-const retrieveNamespaces = (names, key, context) => {
+const retrieveNamespaces = (names, key) => {
     if (names instanceof Object) {
         return [names[key]];
     } else if (names instanceof Array) {
@@ -695,31 +696,29 @@ class Store {
     unlockCommits (props) {
         this.model.lock();
         this._modelLocked = true;
+        const commitsObj = this._commits;
         props.forEach((prop) => {
             this._lockCommit[prop] = false;
             const queuedProps = {};
-            const commitsMap = this._commits;
-            for (const key in commitsMap) {
-                const commits = commitsMap[key];
-                commits.forEach((params) => {
-                    const [propName, value, namespace] = params;
-                    if (namespace) {
-                        !queuedProps[propName] && (queuedProps[propName] = {});
-                        !queuedProps[propName][namespace] && (queuedProps[propName][namespace] = {});
-                        Object.assign(queuedProps[propName][namespace], value);
-                    }
-                });
-                commits.forEach((params) => {
-                    const [propName, value, namespace] = params;
-                    if (propName in queuedProps) {
-                        this.commit(propName, queuedProps[propName][namespace], namespace);
-                    } else {
-                        this.commit(propName, value, namespace);
-                    }
-                });
-            }
+            const commits = commitsObj[prop];
+            commits.forEach((params) => {
+                const [propName, value, namespace] = params;
+                if (namespace) {
+                    !queuedProps[propName] && (queuedProps[propName] = {});
+                    !queuedProps[propName][namespace] && (queuedProps[propName][namespace] = {});
+                    Object.assign(queuedProps[propName][namespace], value);
+                }
+            });
+            commits.forEach((params) => {
+                const [propName, value, namespace] = params;
+                if (propName in queuedProps) {
+                    this.commit(propName, queuedProps[propName][namespace], namespace);
+                } else {
+                    this.commit(propName, value, namespace);
+                }
+            });
+            delete commitsObj[prop];
         });
-
         this._modelLocked = false;
         this.model.unlock();
         return this;
@@ -758,17 +757,23 @@ class Store {
                     }
 
                     names.forEach((nm) => {
-                        !obj[nm] && (obj[nm] = {});
-                        obj[nm][sns] = {
+                        if (!obj[nm]) {
+                            obj[nm] = new Map();
+                        }
+                        obj[nm].set(sns, {
                             depProps
-                        };
+                        });
+                        const size = obj[nm].size;
                         types.forEach((type) => {
-                            initObject(propObj, [type, nm]);
-                            const fns = propObj[type][nm].fns !== undefined ? propObj[type][nm].fns + 1 : propFns[type];
-                            propObj[type][nm] = {
-                                fns,
-                                oriFns: fns
-                            };
+                            if (propFns[type] > 0) {
+                                initObject(propObj, [type, nm]);
+                                const fns = size > 1 ? propObj[type][nm].fns + 1 : (propObj[type][nm].fns !== undefined ?
+                                    propObj[type][nm].fns : propFns[type]);
+                                propObj[type][nm] = {
+                                    fns,
+                                    oriFns: fns
+                                };
+                            }
                         });
                     });
                 });
@@ -803,7 +808,9 @@ class Store {
             }
             if (propListenerMap) {
                 types.forEach((type) => {
-                    propListenerMap[type][namespace].fns = propListenerMap[type][namespace].oriFns;
+                    if (propListenerMap[type]) {
+                        propListenerMap[type][namespace].fns = propListenerMap[type][namespace].oriFns;
+                    }
                 });
             }
         }
@@ -906,6 +913,45 @@ class Store {
         }
         return this;
     }
+
+    removeFromNamespace (subNamespace, namespace, props) {
+        const { _propListenerMap: propsMap, _registeredListeners: listenerMap, _contextMap: contextMap } = this;
+        const listenersObj = listenerMap[namespace];
+        // for (const prop in propsMap) {
+        //     const propsObj = propsMap[prop];
+        //     types.forEach((type) => {
+        //         const obj = propsObj[type];
+        //         for (const ns in obj) {
+        //             if (ns === subNamespace) {
+        //                 delete obj[ns];
+        //             }
+        //         }
+        //     });
+        // }
+        for (const prop in listenersObj) {
+            const nsObj = listenersObj[prop];
+            for (const ns in nsObj) {
+                const snsMap = nsObj[ns];
+                for (const sns of snsMap.keys()) {
+                    if (sns === subNamespace) {
+                        snsMap.delete(sns);
+                        types.forEach((type) => {
+                            const fnInf = getObjProp(propsMap, prop, type, ns);
+                            if (fnInf) {
+                                fnInf.oriFns--;
+                                fnInf.fns = fnInf.oriFns;
+                                if (fnInf.oriFns <= 0) {
+                                    delete propsMap[prop][type][ns];
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        delete contextMap[namespace][subNamespace];
+        return this;
+    }
 }
 
 /**
@@ -987,7 +1033,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                     // Sanitize if required
                                     val = sanitization(val, prevVal, holder);
                                 }
-
+``
                                 if (typeCheck) {
                                     // Checking if a setter is valid
                                     if (typeof typeCheck === 'function') {

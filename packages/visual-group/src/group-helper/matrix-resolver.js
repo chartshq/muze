@@ -438,8 +438,8 @@ export default class MatrixResolver {
 
         const units = [];
         const matrixLayers = this.matrixLayers();
-        const props = [`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`,
-            `${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`];
+        const props = [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`,
+            `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
         const store = this.store();
         store.lockCommits(props);
         this.forEach(VALUE_MATRIX, (i, j, el) => {
@@ -450,7 +450,8 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-        store.unlockCommits(props);
+        store.unlockCommits([props[0]])
+            .unlockCommits([props[1]]);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }

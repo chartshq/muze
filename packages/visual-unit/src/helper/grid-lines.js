@@ -161,24 +161,24 @@ export const createGridLineLayer = (context) => {
         const definitions = getGridLayerDefinitions(context, config, type);
 
         const sel = `_${type}Selection`;
-        context[sel] = createSelection(context[sel], () => {
+        context[sel] = createSelection(context[sel], (atomicDef) => {
             const inst = layerFactory.getLayerInstance({ mark });
             inst.dependencies(context._layerDeps);
-            return inst;
-        }, definitions, atomicDef => atomicDef.definition.name);
-        context[sel].each((layer, atomicDef) => {
-            const definition = atomicDef.definition;
-            const name = definition.name;
-            const sConf = layerFactory.getSerializedConf(mark, definition);
-            const axesObj = atomicDef.axes;
-            layer.metaInf({
+            const name = atomicDef.definition.name;
+            inst.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
                 namespace: `${metaInf.namespace}${type}${name}`,
                 parentNamespace: metaInf.namespace
             })
                 .store(store)
-                .config(sConf)
+            return inst;
+        }, definitions, atomicDef => atomicDef.definition.name);
+        context[sel].each((layer, atomicDef) => {
+            const definition = atomicDef.definition;
+            const sConf = layerFactory.getSerializedConf(mark, definition);
+            const axesObj = atomicDef.axes;
+            layer.config(sConf)
                 .dataProps({
                     timeDiffs
                 })

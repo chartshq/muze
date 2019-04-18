@@ -47,7 +47,6 @@ export const listenerMap = [
                     layerDefArr = [...layerDefArr, ...defFn(layerDefs)];
                 });
                 context.addLayer(layerDefArr);
-                context._queuedLayerDefs.length = 0;
                 const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {
                     const axisArr = defaultValue(getObjProp(context.axes(), type), []);

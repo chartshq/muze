@@ -137,7 +137,6 @@ export {
 } from 'd3-time';
 
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
-
 export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';
