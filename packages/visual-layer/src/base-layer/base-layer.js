@@ -98,14 +98,13 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     static getListeners () {
-        return [...listenerMap.slice(), {
+        return [...listenerMap, {
             type: 'registerChangeListener',
             props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`,
                 ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
-            listener: (context, [, data]) => {
-                if (data) {
-                    renderLayer(context);
-                }
+            listener: (context) => {
+                console.log(context.metaInf().namespace);
+                renderLayer(context);
             },
             subNamespace: (context) => {
                 const { unitRowIndex, unitColIndex, namespace } = context.metaInf();

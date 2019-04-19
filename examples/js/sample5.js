@@ -22,8 +22,7 @@ d3.json('../data/cars.json', (data) => {
         },
         {
             name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'avg'
+            type: 'measure'
         },
         {
             name: 'Weight_in_lbs',
@@ -89,38 +88,72 @@ d3.json('../data/cars.json', (data) => {
 
     // line chart
     window.canvas = env.canvas()
-        .columns(['Year'])
-        .rows(['Cylinders', 'Horsepower'])
-        .width(1200)
-        .height(500)
-        .data(rootData.select((fields) => fields.Cylinders.value === '6' || fields.Cylinders.value === '5'))
+    .rows(['Displacement', 'Acceleration'])
+    .columns(['Horsepower', 'Acceleration'].reverse())
+    .data(rootData)
+      .minUnitHeight(100)
+      .config({
+        //   gridLines: {
+        //     //   x: {
+        //     //       show: false
+        //     //   },
+        //       y: {
+        //         show: true
+        //         }
+        //   }
+      })
+      .detail(['Name'])
+    .minUnitWidth(100)
+      .height(300)
+    .width(600)
+    // .layers([{
+    //     mark: 'point'
+    // }, {
+    //     mark: 'text',
+    //     encoding: {
+    //         text: 'Horsepower'
+    //     }
+    // }])
+    .color('Origin')
+    .config({
+        // gridLines: {
+        //     x: {
+        //         show: false
+        //     },
+        //     y: {
+        //         show: false
+        //     }
+        // }
+    })
+    //   .detail(['Name']) // Show all the data point
+    //   .color('Cylinders')
         // .layers([{
         //     mark: 'line'
         // }])
         .title('Line Chart')
         .mount('#chart');
 
-        window.canvas2 = env.canvas()
-        .rows(['Displacement'])
-        .columns(['Year'])
-        .data(rootData)
-        // .detail(['Maker'])
-          .minUnitHeight(100)
-        .minUnitWidth(100)
-          .height(600)
-        .width(600)
-        //   .detail(['Name']) // Show all the data point
-        //   .color('Cylinders')
-            // .layers([{
-            //     mark: 'line'
-            // }])
-            .title('Line Chart')
-            .mount('#chart2');
+    //     window.canvas2 = env.canvas()
+    //     .rows(['Displacement'])
+    //     .columns(['Year'])
+    //     .data(rootData)
+    //     // .detail(['Maker'])
+    //       .minUnitHeight(100)
+    //     .minUnitWidth(100)
+    //       .height(600)
+    //     .width(600)
+    //     //   .detail(['Name']) // Show all the data point
+    //     //   .color('Cylinders')
+    //         // .layers([{
+    //         //     mark: 'line'
+    //         // }])
+    //         .title('Line Chart')
+    //         .mount('#chart2');
 
-    muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
-        .registerPropagationBehaviourMap({
-            select: 'filter'
-        })
+    // muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
+    //     .registerPropagationBehaviourMap({
+    //         select: 'filter'
+    //     })
     // stacked bar chart
     // env.canvas()
     //     .rows([])

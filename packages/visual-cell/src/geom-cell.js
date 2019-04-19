@@ -174,7 +174,9 @@ class GeomCell extends SimpleCell {
 
         this.availWidth(width);
         this.availHeight(height);
-        unit.width(width).height(height - this.getCaptionSpace().height);
+        unit.lockModel()
+            .width(width).height(height - this.getCaptionSpace().height)
+            .unlockModel();
         this.logicalSpace(null);
         return this;
     }

@@ -549,7 +549,12 @@ const initObject = (obj, props) => {
         obj = obj[prop];
     });
 };
-
+const fetchPropValues = (propNames, params, deps) => {
+    return params.map((param, i) => {
+        const prop = propNames[i];
+        return param.map((val) => (val === undefined || val === null ? val : val[deps[prop]]));
+    });
+}
 const registerListener = (context, type, config) => {
     const registeredListeners = context._registeredListeners;
     const { callBack, instantCall, namespaceInf, props } = config;
@@ -587,11 +592,7 @@ const registerListener = (context, type, config) => {
                 });
                 for (const key in contextsObj) {
                     const { deps, context: contextInst } = contextsObj[key];
-                    values = params.map((param, i) => {
-                        const prop = propNames[i];
-                        return [param[0] !== null ? param[0][deps[prop]] : param[0], param[1] !== null ?
-                            param[1][deps[prop]] : param[1]];
-                    });
+                    values = fetchPropValues(propNames, params, deps);
                     callBack(contextInst, ...values);
                 }
             } else {

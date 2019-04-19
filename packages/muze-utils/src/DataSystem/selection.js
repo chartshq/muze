@@ -245,16 +245,32 @@ class Selection {
      * @memberof Selection
      */
     getObjects () {
-        const objects = [];
+        let currentData;
         let val;
-        const values = this._dataObjects.values();
-
-        while (val = values.next().value) {
-            objects.push(val);
+        const objects = [];
+        const dataObjects = this._dataObjects;
+        // select the data to create object
+        switch (this._mode) {
+        case 'enter':
+            currentData = this._enterdata;
+            break;
+        case 'exit':
+            currentData = this._exitdata;
+            break;
+        default:
+            currentData = this._updatedata;
         }
+
+        const entries = currentData.entries();
+
+        while (val = entries.next().value) {
+            if (dataObjects.has(val[0])) {
+                objects.push(dataObjects.get(val[0]));
+            }
+        }
+
         return objects;
     }
-
 }
 
 export default Selection;

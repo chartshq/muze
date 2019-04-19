@@ -37,6 +37,7 @@ import UnitFireBolt from './firebolt';
 import { initSideEffects } from './firebolt/helper';
 import './styles.scss';
 import localOptions from './local-options';
+import { WIDTH, HEIGHT } from './enums/reactive-props';
 
 const FORMAL_NAME = 'unit';
 
@@ -119,14 +120,21 @@ export default class VisualUnit {
             props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
             listener: calculateDomainListener
         }, {
-            type: 'registerChangeListener',
-            props: ['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`),
-            listener: (context) => {
-                attachDataToGridLineLayers(context);
+            type: 'registerImmediateListener',
+            props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`,
+                `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`,
+                ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
+            listener: (context, [, width], [, height]) => {
+                if (width && height) {
+                    console.log('attachData');
+                    attachDataToGridLineLayers(context);
+                }
             },
             subNamespace: (context) => {
-                const { rowIndex, colIndex } = context.metaInf();
+                const { rowIndex, colIndex, namespace } = context.metaInf();
                 return {
+                    [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`]: namespace,
+                    [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`]: namespace,
                     [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${colIndex}0`,
                     [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${rowIndex}0`
                 };
