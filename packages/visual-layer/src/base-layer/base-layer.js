@@ -98,30 +98,33 @@ export default class BaseLayer extends SimpleLayer {
     }
 
     static getListeners () {
-        return [...listenerMap, {
-            type: 'registerChangeListener',
-            props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`,
-                ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
-            listener: (context) => {
-                console.log(context.metaInf().namespace);
-                renderLayer(context);
-            },
-            subNamespace: (context) => {
-                const { unitRowIndex, unitColIndex, namespace } = context.metaInf();
-                return {
-                    [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`]: namespace,
-                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${unitColIndex}0`,
-                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${unitRowIndex}0`
-                };
-            }
-        }];
+        return {
+            store: [...listenerMap, {
+                type: 'registerChangeListener',
+                props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`,
+                    ...['x', 'y', 'radius'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
+                listener: (context) => {
+                    renderLayer(context);
+                },
+                subNamespace: (context) => {
+                    const { unitRowIndex, unitColIndex, namespace } = context.metaInf();
+                    return {
+                        [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`]: namespace,
+                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${unitColIndex}0`,
+                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${unitRowIndex}0`,
+                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`]: `${unitRowIndex}-${unitColIndex}`
+                    };
+                }
+            }],
+            throwback: []
+        };
     }
 
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
             const { namespace } = this.metaInf();
-            store.registerComponent(namespace, 'layer', this);
+            store.registerComponent(namespace, BaseLayer.formalName(), this);
 
             transactor(this, localOptions, store, {
                 subNamespace: namespace,
@@ -425,7 +428,7 @@ export default class BaseLayer extends SimpleLayer {
      */
     remove () {
         const { namespace } = this.metaInf();
-        this.store().removeFromNamespace(namespace, 'layer');
+        this.store().removeFromNamespace(namespace, BaseLayer.formalName());
         selectElement(this.mount()).remove();
         return this;
     }

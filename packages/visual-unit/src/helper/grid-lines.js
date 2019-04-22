@@ -163,7 +163,7 @@ export const createGridLineLayer = (context) => {
         const sel = `_${type}Selection`;
         context[sel] = createSelection(context[sel], (atomicDef) => {
             const inst = layerFactory.getLayerInstance({ mark });
-            inst.dependencies(context._layerDeps);
+            inst.dependencies(context._dependencies);
             const name = atomicDef.definition.name;
             inst.metaInf({
                 unitRowIndex: metaInf.rowIndex,
@@ -192,10 +192,12 @@ export const attachDataToGridLineLayers = (context) => {
     const axes = context.axes();
     const gridLines = context._gridLines;
     const gridBands = context._gridBands;
-    const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
-    [].concat(...gridBands, ...gridLines).forEach((inst) => {
-        inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y);
-    });
+    if (gridLines.length || gridBands.length) {
+        const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
+        [].concat(...gridBands, ...gridLines).forEach((inst) => {
+            inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y);
+        });
+    }
 };
 
 export const renderGridLineLayers = (context, container) => {

@@ -88,32 +88,38 @@ d3.json('../data/cars.json', (data) => {
 
     // line chart
     window.canvas = env.canvas()
-    .rows(['Displacement', 'Acceleration'])
-    .columns(['Horsepower', 'Acceleration'].reverse())
+    .rows(['Maker', 'Acceleration'])
+    .columns(['Year', 'Origin', 'Horsepower'])
     .data(rootData)
       .minUnitHeight(100)
-      .config({
-        //   gridLines: {
-        //     //   x: {
-        //     //       show: false
-        //     //   },
-        //       y: {
-        //         show: true
-        //         }
-        //   }
-      })
+    //   .config({
+    //     //   gridLines: {
+    //     //     //   x: {
+    //     //     //       show: false
+    //     //     //   },
+    //     //       y: {
+    //     //         show: true
+    //     //         }
+    //     //   }
+    //   })
       .detail(['Name'])
     .minUnitWidth(100)
-      .height(300)
-    .width(600)
+      .height(600)
+    .width(800)
     // .layers([{
-    //     mark: 'point'
-    // }, {
-    //     mark: 'text',
+    //     mark: 'arc',
     //     encoding: {
-    //         text: 'Horsepower'
+    //         angle: 'Acceleration'
     //     }
     // }])
+// .layers([{
+//     mark: 'point'
+// }, {
+//     mark: 'text',
+//     encoding: {
+//         text: 'Displacement'
+//     }
+// }])
     .color('Origin')
     .config({
         // gridLines: {

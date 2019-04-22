@@ -321,23 +321,20 @@ export default class Firebolt {
      */
     propagateWith (action, fields, append = false) {
         const behaviouralActions = this._actions.behavioural;
-        if (fields.length) {
-            if (action === ALL_ACTIONS) {
-                for (const key in behaviouralActions) {
-                    this._propagationFields[key] = {
-                        fields,
-                        append
-                    };
-                }
-            } else {
-                this._propagationFields[action] = {
+        if (action === ALL_ACTIONS) {
+            for (const key in behaviouralActions) {
+                this._propagationFields[key] = {
                     fields,
                     append
                 };
             }
-            return this;
+        } else {
+            this._propagationFields[action] = {
+                fields,
+                append
+            };
         }
-        return this._propagationFields;
+        return this;
     }
 
     /**

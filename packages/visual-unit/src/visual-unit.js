@@ -1,6 +1,5 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import {
-    Store,
     setAttrs,
     getUniqueId,
     getQualifiedClassName,
@@ -34,7 +33,7 @@ import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-
 import { calculateDomainListener, listenerMap } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
-import { initSideEffects } from './firebolt/helper';
+import { initSideEffects, dispatchQueuedSideEffects, clearActionHistory } from './firebolt/helper';
 import './styles.scss';
 import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
@@ -62,23 +61,11 @@ export default class VisualUnit {
     constructor (registry, dependencies) {
         this._id = getUniqueId();
         this._dependencies = dependencies;
-        this._layerDeps = {
-            throwback: new Store({
-                [CommonProps.ON_LAYER_DRAW]: false
-            }),
-            smartLabel: dependencies.smartLabel,
-            lifeCycleManager: dependencies.lifeCycleManager
-        };
         this._renderedResolve = null;
         this._renderedPromise = new Promise((resolve) => {
             this._renderedResolve = resolve;
         });
         createRenderPromise(this);
-        this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
-            this._renderedResolve();
-            this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
-        });
-
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
         this._gridLinesSelection = null;
@@ -111,42 +98,65 @@ export default class VisualUnit {
     }
 
     static getListeners () {
-        return [...listenerMap.map((d) => {
-            const o = Object.assign({}, d);
-            o.props = o.props.map(prop => `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${prop}`);
-            return o;
-        }), {
-            type: 'registerImmediateListener',
-            props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
-            listener: calculateDomainListener
-        }, {
-            type: 'registerImmediateListener',
-            props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`,
-                `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`,
-                ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
-            listener: (context, [, width], [, height]) => {
-                if (width && height) {
-                    console.log('attachData');
-                    attachDataToGridLineLayers(context);
+        return {
+            store: [...listenerMap.map((d) => {
+                const o = Object.assign({}, d);
+                o.props = o.props.map(prop => `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${prop}`);
+                return o;
+            }), {
+                type: 'registerImmediateListener',
+                props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
+                listener: calculateDomainListener
+            }, {
+                type: 'registerImmediateListener',
+                props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`,
+                    `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`,
+                    ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
+                listener: (context, [, width], [, height]) => {
+                    if (width && height) {
+
+                        attachDataToGridLineLayers(context);
+                    }
+                },
+                subNamespace: (context) => {
+                    const { rowIndex, colIndex, namespace } = context.metaInf();
+                    return {
+                        [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`]: namespace,
+                        [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`]: namespace,
+                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${colIndex}0`,
+                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${rowIndex}0`
+                    };
                 }
-            },
-            subNamespace: (context) => {
-                const { rowIndex, colIndex, namespace } = context.metaInf();
-                return {
-                    [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`]: namespace,
-                    [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`]: namespace,
-                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${colIndex}0`,
-                    [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${rowIndex}0`
-                };
-            }
-        }];
+            }],
+            throwback: [
+                {
+                    type: 'registerChangeListener',
+                    props: [CommonProps.ON_LAYER_DRAW],
+                    listener: (context, [, drawn]) => {
+                        if (drawn) {
+                            const firebolt = context.firebolt();
+                            dispatchQueuedSideEffects(firebolt);
+                            clearActionHistory(firebolt);
+                        }
+                        context._renderedResolve();
+                        context._lifeCycleManager.notify({
+                            client: context.layers(),
+                            action: 'drawn',
+                            formalName: 'layer'
+                        });
+                    }
+                }
+            ]
+        }
     }
 
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
+            const throwback = this._dependencies.throwback;
             const metaInf = this.metaInf();
             store.registerComponent(metaInf.namespace, FORMAL_NAME, this);
+            throwback.registerComponent(metaInf.namespace, FORMAL_NAME, this);
             transactor(this, localOptions, store, {
                 subNamespace: metaInf.namespace,
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
@@ -202,12 +212,12 @@ export default class VisualUnit {
     }
 
     lockModel () {
-        this.store().model.lock();
+        this.store().lockModel();
         return this;
     }
 
     unlockModel () {
-        this.store().model.unlock();
+        this.store().unlockModel();
         return this;
     }
 
@@ -437,9 +447,12 @@ export default class VisualUnit {
      * @memberof VisualUnit
      */
     remove () {
-        const lifeCycleManager = this._dependencies.lifeCycleManager;
+        const formalName =  this.constructor.formalName();
+        const { lifeCycleManager, throwback } = this._dependencies;
+        const { namespace } = this.metaInf();
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().removeFromNamespace(this.metaInf().namespace, this.constructor.formalName());
+        this.store().removeFromNamespace(namespace, formalName);
+        throwback.removeFromNamespace(namespace, FORMAL_NAME);
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers

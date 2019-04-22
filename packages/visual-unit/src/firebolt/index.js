@@ -1,6 +1,5 @@
 import { FieldType } from 'muze-utils';
 import { Firebolt } from '@chartshq/muze-firebolt';
-import { registerListeners } from './helper';
 import { isXandYMeasures, getSelectionRejectionModel } from '../helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
@@ -10,11 +9,6 @@ import { propagateValues } from './data-propagator';
  * behavioural actions. It also propagates the behavioural actions to other datamodels.
  */
 export default class UnitFireBolt extends Firebolt {
-    constructor (...params) {
-        super(...params);
-        registerListeners(this);
-    }
-
     propagate (behaviour, payload, selectionSet, sideEffects) {
         propagateValues(this, behaviour, {
             payload,

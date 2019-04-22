@@ -301,13 +301,15 @@ export default class MatrixResolver {
         } = componentRegistry;
         const {
             smartlabel: smartLabel,
-            lifeCycleManager
+            lifeCycleManager,
+            throwback
         } = this.dependencies();
         // Provide the source for the matrix
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
         const store = this.store();
+        store.lockModel();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
@@ -318,7 +320,8 @@ export default class MatrixResolver {
                     sideEffectRegistry
                 }, {
                     smartLabel,
-                    lifeCycleManager
+                    lifeCycleManager,
+                    throwback
                 });
                 unit.metaInf({
                     rowIndex: i,
@@ -336,6 +339,7 @@ export default class MatrixResolver {
                 .coord(coord);
             el.config(unitConfig);
         });
+        store.unlockModel();
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
     }
@@ -442,6 +446,7 @@ export default class MatrixResolver {
             `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
         const store = this.store();
         store.lockCommits(props);
+        store.lockModel();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -450,7 +455,8 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-        store.unlockCommits([props[0]])
+        store.unlockModel()
+            .unlockCommits([props[0]])
             .unlockCommits([props[1]]);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
