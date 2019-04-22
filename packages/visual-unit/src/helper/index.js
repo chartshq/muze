@@ -27,7 +27,7 @@ export const getDimensionMeasureMap = (layers, fieldsConfig) => {
         const measures = [xField, yField].filter(field => fieldsConfig[field] && fieldsConfig[field].def.type ===
             FieldType.MEASURE);
         [colorField, sizeField, shapeField].forEach((field) => {
-            if (fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION) {
+            if (getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION && measures.length) {
                 !retinalEncodingsAndMeasures[field] && (retinalEncodingsAndMeasures[field] = []);
                 retinalEncodingsAndMeasures[field].push(...measures);
             }

@@ -8,6 +8,7 @@ import {
     defaultValue,
     retrieveFieldDisplayName
 } from 'muze-utils';
+import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
@@ -63,9 +64,11 @@ const getRowContent = (fieldInf, context, dataInf, config) => {
     const { separator, classPrefix } = config;
     const dataLen = data.length;
     const values = [];
-    const index = fieldsConfig[field].index;
-    const interval = fieldsConfig[field].def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
-    const formatterFn = getDefaultTooltipFormatterFn(formatters(val => val, interval, valueParser)[type],
+    const fieldObj = fieldsConfig[field];
+    const index = fieldObj.index;
+    const interval = fieldObj.def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
+    const nf = fieldObj.def.type === FieldType.MEASURE ? fieldspace.fieldsObj()[field].numberFormat() : val => val;
+    const formatterFn = getDefaultTooltipFormatterFn(formatters(nf, interval, valueParser)[type],
         defFormatter);
 
     let uniqueVals = type === MeasureSubtype.CONTINUOUS ? data.map(d => d[index]) :
@@ -205,7 +208,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
 };
 
 export const strategies = {
-    selectionSummary: (dm, config, context) => {
+    [SELECTION_SUMMARY]: (dm, config, context) => {
         const { selectionSet } = context;
         const aggFns = selectionSet.mergedEnter.aggFns;
         const dataObj = dm.getData();
@@ -238,7 +241,7 @@ export const strategies = {
         }
         return values;
     },
-    highlightSummary: (data, config, context) => {
+    [HIGHLIGHT_SUMMARY]: (data, config, context) => {
         const values = buildTooltipData(data, config, context);
         return values;
     }
