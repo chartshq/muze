@@ -42,7 +42,7 @@ export const removeElement = (elemID) => {
 export const resolveAligment = (context, componentData) => {
     componentData.children().forEach((component) => {
         const host = component.model().host();
-        if (host instanceof LayoutComponent && host.alignWith()) {
+        if (host instanceof LayoutComponent && host.alignWith() && context.componentMap().get(host.alignWith())) {
             let newNodeConfig = {};
             const point = findNode(context, component.id()).node();
             const node = point.boundBox();

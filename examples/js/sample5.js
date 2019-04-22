@@ -85,41 +85,41 @@ d3.json('../data/cars.json', (jsonData) => {
     );
 
     env.data(rootData);
-
+    window.data = rootData;
     // line chart
     window.canvas = env.canvas()
         .width(600)
         .height(400)
-        .config({
-            interaction: {
-                tooltip: {
-                    formatter: (dataModel, config, context) => {
-                        const colorAxis = context.axes.color[0];
-                        const tooltipData = dataModel.getData().data;
-                        const fieldConfig = dataModel.getFieldsConfig();
+        // .config({
+        //     interaction: {
+        //         tooltip: {
+        //             formatter: (dataModel, config, context) => {
+        //                 const colorAxis = context.axes.color[0];
+        //                 const tooltipData = dataModel.getData().data;
+        //                 const fieldConfig = dataModel.getFieldsConfig();
 
-                        let tooltipContent = '';
-                        tooltipData.forEach((dataArray, i) => {
-                            const originVal = dataArray[fieldConfig.Origin.index];
-                            const hpVal = dataArray[fieldConfig.Horsepower.index];
-                            const cylVal = dataArray[fieldConfig.Cylinders.index];
-                            const l = colorAxis.getRawColor(cylVal)[2]; // luminance
-                            tooltipContent += `
-                ${i ? '' : `<h3 style="background-color:#EAEAEA">Country: ${originVal}</h3>`}
-                <div style="background: ${colorAxis.getColor(cylVal)}; padding: 4px 8px; color: ${l > 0.45 ? 'black' : 'white' };">
-                    <u>${cylVal} Cylinders</u> cars with an average power of <b>${hpVal} HP</b>
-                </div>
-                `;
-                            tooltipContent += '<br>';
-                        });
-                        return html`${tooltipContent}`;
-                    }
-                }
-            }
-        })
+        //                 let tooltipContent = '';
+        //                 tooltipData.forEach((dataArray, i) => {
+        //                     const originVal = dataArray[fieldConfig.Origin.index];
+        //                     const hpVal = dataArray[fieldConfig.Horsepower.index];
+        //                     const cylVal = dataArray[fieldConfig.Cylinders.index];
+        //                     const l = colorAxis.getRawColor(cylVal)[2]; // luminance
+        //                     tooltipContent += `
+        //         ${i ? '' : `<h3 style="background-color:#EAEAEA">Country: ${originVal}</h3>`}
+        //         <div style="background: ${colorAxis.getColor(cylVal)}; padding: 4px 8px; color: ${l > 0.45 ? 'black' : 'white' };">
+        //             <u>${cylVal} Cylinders</u> cars with an average power of <b>${hpVal} HP</b>
+        //         </div>
+        //         `;
+        //                     tooltipContent += '<br>';
+        //                 });
+        //                 return html`${tooltipContent}`;
+        //             }
+        //         }
+        //     }
+        // })
         .color('Cylinders')
-        .rows(['Horsepower'])
-        .columns(['Origin'])
+        .rows(['Maker', 'Horsepower'])
+        .columns(['Year', 'Origin'])
         .mount('#chart');
 
     d3.select('#update').on('click', () => {

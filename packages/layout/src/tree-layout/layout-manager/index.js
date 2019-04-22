@@ -7,6 +7,10 @@ import {
   DEFAULT_HEIGHT
 } from '../constants/defaults';
 
+import {
+   GRID
+} from '../../enums/constants';
+
 import { DrawingManager } from '../drawing-manager';
 import { removeElement } from '../drawing-manager/helper';
 import { Utils } from '../utils';
@@ -140,8 +144,22 @@ export default class LayoutManager {
         return this._layoutDef.componentMap().get(componentName);
     }
 
-    removeComponent (id) {
-        return removeElement(id);
+    removeComponent (name) {
+        const component = this.getComponent(name);
+        if (component) {
+            if (name === GRID) {
+                component.component.map(comp => comp.map((co) => {
+                    this._layoutDef.componentMap().delete(co.name());
+                    const deleteElementId = co.renderAt();
+                    return removeElement(deleteElementId);
+                }));
+            } else {
+                this._layoutDef.componentMap().delete(name);
+                const deleteElementId = component.renderAt();
+                return removeElement(deleteElementId);
+            }
+        }
+        return this;
     }
 
     renderAt (mount) {

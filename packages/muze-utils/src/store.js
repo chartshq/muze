@@ -134,7 +134,14 @@ const createMap = () => new Map();
 
 const types = ['next', 'on'];
 
-const removePropValue = (context, map, sns, prop) => {
+const removePropValue = (context, map, propInf) => {
+    const { subNamespace: sns, prop, propListenerMap } = propInf;
+    const propObj = propListenerMap[prop];
+    types.forEach((type) => {
+        if (type in propObj) {
+            delete propObj[type][sns];
+        }
+    });
     if (map.has(sns)) {
         const value = context.get(prop);
         if (value instanceof Object && sns in value) {
@@ -416,18 +423,26 @@ export class Store {
     }
 
     removeSubNamespace (subNamespace, namespace) {
-        const { _registeredListeners: listenerMap, _contextMap: contextMap } = this;
+        const { _registeredListeners: listenerMap, _contextMap: contextMap, _propListenerMap: propListenerMap } = this;
         const listenersObj = listenerMap[namespace];
 
         for (const prop in listenersObj) {
             const { subNamespaces } = listenersObj[prop];
             if (subNamespaces[subNamespace]) {
-                removePropValue(this, subNamespaces[subNamespace], subNamespace, prop);
+                removePropValue(this, subNamespaces[subNamespace], {
+                    subNamespace,
+                    prop,
+                    propListenerMap
+                });
                 delete subNamespaces[subNamespace];
             } else {
                 for (const ns in subNamespaces) {
                     const snsMap = subNamespaces[ns];
-                    removePropValue(this, snsMap, subNamespace, prop);
+                    removePropValue(this, snsMap, {
+                        subNamespace,
+                        prop,
+                        propListenerMap
+                    });
                     if (!snsMap.size) {
                         delete subNamespaces[ns];
                     }
