@@ -89,20 +89,20 @@ d3.json('../data/cars.json', (data) => {
     // line chart
     window.canvas = env.canvas()
     .rows(['Maker', 'Acceleration'])
-    .columns(['Year', 'Origin', 'Horsepower'])
+    .columns(['Year', 'Origin'])
     .data(rootData)
       .minUnitHeight(100)
-    //   .config({
-    //     //   gridLines: {
-    //     //     //   x: {
-    //     //     //       show: false
-    //     //     //   },
-    //     //       y: {
-    //     //         show: true
-    //     //         }
-    //     //   }
-    //   })
-      .detail(['Name'])
+      .config({
+          gridLines: {
+            //   x: {
+            //       show: false
+            //   },
+              y: {
+                show: true
+                }
+          }
+      })
+    //   .detail(['Name'])
     .minUnitWidth(100)
       .height(600)
     .width(800)
@@ -113,11 +113,19 @@ d3.json('../data/cars.json', (data) => {
     //     }
     // }])
 // .layers([{
-//     mark: 'point'
-// }, {
-//     mark: 'text',
+//     mark: 'line',
 //     encoding: {
-//         text: 'Displacement'
+//         y: 'Horsepower'
+//     }
+// }, {
+//     mark: 'point',
+//     encoding: {
+//         y: 'Acceleration'
+//     }
+// }, {
+//     mark: 'area',
+//     encoding: {
+//         y: 'Acceleration'
 //     }
 // }])
     .color('Origin')
@@ -139,6 +147,10 @@ d3.json('../data/cars.json', (data) => {
         .title('Line Chart')
         .mount('#chart');
 
+    d3.select('#update').on('click', () => {
+        const code = d3.select('#code').node().value;
+        eval(code);
+    });
     //     window.canvas2 = env.canvas()
     //     .rows(['Displacement'])
     //     .columns(['Year'])

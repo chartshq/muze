@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES, getUniqueId } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -313,7 +313,7 @@ export default class MatrixResolver {
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
-                const namespace = `unit${i}-${j}`;
+                const namespace = `unit${i}-${j}-${getUniqueId()}`;
 
                 unit = VisualUnit.create({
                     layerRegistry,

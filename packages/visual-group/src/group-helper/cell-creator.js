@@ -13,7 +13,8 @@ import {
     isDistributionEqual,
     mutateAxesFromMap,
     getFieldsFromSuppliedLayers,
-    extractFields
+    extractFields,
+    removeExitCells
 } from './group-utils';
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
@@ -608,9 +609,7 @@ export const computeMatrices = (context, config) => {
     // Creates value matrices from the datamodel and configs
     const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator, globalConfig);
 
-    resolver.cacheMaps().exitCellMap.forEach((placeholder) => {
-        placeholder.remove();
-    });
+    removeExitCells(resolver);
     resolver.cacheMaps().exitCellMap.clear();
     resolver.valueMatrix(valueMatrixInfo.matrix);
 

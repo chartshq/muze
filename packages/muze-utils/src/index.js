@@ -67,11 +67,9 @@ export {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    Store,
     getDependencyOrder,
     objectIterator,
     intSanitizer,
-    transactor,
     enableChainedTransaction,
     isHTMLElem,
     isEqual,
@@ -125,6 +123,11 @@ export {
     getClientPoint,
     hasTouch
 } from './renderer-utils';
+
+export {
+    Store,
+    transactor
+} from './store';
 
 export {
     timeMillisecond,

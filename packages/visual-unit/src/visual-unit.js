@@ -39,6 +39,8 @@ import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
 
 const FORMAL_NAME = 'unit';
+const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
+const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
 
 /**
  * Visual Unit is hierarchical component created by {@link VisualGroup}. This component accepts layer definitions
@@ -72,7 +74,6 @@ export default class VisualUnit {
         this._gridBandsSelection = null;
         this._gridLines = [];
         this._gridBands = [];
-        this._layerNamespaces = {};
         this._layerAxisIndex = {};
         this._queuedLayerDefs = [];
         layerFactory.setLayerRegistry(registry.layerRegistry);
@@ -97,11 +98,16 @@ export default class VisualUnit {
         ];
     }
 
+    static getQualifiedStateProps () {
+        const unitState = VisualUnit.getState();
+        return unitState.map((state, i) => Object.keys(state).map(prop => `${unitNs[i]}.${prop}`));
+    }
+
     static getListeners () {
         return {
             store: [...listenerMap.map((d) => {
                 const o = Object.assign({}, d);
-                o.props = o.props.map(prop => `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${prop}`);
+                o.props = o.props.map(prop => `${unitNs[1]}.${prop}`);
                 return o;
             }), {
                 type: 'registerImmediateListener',
@@ -109,9 +115,9 @@ export default class VisualUnit {
                 listener: calculateDomainListener
             }, {
                 type: 'registerImmediateListener',
-                props: [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`,
-                    `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`,
-                    ...['x', 'y'].map(type => `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`)],
+                props: [`${unitNs[1]}.${WIDTH}`,
+                    `${unitNs[1]}.${HEIGHT}`,
+                    ...['x', 'y'].map(type => `${groupNs}.domain.${type}`)],
                 listener: (context, [, width], [, height]) => {
                     if (width && height) {
 
@@ -121,10 +127,10 @@ export default class VisualUnit {
                 subNamespace: (context) => {
                     const { rowIndex, colIndex, namespace } = context.metaInf();
                     return {
-                        [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${WIDTH}`]: namespace,
-                        [`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${HEIGHT}`]: namespace,
-                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x`]: `${colIndex}0`,
-                        [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y`]: `${rowIndex}0`
+                        [`${unitNs[1]}.${WIDTH}`]: namespace,
+                        [`${unitNs[1]}.${HEIGHT}`]: namespace,
+                        [`${groupNs}.domain.x`]: `${colIndex}0`,
+                        [`${groupNs}.domain.y`]: `${rowIndex}0`
                     };
                 }
             }],
@@ -155,8 +161,8 @@ export default class VisualUnit {
             const store = this._store = params[0];
             const throwback = this._dependencies.throwback;
             const metaInf = this.metaInf();
-            store.registerComponent(metaInf.namespace, FORMAL_NAME, this);
-            throwback.registerComponent(metaInf.namespace, FORMAL_NAME, this);
+            store.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
+            throwback.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
             transactor(this, localOptions, store, {
                 subNamespace: metaInf.namespace,
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
@@ -392,9 +398,7 @@ export default class VisualUnit {
             }
         };
         let layerIndex = 0;
-        let startIndex = [].concat(...Object.values(this._layersMap)).length;
         const metaInf = this.metaInf();
-        const props = this._layerNamespaces;
         const layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
             const definition = layerDef.def;
             const markId = definition.name;
@@ -402,13 +406,7 @@ export default class VisualUnit {
             const namespaces = [];
             defArr.forEach((def) => {
                 def.order = layerDef.order + layerIndex;
-                const namespace = `${metaInf.namespace}${startIndex}`;
-                if (!layersMap[markId]) {
-                    startIndex++;
-                    if (definition.calculateDomain !== false) {
-                        props[namespace] = true;
-                    }
-                }
+                const namespace = `${metaInf.namespace}-${def.mark}-${getUniqueId()}`;
                 namespaces.push(namespace);
             });
             layerIndex += defArr.length;
@@ -451,13 +449,14 @@ export default class VisualUnit {
         const { lifeCycleManager, throwback } = this._dependencies;
         const { namespace } = this.metaInf();
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().removeFromNamespace(namespace, formalName);
-        throwback.removeFromNamespace(namespace, FORMAL_NAME);
+        const layers = this.layers();
+        this.store().removeSubNamespace(namespace, formalName);
+        throwback.removeSubNamespace(namespace, FORMAL_NAME);
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers
         lifeCycleManager.notify({ client: this.layers(), action: 'beforeremove', formalName: 'layer' });
-        [...this.layers(), ...this._gridLines, ...this._gridBands].forEach((layer) => layer.remove());
+        [...layers, ...this._gridLines, ...this._gridBands].forEach((layer) => layer.remove());
         lifeCycleManager.notify({ client: this.layers(), action: 'removed', formalName: 'layer' });
         lifeCycleManager.notify({ client: this, action: 'removed', formalName: 'unit' });
         return this;

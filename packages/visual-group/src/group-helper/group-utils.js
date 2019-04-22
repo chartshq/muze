@@ -29,6 +29,8 @@ import {
     RADIUS,
     ANGLE
 } from '../enums/constants';
+import { VisualUnit } from '@chartshq/visual-unit';
+import { BaseLayer } from '@chartshq/visual-layer';
 
 const POLAR = COORD_TYPES.POLAR;
 
@@ -472,4 +474,16 @@ export const sortFacetFields = (facets, keys, config) => {
 
         facetSortOrder && keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a[index], b[index]));
     });
+};
+
+export const removeExitCells = (resolver) => {
+    const exitCells = resolver.cacheMaps().exitCellMap;
+    const store = resolver.store();
+    const qualifiedStateProps = [].concat(...VisualUnit.getQualifiedStateProps(),
+        ...BaseLayer.getQualifiedStateProps());
+    store.lockCommits(qualifiedStateProps);
+    exitCells.forEach((placeholder) => {
+        placeholder.remove();
+    });
+    store.unlockCommits(qualifiedStateProps);
 };
