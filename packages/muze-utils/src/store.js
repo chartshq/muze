@@ -428,21 +428,18 @@ export class Store {
 
         for (const prop in listenersObj) {
             const { subNamespaces } = listenersObj[prop];
+            const propInf = {
+                subNamespace,
+                prop,
+                propListenerMap
+            };
             if (subNamespaces[subNamespace]) {
-                removePropValue(this, subNamespaces[subNamespace], {
-                    subNamespace,
-                    prop,
-                    propListenerMap
-                });
+                removePropValue(this, subNamespaces[subNamespace], propInf);
                 delete subNamespaces[subNamespace];
             } else {
                 for (const ns in subNamespaces) {
                     const snsMap = subNamespaces[ns];
-                    removePropValue(this, snsMap, {
-                        subNamespace,
-                        prop,
-                        propListenerMap
-                    });
+                    removePropValue(this, snsMap, propInf);
                     if (!snsMap.size) {
                         delete subNamespaces[ns];
                     }
