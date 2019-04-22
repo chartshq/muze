@@ -236,14 +236,20 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
     return {
         [ROW_SPAN] () {
             placeholder.setAvailableSpace(width, height * span);
+            if (span === 1) {
+                selectElement(this).style('height', `${height * span + borderWidth}px`);
+            }
         },
         [COL_SPAN] () {
+            const primaryUnitWidth = unitWidths.primary[col];
             if (span > 1) {
                 let cumulativeWidth = 0;
                 for (let i = col; i < col + span; i++) {
                     cumulativeWidth += unitWidths.primary[i] - borderWidth;
                 }
                 placeholder.setAvailableSpace(cumulativeWidth + borderWidth, height);
+            } else if (primaryUnitWidth) {
+                placeholder.setAvailableSpace(primaryUnitWidth - borderWidth, height);
             }
             selectElement(this).style('height', `${height}px`);
         }
@@ -253,6 +259,9 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
 const spanApplier = (cells, spans, config, type) => {
     let cellCounter = 0;
     cells.attr(type, function (cell, colIndex) {
+        if (colIndex === 0) {
+            cellCounter = 0;
+        }
         const span = spans[cell.rowIndex][colIndex];
         const placeholder = cell.placeholder;
         const index = {

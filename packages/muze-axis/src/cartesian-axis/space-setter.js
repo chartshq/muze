@@ -133,7 +133,7 @@ export const spaceSetter = (context, spaceConfig) => {
 
                 if (tickInterval < minTickWidth && rotation !== 0) {
                     // set smart ticks and rotation config
-                    labelConfig.rotation = labels.rotation === null ? -90 : rotation;
+                    labelConfig.rotation = rotation;
                     // Remove ticks if not enough height
                     if (tickInterval < minTickHeight) {
                         heightForTicks = availHeight;
@@ -189,7 +189,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const range = context.range();
 
                 // Get Tick Interval
-                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks * 2;
+                tickInterval = ((range[1] - range[0]) / (tickValues || domain).length) - minWidthBetweenTicks;
 
                 // Get height available for ticks
                 heightForTicks = availHeight - axisNameHeight - tickSize - namePadding;
@@ -199,13 +199,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     labelConfig.rotation = rotation === null ? -90 : rotation;
                     labelConfig.smartTicks = false;
 
-                    // Ticks with overlapping height
-                    if (tickInterval < minTickHeight) {
-                        heightForTicks = 0;
-                        tickInterval = 0;
-                        context.renderConfig({ showInnerTicks: false, showOuterTicks: false });
-                        context.range([minTickHeight / 2, availWidth - minTickHeight / 2]);
-                    }
+                    tickInterval = Math.max(heightForTicks, minTickWidth);
                 } else if (tickValues) {
                     const interval = (availWidth / domain.length) - minWidthBetweenTicks;
                     if (interval < minTickWidth) {
@@ -213,7 +207,7 @@ export const spaceSetter = (context, spaceConfig) => {
                     }
                 }
                 if (availHeight < axisNameHeight) {
-                    context.renderConfig({ show: false, showInnerTicks: false, showOuterTicks: false });
+                    context.renderConfig({ show: false });
                 }
 
                 context.maxTickSpaces({
