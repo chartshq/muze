@@ -44,9 +44,13 @@ const barEnterFn = (elem, d) => {
  */
 /* istanbul ignore next */ export const drawRects = (params) => {
     const { layer, points, container, keyFn } = params;
+    const graphicElems = layer._graphicElems;
     const updateFns = {
         enter (elem, d) { barEnterFn(elem, d); },
-        update (elem, d, i) { transitionBars(layer, elem, d, i, params); }
+        update (elem, d, i) {
+            graphicElems[d.rowId] = elem;
+            transitionBars(layer, elem, d, i, params);
+        }
     };
     return makeElement(container, 'rect', points, null, updateFns, keyFn);
 };

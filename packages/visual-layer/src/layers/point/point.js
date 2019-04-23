@@ -54,7 +54,7 @@ export default class PointLayer extends BaseLayer {
      * @return {Object} Default configuration of the point layer
      */
     static defaultConfig () {
-        return defaultConfig;
+        return defaultConfig();
     }
 
     static defaultPolicy (conf, userConf) {
@@ -181,6 +181,8 @@ export default class PointLayer extends BaseLayer {
         containerSelection.classed(qualifiedClassName.join(' '), true).classed(className, true);
 
         this._points = this.generateDataPoints(normalizedData, keys);
+        this._graphicElems = {};
+
         const schema = this.data().getSchema();
         makeElement(container, 'g', this._points, null, {
             update: (group, points) => {

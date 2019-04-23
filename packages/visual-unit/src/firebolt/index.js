@@ -1,6 +1,7 @@
 import { FieldType } from 'muze-utils';
 import { Firebolt } from '@chartshq/muze-firebolt';
 import { registerListeners } from './helper';
+import { isXandYMeasures, getSelectionRejectionModel } from '../helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
 
@@ -67,6 +68,12 @@ export default class UnitFireBolt extends Firebolt {
         return (data, config) => {
             let isSourceFieldPresent = true;
             let isMutableAction = false;
+            const context = this.context;
+            const {
+                model: propagationData,
+                entryRowIds,
+                exitRowIds
+            } = getSelectionRejectionModel(context.data(), data, isXandYMeasures(context), context._cachedValuesMap());
             const propPayload = config.payload;
             const sourceIdentifiers = config.sourceIdentifiers;
             const enabledFn = config.enabled;
@@ -76,19 +83,19 @@ export default class UnitFireBolt extends Firebolt {
             if (sourceIdentifiers) {
                 const fieldsConfig = sourceIdentifiers.getFieldsConfig();
                 const sourceIdentifierFields = Object.keys(fieldsConfig);
-                const propFields = Object.keys(data[0].getFieldsConfig());
+                const propFields = Object.keys(propagationData[0].getFieldsConfig());
                 if (!Object.values(fieldsConfig).some(d => d.def.type === FieldType.MEASURE)) {
                     isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1);
                 }
             }
 
-            const payload = payloadFn(this.context, data, config);
+            const payload = payloadFn(context, propagationData, config);
             const sourceBehaviours = this._sourceBehaviours;
             const filterFn = sourceBehaviours[action] || sourceBehaviours['*'];
             let enabled = true;
 
             if (filterFn) {
-                enabled = filterFn(propPayload || {}, this.context);
+                enabled = filterFn(propPayload || {}, context);
             }
 
             if (enabledFn) {
@@ -103,7 +110,9 @@ export default class UnitFireBolt extends Firebolt {
 
                 const propagationInf = {
                     propagate: false,
-                    data,
+                    data: propagationData,
+                    entryRowIds,
+                    exitRowIds,
                     propPayload,
                     sourceIdentifiers,
                     persistent: false,
@@ -126,13 +135,6 @@ export default class UnitFireBolt extends Firebolt {
         const data = this.context.data();
         if (data) {
             this.createSelectionSet(data.getData().uids, behaviours);
-        }
-        return this;
-    }
-
-    initializeSideEffects () {
-        if (this.context.data()) {
-            super.initializeSideEffects();
         }
         return this;
     }

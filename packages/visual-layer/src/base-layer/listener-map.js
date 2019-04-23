@@ -1,57 +1,36 @@
-import { CommonProps, STATE_NAMESPACES } from 'muze-utils';
-import { encodingFieldInfRetriever } from '../helpers';
 import * as PROPS from '../enums/props';
+import { encodingFieldInfRetriever } from '../helpers';
+import { STATE_NAMESPACES } from 'muze-utils';
 
-const renderLayer = (context) => {
-    const mount = context.mount();
-    if (mount) {
-        context.render(mount);
-        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
-    }
-};
-
-export const listenerMap = (context, ns) => [
+export const listenerMap = [
     {
-        props: [`${ns.local}.${PROPS.DATA}`],
-        listener: ([, data]) => {
+        props: [`${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${PROPS.DATA}`],
+        type: 'registerImmediateListener',
+        listener: (context, [, data]) => {
             const config = context.config();
-            const encodingValue = config.encoding;
-            if (data && encodingValue) {
-                const fieldsConfig = data.getFieldsConfig();
-                const encodingFieldsInf = encodingFieldInfRetriever[context.coord()](encodingValue, fieldsConfig);
-                context.encodingFieldsInf(encodingFieldsInf);
-                context.resolveTransformType();
-                context._transformedData = context.getTransformedData(data, config,
-                    context.transformType(), encodingFieldsInf);
-                context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
-                const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
-                    context.data().getFieldsConfig());
-                context._domain = domain;
-                !context._updateLock && context.domain(domain);
+            if (data && config) {
+                if (context._cacheEnabled) {
+                    context._cachedData.push(data);
+                } else {
+                    context._cachedData = [data];
+                }
+                const encodingValue = config.encoding;
+                if (data && encodingValue) {
+                    const fieldsConfig = data.getFieldsConfig();
+                    const encodingFieldsInf = encodingFieldInfRetriever[context.coord()](encodingValue, fieldsConfig);
+                    context.encodingFieldsInf(encodingFieldsInf);
+                    context.resolveTransformType();
+                    context._transformedData = context.getTransformedData(data, config,
+                        context.transformType(), encodingFieldsInf);
+                    context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
+                    if (config.calculateDomain !== false) {
+                        const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
+                        context.data().getFieldsConfig());
+                        context.domain(domain);
+                    }
+                }
             }
         },
-        type: 'registerImmediateListener'
-    },
-    {
-        props: [`${ns.local}.${PROPS.CONFIG}`],
-        listener: ([, config]) => {
-            const calculateDomain = config.calculateDomain;
-            const props = context.getRenderProps();
-            const store = context.store();
-            const namespaceInf = {
-                namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}.${context.metaInf().namespace}`,
-                key: 'renderListener'
-            };
-            store.unsubscribe(namespaceInf);
-            if (calculateDomain === false) {
-                props.push(`${ns.local}.${PROPS.DATA}`);
-            }
-            store.registerChangeListener(props,
-                () => {
-                    renderLayer(context);
-                }, false, namespaceInf);
-        },
-        type: 'registerImmediateListener'
+        namespace: context => context.metaInf().namespace
     }
 ];
-

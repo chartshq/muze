@@ -77,7 +77,6 @@ export {
     isEqual,
     isSimpleObject,
     nextFrame,
-    filterPropagationModel,
     getObjProp,
     getDataModelFromIdentifiers,
     getDataModelFromRange,
@@ -102,7 +101,8 @@ export {
     temporalFields,
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortFieldByType
 } from './common-utils';
 
 export {
@@ -138,7 +138,6 @@ export {
 } from 'd3-time';
 
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
-
 export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';

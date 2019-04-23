@@ -8,7 +8,8 @@ import {
     STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     getObjProp,
-    COORD_TYPES
+    COORD_TYPES,
+    CommonProps
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -33,23 +34,25 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     const interactionType = config.interactionType;
     interactionStyles.forEach((style) => {
         const styleType = style.type;
-        elements.style(styleType, ((d) => {
-            const { colorTransform, stateColor, originalColor } = d.meta;
-            colorTransform[interactionType] = colorTransform[interactionType] || {};
-            if (apply && !colorTransform[interactionType][styleType]) {
-                // fade selections
-                colorTransform[interactionType][styleType] = style.intensity;
-                const color = transfromColor(colorAxis, d, styleType, style.intensity).color;
-                return color;
-            }
-            if (!apply && colorTransform[interactionType][styleType]) {
-                 // unfade selections
-                colorTransform[interactionType][styleType] = null;
-                return transfromColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
-            }
-            const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor;
-            return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a || 1})`;
-        }));
+        elements.forEach((elem) => {
+            elem.style(styleType, ((d) => {
+                const { colorTransform, stateColor, originalColor } = d.meta;
+                colorTransform[interactionType] = colorTransform[interactionType] || {};
+                if (apply && !colorTransform[interactionType][styleType]) {
+                    // fade selections
+                    colorTransform[interactionType][styleType] = style.intensity;
+                    const color = transfromColor(colorAxis, d, styleType, style.intensity).color;
+                    return color;
+                }
+                if (!apply && colorTransform[interactionType][styleType]) {
+                     // unfade selections
+                    colorTransform[interactionType][styleType] = null;
+                    return transfromColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                }
+                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor;
+                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a || 1})`;
+            }));
+        });
     });
 };
 
@@ -461,6 +464,14 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
     });
 };
 
+
+export const renderLayer = (context) => {
+    const mount = context.mount();
+    if (mount) {
+        context.render(mount);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+    }
+};
 export const initializeGlobalState = (context) => {
     const store = context.store();
     const globalState = context.constructor.getState()[0];

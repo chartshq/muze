@@ -77,7 +77,10 @@ d3.json('../../data/cars.json', (data) => {
 
     var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
+        const canvas = env.canvas().columns(['Origin', 'Acceleration'])
+        .rows(columns).data(rootData).height(400).width(400)
+        .detail(['Maker'])
+        .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
             field: 'Origin'
         }).mount('#chart')
 });

@@ -1,6 +1,6 @@
 import { CLASSPREFIX } from '../../enums/constants';
 
-export const defaultConfig = {
+export const defaultConfig = () => ({
     defClassName: 'layer-point',
     className: '',
     classPrefix: CLASSPREFIX,
@@ -48,4 +48,4 @@ export const defaultConfig = {
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],
     sizes: [20, 30, 40, 50, 60, 70]
-};
+});

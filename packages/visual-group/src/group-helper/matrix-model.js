@@ -120,6 +120,22 @@ const getSplitModelHashMap = (splitModels, facetInfo) => {
 
     return { splitModelsHashMap, rowKeys, colKeys };
 };
+/**
+ * Formats row or columns keys with the provided formatter.
+ *
+ * @param {Array} keys - The collection of row or column keys.
+ * @param {Array} formatterList - The list of corresponding formatter.
+ */
+const formatKeys = (keys, formatterList) => {
+    const formattedKeys = [];
+    keys.forEach((rKeys, rIdx) => {
+        formattedKeys[rIdx] = [];
+        rKeys.forEach((key, idx) => {
+            formattedKeys[rIdx][idx] = formatterList[idx](key);
+        });
+    });
+    return formattedKeys;
+};
 
 /**
 *
@@ -152,6 +168,7 @@ projections
         col += colIndex;
 
         matrix[row] = matrix[row] || [];
+        // sortFacetFields(rowFacets, rowKeys, globalConfig);
 
         const projectionIndexObject = {
             indices: {
@@ -202,6 +219,7 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
         let currentColumnIndex = 0;
         const { keyArr: rowKeyArr, joinedKey: rowKey } = rowKeyObj;
         const newRowIndex = currentRowIndex;
+        // sortFacetFields(colFacets, columnKeys, globalConfig);
 
         colKeys.forEach((colKeyObj) => {
             let context = {};
@@ -235,11 +253,12 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
         currentRowIndex++;
     });
 
-    // Getting column keys
-    const transposedColKeys = colKeys.length > 0 ? colKeys[0].keyArr.map((col, i) =>
-        colKeys.map(row => row.keyArr[i])) : colKeys.map(e => e.keyArr);
+    const formattedColKeys = formatKeys(colKeys.map(e => e.keyArr), colFacets.map(facetField => facetField.rawFormat()));
+    const formattedRowKeys = formatKeys(rowKeys.map(e => e.keyArr), rowFacets.map(facetField => facetField.rawFormat()));
 
-    console.log(new Date().getTime() - x);
+     // Getting column keys
+    const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>
+     formattedColKeys.map(row => row[i])) : formattedColKeys;
 
-    return { matrix, rowKeys: rowKeys.map(e => e.keyArr), columnKeys: transposedColKeys };
+    return { matrix, rowKeys: formattedRowKeys, columnKeys: transposedColKeys };
 };

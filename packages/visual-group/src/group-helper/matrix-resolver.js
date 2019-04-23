@@ -307,13 +307,11 @@ export default class MatrixResolver {
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
-        const globalState = VisualUnit.getState()[0];
-        const globalStates = {};
         const store = this.store();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
-                const namespace = `${i}${j}`;
+                const namespace = `unit${i}-${j}`;
 
                 unit = VisualUnit.create({
                     layerRegistry,
@@ -322,7 +320,6 @@ export default class MatrixResolver {
                     smartLabel,
                     lifeCycleManager
                 });
-                globalStates[namespace] = null;
                 unit.metaInf({
                     rowIndex: i,
                     colIndex: j,
@@ -339,11 +336,6 @@ export default class MatrixResolver {
                 .coord(coord);
             el.config(unitConfig);
         });
-
-        for (const key in globalState) {
-            store.append(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${key}`, globalStates);
-        }
-
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
     }
@@ -446,7 +438,10 @@ export default class MatrixResolver {
 
         const units = [];
         const matrixLayers = this.matrixLayers();
-
+        const props = [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`,
+            `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
+        const store = this.store();
+        store.lockCommits(props);
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -455,7 +450,8 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-
+        store.unlockCommits([props[0]])
+            .unlockCommits([props[1]]);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }

@@ -12,8 +12,10 @@ import {
  * @param {Array.<Object>} data Data of the elements.
  * @return {Selection} d3 selection of the elements.
  */
-const drawText = (container, data, config, smartLabel) => {
+const drawText = (container, data, config, layerInst) => {
     const selection = selectElement(container).selectAll('g').data(data);
+    const { smartLabel } = layerInst._dependencies;
+    const graphicElems = layerInst._graphicElems;
 
     const selectionMerge = selection.enter().append('g')
         .each(function (dataObj) {
@@ -26,6 +28,7 @@ const drawText = (container, data, config, smartLabel) => {
     smartLabel.setStyle(style);
     selectionMerge.each(function (dataObj) {
         const element = selectElement(this);
+        graphicElems[dataObj.rowId] = element;
         const { update, text, color, textanchor, style: textStyle } = dataObj;
         const background = dataObj.background;
         let backgroundVal;

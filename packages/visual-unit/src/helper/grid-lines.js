@@ -49,6 +49,7 @@ const getLayerDefinition = (context, axes, type, orientation) => {
             defClassName: `${defClassName}-${orientation}`,
             className: config.className,
             name: orientation,
+            calculateDomain: false,
             individualClassName: (data, i) => {
                 let className;
                 const isNegativeDomain = isLinearScale && axis.domain()[0] < 0;
@@ -160,23 +161,24 @@ export const createGridLineLayer = (context) => {
         const definitions = getGridLayerDefinitions(context, config, type);
 
         const sel = `_${type}Selection`;
-        context[sel] = createSelection(context[sel], () => {
+        context[sel] = createSelection(context[sel], (atomicDef) => {
             const inst = layerFactory.getLayerInstance({ mark });
             inst.dependencies(context._layerDeps);
+            const name = atomicDef.definition.name;
+            inst.metaInf({
+                unitRowIndex: metaInf.rowIndex,
+                unitColIndex: metaInf.colIndex,
+                namespace: `${metaInf.namespace}${type}${name}`,
+                parentNamespace: metaInf.namespace
+            })
+                .store(store);
             return inst;
         }, definitions, atomicDef => atomicDef.definition.name);
         context[sel].each((layer, atomicDef) => {
             const definition = atomicDef.definition;
-            const name = definition.name;
             const sConf = layerFactory.getSerializedConf(mark, definition);
             const axesObj = atomicDef.axes;
-            layer.metaInf({
-                unitRowIndex: metaInf.rowIndex,
-                unitColIndex: metaInf.colIndex,
-                namespace: `${metaInf.namespace}${type}${name}`
-            })
-                .store(store)
-                .config(sConf)
+            layer.config(sConf)
                 .dataProps({
                     timeDiffs
                 })
@@ -188,15 +190,11 @@ export const createGridLineLayer = (context) => {
 
 export const attachDataToGridLineLayers = (context) => {
     const axes = context.axes();
-    const measurement = {
-        width: context.width(),
-        height: context.height()
-    };
     const gridLines = context._gridLines;
     const gridBands = context._gridBands;
     const gridLayerData = getGridLayerData(axes, context.fields(), context.data().getFieldsConfig());
     [].concat(...gridBands, ...gridLines).forEach((inst) => {
-        inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y).measurement(measurement);
+        inst.data(inst.axes().x ? gridLayerData.x : gridLayerData.y);
     });
 };
 
@@ -205,8 +203,12 @@ export const renderGridLineLayers = (context, container) => {
     const classPrefix = config.classPrefix;
     const gridLines = context._gridLines;
     const gridBands = context._gridBands;
-
+    const measurement = {
+        width: context.width(),
+        height: context.height()
+    };
     const gridLineParentGroup = makeElement(container, 'g', [1], `${classPrefix}-${GRID_PARENT_GROUP}`);
+
     [[gridLines, `${classPrefix}-${GRID_LINE_PARENT_GROUP_CLASS}`],
             [gridBands, `${classPrefix}-${GRID_BAND_PARENT_GROUP_CLASS}`]].forEach((entry) => {
                 const [instances, parentGroupClass] = entry;
@@ -214,7 +216,9 @@ export const renderGridLineLayers = (context, container) => {
                 const className = `${parentGroupClass}-group`;
                 makeElement(mountPoint, 'g', instances, `.${className}`, {
                     update: (group, instance) => {
-                        instance.dataProps({ timeDiffs: context._timeDiffs }).mount(group.node());
+                        instance.dataProps({ timeDiffs: context._timeDiffs })
+                            .measurement(measurement)
+                            .mount(group.node());
                     }
                 });
             });

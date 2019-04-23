@@ -1,8 +1,6 @@
 import {
     mergeRecursive,
     hasTouch,
-    filterPropagationModel,
-    FieldType,
     selectElement,
     isSimpleObject
 } from 'muze-utils';
@@ -408,14 +406,10 @@ export default class Firebolt {
         const context = this.context;
         const filteredDataModel = propagationInf.data ? propagationInf.data :
             context.getDataModelFromIdentifiers(criteria, 'all');
-        const xFields = context.fields().x || [];
-        const yFields = context.fields().y || [];
-        const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
-        const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
         return {
             model: filteredDataModel,
-            uids: criteria === null ? null : (propagationInf.data ? filterPropagationModel(this.getFullData(),
-                propagationInf.data[0], xMeasures && yMeasures).getData().uids : filteredDataModel[0].getData().uids)
+            uids: criteria === null ? null : (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids())
         };
     }
 

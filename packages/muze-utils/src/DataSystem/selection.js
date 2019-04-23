@@ -1,3 +1,10 @@
+const sortSelection = (dataObjects, updateData, sortFn) =>
+    (a, b) => {
+        const kA = a[0];
+        const kB = b[0];
+        return sortFn([a[0], dataObjects.get(kA), updateData.get(kA)], [kB, dataObjects.get(kB), updateData.get(kB)]);
+    };
+
 /**
  * This class represents a selection applied on a data array.
  *
@@ -32,9 +39,10 @@ class Selection {
         const tempMap = new Map();
         const duplicateData = new Map();
         const updatedData = this._updatedata;
+        const idGetter = this._idGetter;
 
         newData.forEach((...params) => {
-            const key = this.idGetter ? this._idGetter(...params) : params[1];
+            const key = idGetter ? idGetter(...params) : params[1];
             if (!tempMap.has(key)) {
                 tempMap.set(key, params[0]);
             } else {
@@ -220,6 +228,16 @@ class Selection {
         return this;
     }
 
+    sort (sortFn) {
+        const updateData = this._updatedata;
+        const dataObjects = this._dataObjects;
+        const sortSel = sortSelection(dataObjects, updateData, sortFn);
+
+        this._updatedata = new Map([...updateData.entries()].sort(sortSel));
+        this._dataObjects = new Map([...dataObjects.entries()].sort(sortSel));
+        return this;
+    }
+
     /**
      *  Gets the object bound to a class
      *
@@ -227,16 +245,32 @@ class Selection {
      * @memberof Selection
      */
     getObjects () {
-        const objects = [];
+        let currentData;
         let val;
-        const values = this._dataObjects.values();
-
-        while (val = values.next().value) {
-            objects.push(val);
+        const objects = [];
+        const dataObjects = this._dataObjects;
+        // select the data to create object
+        switch (this._mode) {
+        case 'enter':
+            currentData = this._enterdata;
+            break;
+        case 'exit':
+            currentData = this._exitdata;
+            break;
+        default:
+            currentData = this._updatedata;
         }
+
+        const entries = currentData.entries();
+
+        while (val = entries.next().value) {
+            if (dataObjects.has(val[0])) {
+                objects.push(dataObjects.get(val[0]));
+            }
+        }
+
         return objects;
     }
-
 }
 
 export default Selection;

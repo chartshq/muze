@@ -9,7 +9,8 @@ import {
     selectElement,
     getEvent,
     require,
-    DateTimeFormatter
+    DateTimeFormatter,
+    Store
 } from 'muze-utils';
 
 import {
@@ -176,5 +177,5 @@ muze.utils = {
     DateTimeFormatter,
     require
 };
-
+muze.Model = new Store().model.constructor;
 export default muze;
