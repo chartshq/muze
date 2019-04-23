@@ -120,7 +120,6 @@ export default class VisualUnit {
                     ...['x', 'y'].map(type => `${groupNs}.domain.${type}`)],
                 listener: (context, [, width], [, height]) => {
                     if (width && height) {
-
                         attachDataToGridLineLayers(context);
                     }
                 },
@@ -153,13 +152,13 @@ export default class VisualUnit {
                     }
                 }
             ]
-        }
+        };
     }
 
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
-            const throwback = this._dependencies.throwback;
+            const { throwback, fireboltDeps } = this._dependencies;
             const metaInf = this.metaInf();
             store.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
             throwback.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
@@ -169,10 +168,10 @@ export default class VisualUnit {
             });
 
             this.firebolt(new UnitFireBolt(this, {
-                physical: physicalActions,
-                behavioural: behaviouralActions,
+                physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
+                behavioural: Object.assign({}, behaviouralActions, fireboltDeps.behaviouralActions),
                 physicalBehaviouralMap: actionBehaviourMap
-            }, sideEffects, behaviourEffectMap));
+            }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
             return this;
         }
         return this._store;
@@ -445,7 +444,7 @@ export default class VisualUnit {
      * @memberof VisualUnit
      */
     remove () {
-        const formalName =  this.constructor.formalName();
+        const formalName = this.constructor.formalName();
         const { lifeCycleManager, throwback } = this._dependencies;
         const { namespace } = this.metaInf();
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
@@ -455,9 +454,9 @@ export default class VisualUnit {
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers
-        lifeCycleManager.notify({ client: this.layers(), action: 'beforeremove', formalName: 'layer' });
-        [...layers, ...this._gridLines, ...this._gridBands].forEach((layer) => layer.remove());
-        lifeCycleManager.notify({ client: this.layers(), action: 'removed', formalName: 'layer' });
+        lifeCycleManager.notify({ client: layers, action: 'beforeremove', formalName: 'layer' });
+        [...layers, ...this._gridLines, ...this._gridBands].forEach(layer => layer.remove());
+        lifeCycleManager.notify({ client: layers, action: 'removed', formalName: 'layer' });
         lifeCycleManager.notify({ client: this, action: 'removed', formalName: 'unit' });
         return this;
     }

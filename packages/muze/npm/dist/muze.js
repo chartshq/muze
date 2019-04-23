@@ -26152,6 +26152,7 @@ function () {
     value: function config() {
       if (arguments.length) {
         this._config = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(this._config, arguments.length <= 0 ? undefined : arguments[0]);
+        Object(_helper__WEBPACK_IMPORTED_MODULE_3__["setSideEffectConfig"])(this.sideEffects(), this._config);
         return this;
       }
 
@@ -26632,12 +26633,13 @@ function () {
 /*!****************************************************!*\
   !*** ./packages/muze-firebolt/src/helper/index.js ***!
   \****************************************************/
-/*! exports provided: initializeSideEffects, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getModelFromSet, getSetInfo, getSideEffects, unionSets */
+/*! exports provided: initializeSideEffects, setSideEffectConfig, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getModelFromSet, getSetInfo, getSideEffects, unionSets */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeSideEffects", function() { return initializeSideEffects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setSideEffectConfig", function() { return setSideEffectConfig; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializeBehaviouralActions", function() { return initializeBehaviouralActions; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initializePhysicalActions", function() { return initializePhysicalActions; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "changeSideEffectAvailability", function() { return changeSideEffectAvailability; });
@@ -26661,16 +26663,21 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var initializeSideEffects = function initializeSideEffects(context, sideEffects) {
   var sideEffectsMap = context._sideEffects;
-  var config = context.config();
   sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
   sideEffects.forEach(function (SideEffect) {
     var formalName = SideEffect.formalName();
     var sideEffectInstance = sideEffectsMap[formalName];
     sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
-    var sideEffectConf = config[formalName];
-    sideEffectConf && sideEffectsMap[formalName].config(sideEffectConf);
   });
   return sideEffectsMap;
+};
+var setSideEffectConfig = function setSideEffectConfig(sideEffects, config) {
+  for (var key in sideEffects) {
+    var sideEffect = sideEffects[key];
+    var formalName = sideEffect.constructor.formalName();
+    var sideEffectConf = config[formalName];
+    sideEffectConf && sideEffect.config(sideEffectConf);
+  }
 };
 var initializeBehaviouralActions = function initializeBehaviouralActions(context, actions) {
   var dispatchableBehaviours = {};
@@ -55909,22 +55916,19 @@ function () {
 
       for (var prop in listenersObj) {
         var subNamespaces = listenersObj[prop].subNamespaces;
+        var propInf = {
+          subNamespace: subNamespace,
+          prop: prop,
+          propListenerMap: propListenerMap
+        };
 
         if (subNamespaces[subNamespace]) {
-          removePropValue(this, subNamespaces[subNamespace], {
-            subNamespace: subNamespace,
-            prop: prop,
-            propListenerMap: propListenerMap
-          });
+          removePropValue(this, subNamespaces[subNamespace], propInf);
           delete subNamespaces[subNamespace];
         } else {
           for (var ns in subNamespaces) {
             var snsMap = subNamespaces[ns];
-            removePropValue(this, snsMap, {
-              subNamespace: subNamespace,
-              prop: prop,
-              propListenerMap: propListenerMap
-            });
+            removePropValue(this, snsMap, propInf);
 
             if (!snsMap.size) {
               delete subNamespaces[ns];
@@ -56241,9 +56245,10 @@ function () {
   }, {
     key: "registerPhysicalActions",
     value: function registerPhysicalActions(action) {
-      canvasIterator(this._registrableComponents, function (firebolt) {
-        firebolt.registerPhysicalActions(action);
-      }, function (canvas) {
+      var canvases = this._registrableComponents;
+      canvases.forEach(function (canvas) {
+        var vGroup = canvas.composition().visualGroup;
+        vGroup.resolver().setFireboltDependencies('physicalActions', action);
         canvas.firebolt().registerPhysicalActions(action);
       });
       return this;
@@ -56292,9 +56297,10 @@ function () {
         actions[_key2] = arguments[_key2];
       }
 
-      canvasIterator(this._registrableComponents, function (firebolt) {
-        firebolt.registerBehaviouralActions(actions);
-      }, function (canvas) {
+      var canvases = this._registrableComponents;
+      canvases.forEach(function (canvas) {
+        var vGroup = canvas.composition().visualGroup;
+        vGroup.resolver().setFireboltDependencies('behaviouralActions', actions);
         canvas.firebolt().registerBehaviouralActions(actions);
       });
       return this;
@@ -56438,9 +56444,10 @@ function () {
         sideEffects[_key3] = arguments[_key3];
       }
 
-      canvasIterator(this._registrableComponents, function (firebolt) {
-        firebolt.registerSideEffects(sideEffects);
-      }, function (canvas) {
+      var canvases = this._registrableComponents;
+      canvases.forEach(function (canvas) {
+        var vGroup = canvas.composition().visualGroup;
+        vGroup.resolver().setFireboltDependencies('sideEffects', sideEffects);
         canvas.firebolt().registerSideEffects(sideEffects);
       });
       return this;
@@ -67878,6 +67885,8 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -67934,6 +67943,7 @@ function () {
     this._datamodelTransform = {};
     this._units = [];
     this._cacheMaps = {};
+    this._fireboltDeps = {};
     this._axes = {
       x: {},
       y: {},
@@ -68229,6 +68239,12 @@ function () {
         y: new Set()
       });
     }
+  }, {
+    key: "setFireboltDependencies",
+    value: function setFireboltDependencies(prop, deps) {
+      Object.assign(this._fireboltDeps, _defineProperty({}, prop, deps));
+      return this;
+    }
     /**
      *
      *
@@ -68251,8 +68267,9 @@ function () {
       var _this$dependencies = this.dependencies(),
           smartLabel = _this$dependencies.smartlabel,
           lifeCycleManager = _this$dependencies.lifeCycleManager,
-          throwback = _this$dependencies.throwback; // Provide the source for the matrix
+          throwback = _this$dependencies.throwback;
 
+      var fireboltDeps = this._fireboltDeps; // Provide the source for the matrix
 
       var units = [[]]; // Setting unit configuration
 
@@ -68270,7 +68287,8 @@ function () {
           }, {
             smartLabel: smartLabel,
             lifeCycleManager: lifeCycleManager,
-            throwback: throwback
+            throwback: throwback,
+            fireboltDeps: fireboltDeps
           });
           unit.metaInf({
             rowIndex: i,
@@ -78348,7 +78366,9 @@ function () {
     value: function store() {
       if (arguments.length) {
         var store = this._store = arguments.length <= 0 ? undefined : arguments[0];
-        var throwback = this._dependencies.throwback;
+        var _this$_dependencies = this._dependencies,
+            throwback = _this$_dependencies.throwback,
+            fireboltDeps = _this$_dependencies.fireboltDeps;
         var metaInf = this.metaInf();
         store.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
         throwback.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
@@ -78357,10 +78377,10 @@ function () {
           namespace: "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE)
         });
         this.firebolt(new _firebolt__WEBPACK_IMPORTED_MODULE_8__["default"](this, {
-          physical: _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["physicalActions"],
-          behavioural: _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["behaviouralActions"],
+          physical: Object.assign({}, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["physicalActions"], fireboltDeps.physicalActions),
+          behavioural: Object.assign({}, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["behaviouralActions"], fireboltDeps.behaviouralActions),
           physicalBehaviouralMap: _firebolt_action_behaviour_map__WEBPACK_IMPORTED_MODULE_3__["actionBehaviourMap"]
-        }, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["sideEffects"], _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["behaviourEffectMap"]));
+        }, Object.assign({}, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["sideEffects"], fireboltDeps.sideEffects), _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["behaviourEffectMap"]));
         return this;
       }
 
@@ -78675,9 +78695,9 @@ function () {
     key: "remove",
     value: function remove() {
       var formalName = this.constructor.formalName();
-      var _this$_dependencies = this._dependencies,
-          lifeCycleManager = _this$_dependencies.lifeCycleManager,
-          throwback = _this$_dependencies.throwback;
+      var _this$_dependencies2 = this._dependencies,
+          lifeCycleManager = _this$_dependencies2.lifeCycleManager,
+          throwback = _this$_dependencies2.throwback;
 
       var _this$metaInf = this.metaInf(),
           namespace = _this$metaInf.namespace;

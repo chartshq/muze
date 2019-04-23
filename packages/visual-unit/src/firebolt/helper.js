@@ -1,4 +1,3 @@
-import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 
 export const initSideEffects = (sideEffects, firebolt) => {

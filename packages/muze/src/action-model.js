@@ -96,9 +96,10 @@ class ActionModel {
      * @return {ActionModel} Instance of the action model.
      */
     registerPhysicalActions (action) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerPhysicalActions(action);
-        }, (canvas) => {
+        const canvases = this._registrableComponents;
+        canvases.forEach((canvas) => {
+            const vGroup = canvas.composition().visualGroup;
+            vGroup.resolver().setFireboltDependencies('physicalActions', action);
             canvas.firebolt().registerPhysicalActions(action);
         });
 
@@ -142,9 +143,10 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerBehaviouralActions (...actions) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerBehaviouralActions(actions);
-        }, (canvas) => {
+        const canvases = this._registrableComponents;
+        canvases.forEach((canvas) => {
+            const vGroup = canvas.composition().visualGroup;
+            vGroup.resolver().setFireboltDependencies('behaviouralActions', actions);
             canvas.firebolt().registerBehaviouralActions(actions);
         });
 
@@ -278,11 +280,13 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerSideEffects (...sideEffects) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerSideEffects(sideEffects);
-        }, (canvas) => {
+        const canvases = this._registrableComponents;
+        canvases.forEach((canvas) => {
+            const vGroup = canvas.composition().visualGroup;
+            vGroup.resolver().setFireboltDependencies('sideEffects', sideEffects);
             canvas.firebolt().registerSideEffects(sideEffects);
         });
+
         return this;
     }
 

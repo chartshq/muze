@@ -1,6 +1,6 @@
+import { STATE_NAMESPACES } from 'muze-utils';
 import * as PROPS from '../enums/props';
 import { encodingFieldInfRetriever } from '../helpers';
-import { STATE_NAMESPACES } from 'muze-utils';
 
 export const listenerMap = [
     {
@@ -24,8 +24,8 @@ export const listenerMap = [
                         context.transformType(), encodingFieldsInf);
                     context._normalizedData = context.getNormalizedData(context._transformedData, fieldsConfig);
                     if (config.calculateDomain !== false) {
-                        const domain = context.calculateDomainFromData(context._normalizedData, context.encodingFieldsInf(),
-                        context.data().getFieldsConfig());
+                        const domain = context.calculateDomainFromData(context._normalizedData,
+                            context.encodingFieldsInf(), context.data().getFieldsConfig());
                         context.domain(domain);
                     }
                 }

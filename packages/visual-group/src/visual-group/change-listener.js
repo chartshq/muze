@@ -30,8 +30,7 @@ export const setupChangeListeners = (context) => {
                     subNamespace: listenerInf.subNamespace
                 });
             });
-        })
-
+        });
     });
 };
 

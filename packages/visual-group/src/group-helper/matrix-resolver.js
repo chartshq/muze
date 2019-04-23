@@ -39,6 +39,7 @@ export default class MatrixResolver {
         this._datamodelTransform = {};
         this._units = [];
         this._cacheMaps = {};
+        this._fireboltDeps = {};
         this._axes = {
             x: {},
             y: {},
@@ -282,6 +283,13 @@ export default class MatrixResolver {
         });
     }
 
+    setFireboltDependencies (prop, deps) {
+        Object.assign(this._fireboltDeps, {
+            [prop]: deps
+        });
+        return this;
+    }
+
     /**
      *
      *
@@ -304,12 +312,15 @@ export default class MatrixResolver {
             lifeCycleManager,
             throwback
         } = this.dependencies();
+        const fireboltDeps = this._fireboltDeps;
+
         // Provide the source for the matrix
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
         const store = this.store();
         store.lockModel();
+
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
@@ -321,7 +332,8 @@ export default class MatrixResolver {
                 }, {
                     smartLabel,
                     lifeCycleManager,
-                    throwback
+                    throwback,
+                    fireboltDeps
                 });
                 unit.metaInf({
                     rowIndex: i,

@@ -12,7 +12,8 @@ import {
     changeSideEffectAvailability,
     initializePhysicalActions,
     unionSets,
-    getSideEffects
+    getSideEffects,
+    setSideEffectConfig
 } from './helper';
 
 /**
@@ -61,6 +62,7 @@ export default class Firebolt {
     config (...config) {
         if (config.length) {
             this._config = mergeRecursive(this._config, config[0]);
+            setSideEffectConfig(this.sideEffects(), this._config);
             return this;
         }
         return this._config;

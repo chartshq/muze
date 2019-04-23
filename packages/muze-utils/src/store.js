@@ -1,6 +1,5 @@
 import Model from 'hyperdis';
 import { defaultValue, getObjProp } from './common-utils';
-import { DATA_TYPE } from './enums';
 
 const initProp = (obj, props, val) => {
     props.forEach((prop) => {
@@ -12,12 +11,10 @@ const initProp = (obj, props, val) => {
     return obj;
 };
 
-const fetchPropValues = (propNames, params, deps) => {
-    return params.map((param, i) => {
-        const prop = propNames[i];
-        return param.map((val) => (val === undefined || val === null ? val : val[deps[prop]]));
-    });
-};
+const fetchPropValues = (propNames, params, deps) => params.map((param, i) => {
+    const prop = propNames[i];
+    return param.map(val => (val === undefined || val === null ? val : val[deps[prop]]));
+});
 
 const addListenerToNamespace = (namespaceInf, fn, context) => {
     let key = namespaceInf.key;
@@ -81,7 +78,7 @@ const registerListener = (context, type, config) => {
     const callbackFn = ((propNames, namespaceVal) => (...params) => {
         const { _savedCommits: commits, _propListenerMap: propListenerMap } = context;
 
-        if (!propNames.some((prop) => getObjProp(propListenerMap, prop, 'disabled'))) {
+        if (!propNames.some(prop => getObjProp(propListenerMap, prop, 'disabled'))) {
             if (namespaceVal) {
                 const listenersObj = context._registeredListeners[namespaceVal];
                 const contextMap = context._contextMap[namespaceVal];
@@ -512,7 +509,7 @@ export const transactor = (holder, options, model, namespaceInf = {}) => {
                                 // Sanitize if required
                                 val = sanitization(val, prevVal, holder);
                             }
-``
+
                             if (typeCheck) {
                                 // Checking if a setter is valid
                                 if (typeof typeCheck === 'function') {
@@ -529,7 +526,7 @@ export const transactor = (holder, options, model, namespaceInf = {}) => {
                                     if (typeCheck(val) === compareTo) {
                                         values.push(val);
                                     }
-                                } else if (typeof typeCheck === DATA_TYPE.STRING) {
+                                } else if (typeof typeCheck === 'string') {
                                     if (typeCheck === 'constructor') {
                                         const typeExpected = spreadParams ? meta.typeExpected[i] :
                                             meta.typeExpected;

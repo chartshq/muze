@@ -1,4 +1,6 @@
 import { Store, FieldType, COORD_TYPES, getObjProp, sortFieldByType } from 'muze-utils';
+import { VisualUnit } from '@chartshq/visual-unit';
+import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -29,8 +31,6 @@ import {
     RADIUS,
     ANGLE
 } from '../enums/constants';
-import { VisualUnit } from '@chartshq/visual-unit';
-import { BaseLayer } from '@chartshq/visual-layer';
 
 const POLAR = COORD_TYPES.POLAR;
 

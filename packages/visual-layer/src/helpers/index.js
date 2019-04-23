@@ -464,7 +464,6 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
     });
 };
 
-
 export const renderLayer = (context) => {
     const mount = context.mount();
     if (mount) {

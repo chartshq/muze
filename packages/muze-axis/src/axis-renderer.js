@@ -223,14 +223,11 @@ export function renderAxis (axisInstance) {
     const axis = axisInstance.axis();
     const scale = axisInstance.scale();
     const {
-        _axisNameStyle: axisNameStyle,
         _tickLabelStyle: tickLabelStyle,
         _tickFormatter: axisTickFormatter
      } = axisInstance;
     const {
         orientation,
-        name,
-
         axisNamePadding,
         className,
         id,
