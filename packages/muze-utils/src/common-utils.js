@@ -62,6 +62,8 @@ import { dataSelect } from './DataSystem';
 import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
+const { CATEGORICAL, TEMPORAL } = DimensionSubtype;
+const { STRING, FUNCTION } = DATA_TYPE;
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
 
@@ -168,7 +170,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
-    case DimensionSubtype.CATEGORICAL:
+    case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
         break;
     default:
@@ -209,7 +211,7 @@ const unionDomain = (domains, fieldType) => {
     let domain = [];
     domains = domains.filter(dom => dom && dom.length);
     if (domains.length) {
-        if (fieldType === DimensionSubtype.CATEGORICAL) {
+        if (fieldType === CATEGORICAL) {
             domain = [].concat(...domains);
         } else {
             domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
@@ -762,7 +764,7 @@ const transactor = (holder, options, model, namespaceInf = {}) => {
                                         if (typeCheck(val) === compareTo) {
                                             values.push(val);
                                         }
-                                    } else if (typeof typeCheck === DATA_TYPE.STRING) {
+                                    } else if (typeof typeCheck === STRING) {
                                         if (typeCheck === 'constructor') {
                                             const typeExpected = spreadParams ? meta.typeExpected[i] :
                                                 meta.typeExpected;
@@ -1259,7 +1261,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     const selFn = fields => selFields.every((field) => {
         const val = fields[field].value;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-        if (typeof range[0] === DATA_TYPE.STRING) {
+        if (typeof range[0] === STRING) {
             return range.find(d => d === val) !== undefined;
         }
         return range ? val >= range[0] && val <= range[1] : true;
@@ -1529,7 +1531,7 @@ const formatTemporal = (value, interval) => {
 const temporalFields = (dataModel) => {
     const filteredFields = {};
     Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
-        if (fieldObj.subtype() === DimensionSubtype.TEMPORAL) {
+        if (fieldObj.subtype() === TEMPORAL) {
             filteredFields[fieldName] = fieldObj;
         }
     });
@@ -1609,10 +1611,10 @@ const nearestSortingDetails = (dataModel) => {
  * @return {Function} Sort function
  */
 const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
-    if (typeof sortOrder === DATA_TYPE.FUNCTION) {
+    if (typeof sortOrder === FUNCTION) {
         return sortOrder(a, b);
     }
-    if (subType === DimensionSubtype.TEMPORAL) {
+    if (subType === TEMPORAL) {
         return sortOrder === SORT_ORDER_ASCENDING ? a - b : b - a;
     }
     return sortOrder === SORT_ORDER_ASCENDING ? a.localeCompare(b) : b.localeCompare(a);
@@ -1629,15 +1631,15 @@ const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
 const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
 
-    if (sortOrderType !== DATA_TYPE.STRING && sortOrderType !== DATA_TYPE.FUNCTION) {
+    if (sortOrderType !== STRING && sortOrderType !== FUNCTION) {
         return null;
     }
-    if (sortOrderType === DATA_TYPE.STRING &&
+    if (sortOrderType === STRING &&
         sortOrder !== SORT_ORDER_ASCENDING &&
         sortOrder !== SORT_ORDER_DESCENDING) {
         return null;
     }
-    if (subType === DimensionSubtype.TEMPORAL || subType === DimensionSubtype.CATEGORICAL) {
+    if (subType === TEMPORAL || subType === CATEGORICAL) {
         return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
     }
     return null;
