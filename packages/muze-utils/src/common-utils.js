@@ -543,28 +543,31 @@ const generateGetterSetters = (context, props) => {
     Object.entries(props).forEach((propInfo) => {
         const prop = propInfo[0];
         const { sanitization, preset, onset, typeChecker, defaultValue: defVal } = propInfo[1];
-        if (defVal) {
-            context[`_${prop}`] = defVal;
+        const prototype = context.constructor.prototype;
+        if (!(Object.hasOwnProperty.call(prototype, prop))) {
+            if (defVal) {
+                context[`_${prop}`] = defVal;
+            }
+            context[prop] = (...params) => {
+                if (params.length) {
+                    let value = params[0];
+                    if (sanitization) {
+                        value = sanitization(context, params[0], context[`_${prop}`]);
+                    }
+                    if (preset) {
+                        preset(context, value);
+                    }
+                    if (typeChecker && !typeChecker(value)) {
+                        return context[`_${prop}`];
+                    }
+                    context[`_${prop}`] = value;
+                    if (onset) {
+                        onset(context, value);
+                    }
+                    return context;
+                } return context[`_${prop}`];
+            };
         }
-        context[prop] = (...params) => {
-            if (params.length) {
-                let value = params[0];
-                if (sanitization) {
-                    value = sanitization(context, params[0], context[`_${prop}`]);
-                }
-                if (preset) {
-                    preset(context, value);
-                }
-                if (typeChecker && !typeChecker(value)) {
-                    return context[`_${prop}`];
-                }
-                context[`_${prop}`] = value;
-                if (onset) {
-                    onset(context, value);
-                }
-                return context;
-            } return context[`_${prop}`];
-        };
     });
 };
 
