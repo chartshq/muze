@@ -7,10 +7,12 @@ import './styles.scss';
 const addLayer = (layerRegistry, context, sideEffect) => {
     context.addLayer((layerDefs) => {
         const layers = [];
+
         if (layerDefs) {
             layerDefs.forEach((layerDef) => {
                 const mark = layerDef.mark;
                 const layerCls = layerRegistry[mark];
+
                 if (layerCls && layerCls.shouldDrawAnchors()) {
                     const depLayerEncoding = layerDef.def.encoding;
                     const encoding = {
@@ -24,6 +26,7 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                     };
                     const commonName = sideEffect.constructor.formalName();
                     const name = `${layerDef.def.name}-${commonName}`;
+
                     layers.push({
                         name,
                         mark: 'point',
@@ -72,6 +75,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
     addAnchorLayers () {
         const context = this.firebolt.context;
         const layerRegistry = context.registry().layerRegistry;
+
         addLayer(layerRegistry, context, this);
         return this;
     }
@@ -93,12 +97,16 @@ export default class AnchorEffect extends SpawnableSideEffect {
     apply (selectionSet) {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
+
         if (selectionSet.isSourceFieldPresent !== false) {
-            const layers = this.firebolt.context.layers().filter(layer => layer.config().groupId === formalName);
+            const context = this.firebolt.context;
+            const layers = context.layers().filter(layer => layer.config().groupId === formalName);
+
             layers.forEach((layer) => {
-                const linkedLayer = this.firebolt.context.getLayerByName(layer.config().owner);
+                const linkedLayer = context.getLayerByName(layer.config().owner);
                 const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
                 const transformedDataModel = new DataModel(transformedData, schema);
+
                 layer.data(transformedDataModel);
             });
         }

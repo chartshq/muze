@@ -107,7 +107,8 @@ export default class VisualUnit {
         return {
             store: [...listenerMap.map((d) => {
                 const o = Object.assign({}, d);
-                o.props = o.props.map(prop => `${unitNs[1]}.${prop}`);
+                const localNs = unitNs[1];
+                o.props = o.props.map(prop => `${localNs}.${prop}`);
                 return o;
             }), {
                 type: 'registerImmediateListener',
@@ -159,11 +160,12 @@ export default class VisualUnit {
         if (params.length) {
             const store = this._store = params[0];
             const { throwback, fireboltDeps } = this._dependencies;
-            const metaInf = this.metaInf();
-            store.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
-            throwback.addSubNamespace(metaInf.namespace, FORMAL_NAME, this);
+            const { namespace } = this.metaInf();
+
+            store.addSubNamespace(namespace, FORMAL_NAME, this);
+            throwback.addSubNamespace(namespace, FORMAL_NAME, this);
             transactor(this, localOptions, store, {
-                subNamespace: metaInf.namespace,
+                subNamespace: namespace,
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
             });
 

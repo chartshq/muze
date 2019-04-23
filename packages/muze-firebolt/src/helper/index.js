@@ -17,6 +17,7 @@ export const setSideEffectConfig = (sideEffects, config) => {
         const sideEffect = sideEffects[key];
         const formalName = sideEffect.constructor.formalName();
         const sideEffectConf = config[formalName];
+
         sideEffectConf && sideEffect.config(sideEffectConf);
     }
 };

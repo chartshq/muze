@@ -104,7 +104,6 @@ export default class CartesianEncoder extends VisualEncoder {
             0: {},
             1: {}
         };
-        console.log('unionDomain');
         // const sortingDetails = nearestSortingDetails(context.getGroupByData());
         const config = context.config();
         const fieldsObj = {

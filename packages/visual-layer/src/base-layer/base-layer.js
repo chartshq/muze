@@ -74,9 +74,7 @@ export default class BaseLayer extends SimpleLayer {
         super();
 
         generateGetterSetters(this, props);
-        // this.data(data);
         this.axes(axes);
-        // this.config(config);
         this.alias(this.constructor.formalName() + getUniqueId());
         this.dependencies(dependencies);
         this._points = [];
@@ -175,11 +173,11 @@ export default class BaseLayer extends SimpleLayer {
      * @return {Object} Default configuration
      */
     static defaultConfig () {
-        return (() => ({
+        return {
             transform: {
                 type: 'identity'
             }
-        }))();
+        };
     }
 
     /**

@@ -15,7 +15,7 @@ export const listenerMap = [
                     context._cachedData = [data];
                 }
                 const encodingValue = config.encoding;
-                if (data && encodingValue) {
+                if (encodingValue) {
                     const fieldsConfig = data.getFieldsConfig();
                     const encodingFieldsInf = encodingFieldInfRetriever[context.coord()](encodingValue, fieldsConfig);
                     context.encodingFieldsInf(encodingFieldsInf);

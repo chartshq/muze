@@ -1,6 +1,6 @@
 import { CLASSPREFIX } from '../../enums/constants';
 
-export const defaultConfig = () => ({
+export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defClassName: 'layer-bar',
     className: '',
@@ -44,5 +44,5 @@ export const defaultConfig = () => ({
             className: `${CLASSPREFIX}-layer-bar-selected`
         }
     }
-});
+};
 

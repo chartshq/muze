@@ -329,8 +329,8 @@ export const setAxisRange = (context) => {
 
 export const isXandYMeasures = (context) => {
     const { x: xFields, y: yFields } = context.fields();
-    const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
-    const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
+    const [xMeasures, yMeasures] = [xFields, yFields].map(fields => fields
+        .every(field => field.type() === FieldType.MEASURE));
     return xMeasures && yMeasures;
 };
 
@@ -356,10 +356,11 @@ export const getValuesMap = (model, context) => {
 };
 
 export const getSelectionRejectionModel = (model, propModel, measures, propValuesMap) => {
-    const { data, schema } = propModel.getData();
     let rejectionModel;
+    const { data, schema } = propModel.getData();
     const entryRowIds = [];
     const exitRowIds = [];
+
     if (schema.length) {
         const fieldMap = model.getFieldsConfig();
         const rowIdsObj = {};

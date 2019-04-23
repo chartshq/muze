@@ -5,7 +5,6 @@ import {
     easeFns,
     selectElement,
     DimensionSubtype,
-    STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     getObjProp,
     COORD_TYPES,
@@ -471,16 +470,6 @@ export const renderLayer = (context) => {
         context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true, context.metaInf().parentNamespace);
     }
 };
-export const initializeGlobalState = (context) => {
-    const store = context.store();
-    const globalState = context.constructor.getState()[0];
-    const namespace = context.metaInf().namespace;
-    for (const prop in globalState) {
-        store.append(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${prop}`, {
-            [namespace]: null
-        });
-    }
-};
 
 export const resolveInvalidTransformType = (context) => {
     const {
@@ -551,10 +540,12 @@ export const getColorMetaInf = (color, colorAxis) => ({
 });
 
 const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;
+
 const coordValueGetter = (radius, angle, xOffset, yOffset) => ({
     x: getCoordValue(radius, 'cos', angle, xOffset),
     y: getCoordValue(radius, 'sin', angle, yOffset)
 });
+
 export const toCartesianCoordinates = (points, measurement, rangePlot = false) => {
     const xOffset = measurement.width / 2;
     const yOffset = measurement.height / 2;

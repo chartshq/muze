@@ -1,6 +1,6 @@
 import { CLASSPREFIX } from '../../enums/constants';
 
-export const defaultConfig = () => ({
+export const defaultConfig = {
     defClassName: 'layer-tick',
     className: '',
     classPrefix: CLASSPREFIX,
@@ -55,4 +55,5 @@ export const defaultConfig = () => ({
             className: `${CLASSPREFIX}-layer-tick-selected`
         }
     }
-});
+};
+

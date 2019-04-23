@@ -187,7 +187,7 @@ export default class TickLayer extends PointLayer {
      * @memberof TickLayer
      */
     static defaultConfig () {
-        return defaultConfig();
+        return defaultConfig;
     }
 
     /**

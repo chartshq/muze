@@ -65,9 +65,9 @@ const getRowContent = (fieldInf, context, dataInf, config) => {
     const dataLen = data.length;
     const values = [];
     const fieldObj = fieldsConfig[field];
-    const index = fieldObj.index;
-    const interval = fieldObj.def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
-    const nf = fieldObj.def.type === FieldType.MEASURE ? fieldspace.fieldsObj()[field].numberFormat() : val => val;
+    const { index, def } = fieldObj;
+    const interval = def.subtype === DimensionSubtype.TEMPORAL ? timeDiffs[field] : 0;
+    const nf = def.type === FieldType.MEASURE ? fieldspace.fieldsObj()[field].numberFormat() : val => val;
     const formatterFn = getDefaultTooltipFormatterFn(formatters(nf, interval, valueParser)[type],
         defFormatter);
 
