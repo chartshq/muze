@@ -122,12 +122,10 @@ class GeomCell extends SimpleCell {
      */
     updateModel () {
         const unit = this.source();
-        unit.lockModel();
         unit.clearCaching();
         [LAYER_DEF, TRANSFORM, AXES, FIELDS, CONFIG, DATA, AXES, FACET_BY_FIELDS, DETAIL_FIELDS].forEach((prop) => {
             this[prop]() && unit[prop](this[prop]());
         });
-        unit.unlockModel();
         return this;
     }
 

@@ -250,6 +250,15 @@ class VisualGroup extends SimpleGroup {
     createMatrices () {
         createMatrices(this);
     }
+
+    remove () {
+        this.matrixInstance().value.clear();
+        this.resolver().clear();
+        const info = this.placeholderInfo();
+        info.rows = null;
+        info.columns = null;
+        info.values = null;
+    }
 }
 
 export default VisualGroup;

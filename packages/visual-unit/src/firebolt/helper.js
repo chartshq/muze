@@ -1,4 +1,3 @@
-import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 
 export const initSideEffects = (sideEffects, firebolt) => {
@@ -30,23 +29,3 @@ export const dispatchQueuedSideEffects = (context) => {
     });
     context._queuedSideEffects = {};
 };
-
-export const registerListeners = (firebolt) => {
-    const context = firebolt.context;
-
-    // store.registerChangeListener([`local.units.${DATA}`], () => {
-    //     if (!firebolt.context.mount()) {
-    //         const originalData = firebolt.context.cachedData()[0];
-    //         originalData.unsubscribe('propagation');
-    //     }
-    // }, false, context.metaInf());
-
-    context._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW],
-        ([, onlayerdraw]) => {
-            if (onlayerdraw) {
-                dispatchQueuedSideEffects(firebolt);
-                clearActionHistory(firebolt);
-            }
-        });
-};
-

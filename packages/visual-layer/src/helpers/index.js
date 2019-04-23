@@ -464,12 +464,11 @@ export const getPlotMeasurement = (context, dimensionalValues) => {
     });
 };
 
-
 export const renderLayer = (context) => {
     const mount = context.mount();
     if (mount) {
         context.render(mount);
-        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true);
+        context.dependencies().throwback.commit(CommonProps.ON_LAYER_DRAW, true, context.metaInf().parentNamespace);
     }
 };
 export const initializeGlobalState = (context) => {

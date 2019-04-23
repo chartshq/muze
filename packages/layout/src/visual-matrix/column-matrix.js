@@ -220,6 +220,7 @@ export default class ColumnVisualMatrix extends VisualMatrix {
             const oldLogicalSpace = col.getLogicalSpace();
 
             col.setAvailableSpace(cWidths[cIdx] - borderWidth, oldLogicalSpace.height);
+
             rHeights[rIdx] = Math.max(rHeights[rIdx] || 0, Math.floor(col.getLogicalSpace().height));
         }));
         if (maxHeights.length > 0) {

@@ -3,16 +3,22 @@ import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
-    const config = context.config();
     sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
     sideEffects.forEach((SideEffect) => {
         const formalName = SideEffect.formalName();
         const sideEffectInstance = sideEffectsMap[formalName];
         sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
-        const sideEffectConf = config[formalName];
-        sideEffectConf && sideEffectsMap[formalName].config(sideEffectConf);
     });
     return sideEffectsMap;
+};
+
+export const setSideEffectConfig = (sideEffects, config) => {
+    for (const key in sideEffects) {
+        const sideEffect = sideEffects[key];
+        const formalName = sideEffect.constructor.formalName();
+        const sideEffectConf = config[formalName];
+        sideEffectConf && sideEffect.config(sideEffectConf);
+    }
 };
 
 export const initializeBehaviouralActions = (context, actions) => {

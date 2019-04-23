@@ -122,30 +122,27 @@ export default class GridComponent extends MuzeComponent {
      * @return {GridComponent} Instance of the GridComponent
      */
     attachScrollListener () {
+        const scrollBarManager = this.scrollBarManager();
         selectElement(`#${this.component[1][1].renderAt()}`)
-                        .on('wheel', () => {
-                            const event = getEvent();
-                            const {
-                                wheelDeltaX,
-                                wheelDeltaY
-                            } = event;
+            .on('wheel', () => {
+                const event = getEvent();
+                const {
+                    wheelDeltaX,
+                    wheelDeltaY
+                } = event;
 
-                            // Prevent default behaviour and stop propagating
-                            event.preventDefault();
-                            event.stopPropagation();
+                // Scrolling horizontally
+                if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
+                    scrollBarManager.preventBrowserScroll('horizontal', event)
+                        .triggerScrollBarAction('horizontal', wheelDeltaX / WHEEL_DELTA_MODIFIER);
+                }
 
-                            // Scrolling horizontally
-                            if (wheelDeltaX !== 0 && Math.abs(wheelDeltaX) > Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager()
-                                    .triggerScrollBarAction('horizontal', wheelDeltaX / WHEEL_DELTA_MODIFIER);
-                            }
-
-                            // Scrolling Vertically
-                            if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
-                                this.scrollBarManager()
-                                    .triggerScrollBarAction('vertical', wheelDeltaY / WHEEL_DELTA_MODIFIER);
-                            }
-                        });
+                // Scrolling Vertically
+                if (wheelDeltaY !== 0 && Math.abs(wheelDeltaX) < Math.abs(wheelDeltaY)) {
+                    scrollBarManager.preventBrowserScroll('vertical', event)
+                        .triggerScrollBarAction('vertical', wheelDeltaY / WHEEL_DELTA_MODIFIER);
+                }
+            });
         return this;
     }
 
@@ -179,6 +176,11 @@ export default class GridComponent extends MuzeComponent {
         this.target(params.config.target);
         this.className(params.config.className);
         this.sanitizeGrid();
+        return this;
+    }
+
+    attachListener () {
+        this.attachScrollListener();
         return this;
     }
 }

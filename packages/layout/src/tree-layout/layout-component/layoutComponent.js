@@ -83,5 +83,9 @@ export default class LayoutComponent {
     draw () {
         throw new Error('draw is not defined');
     }
+
+    attachListener () {
+        return this;
+    }
   }
 

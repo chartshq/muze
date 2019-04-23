@@ -27,7 +27,7 @@ export const getDimensionMeasureMap = (layers, fieldsConfig) => {
         const measures = [xField, yField].filter(field => fieldsConfig[field] && fieldsConfig[field].def.type ===
             FieldType.MEASURE);
         [colorField, sizeField, shapeField].forEach((field) => {
-            if (fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION) {
+            if (getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION && measures.length) {
                 !retinalEncodingsAndMeasures[field] && (retinalEncodingsAndMeasures[field] = []);
                 retinalEncodingsAndMeasures[field].push(...measures);
             }
@@ -56,7 +56,7 @@ export const transformDataModels = (transform, dataModel) => {
 
 export const getLayerFromDef = (context, definition, existingLayer, namespaces) => {
     let instances = existingLayer;
-    const dependencies = context._layerDeps;
+    const dependencies = context._dependencies;
     const metaInf = context.metaInf();
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
@@ -66,8 +66,9 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
                 unitColIndex: metaInf.colIndex,
                 namespace: namespaces[i],
                 parentNamespace: metaInf.namespace
-            });
-            inst.store(context.store());
+            })
+                .dependencies(dependencies)
+                .store(context.store());
         });
     }
     const layers = {};
@@ -78,7 +79,6 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
         instance.coord(context.coord());
         instance.config(def);
         instance.valueParser(context.valueParser());
-        instance.dependencies(dependencies);
         instance.dataProps({
             timeDiffs: context._timeDiffs
         });

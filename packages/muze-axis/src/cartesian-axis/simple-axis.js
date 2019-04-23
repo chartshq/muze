@@ -49,7 +49,7 @@ export default class SimpleAxis {
         const dist = dependencies.labelManager.getOriSize('w');
 
         this._minTickDistance = { width: dist.width * 3 / 4, height: dist.height / 2 };
-        this._minTickSpace = dependencies.labelManager.getOriSize('www');
+        this._minTickSpace = dependencies.labelManager.getOriSize('www...');
 
         generateGetterSetters(this, PROPS);
         this.config(simpleConfig);

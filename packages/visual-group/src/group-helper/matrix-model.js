@@ -197,7 +197,6 @@ projections
 * @return {Object} set of matrices with the corresponding row and column keys
 */
 export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
-    const x = new Date().getTime();
     let currentRowIndex = 0;
     const matrix = [];
     const {
@@ -253,8 +252,10 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
         currentRowIndex++;
     });
 
-    const formattedColKeys = formatKeys(colKeys.map(e => e.keyArr), colFacets.map(facetField => facetField.rawFormat()));
-    const formattedRowKeys = formatKeys(rowKeys.map(e => e.keyArr), rowFacets.map(facetField => facetField.rawFormat()));
+    const formattedColKeys = formatKeys(colKeys.map(e => e.keyArr),
+        colFacets.map(facetField => facetField.rawFormat()));
+    const formattedRowKeys = formatKeys(rowKeys.map(e => e.keyArr),
+        rowFacets.map(facetField => facetField.rawFormat()));
 
      // Getting column keys
     const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>

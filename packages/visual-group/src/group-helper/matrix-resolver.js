@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES, getUniqueId } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -39,6 +39,7 @@ export default class MatrixResolver {
         this._datamodelTransform = {};
         this._units = [];
         this._cacheMaps = {};
+        this._fireboltDeps = {};
         this._axes = {
             x: {},
             y: {},
@@ -282,6 +283,13 @@ export default class MatrixResolver {
         });
     }
 
+    setFireboltDependencies (prop, deps) {
+        Object.assign(this._fireboltDeps, {
+            [prop]: deps
+        });
+        return this;
+    }
+
     /**
      *
      *
@@ -301,24 +309,31 @@ export default class MatrixResolver {
         } = componentRegistry;
         const {
             smartlabel: smartLabel,
-            lifeCycleManager
+            lifeCycleManager,
+            throwback
         } = this.dependencies();
+        const fireboltDeps = this._fireboltDeps;
+
         // Provide the source for the matrix
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
         const store = this.store();
+        store.lockModel();
+
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
-                const namespace = `unit${i}-${j}`;
+                const namespace = `unit${i}-${j}-${getUniqueId()}`;
 
                 unit = VisualUnit.create({
                     layerRegistry,
                     sideEffectRegistry
                 }, {
                     smartLabel,
-                    lifeCycleManager
+                    lifeCycleManager,
+                    throwback,
+                    fireboltDeps
                 });
                 unit.metaInf({
                     rowIndex: i,
@@ -336,6 +351,7 @@ export default class MatrixResolver {
                 .coord(coord);
             el.config(unitConfig);
         });
+        store.unlockModel();
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
     }
@@ -442,6 +458,7 @@ export default class MatrixResolver {
             `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
         const store = this.store();
         store.lockCommits(props);
+        store.lockModel();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -450,7 +467,8 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-        store.unlockCommits([props[0]])
+        store.unlockModel()
+            .unlockCommits([props[0]])
             .unlockCommits([props[1]]);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
@@ -555,4 +573,12 @@ export default class MatrixResolver {
         }
         return this._store;
     }
+
+    clear () {
+        const cacheMaps = this._cacheMaps;
+        for (const key in cacheMaps) {
+            cacheMaps[key].clear();
+        }
+    }
+
 }

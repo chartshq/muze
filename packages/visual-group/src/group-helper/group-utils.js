@@ -1,4 +1,6 @@
 import { Store, FieldType, COORD_TYPES, getObjProp, sortFieldByType } from 'muze-utils';
+import { VisualUnit } from '@chartshq/visual-unit';
+import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -472,4 +474,16 @@ export const sortFacetFields = (facets, keys, config) => {
 
         facetSortOrder && keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a[index], b[index]));
     });
+};
+
+export const removeExitCells = (resolver) => {
+    const exitCells = resolver.cacheMaps().exitCellMap;
+    const store = resolver.store();
+    const qualifiedStateProps = [].concat(...VisualUnit.getQualifiedStateProps(),
+        ...BaseLayer.getQualifiedStateProps());
+    store.lockCommits(qualifiedStateProps);
+    exitCells.forEach((placeholder) => {
+        placeholder.remove();
+    });
+    store.unlockCommits(qualifiedStateProps);
 };

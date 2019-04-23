@@ -57,7 +57,8 @@ export default class Canvas extends TransactionSupport {
         this._store = new Store(APP_INITIAL_STATE);
 
         this._throwback = new Store({
-            [CommonProps.MATRIX_CREATED]: false
+            [CommonProps.MATRIX_CREATED]: false,
+            [CommonProps.ON_LAYER_DRAW]: null
         });
 
         // Setters and getters will be mounted on this. The object will be mutated.

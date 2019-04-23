@@ -21,13 +21,24 @@ export class ScrollManager {
         return this._attachedComponents;
     }
 
+    preventBrowserScroll (type, event) {
+        if (this.scrollBarComponents()[type]) {
+        // Prevent default behaviour and stop propagating
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        return this;
+    }
+
     performAttachedScrollFunction (type, movedViewLength) {
         Object.values(this.attachedComponents()).forEach((e) => {
             e.performScrollAction(type, movedViewLength);
         });
+        return this;
     }
 
     triggerScrollBarAction (type, delta) {
         this.scrollBarComponents()[type] && this.scrollBarComponents()[type].scrollDeltaTo(delta);
+        return this;
     }
 }

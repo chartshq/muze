@@ -99,7 +99,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 const linkedLayer = this.firebolt.context.getLayerByName(layer.config().owner);
                 const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
                 const transformedDataModel = new DataModel(transformedData, schema);
-                console.log(transformedDataModel.getData().data);
                 layer.data(transformedDataModel);
             });
         }
