@@ -160,7 +160,6 @@ const removePropValue = (context, map, propInf) => {
 
         if (value instanceof Object && sns in value) {
             delete value[sns];
-            context.commit(prop, value, undefined, true);
         }
         map.delete(sns);
     }
