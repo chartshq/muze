@@ -62,30 +62,26 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
 
-    // function shuffleArray(array) {
-    //     for (var i = array.length - 1; i > 0; i--) {
-    //         var j = Math.floor(Math.random() * (i + 1));
-    //         var temp = array[i];
-    //         array[i] = array[j];
-    //         array[j] = temp;
-    //     }
-    // }
-    // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
+
+    rootData.sort([
+        ['Cylinders', 'asc'],
+        ['Maker', 'desc'],
+    ])
   
     // .select(fields=>fields.Year.value === '1972-01-01');
 
-    var rows = ['Origin', 'Acceleration'],
+    var rows = ['Origin','Acceleration'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Maker', 'Acceleration'])
-        .rows(columns).data(rootData).height(800).width(800)
-        .detail(['Maker', 'Cylinders'])
+        const canvas = env.canvas().columns(['Cylinders','Maker', 'Acceleration'])
+        .rows(columns).data(rootData).height(800).width(1800)
+        // .detail(['Maker', 'Cylinders'])
         .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
             field: 'Origin'
         }).mount('#chart').config({
             sort:{
                 Maker: 'desc',
-                Cylinders: 'asc'
+                Cylinders: 'asc',
             }
         })
 });

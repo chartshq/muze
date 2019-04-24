@@ -115,11 +115,11 @@ d3.json('../data/twitter-purge.json', (data) => {
             },
             axes: {
                 y: {
-                    tickFormat: function tickFormat (val, parsedVal, j, labels) {
-                        if (j === 0 || j === labels.length - 1) {
-                            return _formatter(val);
-                        } return '';
-                    },
+                    // tickFormat: function tickFormat (val, parsedVal, j, labels) {
+                    //     if (j === 0 || j === labels.length - 1) {
+                    //         return _formatter(val);
+                    //     } return '';
+                    // },
                     showAxisName: false
                 },
                 x: {

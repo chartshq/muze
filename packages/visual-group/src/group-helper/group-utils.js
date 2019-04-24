@@ -1,4 +1,4 @@
-import { Store, FieldType, COORD_TYPES, getObjProp, sortFieldByType } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
 import { VisualUnit } from '@chartshq/visual-unit';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
@@ -462,21 +462,21 @@ export const sortFacetFields = (facets, keys, config) => {
      * Check if the facet sorted by the user is plotted
      * If an incorrect field is sorted, return the keys as is
      */
-    const fieldsSorted = Object.keys(config.sort);
-    const allFacetsFields = facets.map(facet => `${facet}`);
-    const validFacets = fieldsSorted.filter(field => allFacetsFields.includes(field));
+    const schema = [];
+    const facetNames = [];
+    const sortInfo = [];
+    const sortConfig = config.sort;
 
-    validFacets.forEach((facetName) => {
-        const facetField = facets.find(facet => `${facet}` === facetName);
-        const facetSortOrder = config.sort[facetName];
-        const subType = facetField.subtype();
-        const index = facets.indexOf(facetField);
-
-        facetSortOrder &&
-            keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a.keyArr[index], b.keyArr[index]));
+    facets.forEach((facet) => {
+        const name = `${facet}`;
+        const facetSortConfig = sortConfig[name];
+        if (facetSortConfig) {
+            sortInfo.push([name, facetSortConfig]);
+        }
+        schema.push(facet.getSchemaDef());
     });
 
-    return keys;
+    return new DataModel([facetNames, ...keys], schema).sort(sortInfo, { saveChild: false }).getData().data;
 };
 
 export const removeExitCells = (resolver) => {

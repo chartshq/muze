@@ -84,10 +84,15 @@ const prepareHashMaps = (context, facetNames, hashMap, keys, index) => {
 
     if (hashMap[joinedRowKey] === undefined) {
         hashMap[joinedRowKey] = index++;
-        keys.push({ keyArr: rowKey, joinedKey: joinedRowKey, facetArr: facetNames });
+        keys.push(rowKey);
     }
     return rowKey;
 };
+
+const createJoinedKeys = keys => keys.map(e => ({
+    keyArr: e,
+    joinedKey: e.join(',')
+}));
 
 /**
 *
@@ -122,8 +127,8 @@ const getSplitModelHashMap = (splitModels, facetInfo, config) => {
 
     return {
         splitModelsHashMap,
-        rowKeys: sortFacetFields(rowFacets, rowKeys, config),
-        colKeys: sortFacetFields(colFacets, colKeys, config)
+        rowKeys: createJoinedKeys(sortFacetFields(rowFacets, rowKeys, config)),
+        colKeys: createJoinedKeys(sortFacetFields(colFacets, colKeys, config))
     };
 };
 /**
