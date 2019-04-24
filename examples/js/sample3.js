@@ -72,14 +72,20 @@ d3.json('../../data/cars.json', (data) => {
     // }
     // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
+  
     // .select(fields=>fields.Year.value === '1972-01-01');
 
     var rows = ['Origin', 'Acceleration'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Maker','Cylinders', 'Acceleration'])
+        const canvas = env.canvas().columns(['Maker', 'Acceleration'])
         .rows(columns).data(rootData).height(800).width(800)
         .detail(['Maker', 'Cylinders'])
         .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
             field: 'Origin'
-        }).mount('#chart')
+        }).mount('#chart').config({
+            sort:{
+                Maker: 'desc',
+                Cylinders: 'asc'
+            }
+        })
 });

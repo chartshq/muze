@@ -72,7 +72,7 @@ const spanCalculator = (colData, colIdx, matrix, rIdx) => {
     // if data is not header cell then rowspan
     // has to be 1
     if (!colData) {
-        return () => 1;
+        return () => null;
     }
 
     const conditions = {
@@ -146,7 +146,7 @@ const spanGenerator = viewMatrix => ({
         return spans;
     },
     column: () => viewMatrix.map((row, ridx) => row.map((col, i) => spanCalculator(col, i, viewMatrix, ridx)('column'))
-                    .filter(col => col !== 1))
+                    .filter(col => col !== null))
 });
 
 const getOrder = () => ({

@@ -472,8 +472,11 @@ export const sortFacetFields = (facets, keys, config) => {
         const subType = facetField.subtype();
         const index = facets.indexOf(facetField);
 
-        facetSortOrder && keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a[index], b[index]));
+        facetSortOrder &&
+            keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a.keyArr[index], b.keyArr[index]));
     });
+
+    return keys;
 };
 
 export const removeExitCells = (resolver) => {

@@ -1,4 +1,5 @@
 import { DataModel } from 'muze-utils';
+import { sortFacetFields } from './group-utils';
 
 /**
 * Gets name of fields form the variables
@@ -50,15 +51,15 @@ rowProjections
 */
 const prepareFacetInfo = (fieldInfo) => {
     const {
-rowFacets,
-colFacets
-} = fieldInfo;
+        rowFacets,
+        colFacets
+    } = fieldInfo;
 
     const rowFacetNames = getFieldNames(rowFacets);
     const colFacetNames = getFieldNames(colFacets);
     const allFacets = [...rowFacetNames, ...colFacetNames];
 
-    return { rowFacetNames, colFacetNames, allFacets };
+    return { rowFacetNames, colFacetNames, allFacets, rowFacets, colFacets };
 };
 
 /**
@@ -73,7 +74,6 @@ colFacets
 */
 const prepareHashMaps = (context, facetNames, hashMap, keys, index) => {
     const rowKey = [];
-
     facetNames.forEach((name) => {
         const key = context._derivation[context._derivation.length - 1].meta.keys[name];
 
@@ -84,7 +84,7 @@ const prepareHashMaps = (context, facetNames, hashMap, keys, index) => {
 
     if (hashMap[joinedRowKey] === undefined) {
         hashMap[joinedRowKey] = index++;
-        keys.push({ keyArr: rowKey, joinedKey: joinedRowKey });
+        keys.push({ keyArr: rowKey, joinedKey: joinedRowKey, facetArr: facetNames });
     }
     return rowKey;
 };
@@ -96,10 +96,12 @@ const prepareHashMaps = (context, facetNames, hashMap, keys, index) => {
 * @param {*} facetInfo
 * @returns
 */
-const getSplitModelHashMap = (splitModels, facetInfo) => {
+const getSplitModelHashMap = (splitModels, facetInfo, config) => {
     const {
         rowFacetNames,
-        colFacetNames
+        colFacetNames,
+        rowFacets,
+        colFacets
     } = facetInfo;
 
     const rowKeyHashMap = {};
@@ -120,8 +122,8 @@ const getSplitModelHashMap = (splitModels, facetInfo) => {
 
     return {
         splitModelsHashMap,
-        rowKeys: rowKeys.sort((a, b) => a.joinedKey.localeCompare(b.joinedKey)),
-        colKeys: colKeys.sort((a, b) => a.joinedKey.localeCompare(b.joinedKey))
+        rowKeys: sortFacetFields(rowFacets, rowKeys, config),
+        colKeys: sortFacetFields(colFacets, colKeys, config)
     };
 };
 /**
@@ -200,7 +202,7 @@ const splitByColumn = (context, optionalProjections) => {
 * @param {Function} geomCellCreator Callback executed after datamodels are prepared after sel/proj
 * @return {Object} set of matrices with the corresponding row and column keys
 */
-export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
+export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConfig) => {
     let currentRowIndex = 0;
     const matrix = [];
     const {
@@ -216,7 +218,7 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
         splitModelsHashMap,
         rowKeys,
         colKeys
-    } = getSplitModelHashMap(allSplitModels, facetInfo);
+    } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
 
     rowKeys.forEach((rowKeyObj) => {
         let currentColumnIndex = 0;
@@ -228,7 +230,6 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
             let context = {};
             const { keyArr: colKeyArr, joinedKey: colKey } = colKeyObj;
             const hashMapKey = splitModelsHashMap[`${rowKey}-${colKey}`];
-            console.log(rowKey, colKey);
 
             if (hashMapKey) {
                 context = { dataModel: hashMapKey };
