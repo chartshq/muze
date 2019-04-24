@@ -118,7 +118,11 @@ const getSplitModelHashMap = (splitModels, facetInfo) => {
         splitModelsHashMap[`${rowKey}-${colKey}`] = splitContext;
     });
 
-    return { splitModelsHashMap, rowKeys, colKeys };
+    return {
+        splitModelsHashMap,
+        rowKeys: rowKeys.sort((a, b) => a.joinedKey.localeCompare(b.joinedKey)),
+        colKeys: colKeys.sort((a, b) => a.joinedKey.localeCompare(b.joinedKey))
+    };
 };
 /**
  * Formats row or columns keys with the provided formatter.
@@ -146,19 +150,19 @@ const formatKeys = (keys, formatterList) => {
 */
 const splitByColumn = (context, optionalProjections) => {
     const {
-matrix,
-dataModel,
-rowIndex,
-colIndex,
-facetInfo,
-projectionInfo,
-geomCellCreator
-} = context;
+        matrix,
+        dataModel,
+        rowIndex,
+        colIndex,
+        facetInfo,
+        projectionInfo,
+        geomCellCreator
+    } = context;
     const {
-indices,
-uniqueFields,
-projections
-} = projectionInfo;
+        indices,
+        uniqueFields,
+        projections
+    } = projectionInfo;
 
     const commonFields = optionalProjections;
 
@@ -224,12 +228,13 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator) => {
             let context = {};
             const { keyArr: colKeyArr, joinedKey: colKey } = colKeyObj;
             const hashMapKey = splitModelsHashMap[`${rowKey}-${colKey}`];
+            console.log(rowKey, colKey);
 
             if (hashMapKey) {
                 context = { dataModel: hashMapKey };
             } else {
                 const emptyDm = new DataModel([], dataModel.getData().schema);
-                emptyDm.addParent(dataModel);
+                emptyDm.setParent(dataModel);
                 context = { dataModel: emptyDm };
             }
 
