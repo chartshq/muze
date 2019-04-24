@@ -158,8 +158,8 @@ const formatKeys = (keys, formatterList) => {
  */
 export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator, globalConfig) => {
     let rowDataModels = [];
-    const rowKeys = [];
-    const columnKeys = [];
+    let rowKeys = [];
+    let columnKeys = [];
     const allColumnProjections = [];
     const matrix = [];
     const facetInfo = [];
@@ -185,7 +185,7 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
         // Get unique keys in the form of an array of arrays for each row
         uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
 
-        sortFacetFields(rowFacets, rowKeys, globalConfig);
+        rowKeys = sortFacetFields(rowFacets, rowKeys, globalConfig);
 
         // Apply selection -> projection -> row datamodels
         rowKeys.forEach((val) => {
@@ -223,7 +223,7 @@ export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator
             uniqueValues: firstLevelColumnKeys
         });
 
-        sortFacetFields(colFacets, columnKeys, globalConfig);
+        columnKeys = sortFacetFields(colFacets, columnKeys, globalConfig);
 
         // For each row in the datamodel, apply selection -> projection -> push the projection to matri
         rowDataModels.forEach((dme, rIndex) => {

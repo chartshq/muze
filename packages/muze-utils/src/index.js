@@ -103,7 +103,7 @@ export {
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortFieldByType
+    sortCategoricalField
 } from './common-utils';
 
 export {

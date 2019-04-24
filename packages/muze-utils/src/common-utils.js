@@ -1603,46 +1603,25 @@ const nearestSortingDetails = (dataModel) => {
 };
 
 /**
- * Returns the sort function based on the type of field
- * @param {number|string} a first value
- * @param {number|string} b second value
- * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
- * @param {string} subType Field subtype
- * @return {Function} Sort function
- */
-const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
-    if (typeof sortOrder === FUNCTION) {
-        return sortOrder(a, b);
-    }
-    if (subType === TEMPORAL) {
-        return sortOrder === SORT_ORDER_ASCENDING ? a - b : b - a;
-    }
-    return sortOrder === SORT_ORDER_ASCENDING ? a.localeCompare(b) : b.localeCompare(a);
-};
-
-/**
- * Sort field based on it's subtype and sorting order
- * @param {string} subType Field subtype
- * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
- * @param {Array} firstVal First sort parameter
- * @param {number} secondVal Second sort parameter
- * @return {Function|null} Sorting function
+ * Sort categorical field based on it's sorting order
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
+ * @param {string} firstVal First sort parameter
+ * @param {string} secondVal Second sort parameter
+ * @return {number} position
 */
-const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
+const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
 
-    if (sortOrderType !== STRING && sortOrderType !== FUNCTION) {
+    switch (sortOrderType) {
+    case FUNCTION:
+        return sortOrder(firstVal, secondVal);
+    case SORT_ORDER_ASCENDING:
+        return firstVal.localeCompare(secondVal);
+    case SORT_ORDER_DESCENDING:
+        return secondVal.localeCompare(firstVal);
+    default:
         return null;
     }
-    if (sortOrderType === STRING &&
-        sortOrder !== SORT_ORDER_ASCENDING &&
-        sortOrder !== SORT_ORDER_DESCENDING) {
-        return null;
-    }
-    if (subType === TEMPORAL || subType === CATEGORICAL) {
-        return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
-    }
-    return null;
 };
 
 export {
@@ -1725,5 +1704,5 @@ export {
     temporalFields,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortFieldByType
+    sortCategoricalField
 };

@@ -5,7 +5,7 @@ import {
     unionDomain,
     COORD_TYPES,
     toArray,
-    sortFieldByType
+    sortCategoricalField
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import {
@@ -174,14 +174,13 @@ export default class CartesianEncoder extends VisualEncoder {
                     adjustedDomain = getAdjustedDomain(max, min);
                 } else if (typeOfAxis === ScaleType.BAND) {
                     /* Sort categorical fields to ensure consistency across all rows
-                    only if field is categorical and is not explicitily sorted by user */
+                    only if sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
                     const sortingOrder = config.sort && config.sort[currentFieldName];
-                    const subType = fieldsObj[axisType][key].subtype();
 
                     if (sortingOrder) {
-                        domains[axisType][key].sort((a, b) => sortFieldByType(subType, sortingOrder, a, b));
+                        domains[axisType][key].sort((a, b) => sortCategoricalField(sortingOrder, a, b));
                     }
                 }
 

@@ -1,4 +1,4 @@
-import { Store, FieldType, COORD_TYPES, getObjProp, sortFieldByType } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -454,22 +454,22 @@ export const extractFields = (facetsAndProjections, layerFields) => {
  * @param {Object} facets Array of facets
  * @param {Array} keys Array of the facet field values
  * @param {Object} config configuration object
+ * @return {Array} Returns sorted facets
  */
 export const sortFacetFields = (facets, keys, config) => {
-    /**
-     * Check if the facet sorted by the user is plotted
-     * If an incorrect field is sorted, return the keys as is
-     */
-    const fieldsSorted = Object.keys(config.sort);
-    const allFacetsFields = facets.map(facet => `${facet}`);
-    const validFacets = fieldsSorted.filter(field => allFacetsFields.includes(field));
+    const schema = [];
+    const facetNames = [];
+    const sortInfo = [];
+    const sortConfig = config.sort;
 
-    validFacets.forEach((facetName) => {
-        const facetField = facets.find(facet => `${facet}` === facetName);
-        const facetSortOrder = config.sort[facetName];
-        const subType = facetField.subtype();
-        const index = facets.indexOf(facetField);
-
-        facetSortOrder && keys.sort((a, b) => sortFieldByType(subType, facetSortOrder, a[index], b[index]));
+    facets.forEach((facet) => {
+        const name = `${facet}`;
+        if (sortConfig[name]) {
+            sortInfo.push([name, sortConfig[name]]);
+        }
+        schema.push(facet.getSchemaDef());
+        facetNames.push(name);
     });
+
+    return new DataModel([facetNames, ...keys], schema).sort(sortInfo).getData().data;
 };
