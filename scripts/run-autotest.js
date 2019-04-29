@@ -13,6 +13,7 @@ const uuid = require('uuid/v4');
 const semver = require('semver');
 const FormData = require('form-data');
 const axios = require('axios');
+const prompt = require('prompt');
 
 const mycroftProtocol = process.env.MYCROFT_PROTOCOL;
 const mycroftHost = process.env.MYCROFT_HOST;
@@ -25,10 +26,11 @@ const initiateStatusInterval = 1000;
 let cursorRelYPos = 0;
 
 program
-    .option('-m, --mode <mode>', 'muze build mode')
+    .option('-m, --mode <mode>', 'The muze build mode')
+    .option('-l, --lib <lib>', 'The library name to be uploaded to sherlock')
     .parse(process.argv);
 
-let { mode } = program;
+let { mode, lib } = program;
 if (!mode) {
     mode = 'production';
 }
@@ -202,8 +204,24 @@ const printAutotestSummery = async (tag) => {
 };
 
 const run = async () => {
+    prompt.message = '';
+    prompt.start();
+
+    let { tag } = await promisify(prompt.get.bind(prompt))({
+        properties: {
+            tag: {
+                conform: value => !!semver.valid(value),
+                message: 'Should be semver value',
+                description: 'Enter tag name[current branch]',
+                type: 'string',
+                required: false,
+                before: value => (value ? `v${semver.valid(value)}` : '')
+            }
+        }
+    });
+
     const muzePkg = await fs.readJSON(path.resolve('packages/muze/package.json'));
-    const tag = await generateBuildTag(muzePkg.version);
+    tag = tag || await generateBuildTag(muzePkg.version);
     let reqId;
 
     out('\n');

@@ -87,8 +87,8 @@
     "lint": "eslint ./packages",
     "lint-errors": "eslint --quiet ./packages",
     "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json",
-    "autotest:prod": "node scripts/run-autotest.js --export --mode production",
-    "autotest:dev": "node scripts/run-autotest.js --export --mode development",
+    "autotest:prod": "node scripts/run-autotest.js --mode production",
+    "autotest:dev": "node scripts/run-autotest.js --mode development",
     "autotest": "npm run autotest:dev",
     "upload": "node scripts/upload-build.js",
     "postinstall": "lerna bootstrap"
