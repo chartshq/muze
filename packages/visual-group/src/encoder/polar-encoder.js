@@ -164,6 +164,7 @@ export default class PolarEncoder extends VisualEncoder {
 
     unionUnitDomains (context) {
         const store = context.store();
+        store.lockModel();
         const domainProps = {
             radius: [],
             angle: [],
@@ -192,11 +193,14 @@ export default class PolarEncoder extends VisualEncoder {
                 axesArr.forEach((axisArr, cIdx) => {
                     axisArr.forEach((axis, i) => {
                         axis.domain(defaultValue(getObjProp(domainProps[key], rIdx, cIdx, i), []));
+
+                        store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${key}`, domainProps[key],
+                            `${rIdx}-${cIdx}`);
                     });
                 });
             });
-            store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${key}`, domainProps[key]);
         }
+        store.unlockModel();
     }
 
     /**

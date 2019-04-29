@@ -3,16 +3,23 @@ import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
-    const config = context.config();
     sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
     sideEffects.forEach((SideEffect) => {
         const formalName = SideEffect.formalName();
         const sideEffectInstance = sideEffectsMap[formalName];
         sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
-        const sideEffectConf = config[formalName];
-        sideEffectConf && sideEffectsMap[formalName].config(sideEffectConf);
     });
     return sideEffectsMap;
+};
+
+export const setSideEffectConfig = (sideEffects, config) => {
+    for (const key in sideEffects) {
+        const sideEffect = sideEffects[key];
+        const formalName = sideEffect.constructor.formalName();
+        const sideEffectConf = config[formalName];
+
+        sideEffectConf && sideEffect.config(sideEffectConf);
+    }
 };
 
 export const initializeBehaviouralActions = (context, actions) => {
@@ -67,19 +74,16 @@ export const getSourceFields = (propagationInf, criteria = {}) => {
 };
 
 const conditionsMap = {
-    newEntry: [SELECTION.SELECTION_NEW_ENTRY],
-    oldEntry: [SELECTION.SELECTION_OLD_ENTRY],
     mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
-    newExit: [SELECTION.SELECTION_NEW_EXIT],
-    oldExit: [SELECTION.SELECTION_OLD_EXIT],
     mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
     complete: []
 };
 
 export const getModelFromSet = (type, model, set) => {
-    if (model) {
+    const conditions = conditionsMap[type];
+    if (model && conditions) {
         return model.select((fields, i) =>
-           (conditionsMap[type].some(condition => set[i] === condition)), {
+           (conditions.some(condition => set[i] === condition)), {
                saveChild: false
            });
     }
@@ -93,7 +97,7 @@ export const getSetInfo = (type, set, config) => {
     if (!config.propagationData) {
         if (selectionSet.resetted()) {
             model = null;
-        } else {
+        } else if (type === 'mergedEnter') {
             model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
         }
     } else if (filteredDataModel) {

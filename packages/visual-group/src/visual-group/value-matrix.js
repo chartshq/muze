@@ -131,6 +131,11 @@ class ValueMatrix {
     findPlaceHolderById (id) {
         return this.instancesById()[id];
     }
+
+    clear () {
+        this.each(cell => cell.remove());
+        this.matrix([]);
+    }
 }
 
 export default ValueMatrix;

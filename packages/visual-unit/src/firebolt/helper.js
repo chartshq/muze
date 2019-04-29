@@ -1,6 +1,4 @@
-import { CommonProps } from 'muze-utils';
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
-import { DATA } from '../enums/reactive-props';
 
 export const initSideEffects = (sideEffects, firebolt) => {
     for (const key in sideEffects) {
@@ -30,35 +28,4 @@ export const dispatchQueuedSideEffects = (context) => {
         context.dispatchSideEffect(sideEffect.name, ...sideEffect.params);
     });
     context._queuedSideEffects = {};
-};
-
-export const registerListeners = (firebolt) => {
-    const context = firebolt.context;
-    const store = context.store();
-
-    store.registerImmediateListener([`local.units.${context.metaInf().namespace}.${DATA}`], (dataModel) => {
-        const dm = dataModel[1];
-
-        if (dm) {
-            firebolt.createSelectionSet(firebolt.context.data().getData().uids);
-            firebolt.initializeSideEffects();
-            const originalData = firebolt.context.cachedData()[0];
-            firebolt.attachPropagationListener(originalData);
-        }
-    });
-
-    store.registerChangeListener([`local.units.${context.metaInf().namespace}.${DATA}`], () => {
-        if (!firebolt.context.mount()) {
-            const originalData = firebolt.context.cachedData()[0];
-            originalData.unsubscribe('propagation');
-        }
-    });
-
-    context._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW],
-        ([, onlayerdraw]) => {
-            if (onlayerdraw) {
-                dispatchQueuedSideEffects(firebolt);
-                clearActionHistory(firebolt);
-            }
-        });
 };

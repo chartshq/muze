@@ -15,7 +15,9 @@ export const SUB_TITLE_CONFIG = {
     className: `${MUZE_PREFIX}-subtitle-container`
 };
 
-export const GRID = 'grid';
+export const MESSAGE_CONFIG = {
+    className: `${MUZE_PREFIX}-message-container`
+};
 
 export const CANVAS = 'canvas';
 

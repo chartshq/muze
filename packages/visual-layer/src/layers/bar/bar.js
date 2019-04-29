@@ -164,6 +164,7 @@ export default class BarLayer extends BaseLayer {
         }, `id-${this.id()}`);
 
         this._points = this.generateDataPoints(normalizedDataArr, keys);
+        this._graphicElems = {};
 
         createElements({
             data: this._points,

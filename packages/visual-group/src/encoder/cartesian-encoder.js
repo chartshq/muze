@@ -4,7 +4,8 @@ import {
     STATE_NAMESPACES,
     unionDomain,
     COORD_TYPES,
-    toArray
+    toArray,
+    sortFieldByType
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import {
@@ -17,7 +18,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, ASCENDING, DESCENDING } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 const CARTESIAN = COORD_TYPES.CARTESIAN;
@@ -95,25 +96,6 @@ export default class CartesianEncoder extends VisualEncoder {
         return geomCellAxes;
     }
 
-    updateDomains (store, axes) {
-        const xAxes = axes.x;
-        const yAxes = axes.y;
-        store.model.lock();
-        for (let i = 0; i < xAxes.length; i++) {
-            for (let j = 0; j < xAxes[i].length; j++) {
-                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${0}${i}0`, xAxes[i][j].domain());
-            }
-        }
-        for (let i = 0; i < yAxes.length; i++) {
-            for (let j = 0; j < yAxes[i].length; j++) {
-                store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${i}${0}0`, yAxes[i][j].domain());
-                yAxes[i][j]._domainLock = false;
-            }
-        }
-
-        store.model.unlock();
-    }
-
     unionUnitDomains (context) {
         const store = context.store();
         const resolver = context.resolver();
@@ -153,7 +135,7 @@ export default class CartesianEncoder extends VisualEncoder {
         }
 
         const { x: xAxes, y: yAxes } = resolver.axes();
-        store.model.lock();
+        store.lockModel();
         [xAxes, yAxes].forEach((axesArr, axisType) => {
             axesArr.forEach((axes, idx) => {
                 let key;
@@ -176,15 +158,11 @@ export default class CartesianEncoder extends VisualEncoder {
                     only if field is categorical and is not explicitily sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
-                    const sortingOrder = config.sort[currentFieldName];
-                    const isSortingDisabled = config.sort.disabled;
+                    const sortingOrder = config.sort && config.sort[currentFieldName];
+                    const subType = fieldsObj[axisType][key].subtype();
 
-                    if (!isSortingDisabled && sortingOrder) {
-                        if (sortingOrder === ASCENDING) {
-                            domains[axisType][key].sort();
-                        } else if (sortingOrder === DESCENDING) {
-                            domains[axisType][key].sort().reverse();
-                        }
+                    if (sortingOrder) {
+                        domains[axisType][key].sort((a, b) => sortFieldByType(subType, sortingOrder, a, b));
                     }
                 }
 
@@ -194,11 +172,11 @@ export default class CartesianEncoder extends VisualEncoder {
 
                     domain && axis.domain(domain);
                     const type = !axisType ? 'x' : 'y';
-                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}.${idx}${index}`, domain);
+                    store.commit(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type}`, domain, `${idx}${index}`);
                 });
             });
         });
-        store.model.unlock();
+        store.unlockModel();
     }
 
     /**

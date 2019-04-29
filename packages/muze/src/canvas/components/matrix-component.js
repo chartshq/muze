@@ -62,7 +62,7 @@ export default class MatrixComponent extends MuzeComponent {
             spans
         } = cellSpanMaker(this.component, row, column);
 
-            // Rendering the table components
+        // Rendering the table components
         const { cells } = this.renderTable(containerForMatrix, `${classPrefix}-grid`, viewMatrix);
 
         applySpans(cells, spans, { dimensions, border }, `${row}-${column}`);
