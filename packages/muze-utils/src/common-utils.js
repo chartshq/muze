@@ -61,6 +61,8 @@ import { dataSelect } from './DataSystem';
 import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
+const { CATEGORICAL, TEMPORAL } = DimensionSubtype;
+const { STRING, FUNCTION } = DATA_TYPE;
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
 
@@ -167,7 +169,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
-    case DimensionSubtype.CATEGORICAL:
+    case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
         break;
     default:
@@ -208,7 +210,7 @@ const unionDomain = (domains, fieldType) => {
     let domain = [];
     domains = domains.filter(dom => dom && dom.length);
     if (domains.length) {
-        if (fieldType === DimensionSubtype.CATEGORICAL) {
+        if (fieldType === CATEGORICAL) {
             domain = [].concat(...domains);
         } else {
             domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
@@ -951,7 +953,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     const selFn = fields => selFields.every((field) => {
         const val = fields[field].value;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-        if (typeof range[0] === DATA_TYPE.STRING) {
+        if (typeof range[0] === STRING) {
             return range.find(d => d === val) !== undefined;
         }
         return range ? val >= range[0] && val <= range[1] : true;
@@ -1221,7 +1223,7 @@ const formatTemporal = (value, interval) => {
 const temporalFields = (dataModel) => {
     const filteredFields = {};
     Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
-        if (fieldObj.subtype() === DimensionSubtype.TEMPORAL) {
+        if (fieldObj.subtype() === TEMPORAL) {
             filteredFields[fieldName] = fieldObj;
         }
     });
@@ -1293,46 +1295,25 @@ const nearestSortingDetails = (dataModel) => {
 };
 
 /**
- * Returns the sort function based on the type of field
- * @param {number|string} a first value
- * @param {number|string} b second value
- * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
- * @param {string} subType Field subtype
- * @return {Function} Sort function
- */
-const getAppropriateSortingFn = (a, b, sortOrder, subType) => {
-    if (typeof sortOrder === DATA_TYPE.FUNCTION) {
-        return sortOrder(a, b);
-    }
-    if (subType === DimensionSubtype.TEMPORAL) {
-        return sortOrder === SORT_ORDER_ASCENDING ? a - b : b - a;
-    }
-    return sortOrder === SORT_ORDER_ASCENDING ? a.localeCompare(b) : b.localeCompare(a);
-};
-
-/**
- * Sort field based on it's subtype and sorting order
- * @param {string} subType Field subtype
- * @param {string} sortOrder Order by which field is to be sorted (asc or desc)
- * @param {Array} firstVal First sort parameter
- * @param {number} secondVal Second sort parameter
- * @return {Function|null} Sorting function
+ * Sort categorical field based on it's sorting order
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
+ * @param {string} firstVal First sort parameter
+ * @param {string} secondVal Second sort parameter
+ * @return {number} position
 */
-const sortFieldByType = (subType, sortOrder, firstVal, secondVal) => {
+const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
 
-    if (sortOrderType !== DATA_TYPE.STRING && sortOrderType !== DATA_TYPE.FUNCTION) {
+    switch (sortOrderType) {
+    case FUNCTION:
+        return sortOrder(firstVal, secondVal);
+    case SORT_ORDER_ASCENDING:
+        return firstVal.localeCompare(secondVal);
+    case SORT_ORDER_DESCENDING:
+        return secondVal.localeCompare(firstVal);
+    default:
         return null;
     }
-    if (sortOrderType === DATA_TYPE.STRING &&
-        sortOrder !== SORT_ORDER_ASCENDING &&
-        sortOrder !== SORT_ORDER_DESCENDING) {
-        return null;
-    }
-    if (subType === DimensionSubtype.TEMPORAL || subType === DimensionSubtype.CATEGORICAL) {
-        return getAppropriateSortingFn(firstVal, secondVal, sortOrder, subType);
-    }
-    return null;
 };
 
 export {
@@ -1412,5 +1393,5 @@ export {
     temporalFields,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortFieldByType
+    sortCategoricalField
 };
