@@ -9,13 +9,19 @@ export default class MessageComponent extends MuzeComponent {
 
     render (container) {
         const parent = selectElement(container);
-        const { className } = this.params.config.classPrefix;
+
+        const { config } = this.params;
+        const { className } = config.classPrefix;
+
         const node = makeElement(parent, 'div', [1], className);
-        const { height, width } = this.params.config.dimensions;
-        const { message } = this.params.config;
+        const { height, width } = config.dimensions;
+        const { message } = config;
+
         applyStyle(node, { width: `${width}px`, height: `${height}px` });
+
         const child = makeElement(node, 'div', [1], `${className}-child`);
         const textElement = makeElement(child, 'text', [1]);
+
         textElement.html(message);
     }
 
