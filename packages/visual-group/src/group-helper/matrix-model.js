@@ -220,7 +220,6 @@ const createColumnDataModels = (colContext, fieldInfo, sourceDM) => {
         context = { dataModel: hashMapKey };
     } else {
         const emptyDm = new DataModel([], sourceDM.getData().schema);
-        emptyDm.setParent(sourceDM);
         context = { dataModel: emptyDm };
     }
 
