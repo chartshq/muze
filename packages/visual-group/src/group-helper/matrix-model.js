@@ -188,7 +188,6 @@ const splitByColumn = (context, optionalProjections) => {
             },
             projections: projections[i]
         };
-
         matrix[row][col] = geomCellCreator(model, projectionIndexObject, facetInfo);
     });
     const lastIndex = indices[indices.length - 1];
@@ -257,14 +256,13 @@ const createRowDataModels = (rowContext, fieldInfo, sourceDM) => {
         ...rowContext,
         rowKeyArr,
         rowKey,
-
-        newRowIndex,
-        currentColumnIndex
+        newRowIndex
     };
 
     if (colKeys.length) {
         colKeys.forEach((colKeyObj) => {
             colContext.colKeyObj = colKeyObj;
+            colContext.currentColumnIndex = currentColumnIndex;
             const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
 
             currentColumnIndex = columnIndex;
@@ -272,6 +270,7 @@ const createRowDataModels = (rowContext, fieldInfo, sourceDM) => {
         });
     } else {
         colContext.colKeyObj = { keyArr: [], joinedKey: '' };
+        colContext.currentColumnIndex = currentColumnIndex;
         const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
 
         currentColumnIndex = columnIndex;
@@ -368,6 +367,5 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConf
      // Getting column keys
     const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>
      formattedColKeys.map(row => row[i])) : formattedColKeys;
-
     return { matrix, rowKeys: formattedRowKeys, columnKeys: transposedColKeys };
 };

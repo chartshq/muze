@@ -55714,6 +55714,12 @@ function (_VisualEncoder) {
           axes.forEach(function (axis, index) {
             key = !axisType ? "0".concat(idx).concat(index) : "".concat(idx, "0").concat(index);
             domain = adjustedDomain[index] || domains[axisType][key];
+
+            if (domain) {
+              console.log(domain);
+              console.log(index, idx);
+            }
+
             domain && axis.domain(domain);
             var type = !axisType ? 'x' : 'y';
             store.commit("".concat(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.").concat(type), domain, "".concat(idx).concat(index));
@@ -59487,22 +59493,40 @@ var createRowDataModels = function createRowDataModels(rowContext, fieldInfo, so
   var newRowIndex = currentRowIndex;
   var rowKeyArr = rowKeyObj.keyArr,
       rowKey = rowKeyObj.joinedKey;
-  colKeys.forEach(function (colKeyObj) {
-    var colContext = _objectSpread({}, rowContext, {
-      rowKeyArr: rowKeyArr,
-      rowKey: rowKey,
-      colKeyObj: colKeyObj,
-      newRowIndex: newRowIndex,
-      currentColumnIndex: currentColumnIndex
-    });
 
-    var _createColumnDataMode = createColumnDataModels(colContext, fieldInfo, sourceDM),
-        columnIndex = _createColumnDataMode.columnIndex,
-        rowIndex = _createColumnDataMode.rowIndex;
+  var colContext = _objectSpread({}, rowContext, {
+    rowKeyArr: rowKeyArr,
+    rowKey: rowKey,
+    newRowIndex: newRowIndex
+  });
+
+  if (colKeys.length) {
+    colKeys.forEach(function (colKeyObj) {
+      colContext.colKeyObj = colKeyObj;
+      colContext.currentColumnIndex = currentColumnIndex;
+
+      var _createColumnDataMode = createColumnDataModels(colContext, fieldInfo, sourceDM),
+          columnIndex = _createColumnDataMode.columnIndex,
+          rowIndex = _createColumnDataMode.rowIndex;
+
+      currentColumnIndex = columnIndex;
+      rowIndexForCurrentKey = rowIndex;
+    });
+  } else {
+    colContext.colKeyObj = {
+      keyArr: [],
+      joinedKey: ''
+    };
+    colContext.currentColumnIndex = currentColumnIndex;
+
+    var _createColumnDataMode2 = createColumnDataModels(colContext, fieldInfo, sourceDM),
+        columnIndex = _createColumnDataMode2.columnIndex,
+        rowIndex = _createColumnDataMode2.rowIndex;
 
     currentColumnIndex = columnIndex;
     rowIndexForCurrentKey = rowIndex;
-  });
+  }
+
   return {
     rowIndex: rowIndexForCurrentKey++
   };
@@ -59561,9 +59585,9 @@ var getMatrixModel = function getMatrixModel(dataModel, fieldInfo, geomCellCreat
         currentColumnIndex: currentColumnIndex
       });
 
-      var _createColumnDataMode2 = createColumnDataModels(colContext, fieldInfo, dataModel),
-          columnIndex = _createColumnDataMode2.columnIndex,
-          rowIndex = _createColumnDataMode2.rowIndex;
+      var _createColumnDataMode3 = createColumnDataModels(colContext, fieldInfo, dataModel),
+          columnIndex = _createColumnDataMode3.columnIndex,
+          rowIndex = _createColumnDataMode3.rowIndex;
 
       currentRowIndex = rowIndex;
       currentColumnIndex = columnIndex;
@@ -59583,9 +59607,9 @@ var getMatrixModel = function getMatrixModel(dataModel, fieldInfo, geomCellCreat
       currentColumnIndex: _currentColumnIndex
     });
 
-    var _createColumnDataMode3 = createColumnDataModels(colContext, fieldInfo, dataModel),
-        columnIndex = _createColumnDataMode3.columnIndex,
-        rowIndex = _createColumnDataMode3.rowIndex;
+    var _createColumnDataMode4 = createColumnDataModels(colContext, fieldInfo, dataModel),
+        columnIndex = _createColumnDataMode4.columnIndex,
+        rowIndex = _createColumnDataMode4.rowIndex;
 
     currentRowIndex = rowIndex;
     _currentColumnIndex = columnIndex;
