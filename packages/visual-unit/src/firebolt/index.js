@@ -64,7 +64,7 @@ export default class UnitFireBolt extends Firebolt {
             let isMutableAction = false;
             const context = this.context;
             if (!context.mount()) {
-                return this;
+                return;
             }
             const {
                 model: propagationData,

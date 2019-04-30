@@ -1,4 +1,4 @@
-import { FieldType, InvalidAwareTypes } from 'muze-utils';
+import { FieldType, InvalidAwareTypes, getObjProp } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { LineLayer } from '../line';
 import drawArea from './renderer';
@@ -62,7 +62,7 @@ export default class AreaLayer extends LineLayer {
         const domains = super.calculateDomainFromData(data, fieldsConfig);
         [ENCODING.X, ENCODING.Y].forEach((type) => {
             const { [`${type}FieldType`]: fieldType } = encodingFieldsInf;
-            if (fieldType === FieldType.MEASURE && domains[type] !== undefined) {
+            if (fieldType === FieldType.MEASURE && getObjProp(domains[type], 'length')) {
                 domains[type][0] = Math.min(domains[type][0], 0);
                 domains[type][1] = Math.max(0, domains[type][1]);
             }
