@@ -253,21 +253,30 @@ const createRowDataModels = (rowContext, fieldInfo, sourceDM) => {
     } = rowContext;
     const newRowIndex = currentRowIndex;
     const { keyArr: rowKeyArr, joinedKey: rowKey } = rowKeyObj;
+    const colContext = {
+        ...rowContext,
+        rowKeyArr,
+        rowKey,
 
-    colKeys.forEach((colKeyObj) => {
-        const colContext = {
-            ...rowContext,
-            rowKeyArr,
-            rowKey,
-            colKeyObj,
-            newRowIndex,
-            currentColumnIndex
-        };
+        newRowIndex,
+        currentColumnIndex
+    };
+
+    if (colKeys.length) {
+        colKeys.forEach((colKeyObj) => {
+            colContext.colKeyObj = colKeyObj;
+            const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
+
+            currentColumnIndex = columnIndex;
+            rowIndexForCurrentKey = rowIndex;
+        });
+    } else {
+        colContext.colKeyObj = { keyArr: [], joinedKey: '' };
         const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
 
         currentColumnIndex = columnIndex;
         rowIndexForCurrentKey = rowIndex;
-    });
+    }
 
     return {
         rowIndex: rowIndexForCurrentKey++
