@@ -1,132 +1,135 @@
 import { DataModel } from 'muze-utils';
-import { retriveDomainFromData, sortFacetFields } from './group-utils';
+import { sortFacetFields } from './group-utils';
 
 /**
- * Gets name of fields form the variables
- *
- * @param {*} fields1
- * @param {*} [fields2=[]]
- *
- */
-const getFieldNames = (fields1, fields2 = []) => [fields1, fields2].map(fields => fields.reduce((acc, d) => {
+* Gets name of fields form the variables
+*
+* @param {*} fields1
+* @param {*} [fields2=[]]
+*
+*/
+const getFieldNames = fieldVar => fieldVar.reduce((acc, d) => {
     acc = [...acc, ...d.getMembers()];
     return acc;
-}, []));
+}, []);
 
 /**
- * Creates a selected datamodel from a parent datamodel and a set of field names
- *
- * @param {Object} datamodel provided as input
- * @param {Array} fieldNames schema  names
- * @param {Array} fieldValues values of those schema names to be selected
- * @return {Object} creates a new selected datamodel
- */
-const createSelectedDataModel = (datamodel, fieldNames, fieldValues) =>
-    datamodel.select(fields => fieldNames.every((field, k) => fields[field].value === fieldValues[k]));
-
-/**
- *
- *
- * @param {*} facets
- * @param {*} keyArray
- *
- */
-const uniqueKeyGenerator = (keyArray, context, depth = 0, val = []) => {
+*
+*
+* @param {*} fieldInfo
+* @returns
+*/
+const prepareProjectionInfo = (fieldInfo) => {
     const {
-        facets,
-        dataModel,
-        uniqueValues
-    } = context;
+colProjections,
+rowProjections
+} = fieldInfo;
+    const uniqueFields = [];
+    const indices = [];
+    const projections = [];
 
-    // Get unique keys for the next depth recursively if required
-    if (facets[depth + 1]) {
-        const field = facets[depth];
-        uniqueValues.forEach((value) => {
-            const newDm = dataModel.select(fields => fields[field].value === value);
-            const nextDepthUniqueValues = retriveDomainFromData(newDm, facets[depth + 1]);
-            const newContext = {
-                facets,
-                dataModel: newDm,
-                uniqueValues: nextDepthUniqueValues
-            };
+    rowProjections.forEach((rowProj, rIndex) => {
+        const newRIndex = rIndex;
+        colProjections.forEach((colProj, cIndex) => {
+            const newCIndex = cIndex;
+            const newRowProj = getFieldNames(rowProj);
+            const newColProj = getFieldNames(colProj);
 
-            uniqueKeyGenerator(keyArray, newContext, depth + 1, [...val, value]);
+            uniqueFields.push([...newRowProj, ...newColProj]);
+            indices.push({ rowIndex: newRIndex, colIndex: newCIndex });
+            projections.push({ rowFields: rowProj, columnFields: colProj });
         });
-    } else {
-        uniqueValues.forEach((value) => {
-            keyArray.push([...val, value]);
-        });
-    }
+    });
+    return { uniqueFields, indices, projections };
 };
 
 /**
- * projects row model based on the set of row and/or column and other projection fields
- *
- * @param {Object} datamodel provided as input
- * @return {Object} Projected datamodel
- */
-const projectRows = (datamodel, projections) => {
+*
+*
+* @param {*} fieldInfo
+* @returns
+*/
+const prepareFacetInfo = (fieldInfo) => {
     const {
-        allColumnProjections,
-        rowProjections,
-        optionalProjections
-    } = projections;
-
-    if (rowProjections.length > 0) {
-        return rowProjections.map((projectFields) => {
-            const [projFieldNames, colProjFieldNames] = getFieldNames(projectFields, allColumnProjections);
-            return datamodel.project([...projFieldNames, ...colProjFieldNames, ...optionalProjections]);
-        });
-    }
-    return [datamodel];
-};
-
-/**
- * Adds the datamodels to current row index based on column fields
- *
- * @param {Array} context current context
- * @param {Array} valueCellCreator List of facets applied to the current datamodel
- */
-const pushToMatrix = (context, valueCellCreator) => {
-    let cells = [];
-    const {
-        matrix,
-        datamodel,
-        facetInfo,
-        fieldInfo
-    } = context;
-    // Get projected fields for current row
-    const {
-        rowProjections,
-        colProjections,
-        optionalProjections
+        rowFacets,
+        colFacets
     } = fieldInfo;
-    const {
-        rowIndex,
-        columnIndex
-    } = facetInfo;
-    const rowProj = rowProjections[(rowIndex) % rowProjections.length] || [];
 
-    // Get the cells for the matrix from the return function of the callback on the datamodel.
-    // callback function -> (datamodel, {projections, indices}, facets)
-    if (colProjections.length > 0) {
-        cells = colProjections.map((projectFields, projIdx) => {
-            const [colProjFieldNames, rowProjFieldNames] = getFieldNames(projectFields, rowProj);
-            const projectedDm = datamodel.project([...colProjFieldNames, ...rowProjFieldNames, ...optionalProjections]);
-            const projections = { rowFields: rowProj, columnFields: projectFields };
-            const indices = { rowIndex, columnIndex: columnIndex * colProjections.length + projIdx };
+    const rowFacetNames = getFieldNames(rowFacets);
+    const colFacetNames = getFieldNames(colFacets);
+    const allFacets = [...rowFacetNames, ...colFacetNames];
 
-            return valueCellCreator(projectedDm, { projections, indices }, facetInfo);
-        });
-    } else {
-        const projections = { rowFields: rowProj, columnFields: [] };
-        const indices = { rowIndex, columnIndex };
+    return { rowFacetNames, colFacetNames, allFacets, rowFacets, colFacets };
+};
 
-        cells = [valueCellCreator(datamodel, { projections, indices }, facetInfo)];
+/**
+*
+*
+* @param {*} context
+* @param {*} facetNames
+* @param {*} hashMap
+* @param {*} keys
+* @param {*} index
+* @returns
+*/
+const prepareHashMaps = (context, facetNames, hashMap, keys, index) => {
+    const rowKey = [];
+    facetNames.forEach((name) => {
+        const key = context._derivation[context._derivation.length - 1].meta.keys[name];
+
+        rowKey.push(key);
+    });
+
+    const joinedRowKey = rowKey.join(',');
+
+    if (hashMap[joinedRowKey] === undefined) {
+        hashMap[joinedRowKey] = index++;
+        keys.push(rowKey);
     }
+    return rowKey;
+};
 
-    matrix[rowIndex] = matrix[rowIndex] || [];
-    matrix[rowIndex].push(...cells);
+const createJoinedKeys = keys => keys.map(e => ({
+    keyArr: e,
+    joinedKey: e.join(',')
+}));
+
+/**
+*
+*
+* @param {*} splitModels
+* @param {*} facetInfo
+* @returns
+*/
+const getSplitModelHashMap = (splitModels, facetInfo, config) => {
+    const {
+        rowFacetNames,
+        colFacetNames,
+        rowFacets,
+        colFacets
+    } = facetInfo;
+
+    const rowKeyHashMap = {};
+    const colKeyHashMap = {};
+
+    const rowKeys = [];
+    const colKeys = [];
+    const rowIndex = 0;
+
+    const splitModelsHashMap = {};
+
+    splitModels.forEach((splitContext) => {
+        const rowKey = prepareHashMaps(splitContext, rowFacetNames, rowKeyHashMap, rowKeys, rowIndex);
+        const colKey = prepareHashMaps(splitContext, colFacetNames, colKeyHashMap, colKeys, 1);
+
+        splitModelsHashMap[`${rowKey}-${colKey}`] = splitContext;
+    });
+
+    return {
+        splitModelsHashMap,
+        rowKeys: createJoinedKeys(sortFacetFields(rowFacets, rowKeys, config)),
+        colKeys: createJoinedKeys(sortFacetFields(colFacets, colKeys, config))
+    };
 };
 
 /**
@@ -147,135 +150,221 @@ const formatKeys = (keys, formatterList) => {
 };
 
 /**
- * Gets Matrixes for corresponding datamodel, facets and projections
- *
- * @param {Object} dataModel input datamodel
- * @param {Array} facetsAndProjections contains the set of facets and projections for the matrices
- * @param {Function} valueCellCreator Callback executed after datamodels are prepared after sel/proj
- * @param {Object} globalConfig global config
- *
- * @return {Object} set of matrices with the corresponding row and column keys
- */
-export const getMatrixModel = (dataModel, facetsAndProjections, valueCellCreator, globalConfig) => {
-    let rowDataModels = [];
-    let rowKeys = [];
-    let columnKeys = [];
-    const allColumnProjections = [];
-    const matrix = [];
-    const facetInfo = [];
+*
+*
+* @param {Object} context
+* @param {Object} fieldInfo
+* @returns
+*/
+const splitByColumn = (context, optionalProjections) => {
+    const {
+        matrix,
+        dataModel,
+        rowIndex,
+        colIndex,
+        facetInfo,
+        projectionInfo,
+        geomCellCreator
+    } = context;
+    const {
+        indices,
+        uniqueFields,
+        projections
+    } = projectionInfo;
 
-    const fieldInfo = Object.assign({}, facetsAndProjections);
+    const commonFields = optionalProjections;
+
+    dataModel.splitByColumn(commonFields, uniqueFields).forEach((model, i) => {
+        let { rowIndex: row, colIndex: col } = indices[i];
+        row += rowIndex;
+        col += colIndex;
+
+        matrix[row] = matrix[row] || [];
+
+        const projectionIndexObject = {
+            indices: {
+                rowIndex: row,
+                columnIndex: col
+            },
+            projections: projections[i]
+        };
+        matrix[row][col] = geomCellCreator(model, projectionIndexObject, facetInfo);
+    });
+    const lastIndex = indices[indices.length - 1];
+
+    return {
+        rowIndex: lastIndex.rowIndex + rowIndex,
+        colIndex: lastIndex.colIndex + colIndex
+    };
+};
+
+const createColumnDataModels = (colContext, fieldInfo, sourceDM) => {
+    let context = {};
     const {
         rowFacets,
-        colFacets,
-        colProjections
+        colFacets
+    } = fieldInfo;
+    const {
+        rowKeyArr,
+        rowKey,
+        colKeyObj,
+        newRowIndex,
+        splitModelsHashMap,
+        currentColumnIndex
+    } = colContext;
+
+    const { keyArr: colKeyArr, joinedKey: colKey } = colKeyObj;
+    const hashMapKey = splitModelsHashMap[`${rowKey}-${colKey}`];
+
+    if (hashMapKey) {
+        context = { dataModel: hashMapKey };
+    } else {
+        const emptyDm = new DataModel([], sourceDM.getData().schema);
+        context = { dataModel: emptyDm };
+    }
+
+    context = {
+        ...context,
+        ...colContext,
+        facetInfo: {
+            rowFacets: [rowFacets, rowKeyArr],
+            colFacets: [colFacets, colKeyArr]
+        },
+        rowIndex: newRowIndex,
+        colIndex: currentColumnIndex
+    };
+    const dataModels = splitByColumn(context, fieldInfo.optionalProjections);
+
+    return {
+        columnIndex: dataModels.colIndex + 1,
+        rowIndex: dataModels.rowIndex
+    };
+};
+
+const createRowDataModels = (rowContext, fieldInfo, sourceDM) => {
+    let currentColumnIndex = 0;
+    let rowIndexForCurrentKey = 0;
+    const {
+        colKeys,
+        rowKeyObj,
+        currentRowIndex
+    } = rowContext;
+    const newRowIndex = currentRowIndex;
+    const { keyArr: rowKeyArr, joinedKey: rowKey } = rowKeyObj;
+    const colContext = {
+        ...rowContext,
+        rowKeyArr,
+        rowKey,
+        newRowIndex
+    };
+
+    if (colKeys.length) {
+        colKeys.forEach((colKeyObj) => {
+            colContext.colKeyObj = colKeyObj;
+            colContext.currentColumnIndex = currentColumnIndex;
+            const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
+
+            currentColumnIndex = columnIndex;
+            rowIndexForCurrentKey = rowIndex;
+        });
+    } else {
+        colContext.colKeyObj = { keyArr: [], joinedKey: '' };
+        colContext.currentColumnIndex = currentColumnIndex;
+        const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
+
+        currentColumnIndex = columnIndex;
+        rowIndexForCurrentKey = rowIndex;
+    }
+
+    return {
+        rowIndex: rowIndexForCurrentKey++
+    };
+};
+
+/**
+* Gets Matrixes for corresponding datamodel, facets and projections
+*
+* @param {Object} dataModel input datamodel
+* @param {Object} fieldInfo Information about the fields
+* @param {Function} geomCellCreator Callback executed after datamodels are prepared after sel/proj
+* @return {Object} set of matrices with the corresponding row and column keys
+*/
+export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConfig) => {
+    let currentRowIndex = 0;
+    const matrix = [];
+    const {
+        rowFacets,
+        colFacets
     } = fieldInfo;
 
-    colProjections.forEach((colProj) => {
-        allColumnProjections.push(...colProj);
-    });
-    fieldInfo.allColumnProjections = allColumnProjections;
+    const projectionInfo = prepareProjectionInfo(fieldInfo);
+    const facetInfo = prepareFacetInfo(fieldInfo);
+    const allSplitModels = dataModel.splitByRow(facetInfo.allFacets);
 
-    // Performing row selection and projection
-    if (rowFacets.length > 0) {
-        // Get unique values for the root level of facet
-        const field = rowFacets[0].toString();
-        const firstLevelRowKeys = retriveDomainFromData(dataModel, field);
+    const {
+        splitModelsHashMap,
+        rowKeys,
+        colKeys
+    } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
 
-        // Get unique keys in the form of an array of arrays for each row
-        uniqueKeyGenerator(rowKeys, { facets: rowFacets, dataModel, uniqueValues: firstLevelRowKeys });
+    const generalContext = {
+        matrix,
+        geomCellCreator,
+        projectionInfo,
+        splitModelsHashMap,
+        colKeys
+    };
 
-        rowKeys = sortFacetFields(rowFacets, rowKeys, globalConfig);
-
-        // Apply selection -> projection -> row datamodels
-        rowKeys.forEach((val) => {
-            // Create faceted datamodel
-            const [rowFacetFieldNames] = getFieldNames(rowFacets);
-            const selectedDataModel = createSelectedDataModel(dataModel, rowFacetFieldNames, val);
-
-            // Project the datamodel based on the number of projections (based on last levels)
-            const newProjectedDataModels = projectRows(selectedDataModel, fieldInfo);
-            rowDataModels.push(...newProjectedDataModels);
-
-            newProjectedDataModels.forEach(() => {
-                facetInfo.push([rowFacets, val]);
-            });
-        });
-    } else {
-        // No row facets, hence only row projection
-        rowDataModels.push(...projectRows(dataModel, fieldInfo));
-    }
-
-    // Maintaining set of row datamodels for column resolution
-    rowDataModels = rowDataModels.length > 0 ? rowDataModels : [[]];
-
-    // Performing column selection and projection
-    if (colFacets.length > 0) {
-        const colFacetNames = colFacets.map(d => `${d}`);
-        // Get unique values for the root level of facet
-        const field = colFacetNames[0];
-        const firstLevelColumnKeys = retriveDomainFromData(dataModel, field);
-
-        // Get unique keys to create faceted datamodels: this time for columns
-        uniqueKeyGenerator(columnKeys, {
-            facets: colFacetNames,
-            dataModel,
-            uniqueValues: firstLevelColumnKeys
-        });
-
-        columnKeys = sortFacetFields(colFacets, columnKeys, globalConfig);
-
-        // For each row in the datamodel, apply selection -> projection -> push the projection to matri
-        rowDataModels.forEach((dme, rIndex) => {
-            facetInfo[rIndex] = facetInfo[rIndex] || [[], []];
-            columnKeys.forEach((val, cIndex) => {
-                matrix[rIndex] = matrix[rIndex] || [];
-
-                // If datamodel is not present in current row, choose parent datamodel
-                const datamodel = dme instanceof DataModel ? dme : dataModel;
-
-                // Selection is made on the datamodel for the current row
-                const selectedDataModel = createSelectedDataModel(datamodel, colFacetNames, val);
-                const context = {
-                    matrix,
-                    datamodel: selectedDataModel,
-                    facetInfo: {
-                        rowFacets: facetInfo[rIndex],
-                        colFacets: [colFacets, val],
-                        rowIndex: rIndex,
-                        columnIndex: cIndex
-                    },
-                    fieldInfo
-                };
-                pushToMatrix(context, valueCellCreator);
-            });
-        });
-    } else {
-        // No column facets, hence only row projection
-        rowDataModels.forEach((dme, rIndex) => {
-            facetInfo[rIndex] = facetInfo[rIndex] || [[], []];
-            const context = {
-                matrix,
-                datamodel: dme || dataModel,
-                facetInfo: {
-                    rowFacets: facetInfo[rIndex],
-                    colFacets: [[], []],
-                    rowIndex: rIndex,
-                    columnIndex: 0
-                },
-                fieldInfo
+    if (rowKeys.length) {
+        rowKeys.forEach((rowKeyObj) => {
+            const rowContext = {
+                ...generalContext,
+                rowKeyObj,
+                currentRowIndex
             };
-
-            pushToMatrix(context, valueCellCreator);
+            createRowDataModels(rowContext, fieldInfo, dataModel);
+            currentRowIndex++;
         });
+    } else if (colKeys.length) {
+        let currentColumnIndex = 0;
+        const newRowIndex = currentRowIndex;
+
+        colKeys.forEach((colKeyObj) => {
+            const colContext = {
+                ...generalContext,
+                rowKeyArr: [],
+                rowKey: '',
+                colKeyObj,
+                newRowIndex,
+                currentColumnIndex
+            };
+            const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, dataModel);
+            currentRowIndex = rowIndex;
+            currentColumnIndex = columnIndex;
+        });
+    } else {
+        let currentColumnIndex = 0;
+        const newRowIndex = currentRowIndex;
+        const colContext = {
+            ...generalContext,
+            rowKeyArr: [],
+            rowKey: '',
+            colKeyObj: { keyArr: [], joinedKey: '' },
+            newRowIndex,
+            currentColumnIndex
+        };
+        const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, dataModel);
+        currentRowIndex = rowIndex;
+        currentColumnIndex = columnIndex;
     }
 
-    const formattedColKeys = formatKeys(columnKeys, colFacets.map(facetField => facetField.rawFormat()));
-    const formattedRowKeys = formatKeys(rowKeys, rowFacets.map(facetField => facetField.rawFormat()));
+    const formattedColKeys = formatKeys(colKeys.map(e => e.keyArr),
+        colFacets.map(facetField => facetField.rawFormat()));
+    const formattedRowKeys = formatKeys(rowKeys.map(e => e.keyArr),
+        rowFacets.map(facetField => facetField.rawFormat()));
 
-    // Getting column keys
+     // Getting column keys
     const transposedColKeys = formattedColKeys.length > 0 ? formattedColKeys[0].map((col, i) =>
-                    formattedColKeys.map(row => row[i])) : formattedColKeys;
-
+     formattedColKeys.map(row => row[i])) : formattedColKeys;
     return { matrix, rowKeys: formattedRowKeys, columnKeys: transposedColKeys };
 };

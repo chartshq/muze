@@ -459,6 +459,10 @@ export const extractFields = (facetsAndProjections, layerFields) => {
  * @return {Array} Returns sorted facets
  */
 export const sortFacetFields = (facets, keys, config) => {
+    /**
+     * Check if the facet sorted by the user is plotted
+     * If an incorrect field is sorted, return the keys as is
+     */
     const schema = [];
     const facetNames = [];
     const sortInfo = [];
@@ -466,14 +470,14 @@ export const sortFacetFields = (facets, keys, config) => {
 
     facets.forEach((facet) => {
         const name = `${facet}`;
-        if (sortConfig[name]) {
-            sortInfo.push([name, sortConfig[name]]);
+        const facetSortConfig = sortConfig[name];
+        if (facetSortConfig) {
+            sortInfo.push([name, facetSortConfig]);
         }
         schema.push(facet.getSchemaDef());
-        facetNames.push(name);
     });
 
-    return new DataModel([facetNames, ...keys], schema).sort(sortInfo).getData().data;
+    return new DataModel([facetNames, ...keys], schema).sort(sortInfo, { saveChild: false }).getData().data;
 };
 
 export const removeExitCells = (resolver) => {
