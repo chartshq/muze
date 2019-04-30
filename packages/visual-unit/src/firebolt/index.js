@@ -63,6 +63,9 @@ export default class UnitFireBolt extends Firebolt {
             let isSourceFieldPresent = true;
             let isMutableAction = false;
             const context = this.context;
+            if (!context.mount()) {
+                return this;
+            }
             const {
                 model: propagationData,
                 entryRowIds,
