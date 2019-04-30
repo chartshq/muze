@@ -131,6 +131,7 @@ const getSplitModelHashMap = (splitModels, facetInfo, config) => {
         colKeys: createJoinedKeys(sortFacetFields(colFacets, colKeys, config))
     };
 };
+
 /**
  * Formats row or columns keys with the provided formatter.
  *
@@ -179,7 +180,6 @@ const splitByColumn = (context, optionalProjections) => {
         col += colIndex;
 
         matrix[row] = matrix[row] || [];
-        // sortFacetFields(rowFacets, rowKeys, globalConfig);
 
         const projectionIndexObject = {
             indices: {
@@ -196,6 +196,81 @@ const splitByColumn = (context, optionalProjections) => {
     return {
         rowIndex: lastIndex.rowIndex + rowIndex,
         colIndex: lastIndex.colIndex + colIndex
+    };
+};
+
+const createColumnDataModels = (colContext, fieldInfo, sourceDM) => {
+    let context = {};
+    const {
+        rowFacets,
+        colFacets
+    } = fieldInfo;
+    const {
+        rowKeyArr,
+        rowKey,
+        colKeyObj,
+        newRowIndex,
+        splitModelsHashMap,
+        currentColumnIndex
+    } = colContext;
+
+    const { keyArr: colKeyArr, joinedKey: colKey } = colKeyObj;
+    const hashMapKey = splitModelsHashMap[`${rowKey}-${colKey}`];
+
+    if (hashMapKey) {
+        context = { dataModel: hashMapKey };
+    } else {
+        const emptyDm = new DataModel([], sourceDM.getData().schema);
+        emptyDm.setParent(sourceDM);
+        context = { dataModel: emptyDm };
+    }
+
+    context = {
+        ...context,
+        ...colContext,
+        facetInfo: {
+            rowFacets: [rowFacets, rowKeyArr],
+            colFacets: [colFacets, colKeyArr]
+        },
+        rowIndex: newRowIndex,
+        colIndex: currentColumnIndex
+    };
+    const dataModels = splitByColumn(context, fieldInfo.optionalProjections);
+
+    return {
+        columnIndex: dataModels.colIndex + 1,
+        rowIndex: dataModels.rowIndex
+    };
+};
+
+const createRowDataModels = (rowContext, fieldInfo, sourceDM) => {
+    let currentColumnIndex = 0;
+    let rowIndexForCurrentKey = 0;
+    const {
+        colKeys,
+        rowKeyObj,
+        currentRowIndex
+    } = rowContext;
+    const newRowIndex = currentRowIndex;
+    const { keyArr: rowKeyArr, joinedKey: rowKey } = rowKeyObj;
+
+    colKeys.forEach((colKeyObj) => {
+        const colContext = {
+            ...rowContext,
+            rowKeyArr,
+            rowKey,
+            colKeyObj,
+            newRowIndex,
+            currentColumnIndex
+        };
+        const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, sourceDM);
+
+        currentColumnIndex = columnIndex;
+        rowIndexForCurrentKey = rowIndex;
+    });
+
+    return {
+        rowIndex: rowIndexForCurrentKey++
     };
 };
 
@@ -225,43 +300,56 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConf
         colKeys
     } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
 
-    rowKeys.forEach((rowKeyObj) => {
+    const generalContext = {
+        matrix,
+        geomCellCreator,
+        projectionInfo,
+        splitModelsHashMap,
+        colKeys
+    };
+
+    if (rowKeys.length) {
+        rowKeys.forEach((rowKeyObj) => {
+            const rowContext = {
+                ...generalContext,
+                rowKeyObj,
+                currentRowIndex
+            };
+            createRowDataModels(rowContext, fieldInfo, dataModel);
+            currentRowIndex++;
+        });
+    } else if (colKeys.length) {
         let currentColumnIndex = 0;
-        const { keyArr: rowKeyArr, joinedKey: rowKey } = rowKeyObj;
         const newRowIndex = currentRowIndex;
-        // sortFacetFields(colFacets, columnKeys, globalConfig);
 
         colKeys.forEach((colKeyObj) => {
-            let context = {};
-            const { keyArr: colKeyArr, joinedKey: colKey } = colKeyObj;
-            const hashMapKey = splitModelsHashMap[`${rowKey}-${colKey}`];
-
-            if (hashMapKey) {
-                context = { dataModel: hashMapKey };
-            } else {
-                const emptyDm = new DataModel([], dataModel.getData().schema);
-                emptyDm.setParent(dataModel);
-                context = { dataModel: emptyDm };
-            }
-
-            context = {
-                ...context,
-                matrix,
-                facetInfo: {
-                    rowFacets: [rowFacets, rowKeyArr],
-                    colFacets: [colFacets, colKeyArr]
-                },
-                projectionInfo,
-                rowIndex: newRowIndex,
-                colIndex: currentColumnIndex,
-                geomCellCreator
+            const colContext = {
+                ...generalContext,
+                rowKeyArr: [],
+                rowKey: '',
+                colKeyObj,
+                newRowIndex,
+                currentColumnIndex
             };
-            const dataModels = splitByColumn(context, fieldInfo.optionalProjections);
-            currentColumnIndex = dataModels.colIndex + 1;
-            currentRowIndex = dataModels.rowIndex;
+            const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, dataModel);
+            currentRowIndex = rowIndex;
+            currentColumnIndex = columnIndex;
         });
-        currentRowIndex++;
-    });
+    } else {
+        let currentColumnIndex = 0;
+        const newRowIndex = currentRowIndex;
+        const colContext = {
+            ...generalContext,
+            rowKeyArr: [],
+            rowKey: '',
+            colKeyObj: { keyArr: [], joinedKey: '' },
+            newRowIndex,
+            currentColumnIndex
+        };
+        const { columnIndex, rowIndex } = createColumnDataModels(colContext, fieldInfo, dataModel);
+        currentRowIndex = rowIndex;
+        currentColumnIndex = columnIndex;
+    }
 
     const formattedColKeys = formatKeys(colKeys.map(e => e.keyArr),
         colFacets.map(facetField => facetField.rawFormat()));
