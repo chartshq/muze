@@ -433,8 +433,12 @@ export default class BaseLayer extends SimpleLayer {
      * @return {BaseLayer} Instance of layer.
      */
     remove () {
-        const { namespace } = this.metaInf();
-        this.store().removeSubNamespace(namespace, BaseLayer.formalName());
+        const { namespace, parentNamespace } = this.metaInf();
+        const store = this.store();
+        store.removeSubNamespace(namespace, BaseLayer.formalName());
+        const layersDomain = store.get(`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`);
+        const unitDom = layersDomain[parentNamespace];
+        unitDom && (delete unitDom[namespace]);
         selectElement(this.mount()).remove();
         return this;
     }
