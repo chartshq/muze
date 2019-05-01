@@ -2704,20 +2704,19 @@ return /******/ (function(modules) { // webpackBootstrap
         }
 
         return function (e, t, n, r, a) {
-          var i = void 0,
+          var i = {},
               o = {},
-              u = {},
-              c = {};
+              u = {};
           return R(e, function (e) {
             if (t(e)) {
               var n = "",
-                  f = {
+                  c = {
                 keys: {}
               };
               r.forEach(function (t) {
                 var r = a[t].partialField.data[e];
-                n = n + "-" + r, f.keys[t] = r;
-              }), void 0 === o[n] && (o[n] = [], c[n] = -1, u[n] = f), -1 !== c[n] && e === c[n] + 1 ? (i = o[n].length - 1, o[n][i] = o[n][i].split("-")[0] + "-" + e) : o[n].push("" + e), c[n] = e;
+                n = n + "-" + r, c.keys[t] = r;
+              }), void 0 === o[n] && (o[n] = [], i[n] = -1, u[n] = c), wt(o[n], e, i[n]), i[n] = e;
             }
           }), {
             splitRowDiffset: o,
@@ -3062,8 +3061,10 @@ return /******/ (function(modules) { // webpackBootstrap
           };
           return function (e, t, n, r) {
             var a = {},
-                i = n.mode,
-                o = e.clone(r.saveChild),
+                i = n.mode;
+            i = i || l.NORMAL;
+
+            var o = e.clone(r.saveChild),
                 u = _t(o, t, n, e, Ot),
                 c = bt[i].diffIndex;
 
@@ -55714,12 +55715,6 @@ function (_VisualEncoder) {
           axes.forEach(function (axis, index) {
             key = !axisType ? "0".concat(idx).concat(index) : "".concat(idx, "0").concat(index);
             domain = adjustedDomain[index] || domains[axisType][key];
-
-            if (domain) {
-              console.log(domain);
-              console.log(index, idx);
-            }
-
             domain && axis.domain(domain);
             var type = !axisType ? 'x' : 'y';
             store.commit("".concat(muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].GROUP_GLOBAL_NAMESPACE, ".domain.").concat(type), domain, "".concat(idx).concat(index));
@@ -59286,6 +59281,14 @@ var prepareProjectionInfo = function prepareProjectionInfo(fieldInfo) {
       });
     });
   });
+  indices = indices.length ? indices : [{
+    rowIndex: 0,
+    colIndex: 0
+  }];
+  projections = projections.length ? projections : [{
+    rowFields: [],
+    columnFields: []
+  }];
   return {
     uniqueFields: uniqueFields,
     indices: indices,
@@ -59463,7 +59466,6 @@ var createColumnDataModels = function createColumnDataModels(colContext, fieldIn
     };
   } else {
     var emptyDm = new muze_utils__WEBPACK_IMPORTED_MODULE_0__["DataModel"]([], sourceDM.getData().schema);
-    emptyDm.setParent(sourceDM);
     context = {
       dataModel: emptyDm
     };
