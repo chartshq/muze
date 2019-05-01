@@ -74,10 +74,17 @@ d3.json('../../data/cars.json', (data) => {
     var rows = ['Origin','Acceleration'],
             columns = rows.reverse();
         const canvas = env.canvas()
-        .columns(['Cylinders'])
-        .rows([  'Origin']).data(rootData).height(300).width(300)
-        .detail(['Name', 'Cylinders'])
+        .columns([])
+        .rows([]).data(rootData).height(400).width(400)
+        .layers([{
+            mark: 'arc',
+            encoding: {
+                angle: 'Acceleration',
+                radius: 'Horsepower'
+            }
+        }])
+        // .detail(['Name', 'Cylinders'])
         .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
-            field: 'Acceleration'
+            field: 'Origin'
         }).mount('#chart')
 });

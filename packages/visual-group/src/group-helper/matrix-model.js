@@ -21,12 +21,12 @@ const getFieldNames = fieldVar => fieldVar.reduce((acc, d) => {
 */
 const prepareProjectionInfo = (fieldInfo) => {
     const {
-colProjections,
-rowProjections
-} = fieldInfo;
+        colProjections,
+        rowProjections
+    } = fieldInfo;
     const uniqueFields = [];
-    const indices = [];
-    const projections = [];
+    let indices = [];
+    let projections = [];
 
     rowProjections.forEach((rowProj, rIndex) => {
         const newRIndex = rIndex;
@@ -40,6 +40,8 @@ rowProjections
             projections.push({ rowFields: rowProj, columnFields: colProj });
         });
     });
+    indices = indices.length ? indices : [{ rowIndex: 0, colIndex: 0 }];
+    projections = projections.length ? projections : [{ rowFields: [], columnFields: [] }];
     return { uniqueFields, indices, projections };
 };
 
