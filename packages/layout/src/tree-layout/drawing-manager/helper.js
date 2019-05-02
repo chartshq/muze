@@ -13,15 +13,7 @@ export const renderHTML = (context) => {
     context.renderer().createhtml(context.mount(), context.className());
 };
 
-export const drawLayout = (context) => {
-    switch (context.renderer()) {
-    case 'html':
-        renderHTML(context);
-        break;
-    default:
-        renderHTML(context);
-    }
-};
+export const drawLayout = context => renderHTML(context);
 
 export const drawComponent = (componentData) => {
     componentData.children().forEach((node) => {
