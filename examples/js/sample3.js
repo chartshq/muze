@@ -57,30 +57,34 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
-    // function shuffleArray(array) {
-    //     for (var i = array.length - 1; i > 0; i--) {
-    //         var j = Math.floor(Math.random() * (i + 1));
-    //         var temp = array[i];
-    //         array[i] = array[j];
-    //         array[j] = temp;
-    //     }
-    // }
-    // shuffleArray(jsonData)
     let rootData = new DataModel(jsonData, schema)
-    // .select(fields=>fields.Year.value === '1972-01-01');
 
+    rootData.sort([
+        ['Cylinders', 'asc'],
+        ['Maker', 'desc'],
+    ])
 
-    var rows = ['Acceleration', 'Horsepower', 'Weight_in_lbs'],
+    var rows = ['Origin','Acceleration'],
             columns = rows.reverse();
-        const canvas = env.canvas().columns(['Origin', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400).title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).color({
-            field: 'Origin'
-        }).mount('#chart').once('canvas.animationend').then(function (client) {
-            var element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+        const canvas = env.canvas();
+        canvas.data(rootData).columns(['Cylinders', 'Horsepower']).rows(['Acceleration']).color('Maker').mount('#chart').height(500)
+     
+        setTimeout(()=>{
+        // canvas.data(rootData).rows(['Maker']).columns([ ]).color('Cylinders')
+        // .layers([{
+        //     mark:'arc',
+
+        // }])
+        // setTimeout(()=>{
+        //     canvas.data(rootData).columns(['Maker']).rows([ 'Cylinders']) .layers([{
+        //         mark:'arc',
+    
+        //     }]).color('Cylinders')
+        // }, 1000)
+    }, 1000)
 });

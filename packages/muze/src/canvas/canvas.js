@@ -57,14 +57,15 @@ export default class Canvas extends TransactionSupport {
         this._store = new Store(APP_INITIAL_STATE);
 
         this._throwback = new Store({
-            [CommonProps.MATRIX_CREATED]: false
+            [CommonProps.MATRIX_CREATED]: false,
+            [CommonProps.ON_LAYER_DRAW]: null
         });
 
         // Setters and getters will be mounted on this. The object will be mutated.
         const namespace = STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE;
         const allOptions = Object.assign({}, options, localOptions, canvasOptions);
 
-        transactor(this, allOptions, this._store.model, {
+        transactor(this, allOptions, this._store, {
             namespace
         });
 

@@ -1,4 +1,6 @@
-import { Store, FieldType, COORD_TYPES, getObjProp } from 'muze-utils';
+import { Store, FieldType, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
+import { VisualUnit } from '@chartshq/visual-unit';
+import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
@@ -451,18 +453,41 @@ export const extractFields = (facetsAndProjections, layerFields) => {
 
 /**
  * This method sorts the facets fields inplace if field is of categorical type
- * @param {Object} facet
+ * @param {Object} facets Array of facets
  * @param {Array} keys Array of the facet field values
+ * @param {Object} config configuration object
+ * @return {Array} Returns sorted facets
  */
-export const sortFacetFields = (facet, keys, config) => {
-    const facetName = `${facet}`;
-    const type = facet.type();
+export const sortFacetFields = (facets, keys, config) => {
+    /**
+     * Check if the facet sorted by the user is plotted
+     * If an incorrect field is sorted, return the keys as is
+     */
+    const schema = [];
+    const facetNames = [];
+    const sortInfo = [];
+    const sortConfig = config.sort;
 
-    if (type === DIMENSION && config.sort[facetName]) {
-        if (config.sort[facetName] === 'asc') {
-            keys.sort((a, b) => a - b);
-        } else {
-            keys.sort((a, b) => b - a);
+    facets.forEach((facet) => {
+        const name = `${facet}`;
+        const facetSortConfig = sortConfig[name];
+        if (facetSortConfig) {
+            sortInfo.push([name, facetSortConfig]);
         }
-    }
+        schema.push(facet.getSchemaDef());
+    });
+
+    return new DataModel([facetNames, ...keys], schema).sort(sortInfo, { saveChild: false }).getData().data;
+};
+
+export const removeExitCells = (resolver) => {
+    const exitCells = resolver.cacheMaps().exitCellMap;
+    const store = resolver.store();
+    const qualifiedStateProps = [].concat(...VisualUnit.getQualifiedStateProps(),
+        ...BaseLayer.getQualifiedStateProps());
+    store.lockCommits(qualifiedStateProps);
+    exitCells.forEach((placeholder) => {
+        placeholder.remove();
+    });
+    store.unlockCommits(qualifiedStateProps);
 };

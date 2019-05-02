@@ -6,9 +6,10 @@ import { FRAGMENTED } from '../../enums/constants';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
+import { HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 
 const configResolvers = {
-    highlightSummary: (specificConf, config) => defaultValue(specificConf, config),
+    [HIGHLIGHT_SUMMARY]: (specificConf, config) => defaultValue(specificConf, config),
     default: specificConf => defaultValue(specificConf, {})
 };
 
@@ -25,8 +26,8 @@ export default class Tooltip extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
         this._tooltips = {};
-        this._strategies = strategies;
-        this._strategy = 'highlightSummary';
+        this._strategies = mergeRecursive({}, strategies);
+        this._strategy = HIGHLIGHT_SUMMARY;
     }
 
     static defaultConfig () {
@@ -129,6 +130,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const strategy = defaultValue(options.strategy, this._strategy);
         const strategyConf = config[strategy];
         const { dataTransform, fields: projectFields } = strategyConf;
+        const strategyObj = this._strategies;
         // Show tooltip for each datamodel
         for (let i = 0; i < dataModels.length; i++) {
             let plotDim = plotDimensions[i];
@@ -158,7 +160,7 @@ export default class Tooltip extends SpawnableSideEffect {
             sourceInf.valueParser = context.valueParser();
             sourceInf.selectionSet = selectionSet;
             tooltipInst.context(sourceInf);
-            const strategyFn = strategies[strategy];
+            const strategyFn = strategyObj[strategy];
             tooltipInst.content(strategy, dt, {
                 formatter: strategyFn,
                 order: options.order

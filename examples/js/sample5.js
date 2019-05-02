@@ -1,145 +1,90 @@
-/* eslint-disable */
-d3.json('../data/cars.json', (data) => {
-    const jsonData = data;
-    const schema = [
-        {
-            name: 'Name',
-            type: 'dimension'
-        },
-        {
-            name: 'Maker',
-            type: 'dimension'
-        },
-        {
-            name: 'Miles_per_Gallon',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
+const env = muze();
+const DataModel = muze.DataModel;
 
-        {
-            name: 'Displacement',
-            type: 'measure'
-        },
-        {
-            name: 'Horsepower',
-            type: 'measure',
-            defAggFn: 'avg'
-        },
-        {
-            name: 'Weight_in_lbs',
-            type: 'measure'
-        },
-        {
-            name: 'Acceleration',
-            type: 'measure',
-            defAggFn: 'sum'
-        },
-        {
-            name: 'Origin',
-            type: 'dimension'
-        },
-        {
-            name: 'Cylinders',
-            type: 'dimension'
-        },
-        {
-            name: 'Year',
-            type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
-        }
+function shuffleArray (array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+d3.json('../../data/cars.json', (data) => {
+    const jsonData = data;
+    const schema = [{
+        name: 'Name',
+        type: 'dimension'
+    },
+    {
+        name: 'Maker',
+        type: 'dimension'
+    },
+    {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    },
+
+    {
+        name: 'Displacement',
+        type: 'measure',
+        defAggFn: 'min'
+    },
+    {
+        name: 'Horsepower',
+        type: 'measure'
+    },
+    {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    },
+    {
+        name: 'Acceleration',
+        type: 'measure',
+        numberFormat: val => `$${val}`
+    },
+    {
+        name: 'Origin',
+        type: 'dimension',
+        displayName: 'Origin2'
+    },
+    {
+        name: 'Cylinders',
+        type: 'dimension'
+    },
+    {
+        name: 'Year',
+        type: 'dimension'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
+    }
     ];
 
-    const env = muze();
-    const DataModel = muze.DataModel;
+    const rootData = new DataModel(jsonData, schema);
 
-    let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.calculateVariable(
-        {
-            name: 'CountVehicle',
-            type: 'measure',
-            defAggFn: 'count',
-            numberFormat: val => parseInt(val, 10)
-        },
-        ['Name', () => 1]
-    );
-    env.data(rootData);
+    rootData.sort([
+        ['Cylinders', 'asc'],
+        ['Maker', 'desc']
+    ]);
 
-    // line chart
-    window.canvas = env.canvas()
-        .columns(['Origin', 'Year'])
-        .rows(['Horsepower'])
-        .width(450)
-        .height(300)
-        // .layers([{
-        //     mark: 'line'
-        // }])
-        .title('Line Chart')
-        .mount('#chart');
+    let rows = ['Origin', 'Acceleration'],
+        columns = rows.reverse();
+    const canvas = env.canvas();
+    canvas.data(rootData).rows(['Maker']).columns(['Name'])
+        // .color('Maker')
+        .mount('#chart').height(500);
 
-    // stacked bar chart
-    env.canvas()
-        .rows([])
-        .columns([])
-        .width(600)
-        .color('Origin')
+    setTimeout(() => {
+        canvas.data(rootData).rows(['Maker']).columns([]).color('Cylinders')
         .layers([{
-            mark: 'arc',
-            encoding: {
-                angle: 'Maker',
-                radius: 'Acceleration'
-            },
-            transform: {
-                type: 'stack'
-            }
-        }, {
-            mark: 'text',
-            encoding: {
-                angle: 'Maker',
-                radius: 'Acceleration',
-                text: {
-                    field: 'Acceleration',
-                    formatter: (d) => d.toFixed(2)
-                },
-                rotation: {
-                    value: () => 40
-                }
-            }
-        }, {
-            mark: 'tick',
-            encoding: {
-                angle: 'Maker',
-                radius0: {
-                    value: (d) => {
-                        return d.radius + 20;
-                    }
-                },
-                radius: 'Acceleration',
-                text: {
-                    field: 'Acceleration',
-                    formatter: (d) => d.toFixed(2)
-                },
-                rotation: {
-                    value: () => 40
-                }
-            }
-        }])
-        .height(500)
-        .title('Stacked Bar Chart')
-        .mount('#chart2');
+            mark: 'arc'
 
-    // grouped bar chart with line
-    env.canvas()
-        .rows(['Miles_per_Gallon'])
-        .columns(['Year'])
-        .width(1050)
-        .color('Origin')
-        .layers([{
-            mark: 'bar'
-        }, {
-            mark: 'line'
-        }])
-        .height(300)
-        .title('Grouped Bar Chart and Line')
-        .mount('#chart3');
+        }]);
+        setTimeout(() => {
+            canvas.data(rootData).columns(['Maker']).rows(['Cylinders']).layers([{
+                mark: 'arc'
+
+            }]).color('Cylinders');
+        }, 1000);
+    }, 1000);
 });

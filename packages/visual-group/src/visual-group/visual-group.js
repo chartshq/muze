@@ -75,11 +75,11 @@ class VisualGroup extends SimpleGroup {
     static getState () {
         return [{
             domain: {
-                x: {},
-                y: {},
-                radius: {},
-                angle: {},
-                angle0: {}
+                x: null,
+                y: null,
+                radius: null,
+                angle: null,
+                angle0: null
             }
         }, {}];
     }
@@ -249,6 +249,15 @@ class VisualGroup extends SimpleGroup {
 
     createMatrices () {
         createMatrices(this);
+    }
+
+    remove () {
+        this.matrixInstance().value.clear();
+        this.resolver().clear();
+        const info = this.placeholderInfo();
+        info.rows = null;
+        info.columns = null;
+        info.values = null;
     }
 }
 

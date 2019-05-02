@@ -7,7 +7,8 @@ import {
     FieldType,
     MeasureSubtype,
     Scales,
-    getNearestValue
+    getNearestValue,
+    getObjProp
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
@@ -109,7 +110,7 @@ export default class BarLayer extends BaseLayer {
     calculateDomainFromData (data, encodingFieldInf, fieldsConfig) {
         const domain = super.calculateDomainFromData(data, encodingFieldInf, fieldsConfig);
         ['x', 'y'].forEach((d) => {
-            if (encodingFieldInf[`${d}FieldType`] === MEASURE && domain[d]) {
+            if (encodingFieldInf[`${d}FieldType`] === MEASURE && getObjProp(domain[d], 'length')) {
                 if (encodingFieldInf[`${d}0Field`]) {
                     domain[d] = domain[d].sort((a, b) => a - b);
                 } else {
@@ -164,6 +165,7 @@ export default class BarLayer extends BaseLayer {
         }, `id-${this.id()}`);
 
         this._points = this.generateDataPoints(normalizedDataArr, keys);
+        this._graphicElems = {};
 
         createElements({
             data: this._points,

@@ -189,7 +189,7 @@ export const getHorizontalAxisSpace = (context, axisDimensions, range) => {
 
         width = ((max - min) / Math.abs(minTickDiff)) * (tickDimWidth + context._minTickDistance.width);
     }
-    if (!width || width === 0) {
+    if (!range || !range.length) {
         height = Math.max(tickDimWidth, tickDimHeight);
     } else {
         height = tickDimHeight;
@@ -259,15 +259,15 @@ export const calculateBandSpace = (context) => {
             height
         } = getHorizontalAxisSpace(context, axisDimensions, range);
 
-        if (!width || width === 0) {
+        if (!range || !range.length) {
             width = allTickDimensions.reduce((t, n) =>
                 t + Math.min(n.width, n.height) + minTickWidth, 0);
         }
+
         if (show === false) {
             height = 0;
             width = 0;
         }
-
         return {
             width,
             height

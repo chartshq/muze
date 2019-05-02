@@ -41,9 +41,6 @@ export const DEFAULT_CONFIG = {
             width: 20
         }
     },
-    sort: {
-        disabled: false
-    },
     showHeaders: false,
     minWidth: 100,
     minHeight: 100,
@@ -67,5 +64,6 @@ export const DEFAULT_CONFIG = {
     autoGroupBy: {
         disabled: false
     },
-    invalidValues: {}
+    invalidValues: {},
+    sort: {}
 };

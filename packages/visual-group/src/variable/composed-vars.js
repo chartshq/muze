@@ -76,6 +76,10 @@ class ComposedVars extends Variable {
         return this.vars()[0].format(values);
     }
 
+    getSchemaDef () {
+        return this.data().getFieldsConfig()[this.vars()[0]].def;
+    }
+
     /**
      * Returns the subtype of the fields associated with this variable instance.
      *

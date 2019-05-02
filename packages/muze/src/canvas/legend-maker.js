@@ -1,5 +1,5 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
-import { getValueParser, retrieveFieldDisplayName } from 'muze-utils';
+import { getValueParser, retrieveFieldDisplayName, DataModel, getObjProp } from 'muze-utils';
 import {
     VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, MARGIN
 } from '../constants';
@@ -69,8 +69,6 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
 
     const parser = getValueParser(invalidValues);
     legendInfo.forEach((dataInfo, index) => {
-        let legend = {};
-
         const legendMeasures = {};
         const {
                 LegendCls,
@@ -85,10 +83,8 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
         if (config.show) {
             config.position = position;
             config.align = align;
-
-            if (prevLegends[index]) {
-                legend = prevLegends[index].legend;
-            } else {
+            let legend = getObjProp(prevLegends[scaleType], index);
+            if (!legend) {
                 legend = LegendCls.create({
                     labelManager: canvas._dependencies.smartlabel,
                     cells: {
@@ -104,6 +100,10 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             [PADDING, BORDER, MARGIN].forEach((e) => {
                 legendMeasures[e] = config[e];
             });
+            const metaData = legend.metaData();
+            if (metaData instanceof DataModel) {
+                metaData.dispose();
+            }
             legend.scale(scale)
                             .valueParser(parser)
                             .title(title)
@@ -182,5 +182,5 @@ export const createLegend = (context, headerHeight, height, width) => {
 
     legend.show = show ? ((align === VERTICAL && width > 200) || (align === HORIZONTAL && height > 200)) : show;
     legend.align = align;
-    return legendInitializer(legend, context, measurement, context.legends || []);
+    return legendInitializer(legend, context, measurement, context.composition().legend || {});
 };

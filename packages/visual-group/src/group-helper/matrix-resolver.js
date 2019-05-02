@@ -1,5 +1,5 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { generateGetterSetters, STATE_NAMESPACES } from 'muze-utils';
+import { generateGetterSetters, STATE_NAMESPACES, getUniqueId } from 'muze-utils';
 import {
      initializeCacheMaps,
      headerCreator,
@@ -39,6 +39,7 @@ export default class MatrixResolver {
         this._datamodelTransform = {};
         this._units = [];
         this._cacheMaps = {};
+        this._fireboltDeps = {};
         this._axes = {
             x: {},
             y: {},
@@ -278,8 +279,19 @@ export default class MatrixResolver {
     resetSimpleAxes () {
         return this.axes({
             x: new Set(),
-            y: new Set()
+            y: new Set(),
+            radius: [],
+            angle: [],
+            angle0: [],
+            pie: []
         });
+    }
+
+    setFireboltDependencies (prop, deps) {
+        Object.assign(this._fireboltDeps, {
+            [prop]: deps
+        });
+        return this;
     }
 
     /**
@@ -301,28 +313,32 @@ export default class MatrixResolver {
         } = componentRegistry;
         const {
             smartlabel: smartLabel,
-            lifeCycleManager
+            lifeCycleManager,
+            throwback
         } = this.dependencies();
+        const fireboltDeps = this._fireboltDeps;
+
         // Provide the source for the matrix
         const units = [[]];
         // Setting unit configuration
         const unitConfig = extractUnitConfig(globalConfig || {});
-        const globalState = VisualUnit.getState()[0];
-        const globalStates = {};
         const store = this.store();
+        store.lockModel();
+
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
             if (!unit) {
-                const namespace = `${i}${j}`;
+                const namespace = `unit${i}-${j}-${getUniqueId()}`;
 
                 unit = VisualUnit.create({
                     layerRegistry,
                     sideEffectRegistry
                 }, {
                     smartLabel,
-                    lifeCycleManager
+                    lifeCycleManager,
+                    throwback,
+                    fireboltDeps
                 });
-                globalStates[namespace] = null;
                 unit.metaInf({
                     rowIndex: i,
                     colIndex: j,
@@ -339,11 +355,7 @@ export default class MatrixResolver {
                 .coord(coord);
             el.config(unitConfig);
         });
-
-        for (const key in globalState) {
-            store.append(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${key}`, globalStates);
-        }
-
+        store.unlockModel();
         lifeCycleManager.notify({ client: units, action: INITIALIZED, formalName: UNIT });
         return this.units(units);
     }
@@ -446,7 +458,11 @@ export default class MatrixResolver {
 
         const units = [];
         const matrixLayers = this.matrixLayers();
-
+        const props = [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`,
+            `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
+        const store = this.store();
+        store.lockCommits(props);
+        store.lockModel();
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             el.axes(Object.assign(el.axes(), retinalAxes));
             el.source() && el.source().retinalFields(config);
@@ -455,7 +471,9 @@ export default class MatrixResolver {
 
             units.push(el.source());
         });
-
+        store.unlockModel()
+            .unlockCommits([props[0]])
+            .unlockCommits([props[1]]);
         lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }
@@ -559,4 +577,12 @@ export default class MatrixResolver {
         }
         return this._store;
     }
+
+    clear () {
+        const cacheMaps = this._cacheMaps;
+        for (const key in cacheMaps) {
+            cacheMaps[key].clear();
+        }
+    }
+
 }
