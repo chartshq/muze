@@ -279,7 +279,11 @@ export default class MatrixResolver {
     resetSimpleAxes () {
         return this.axes({
             x: new Set(),
-            y: new Set()
+            y: new Set(),
+            radius: [],
+            angle: [],
+            angle0: [],
+            pie: []
         });
     }
 
