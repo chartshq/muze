@@ -57,8 +57,8 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }
     ];
 
@@ -69,15 +69,7 @@ d3.json('../../data/cars.json', (data) => {
         ['Maker', 'desc'],
     ])
 
-    // .select(fields=>fields.Year.value === '1972-01-01');
-
-
-    var rows = ['Origin', 'Weight_in_lbs'],
-            columns = rows.reverse();
-        const canvas = env.canvas().columns(['Maker', 'Cylinders', 'Acceleration']).rows(columns).data(rootData).height(400).width(400)
-        .mount('#chart').once('canvas.animationend').then(function (client) {
-
-            var element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+    const canvas = env.canvas();
+    canvas.data(rootData).rows(['Acceleration', 'Horsepower']).columns([ 'Year']).color('Origin').mount('#chart')
+        .height(500);
 });
