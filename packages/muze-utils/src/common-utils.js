@@ -1295,6 +1295,14 @@ const nearestSortingDetails = (dataModel) => {
 };
 
 /**
+ * Map containing key, value sortingOrder pairs
+ */
+const sortOrderMap = {
+    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => firstVal.localeCompare(secondVal),
+    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => secondVal.localeCompare(firstVal)
+};
+
+/**
  * Sort categorical field based on it's sorting order
  * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
  * @param {string} firstVal First sort parameter
@@ -1304,16 +1312,12 @@ const nearestSortingDetails = (dataModel) => {
 const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
 
-    switch (sortOrderType) {
-    case FUNCTION:
+    if (sortOrderType === FUNCTION) {
         return sortOrder(firstVal, secondVal);
-    case SORT_ORDER_ASCENDING:
-        return firstVal.localeCompare(secondVal);
-    case SORT_ORDER_DESCENDING:
-        return secondVal.localeCompare(firstVal);
-    default:
-        return null;
+    } else if (sortOrderType === STRING) {
+        return sortOrderMap[sortOrder](firstVal, secondVal);
     }
+    return null;
 };
 
 export {
