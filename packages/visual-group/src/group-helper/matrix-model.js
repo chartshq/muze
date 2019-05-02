@@ -175,8 +175,9 @@ const splitByColumn = (context, optionalProjections) => {
     } = projectionInfo;
 
     const commonFields = optionalProjections;
-
-    dataModel.splitByColumn(commonFields, uniqueFields).forEach((model, i) => {
+    console.log(uniqueFields, commonFields);
+    dataModel.splitByColumn(uniqueFields, commonFields).forEach((model, i) => {
+        console.log(model);
         let { rowIndex: row, colIndex: col } = indices[i];
         row += rowIndex;
         col += colIndex;

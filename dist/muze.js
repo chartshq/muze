@@ -3059,7 +3059,7 @@ return /******/ (function(modules) { // webpackBootstrap
             mode: l.NORMAL,
             saveChild: !0
           };
-          return function (e, t, n, r) {
+          return (t = Object.assign({}, n, t)).mode = t.mode || n.mode, function (e, t, n, r) {
             var a = {},
                 i = n.mode;
             i = i || l.NORMAL;
@@ -3069,7 +3069,7 @@ return /******/ (function(modules) { // webpackBootstrap
                 c = bt[i].diffIndex;
 
             return St(o, u[c[0]], e, n, t), c.length > 1 ? (a = e.clone(r.saveChild), St(a, u[c[1]], e, n, t), [o, a]) : o;
-          }(this, e, t = Object.assign({}, n, t), {
+          }(this, e, t, {
             saveChild: t.saveChild
           });
         }
@@ -3638,7 +3638,7 @@ return /******/ (function(modules) { // webpackBootstrap
               a = this.getFieldsConfig(),
               i = Object.keys(a),
               o = [[e]];
-          return n = Object.assign({}, r, n), t.forEach(function (t, n) {
+          return n = Object.assign({}, r, n), (t = t.length ? t : [[]]).forEach(function (t, n) {
             o[n] = Ct([].concat(Vt(e), Vt(t)), i, a);
           }), function (e, t, n, r) {
             return t.map(function (t) {
@@ -59502,6 +59502,8 @@ var createRowDataModels = function createRowDataModels(rowContext, fieldInfo, so
     newRowIndex: newRowIndex
   });
 
+  rowIndexForCurrentKey = currentRowIndex;
+
   if (colKeys.length) {
     colKeys.forEach(function (colKeyObj) {
       colContext.colKeyObj = colKeyObj;
@@ -59530,7 +59532,7 @@ var createRowDataModels = function createRowDataModels(rowContext, fieldInfo, so
   }
 
   return {
-    rowIndex: rowIndexForCurrentKey++
+    rowIndex: ++rowIndexForCurrentKey
   };
 };
 /**
@@ -59572,8 +59574,10 @@ var getMatrixModel = function getMatrixModel(dataModel, fieldInfo, geomCellCreat
         currentRowIndex: currentRowIndex
       });
 
-      createRowDataModels(rowContext, fieldInfo, dataModel);
-      currentRowIndex++;
+      var _createRowDataModels = createRowDataModels(rowContext, fieldInfo, dataModel),
+          rowIndex = _createRowDataModels.rowIndex;
+
+      currentRowIndex = rowIndex;
     });
   } else if (colKeys.length) {
     var currentColumnIndex = 0;
