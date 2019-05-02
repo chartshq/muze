@@ -103,10 +103,6 @@ export default class SimpleVariable extends Variable {
         return fieldDef.type;
     }
 
-    getSchemaDef () {
-        return this.data().getFieldsConfig()[this.oneVar()].def;
-    }
-
     /**
      * Returns the subtype of the variable. Subtype can be categorical or temporal. If no subtype is found, then it
      * returns the type of the variable.

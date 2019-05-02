@@ -15,11 +15,11 @@ export const renderHTML = (context) => {
 
 export const drawLayout = (context) => {
     switch (context.renderer()) {
-        case 'html':
-            renderHTML(context);
-            break;
-        default:
-            renderHTML(context);
+    case 'html':
+        renderHTML(context);
+        break;
+    default:
+        renderHTML(context);
     }
 };
 
