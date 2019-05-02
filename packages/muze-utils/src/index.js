@@ -67,17 +67,14 @@ export {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    Store,
     getDependencyOrder,
     objectIterator,
     intSanitizer,
-    transactor,
     enableChainedTransaction,
     isHTMLElem,
     isEqual,
     isSimpleObject,
     nextFrame,
-    filterPropagationModel,
     getObjProp,
     getDataModelFromIdentifiers,
     getDataModelFromRange,
@@ -102,7 +99,8 @@ export {
     temporalFields,
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortCategoricalField
 } from './common-utils';
 
 export {
@@ -127,6 +125,11 @@ export {
 } from './renderer-utils';
 
 export {
+    Store,
+    transactor
+} from './store';
+
+export {
     timeMillisecond,
     timeSecond,
     timeMinute,
@@ -138,7 +141,6 @@ export {
 } from 'd3-time';
 
 export { default as Smartlabel } from 'fusioncharts-smartlabel';
-
 export { dataSelect } from './DataSystem';
 
 export { default as LifeCycleManager } from './lifecycle-manager';

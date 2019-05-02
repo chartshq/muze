@@ -57,10 +57,12 @@ import {
    hsl
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
-import Model from 'hyperdis';
 import { dataSelect } from './DataSystem';
+import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
+const { CATEGORICAL, TEMPORAL } = DimensionSubtype;
+const { STRING, FUNCTION } = DATA_TYPE;
 const { InvalidAwareTypes } = DataModel;
 const HTMLElement = window.HTMLElement;
 
@@ -167,7 +169,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
     switch (fieldType) {
-    case DimensionSubtype.CATEGORICAL:
+    case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
         break;
     default:
@@ -208,7 +210,7 @@ const unionDomain = (domains, fieldType) => {
     let domain = [];
     domains = domains.filter(dom => dom && dom.length);
     if (domains.length) {
-        if (fieldType === DimensionSubtype.CATEGORICAL) {
+        if (fieldType === CATEGORICAL) {
             domain = [].concat(...domains);
         } else {
             domain = [Math.min(...domains.map(d => d[0])), Math.max(...domains.map(d => d[1]))];
@@ -509,28 +511,6 @@ const objectIterator = (obj, fn) => {
     }
 }
 
-const addListenerToNamespace = (namespaceInf, fn, context) => {
-    let key = namespaceInf.key;
-    const namespace = namespaceInf.namespace;
-    if (namespace) {
-        !context._listeners[namespace] && (context._listeners[namespace] = []);
-        if (!key) {
-            key = Object.keys(context._listeners[namespace]).length;
-        }
-        context._listeners[namespace][key] = fn;
-    } else {
-        key = Object.keys(context._listeners).length;
-        context._listeners[key] = fn;
-    }
-};
-
-/**
- *
- *
- * @param {*} obj
- * @param {*} fields
- *
- */
 const getObjProp = (obj, ...fields) => {
     if (obj === undefined || obj === null) {
         return obj;
@@ -544,132 +524,6 @@ const getObjProp = (obj, ...fields) => {
     }
     return retObj;
 };
-
-/**
- * Methods to handle changes to table configuration and reactivity are handled by this
- * class.
- */
-/**
- *  Common store class
- *
- * @class Store
- */
-class Store {
-    /**
-     * Creates an instance of Store.
-     * @param {Object} config The object to create the state store with.
-     * @memberof Store
-     */
-    constructor (config) {
-        // create reactive model
-        this.model = Model.create(config);
-        this._listeners = {};
-    }
-
-    /**
-     * This method returns a plain JSON object
-     * with all the fields in the state store.
-     *
-     * @return {Object} Serialized representation of state store.
-     * @memberof Store
-     */
-    serialize () {
-        return this.model.serialize();
-    }
-
-    /**
-     * This method is used to update the value of a property in the state store.
-     *
-     * @param {string} propName The name of the property.
-     * @param {number} value The new value of the property.
-     * @memberof Store
-     */
-    commit (propName, value) {
-        // check if appropriate enum has been used
-        this.model.prop(propName, value);
-    }
-
-    /**
-     * This method is used to register a callbacl that will execute
-     * when one or more properties change.
-     *
-     * @param {string | Array} propNames name of property or array of props.
-     * @param {Function} callBack The callback to execute.
-     * @memberof Store
-     */
-    /* istanbul ignore next */registerChangeListener (propNames, callBack, instantCall, namespaceInf = {}) {
-        let props = propNames;
-        if (!Array.isArray(propNames)) {
-            props = [propNames];
-        }
-        const fn = this.model.next(props, callBack, instantCall);
-        addListenerToNamespace(namespaceInf, fn, this);
-        return this;
-    }
-    /**
-     * This method is used to register a callbacl that will execute
-     * when one or more properties change.
-     *
-     * @param {string | Array} propNames name of property or array of props.
-     * @param {Function} callBack The callback to execute.
-     * @memberof Store
-     */
-    /* istanbul ignore next */ registerImmediateListener (propNames, callBack, instantCall, namespaceInf = {}) {
-        let props = propNames;
-        if (!Array.isArray(propNames)) {
-            props = [propNames];
-        }
-        const fn = this.model.on(props, callBack, instantCall);
-        addListenerToNamespace(namespaceInf, fn, this);
-        return this;
-    }
-    /**
-     * This method is used to get the name of the property
-     * from the state store.
-     *
-     * @param {string} propName The name of the field in state store.
-     * @return {any} The value of the field.
-     * @memberof Store
-     */
-    get (propName) {
-        return this.model.prop(propName);
-    }
-
-    /**
-     * This method is used to register a computed property that is computed every time
-     * the store value changes.
-     *
-     * @param {string} propName The name of the property to create.
-     * @param {Function} callBack The function to execute when depemdent props change.
-     * @memberof Store
-     */
-    computed (propName, callBack) {
-        return this.model.calculatedProp(propName, callBack);
-    }
-
-    append (propName, value) {
-        this.model.append(propName, value);
-        return this;
-    }
-
-    unsubscribeAll () {
-        Object.values(this._listeners).forEach(fn => fn());
-        return this;
-    }
-
-    unsubscribe (namespaceInf = {}) {
-        const { namespace, key } = namespaceInf;
-        const listeners = this._listeners[namespace];
-        if (key) {
-            const fn = getObjProp(listeners, key);
-            fn && fn();
-        } else {
-            Object.values(listeners).forEach(fn => fn());
-            this._listeners[namespace] = [];
-        }
-        return this;
-    }
-}
 
 /**
  * Sanitize an input number / string mixed number. Currently dot in the no is not supported.
@@ -687,142 +541,10 @@ const intSanitizer = (val) => {
     return parseInt(arr[0], 10);
 };
 
-/**
- * Setter getter creator from config
- * Format
- *  PROPERTRY_NAME: {
- *      value: // default value of the property,
- *      meta: {
- *          typeCheck: // The setter value will be checked using this. If the value is function then the setter value
- *                     // is passed as args. (Optional)
- *          typeExpected: // The output of typecheck action will be tested against this. Truthy value will set the
- *                       // value to the setter
- *          sanitizaiton: // Need for sanitization before type is checked
- *      }
- *  }
- *
- * @param {Object} holder an empty object on which the getters and setters will be mounted
- * @param {Object} options options config based on which the getters and setters are determined.
- * @param {Hyperdis} model optional model to attach the property. If not sent new moel is created.
- * @return {Array}
- */
-const transactor = (holder, options, model, namespaceInf = {}) => {
-    let conf;
-    const store = model && model instanceof Model ? model : Model.create({});
-    const stateProps = {};
-    for (const prop in options) {
-        if ({}.hasOwnProperty.call(options, prop)) {
-            conf = options[prop];
-            const addAsMethod = conf.meta ? conf.meta.addAsMethod : true;
-            let nameSpaceProp;
-            const namespace = namespaceInf.namespace;
-            if (namespace) {
-                nameSpaceProp = `${namespace}.${prop}`;
-            } else {
-                nameSpaceProp = prop;
-            }
-
-            stateProps[prop] = conf.value;
-            if (addAsMethod !== false) {
-                holder[prop] = ((context, meta, nsProp) => (...params) => {
-                    let val;
-                    let compareTo;
-                    const paramsLen = params.length;
-                    const prevVal = store.prop(nsProp);
-                    if (paramsLen) {
-                        // If parameters are passed then it's a setter
-                        const spreadParams = meta && meta.spreadParams;
-                        val = params;
-                        const values = [];
-                        if (meta) {
-                            for (let i = 0; i < paramsLen; i++) {
-                                val = params[i];
-                                const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
-                                    meta.sanitization);
-                                const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
-                                if (sanitization && typeof sanitization === 'function') {
-                                    // Sanitize if required
-                                    val = sanitization(val, prevVal, holder);
-                                }
-
-                                if (typeCheck) {
-                                    // Checking if a setter is valid
-                                    if (typeof typeCheck === 'function') {
-                                        let typeExpected = meta.typeExpected;
-                                        if (typeExpected && spreadParams) {
-                                            typeExpected = typeExpected[i];
-                                        }
-                                        if (typeExpected) {
-                                            compareTo = typeExpected;
-                                        } else {
-                                            compareTo = true;
-                                        }
-
-                                        if (typeCheck(val) === compareTo) {
-                                            values.push(val);
-                                        }
-                                    } else if (typeof typeCheck === 'string') {
-                                        if (typeCheck === 'constructor') {
-                                            const typeExpected = spreadParams ? meta.typeExpected[i] :
-                                                meta.typeExpected;
-                                            if (val && (val.constructor.name === typeExpected)) {
-                                                values.push(val);
-                                            }
-                                        }
-                                    } else {
-                                        // context.prop(key, val);
-                                        values.push(val);
-                                    }
-                                } else {
-                                    values.push(val);
-                                }
-                            }
-                            const preset = meta.preset;
-                            const oldValues = context.prop(nsProp);
-                            preset && preset(values[0], holder);
-                            if (spreadParams) {
-                                oldValues.forEach((value, i) => {
-                                    if (values[i] === undefined) {
-                                        values[i] = value;
-                                    }
-                                });
-                            }
-                            values.length && context.prop(nsProp, spreadParams ? values : values[0]);
-                        } else {
-                            context.prop(nsProp, spreadParams ? val : val[0]);
-                        }
-                        return holder;
-                    }
-                // No parameters are passed hence its a getter
-                    return context.prop(nsProp);
-                })(store, conf.meta, nameSpaceProp);
-            }
-        }
-    }
-
-    if (namespaceInf.namespace === undefined) {
-        store.append(stateProps);
-    } else {
-        const namespace = namespaceInf.namespace;
-        store.append(namespace, stateProps);
-    }
-
-    return [holder, store];
-};
-
-/**
- *
- *
- * @param {*} context
- * @param {*} props
- */
 const generateGetterSetters = (context, props) => {
     Object.entries(props).forEach((propInfo) => {
         const prop = propInfo[0];
-        const typeChecker = propInfo[1].typeChecker;
-        const defVal = propInfo[1].defaultValue;
-        const sanitization = propInfo[1].sanitization;
-        const preset = propInfo[1].preset;
+        const { sanitization, preset, onset, typeChecker, defaultValue: defVal } = propInfo[1];
         const prototype = context.constructor.prototype;
         if (!(Object.hasOwnProperty.call(prototype, prop))) {
             if (defVal) {
@@ -832,7 +554,7 @@ const generateGetterSetters = (context, props) => {
                 if (params.length) {
                     let value = params[0];
                     if (sanitization) {
-                        value = sanitization(context, params[0]);
+                        value = sanitization(context, params[0], context[`_${prop}`]);
                     }
                     if (preset) {
                         preset(context, value);
@@ -841,6 +563,9 @@ const generateGetterSetters = (context, props) => {
                         return context[`_${prop}`];
                     }
                     context[`_${prop}`] = value;
+                    if (onset) {
+                        onset(context, value);
+                    }
                     return context;
                 } return context[`_${prop}`];
             };
@@ -902,7 +627,8 @@ const isEqual = type => (oldVal, newVal) => {
  * @return {any} @todo
  */
 const enableChainedTransaction = (transactionModel, transactionEndpoint, transactionItems) =>
-    transactionItems.forEach(item => transactionModel.on(item, ([, newVal]) => transactionEndpoint[item](newVal)));
+    transactionItems.forEach(item => transactionModel
+        .registerImmediateListener(item, ([, newVal]) => transactionEndpoint[item](newVal)));
 
 /**
  * Chceks if the element is istanceof HTMLElement
@@ -1179,37 +905,6 @@ const detectColor = (col) => {
     } return col;
 };
 
-/**
- *
- *
- * @param {*} model
- * @param {*} propModel
- *
- */
-const filterPropagationModel = (model, propModel, measures) => {
-    const { data, schema } = propModel.getData();
-    let filteredModel;
-    if (schema.length) {
-        const fieldMap = model.getFieldsConfig();
-        filteredModel = model.select((fields) => {
-            const include = data.some(row => schema.every((propField, idx) => {
-                if (!measures && (!(propField.name in fieldMap) ||
-                        fieldMap[propField.name].def.type === FieldType.MEASURE)) {
-                    return true;
-                }
-                return row[idx] === fields[propField.name].valueOf();
-            }));
-            return include;
-        }, {
-            saveChild: false
-        });
-    } else {
-        filteredModel = propModel;
-    }
-
-    return filteredModel;
-};
-
 const assembleModelFromIdentifiers = (model, identifiers) => {
     let schema = [];
     let data;
@@ -1258,7 +953,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     const selFn = fields => selFields.every((field) => {
         const val = fields[field].value;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
-        if (typeof range[0] === 'string') {
+        if (typeof range[0] === STRING) {
             return range.find(d => d === val) !== undefined;
         }
         return range ? val >= range[0] && val <= range[1] : true;
@@ -1321,10 +1016,10 @@ const registerListeners = (context, listenerMap, ...params) => {
     const propListenerMap = listenerMap(context, ...params);
     for (const key in propListenerMap) {
         if ({}.hasOwnProperty.call(propListenerMap, key)) {
-            const namespace = params[0];
+            const { namespace } = params[1];
             let ns = null;
             if (namespace) {
-                ns = namespace.local;
+                ns = namespace;
             }
             const mapObj = propListenerMap[key];
             const propType = mapObj.type;
@@ -1528,7 +1223,7 @@ const formatTemporal = (value, interval) => {
 const temporalFields = (dataModel) => {
     const filteredFields = {};
     Object.entries(dataModel.getFieldspace().getDimension()).forEach(([fieldName, fieldObj]) => {
-        if (fieldObj.subtype() === DimensionSubtype.TEMPORAL) {
+        if (fieldObj.subtype() === TEMPORAL) {
             filteredFields[fieldName] = fieldObj;
         }
     });
@@ -1599,6 +1294,32 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+/**
+ * Map containing key, value sortingOrder pairs
+ */
+const sortOrderMap = {
+    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => firstVal.localeCompare(secondVal),
+    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => secondVal.localeCompare(firstVal)
+};
+
+/**
+ * Sort categorical field based on it's sorting order
+ * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
+ * @param {string} firstVal First sort parameter
+ * @param {string} secondVal Second sort parameter
+ * @return {number} position
+*/
+const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
+    const sortOrderType = typeof sortOrder;
+
+    if (sortOrderType === FUNCTION) {
+        return sortOrder(firstVal, secondVal);
+    } else if (sortOrderType === STRING) {
+        return sortOrderMap[sortOrder](firstVal, secondVal);
+    }
+    return null;
+};
+
 export {
     getValueParser,
     require,
@@ -1629,7 +1350,6 @@ export {
     ERROR_MSG,
     reqAnimFrame,
     nextAnimFrame,
-    filterPropagationModel,
     transposeArray,
     cancelAnimFrame,
     getMax,
@@ -1654,11 +1374,9 @@ export {
     capitalizeFirst,
     getWindow,
     getQualifiedClassName,
-    Store,
     getDependencyOrder,
     objectIterator,
     intSanitizer,
-    transactor,
     enableChainedTransaction,
     isHTMLElem,
     isSimpleObject,
@@ -1678,5 +1396,6 @@ export {
     formatTemporal,
     temporalFields,
     retrieveFieldDisplayName,
-    sanitizeDomainWhenEqual
+    sanitizeDomainWhenEqual,
+    sortCategoricalField
 };

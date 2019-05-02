@@ -64,7 +64,8 @@ d3.json('../../data/cars.json', (data) => {
     //     Acceleration: "avg"
     // });
 
-    canvas = env.canvas().data(rootData).rows(['Acceleration']).columns([['Year'], ['Year']]).data(rootData).height(400).width(400).color('Origin').config({
+    canvas = env.canvas().data(rootData).rows(['Origin', 'Horsepower']).detail(['Name'])
+    .columns(['Maker', 'Acceleration']).data(rootData).height(400).width(1400).color('Origin').config({
         legend: { position: 'bottom' }}).mount('#chart')
 });
 

@@ -75,11 +75,11 @@ class VisualGroup extends SimpleGroup {
     static getState () {
         return [{
             domain: {
-                x: {},
-                y: {},
-                radius: {},
-                angle: {},
-                angle0: {}
+                x: null,
+                y: null,
+                radius: null,
+                angle: null,
+                angle0: null
             }
         }, {}];
     }

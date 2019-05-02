@@ -142,4 +142,13 @@ export default class SimpleVariable extends Variable {
     displayName () {
         return retrieveFieldDisplayName(this.data(), this.oneVar());
     }
+
+    /**
+     * Returns the schema defination of the field.
+     *
+     * @return {Object} schema def
+     */
+    getSchemaDef () {
+        return this.data().getFieldsConfig()[this.oneVar()].def;
+    }
 }

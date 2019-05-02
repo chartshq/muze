@@ -8,11 +8,11 @@ const line = Symbols.line;
  * @return {Selection} Ticks Selection
  */
 export default /* istanbul ignore next */ (params) => {
-    const { points, container, keyFn, className, interpolate } = params;
+    const { points, container, keyFn, className, interpolate, layer } = params;
     const mount = selectElement(container);
     const ticks = mount.selectAll('path').data(points, keyFn);
     const ticksEnter = ticks.enter().append('path');
-
+    const graphicElems = layer._graphicElems;
     mount.attr('class', className || '');
     ticksEnter.each(function (d) {
         const selection = selectElement(this);
@@ -24,6 +24,7 @@ export default /* istanbul ignore next */ (params) => {
     return ticks.merge(ticksEnter)
                     .each(function (d) {
                         const selection = selectElement(this);
+                        graphicElems[d.rowId] = selection;
                         const update = d.update;
                         const updateStyle = d.style || {};
                         const x0 = update.x0 !== undefined ? update.x0 : update.x;

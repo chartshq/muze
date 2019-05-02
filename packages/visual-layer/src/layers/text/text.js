@@ -210,6 +210,8 @@ export default class TextLayer extends BaseLayer {
         const containerSelection = selectElement(container);
 
         containerSelection.classed(`${qualifiedClassName.join(' ')} ${className}`, true);
+        this._graphicElems = {};
+
         createElements({
             data: normalizedData,
             append: 'g',
@@ -223,7 +225,7 @@ export default class TextLayer extends BaseLayer {
                 });
                 drawText(node, points, {
                     className: qualifiedClassName[0]
-                }, this._dependencies.smartLabel);
+                }, this);
             }
         });
         return this;

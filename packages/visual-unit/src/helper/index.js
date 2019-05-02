@@ -27,7 +27,7 @@ export const getDimensionMeasureMap = (layers, fieldsConfig) => {
         const measures = [xField, yField].filter(field => fieldsConfig[field] && fieldsConfig[field].def.type ===
             FieldType.MEASURE);
         [colorField, sizeField, shapeField].forEach((field) => {
-            if (fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION) {
+            if (getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION && measures.length) {
                 !retinalEncodingsAndMeasures[field] && (retinalEncodingsAndMeasures[field] = []);
                 retinalEncodingsAndMeasures[field].push(...measures);
             }
@@ -56,7 +56,7 @@ export const transformDataModels = (transform, dataModel) => {
 
 export const getLayerFromDef = (context, definition, existingLayer, namespaces) => {
     let instances = existingLayer;
-    const dependencies = context._layerDeps;
+    const dependencies = context._dependencies;
     const metaInf = context.metaInf();
     if (!existingLayer) {
         instances = layerFactory.getLayerInstance(definition);
@@ -64,9 +64,11 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
             inst.metaInf({
                 unitRowIndex: metaInf.rowIndex,
                 unitColIndex: metaInf.colIndex,
-                namespace: namespaces[i]
-            });
-            inst.store(context.store());
+                namespace: namespaces[i],
+                parentNamespace: metaInf.namespace
+            })
+                .dependencies(dependencies)
+                .store(context.store());
         });
     }
     const layers = {};
@@ -77,7 +79,6 @@ export const getLayerFromDef = (context, definition, existingLayer, namespaces) 
         instance.coord(context.coord());
         instance.config(def);
         instance.valueParser(context.valueParser());
-        instance.dependencies(dependencies);
         instance.dataProps({
             timeDiffs: context._timeDiffs
         });
@@ -325,3 +326,71 @@ export const setAxisRange = (context) => {
         });
     }
 };
+
+export const isXandYMeasures = (context) => {
+    const { x: xFields, y: yFields } = context.fields();
+    const [xMeasures, yMeasures] = [xFields, yFields].map(fields => fields
+        .every(field => field.type() === FieldType.MEASURE));
+    return xMeasures && yMeasures;
+};
+
+const getKey = (arr, row) => {
+    let key = row[arr[0]];
+    for (let i = 1, len = arr.length; i < len; i++) {
+        key = `${key},${row[arr[i]]}`;
+    }
+    return key;
+};
+
+export const getValuesMap = (model, context) => {
+    const valuesMap = {};
+    const { data: dataArr, schema, uids } = model.getData();
+    const fieldsConfig = model.getFieldsConfig();
+    const fieldIndices = isXandYMeasures(context) ? schema.map((d, i) => i) :
+                            Object.keys(model.getFieldspace().getDimension()).map(d => fieldsConfig[d].index);
+    dataArr.forEach((row, i) => {
+        const key = getKey(fieldIndices, row);
+        valuesMap[key] = uids[i];
+    });
+    return valuesMap;
+};
+
+export const getSelectionRejectionModel = (model, propModel, measures, propValuesMap) => {
+    let rejectionModel;
+    const { data, schema } = propModel.getData();
+    const entryRowIds = [];
+    const exitRowIds = [];
+
+    if (schema.length) {
+        const fieldMap = model.getFieldsConfig();
+        const rowIdsObj = {};
+        const filteredSchema = measures ? schema.map((d, idx) => idx) :
+            Object.keys(model.getFieldspace().getDimension()).map(d => fieldMap[d].index);
+        data.forEach((row) => {
+            const key = getKey(filteredSchema, row);
+            const id = propValuesMap[key];
+            if (key in propValuesMap) {
+                entryRowIds.push(id);
+                rowIdsObj[id] = 1;
+            }
+        });
+        rejectionModel = model.select((fields, i) => {
+            if (!rowIdsObj[i]) {
+                exitRowIds.push(i);
+                return true;
+            }
+            return false;
+        }, {
+            saveChild: false
+        });
+    } else {
+        rejectionModel = propModel;
+    }
+
+    return {
+        model: [propModel, rejectionModel],
+        entryRowIds,
+        exitRowIds
+    };
+};
+
