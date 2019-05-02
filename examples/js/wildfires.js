@@ -58,15 +58,15 @@ d3.csv('../data/wildfires.csv', (data) => {
                             y: { show: false }
                         },
                         sort: {
-                            'Months of Fire': 'desc',
-                            year: 'desc'
+                            // 'Months of Fire': 'desc',
+                            // year: 'desc'
                         },
                         border: {
                             showValueBorders: { left: false, bottom: false }
                         },
                         axes: {
                             y: {
-                                // tickValues: [1950, 1970, 1990, 2010],
+                                tickValues: [1950, 1970, 1990, 2010],
                                 showAxisName: false
                             },
                             x: {
