@@ -69,7 +69,22 @@ d3.json('../../data/cars.json', (data) => {
         ['Maker', 'desc'],
     ])
 
-    const canvas = env.canvas();
-    canvas.data(rootData).rows(['Acceleration', 'Horsepower']).columns([ 'Year']).color('Origin').mount('#chart')
-        .height(500);
+    var rows = ['Origin','Acceleration'],
+            columns = rows.reverse();
+        const canvas = env.canvas();
+        canvas.data(rootData).columns(['Cylinders', 'Horsepower']).rows(['Acceleration']).color('Maker').mount('#chart').height(500)
+     
+        setTimeout(()=>{
+        // canvas.data(rootData).rows(['Maker']).columns([ ]).color('Cylinders')
+        // .layers([{
+        //     mark:'arc',
+
+        // }])
+        // setTimeout(()=>{
+        //     canvas.data(rootData).columns(['Maker']).rows([ 'Cylinders']) .layers([{
+        //         mark:'arc',
+    
+        //     }]).color('Cylinders')
+        // }, 1000)
+    }, 1000)
 });

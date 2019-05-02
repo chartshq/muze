@@ -40,7 +40,7 @@ d3.csv('../data/wildfires.csv', (data) => {
     env.canvas()
                     .rows(['year'])
                     .columns(['Months of Fire'])
-                    .data(rootData.sort([['year', 'desc']]))
+                    .data(rootData)
                     .width(600)
                     .height(600)
                     .detail(['fire_name'])
@@ -57,12 +57,16 @@ d3.csv('../data/wildfires.csv', (data) => {
                         gridLines: {
                             y: { show: false }
                         },
+                        sort: {
+                            'Months of Fire': 'desc',
+                            year: 'desc'
+                        },
                         border: {
                             showValueBorders: { left: false, bottom: false }
                         },
                         axes: {
                             y: {
-                                tickValues: [1950, 1970, 1990, 2010],
+                                // tickValues: [1950, 1970, 1990, 2010],
                                 showAxisName: false
                             },
                             x: {
