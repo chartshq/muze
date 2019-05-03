@@ -1,3 +1,4 @@
+require('dotenv').config();
 const path = require('path');
 const querystring = require('querystring');
 const readline = require('readline');
@@ -12,28 +13,26 @@ const uuid = require('uuid/v4');
 const semver = require('semver');
 const FormData = require('form-data');
 const axios = require('axios');
+const prompt = require('prompt');
 
-const mycroftProtocol = 'http';
-const mycroftHost = 'sherlock.charts.com';
-const mycroftPort = '3001';
-const mollyProtocol = 'http';
-const mollyHost = 'sherlock.charts.com';
-const mollyPort = '80';
+const mycroftProtocol = process.env.MYCROFT_PROTOCOL;
+const mycroftHost = process.env.MYCROFT_HOST;
+const mycroftPort = process.env.MYCROFT_PORT;
+const mollyProtocol = process.env.MOLLY_PROTOCOL;
+const mollyHost = process.env.MOLLY_HOST;
+const mollyPort = process.env.MOLLY_PORT;
 const currentPrintStream = process.stdout;
 const initiateStatusInterval = 1000;
 let cursorRelYPos = 0;
 
 program
-    .option('-m, --mode <mode>', 'muze build mode')
-    .option('-e, --export', 'whether to export testing result or not')
+    .option('-m, --mode <mode>', 'The muze build mode')
+    .option('-l, --lib <lib>', 'The library name to be uploaded to sherlock')
     .parse(process.argv);
 
-let { mode, export: isExport } = program;
+let { mode, lib } = program;
 if (!mode) {
     mode = 'production';
-}
-if (!isExport) {
-    isExport = false;
 }
 
 const out = (text) => {
@@ -58,9 +57,32 @@ const makeBuild = buildMode => new Promise((res, rej) => {
     });
 });
 
-const generateBuildTag = (v) => {
-    const randomBuildId = uuid().replace(/-/g, '');
-    return `v${semver.major(v)}.${semver.minor(v)}.${semver.patch(v)}-build${randomBuildId}`;
+const currBranch = () => new Promise((res, rej) => {
+    shell.exec('git branch | grep \\* | cut -d \' \' -f2', { async: true, silent: true }, (code, stdout, stderr) => {
+        if (code) {
+            const err = new Error();
+            err.stdout = stdout;
+            err.stderr = stderr;
+            rej(err);
+        } else {
+            res(stdout.trim());
+        }
+    });
+});
+
+const generateBuildTag = async (v) => {
+    let tag;
+    const muzeVersion = `v${v}`;
+    const currentBranch = await currBranch();
+    const m = currentBranch.match(/^(.+)\/#(\d+)-(.+)$/);
+
+    if (m) {
+        tag = semver.valid(`${muzeVersion}-${m[1]}-${m[2]}-${m[3].slice(0, 30)}`);
+    }
+
+    tag = tag || semver.valid(`${muzeVersion}-${uuid().replace(/-/g, '')}`);
+
+    return `v${tag}`;
 };
 
 const uploadBuild = async (tag) => {
@@ -182,8 +204,24 @@ const printAutotestSummery = async (tag) => {
 };
 
 const run = async () => {
+    prompt.message = '';
+    prompt.start();
+
+    let { tag } = await promisify(prompt.get.bind(prompt))({
+        properties: {
+            tag: {
+                conform: value => !!semver.valid(value),
+                message: 'Should be semver value',
+                description: 'Enter tag name[current branch]',
+                type: 'string',
+                required: false,
+                before: value => (value ? `v${semver.valid(value)}` : '')
+            }
+        }
+    });
+
     const muzePkg = await fs.readJSON(path.resolve('packages/muze/package.json'));
-    const tag = generateBuildTag(muzePkg.version);
+    tag = tag || await generateBuildTag(muzePkg.version);
     let reqId;
 
     out('\n');

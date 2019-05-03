@@ -1,3 +1,12 @@
+import { defaultValue } from '../common-utils';
+
+const sortSelection = (dataObjects, updateData, sortFn) =>
+    (a, b) => {
+        const kA = a[0];
+        const kB = b[0];
+        return sortFn([a[0], dataObjects.get(kA), updateData.get(kA)], [kB, dataObjects.get(kB), updateData.get(kB)]);
+    };
+
 /**
  * This class represents a selection applied on a data array.
  *
@@ -11,10 +20,9 @@ class Selection {
      */
     constructor (idGetter) {
         this._dataObjects = new Map();
-        this._updatedata = new Map();
-        this._mode = '';
-        this._enterdata = new Map();
-        this._exitdata = new Map();
+        this._updateData = new Map();
+        this._enterData = new Map();
+        this._exitData = new Map();
         this._idGetter = idGetter;
     }
 
@@ -31,10 +39,11 @@ class Selection {
         const exitdata = new Map();
         const tempMap = new Map();
         const duplicateData = new Map();
-        const updatedData = this._updatedata;
+        const updatedData = this._updateData;
+        const idGetter = this._idGetter;
 
         newData.forEach((...params) => {
-            const key = this.idGetter ? this._idGetter(...params) : params[1];
+            const key = idGetter ? idGetter(...params) : params[1];
             if (!tempMap.has(key)) {
                 tempMap.set(key, params[0]);
             } else {
@@ -67,10 +76,10 @@ class Selection {
         }
 
         const newSelection = new Selection(this._idGetter);
-        newSelection._updatedata = updatedData;
+        newSelection._updateData = updatedData;
         newSelection._dataObjects = this._dataObjects;
-        newSelection._enterdata = entryData;
-        newSelection._exitdata = exitdata;
+        newSelection._enterData = entryData;
+        newSelection._exitData = exitdata;
 
         return newSelection;
     }
@@ -84,23 +93,11 @@ class Selection {
      * @memberof Selection
      */
     append (callback) {
-        let currentData;
         let val;
         const dataObjects = new Map();
         const data = new Map();
-
-        // select the data to create object
-        switch (this._mode) {
-        case 'enter':
-            currentData = this._enterdata;
-            break;
-        case 'exit':
-            currentData = this._exitdata;
-            break;
-        default:
-            currentData = this._updatedata;
-        }
-
+        const mode = defaultValue(this._mode, 'update');
+        const currentData = this[`_${mode}Data`];
         const entries = currentData.entries();
 
         while (val = entries.next().value) {
@@ -109,9 +106,8 @@ class Selection {
         }
 
         const newSelection = new Selection(this._idGetter);
-        newSelection._updatedata = data;
+        newSelection._updateData = data;
         newSelection._dataObjects = dataObjects;
-        this._mode = '';
 
         return newSelection;
     }
@@ -153,25 +149,25 @@ class Selection {
         let entries;
 
         // merge Object and data present in this selection
-        entries = this._updatedata.entries();
+        entries = this._updateData.entries();
         while (val = entries.next().value) {
-            if (!this._exitdata.has(val[0])) {
+            if (!this._exitData.has(val[0])) {
                 mergedData.set(val[0], val[1]);
                 mergedObjects.set(val[0], this._dataObjects.get(val[0]));
             }
         }
 
         // merge object from target selection
-        entries = target._updatedata.entries();
+        entries = target._updateData.entries();
         while (val = entries.next().value) {
-            if (!(mergedData.has(val[0]) || target._exitdata.has(val[0]))) {
+            if (!(mergedData.has(val[0]) || target._exitData.has(val[0]))) {
                 mergedData.set(val[0], val[1]);
                 mergedObjects.set(val[0], target._dataObjects.get(val[0]));
             }
         }
 
         const newSelection = new Selection(this._idGetter);
-        newSelection._updatedata = mergedData;
+        newSelection._updateData = mergedData;
         newSelection._dataObjects = mergedObjects;
 
         return newSelection;
@@ -182,7 +178,7 @@ class Selection {
         const entries = this._dataObjects.entries();
 
         while (val = entries.next().value) {
-            fn(val[1], this._updatedata.get(val[0]), val[0]);
+            fn(val[1], this._updateData.get(val[0]), val[0]);
         }
     }
 
@@ -192,31 +188,31 @@ class Selection {
         const entries = this._dataObjects.entries();
 
         while (val = entries.next().value) {
-            newdata.set(val[0], fn(val[1], this._updatedata.get(val[0]), val[0]));
+            newdata.set(val[0], fn(val[1], this._updateData.get(val[0]), val[0]));
         }
         const newSelection = new Selection(this._idGetter);
-        newSelection._updatedata = this._updatedata;
+        newSelection._updateData = this._updateData;
         newSelection._dataObjects = newdata;
 
         return newSelection;
     }
 
     remove () {
-        let currentData;
-
-        switch (this._mode) {
-        case 'enter':
-            currentData = this._enterdata;
-            break;
-        case 'exit':
-            currentData = this._exitdata;
-            break;
-        default:
-            currentData = this._updatedata;
-        }
+        const mode = defaultValue(this._mode, 'update');
+        const currentData = this[`_${mode}Data`];
 
         currentData.clear();
 
+        return this;
+    }
+
+    sort (sortFn) {
+        const updateData = this._updateData;
+        const dataObjects = this._dataObjects;
+        const sortSel = sortSelection(dataObjects, updateData, sortFn);
+
+        this._updateData = new Map([...updateData.entries()].sort(sortSel));
+        this._dataObjects = new Map([...dataObjects.entries()].sort(sortSel));
         return this;
     }
 
@@ -227,16 +223,22 @@ class Selection {
      * @memberof Selection
      */
     getObjects () {
-        const objects = [];
         let val;
-        const values = this._dataObjects.values();
+        const objects = [];
+        const dataObjects = this._dataObjects;
+        // select the data to create object
+        const mode = defaultValue(this._mode, 'update');
+        const currentData = this[`_${mode}Data`];
+        const entries = currentData.entries();
 
-        while (val = values.next().value) {
-            objects.push(val);
+        while (val = entries.next().value) {
+            if (dataObjects.has(val[0])) {
+                objects.push(dataObjects.get(val[0]));
+            }
         }
+
         return objects;
     }
-
 }
 
 export default Selection;

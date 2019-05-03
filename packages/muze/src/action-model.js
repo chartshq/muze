@@ -30,6 +30,17 @@ const canvasIterator = (canvases, iteratorFn, cFn) => {
     });
 };
 
+const registerActions = (context, type, fnName, deps) => {
+    const canvases = context._registrableComponents;
+
+    canvases.forEach((canvas) => {
+        const vGroup = canvas.composition().visualGroup;
+
+        vGroup.resolver().setFireboltDependencies(type, deps);
+        canvas.firebolt()[fnName](deps);
+    });
+};
+
 /**
  * This class is initiated only once in lifecycle and is reponsible for regisration of physical and behavioural
  * actions and side effects and the mapping between them.
@@ -96,12 +107,7 @@ class ActionModel {
      * @return {ActionModel} Instance of the action model.
      */
     registerPhysicalActions (action) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerPhysicalActions(action);
-        }, (canvas) => {
-            canvas.firebolt().registerPhysicalActions(action);
-        });
-
+        registerActions(this, 'physicalActions', 'registerPhysicalActions', action);
         return this;
     }
 
@@ -142,12 +148,7 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerBehaviouralActions (...actions) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerBehaviouralActions(actions);
-        }, (canvas) => {
-            canvas.firebolt().registerBehaviouralActions(actions);
-        });
-
+        registerActions(this, 'behaviouralActions', 'registerBehaviouralActions', actions);
         return this;
     }
 
@@ -278,11 +279,7 @@ class ActionModel {
      * @return {ActionModel} Instance of action model.
      */
     registerSideEffects (...sideEffects) {
-        canvasIterator(this._registrableComponents, (firebolt) => {
-            firebolt.registerSideEffects(sideEffects);
-        }, (canvas) => {
-            canvas.firebolt().registerSideEffects(sideEffects);
-        });
+        registerActions(this, 'sideEffects', 'registerSideEffects', sideEffects);
         return this;
     }
 

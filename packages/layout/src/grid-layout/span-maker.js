@@ -72,7 +72,7 @@ const spanCalculator = (colData, colIdx, matrix, rIdx) => {
     // if data is not header cell then rowspan
     // has to be 1
     if (!colData) {
-        return () => 1;
+        return () => null;
     }
 
     const conditions = {
@@ -146,42 +146,32 @@ const spanGenerator = viewMatrix => ({
         return spans;
     },
     column: () => viewMatrix.map((row, ridx) => row.map((col, i) => spanCalculator(col, i, viewMatrix, ridx)('column'))
-                    .filter(col => col !== 1))
+                    .filter(col => col !== null))
 });
 
-const getOrder = isReverse => ({
-    row: (matrix) => {
-        if (isReverse) {
-            return orderMaker(matrix[0]).reverse();
-        }
-        return orderMaker(matrix[0]);
-    },
-    column: (matrix) => {
-        if (isReverse) {
-            return orderMaker(matrix).reverse();
-        }
-        return orderMaker(matrix);
-    }
+const getOrder = () => ({
+    row: matrix => orderMaker(matrix[0]),
+    column: matrix => orderMaker(matrix)
 });
 
 const matrixSpanGeneratorMap = {
     [`${TOP}-1`]: {
-        orderGetter: getOrder(false)[COLUMN],
+        orderGetter: getOrder()[COLUMN],
         viewMatrixMaker: (...params) => maskCreator(...params)[COLUMN],
         spanMaker: (...params) => spanGenerator(...params)[COLUMN]
     },
     [`${BOTTOM}-1`]: {
-        orderGetter: getOrder(true)[COLUMN],
+        orderGetter: getOrder()[COLUMN],
         viewMatrixMaker: (...params) => maskCreator(...params)[COLUMN],
         spanMaker: (...params) => spanGenerator(...params)[COLUMN]
     },
     [`${CENTER}-0`]: {
-        orderGetter: getOrder(false)[ROW],
+        orderGetter: getOrder()[ROW],
         viewMatrixMaker: (...params) => maskCreator(...params)[ROW],
         spanMaker: (...params) => spanGenerator(...params)[ROW]
     },
     [`${CENTER}-2`]: {
-        orderGetter: getOrder(true)[ROW],
+        orderGetter: getOrder()[ROW],
         viewMatrixMaker: (...params) => maskCreator(...params)[ROW],
         spanMaker: (...params) => spanGenerator(...params)[ROW]
     }
@@ -236,14 +226,20 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
     return {
         [ROW_SPAN] () {
             placeholder.setAvailableSpace(width, height * span);
+            if (span === 1) {
+                selectElement(this).style('height', `${height * span + borderWidth}px`);
+            }
         },
         [COL_SPAN] () {
+            const primaryUnitWidth = unitWidths.primary[col];
             if (span > 1) {
                 let cumulativeWidth = 0;
                 for (let i = col; i < col + span; i++) {
                     cumulativeWidth += unitWidths.primary[i] - borderWidth;
                 }
                 placeholder.setAvailableSpace(cumulativeWidth + borderWidth, height);
+            } else if (primaryUnitWidth) {
+                placeholder.setAvailableSpace(primaryUnitWidth - borderWidth, height);
             }
             selectElement(this).style('height', `${height}px`);
         }
@@ -253,6 +249,9 @@ const spaceAllocationDueToSpan = (span = 1, placeholder, config, index) => {
 const spanApplier = (cells, spans, config, type) => {
     let cellCounter = 0;
     cells.attr(type, function (cell, colIndex) {
+        if (colIndex === 0) {
+            cellCounter = 0;
+        }
         const span = spans[cell.rowIndex][colIndex];
         const placeholder = cell.placeholder;
         const index = {

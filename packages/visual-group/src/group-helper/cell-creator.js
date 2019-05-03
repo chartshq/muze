@@ -2,10 +2,10 @@ import { AxisOrientation } from '@chartshq/muze-axis';
 import {
     getObjProp,
     FieldType,
-    STATE_NAMESPACES,
     retrieveNearestGroupByReducers,
     mergeRecursive,
-    createSelection
+    createSelection,
+    DataModel
 } from 'muze-utils';
 import { getMatrixModel } from './matrix-model';
 import {
@@ -13,7 +13,8 @@ import {
     isDistributionEqual,
     mutateAxesFromMap,
     getFieldsFromSuppliedLayers,
-    extractFields
+    extractFields,
+    removeExitCells
 } from './group-utils';
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
@@ -118,6 +119,8 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     return entryCellMap.get(geomCellKey);
 };
 
+const extractAxisIndex = id => getObjProp(id.match(/^[0-9]*?(?=-)/g), 0);
+
 /**
  * Creates axis cells based on the set of axes
  *
@@ -127,11 +130,10 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
  * @param {Object} cells Contains a collection of the cells
  * @return {Object} return either set of axis/blank cells depending on the config
  */
-
 const createAxisCells = (selection, axes, axisIndex, cells) =>
     createSelection(selection, axis => axis, axes, (item, i) => i + item.reduce((e, n) => {
         const id = n.id + axisIndex;
-        return e + id;
+        return `${e}-${id}`;
     }, '')).map((currObj, axis) => {
         if (axis && axis[axisIndex]) {
             const axisInst = axis[axisIndex];
@@ -143,7 +145,7 @@ const createAxisCells = (selection, axes, axisIndex, cells) =>
             });
         }
         return new cells.BlankCell().config({ show: false });
-    });
+    }).sort((a, b) => extractAxisIndex(a[0]) - extractAxisIndex(b[0]));
 
 /**
  *
@@ -201,11 +203,13 @@ const axisPlaceholderGn = (context, selObj, cells) => {
  * @return {Object} return either set of header cells depending on the config
  */
 const createTextCells = (selection, headers, cells, labelManager) => createSelection(selection,
-    (label) => {
-        const textCell = new cells.TextCell({}, { labelManager });
-        textCell.source(label);
-        return textCell;
-    }, headers, (key, i) => key + i);
+        (label) => {
+            const textCell = new cells.TextCell({}, { labelManager });
+            textCell.source(label);
+            return textCell;
+        }, headers, (key, i) => key + i);
+
+const extractFacetIndex = id => id.split('-').pop();
 
 /**
  *
@@ -227,7 +231,8 @@ const headerPlaceholderGn = (context, selectionObj, cells, labelManager) => {
     const selectionKeys = keys.length ? axis.map((d, i) => keys[Math.floor(i / counter)]) : [];
 
     const selObjUpdater = createSelection(selectionObj[`${type}Headers`], keySet => keySet, selectionKeys,
-    (keySet, i) => `${keySet.join(',')}-${i}`);
+    (keySet, i) => `${keySet.join(',')}-${i}`)
+        .sort((a, b) => extractFacetIndex(a[0]) - extractFacetIndex(b[0]));
 
     return selObjUpdater.map((keySet, data) => {
         let textCells = createTextCells(null, data, cells, labelManager);
@@ -460,6 +465,7 @@ export const generateMatrices = (context, matrices, cells, labelManager) => {
         rowPriority
     };
 };
+
 const getAxisFields = (projections, fieldHolder = []) =>
                             projections.reduce((acc, item) =>
                                 [...acc, ...item.reduce((ac, field) =>
@@ -472,8 +478,38 @@ const sortDmTemporalFields = (resolver, datamodel) => {
 
     const fieldConfig = datamodel.getFieldsConfig();
     const temporalFields = axisFields.reduce((acc, field) =>
-                                    ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
+        ((fieldConfig[field].def.subtype === TEMPORAL) ? [...acc, [field]] : acc), []);
     return temporalFields.length ? datamodel.sort(temporalFields, { saveChild: true }) : datamodel;
+};
+
+const transformDataModel = (dataModel, config, resolver) => {
+    let groupedModel;
+
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const resolvedData = resolver.data();
+    const { groupBy, suppliedLayers, facetsAndProjections } = config;
+
+    if (resolvedData instanceof DataModel) {
+        resolvedData.dispose();
+    }
+    groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
+    resolver.data(groupedModel);
+    if (!groupBy.disabled) {
+        const fields = getFieldsFromSuppliedLayers(suppliedLayers, groupedModel.getFieldsConfig());
+        const allFields = extractFields(facetsAndProjections, fields);
+        const dimensions = allFields.filter(field =>
+            getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+        const aggregationFns = groupBy.measures;
+        const measureNames = Object.keys(groupedModel.getFieldspace().getMeasure());
+        const nearestAggFns = retrieveNearestGroupByReducers(groupedModel, ...measureNames);
+        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
+
+        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns)
+                                            .project(allFields);
+    }
+    // sort temporal fields if any in the given rows and columns
+    groupedModel = sortDmTemporalFields(resolver, groupedModel);
+    return groupedModel;
 };
 
 /**
@@ -561,31 +597,19 @@ export const computeMatrices = (context, config) => {
             shape: config.shape
         }
     };
-    const fieldsConfig = datamodel.getFieldsConfig();
-    let groupedModel = datamodel;
-    if (!groupBy.disabled) {
-        const fields = getFieldsFromSuppliedLayers(valueCellContext.suppliedLayers, datamodel.getFieldsConfig());
-        const allFields = extractFields(facetsAndProjections, fields);
 
-        const dimensions = allFields.filter(field =>
-            fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
-        const aggregationFns = groupBy.measures;
-        const measureNames = Object.keys(datamodel.getFieldspace().getMeasure());
-        const nearestAggFns = retrieveNearestGroupByReducers(datamodel, ...measureNames);
-        const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
-        groupedModel = datamodel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns).project(allFields);
-    }
+    const groupedModel = transformDataModel(datamodel, {
+        facetsAndProjections,
+        suppliedLayers: valueCellContext.suppliedLayers,
+        groupBy
+    }, resolver);
 
-    // sort temporal fields if any in the given rows and columns
-    groupedModel = sortDmTemporalFields(resolver, groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
     const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator, globalConfig);
 
-    resolver.cacheMaps().exitCellMap.forEach((placeholder) => {
-        placeholder.remove();
-    });
+    removeExitCells(resolver);
     resolver.cacheMaps().exitCellMap.clear();
     resolver.valueMatrix(valueMatrixInfo.matrix);
 
@@ -595,18 +619,7 @@ export const computeMatrices = (context, config) => {
         x: xAxes,
         y: yAxes
     });
-    const store = resolver.store();
 
-    [xAxes, yAxes].forEach((axesArr, type) => {
-        const stateProps = {};
-        axesArr = axesArr || [];
-        axesArr.forEach((axes, idx) => {
-            axes.forEach((axis, axisIndex) => {
-                stateProps[`${idx}${axisIndex}`] = null;
-            });
-        });
-        store.append(`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.${type ? 'y' : 'x'}`, stateProps);
-    });
     resolver.createUnits(componentRegistry, config);
 
     const matrices = {

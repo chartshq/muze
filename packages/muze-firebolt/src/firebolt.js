@@ -1,8 +1,6 @@
 import {
     mergeRecursive,
     hasTouch,
-    filterPropagationModel,
-    FieldType,
     selectElement,
     isSimpleObject
 } from 'muze-utils';
@@ -14,7 +12,8 @@ import {
     changeSideEffectAvailability,
     initializePhysicalActions,
     unionSets,
-    getSideEffects
+    getSideEffects,
+    setSideEffectConfig
 } from './helper';
 
 /**
@@ -63,6 +62,7 @@ export default class Firebolt {
     config (...config) {
         if (config.length) {
             this._config = mergeRecursive(this._config, config[0]);
+            setSideEffectConfig(this.sideEffects(), this._config);
             return this;
         }
         return this._config;
@@ -323,23 +323,20 @@ export default class Firebolt {
      */
     propagateWith (action, fields, append = false) {
         const behaviouralActions = this._actions.behavioural;
-        if (fields.length) {
-            if (action === ALL_ACTIONS) {
-                for (const key in behaviouralActions) {
-                    this._propagationFields[key] = {
-                        fields,
-                        append
-                    };
-                }
-            } else {
-                this._propagationFields[action] = {
+        if (action === ALL_ACTIONS) {
+            for (const key in behaviouralActions) {
+                this._propagationFields[key] = {
                     fields,
                     append
                 };
             }
-            return this;
+        } else {
+            this._propagationFields[action] = {
+                fields,
+                append
+            };
         }
-        return this._propagationFields;
+        return this;
     }
 
     /**
@@ -408,14 +405,10 @@ export default class Firebolt {
         const context = this.context;
         const filteredDataModel = propagationInf.data ? propagationInf.data :
             context.getDataModelFromIdentifiers(criteria, 'all');
-        const xFields = context.fields().x || [];
-        const yFields = context.fields().y || [];
-        const xMeasures = xFields.every(field => field.type() === FieldType.MEASURE);
-        const yMeasures = yFields.every(field => field.type() === FieldType.MEASURE);
         return {
             model: filteredDataModel,
-            uids: criteria === null ? null : (propagationInf.data ? filterPropagationModel(this.getFullData(),
-                propagationInf.data[0], xMeasures && yMeasures).getData().uids : filteredDataModel[0].getData().uids)
+            uids: criteria === null ? null : (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids())
         };
     }
 

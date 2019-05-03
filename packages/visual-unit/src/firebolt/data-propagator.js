@@ -5,24 +5,25 @@ const getModelWithFacetData = (dm, data) => {
     const schema1 = dataObj.schema;
     const data1 = dataObj.data;
     const jsonData = [];
-    const schema2 = data[0].map(d => ({
+    const derivedSchema = data[0].map(d => ({
         name: `${d}`,
-        type: FieldType.DIMENSION
+        type: FieldType.DIMENSION,
+        subtype: d.subtype()
     }));
-    const data2 = data[1];
+    const dataAtFirstPos = data[1];
 
     data1.forEach((d) => {
         const tuple = {};
         schema1.forEach((obj, i) => {
             tuple[obj.name] = d[i];
         });
-        schema2.forEach((obj, i) => {
-            tuple[obj.name] = data2[i];
+        derivedSchema.forEach((obj, i) => {
+            tuple[obj.name] = dataAtFirstPos[i];
         });
         jsonData.push(tuple);
     });
 
-    return new DataModel(jsonData, [...schema1, ...schema2]);
+    return new DataModel(jsonData, [...schema1, ...derivedSchema]);
 };
 
 export const propagateValues = (instance, action, config = {}) => {

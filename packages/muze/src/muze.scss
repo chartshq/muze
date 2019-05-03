@@ -197,6 +197,20 @@
     float: left;
 }
 
+.#{$messageContainer} {
+    background-color: rgb(241,241,241);
+    display: table;
+    border: 1px solid #c3c9d0;
+}
+
+.#{$messageContainer}-child {
+    vertical-align: middle;
+    text-align: center;
+    font-size:  18px;
+    color: rgb(140, 141, 142);
+    display: table-cell;
+}
+
 .hidden {
     display: none;
 }

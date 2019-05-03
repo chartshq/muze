@@ -70,17 +70,6 @@ export default class ArcLayer extends BaseLayer {
         return null;
     }
 
-    /**
-     *
-     *
-     * @param {*} set
-     *
-     * @memberof ArcLayer
-     */
-    getPlotElementsFromSet (set) {
-        return selectElement(this.mount()).selectAll(this.elemType()).filter(d => set.indexOf(d.rowId) !== -1);
-    }
-
     translatePoints (data) {
         const { angle, color: colorAxis, radius: radiusAxis } = this.axes();
         const pieIndex = {};
@@ -95,40 +84,42 @@ export default class ArcLayer extends BaseLayer {
         });
         data.forEach((d, i) => {
             const angles = angle.getScaleValue(d.angle);
-            !angleV[d.angle] && (angleV[d.angle] = 0);
-            const { startAngle, endAngle } = angles[angleV[d.angle]++];
-            const uid = d.rowId;
-            const resolvedEncodings = resolveEncodingValues({
-                values: {
-                    radius: radiusAxis.getOuterRadius(d.radius),
-                    radius0: radiusAxis.getInnerRadius(d.radius0),
-                    color: colorAxis.getColor(d.color),
-                    angle0: startAngle,
-                    angle: endAngle,
-                    startAngle,
-                    endAngle,
-                    startAngle0: startAngle,
-                    endAngle0: endAngle
-                },
-                data: d
-            }, i, data, this);
-            const color = resolvedEncodings.color;
-            points.push({
-                source: d.source,
-                index: i,
-                enter: {},
-                update: {
-                    angle0: resolvedEncodings.angle0,
-                    angle: resolvedEncodings.angle,
-                    radius0: resolvedEncodings.radius0,
-                    radius: resolvedEncodings.radius
-                },
-                color,
-                meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
-                rowId: uid,
-                _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
-                    getPreviousPoint(pieIndex, i, this)
-            });
+            if (angles) {
+                !angleV[d.angle] && (angleV[d.angle] = 0);
+                const { startAngle, endAngle } = angles[angleV[d.angle]++];
+                const uid = d.rowId;
+                const resolvedEncodings = resolveEncodingValues({
+                    values: {
+                        radius: radiusAxis.getOuterRadius(d.radius),
+                        radius0: radiusAxis.getInnerRadius(d.radius0),
+                        color: colorAxis.getColor(d.color),
+                        angle0: startAngle,
+                        angle: endAngle,
+                        startAngle,
+                        endAngle,
+                        startAngle0: startAngle,
+                        endAngle0: endAngle
+                    },
+                    data: d
+                }, i, data, this);
+                const color = resolvedEncodings.color;
+                points.push({
+                    source: d.source,
+                    index: i,
+                    enter: {},
+                    update: {
+                        angle0: resolvedEncodings.angle0,
+                        angle: resolvedEncodings.angle,
+                        radius0: resolvedEncodings.radius0,
+                        radius: resolvedEncodings.radius
+                    },
+                    color,
+                    meta: getColorMetaInf(color, colorAxis),
+                    rowId: uid,
+                    _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
+                        getPreviousPoint(pieIndex, i, this)
+                });
+            }
         });
         return points;
     }
@@ -162,7 +153,7 @@ export default class ArcLayer extends BaseLayer {
                 .innerRadius(d => d.update.radius0);
 
         this._points = this._normalizedData.map(arr => this.translatePoints(arr));
-
+        const graphicElems = this._graphicElems = {};
         // Creating the group that holds all the arcs
         const g = makeElement(selectElement(container), 'g', this._points, `${qualClassName[0]}-group`)
                 .classed(`${qualClassName[1]}-group`, true)
@@ -170,16 +161,19 @@ export default class ArcLayer extends BaseLayer {
                     ${measurement.height / 2})`);
         const tween = (elem) => {
             makeElement(elem, 'path', d => [d], `${qualClassName[0]}-path`)
-                            .style('fill', d => d.color)
-                            .transition()
-                            .duration(transition.duration)
-                            .on('end', this.registerAnimationDoneHook())
-                            .attrTween('d', (...params) => tweenPie(path, params))
-                            .attr('class', (d, i) => {
-                                const individualClass = getIndividualClassName(d, i, this._points, this);
-                                return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
-                                    ${individualClass}`;
-                            });
+                .style('fill', d => d.color)
+                .each(function (d) {
+                    graphicElems[d.rowId] = selectElement(this);
+                })
+                .transition()
+                .duration(transition.duration)
+                .on('end', this.registerAnimationDoneHook())
+                .attrTween('d', (...params) => tweenPie(path, params))
+                .attr('class', (d, i) => {
+                    const individualClass = getIndividualClassName(d, i, this._points, this);
+                    return `${qualClassName[0]}-path ${qualClassName[1]}-path-${d.index}
+                        ${individualClass}`;
+                });
         };
         const consecutiveExits = [];
         let exitCounter = 0;

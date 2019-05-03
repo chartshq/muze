@@ -1,13 +1,11 @@
 import { layerFactory } from '@chartshq/visual-layer';
 import {
-    Store,
     setAttrs,
     getUniqueId,
     getQualifiedClassName,
     selectElement,
     transactor,
     makeElement,
-    registerListeners,
     generateGetterSetters,
     getDataModelFromIdentifiers,
     isSimpleObject,
@@ -31,18 +29,18 @@ import {
     createRenderPromise,
     setAxisRange
 } from './helper';
-import { renderGridLineLayers } from './helper/grid-lines';
-import localOptions from './local-options';
-import { listenerMap, calculateDomainListener } from './listener-map';
-import {
-    DOMAIN
-} from './enums/reactive-props';
+import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
+import { calculateDomainListener, listenerMap } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
-import { initSideEffects } from './firebolt/helper';
+import { initSideEffects, dispatchQueuedSideEffects, clearActionHistory } from './firebolt/helper';
 import './styles.scss';
+import localOptions from './local-options';
+import { WIDTH, HEIGHT } from './enums/reactive-props';
 
 const FORMAL_NAME = 'unit';
+const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
+const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
 
 /**
  * Visual Unit is hierarchical component created by {@link VisualGroup}. This component accepts layer definitions
@@ -65,32 +63,19 @@ export default class VisualUnit {
     constructor (registry, dependencies) {
         this._id = getUniqueId();
         this._dependencies = dependencies;
-        this._layerDeps = {
-            throwback: new Store({
-                [CommonProps.ON_LAYER_DRAW]: false
-            }),
-            smartLabel: dependencies.smartLabel,
-            lifeCycleManager: dependencies.lifeCycleManager
-        };
         this._renderedResolve = null;
         this._renderedPromise = new Promise((resolve) => {
             this._renderedResolve = resolve;
         });
         createRenderPromise(this);
-        this._layerDeps.throwback.registerChangeListener([CommonProps.ON_LAYER_DRAW], () => {
-            this._renderedResolve();
-            this._lifeCycleManager.notify({ client: this.layers(), action: 'drawn', formalName: 'layer' });
-        });
-
         this._lifeCycleManager = dependencies.lifeCycleManager;
         this._layersMap = {};
         this._gridLinesSelection = null;
         this._gridBandsSelection = null;
         this._gridLines = [];
         this._gridBands = [];
-        this._layerNamespaces = {};
         this._layerAxisIndex = {};
-        this._transformedDataModels = {};
+        this._queuedLayerDefs = [];
         layerFactory.setLayerRegistry(registry.layerRegistry);
         generateGetterSetters(this, PROPS);
         this.registry(registry);
@@ -104,35 +89,91 @@ export default class VisualUnit {
     static getState () {
         return [
             {
-                domain: {}
+                domain: null
             },
-            localOptions
+            Object.keys((localOptions)).reduce((acc, v) => {
+                acc[v] = localOptions[v].value;
+                return acc;
+            }, {})
         ];
+    }
+
+    static getQualifiedStateProps () {
+        const unitState = VisualUnit.getState();
+        return unitState.map((state, i) => Object.keys(state).map(prop => `${unitNs[i]}.${prop}`));
+    }
+
+    static getListeners () {
+        return {
+            store: [...listenerMap.map((d) => {
+                const o = Object.assign({}, d);
+                const localNs = unitNs[1];
+                o.props = o.props.map(prop => `${localNs}.${prop}`);
+                return o;
+            }), {
+                type: 'registerImmediateListener',
+                props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
+                listener: calculateDomainListener
+            }, {
+                type: 'registerImmediateListener',
+                props: [`${unitNs[1]}.${WIDTH}`,
+                    `${unitNs[1]}.${HEIGHT}`,
+                    ...['x', 'y'].map(type => `${groupNs}.domain.${type}`)],
+                listener: (context, [, width], [, height]) => {
+                    if (width && height) {
+                        attachDataToGridLineLayers(context);
+                    }
+                },
+                subNamespace: (context) => {
+                    const { rowIndex, colIndex, namespace } = context.metaInf();
+                    return {
+                        [`${unitNs[1]}.${WIDTH}`]: namespace,
+                        [`${unitNs[1]}.${HEIGHT}`]: namespace,
+                        [`${groupNs}.domain.x`]: `${colIndex}0`,
+                        [`${groupNs}.domain.y`]: `${rowIndex}0`
+                    };
+                }
+            }],
+            throwback: [
+                {
+                    type: 'registerChangeListener',
+                    props: [CommonProps.ON_LAYER_DRAW],
+                    listener: (context, [, drawn]) => {
+                        if (drawn) {
+                            const firebolt = context.firebolt();
+                            dispatchQueuedSideEffects(firebolt);
+                            clearActionHistory(firebolt);
+                        }
+                        context._renderedResolve();
+                        context._lifeCycleManager.notify({
+                            client: context.layers(),
+                            action: 'drawn',
+                            formalName: 'layer'
+                        });
+                    }
+                }
+            ]
+        };
     }
 
     store (...params) {
         if (params.length) {
-            this._store = params[0];
-            const metaInf = this.metaInf();
-            this.store().append(`${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`, {
-                [`${metaInf.namespace}`]: null
+            const store = this._store = params[0];
+            const { throwback, fireboltDeps } = this._dependencies;
+            const { namespace } = this.metaInf();
+
+            store.addSubNamespace(namespace, FORMAL_NAME, this);
+            throwback.addSubNamespace(namespace, FORMAL_NAME, this);
+            transactor(this, localOptions, store, {
+                subNamespace: namespace,
+                namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
             });
-            const localNs = `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`;
-            transactor(this, localOptions, this.store().model, {
-                namespace: localNs
-            });
-            registerListeners(this, listenerMap, {
-                local: localNs,
-                global: STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE
-            }, {
-                rowIndex: metaInf.rowIndex,
-                colIndex: metaInf.colIndex
-            });
+
             this.firebolt(new UnitFireBolt(this, {
-                physical: physicalActions,
-                behavioural: behaviouralActions,
+                physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
+                behavioural: Object.assign({}, behaviouralActions, fireboltDeps.behaviouralActions),
                 physicalBehaviouralMap: actionBehaviourMap
-            }, sideEffects, behaviourEffectMap));
+            }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
             return this;
         }
         return this._store;
@@ -178,12 +219,12 @@ export default class VisualUnit {
     }
 
     lockModel () {
-        this._store.model.lock();
+        this.store().lockModel();
         return this;
     }
 
     unlockModel () {
-        this._store.model.unlock();
+        this.store().unlockModel();
         return this;
     }
 
@@ -343,6 +384,10 @@ export default class VisualUnit {
      * @return {Array} Array of layer instances.
      */
     addLayer (layerDefinition) {
+        if (layerDefinition instanceof Function) {
+            this._queuedLayerDefs.push(layerDefinition);
+            return this;
+        }
         const layerDefinitions = sanitizeLayerDef(toArray(layerDefinition));
 
         const layersMap = this._layersMap;
@@ -354,9 +399,7 @@ export default class VisualUnit {
             }
         };
         let layerIndex = 0;
-        let startIndex = [].concat(...Object.values(this._layersMap)).length;
         const metaInf = this.metaInf();
-        const props = this._layerNamespaces;
         const layers = layerDefinitions.sort((a, b) => a.order - b.order).reduce((layersArr, layerDef) => {
             const definition = layerDef.def;
             const markId = definition.name;
@@ -364,13 +407,7 @@ export default class VisualUnit {
             const namespaces = [];
             defArr.forEach((def) => {
                 def.order = layerDef.order + layerIndex;
-                const namespace = `${metaInf.namespace}${startIndex}`;
-                if (!layersMap[markId]) {
-                    startIndex++;
-                    if (definition.calculateDomain !== false) {
-                        props[`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.${DOMAIN}.${namespace}`] = true;
-                    }
-                }
+                const namespace = `${metaInf.namespace}-${def.mark}-${getUniqueId()}`;
                 namespaces.push(namespace);
             });
             layerIndex += defArr.length;
@@ -398,17 +435,6 @@ export default class VisualUnit {
 
         this._layerDepOrder = layerdeps;
         this._layerAxisIndex = Object.assign(this._layerAxisIndex, getLayerAxisIndex(layers, this.fields()));
-        const stateStore = this.store();
-
-        stateStore.unsubscribe({
-            key: 'calculateDomainListener',
-            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
-        });
-        stateStore.registerImmediateListener(Object.keys(props), calculateDomainListener(this, metaInf.namespace),
-            false, {
-                key: 'calculateDomainListener',
-                namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${metaInf.namespace}`
-            });
         this.layers(layersArr);
         return layers;
     }
@@ -420,17 +446,19 @@ export default class VisualUnit {
      * @memberof VisualUnit
      */
     remove () {
-        const lifeCycleManager = this._dependencies.lifeCycleManager;
+        const formalName = this.constructor.formalName();
+        const { lifeCycleManager, throwback } = this._dependencies;
+        const { namespace } = this.metaInf();
         lifeCycleManager.notify({ client: this, action: 'beforeremove', formalName: 'unit' });
-        this.store().unsubscribe({
-            namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}.${this.metaInf().namespace}`
-        });
+        const layers = this.layers();
+        this.store().removeSubNamespace(namespace, formalName);
+        throwback.removeSubNamespace(namespace, FORMAL_NAME);
         selectElement(this.mount()).remove();
         this.firebolt().remove();
         // Remove layers
-        lifeCycleManager.notify({ client: this.layers(), action: 'beforeremove', formalName: 'layer' });
-        this.layers().forEach(layer => layer.remove());
-        lifeCycleManager.notify({ client: this.layers(), action: 'removed', formalName: 'layer' });
+        lifeCycleManager.notify({ client: layers, action: 'beforeremove', formalName: 'layer' });
+        [...layers, ...this._gridLines, ...this._gridBands].forEach(layer => layer.remove());
+        lifeCycleManager.notify({ client: layers, action: 'removed', formalName: 'layer' });
         lifeCycleManager.notify({ client: this, action: 'removed', formalName: 'unit' });
         return this;
     }
@@ -478,7 +506,7 @@ export default class VisualUnit {
     }
 
     getDataDomain () {
-        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain.${this.metaInf().namespace}`);
+        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`, this.metaInf().namespace);
     }
 
     /**

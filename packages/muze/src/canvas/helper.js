@@ -1,6 +1,6 @@
 import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG }
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID }
     from '../constants';
 import { canvasOptions } from './local-options';
 import { LayoutManager } from '../../../layout/src/tree-layout';
@@ -28,7 +28,8 @@ export const fixScrollBarConfig = (config) => {
 
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
-    const boundBox = layoutManager.getComponent('grid').getBoundBox();
+    const gridLayout = layoutManager.getComponent(GRID);
+    const boundBox = gridLayout && gridLayout.getBoundBox();
     const valueMatrix = context.composition().visualGroup.matrixInstance().value;
     const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
     valueMatrix.each((cell) => {
@@ -110,7 +111,8 @@ const updateChecker = (props, params) => props.every((option, i) => {
 });
 
 export const notifyAnimationEnd = (context) => {
-    const centerMatrix = context.layout().viewInfo().viewMatricesInfo.matrices.center[1] || [];
+    const viewInfo = context.layout().viewInfo();
+    const centerMatrix = viewInfo && viewInfo.viewMatricesInfo.matrices.center[1] || [];
     const promises = [];
     centerMatrix.forEach((cellArr) => {
         cellArr.forEach((cell) => {
@@ -158,12 +160,15 @@ export const setupChangeListener = (context) => {
     const nameSpaceProps = [...allOptions, ...Object.keys(canvasOptions)].map(prop =>
         `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
     store.registerChangeListener(nameSpaceProps, (...params) => {
-        let updateProps = equalityChecker(props, params);
-        updateProps = updateChecker(props, params);
-
+        const equalityProps = equalityChecker(props, params);
+        const updateProps = updateChecker(props, params);
         // inform attached board to rerender
-        if (updateProps && context.mount()) {
-            dispatchProps(context);
+        if (equalityProps && context.mount()) {
+            if (updateProps) {
+                dispatchProps(context);
+            } else {
+                context.composition().visualGroup.remove();
+            }
             context.render();
         }
         notifyAnimationEnd(context);
