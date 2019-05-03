@@ -227,10 +227,13 @@ export const strategies = {
             }
         }, 'Items Selected']];
         const measureNames = measures.map(d => d.name);
+        const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
-            values.push([`(${aggFns[measure].toUpperCase()})`, `${retrieveFieldDisplayName(dm, measure)}`,
+            const value = data[0][fieldsConf[measure].index];
+            value instanceof InvalidAwareTypes ? values.push([]) : values.push([`(${aggFns[measure].toUpperCase()})`,
+                `${retrieveFieldDisplayName(dm, measure)}`,
                 {
-                    value: `${aggregatedModel.getData().data[0][fieldsConf[measure].index].toFixed(2)}`,
+                    value: `${value.toFixed(2)}`,
                     style: {
                         'font-weight': 'bold'
                     }
