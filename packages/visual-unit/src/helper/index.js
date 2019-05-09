@@ -134,9 +134,7 @@ export const attachDataToLayers = (layers, dm, transformedDataModels) => {
         const dataSource = layer.config().source;
         const dataModel = dataSource instanceof Function ? dataSource(dm) :
             (transformedDataModels[dataSource] || dm);
-        if (layer.data() !== dataModel) {
-            layer.data(dataModel);
-        }
+        layer.data(dataModel);
     });
 };
 

@@ -280,6 +280,7 @@ export default class Firebolt {
             if ({}.hasOwnProperty.call(behaviours, key)) {
                 selectionSet[key] = new SelectionSet(uniqueIds);
                 volatileSelectionSet[key] = new SelectionSet(uniqueIds, true);
+                this._entryExitSet[key] = null;
             }
         }
         this._volatileSelectionSet = volatileSelectionSet;

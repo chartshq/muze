@@ -79,11 +79,12 @@ export default class UnitFireBolt extends Firebolt {
 
             if (sourceIdentifiers) {
                 const fieldsConfig = sourceIdentifiers.getFieldsConfig();
-                const sourceIdentifierFields = Object.keys(fieldsConfig);
+                const sourceIdentifierFields = Object.keys(fieldsConfig).filter(field => fieldsConfig[field].def.type
+                    !== FieldType.MEASURE);
                 const propFields = Object.keys(propagationData[0].getFieldsConfig());
-                if (!Object.values(fieldsConfig).some(d => d.def.type === FieldType.MEASURE)) {
-                    isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1);
-                }
+                const hasCommonGroupId = config.groupId === context.parentAlias();
+                isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1) ||
+                    hasCommonGroupId;
             }
 
             const payload = payloadFn(context, propagationData, config);
