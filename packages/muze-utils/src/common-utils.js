@@ -1320,9 +1320,16 @@ const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     return null;
 };
 
+const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
+    const [fn1, fn2] = accessors;
+    const set = new Set(arr2.map(v => fn2(v)));
+    return arr1.filter(value => set.has(fn1(value)));
+};
+
 export {
     getValueParser,
     require,
+    intersect,
     Scales,
     Symbols,
     pathInterpolators,

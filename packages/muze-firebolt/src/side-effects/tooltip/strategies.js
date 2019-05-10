@@ -8,7 +8,8 @@ import {
     defaultValue,
     retrieveFieldDisplayName,
     nestCollection,
-    getObjProp
+    getObjProp,
+    intersect
 } from 'muze-utils';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 
@@ -16,12 +17,8 @@ const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
 
 const formatters = (formatter, interval, valueParser) => ({
-    [DimensionSubtype.TEMPORAL]: (value) => {
-        if (value instanceof InvalidAwareTypes) {
-            return valueParser(value);
-        }
-        return formatTemporal(Number(value), interval);
-    },
+    [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
+        formatTemporal(Number(value), interval)),
     [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
         formatter(value.toFixed(2))),
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
@@ -59,7 +56,7 @@ const getKeyValue = (field, value, classPrefix, margin) => {
     }];
 };
 
-const generateRetinalContent = (valueArr, retinalFields, content, context) => {
+const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
     const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen } = context;
     const { classPrefix, margin, separator } = config;
     const colorAxis = axes.color[0];
@@ -124,7 +121,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
-    const containsDetailField = schema.find(d => detailFields.indexOf(d.name) !== -1);
+    const containsDetailField = !!intersect(schema, detailFields).length;
     const dataLen = data.length;
     const {
         dimensionMeasureMap,
@@ -149,6 +146,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const indices = filteredDimensions.map(dim => fieldsConfig[dim.name].index);
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
         const filteredMeasures = dataLen > 1 ? measures.filter(d => allMeasures.indexOf(d.name) === -1) : measures;
+
         nestedDataObj = nestCollection({
             data,
             keys: indices
@@ -156,7 +154,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         nestedDataObj = !getObjProp(nestedDataObj[0], 'key') ? [{
             values: nestedDataObj
         }] : nestedDataObj;
-        (function generateTooltipContent (nestedData, index = 0, content = []) {
+
+        const generateTooltipContent = (nestedData, index = 0, content = []) => {
             const { classPrefix, separator } = config;
 
             for (let i = 0, len = nestedData.length; i < len; i++) {
@@ -175,7 +174,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 } else {
                     for (let j = 0, len2 = values.length; j < len2; j++) {
                         const valueArr = values[j];
-                        generateRetinalContent(valueArr, retinalFields, content, {
+                        generateRetinalFieldsValues(valueArr, retinalFields, content, {
                             fieldInf,
                             axes,
                             config,
@@ -185,17 +184,15 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         });
 
                         filteredMeasures.forEach((measure) => {
-                            const { name } = measure;
-                            const { displayName, fn } = fieldInf[name];
-                            const measureIndex = fieldsConfig[name].index;
-                            const value = fn(valueArr[measureIndex]);
+                            const { displayName, fn } = fieldInf[measure.name];
                             content.push(getKeyValue(`${displayName}${separator}`,
-                                value, classPrefix));
+                                fn(valueArr[fieldsConfig[name].index]), classPrefix));
                         });
                     }
                 }
             }
-        }(nestedDataObj, 0, fieldValues));
+        };
+        generateTooltipContent(nestedDataObj, 0, fieldValues);
     }
 
     return {
@@ -241,8 +238,5 @@ export const strategies = {
         }
         return values;
     },
-    [HIGHLIGHT_SUMMARY]: (data, config, context) => {
-        const values = buildTooltipData(data, config, context);
-        return values;
-    }
+    [HIGHLIGHT_SUMMARY]: (data, config, context) => buildTooltipData(data, config, context)
 };
