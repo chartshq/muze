@@ -234,6 +234,7 @@ export const renderLayers = (context, container, layers, measurement) => {
             };
         }
     });
+
     const layerSeq = layerDepOrder.map(name => groups[name]);
     layerSeq.forEach((o) => {
         const layer = o.layer;

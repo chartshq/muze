@@ -184,7 +184,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                         });
 
                         filteredMeasures.forEach((measure) => {
-                            const { displayName, fn } = fieldInf[measure.name];
+                            const { name } = measure;
+                            const { displayName, fn } = fieldInf[name];
                             content.push(getKeyValue(`${displayName}${separator}`,
                                 fn(valueArr[fieldsConfig[name].index]), classPrefix));
                         });
