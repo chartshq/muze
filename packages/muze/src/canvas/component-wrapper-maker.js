@@ -10,7 +10,8 @@ import {
     RIGHT,
     MESSAGE,
     GRID,
-    NO_DATA_MESSAGE
+    NO_DATA_MESSAGE,
+    HORIZONTAL_CENTER
 } from '../constants';
 import HeaderComponent from './components/headerComponent';
 import LegendComponent from './components/legendComponent';
@@ -81,8 +82,7 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
         });
 
         if (headerConfig.align === CENTER) {
-            headerConfig.alignment = null;
-            headerConfig.alignWith = null;
+            headerConfig.alignment = HORIZONTAL_CENTER;
         }
         if (headerConfig.align === RIGHT) {
             headerConfig.alignment = RIGHT;
