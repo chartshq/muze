@@ -18,7 +18,7 @@ import LegendComponent from './components/legendComponent';
 import ScrollComponent from './components/scroll-component';
 import GridComponent from './components/grid-component';
 import MessageComponent from './components/message-component';
-import { TITLE_CONFIG, SUB_TITLE_CONFIG, CANVAS, LAYOUT_ALIGN, MESSAGE_CONFIG } from './defaults';
+import { TITLE_CONFIG, SUB_TITLE_CONFIG, CANVAS, MESSAGE_CONFIG } from './defaults';
 import { ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, CENTER } from '../../../layout/src/enums/constants';
 
 // Mapping between types of headers and their required configs for wrapper creation
@@ -32,6 +32,14 @@ const headerMap = {
         configType: SUB_TITLE_CONFIG
     }
 };
+
+// Mapping of header alignment values
+const headerAlignmentMap = {
+    [LEFT]: LEFT,
+    [RIGHT]: RIGHT,
+    [CENTER]: HORIZONTAL_CENTER
+};
+
 /**
  * returns if data is Valid
  *
@@ -77,16 +85,10 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
-            alignment: LAYOUT_ALIGN.LEFT,
+            alignment: headerAlignmentMap[LEFT],
             className: configType.className
         });
-
-        if (headerConfig.align === CENTER) {
-            headerConfig.alignment = HORIZONTAL_CENTER;
-        }
-        if (headerConfig.align === RIGHT) {
-            headerConfig.alignment = RIGHT;
-        }
+        headerConfig.alignment = headerAlignmentMap[headerConfig.align];
 
         const wrapperParams = {
             name: headerType,

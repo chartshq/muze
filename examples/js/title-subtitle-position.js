@@ -39,17 +39,17 @@
         format: '%Y-%m-%d'
     }];
 
-    const rootData = new DataModel(data, schema);
+    const dm = new DataModel(data, schema);
     const canvas = env.canvas();
     
     canvas
-        .columns(['Acceleration'])
-        .rows(['Cylinders'])
-        .data(rootData)
-        .height(400)
-        .width(400)
-        .title('The car', { position: 'bottom', align: 'center' })
-        .subtitle('The car', { position: 'bottom', align: 'center' })
-        .mount('#chart');
+        .data(dm)
+        .width(850)
+        .height(550)
+        .columns(["Year", "Origin", "Name"])
+        .rows(["Horsepower"])
+        .mount("#chart")
+        .title('The car', { position: 'top', align: 'right' })
+        .subtitle('The car', { position: 'bottom', align: 'left' })
     });
 }());
