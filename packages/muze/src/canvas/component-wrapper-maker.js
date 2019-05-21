@@ -85,10 +85,9 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
             classPrefix: layoutConfig.classPrefix,
             ...target,
             alignWith: `${ROW_MATRIX_INDEX[0]}-${COLUMN_MATRIX_INDEX[1]}`,
-            alignment: headerAlignmentMap[LEFT],
+            alignment: headerAlignmentMap[headerConfig.align],
             className: configType.className
         });
-        headerConfig.alignment = headerAlignmentMap[headerConfig.align];
 
         const wrapperParams = {
             name: headerType,
