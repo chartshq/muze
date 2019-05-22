@@ -1,5 +1,6 @@
 import SurrogateSideEffect from '../surrogate';
 import { strategies } from './strategy';
+import { HIGHLIGHTER } from '../../enums/side-effects';
 
 export default class PlotHighlighter extends SurrogateSideEffect {
     constructor (...params) {
@@ -9,7 +10,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
     }
 
     static formalName () {
-        return 'highlighter';
+        return HIGHLIGHTER;
     }
 
     static target () {
@@ -19,9 +20,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
     apply (selectionSet, payload, options = {}) {
         const strategy = this._strategies[options.strategy || this._strategy];
 
-        if (selectionSet.isSourceFieldPresent !== false) {
-            strategy(selectionSet, this, options.strategy || this._strategy);
-        }
+        strategy(selectionSet, this, options.strategy || this._strategy);
 
         return this;
     }

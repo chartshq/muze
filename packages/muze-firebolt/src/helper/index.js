@@ -134,8 +134,6 @@ export const unionSets = (context, behaviours) => {
     behaviours.forEach((behaviour) => {
         const entryExitSet = context._entryExitSet[behaviour];
         if (entryExitSet) {
-            const isSourceFieldPresent = combinedSet.isSourceFieldPresent !== undefined ?
-                combinedSet.isSourceFieldPresent : true;
             combinedSet = Object.assign(combinedSet, clone(entryExitSet));
             ['mergedEnter', 'mergedExit'].forEach((type) => {
                 const model = entryExitSet[type].model;
@@ -153,7 +151,6 @@ export const unionSets = (context, behaviours) => {
                 combinedSet[type].model = existingModel;
                 combinedSet[type].aggFns = aggFns;
             });
-            combinedSet.isSourceFieldPresent = combinedSet.isSourceFieldPresent && isSourceFieldPresent;
         }
     });
     return combinedSet;
