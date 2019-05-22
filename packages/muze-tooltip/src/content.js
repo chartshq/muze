@@ -7,6 +7,7 @@ import {
     getSymbol,
     isSimpleObject
 } from 'muze-utils';
+import { TABLE_FORMAT } from './constants';
 import { defaultConfig } from './default-config';
 
 /**
@@ -83,7 +84,7 @@ export default class Content {
             const body = makeElement(mount, 'div', [displayFormat], `${config.classPrefix}-tooltip-content`, {},
                 d => d);
 
-            if (displayFormat === 'table') {
+            if (displayFormat === TABLE_FORMAT) {
                 const table = makeElement(body, 'table', [1], `${config.classPrefix}-tooltip-table`);
                 const tbody = makeElement(table, 'tbody', [1], `${config.classPrefix}-tooltip-table-tbody`);
                 const rows = makeElement(tbody, 'tr', content, `${config.classPrefix}-tooltip-table-row`);

@@ -11,6 +11,7 @@ import {
     getObjProp,
     intersect
 } from 'muze-utils';
+import { TABLE_FORMAT } from '@chartshq/muze-tooltip';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
@@ -136,7 +137,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             schema,
             fieldspace
         }, fieldInf);
-        displayFormat = 'table';
+        displayFormat = TABLE_FORMAT;
     } else {
         const retinalFields = [color.field, shape.field, size.field].reduce((acc, field) => {
             field && fieldsConfig[field].def.type === FieldType.DIMENSION && (acc[field] = 1);
@@ -159,13 +160,12 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             const { classPrefix, separator } = config;
 
             for (let i = 0, len = nestedData.length; i < len; i++) {
-                const dataObj = nestedData[i];
-                const values = dataObj.values;
+                const { values, key } = nestedData[i];
                 const field = getObjProp(schema, indices[index], 'name');
 
                 if (field) {
                     const { displayName, fn } = fieldInf[field];
-                    const formattedValue = fn(dataObj.key);
+                    const formattedValue = fn(key);
                     content.push(getKeyValue(`${displayName}${separator}`, formattedValue, classPrefix));
                 }
 

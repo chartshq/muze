@@ -471,26 +471,27 @@ export const renderLayer = (context) => {
     }
 };
 
-const transformResolverPredicates = [
-    encodingFieldInf => !encodingFieldInf.xField || !encodingFieldInf.yField,
-    (encodingFieldInf, context, groupByField) => {
-        const fieldsConfig = context.data().getFieldsConfig();
-        return !groupByField || getObjProp(fieldsConfig[groupByField], 'def', 'type') === FieldType.MEASURE;
-    },
-    encodingFieldInf => encodingFieldInf.xFieldType === FieldType.DIMENSION &&
-        encodingFieldInf.yFieldType === FieldType.DIMENSION,
-    (encodingFieldInf, context, groupByField) => {
-        const dimensionField = ['xField', 'yField'].find(type =>
-                encodingFieldInf[`${type}Type`] === FieldType.DIMENSION);
-        return (dimensionField && encodingFieldInf[dimensionField] === groupByField);
-    }
-];
+const transformResolverPredicates = (encodingFieldInf, context, groupByField) => {
+    const fieldsConfig = context.data().getFieldsConfig();
+    const { xField, yField, xFieldType, yFieldType } = encodingFieldInf;
+    const dimensionField = ['xField', 'yField'].find(type =>
+        encodingFieldInf[`${type}Type`] === FieldType.DIMENSION);
+
+    return [
+        () => !xField,
+        () => !yField,
+        () => !groupByField,
+        () => getObjProp(fieldsConfig[groupByField], 'def', 'type') === FieldType.MEASURE,
+        () => xFieldType === FieldType.DIMENSION && yFieldType === FieldType.DIMENSION,
+        () => dimensionField && encodingFieldInf[dimensionField] === groupByField
+    ];
+};
 
 export const resolveInvalidTransformType = (context) => {
     const encodingFieldInf = context.encodingFieldsInf();
     const groupByField = context.config().transform.groupBy;
 
-    if (transformResolverPredicates.some(fn => fn(encodingFieldInf, context, groupByField))) {
+    if (transformResolverPredicates(encodingFieldInf, context, groupByField).some(fn => fn())) {
         return IDENTITY;
     }
     return null;

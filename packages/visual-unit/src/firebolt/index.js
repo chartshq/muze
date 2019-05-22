@@ -21,8 +21,15 @@ const sideEffectPolicy = (propPayload, context, propagationInf) => {
 export default class UnitFireBolt extends Firebolt {
     constructor (...params) {
         super(...params);
-        const disabledSideEffects = [SIDE_EFFECTS.TOOLTIP, SIDE_EFFECTS.HIGHLIGHTER, SIDE_EFFECTS.ANCHORS,
-            SIDE_EFFECTS.BRUSH_ANCHORS, SIDE_EFFECTS.PERSISTENT_ANCHORS];
+        const {
+            TOOLTIP,
+            HIGHLIGHTER,
+            ANCHORS,
+            BRUSH_ANCHORS,
+            PERSISTENT_ANCHORS
+        } = SIDE_EFFECTS;
+
+        const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
         disabledSideEffects.forEach((sideEffect) => {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
         });
@@ -59,11 +66,11 @@ export default class UnitFireBolt extends Firebolt {
                 }
                 if (!actionOnSource && payload.criteria !== null) {
                     const sideEffectCheckers = Object.values(sourceSideEffects[se.name || se] || {});
-
+                    const { sourceIdentifiers, data: propagationData } = propagationInf;
                     return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
                         checker(propagationInf.propPayload, context, {
-                            sourceIdentifiers: propagationInf.sourceIdentifiers,
-                            propagationData: propagationInf.data
+                            sourceIdentifiers,
+                            propagationData
                         })) : true;
                 }
                 if (propagationSourceCanvas === aliasName || actionOnSource) {
