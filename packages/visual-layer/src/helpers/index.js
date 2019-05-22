@@ -478,12 +478,12 @@ const transformResolverPredicates = (encodingFieldInf, context, groupByField) =>
         encodingFieldInf[`${type}Type`] === FieldType.DIMENSION);
 
     return [
-        () => !xField,
-        () => !yField,
-        () => !groupByField,
-        () => getObjProp(fieldsConfig[groupByField], 'def', 'type') === FieldType.MEASURE,
-        () => xFieldType === FieldType.DIMENSION && yFieldType === FieldType.DIMENSION,
-        () => dimensionField && encodingFieldInf[dimensionField] === groupByField
+        !xField,
+        !yField,
+        !groupByField,
+        getObjProp(fieldsConfig[groupByField], 'def', 'type') === FieldType.MEASURE,
+        xFieldType === FieldType.DIMENSION && yFieldType === FieldType.DIMENSION,
+        dimensionField && encodingFieldInf[dimensionField] === groupByField
     ];
 };
 
@@ -491,7 +491,7 @@ export const resolveInvalidTransformType = (context) => {
     const encodingFieldInf = context.encodingFieldsInf();
     const groupByField = context.config().transform.groupBy;
 
-    if (transformResolverPredicates(encodingFieldInf, context, groupByField).some(fn => fn())) {
+    if (transformResolverPredicates(encodingFieldInf, context, groupByField).some(value => value)) {
         return IDENTITY;
     }
     return null;
