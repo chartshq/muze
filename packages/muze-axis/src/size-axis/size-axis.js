@@ -31,8 +31,9 @@ export default class SizeAxis {
         this._rangeType = CONTINOUS;
 
         this._sizeStrategy = this.setStrategy(this._domainType, this._rangeType);
+        this._config.range.sort((a, b) => a - b);
+
         this._scale = this.createScale(this._sizeStrategy);
-        this._range = this._config.range;
 
         this.updateDomain(config.domain);
     }
@@ -108,6 +109,7 @@ export default class SizeAxis {
         } else {
             return this._sizeStrategy.range(domainVal, scale, this.domain(), this.uniqueValues());
         }
+
         return sizeVal;
     }
 

@@ -38,6 +38,7 @@ export const prepareLayout = (layout, renderDetails) => {
         bottomLeft,
         bottomRight
     } = cornerMatrices;
+
     if (rows && columns) {
         layout.measurement(measurement)
                         .config(layoutConfig)
