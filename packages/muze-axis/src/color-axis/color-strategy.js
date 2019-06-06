@@ -1,27 +1,8 @@
-import { numberInterpolator, piecewiseInterpolator, hslInterpolator, sanitizeDomainWhenEqual } from 'muze-utils';
+import { piecewiseInterpolator, hslInterpolator, sanitizeDomainWhenEqual, getActualStopsFromDomain } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
 import { treatNullMeasures } from '../helper';
-
-const getStops = (domain, stops) => {
-    let newStops = [];
-
-    if (stops instanceof Array) {
-        newStops = stops.slice().sort();
-        newStops = [...new Set([domain[0], ...stops, domain[1]])].sort();
-    } else {
-        const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i <= stops; i++) {
-            newStops[i] = interpolator(i / stops);
-        }
-    }
-
-    if (newStops[0] < domain[0]) {
-        newStops.shift();
-    }
-    return { domain, newStops };
-};
 
 const rangeStops = (newStopsLength, range) => {
     let newRange = [];
@@ -80,14 +61,14 @@ const normalDomain = (domain, stops, range) => {
  *
  */
 const steppedDomain = (domain, stops, range) => {
-    const { domain: uniqueVals, newStops } = getStops(domain, stops);
+    const { domain: uniqueVals, newStops } = getActualStopsFromDomain(domain, stops);
     const { newRange } = rangeStops(newStops.length - 1, range);
 
     return { uniqueVals, domain: newStops, nice: true, range: newRange };
 };
 
 const continousSteppedDomain = (domain, stops, range) => {
-    const { domain: uniqueVals, newStops } = getStops(sanitizeDomainWhenEqual(domain), range.length - 1);
+    const { domain: uniqueVals, newStops } = getActualStopsFromDomain(sanitizeDomainWhenEqual(domain), range.length - 1);
     const hslRange = range.map(e => getHslString(e));
     return { uniqueVals, domain: newStops, nice: true, range: hslRange };
 };

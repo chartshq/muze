@@ -1,4 +1,4 @@
-import { numberInterpolator, piecewiseInterpolator } from 'muze-utils';
+import { numberInterpolator, piecewiseInterpolator, getActualStopsFromDomain } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, THRESHOLD } from '../enums/scale-type';
 import { treatNullMeasures } from '../helper';
@@ -19,35 +19,12 @@ const indexedDomain = (domain) => {
  *
  *
  * @param {*} domain
+ * @param {*} stops
  *
  */
-const normalDomain = (domain) => {
-    const uniqueVals = domain;
-    return { uniqueVals, domain };
-};
-
-/**
- *
- *
- * @param {*} domain
- * @param {*} intervals
- *
- */
-const steppedDomain = (domain, intervals) => {
-    let newIntervals = [];
-    if (intervals instanceof Array) {
-        newIntervals = intervals.slice().sort();
-    } else {
-        const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i < intervals; i++) {
-            newIntervals[i] = interpolator(i / (intervals - 1));
-        }
-    }
-    if (newIntervals[0] < domain[0]) {
-        newIntervals.shift();
-    }
-    const retDomain = newIntervals;
-    return { uniqueVals: newIntervals, domain: retDomain, nice: true };
+const steppedDomain = (originalDomain, stops) => {
+    const { newStops } = getActualStopsFromDomain(originalDomain, stops);
+    return { uniqueVals: newStops, domain: newStops, nice: true };
 };
 
 /**
@@ -92,7 +69,7 @@ const normalRange = (domainValue, scale, domain) =>
 /**
  *
  *
- * @param {*} intervals
+ * @param {*} stops
  */
 const strategies = {
     [`${DISCRETE}-${CONTINOUS}`]: {
@@ -102,7 +79,8 @@ const strategies = {
     },
     [`${CONTINOUS}-${CONTINOUS}`]: {
         scale: LINEAR,
-        domain: normalDomain,
+        domain: steppedDomain,
+        // domain: normalDomain,
         range: normalRange
     },
     [`${CONTINOUS}-${DISCRETE}`]: {
@@ -118,7 +96,7 @@ const strategies = {
  * @param {*} domainType
  * @param {*} rangeType
  * @param {*} schemeType
- * @param {*} intervals
+ * @param {*} stops
  */
 export const strategyGetter = (domainType, rangeType) =>
      strategies[`${domainType}-${rangeType}`];

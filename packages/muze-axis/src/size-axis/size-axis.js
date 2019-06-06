@@ -121,7 +121,7 @@ export default class SizeAxis {
         if (domain) {
             const domainFn = this._sizeStrategy.domain;
 
-            const domainInfo = domainFn(domain, this.config().intervals);
+            const domainInfo = domainFn(domain, this.config().stops);
 
             this.domain(domainInfo.domain);
             this.uniqueValues(domainInfo.uniqueVals);

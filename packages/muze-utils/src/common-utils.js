@@ -938,6 +938,25 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
     return new model.constructor(data, schema);
 };
 
+const getActualStopsFromDomain = (domain, stops) => {
+    let newStops = [];
+
+    if (stops instanceof Array) {
+        newStops = stops.slice().sort();
+        newStops = [...new Set([domain[0], ...stops, domain[1]])].sort((a, b) => a - b);
+    } else {
+        const numInt = numberInterpolator()(...domain);
+        for (let i = 0; i <= stops; i++) {
+            newStops[i] = numInt(i / stops);
+        }
+    }
+
+    if (newStops[0] < domain[0]) {
+        newStops.shift();
+    }
+    return { domain, newStops };
+};
+
 /**
  *
  *
@@ -1397,5 +1416,6 @@ export {
     temporalFields,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortCategoricalField
+    sortCategoricalField,
+    getActualStopsFromDomain
 };
