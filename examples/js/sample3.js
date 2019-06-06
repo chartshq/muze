@@ -73,16 +73,16 @@ d3.json('../../data/cars.json', (data) => {
             columns = rows.reverse();
         const canvas = env.canvas();
         canvas.data(rootData).columns(['Cylinders', 'Horsepower']).rows(['Acceleration'])
-        // .color({
-        //     field: 'Displacement',
-        //     stops: [-100],
-        //     domain: [-500, 1000],
-        //     range: ['red', 'blue']
-        // })
+        .color({
+            field: 'Displacement',
+            stops: 1,
+            // domain: [-500, 1000],
+            // range: ['red', 'blue']
+        })
         .size({
             field: 'Displacement',
-            stops: 10,
-            range: [10, 10000, 1000, 300, 100, 500]
+            stops: 'as'
+            // range: [10, 10000, 1000, 300, 100, 500]
             // stops: [100, -10, 500, 999]
         }).mount('#chart').height(500)
      

@@ -18,3 +18,11 @@ export const resolveAxisConfig = (propVal, defaultVal, context) => {
         return defaultVal;
     }
 };
+
+export const sanitizeRetinalConfig = (oldConfig, newConfig) => {
+    const stops = newConfig.stops;
+    if (!stops || stops <= 1 || isNaN(stops)) {
+        newConfig.stops = oldConfig.stops;
+    }
+    return newConfig;
+};

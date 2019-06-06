@@ -25,7 +25,8 @@ export default class SizeAxis {
         generateGetterSetters(this, PROPS);
 
         this._id = getUniqueId();
-        this._config = Object.assign({}, this.constructor.defaultConfig(), config);
+
+        this.config(config);
         // @todo: Will use configuration override using scale decorator
         this._domainType = this._config.type === 'linear' ? CONTINOUS : DISCRETE;
         this._rangeType = CONTINOUS;

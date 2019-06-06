@@ -17,7 +17,8 @@ import VisualMatrix from './visual-matrix';
 export default class ColumnVisualMatrix extends VisualMatrix {
 
     /**
-     *Creates an instance of VisualMatrix.
+     * Creates an instance of VisualMatrix.
+     *
      * @param {any} matrix Two set of matrices
      * @param {any} [config={}] Configuration for VisualMatrix
      * @memberof VisualMatrix

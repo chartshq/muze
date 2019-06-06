@@ -23,7 +23,8 @@ const indexedDomain = (domain) => {
  *
  */
 const steppedDomain = (originalDomain, stops) => {
-    const { newStops } = getActualStopsFromDomain(originalDomain, stops);
+    const actualStops = stops instanceof Array ? stops : stops - 1;
+    const { newStops } = getActualStopsFromDomain(originalDomain, actualStops);
     return { uniqueVals: newStops, domain: newStops, nice: true };
 };
 

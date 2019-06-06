@@ -2,6 +2,7 @@ import { mergeRecursive, detectColor, hexToHsv, rgbToHsv } from 'muze-utils';
 import { x11Colors } from './color-maps';
 import { palette, DEFAULT_GRADIENT_COLOR } from './defaults';
 import { LINEAR, RGB, HEX, HSL, HSLA } from '../enums/constants';
+import { sanitizeRetinalConfig } from '../helper';
 
 export const getHslString = hslArr => `hsla(${hslArr[0] * 360},${hslArr[1] * 100}%,${hslArr[2] * 100}%,\
 ${hslArr[3] || 1})`;
@@ -42,7 +43,7 @@ export const PROPS = {
                 config.range = config.range.length > 1 ? config.range : [DEFAULT_GRADIENT_COLOR, ...config.range];
             }
             const oldConfig = mergeRecursive(defCon, context.config());
-            const newConfig = mergeRecursive(oldConfig, config);
+            const newConfig = mergeRecursive(oldConfig, sanitizeRetinalConfig(oldConfig, config));
 
             if (newConfig.range instanceof Array) {
                 newConfig.range = newConfig.range.map((e, i) => getActualHslColor(e, palette[i]));
