@@ -64,15 +64,17 @@ d3.json('../../data/cars.json', (data) => {
 
     let rootData = new DataModel(jsonData, schema)
 
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
+    // rootData.sort([
+    //     ['Cylinders', 'asc'],
+    //     ['Maker', 'desc'],
+    // ])
 
     var rows = ['Origin','Acceleration'],
             columns = rows.reverse();
         const canvas = env.canvas();
-        canvas.data(rootData).columns(['Cylinders', 'Horsepower']).rows(['Acceleration']).color('Maker').mount('#chart').height(500)
+        canvas 
+        .data(rootData)
+        .rows(['Weight_in_lbs']).columns(['Origin', 'Year', 'Cylinders']).height(800).width(600).mount('#chart')
      
         setTimeout(()=>{
         // canvas.data(rootData).rows(['Maker']).columns([ ]).color('Cylinders')
