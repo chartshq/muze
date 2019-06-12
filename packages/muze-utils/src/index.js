@@ -100,7 +100,8 @@ export {
     retrieveNearestGroupByReducers,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortCategoricalField
+    sortCategoricalField,
+    intersect
 } from './common-utils';
 
 export {

@@ -55,7 +55,8 @@ const defaultCrossInteractionPolicy = {
                 return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
             }
             return true;
-        }
+        },
+        selectionBox: () => false
     }
 };
 

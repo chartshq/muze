@@ -471,13 +471,16 @@ export const sortFacetFields = (facets, keys, config) => {
     facets.forEach((facet) => {
         const name = `${facet}`;
         const facetSortConfig = sortConfig[name];
+
         if (facetSortConfig) {
             sortInfo.push([name, facetSortConfig]);
+        } else {
+            sortInfo.push([name, null]);
         }
         schema.push(facet.getSchemaDef());
     });
 
-    return new DataModel([facetNames, ...keys], schema).sort(sortInfo, { saveChild: false }).getData().data;
+    return new DataModel([facetNames, ...keys], schema).getData({ sort: sortInfo }).data;
 };
 
 export const removeExitCells = (resolver) => {

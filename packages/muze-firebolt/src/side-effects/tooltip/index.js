@@ -3,6 +3,7 @@ import { FieldType, mergeRecursive, defaultValue } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { strategies } from './strategies';
 import { FRAGMENTED } from '../../enums/constants';
+import { TOOLTIP } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
@@ -56,7 +57,7 @@ export default class Tooltip extends SpawnableSideEffect {
     }
 
     static formalName () {
-        return 'tooltip';
+        return TOOLTIP;
     }
 
     config (...params) {
@@ -78,7 +79,7 @@ export default class Tooltip extends SpawnableSideEffect {
         const dataModel = selectionSet.mergedEnter.model;
         const context = this.firebolt.context;
         const drawingInf = this.drawingContext();
-        if ((dataModel.isEmpty() || payload.criteria === null) || selectionSet.isSourceFieldPresent === false) {
+        if ((dataModel.isEmpty() || payload.criteria === null)) {
             this.hide(options, null);
             return this;
         }

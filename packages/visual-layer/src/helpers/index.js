@@ -471,18 +471,27 @@ export const renderLayer = (context) => {
     }
 };
 
-export const resolveInvalidTransformType = (context) => {
-    const {
-        xField,
-        yField,
-        xFieldType,
-        yFieldType
-    } = context.encodingFieldsInf();
-    const groupByField = context.config().transform.groupBy;
+const transformResolverPredicates = (encodingFieldInf, context, groupByField) => {
     const fieldsConfig = context.data().getFieldsConfig();
-    const groupByFieldMeasure = fieldsConfig[groupByField] && fieldsConfig[groupByField].def.type === FieldType.MEASURE;
-    if (!xField || !yField || groupByFieldMeasure || !groupByField || xFieldType === FieldType.DIMENSION &&
-        yFieldType === FieldType.DIMENSION) {
+    const { xField, yField, xFieldType, yFieldType } = encodingFieldInf;
+    const dimensionField = ['xField', 'yField'].find(type =>
+        encodingFieldInf[`${type}Type`] === FieldType.DIMENSION);
+
+    return [
+        !xField,
+        !yField,
+        !groupByField,
+        getObjProp(fieldsConfig[groupByField], 'def', 'type') === FieldType.MEASURE,
+        xFieldType === FieldType.DIMENSION && yFieldType === FieldType.DIMENSION,
+        dimensionField && encodingFieldInf[dimensionField] === groupByField
+    ];
+};
+
+export const resolveInvalidTransformType = (context) => {
+    const encodingFieldInf = context.encodingFieldsInf();
+    const groupByField = context.config().transform.groupBy;
+
+    if (transformResolverPredicates(encodingFieldInf, context, groupByField).some(value => value)) {
         return IDENTITY;
     }
     return null;

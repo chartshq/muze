@@ -63,7 +63,6 @@ export default class GenericBehaviour {
         const propagationInf = this.firebolt.getPropagationInf();
         const dataModel = this.firebolt.getFullData();
         const setConfig = {
-            isSourceFieldPresent: propagationInf.isSourceFieldPresent,
             dataModel,
             filteredDataModel,
             propagationData: propagationInf.data,
@@ -78,7 +77,6 @@ export default class GenericBehaviour {
             mergedEnter: getSetInfo('mergedEnter', getMergedSet(entrySet), setConfig),
             mergedExit: getSetInfo('mergedExit', getMergedSet(exitSet), setConfig),
             completeSet: getSetInfo('complete', completeSet, setConfig),
-            isSourceFieldPresent: propagationInf.isSourceFieldPresent,
             fields: getSourceFields(propagationInf, payload.criteria),
             sourceSelectionSet: selectionSet._volatile === true
         };

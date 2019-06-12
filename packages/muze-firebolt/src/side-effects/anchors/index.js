@@ -1,5 +1,6 @@
 import { DataModel, getObjProp } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
+import { ANCHORS } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
@@ -69,7 +70,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
     }
 
     static formalName () {
-        return 'anchors';
+        return ANCHORS;
     }
 
     addAnchorLayers () {
@@ -98,18 +99,16 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
 
-        if (selectionSet.isSourceFieldPresent !== false) {
-            const context = this.firebolt.context;
-            const layers = context.layers().filter(layer => layer.config().groupId === formalName);
+        const context = this.firebolt.context;
+        const layers = context.layers().filter(layer => layer.config().groupId === formalName);
 
-            layers.forEach((layer) => {
-                const linkedLayer = context.getLayerByName(layer.config().owner);
-                const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
-                const transformedDataModel = new DataModel(transformedData, schema);
+        layers.forEach((layer) => {
+            const linkedLayer = context.getLayerByName(layer.config().owner);
+            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
+            const transformedDataModel = new DataModel(transformedData, schema);
 
-                layer.data(transformedDataModel);
-            });
-        }
+            layer.data(transformedDataModel);
+        });
         return this;
     }
 }
