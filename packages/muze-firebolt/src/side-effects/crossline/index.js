@@ -2,6 +2,7 @@ import { selectElement, FieldType } from 'muze-utils';
 
 import './styles.scss';
 import { CLASSPREFIX } from '../../enums/constants';
+import { CROSSLINE } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 
 export default class Crossline extends SpawnableSideEffect {
@@ -14,7 +15,7 @@ export default class Crossline extends SpawnableSideEffect {
     }
 
     static formalName () {
-        return 'crossline';
+        return CROSSLINE;
     }
 
     apply (selectionSet, payload) {

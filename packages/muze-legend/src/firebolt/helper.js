@@ -5,17 +5,18 @@ import { STEP, GRADIENT, DISCRETE, MEASURE } from '../enums/constants';
 
 export const propagate = (firebolt, action, selectionSet, config = {}) => {
     let propagationData;
-    const type = firebolt.context.constructor.type();
+    const context = firebolt.context;
+    const type = context.constructor.type();
     const payload = config.payload;
-    const data = firebolt.context.data();
-    const metaData = firebolt.context.metaData();
+    const data = context.data();
+    const metaData = context.metaData();
     const fieldType = metaData.getData().schema[0].type;
 
     const propPayload = {};
-    const sourceId = firebolt.context._id;
+    const sourceId = context._id;
     propPayload.action = propagationBehaviourMap[action] || action;
     propPayload.sideEffects = propagationSideEffects[action];
-    propPayload.sourceCanvas = firebolt.context.canvasAlias();
+    propPayload.sourceCanvas = context.canvasAlias();
     const isMutableAction = firebolt._actions.behavioural[propPayload.action].constructor.mutates();
     if (payload.criteria === null) {
         propagationData = null;
