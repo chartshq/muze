@@ -63,7 +63,7 @@
 			Acceleration: 'mean'
         });
         const makers = ['bmw', 'ford', 'toyota', 'amc']
-        rootData = rootData.select(fields=>makers.indexOf(fields.Maker.value)>-1)
+        rootData = rootData.select(fields=>makers.indexOf(fields.Maker.internalValue)>-1)
 
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');

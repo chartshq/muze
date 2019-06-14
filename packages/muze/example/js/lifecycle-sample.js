@@ -53,7 +53,7 @@ d3.json('../../data/cars.json', (data) => {
         ];
 
     window.rootData = new DataModel(jsonData, schema);
-    window.rootData1 = rootData.select(fields => fields.Displacement.value < 300);
+    window.rootData1 = rootData.select(fields => fields.Displacement.internalValue < 300);
     window.rootData2 = rootData.select(fields => fields.Origin.value === 'USA');
 
     let mountPoint = document.getElementById('chart');
