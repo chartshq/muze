@@ -29,7 +29,7 @@ export const propagate = (firebolt, action, selectionSet, config = {}) => {
             propagationData = values.length ? metaData.select((fields) => {
                 let check = false;
                 for (let i = 0; i < values.length; i++) {
-                    check = fields[field].value >= values[i][0] && fields[field].value <= values[i][1];
+                    check = fields[field].internalValue >= values[i][0] && fields[field].internalValue <= values[i][1];
                     if (check === true) {
                         break;
                     }

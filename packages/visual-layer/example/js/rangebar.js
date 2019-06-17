@@ -21,7 +21,7 @@ d3.csv('../../data/seattle-weather.csv', (jsonData) => {
         type: 'measure'
     }
     ];
-    let rootData = new DataModel(jsonData, schema).select((fields) => fields.date.value <
+    let rootData = new DataModel(jsonData, schema).select((fields) => fields.date.internalValue <
         new Date(2013, 0, 1).getTime());
 
     let xAxis = new Axis.SimpleAxis({
