@@ -52,8 +52,8 @@ d3.json('../../data/cars.json', (data) => {
       .rows(['Acceleration']) // Acceleration goes in Y-Axis
       .columns(['Year']) // Horsepower goes in Y-Axis
       .data(rootData1)
-      .width(550)
-      .height(350)
+      .width(650)
+      .height(550)
       .color('Origin')
       .layers([{
         mark: 'line',

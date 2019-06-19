@@ -27,7 +27,7 @@
     padding-bottom: 4px;
 }
 .#{$prefix}tooltip-value{
-    font-weight: 600;
+    color:#5F5F5F;
     float: right;
     margin-left: 10px;
 }
@@ -108,8 +108,8 @@
 
 .#{$prefix}tooltip-content-container-selectionSummary{
     .#{$prefix}tooltip-content {
-        margin-left: 5px;
-        margin-right: 5px;
+        margin-left: 3px;
+        margin-right: 3px;
     }
 }
 
