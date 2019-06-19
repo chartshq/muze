@@ -96,15 +96,26 @@ export default class Content {
                     selectElement(this).html(d);
                 });
             } else {
-                const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`);
+                const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`, {
+                    update: (elem, elemData) => {
+                        let isSelected = false;
+                        elemData.forEach((element) => {
+                            if (element.className && element.className.includes('selected')) {
+                                isSelected = true;
+                            }
+                        });
+                        if (isSelected) {
+                            elem.attr('class', `${config.classPrefix}-tooltip-row selected`);
+                        } else elem.attr('class', `${config.classPrefix}-tooltip-row`);
+                    } });
                 const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
                 cells.attr('class', `${config.classPrefix}-tooltip-content`);
                 setStyles(rows, {
                     margin: rowMargin
                 });
                 setStyles(cells, {
-                    display: 'inline-block',
-                    'margin-right': `${config.spacing}px`
+                    display: 'inline-block'
+                    // 'margin-right': `${config.spacing}px`
                 });
 
                 cells.each(function (d) {

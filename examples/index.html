@@ -8,11 +8,13 @@
     <title>Muze</title>
     <!-- <link rel="stylesheet" href="./muze.css" /> -->
     <script src="/muze.js"></script>
-    <!-- <style>
-        div {
-            border: 1px blueviolet solid;
+    <style>
+        #parentdiv {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
         }
-    </style> -->
+    </style>
 </head>
 
 <body>
@@ -24,8 +26,15 @@
         <div id="chart2"></div>
         <div id="chart4"></div>
         <div id="chart3"></div>
+        <div id="chart5"></div>
+        <div id="chart7"></div>
 </div>
     <!-- <script /src="https://d3js.org/d3.v4.js"></script> -->
-    <script src="./js/sample3.js"></script>
+    <script src="./js/tooltips/area.js"></script>
+    <script src="./js/tooltips/line.js"></script>
+    <script src="./js/tooltips/scatter-plot.js"></script>
+    <script src="./js/tooltips/simple-bar.js"></script>
+    <script src="./js/tooltips/stacked-bar.js"></script>
+    <script src="./js/tooltips/crosstab.js"></script>
 </body>
 </html>

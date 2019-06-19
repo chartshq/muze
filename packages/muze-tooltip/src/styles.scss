@@ -8,8 +8,6 @@
     font-size: 12px;
     color: #5f5f5f;
     border-radius: 1px;
-    padding-left: 8px;
-    padding-right: 8px;
     padding-top: 4px;
     display: inline-block;
     pointer-events: none;
@@ -18,10 +16,13 @@
 
 }
 .#{$prefix}tooltip-row{
-    padding-bottom: 8px;
+    padding-bottom: 4px;
+    padding-top: 4px;
     overflow: auto;
 }
-
+.selected{
+    background-color:#ebebeb
+}
 .#{$prefix}tooltip-row:last-child{
     padding-bottom: 4px;
 }
@@ -96,12 +97,35 @@
 
 .#{$prefix}tooltip-content-container {
     float: none !important;
-    padding-left: 8px;
-    padding-right: 8px;
-    padding-top: 4px;
 }
-.#{$prefix}-tooltip-value {
-    font-weight: bold;
+
+.#{$prefix}tooltip-content {
+    svg {
+        margin-left: 16px;
+        margin-right: -10px;
+    }
+}
+
+.#{$prefix}tooltip-content-container-selectionSummary{
+    .#{$prefix}tooltip-content {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+}
+
+.#{$prefix}tooltip-value {
+    margin-right: 24px;
+    margin-left: 24px;
+}
+
+.#{$prefix}tooltip-first {
+    font-weight: 600;
+    font-size: 15px;
+    margin-left: 15px;
+}
+
+.#{$prefix}tooltip-key {
+    margin-left: 16px;
 }
 
 .muze-tooltip-table-tbody td {
