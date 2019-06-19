@@ -951,7 +951,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     }
     const selFields = Object.keys(criteria);
     const selFn = fields => selFields.every((field) => {
-        const val = fields[field].value;
+        const val = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
         if (typeof range[0] === STRING) {
             return range.find(d => d === val) !== undefined;
@@ -985,7 +985,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
             filteredDataModel = dataModel.select((fields) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    const value = fields[propField].valueOf();
+                    const value = fields[propField].internalValue;
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });

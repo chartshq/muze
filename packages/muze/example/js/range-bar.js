@@ -26,7 +26,7 @@ d3.csv('../../data/seattle-weather.csv', (data) => {
     ];
 
     let rootData = new DataModel(jsonData, schema);
-    rootData = rootData.select(fields => fields.date.value <= new Date(2012, 2, 1).getTime());
+    rootData = rootData.select(fields => fields.date.internalValue <= new Date(2012, 2, 1).getTime());
     const rows = [op = share('temp_max', 'temp_min')];
     const columns = ['date'];
 
