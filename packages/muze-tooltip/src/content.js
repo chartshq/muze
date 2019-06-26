@@ -99,14 +99,22 @@ export default class Content {
                 const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`, {
                     update: (elem, elemData) => {
                         let isSelected = false;
+                        const SELECTED_CLASSNAME = `${config.classPrefix}-tooltip-selected-row`;
+                        let className = elem.attr('class');
                         elemData.forEach((element) => {
-                            if (element.className && element.className.includes('selected')) {
+                            if (element.className && element.className.includes(
+                                SELECTED_CLASSNAME)) {
                                 isSelected = true;
                             }
                         });
                         if (isSelected) {
-                            elem.attr('class', `${config.classPrefix}-tooltip-row selected`);
-                        } else elem.attr('class', `${config.classPrefix}-tooltip-row`);
+                            className += ` ${SELECTED_CLASSNAME}`;
+                            elem.attr('class', className);
+                        } else if (className && className.includes(
+                            SELECTED_CLASSNAME)) {
+                            className = className.replace(SELECTED_CLASSNAME, '');
+                            elem.attr('class', className);
+                        }
                     } });
                 const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
                 cells.attr('class', `${config.classPrefix}-tooltip-content`);
