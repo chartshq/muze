@@ -101,8 +101,8 @@
 
 .#{$prefix}tooltip-content {
     svg {
-        margin-left: 16px;
-        margin-right: -10px;
+        margin-left: 10px;
+        margin-right: 5px;
     }
 }
 
@@ -124,9 +124,9 @@
     margin-left: 15px;
 }
 
-.#{$prefix}tooltip-key {
-    margin-left: 16px;
-}
+// .#{$prefix}tooltip-key {
+//     margin-left: 16px;
+// }
 
 .muze-tooltip-table-tbody td {
     padding: 3px;

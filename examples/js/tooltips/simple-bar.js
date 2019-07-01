@@ -50,12 +50,12 @@ d3.json('../../data/cars.json', (data) => {
     let canvas3 = env3.canvas();
 		
     canvas3 = canvas3
-      .rows(['Acceleration']) // Acceleration goes in Y-Axis
-      .columns(['Year']) // Horsepower goes in Y-Axis
-      .data(rootData3)
-      .width(450)
-      .height(250)
-      .title('Simple BAr Chart')
-      .mount("#chart4");
+    .rows([['Acceleration'], ['Horsepower']]) // Acceleration goes in Y-Axis
+    .columns(['Year']) // Horsepower goes in Y-Axis
+    .data(rootData3)
+    .width(650)
+    .height(550)
+    .color('Origin')
+    .mount(chart3)
 });
 
