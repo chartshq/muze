@@ -43,6 +43,10 @@ const pointTranslators = {
                 },
                 data: d
             }, i, data, layerInst);
+            const style = {
+                stroke: resolvedVal.color
+            };
+
             const point = {
                 enter: {},
                 update: {
@@ -51,12 +55,10 @@ const pointTranslators = {
                     angle: resolvedVal.angle,
                     angle0: resolvedVal.angle0
                 },
-                style: {
-                    stroke: resolvedVal.color
-                },
+                style,
                 source: d.source,
                 rowId: d.rowId,
-                meta: getColorMetaInf(resolvedVal.color, colorAxis)
+                meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, layerInst);
             points.push(point);
@@ -140,6 +142,9 @@ const pointTranslators = {
                 },
                 data: d
             }, i, data, layerInst);
+            const style = {
+                stroke: resolvedEncodings.color
+            };
 
             if (!isNaN(xPx) && !isNaN(yPx)) {
                 const point = {
@@ -150,12 +155,10 @@ const pointTranslators = {
                         x0: resolvedEncodings.x0,
                         y0: resolvedEncodings.y0
                     },
-                    style: {
-                        stroke: resolvedEncodings.color
-                    },
+                    style,
                     source: row,
                     rowId: d.rowId,
-                    meta: getColorMetaInf(resolvedEncodings.color, colorAxis)
+                    meta: getColorMetaInf(style, colorAxis)
                 };
                 point.className = getIndividualClassName(d, i, data, layerInst);
                 points.push(point);

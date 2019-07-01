@@ -893,7 +893,7 @@ const detectColor = (col) => {
      // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
      // eslint-disable-next-line
-    const matchHsla = /^hsla\((\d.+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
+    const matchHsla = /^hsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
     if (matchRgb.test(col) || matchRgba.test(col)) {

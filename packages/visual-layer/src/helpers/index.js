@@ -8,7 +8,8 @@ import {
     retrieveNearestGroupByReducers,
     getObjProp,
     COORD_TYPES,
-    CommonProps
+    CommonProps,
+    defaultValue
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -17,12 +18,13 @@ import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCEN
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
 
-const transfromColor = (colorAxis, datum, styleType, intensity) => {
-    datum.meta.stateColor[styleType] = datum.meta.stateColor[styleType] || datum.meta.originalColor;
-    const fillColorInfo = colorAxis.transformColor(datum.meta.stateColor[styleType], intensity);
-    datum.meta.stateColor[styleType] = fillColorInfo.hsla;
+const transformColor = (colorAxis, datum, styleType, intensity) => {
+    const meta = datum.meta;
+    const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
+    const colorInfo = colorAxis.transformColor(stateColor, intensity);
 
-    return fillColorInfo;
+    meta.stateColor[styleType] = colorInfo.hsla;
+    return colorInfo;
 };
 
 export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
@@ -40,16 +42,16 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
                 if (apply && !colorTransform[interactionType][styleType]) {
                     // fade selections
                     colorTransform[interactionType][styleType] = style.intensity;
-                    const color = transfromColor(colorAxis, d, styleType, style.intensity).color;
+                    const color = transformColor(colorAxis, d, styleType, style.intensity).color;
                     return color;
                 }
                 if (!apply && colorTransform[interactionType][styleType]) {
                      // unfade selections
                     colorTransform[interactionType][styleType] = null;
-                    return transfromColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                    return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
                 }
-                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor;
-                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a || 1})`;
+                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
+                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
             }));
         });
     });
@@ -542,8 +544,13 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (color, colorAxis) => ({
-    originalColor: colorAxis.getHslArray(color),
+export const getColorMetaInf = (colorInf, colorAxis) => ({
+    originalColor: Object.keys(colorInf).reduce((acc, key) => {
+        if (colorInf[key]) {
+            acc[key] = colorAxis.getHslArray(colorInf[key]);
+        }
+        return acc;
+    }, {}),
     stateColor: {},
     colorTransform: {}
 });
