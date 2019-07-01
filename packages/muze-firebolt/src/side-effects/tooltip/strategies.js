@@ -16,6 +16,7 @@ import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strate
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
+const FIRST_VALUE_MARGIN = '10px';
 
 const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
@@ -53,16 +54,27 @@ const getKeyValue = (params) => {
                 'margin-left': `${margin}px`
             };
         }
-        return [keyObj, {
+        const valueObj = {
             value,
-            className: isSelected ? `${classPrefix}-tooltip-value ${classPrefix}-tooltip-selected-row`
-            : `${classPrefix}-tooltip-value`
-        }];
+            className: `${classPrefix}-tooltip-value`
+        };
+        return ({
+            className: isSelected ? `${classPrefix}-tooltip-row ${classPrefix}-tooltip-selected-row`
+                : `${classPrefix}-tooltip-row`,
+            data: [keyObj, valueObj]
+        }
+        );
     }
-    return [{
-        value,
+    return ({
+        data: [{
+            className: '',
+            value,
+            style: {
+                'margin-left': FIRST_VALUE_MARGIN
+            }
+        }],
         className: `${classPrefix}-tooltip-first`
-    }];
+    });
 };
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
@@ -102,21 +114,17 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
                 const measureIndex = fieldsConfig[measure].index;
                 const { displayName: dName, fn: formatterFn } = fieldInf[measure];
                 const value = formatterFn(valueArr[measureIndex]);
-                content.push(hasMultipleMeasures ?
-                        getKeyValue({
-                            field: `${dName}${separator}`,
-                            value,
-                            classPrefix,
-                            margin,
-                            isSelected
-                        }) : [icon, ...getKeyValue({
-                            field: formattedRetinalValue,
-                            value,
-                            classPrefix,
-                            margin: undefined,
-                            isSelected
-                        })
-                        ]);
+                const keyValue = getKeyValue({
+                    field: hasMultipleMeasures ? `${dName}${separator}` : formattedRetinalValue,
+                    value,
+                    classPrefix,
+                    margin: hasMultipleMeasures ? margin : undefined,
+                    isSelected
+                });
+                if (hasMultipleMeasures) {
+                    keyValue.data = [icon, keyValue.data];
+                }
+                content.push(keyValue);
             });
         }
     }
@@ -276,7 +284,9 @@ export const strategies = {
         if (measureNames.length === 1) {
             values = [[...values[0], ...values[1]]];
         }
-        return values;
+        return ([{
+            data: values[0]
+        }]);
     },
     [HIGHLIGHT_SUMMARY]: (data, config, context) => buildTooltipData(data, config, context)
 };

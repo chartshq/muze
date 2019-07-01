@@ -96,34 +96,16 @@ export default class Content {
                     selectElement(this).html(d);
                 });
             } else {
-                const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`, {
-                    update: (elem, elemData) => {
-                        let isSelected = false;
-                        const SELECTED_CLASSNAME = `${config.classPrefix}-tooltip-selected-row`;
-                        let className = elem.attr('class');
-                        elemData.forEach((element) => {
-                            if (element.className && element.className.includes(
-                                SELECTED_CLASSNAME)) {
-                                isSelected = true;
-                            }
-                        });
-                        if (isSelected) {
-                            className += ` ${SELECTED_CLASSNAME}`;
-                            elem.attr('class', className);
-                        } else if (className && className.includes(
-                            SELECTED_CLASSNAME)) {
-                            className = className.replace(SELECTED_CLASSNAME, '');
-                            elem.attr('class', className);
-                        }
-                    } });
-                const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
+                const rows = makeElement(body, 'div', content, '', {
+                    update: (elem, elemData) => elem.attr('class', elemData.className)
+                });
+                const cells = makeElement(rows, 'span', d => d.data, `${config.classPrefix}-tooltip-content`);
                 cells.attr('class', `${config.classPrefix}-tooltip-content`);
                 setStyles(rows, {
                     margin: rowMargin
                 });
                 setStyles(cells, {
-                    display: 'inline-block'
-                    // 'margin-right': `${config.spacing}px`
+                    display: 'inline-block' // 'margin-right': `${config.spacing}px`
                 });
 
                 cells.each(function (d) {
