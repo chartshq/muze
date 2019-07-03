@@ -98,6 +98,10 @@
 .#{$prefix}tooltip-content-container {
     float: none !important;
 }
+.#{$prefix}tooltip-html-container {
+    margin-left: 10px;
+    margin-right: 10px;
+}
 
 .#{$prefix}tooltip-content {
     svg {
@@ -123,11 +127,6 @@
     font-size: 15px;
     margin-left: 15px;
 }
-
-// .#{$prefix}tooltip-key {
-//     margin-left: 16px;
-// }
-
 .muze-tooltip-table-tbody td {
     padding: 3px;
 }
