@@ -203,7 +203,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             for (let i = 0, len = nestedData.length; i < len; i++) {
                 const { values, key } = nestedData[i];
                 const field = getObjProp(schema, indices[index], 'name');
-                const margin = dataLen === 1 ? SINGLE_DATA_MARGIN : undefined;
+                const margin = dataLen === 1 || Object.keys(retinalFields).length === 0
+                ? SINGLE_DATA_MARGIN : undefined;
                 if (field) {
                     const { displayName, fn } = fieldInf[field];
                     const formattedValue = fn(key);
@@ -240,7 +241,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                                 field: `${displayName}${separator}`,
                                 value: fn(valueArr[fieldsConfig[name].index]),
                                 classPrefix,
-                                margin
+                                margin: SINGLE_DATA_MARGIN
                             }));
                         });
                     }
