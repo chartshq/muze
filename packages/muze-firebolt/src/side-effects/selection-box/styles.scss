@@ -1,8 +1,8 @@
 @import '../../prefix.scss';
 .#{$prefix}selection-box-group {
-    fill: rgb(119, 119, 119);
+    fill: rgb(211, 211, 211);
     fill-opacity: 0.3;
-    stroke: #fff;
+    stroke: rgb(180, 180, 180);
     cursor: all-scroll;
     pointer-events: all;
 }
