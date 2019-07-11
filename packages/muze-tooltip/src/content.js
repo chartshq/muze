@@ -62,6 +62,7 @@ export default class Content {
         const formatter = this._formatter;
         const rowMargin = config.rowMargin;
         const model = this._model;
+        const { classPrefix } = config;
 
         this._mount = mount;
         if (model instanceof Array) {
@@ -71,7 +72,8 @@ export default class Content {
         }
 
         if (data instanceof Function) {
-            mount.html(data());
+            const mountHtmlTooltip = makeElement(mount, 'div', [1], `${classPrefix}-tooltip-html-container`);
+            mountHtmlTooltip.html(data());
         } else {
             let content = data;
             let displayFormat = 'default';
@@ -81,30 +83,31 @@ export default class Content {
                 displayFormat = data.displayFormat;
             }
 
-            const body = makeElement(mount, 'div', [displayFormat], `${config.classPrefix}-tooltip-content`, {},
+            const body = makeElement(mount, 'div', [displayFormat], `${classPrefix}-tooltip-content`, {},
                 d => d);
 
             if (displayFormat === TABLE_FORMAT) {
-                const table = makeElement(body, 'table', [1], `${config.classPrefix}-tooltip-table`);
-                const tbody = makeElement(table, 'tbody', [1], `${config.classPrefix}-tooltip-table-tbody`);
-                const rows = makeElement(tbody, 'tr', content, `${config.classPrefix}-tooltip-table-row`);
+                const table = makeElement(body, 'table', [1], `${classPrefix}-tooltip-table`);
+                const tbody = makeElement(table, 'tbody', [1], `${classPrefix}-tooltip-table-tbody`);
+                const rows = makeElement(tbody, 'tr', content, `${classPrefix}-tooltip-table-row`);
                 rows.each(function (d, i) {
-                    selectElement(this).classed(`${config.classPrefix}-tooltip-table-row-${i}`, true);
+                    selectElement(this).classed(`${classPrefix}-tooltip-table-row-${i}`, true);
                 });
-                const cells = makeElement(rows, 'td', d => d, `${config.classPrefix}-tooltip-table-cell`);
+                const cells = makeElement(rows, 'td', d => d, `${classPrefix}-tooltip-table-cell`);
                 cells.each(function (d) {
                     selectElement(this).html(d);
                 });
             } else {
-                const rows = makeElement(body, 'div', content, `${config.classPrefix}-tooltip-row`);
-                const cells = makeElement(rows, 'span', d => d, `${config.classPrefix}-tooltip-content`);
-                cells.attr('class', `${config.classPrefix}-tooltip-content`);
+                const rows = makeElement(body, 'div', content, '', {
+                    update: (elem, elemData) => elem.attr('class', elemData.className)
+                });
+                const cells = makeElement(rows, 'span', d => d.data, `${classPrefix}-tooltip-content`);
+                cells.attr('class', `${classPrefix}-tooltip-content`);
                 setStyles(rows, {
                     margin: rowMargin
                 });
                 setStyles(cells, {
-                    display: 'inline-block',
-                    'margin-right': `${config.spacing}px`
+                    display: 'inline-block' // 'margin-right': `${config.spacing}px`
                 });
 
                 cells.each(function (d) {

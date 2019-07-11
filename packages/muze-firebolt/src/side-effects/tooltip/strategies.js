@@ -16,6 +16,8 @@ import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strate
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
+const FIRST_VALUE_MARGIN = '10px';
+const SINGLE_DATA_MARGIN = 10;
 
 const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
@@ -41,28 +43,54 @@ const getTabularData = (dataObj, fieldInf) => {
     return rows;
 };
 
-const getKeyValue = (field, value, classPrefix, margin) => {
-    const keyObj = {
-        value: field,
-        className: `${classPrefix}-tooltip-key`
-    };
-    if (margin !== undefined) {
-        keyObj.style = {
-            'margin-left': `${margin}px`
+const getKeyValue = (params) => {
+    const { field, value, classPrefix, margin, isSelected, removeKey } = params;
+
+    if (!removeKey) {
+        const keyObj = {
+            value: field,
+            className: `${classPrefix}-tooltip-key`
         };
+        const valueObj = {
+            value,
+            className: `${classPrefix}-tooltip-value`
+        };
+        if (margin !== undefined) {
+            keyObj.style = {
+                'margin-left': `${margin}px`
+            };
+            valueObj.style = {
+                'margin-left': `${margin}px`
+            };
+        }
+
+        return ({
+            className: isSelected ? `${classPrefix}-tooltip-row ${classPrefix}-tooltip-selected-row`
+                : `${classPrefix}-tooltip-row`,
+            data: [keyObj, valueObj]
+        }
+        );
     }
-    return [keyObj, {
-        value,
-        className: `${classPrefix}-tooltip-value`
-    }];
+    return ({
+        data: [{
+            className: '',
+            value,
+            style: {
+                'margin-left': FIRST_VALUE_MARGIN
+            }
+        }],
+        className: `${classPrefix}-tooltip-first`
+    });
 };
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
-    const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen } = context;
+    const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target } = context;
     const { classPrefix, margin, separator } = config;
     const colorAxis = axes.color[0];
     const shapeAxis = axes.shape[0];
     const sizeAxis = axes.size[0];
+    const REF_VALUES_INDEX = 1;
+    const REF_KEYS_INDEX = 0;
 
     for (const retField in retinalFields) {
         const retIndex = fieldsConfig[retField].index;
@@ -78,18 +106,32 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         const formattedRetinalValue = fn(retinalFieldValue);
 
         if (dataLen === 1) {
-            content.push(getKeyValue(displayName, formattedRetinalValue, classPrefix));
+            content.push(getKeyValue({
+                field: displayName,
+                value: formattedRetinalValue,
+                classPrefix,
+                margin: SINGLE_DATA_MARGIN
+            }));
         } else {
             const hasMultipleMeasures = measuresArr.length > 1;
-            hasMultipleMeasures && (content.push([icon, formattedRetinalValue]));
+            hasMultipleMeasures && (content.push({ data: [icon, formattedRetinalValue] }));
+            const selectedContext = target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
+            const isSelected = selectedContext === retinalFieldValue;
             measuresArr.forEach((measure) => {
                 const measureIndex = fieldsConfig[measure].index;
                 const { displayName: dName, fn: formatterFn } = fieldInf[measure];
                 const value = formatterFn(valueArr[measureIndex]);
-                content.push(hasMultipleMeasures ?
-                        getKeyValue(`${dName}${separator}`, value, classPrefix, margin) :
-                [icon, ...getKeyValue(formattedRetinalValue, value, classPrefix)
-                ]);
+                const keyValue = getKeyValue({
+                    field: hasMultipleMeasures ? `${dName}${separator}` : formattedRetinalValue,
+                    value,
+                    classPrefix,
+                    margin: hasMultipleMeasures ? margin : undefined,
+                    isSelected
+                });
+                if (!hasMultipleMeasures) {
+                    keyValue.data = [icon, ...keyValue.data];
+                }
+                content.push(keyValue);
             });
         }
     }
@@ -158,15 +200,23 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
 
         const generateTooltipContent = (nestedData, index = 0, content = []) => {
             const { classPrefix, separator } = config;
-
             for (let i = 0, len = nestedData.length; i < len; i++) {
                 const { values, key } = nestedData[i];
                 const field = getObjProp(schema, indices[index], 'name');
-
+                const margin = dataLen === 1 || Object.keys(retinalFields).length === 0
+                ? SINGLE_DATA_MARGIN : undefined;
                 if (field) {
                     const { displayName, fn } = fieldInf[field];
                     const formattedValue = fn(key);
-                    content.push(getKeyValue(`${displayName}${separator}`, formattedValue, classPrefix));
+                    const removeKey = values.length > 1;
+                    content.push(getKeyValue({
+                        field: `${displayName}${separator}`,
+                        value: formattedValue,
+                        classPrefix,
+                        margin,
+                        isSelected: undefined,
+                        removeKey
+                    }));
                 }
 
                 if (values[0] && values[0].key) {
@@ -180,14 +230,19 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             config,
                             fieldsConfig,
                             dimensionMeasureMap,
-                            dataLen
+                            dataLen,
+                            target: context.payload.target
                         });
 
                         filteredMeasures.forEach((measure) => {
                             const { name } = measure;
                             const { displayName, fn } = fieldInf[name];
-                            content.push(getKeyValue(`${displayName}${separator}`,
-                                fn(valueArr[fieldsConfig[name].index]), classPrefix));
+                            content.push(getKeyValue({
+                                field: `${displayName}${separator}`,
+                                value: fn(valueArr[fieldsConfig[name].index]),
+                                classPrefix,
+                                margin: SINGLE_DATA_MARGIN
+                            }));
                         });
                     }
                 }
@@ -237,7 +292,9 @@ export const strategies = {
         if (measureNames.length === 1) {
             values = [[...values[0], ...values[1]]];
         }
-        return values;
+        return ([{
+            data: values[0]
+        }]);
     },
     [HIGHLIGHT_SUMMARY]: (data, config, context) => buildTooltipData(data, config, context)
 };

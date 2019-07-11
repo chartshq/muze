@@ -14,7 +14,7 @@ export const defaultConfig = {
         iconScale: 1,
         iconShape: 'circle',
         iconColor: '#ff0000',
-        rowMargin: '0px',
+        rowMargin: '4px 0 4px 0',
         margin: 10,
         separator: ':',
         className: 'tooltip-content-container',
