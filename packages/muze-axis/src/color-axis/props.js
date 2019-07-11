@@ -1,4 +1,4 @@
-import { mergeRecursive, detectColor, hexToHsv, rgbToHsv } from 'muze-utils';
+import { mergeRecursive, detectColor, hexToHsv, rgbToHsv, defaultValue } from 'muze-utils';
 import { x11Colors } from './color-maps';
 import { palette, DEFAULT_GRADIENT_COLOR } from './defaults';
 import { LINEAR, RGB, HEX, HSL, HSLA } from '../enums/constants';
@@ -16,7 +16,7 @@ export const getActualHslColor = (e, paletteColor) => {
         e = e.toLowerCase();
         if (detectColor(e) === HSL || detectColor(e) === HSLA) {
             color = e.match(/(\d+(\.\d+)?)/g);
-            color = [color[0] / 360, color[1] / 100, color[2] / 100, color[3] || 1];
+            color = [color[0] / 360, color[1] / 100, color[2] / 100, defaultValue(Number(color[3]), 1)];
         } else if (detectColor(e) === HEX) {
             color = hexToHsv(e);
         } else if (detectColor(e) === RGB) {

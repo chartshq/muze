@@ -68,7 +68,9 @@ const pointTranslators = {
                     padding: backgroundPadding
                 },
                 'alignment-baseline': resolvedVal['alignment-baseline'],
-                meta: getColorMetaInf(resolvedVal.color, colorAxis),
+                meta: getColorMetaInf({
+                    fill: resolvedVal.color
+                }, colorAxis),
                 style: {},
                 source,
                 rowId: d.rowId
@@ -135,7 +137,9 @@ const pointTranslators = {
                 },
                 'alignment-baseline': resolvedEncodings['alignment-baseline'],
                 rotation: resolvedEncodings.rotation,
-                meta: getColorMetaInf(resolvedEncodings.color, colorAxis),
+                meta: getColorMetaInf({
+                    fill: resolvedEncodings.color
+                }, colorAxis),
                 style: {},
                 source: d.source,
                 rowId: d.rowId

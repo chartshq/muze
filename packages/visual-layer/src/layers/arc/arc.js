@@ -114,7 +114,9 @@ export default class ArcLayer extends BaseLayer {
                         radius: resolvedEncodings.radius
                     },
                     color,
-                    meta: getColorMetaInf(color, colorAxis),
+                    meta: getColorMetaInf({
+                        fill: color
+                    }, colorAxis),
                     rowId: uid,
                     _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
                         getPreviousPoint(pieIndex, i, this)

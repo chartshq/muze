@@ -192,6 +192,10 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
         }, i, data, context);
         color = resolvedEncodings.color;
         const { x, y, width, height } = resolvedEncodings;
+        const style = {
+            fill: color
+        };
+
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
             point = {
@@ -204,10 +208,8 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 },
                 source: d.source,
                 rowId: d.rowId,
-                style: {
-                    fill: color
-                },
-                meta: getColorMetaInf(color, colorAxis)
+                style,
+                meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);
