@@ -1307,7 +1307,7 @@ const sortOrderMap = {
  * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
  * @param {string} firstVal First sort parameter
  * @param {string} secondVal Second sort parameter
- * @return {number} position
+ * @return {number} position|null if sort order is invalid
 */
 const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
@@ -1315,6 +1315,7 @@ const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     if (sortOrderType === FUNCTION) {
         return sortOrder(firstVal, secondVal);
     } else if (sortOrderType === STRING) {
+        if (!sortOrderMap[sortOrder]) return null;
         return sortOrderMap[sortOrder](firstVal, secondVal);
     }
     return null;

@@ -106,11 +106,10 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     const geomCell = !exitCellMap.has(geomCellKey) ? new GeomCell() : exitCellMap.get(geomCellKey);
 
     // Sort datamodel if user has sorted a field
-    Object.keys(sortedFields).forEach((field) => {
-        datamodel = datamodel.sort([
-            [field, sortedFields[field]]
-        ]);
-    });
+    const sortConfig = Object.keys(sortedFields).map(field => [field, sortedFields[field]]);
+    if (sortConfig.length) {
+        datamodel = datamodel.sort(sortConfig, { saveChild: true });
+    }
 
     geomCell.data(datamodel)
                     .fields(fields)
