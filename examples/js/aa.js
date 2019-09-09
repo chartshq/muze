@@ -36,8 +36,8 @@
     }, {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }];
     const dm = new DataModel(jsonData, schema);
     const canvas = env.canvas();
@@ -46,30 +46,32 @@
         .data(dm)
         .width(600)
         .height(400)
-        .rows(['Horsepower'])
-        .columns(['Cylinders'])
+        .rows(['Acceleration'])
+        .columns(['Origin', "Cylinders"])
         // .detail(['Name'])
         .mount('#chart') /* Attaching the canvas to DOM element */
+        .layers([
+            {
+                mark: 'bar'
+            }
+        ])
         .config({
-            axes: {
-                y: {
-                    interpolator: 'pow',
-                    exponent: 2,
-                },
+            sort: {
+                Acceleration: 'desc'
             }
         })
 
-        setTimeout(() => {
-            canvas
-                .config({
-                    axes: {
-                        y: {
-                            tickFormat: (d) => `${d/1000}K`,
-                            interpolator: 'linear',
-                            base: 2,
-                        }
-                    }
-                });
-        }, 2000);
+        // setTimeout(() => {
+        //     canvas
+        //         .config({
+        //             axes: {
+        //                 y: {
+        //                     tickFormat: (d) => `${d/1000}K`,
+        //                     interpolator: 'linear',
+        //                     base: 2,
+        //                 }
+        //             }
+        //         });
+        // }, 2000);
     });
 }());

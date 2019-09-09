@@ -74,6 +74,7 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     const horizontalAxis = resolver.horizontalAxis();
     const verticalAxis = resolver.verticalAxis();
     const datamodelTransform = resolver.datamodelTransform();
+    const sortedFields = config.sort;
     const {
         entryCellMap,
         exitCellMap
@@ -103,6 +104,13 @@ export const createValueCells = (context, datamodel, fieldInfo, facets) => {
     };
 
     const geomCell = !exitCellMap.has(geomCellKey) ? new GeomCell() : exitCellMap.get(geomCellKey);
+
+    // Sort datamodel if user has sorted a field
+    Object.keys(sortedFields).forEach((field) => {
+        datamodel = datamodel.sort([
+            [field, sortedFields[field]]
+        ]);
+    });
 
     geomCell.data(datamodel)
                     .fields(fields)
