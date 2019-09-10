@@ -115,10 +115,15 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  * @return {Instance} Returns the respective wrappers
  */
 const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) => {
+    const headerValues = Object.values(renderDetails.components.headers)
+    let sum = 0
+    for (const val of headerValues) {
+        sum = sum + val.logicalSpace().height
+    }
     let messageWrapper = null;
 
     if (!renderGrid) {
-        const defaultDimensions = { height: canvas.height(), width: canvas.width() };
+        const defaultDimensions = { height: canvas.height() - sum, width: canvas.width() };
         const gridComponent = layoutManager.getComponent(GRID);
         const { height, width } = (gridComponent && gridComponent.getBoundBox()) || defaultDimensions;
         const target = { target: CANVAS };
