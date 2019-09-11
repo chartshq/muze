@@ -115,10 +115,10 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  * @return {Instance} Returns the respective wrappers
  */
 const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) => {
-    const headerValues = Object.values(renderDetails.components.headers)
-    let sum = 0
+    const headerValues = Object.values(renderDetails.components.headers);
+    let sum = 0;
     for (const val of headerValues) {
-        sum = sum + val.logicalSpace().height
+        sum += val.logicalSpace().height;
     }
     let messageWrapper = null;
 

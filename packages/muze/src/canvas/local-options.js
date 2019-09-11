@@ -120,37 +120,31 @@ export const canvasOptions = {
     [TITLE]: {
         value: [null, null],
         meta: {
-            typeCheck: ['constructor', 'constructor'],
-            typeExpected: ['Function', 'Object'],
-            spreadParams: true,
-            sanitization: [(title) => {
+            takesMultipleParams: true,
+            typeCheck: ([arg1, arg2]) => typeof arg1 === 'function' && typeof arg2 === 'object',
+            sanitization: ([title, titleConfig]) => {
+                let t = title;
                 if (typeof title === 'string' || !title) {
-                    const t = () => title;
-                    return t;
+                    t = () => title;
                 }
-                return title;
-            }, (titleConfig) => {
                 const defConfig = mergeRecursive({}, TITLE_CONFIG);
-                return mergeRecursive(defConfig, titleConfig);
-            }]
+                return [t, mergeRecursive(defConfig, titleConfig)];
+            }
         }
     },
     [SUB_TITLE]: {
         value: [null, null],
         meta: {
-            typeCheck: ['constructor', 'constructor'],
-            typeExpected: ['Function', 'Object'],
-            spreadParams: true,
-            sanitization: [(subtitle) => {
+            takesMultipleParams: true,
+            typeCheck: ([arg1, arg2]) => typeof arg1 === 'function' && typeof arg2 === 'object',
+            sanitization: ([subtitle, subtitleConfig]) => {
+                let sub = subtitle;
                 if (typeof subtitle === 'string' || !subtitle) {
-                    const sub = () => subtitle;
-                    return sub;
+                    sub = () => subtitle;
                 }
-                return subtitle;
-            }, (subtitleConfig) => {
                 const defConfig = mergeRecursive({}, SUB_TITLE_CONFIG);
-                return mergeRecursive(defConfig, subtitleConfig);
-            }]
+                return [sub, mergeRecursive(defConfig, subtitleConfig)];
+            }
         }
     }
 };

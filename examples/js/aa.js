@@ -45,9 +45,9 @@
     canvas
         .data(dm)
         .width(600)
-        .height(400)
-        .rows(['Acceleration'])
-        .columns(['Origin', "Cylinders"])
+        .height(700)
+        .rows(['Weight_in_lbs'])
+        .columns(['Name'])
         // .detail(['Name'])
         .mount('#chart') /* Attaching the canvas to DOM element */
         .layers([
@@ -57,21 +57,39 @@
         ])
         .config({
             sort: {
-                Acceleration: 'desc'
+                Name: 'asc'
             }
         })
 
-        // setTimeout(() => {
-        //     canvas
-        //         .config({
-        //             axes: {
-        //                 y: {
-        //                     tickFormat: (d) => `${d/1000}K`,
-        //                     interpolator: 'linear',
-        //                     base: 2,
-        //                 }
-        //             }
-        //         });
-        // }, 2000);
+        setTimeout(() => {
+            canvas.config(
+                { sort: { Weight_in_lbs: 'desc' }},
+                { reset: true },
+            )
+        }, 2000);
+        
+
+        setTimeout(() => {
+            canvas.config({
+                sort: {
+                    Name: 'asc'
+                },
+                legend: { show: true }
+            }, { reset: true })
+        }, 4000);
+
+        setTimeout(() => {
+            canvas.config(
+                { sort: { }},
+                { reset: true },
+            )
+        }, 6000);
+
+        setTimeout(() => {
+            canvas.config(
+                { sort: { Weight_in_lbs: 'asc' }},
+                { reset: true },
+            )
+        }, 8000);
     });
 }());
