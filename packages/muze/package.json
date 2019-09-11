@@ -1,7 +1,7 @@
 {
   "name": "muze",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://muzejs.org",
   "author": "Muzejs.org (https://muzejs.org/)",
@@ -29,12 +29,21 @@
     },
     {
       "name": "Rousan Ali",
-      "email": "rousanali786@gmail.com",
+      "email": "hello@rousan.io",
       "url": "https://rousan.io"
     },
     {
       "name": "Ujjal Kumar Dutta",
-      "email": "duttaujjalkumar@live.com"
+      "email": "duttaujjal143@gmail.com"
+    },
+    {
+      "name": "Adarsh Lilha",
+      "email": "adarshlilha@gmail.com",
+      "url": "https://adarshlilha.com"
+    },
+    {
+      "name": "Swati Mukherjee",
+      "email": "swati@charts.com"
     }
   ],
   "main": "src/index.js",
