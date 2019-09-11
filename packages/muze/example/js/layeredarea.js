@@ -120,7 +120,7 @@
                 .columns(columns)
                 .transform([
                     ['rangeAreaData', [
-                        dm => dm.select(fields => fields.Value.value >= 100)
+                        dm => dm.select(fields => fields.Value.internalValue >= 100)
                     ]]
                 ])
                 .layers({

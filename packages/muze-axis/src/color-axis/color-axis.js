@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { getUniqueId, generateGetterSetters, rgbToHsv } from 'muze-utils';
+import { getUniqueId, generateGetterSetters, rgbToHsv, defaultValue } from 'muze-utils';
 import { createScale, getScheme, getSchemeType } from '../scale-creator';
 import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
 import { strategyGetter } from './color-strategy';
@@ -179,11 +179,11 @@ export default class ColorAxis {
         const h = color[0] * 360;
         const s = color[1] * 100;
         const l = color[2] * 100;
-        const a = color[3] || 1;
+        const a = Math.min(defaultValue(color[3], 0), 1);
         const newH = h + transformationArr[0];
         const newS = s + transformationArr[1];
         const newL = l + transformationArr[2];
-        const newA = a + transformationArr[3] || 0;
+        const newA = Math.min(a + transformationArr[3] || 0, 1);
 
         return { color: `hsla(${newH},${newS}%,${newL}%,${newA})`, hsla: [newH / 360, newS / 100, newL / 100, newA] };
     }

@@ -7,6 +7,7 @@ import { physicalActions } from './actions/physical';
 import * as BEHAVIOURS from './enums/behaviours';
 import * as ACTIONS from './enums/actions';
 import * as SELECTION from './enums/selection';
+import * as SIDE_EFFECTS from './enums/side-effects';
 import SurrogateSideEffect from './side-effects/surrogate';
 import SpawnableSideEffect from './side-effects/spawnable';
 import GenericSideEffect from './side-effects/generic';
@@ -29,5 +30,6 @@ export {
     SurrogateSideEffect,
     SpawnableSideEffect,
     GenericSideEffect,
-    SELECTION
+    SELECTION,
+    SIDE_EFFECTS
 };

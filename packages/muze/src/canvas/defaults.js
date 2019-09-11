@@ -20,10 +20,3 @@ export const MESSAGE_CONFIG = {
 };
 
 export const CANVAS = 'canvas';
-
-export const LAYOUT_ALIGN = {
-    TOP: 'top',
-    LEFT: 'left',
-    RIGHT: 'right',
-    BOTTOM: 'bottom'
-};

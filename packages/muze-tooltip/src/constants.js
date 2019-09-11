@@ -12,3 +12,4 @@ export const INITIAL_STYLE = {
     width: 0,
     height: 0
 };
+export const TABLE_FORMAT = 'table';

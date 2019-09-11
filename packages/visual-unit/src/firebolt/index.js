@@ -1,14 +1,39 @@
-import { FieldType } from 'muze-utils';
-import { Firebolt } from '@chartshq/muze-firebolt';
+import { FieldType, intersect } from 'muze-utils';
+import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { isXandYMeasures, getSelectionRejectionModel } from '../helper';
 import { payloadGenerator } from './payload-generator';
 import { propagateValues } from './data-propagator';
+
+const sideEffectPolicy = (propPayload, context, propagationInf) => {
+    const { sourceIdentifiers, propagationData } = propagationInf;
+    const fieldsConfig = sourceIdentifiers.getFieldsConfig();
+    const sourceIdentifierFields = Object.keys(fieldsConfig).filter(field =>
+        fieldsConfig[field].def.type !== FieldType.MEASURE);
+    const propFields = Object.keys(propagationData[0].getFieldsConfig());
+    const hasCommonCanvas = propPayload.sourceCanvas === context.parentAlias();
+    return intersect(sourceIdentifierFields, propFields).length || hasCommonCanvas;
+};
 
 /**
  * This class manages the interactions of visual unit. It associates physical actions with
  * behavioural actions. It also propagates the behavioural actions to other datamodels.
  */
 export default class UnitFireBolt extends Firebolt {
+    constructor (...params) {
+        super(...params);
+        const {
+            TOOLTIP,
+            HIGHLIGHTER,
+            ANCHORS,
+            BRUSH_ANCHORS,
+            PERSISTENT_ANCHORS
+        } = SIDE_EFFECTS;
+
+        const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
+        disabledSideEffects.forEach((sideEffect) => {
+            this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
+        });
+    }
     propagate (behaviour, payload, selectionSet, sideEffects) {
         propagateValues(this, behaviour, {
             payload,
@@ -40,8 +65,13 @@ export default class UnitFireBolt extends Firebolt {
                     return false;
                 }
                 if (!actionOnSource && payload.criteria !== null) {
-                    const sideEffectChecker = sourceSideEffects[se.name || se];
-                    return sideEffectChecker ? sideEffectChecker(propagationInf.propPayload, context) : true;
+                    const sideEffectCheckers = Object.values(sourceSideEffects[se.name || se] || {});
+                    const { sourceIdentifiers, data: propagationData } = propagationInf;
+                    return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
+                        checker(propagationInf.propPayload, context, {
+                            sourceIdentifiers,
+                            propagationData
+                        })) : true;
                 }
                 if (propagationSourceCanvas === aliasName || actionOnSource) {
                     return se.applyOnSource !== false;
@@ -60,7 +90,6 @@ export default class UnitFireBolt extends Firebolt {
 
     onDataModelPropagation () {
         return (data, config) => {
-            let isSourceFieldPresent = true;
             let isMutableAction = false;
             const context = this.context;
             if (!context.mount()) {
@@ -71,29 +100,21 @@ export default class UnitFireBolt extends Firebolt {
                 entryRowIds,
                 exitRowIds
             } = getSelectionRejectionModel(context.data(), data, isXandYMeasures(context), context._cachedValuesMap());
-            const propPayload = config.payload;
-            const sourceIdentifiers = config.sourceIdentifiers;
-            const enabledFn = config.enabled;
-            const action = config.action;
+            const {
+                enabled: enabledFn,
+                sourceIdentifiers,
+                action,
+                payload: propPayload
+            } = config;
+
             const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
-
-            if (sourceIdentifiers) {
-                const fieldsConfig = sourceIdentifiers.getFieldsConfig();
-                const sourceIdentifierFields = Object.keys(fieldsConfig);
-                const propFields = Object.keys(propagationData[0].getFieldsConfig());
-                if (!Object.values(fieldsConfig).some(d => d.def.type === FieldType.MEASURE)) {
-                    isSourceFieldPresent = sourceIdentifierFields.some(d => propFields.indexOf(d) !== -1);
-                }
-            }
-
             const payload = payloadFn(context, propagationData, config);
             const sourceBehaviours = this._sourceBehaviours;
-            const filterFn = sourceBehaviours[action] || sourceBehaviours['*'];
-            let enabled = true;
-
-            if (filterFn) {
-                enabled = filterFn(propPayload || {}, context);
-            }
+            const filterFns = Object.values(sourceBehaviours[action] || sourceBehaviours['*'] || {});
+            let enabled = filterFns.every(fn => fn(propPayload || {}, context, {
+                sourceIdentifiers,
+                propagationData
+            }));
 
             if (enabledFn) {
                 enabled = enabledFn(config, this) && enabled !== false;
@@ -113,7 +134,6 @@ export default class UnitFireBolt extends Firebolt {
                     propPayload,
                     sourceIdentifiers,
                     persistent: false,
-                    isSourceFieldPresent,
                     sourceId: config.propagationSourceId,
                     isMutableAction: config.isMutableAction
                 };

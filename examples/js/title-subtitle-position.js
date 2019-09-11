@@ -5,7 +5,7 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        const schema = [{
+        schema = [{
         name: 'Name',
         type: 'dimension'
     }, {
@@ -35,30 +35,21 @@
     }, {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }];
 
-    let rootData = new DataModel(data, schema)
-
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
-
+    const dm = new DataModel(data, schema);
     const canvas = env.canvas();
     
     canvas
-        .data(rootData)
-        .columns(['Cylinders', 'Horsepower'])
-        .rows(['Acceleration'])
-        .color('Maker')
-        .mount('#chart')
-        .height(500)
-        .title('Charts');
-     
-    setTimeout(() => {
-        canvas.data(canvas.data().select(() => false))
-    }, 1000);
-    })
-})();
+        .data(dm)
+        .width(850)
+        .height(550)
+        .columns(["Year", "Origin", "Name"])
+        .rows(["Horsepower"])
+        .mount("#chart")
+        .title('The car', { position: 'top', align: 'right' })
+        .subtitle('The car', { position: 'bottom', align: 'left' })
+    });
+}());

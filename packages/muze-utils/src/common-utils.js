@@ -893,7 +893,7 @@ const detectColor = (col) => {
      // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
      // eslint-disable-next-line
-    const matchHsla = /^hsla\((\d.+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
+    const matchHsla = /^hsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
     if (matchRgb.test(col) || matchRgba.test(col)) {
@@ -951,7 +951,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     }
     const selFields = Object.keys(criteria);
     const selFn = fields => selFields.every((field) => {
-        const val = fields[field].value;
+        const val = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
         if (typeof range[0] === STRING) {
             return range.find(d => d === val) !== undefined;
@@ -985,7 +985,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
             filteredDataModel = dataModel.select((fields) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    const value = fields[propField].valueOf();
+                    const value = fields[propField].internalValue;
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });
@@ -1307,7 +1307,7 @@ const sortOrderMap = {
  * @param {string} sortOrder Order by which field is to be sorted (asc or desc or func)
  * @param {string} firstVal First sort parameter
  * @param {string} secondVal Second sort parameter
- * @return {number} position
+ * @return {number} position|null if sort order is invalid
 */
 const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     const sortOrderType = typeof sortOrder;
@@ -1315,14 +1315,22 @@ const sortCategoricalField = (sortOrder, firstVal, secondVal) => {
     if (sortOrderType === FUNCTION) {
         return sortOrder(firstVal, secondVal);
     } else if (sortOrderType === STRING) {
+        if (!sortOrderMap[sortOrder]) return null;
         return sortOrderMap[sortOrder](firstVal, secondVal);
     }
     return null;
 };
 
+const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
+    const [fn1, fn2] = accessors;
+    const set = new Set(arr2.map(v => fn2(v)));
+    return arr1.filter(value => set.has(fn1(value)));
+};
+
 export {
     getValueParser,
     require,
+    intersect,
     Scales,
     Symbols,
     pathInterpolators,

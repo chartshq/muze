@@ -129,7 +129,9 @@ export default class LineLayer extends BaseLayer {
                 },
                 rowId: d.rowId,
                 source: d.source,
-                meta: getColorMetaInf(resolvedEncodings.color, colorAxis)
+                meta: getColorMetaInf({
+                    stroke: resolvedEncodings.color
+                }, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);

@@ -61,30 +61,74 @@ d3.json('../../data/cars.json', (data) => {
         // format: '%Y-%m-%d'
     }
     ];
+    jsonData = [
+        {
+            Origin: 'USA',
+            Cylinders: 5,
+            Name: 'x',
+            Horsepower: 12
+        },
+
+
+        {
+            Origin: 'Japan',
+            Cylinders: 3,
+            Name: 'z',
+            Horsepower: 12
+        },
+        {
+            Origin: 'Japan',
+            Cylinders: 3,
+            Name: 'k',
+            Horsepower: 12
+        },
+        {
+            Origin: 'Japan',
+            Cylinders: 5,
+            Name: 'x',
+            Horsepower: 12
+        },
+        {
+            Origin: 'Europe',
+            Cylinders: 3,
+            Name: 'x',
+            Horsepower: 12
+        },
+        {
+            Origin: 'Europe',
+            Cylinders: 3,
+            Name: 'r',
+            Horsepower: 12
+        },
+        {
+            Origin: 'Europe',
+            Cylinders: 5,
+            Name: 'x',
+            Horsepower: 12
+        },
+    ]
 
     let rootData = new DataModel(jsonData, schema)
+    console.log(rootData.sort([
+        ['Cylinders', null],
+        ['Origin', 'desc'],
+        ['Name', 'asc']
+    ]).getData().data);
 
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
 
-    var rows = ['Origin','Acceleration'],
-            columns = rows.reverse();
         const canvas = env.canvas();
-        canvas.data(rootData).columns(['Cylinders', 'Horsepower']).rows(['Acceleration']).color('Maker').mount('#chart').height(500)
-     
-        setTimeout(()=>{
-        // canvas.data(rootData).rows(['Maker']).columns([ ]).color('Cylinders')
-        // .layers([{
-        //     mark:'arc',
-
-        // }])
-        // setTimeout(()=>{
-        //     canvas.data(rootData).columns(['Maker']).rows([ 'Cylinders']) .layers([{
-        //         mark:'arc',
-    
-        //     }]).color('Cylinders')
-        // }, 1000)
-    }, 1000)
+        canvas
+        .data(rootData)
+        .width(850)
+        .height(550)
+        .rows(["Cylinders", "Origin", "Name"])
+        .columns(["Horsepower"])
+        .mount("#chart")
+        .config({
+            showHeaders: true,
+            sort: {
+                Origin: "asc",
+                Name: "asc"
+            }
+        })
 });

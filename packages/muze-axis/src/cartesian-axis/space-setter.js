@@ -116,8 +116,8 @@ export const spaceSetter = (context, spaceConfig) => {
     const domain = context.domain();
     const axisNameHeight = axisNameDimensions.height;
     const minWidthBetweenTicks = minTickDistance.width;
-    const minTickWidth = minTickSpace.width;
-    const minTickHeight = minTickSpace.height;
+    const minTickWidth = Math.min(minTickSpace.width, tickDimWidth);
+    const minTickHeight = Math.min(minTickSpace.height, tickDimHeight);
 
     return {
         [TIME]: {
@@ -200,6 +200,10 @@ export const spaceSetter = (context, spaceConfig) => {
                     labelConfig.smartTicks = false;
 
                     tickInterval = Math.max(heightForTicks, minTickWidth);
+
+                    if (heightForTicks < minTickWidth) {
+                        context.renderConfig({ showAxisName: false });
+                    }
                 } else if (tickValues) {
                     const interval = (availWidth / domain.length) - minWidthBetweenTicks;
                     if (interval < minTickWidth) {

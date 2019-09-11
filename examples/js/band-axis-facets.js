@@ -78,9 +78,9 @@ d3.json('../../data/cars.json', (data) => {
         .mount('#chart')
         .config({
             sort:{
-                Maker: 'desc',
+                Maker: 'asc',
                 Cylinders: (a, b) => a - b,
-                Origin: (a, b) => b.localeCompare(a)
+                Origin: (a, b) => b.localeCompare(a),
             }
         })
 });

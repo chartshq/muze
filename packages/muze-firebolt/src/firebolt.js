@@ -40,9 +40,7 @@ export default class Firebolt {
         this._selectionSet = {};
         this._volatileSelectionSet = {};
         this._propagationFields = {};
-        this._sourceSideEffects = {
-            selectionBox: () => false
-        };
+        this._sourceSideEffects = {};
         this._propagationBehaviourMap = {};
         this._sourceBehaviours = {};
         this._actionBehaviourMap = {};
@@ -192,21 +190,33 @@ export default class Firebolt {
         return true;
     }
 
-    changeBehaviourStateOnPropagation (behaviour, value) {
+    changeBehaviourStateOnPropagation (behaviour, value, key = 'default') {
+        const behaviourConditions = this._sourceBehaviours[behaviour] || (this._sourceBehaviours[behaviour] = {});
         if (value instanceof Function) {
-            this._sourceBehaviours[behaviour] = value;
+            behaviourConditions[key] = value;
         } else {
-            this._sourceBehaviours[behaviour] = () => value;
+            behaviourConditions[key] = () => value;
         }
         return this;
     }
 
-    changeSideEffectStateOnPropagation (sideEffect, value) {
+    changeSideEffectStateOnPropagation (sideEffect, value, key = 'default') {
+        const sideEffectConditions = this._sourceSideEffects[sideEffect] || (this._sourceSideEffects[sideEffect] = {});
         if (value instanceof Function) {
-            this._sourceSideEffects[sideEffect] = value;
+            sideEffectConditions[key] = value;
         } else {
-            this._sourceSideEffects[sideEffect] = () => value;
+            sideEffectConditions[key] = () => value;
         }
+    }
+
+    removeSideEffectPolicy (sideEffect, key) {
+        delete this._sourceSideEffects[sideEffect][key];
+        return this;
+    }
+
+    removeBehaviourPolicy (behaviour, key) {
+        delete this._sourceBehaviours[behaviour][key];
+        return this;
     }
 
     propagate () {
@@ -280,6 +290,7 @@ export default class Firebolt {
             if ({}.hasOwnProperty.call(behaviours, key)) {
                 selectionSet[key] = new SelectionSet(uniqueIds);
                 volatileSelectionSet[key] = new SelectionSet(uniqueIds, true);
+                this._entryExitSet[key] = null;
             }
         }
         this._volatileSelectionSet = volatileSelectionSet;

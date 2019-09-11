@@ -102,6 +102,7 @@ export default class PointLayer extends BaseLayer {
         const measurement = this.measurement();
         const colorAxis = axes.color;
         const { x: offsetX, y: offsetY } = config.offset;
+        const stroke = encoding.stroke.value;
 
         for (let i = 0, len = data.length; i < len; i++) {
             const d = data[i];
@@ -131,9 +132,10 @@ export default class PointLayer extends BaseLayer {
                 data: d
             }, i, data, this);
             color = resolvedEncodings.color;
+
             const style = {
                 fill: color,
-                stroke: color
+                stroke
             };
             const pos = {
                 x: resolvedEncodings.x,
@@ -146,7 +148,7 @@ export default class PointLayer extends BaseLayer {
                     update: pos,
                     shape: resolvedEncodings.shape,
                     size: Math.abs(resolvedEncodings.size),
-                    meta: getColorMetaInf(color, colorAxis),
+                    meta: getColorMetaInf(style, colorAxis),
                     style,
                     source: d.source,
                     rowId: d.rowId

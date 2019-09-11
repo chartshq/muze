@@ -7,8 +7,8 @@ export const defaultConfig = {
     defColorStyle: 'stroke',
     interaction: {
         highlight: [{
-            type: 'fill',
-            intensity: [0, 0, -20, 0]
+            type: 'stroke',
+            intensity: [0, 0, 0, +1]
         }],
         fade: [{
             type: 'fill',
@@ -33,7 +33,11 @@ export const defaultConfig = {
         size: {
             value: 30
         },
-        color: { },
+        color: {},
+        stroke: {
+            value: 'hsla(0,0%,0%,0)'
+        },
+        fill: {},
         shape: {
             value: 'circle'
         },

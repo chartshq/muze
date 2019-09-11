@@ -1,5 +1,5 @@
 import Model from 'hyperdis';
-import { defaultValue, getObjProp } from './common-utils';
+import { defaultValue, getObjProp, toArray } from './common-utils';
 
 const initProp = (obj, props, val = () => ({})) => {
     props.forEach((prop) => {
@@ -469,7 +469,7 @@ export class Store {
  *                     // is passed as args. (Optional)
  *          typeExpected: // The output of typecheck action will be tested against this. Truthy value will set the
  *                       // value to the setter
- *          sanitizaiton: // Need for sanitization before type is checked
+ *          sanitization: // Need for sanitization before type is checked
  *      }
  *  }
  *
@@ -498,77 +498,55 @@ export const transactor = (holder, options, model, namespaceInf = {}) => {
             }
 
             holder[prop] = ((context, meta, nsProp) => (...params) => {
-                let val;
-                let compareTo;
                 const paramsLen = params.length;
-                const prevVal = context.get(nsProp, subNamespace);
                 if (paramsLen) {
+                    const { takesMultipleParams = false } = meta || {};
                     // If parameters are passed then it's a setter
-                    const spreadParams = meta && meta.spreadParams;
-                    val = params;
-                    const values = [];
+                    let val = takesMultipleParams ? params : params[0];
+
                     if (meta) {
-                        for (let i = 0; i < paramsLen; i++) {
-                            val = params[i];
-                            const sanitization = meta.sanitization && (spreadParams ? meta.sanitization[i] :
-                                meta.sanitization);
-                            const typeCheck = meta.typeCheck && (spreadParams ? meta.typeCheck[i] : meta.typeCheck);
-                            if (sanitization && typeof sanitization === 'function') {
-                                // Sanitize if required
-                                val = sanitization(val, prevVal, holder);
-                            }
-
-                            if (typeCheck) {
-                                // Checking if a setter is valid
-                                if (typeof typeCheck === 'function') {
-                                    let typeExpected = meta.typeExpected;
-                                    if (typeExpected && spreadParams) {
-                                        typeExpected = typeExpected[i];
-                                    }
-                                    if (typeExpected) {
-                                        compareTo = typeExpected;
-                                    } else {
-                                        compareTo = true;
-                                    }
-
-                                    if (typeCheck(val) === compareTo) {
-                                        values.push(val);
-                                    }
-                                } else if (typeof typeCheck === 'string') {
-                                    if (typeCheck === 'constructor') {
-                                        const typeExpected = spreadParams ? meta.typeExpected[i] :
-                                            meta.typeExpected;
-                                        if (val && (val.constructor.name === typeExpected)) {
-                                            values.push(val);
-                                        }
-                                    }
-                                } else {
-                                    // context.prop(key, val);
-                                    values.push(val);
-                                }
-                            } else {
-                                values.push(val);
-                            }
+                        let values;
+                        const prevVal = context.get(nsProp, subNamespace);
+                        const { sanitization, typeCheck, typeExpected } = meta;
+                        if (typeof sanitization === 'function') {
+                            // Sanitize if required
+                            val = sanitization(val, prevVal, holder);
                         }
+
+                        // Checking if a setter is valid
+                        if (typeof typeCheck === 'function') {
+                            const typeCheckResult = typeCheck(val);
+
+                            if (typeCheckResult) {
+                                values = val;
+                            }
+                        } else if (typeof typeCheck === 'string' && typeCheck === 'constructor') {
+                            if (val && val.constructor.name === typeExpected) {
+                                values = val;
+                            }
+                        } else {
+                            values = val;
+                        }
+
                         const preset = meta.preset;
-                        const oldValues = context.get(nsProp, subNamespace);
-                        preset && preset(values[0], holder);
-                        if (spreadParams) {
+                        const oldValues = toArray(context.get(nsProp, subNamespace));
+                        preset && preset(values, holder);
+                        if (takesMultipleParams) {
                             oldValues.forEach((value, i) => {
                                 if (values[i] === undefined) {
                                     values[i] = value;
                                 }
                             });
                         }
-                        values.length && context.commit(nsProp, spreadParams ? values : values[0], subNamespace);
+                        values && context.commit(nsProp, values, subNamespace);
                     } else {
-                        context.commit(nsProp, spreadParams ? val : val[0], subNamespace);
+                        context.commit(nsProp, val, subNamespace);
                     }
                     return holder;
                 }
                 // No parameters are passed hence its a getter
                 return context.get(nsProp, subNamespace);
-            })(store, conf.meta, nameSpaceProp, subNamespace);
+            })(store, conf.meta, nameSpaceProp, Array.isArray(conf.value));
         }
     }
 

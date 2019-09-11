@@ -54,18 +54,23 @@ export default {
         }
     },
     config: {
-        value: null,
+        value: [null, null],
         meta: {
             typeCheck: 'constructor',
             typeExpected: 'Object',
-            sanitization: (config, oldConfig) => {
-                // Reset the configuration when null is passed
-                const oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
-                const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
-                let newConf = mergeRecursive(defConfig, config);
-                newConf = fixScrollBarConfig(newConf);
+            takesMultipleParams: true,
+            sanitization: ([config, auxConfig = {}], oldConfig) => {
+                // Stores additional config, if passed
+                const { reset = false } = auxConfig;
+                let oldConf = {};
 
-                return newConf;
+                if (!reset) {
+                    oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
+                }
+
+                const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
+                const newConf = mergeRecursive(defConfig, config);
+                return fixScrollBarConfig(newConf);
             }
 
         }

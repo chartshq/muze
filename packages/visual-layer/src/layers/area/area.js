@@ -122,6 +122,10 @@ export default class AreaLayer extends LineLayer {
                 data: d
             }, i, data, this);
             color = resolvedValues.color;
+            const style = {
+                fill: color
+            };
+
             const point = {
                 enter: {
                     x: xPx,
@@ -136,10 +140,8 @@ export default class AreaLayer extends LineLayer {
                 source: d.source,
                 rowId: d.rowId,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
-                style: {
-                    fill: color
-                },
-                meta: getColorMetaInf(color, colorAxis)
+                style,
+                meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);

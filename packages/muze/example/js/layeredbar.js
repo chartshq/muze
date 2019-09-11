@@ -127,7 +127,7 @@
                 .columns(columns)
                 .transform([
                     ['thresholdBarData', [
-                        dm => dm.select(fields => fields.Value.value > 300)
+                        dm => dm.select(fields => fields.Value.internalValue > 300)
                     ]]
                 ])
                 .layers({
