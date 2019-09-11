@@ -5,8 +5,7 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        let jsonData = data,
-        schema = [{
+        const schema = [{
         name: 'Name',
         type: 'dimension'
     }, {
@@ -39,57 +38,27 @@
         // subtype: 'temporal',
         // format: '%Y-%m-%d'
     }];
-    const dm = new DataModel(jsonData, schema);
+
+    let rootData = new DataModel(data, schema)
+
+    rootData.sort([
+        ['Cylinders', 'asc'],
+        ['Maker', 'desc'],
+    ])
+
     const canvas = env.canvas();
     
     canvas
-        .data(dm)
-        .width(600)
-        .height(700)
-        .rows(['Weight_in_lbs'])
-        .columns(['Name'])
-        // .detail(['Name'])
-        .mount('#chart') /* Attaching the canvas to DOM element */
-        .layers([
-            {
-                mark: 'bar'
-            }
-        ])
-        .config({
-            sort: {
-                Name: 'asc'
-            }
-        })
-
-        setTimeout(() => {
-            canvas.config(
-                { sort: { Weight_in_lbs: 'desc' }},
-                { reset: true },
-            )
-        }, 2000);
-        
-
-        setTimeout(() => {
-            canvas.config({
-                sort: {
-                    Name: 'asc'
-                },
-                legend: { show: true }
-            }, { reset: true })
-        }, 4000);
-
-        setTimeout(() => {
-            canvas.config(
-                { sort: { }},
-                { reset: true },
-            )
-        }, 6000);
-
-        setTimeout(() => {
-            canvas.config(
-                { sort: { Weight_in_lbs: 'asc' }},
-                { reset: true },
-            )
-        }, 8000);
-    });
-}());
+        .data(rootData)
+        .columns(['Cylinders', 'Horsepower'])
+        .rows(['Acceleration'])
+        .color('Maker')
+        .mount('#chart')
+        .height(500)
+        .title('Charts');
+     
+    setTimeout(() => {
+        canvas.data(canvas.data().select(() => false))
+    }, 1000);
+    })
+})();
