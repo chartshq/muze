@@ -117,10 +117,11 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
 const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) => {
     const headerValues = Object.values(renderDetails.components.headers);
     let sum = 0;
+    let messageWrapper = null;
+
     for (const val of headerValues) {
         sum += val.logicalSpace().height;
     }
-    let messageWrapper = null;
 
     if (!renderGrid) {
         const defaultDimensions = { height: canvas.height() - sum, width: canvas.width() };
@@ -131,7 +132,8 @@ const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) 
             ...target,
             dimensions: { height, width },
             message: NO_DATA_MESSAGE,
-            classPrefix: MESSAGE_CONFIG
+            classPrefix: MESSAGE_CONFIG,
+            position: TOP
         };
         const wrapperParams = {
             name: MESSAGE,
@@ -141,8 +143,7 @@ const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) 
         const existingComponent = layoutManager.getComponent(MESSAGE);
 
         if (existingComponent) {
-            messageWrapper = existingComponent
-                                    .updateWrapper(wrapperParams);
+            messageWrapper = existingComponent.updateWrapper(wrapperParams);
         } else {
             messageWrapper = new MessageComponent(wrapperParams);
         }

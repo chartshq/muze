@@ -37,11 +37,12 @@ export default class MessageComponent extends MuzeComponent {
     }
 
     setParams (params) {
+        const { target, className } = params.config;
         this.component = params.component;
         this.params = params;
-        const { target, className } = params.config;
         this.target(target);
         this.className(className);
+        this.position(params.config.position);
         return this;
     }
 }
