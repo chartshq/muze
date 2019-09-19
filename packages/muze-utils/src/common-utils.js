@@ -1251,7 +1251,7 @@ const nextAnimFrame = window.requestAnimationFrame || window.webkitRequestAnimat
     };
 
 const getValueParser = config => (val) => {
-    if (val instanceof InvalidAwareTypes) {
+    if (InvalidAwareTypes.getInvalidType(val)) {
         return val in config ? config[val] : `${val}`;
     }
     return val;

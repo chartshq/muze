@@ -194,7 +194,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
             data,
             keys: indices
         });
-        nestedDataObj = !getObjProp(nestedDataObj[0], 'key') ? [{
+
+        nestedDataObj = !('key' in nestedDataObj[0]) ? [{
             values: nestedDataObj
         }] : nestedDataObj;
 
