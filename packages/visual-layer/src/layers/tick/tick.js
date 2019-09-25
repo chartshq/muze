@@ -4,7 +4,7 @@ import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
-import { getAxesScales, positionPoints, getIndividualClassName,
+import { positionPoints, getIndividualClassName,
     getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
 
 const pointTranslators = {
@@ -69,10 +69,7 @@ const pointTranslators = {
     cartesian: (data, config = {}, layerInst) => {
         const axes = layerInst.axes();
         let points = [];
-        const {
-                xAxis,
-                yAxis
-            } = getAxesScales(axes);
+        const { x: xAxis, y: yAxis } = axes;
         const {
                 xField,
                 yField,

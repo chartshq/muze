@@ -57,47 +57,6 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     });
 };
 
-/**
- *
- *
- * @param {*} selectionSet
- * @param {*} className
- * @param {*} hasFaded
- */
-export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction) => {
-    const interactionConfig = { interaction, apply: hasFaded };
-    applyInteractionStyle(context, selectionSet, 'fade', interactionConfig);
-};
-
-/**
- *
- *
- * @param {*} selectionSet
- * @param {*} className
- * @param {*} hasFaded
- */
-export const focusUnfocusSelection = (context, selectionSet, isFocussed, interaction) => {
-    const interactionConfig = { interaction, apply: isFocussed };
-    applyInteractionStyle(context, selectionSet, 'focus', interactionConfig);
-};
-
-/**
- *
- *
- * @param {*} axes
- *
- */
-export const getAxesScales = (axes) => {
-    const [xAxis, yAxis] = [ENCODING.X, ENCODING.Y].map(e => axes[e]);
-    const [xScale, yScale] = [xAxis, yAxis].map(e => e && e.scale());
-    return {
-        xAxis,
-        yAxis,
-        xScale,
-        yScale
-    };
-};
-
 export const encodingFieldInfRetriever = {
     [POLAR]: (encoding, fieldsConfig) => {
         const encodingInf = {};

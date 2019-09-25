@@ -5,7 +5,6 @@ import drawArea from './renderer';
 import './styles.scss';
 import { STACK, ENCODING } from '../../enums/constants';
 import {
-    getAxesScales,
     positionPoints,
     getIndividualClassName,
     getValidTransformForAggFn,
@@ -93,10 +92,7 @@ export default class AreaLayer extends LineLayer {
         const config = this.config();
         const fieldsConfig = this.data().getFieldsConfig();
         const { xField, yField, y0Field } = this.encodingFieldsInf();
-        const {
-            xAxis,
-            yAxis
-       } = getAxesScales(axes);
+        const { x: xAxis, y: yAxis } = axes;
         const classNameFn = config.individualClassName;
         const isXDim = fieldsConfig[xField] && fieldsConfig[xField].def.type === FieldType.DIMENSION;
         const isYDim = fieldsConfig[yField] && fieldsConfig[yField].def.type === FieldType.DIMENSION;
