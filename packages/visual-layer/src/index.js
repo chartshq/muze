@@ -11,6 +11,8 @@ import * as LAYER_TYPES from './enums/layer-types';
 import layerFactory from './layer-factory';
 import layerRegistry from './layer-registry';
 import { ENCODING } from './enums/constants';
+import * as helpers from './helpers';
+import * as enums from './enums';
 
 export {
     BaseLayer,
@@ -25,5 +27,7 @@ export {
     SimpleLayer,
     layerRegistry,
     LAYER_TYPES,
-    ENCODING
+    ENCODING,
+    helpers,
+    enums
 };

@@ -16,3 +16,20 @@ export const INTERFACES = {
     SimpleCell
 };
 
+const componentRegistry = (components = COMPONENTS) => {
+    const reg = Object.assign({}, components);
+
+    return {
+        set: (key, cls) => {
+            reg[key] = cls;
+            return componentRegistry;
+        },
+        get: () => reg
+    };
+};
+
+export const registry = {
+    components: componentRegistry(COMPONENTS),
+    cellRegistry: cellRegistry(),
+    layerRegistry: layerRegistry()
+};

@@ -121,7 +121,7 @@ export const getIndividualClassName = (d, i, data, context) => {
     return classNameStr;
 };
 
-const dataNormalizers = {
+export const dataNormalizers = {
     [POLAR]: (transformedData, encodingFieldInf, fieldsConfig) => {
         const {
             radiusFieldIndex,

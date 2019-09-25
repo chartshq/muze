@@ -8,7 +8,6 @@ import {
     clone,
     generateGetterSetters,
     STATE_NAMESPACES,
-    COORD_TYPES,
     transactor,
     defaultValue,
     getObjProp
@@ -22,7 +21,8 @@ import {
     applyInteractionStyle,
     getValidTransform,
     domainCalculator,
-    renderLayer
+    renderLayer,
+    encodingFieldInfRetriever
 } from '../helpers';
 import { localOptions } from './local-options';
 import { listenerMap } from './listener-map';
@@ -73,7 +73,7 @@ export default class BaseLayer extends SimpleLayer {
     constructor (data, axes, config, dependencies = {}) {
         super();
 
-        generateGetterSetters(this, props);
+        generateGetterSetters(this, this.constructor.getterSetters());
         this.axes(axes);
         this.alias(this.constructor.formalName() + getUniqueId());
         this.dependencies(dependencies);
@@ -91,7 +91,7 @@ export default class BaseLayer extends SimpleLayer {
             {
                 domain: null
             },
-            Object.keys(localOptions).reduce((acc, v) => {
+            Object.keys(this.localOptions()).reduce((acc, v) => {
                 acc[v] = localOptions[v].value;
                 return acc;
             }, {})
@@ -132,7 +132,7 @@ export default class BaseLayer extends SimpleLayer {
             const { namespace } = this.metaInf();
             store.addSubNamespace(namespace, BaseLayer.formalName(), this);
 
-            transactor(this, localOptions, store, {
+            transactor(this, this.constructor.localOptions(), store, {
                 subNamespace: namespace,
                 namespace: `${STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE}`
             });
@@ -180,6 +180,13 @@ export default class BaseLayer extends SimpleLayer {
         };
     }
 
+    static getterSetters () {
+        return props;
+    }
+
+    static localOptions () {
+        return localOptions;
+    }
     /**
      * Policy defines how user config gets merged to default config. The default policy here does a deep copy
      * operation.
@@ -215,22 +222,6 @@ export default class BaseLayer extends SimpleLayer {
         return 'base';
     }
 
-    encodingFieldsInf (...fieldsInf) {
-        if (fieldsInf.length) {
-            this._encodingFieldsInf = fieldsInf[0];
-            return this;
-        }
-        return this._encodingFieldsInf;
-    }
-
-    encodingTransform (...encodingTransform) {
-        if (encodingTransform.length) {
-            this._encodingTransform = encodingTransform[0];
-            return this;
-        }
-        return this._encodingTransform;
-    }
-
     /**
      * Provides a alias for a layer. Like it's possible to have same layer (like bar) multiple times, but among multiple
      * layers of same type if one layer has to be referred, alias is used. If no alias is given then `formalName` is set
@@ -252,14 +243,6 @@ export default class BaseLayer extends SimpleLayer {
             return this;
         }
         return this._alias || this.constructor.formalName();
-    }
-
-    dependencies (...params) {
-        if (params.length) {
-            this._dependencies = params[0];
-            return this;
-        }
-        return this._dependencies;
     }
 
     enableCaching () {
@@ -391,16 +374,6 @@ export default class BaseLayer extends SimpleLayer {
         }
     }
 
-    disableUpdate () {
-        this._updateLock = true;
-        return this;
-    }
-
-    enableUpdate () {
-        this._updateLock = false;
-        return this;
-    }
-
     resolveTransformType () {
         this._transformType = getValidTransform(this);
     }
@@ -417,12 +390,6 @@ export default class BaseLayer extends SimpleLayer {
         return this;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof BaseLayer
-     */
     elemType () {
         return 'g';
     }
@@ -458,21 +425,6 @@ export default class BaseLayer extends SimpleLayer {
         !pointMap[key] && (pointMap[key] = []);
         pointMap[key].push(data);
         return this;
-    }
-
-    /**
-     *
-     *
-     * @param {*} dataProps
-     *
-     * @memberof BaseLayer
-     */
-    dataProps (...dataProps) {
-        if (dataProps.length) {
-            this._dataProps = dataProps[0];
-            return this;
-        }
-        return this._dataProps;
     }
 
     /**
@@ -695,12 +647,40 @@ export default class BaseLayer extends SimpleLayer {
         };
     }
 
-    getRenderProps () {
-        if (this.coord() === COORD_TYPES.POLAR) {
-            return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.radius`];
+    /**
+     * Called when the layer datamodel is set.
+     *
+     * @param {Array} arr Old and new datamodel instance.
+     * @param {DataModel} arr[0] Previous datamodel instance.
+     * @param {DataModel} arr[1] Current datamodel instance.
+     *
+     * @return {BaseLayer} Instance of layer.
+     */
+    dataDidSet ([, data]) {
+        const config = this.config();
+
+        if (data && config) {
+            if (this._cacheEnabled) {
+                this._cachedData.push(data);
+            } else {
+                this._cachedData = [data];
+            }
+            const encodingValue = config.encoding;
+            if (encodingValue) {
+                const fieldsConfig = data.getFieldsConfig();
+                const encodingFieldsInf = encodingFieldInfRetriever[this.coord()](encodingValue, fieldsConfig);
+                this.encodingFieldsInf(encodingFieldsInf);
+                this.resolveTransformType();
+                this._transformedData = this.getTransformedData(data, config,
+                    this.transformType(), encodingFieldsInf);
+                this._normalizedData = this.getNormalizedData(this._transformedData, fieldsConfig);
+                if (config.calculateDomain !== false) {
+                    const domain = this.calculateDomainFromData(this._normalizedData,
+                        this.encodingFieldsInf(), this.data().getFieldsConfig());
+                    this.domain(domain);
+                }
+            }
         }
-        const { unitRowIndex: rowIndex, unitColIndex: colIndex } = this.metaInf();
-        return [`${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.y.${rowIndex}0`,
-            `${STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE}.domain.x.${colIndex}0`];
+        return this;
     }
 }

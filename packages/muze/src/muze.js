@@ -13,6 +13,8 @@ import {
     Store
 } from 'muze-utils';
 
+import { VisualUnit } from '@chartshq/visual-unit';
+import { VisualGroup } from '@chartshq/visual-group';
 import {
     SurrogateSideEffect,
     SpawnableSideEffect,
@@ -23,18 +25,30 @@ import {
     behaviouralActions,
     GenericSideEffect
 } from '@chartshq/muze-firebolt';
-import { layerFactory } from '@chartshq/visual-layer';
+import {
+    layerFactory,
+    BaseLayer,
+    LineLayer,
+    TextLayer,
+    TickLayer,
+    PointLayer,
+    helpers,
+    enums,
+    SimpleLayer,
+    AreaLayer,
+    ArcLayer
+} from '@chartshq/visual-layer';
 import pkg from '../package.json';
 import * as operators from './operators';
 import { actionModel as ActionModel } from './action-model';
 import options from './options';
 import { Canvas } from './canvas';
-import { COMPONENTS, SUBREGISTRIES } from './default-registry';
+import { registry as globalRegistry, SUBREGISTRIES } from './default-registry';
 import './muze.scss';
 
 // Cache singleton instances which should be included only once in a page
 const globalCache = {};
-const defaultRegistry = COMPONENTS;
+const defaultRegistry = globalRegistry.components;
 
 const overrideRegistryDefinitions = (overrideRegistry, registry) => {
     for (const prop in overrideRegistry) {
@@ -72,12 +86,13 @@ const overrideRegistryDefinitions = (overrideRegistry, registry) => {
 const muze = () => {
     // Setters and getters will be mounted on this. Object will be mutated.
     const [env, globalStore] = transactor({}, options);
-    const components = Object.assign({}, COMPONENTS);
-    const componentSubRegistryDef = Object.assign(SUBREGISTRIES);
+    const components = Object.assign({}, globalRegistry.components.get());
+    const componentSubRegistryDef = Object.assign({}, SUBREGISTRIES);
+
     const componentSubRegistry = {};
 
     for (const prop in componentSubRegistryDef) {
-        componentSubRegistry[prop] = componentSubRegistryDef[prop]();
+        componentSubRegistry[prop] = componentSubRegistryDef[prop](globalRegistry[prop].get());
     }
 
     // Apart form the setter getter, an instance method is injected to create real renderer instances
@@ -142,6 +157,35 @@ const muze = () => {
     };
 
     return env;
+};
+
+muze.registry = {
+    components: globalRegistry.components,
+    cells: globalRegistry.cellRegistry,
+    layers: globalRegistry.layerRegistry
+};
+
+muze.Components = {
+    VisualLayer: {
+        layers: {
+            BaseLayer,
+            LineLayer,
+            TextLayer,
+            TickLayer,
+            PointLayer,
+            SimpleLayer,
+            AreaLayer,
+            ArcLayer
+        },
+        helpers,
+        enums
+    },
+    VisualUnit: {
+        cls: VisualUnit
+    },
+    VisualGroup: {
+        cls: VisualGroup
+    }
 };
 
 const SideEffects = {
