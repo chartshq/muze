@@ -38,10 +38,10 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
 
-        const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
+        const payload = getDragActionConfig(firebolt.context, {
             startPos,
             endPos
-        }, firebolt.context.data().getFieldsConfig());
+        });
         behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
     }).on('end', () => {
         const event = getEvent();
@@ -57,11 +57,11 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
 
-        const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
+        const payload = getDragActionConfig(firebolt.context, {
             startPos,
             endPos,
             snap: true
-        }, firebolt.context.data().getFieldsConfig());
+        });
         payload.dragEnd = true;
         behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
     }));

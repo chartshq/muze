@@ -50,15 +50,12 @@
     
     canvas
         .data(rootData)
-        .columns(['Cylinders', 'Horsepower'])
         .rows(['Acceleration'])
-        .color('Maker')
+        .columns(['Maker'])
+        // .detail(['Name'])
         .mount('#chart')
         .height(500)
+        .width(500)
         .title('Charts');
-     
-    setTimeout(() => {
-        canvas.data(canvas.data().select(() => false))
-    }, 1000);
     })
 })();
