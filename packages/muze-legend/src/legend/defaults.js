@@ -49,7 +49,7 @@ export const DEFAULT_CONFIG = {
             className: 'legend-icon',
             height: 20,
             width: 20,
-            color: 'rgba(0,0,0,.5)',
+            color: 'rgba(192,192,192,0.6)',
             type: 'square'
         }
     }
