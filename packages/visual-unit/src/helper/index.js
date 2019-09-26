@@ -392,4 +392,3 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
         exitRowIds
     };
 };
-

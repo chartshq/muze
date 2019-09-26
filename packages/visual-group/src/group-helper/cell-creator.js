@@ -565,10 +565,10 @@ export const computeMatrices = (context, config) => {
         resolver
     };
     const cells = {
-        GeomCell: resolver.getCellDef(registry.GeomCell),
-        AxisCell: resolver.getCellDef(registry.AxisCell),
-        BlankCell: resolver.getCellDef(registry.BlankCell),
-        TextCell: resolver.getCellDef(registry.TextCell)
+        GeomCell: resolver.getCellDef(registry.cells.GeomCell),
+        AxisCell: resolver.getCellDef(registry.cells.AxisCell),
+        BlankCell: resolver.getCellDef(registry.cells.BlankCell),
+        TextCell: resolver.getCellDef(registry.cells.TextCell)
     };
     const isRowSizeEqual = isDistributionEqual(normalizedRows);
     const isColumnSizeEqual = isDistributionEqual(normalizedColumns);

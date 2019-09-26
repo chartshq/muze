@@ -15,6 +15,7 @@ import { PROPS } from './props';
 import { DEFAULT_CONFIG } from './enums/defaults';
 import { CLASSPREFIX, TOP, BOTTOM, LEFT, RIGHT, HEADER, WIDTH, TEXT_CELL } from './enums/constants';
 import './text-cell.scss';
+import * as CONSTANTS from './constants';
 
 const setSmartText = (context) => {
     const source = context.source();
@@ -196,6 +197,10 @@ class TextCell extends SimpleCell {
      */
     static defaultConfig () {
         return DEFAULT_CONFIG;
+    }
+
+    static formalName () {
+        return CONSTANTS.TEXT_CELL;
     }
 
     /**

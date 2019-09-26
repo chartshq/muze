@@ -4,9 +4,10 @@ import { layerRegistry } from '@chartshq/visual-layer';
 import { SimpleGroup, VisualGroup } from '@chartshq/visual-group';
 
 export const COMPONENTS = {
-    VisualGroup,
-    VisualUnit
+    [VisualGroup.formalName()]: VisualGroup,
+    [VisualUnit.formalName()]: VisualUnit
 };
+
 export const SUBREGISTRIES = {
     cellRegistry,
     layerRegistry
@@ -20,7 +21,8 @@ const componentRegistry = (components = COMPONENTS) => {
     const reg = Object.assign({}, components);
 
     return {
-        set: (key, cls) => {
+        register: (cls) => {
+            const key = cls.formalName();
             reg[key] = cls;
             return componentRegistry;
         },

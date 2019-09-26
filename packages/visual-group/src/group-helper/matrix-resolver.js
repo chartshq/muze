@@ -1,4 +1,3 @@
-import { VisualUnit } from '@chartshq/visual-unit';
 import { generateGetterSetters, STATE_NAMESPACES, getUniqueId } from 'muze-utils';
 import {
      initializeCacheMaps,
@@ -216,7 +215,7 @@ export default class MatrixResolver {
      * @memberof MatrixResolver
      */
     getCellDef (cell) {
-        const registry = this.registry();
+        const registry = this.registry().cells;
 
         Object.values(registry).forEach((e) => {
             if (e.prototype instanceof cell) {
@@ -324,6 +323,7 @@ export default class MatrixResolver {
         const unitConfig = extractUnitConfig(globalConfig || {});
         const store = this.store();
         store.lockModel();
+        const { VisualUnit } = this.registry();
 
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
@@ -501,8 +501,7 @@ export default class MatrixResolver {
             showHeaders,
             classPrefix
         } = config;
-        const TextCell = this.getCellDef(this.registry().TextCell);
-        const BlankCell = this.getCellDef(this.registry().BlankCell);
+        const { TextCell, BlankCell } = this.registry().cells;
         const [leftRows, rightRows] = rows;
         const [topCols, bottomCols] = columns;
         const rowHeaders = fieldNames.rows;

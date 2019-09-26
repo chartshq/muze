@@ -42,6 +42,7 @@ class VisualGroup extends SimpleGroup {
         super();
 
         const {
+            components,
             componentSubRegistry
         } = registry;
 
@@ -68,7 +69,8 @@ class VisualGroup extends SimpleGroup {
          // Getting indiviual registered items
         this.registry({
             layerRegistry: componentSubRegistry.layerRegistry.get(),
-            cellRegistry: componentSubRegistry.cellRegistry.get()
+            cellRegistry: componentSubRegistry.cellRegistry.get(),
+            VisualUnit: components.VisualUnit
         });
     }
 
@@ -95,6 +97,10 @@ class VisualGroup extends SimpleGroup {
             return this;
         }
         return this._store;
+    }
+
+    static formalName () {
+        return 'VisualGroup';
     }
 
     /**

@@ -13,7 +13,7 @@ import {
     Store
 } from 'muze-utils';
 
-import { VisualUnit } from '@chartshq/visual-unit';
+import { VisualUnit, helpers as unitHelpers, enums as unitEnums, UnitFireBolt } from '@chartshq/visual-unit';
 import { VisualGroup } from '@chartshq/visual-group';
 import {
     SurrogateSideEffect,
@@ -51,9 +51,9 @@ const globalCache = {};
 const defaultRegistry = globalRegistry.components;
 
 const overrideRegistryDefinitions = (overrideRegistry, registry) => {
-    for (const prop in overrideRegistry) {
-        registry.set(prop, overrideRegistry[prop]);
-    }
+    overrideRegistry.forEach((def) => {
+        registry.register(def);
+    });
 };
 
 /**
@@ -128,11 +128,12 @@ const muze = () => {
     env.registry = (...overrideRegistry) => {
         // Selectively copy the properties from COMPONENTS
         if (overrideRegistry.length) {
-            for (const prop in overrideRegistry) {
+            overrideRegistry.forEach((def) => {
+                const prop = def.formalName();
                 if (prop in defaultRegistry) {
-                    components[prop] = overrideRegistry[prop];
+                    components[prop] = def;
                 }
-            }
+            });
             return env;
         }
         return components;
@@ -141,7 +142,7 @@ const muze = () => {
     env.cellRegistry = (...overrideRegistry) => {
         const cellRegistry = componentSubRegistry.cellRegistry;
         if (overrideRegistry.length) {
-            overrideRegistryDefinitions(overrideRegistry[0], cellRegistry);
+            overrideRegistryDefinitions(overrideRegistry, cellRegistry);
             return env;
         }
         return cellRegistry.get();
@@ -150,7 +151,7 @@ const muze = () => {
     env.layerRegistry = (...overrideRegistry) => {
         const layerRegistry = componentSubRegistry.layerRegistry;
         if (overrideRegistry.length) {
-            overrideRegistryDefinitions(overrideRegistry[0], layerRegistry);
+            overrideRegistryDefinitions(overrideRegistry, layerRegistry);
             return env;
         }
         return layerRegistry.get();
@@ -181,7 +182,10 @@ muze.Components = {
         enums
     },
     VisualUnit: {
-        cls: VisualUnit
+        cls: VisualUnit,
+        helpers: unitHelpers,
+        enums: unitEnums,
+        UnitFireBolt
     },
     VisualGroup: {
         cls: VisualGroup
