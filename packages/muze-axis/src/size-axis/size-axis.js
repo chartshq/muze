@@ -28,7 +28,7 @@ export default class SizeAxis {
         this._config = Object.assign({}, this.constructor.defaultConfig(), config);
         // @todo: Will use configuration override using scale decorator
         this._domainType = this._config.type === 'linear' ? CONTINOUS : DISCRETE;
-        this._rangeType = CONTINOUS;
+        this._rangeType = this._config.intervals > 0 ? DISCRETE : CONTINOUS;
 
         this._sizeStrategy = this.setStrategy(this._domainType, this._rangeType);
         this._scale = this.createScale(this._sizeStrategy);

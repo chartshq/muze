@@ -50,9 +50,12 @@ export default class DiscreteLegend extends SimpleLegend {
     dataFromScale () {
         const scale = this.scale();
         const { scaleType, domain, scaleFn } = getScaleInfo(scale);
-        let domainForLegend = [...new Set(domain)];
         const field = this.metaData().getFieldspace().fields[0];
         const { type, subtype } = field.schema();
+        const {range, config} = scale;
+        let domainForLegend = type === FieldType.MEASURE  && !config().intervals > 0
+                                ? [...new Set(range())]
+                                : [...new Set(domain)]
 
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
