@@ -470,6 +470,8 @@ export const sortFacetFields = (facets, keys, config) => {
 
     facets.forEach((facet) => {
         const name = `${facet}`;
+        facetNames.push(name);
+
         const facetSortConfig = sortConfig[name];
 
         if (facetSortConfig) {
