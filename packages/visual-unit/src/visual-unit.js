@@ -470,12 +470,10 @@ export default class VisualUnit {
      *
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers, mode, parentModel) {
-        if (identifiers === null) {
-            return null;
-        }
+    getDataModelFromIdentifiers (identifiers, mode, parentModel, behaviourType) {
+        if (!identifiers) return null;
         const dataModel = parentModel || this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers, mode);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode, behaviourType);
     }
 
     /**

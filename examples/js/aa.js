@@ -35,16 +35,16 @@
     }, {
         name: 'Year',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }];
 
     let rootData = new DataModel(data, schema)
 
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
+    // rootData.sort([
+    //     ['Cylinders', 'asc'],
+    //     ['Maker', 'desc'],
+    // ])
 
     const canvas = env.canvas();
     
@@ -52,10 +52,13 @@
         .data(rootData)
         .rows(['Acceleration'])
         .columns(['Maker'])
+        .layers([{
+            mark: 'area'
+        }])
         // .detail(['Name'])
         .mount('#chart')
         .height(500)
-        .width(500)
+        .width(900)
         .title('Charts');
     })
 })();

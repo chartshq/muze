@@ -30,58 +30,43 @@ export const getBoxDimensionsFromPayload = (payload, axes, axisFields) => {
             xRange = xCriteria || [];
             yRange = yCriteria || [];
         }
-        // direction = xCriteria && yCriteria ? 'both' : (xCriteria ? 'vertical' : 'horizontal');
+
         if (xRange && xRange.length) {
-            // if ((yAxis.constructor.type() === 'band' && xLinear)) {
-            //     x1 = x2 = undefined;
-            //     direction = 'horizontal';
-            // } else {
             const domain = xAxis.domain();
             const bandScale = xAxis.constructor.type() === 'band';
-            let x1Val;
-            let x2Val;
+            let x1Val = xRange[0];
+            let x2Val = xRange[xRange.length - 1];
+
             if (bandScale) {
                 let x1DomainIndex = domain.indexOf(xRange[0]);
                 let x2DomainIndex = domain.indexOf(xRange[xRange.length - 1]);
                 [x1DomainIndex, x2DomainIndex] = [x1DomainIndex, x2DomainIndex].sort((a, b) => a - b);
                 x1Val = domain[x1DomainIndex];
                 x2Val = domain[x2DomainIndex];
-            } else {
-                x1Val = xRange[0];
-                x2Val = xRange[xRange.length - 1];
             }
+
             x1 = xAxis.getScaleValue(x1Val);
             x2 = xAxis.getScaleValue(x2Val);
             x2 += bandScale ? xAxis.getUnitWidth() : 0;
-            // }
-        } else {
-            x1 = x2 = undefined;
         }
+
         if (yRange && yRange.length) {
-            // if ((xAxis.constructor.type() === 'band' && yLinear)) {
-                // y1 = y2 = undefined;
-                // direction = 'vertical';
-            // } else {
             const domain = yAxis.domain();
             const bandScale = yAxis.constructor.type() === 'band';
-            let y1Val;
-            let y2Val;
+            let y1Val = yRange[0];
+            let y2Val = yRange[yRange.length - 1];
+
             if (bandScale) {
                 let y1DomainIndex = domain.indexOf(yRange[0]);
                 let y2DomainIndex = domain.indexOf(yRange[yRange.length - 1]);
                 [y1DomainIndex, y2DomainIndex] = [y1DomainIndex, y2DomainIndex].sort(((a, b) => b - a));
                 y1Val = domain[y1DomainIndex];
                 y2Val = domain[y2DomainIndex];
-            } else {
-                y1Val = yRange[0];
-                y2Val = yRange[yRange.length - 1];
             }
+
             y1 = yAxis.getScaleValue(y1Val);
             y2 = yAxis.getScaleValue(y2Val);
             y2 += yAxis.constructor.type() === 'band' ? yAxis.getUnitWidth() : 0;
-            // }
-        } else {
-            y1 = y2 = undefined;
         }
 
         if ((yLinear && xLinear) || !payload.dragEnd) {

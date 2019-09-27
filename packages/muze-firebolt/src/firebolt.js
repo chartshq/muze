@@ -414,12 +414,15 @@ export default class Firebolt {
 
     getAddSetFromCriteria (criteria, propagationInf = {}) {
         const context = this.context;
+        const enabledIntermediateSelection =
+            this.context.axes().x[0].constructor.name === 'BandAxis' ||
+            this.context.axes().y[0].constructor.name === 'BandAxis';
         const filteredDataModel = propagationInf.data ? propagationInf.data :
-            context.getDataModelFromIdentifiers(criteria, 'all');
+            context.getDataModelFromIdentifiers(criteria, 'all', undefined, enabledIntermediateSelection);
         return {
             model: filteredDataModel,
-            uids: criteria === null ? null : (propagationInf.data ? propagationInf.entryRowIds :
-                filteredDataModel[0].getUids())
+            uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids()) : null
         };
     }
 

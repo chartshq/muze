@@ -59,8 +59,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
                 endPos: {
                     x: x2,
                     y: y2
-                },
-                snap: true
+                }
             });
             payload.dragEnd = true;
             onDrag(payload);

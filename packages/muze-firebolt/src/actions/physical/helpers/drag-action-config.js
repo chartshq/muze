@@ -1,7 +1,7 @@
-import { DimensionSubtype, MeasureSubtype, COORD_TYPES } from 'muze-utils';
+import { DimensionSubtype, COORD_TYPES } from 'muze-utils';
 
 const dragCriteriaRetriever = {
-    [COORD_TYPES.CARTESIAN]: (context, sourceInfo, { startPos, endPos, snap }) => {
+    [COORD_TYPES.CARTESIAN]: (context, sourceInfo, { startPos, endPos }) => {
         const fieldsConfig = context.data().getFieldsConfig();
         const axes = sourceInfo.axes;
         const xAxis = axes.x[0];
@@ -13,19 +13,10 @@ const dragCriteriaRetriever = {
         const yFieldType = fieldsConfig[yField].def.subtype;
         const dimensions = {};
 
-        // x, y
-        // const dragDim = xFieldType === MeasureSubtype.CONTINUOUS ? (yFieldType === MeasureSubtype.CONTINUOUS ?
-        //     ['x', 'y'] : ['y']) : ['x'];
-        // const dragDim = ['x', 'y'];
-        // const criteria = {};
         const isXDimension = xFieldType === DimensionSubtype.CATEGORICAL;
         const isYDimension = yFieldType === DimensionSubtype.CATEGORICAL;
         const xRange = xAxis.invertExtent(startPos.x, endPos.x);
         const yRange = yAxis.invertExtent(startPos.y, endPos.y);
-        // const selectedDomains = {
-        //     x: startPos.x === endPos.x ? [] : (isXDimension ? xRange : xRange.sort((a, b) => a - b)),
-        //     y: startPos.y === endPos.y ? [] : (isYDimension ? yRange : yRange.sort((a, b) => a - b))
-        // };
         const selectedDomains = {
             x: isXDimension ? xRange : xRange.sort((a, b) => a - b),
             y: isYDimension ? yRange : yRange.sort((a, b) => a - b)
@@ -34,7 +25,6 @@ const dragCriteriaRetriever = {
 
         rangeObj[xField] = selectedDomains.x;
         rangeObj[yField] = selectedDomains.y;
-        console.log(snap);
 
         if (xField === yField) {
             const xdom = selectedDomains.x;
@@ -46,32 +36,10 @@ const dragCriteriaRetriever = {
             } else {
                 rangeObj[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
             }
-            dimensions.x = [startPos.x, endPos.x];
-            dimensions.y = [startPos.y, endPos.y];
         }
 
-        // if (xFieldType === DimensionSubtype.CATEGORICAL) {
-        //     dimensions.x = (snap && startPos.x !== endPos.x) ? xAxis.getNearestRange(startPos.x, endPos.x) :
-        //                     [startPos.x, endPos.x];
-        // }
-
-        // else {
-        //     criteria[dragDim[0]] = selectedDomains[dragDim[0]] || [];
-
-        //     if (dragDim[0] === 'x') {
-        //         rangeObj[xField] = criteria.x;
-        //         if (xFieldType === DimensionSubtype.CATEGORICAL) {
-        //             dimensions.x = (snap && startPos.x !== endPos.x) ? xAxis.getNearestRange(startPos.x, endPos.x) :
-        //                 [startPos.x, endPos.x];
-        //         }
-        //     } else {
-        //         rangeObj[yField] = criteria.y;
-        //         if (yFieldType === DimensionSubtype.CATEGORICAL) {
-        //             dimensions.y = (snap && startPos.y !== endPos.y) ? yAxis.getNearestRange(startPos.y, endPos.y) :
-        //                 [startPos.y, endPos.y];
-        //         }
-        //     }
-        // }
+        dimensions.x = [startPos.x, endPos.x];
+        dimensions.y = [startPos.y, endPos.y];
 
         return {
             criteria: rangeObj,

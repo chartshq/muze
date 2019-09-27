@@ -51,6 +51,10 @@ class SelectionBox extends SpawnableSideEffect {
      * @param {number} unitHeight Height of the visual unit.
      */
     apply (selectionSet, payload) {
+        let x = 0;
+        let y = 0;
+        let width;
+        let height;
         const config = this._config;
         const boxConf = config.box;
         const firebolt = this.firebolt;
@@ -61,19 +65,18 @@ class SelectionBox extends SpawnableSideEffect {
         const classPrefix = config.classPrefix;
         const selectionGroupClassName = config.defClassName;
 
-        let x = 0;
-        let y = 0;
-        let width = unitWidth;
-        let height = unitHeight;
+        width = unitWidth;
+        height = unitHeight;
 
-        if (payload.criteria === null) {
+        // Hide selection-box on dragEnd or when criteria is empty
+        if (!payload.criteria || payload.dragEnd) {
             this.hide(drawingInf);
             return this;
         }
 
         const sourceInf = firebolt.context.getSourceInfo();
-        const { dimension, direction } = getBoxDimensionsFromPayload(payload, sourceInf.axes,
-            sourceInf.fields);
+        const { dimension, direction } =
+            getBoxDimensionsFromPayload(payload, sourceInf.axes, sourceInf.fields);
         const transition = payload.dragEnd && config.transition;
 
         if (direction === 'both') {
@@ -130,4 +133,3 @@ class SelectionBox extends SpawnableSideEffect {
 }
 
 export default SelectionBox;
-

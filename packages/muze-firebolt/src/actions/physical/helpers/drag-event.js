@@ -1,8 +1,7 @@
 import {
     getEvent,
     getD3Drag
- } from 'muze-utils';
-
+} from 'muze-utils';
 import getDragActionConfig from './drag-action-config';
 
 /**
@@ -59,8 +58,7 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
 
         const payload = getDragActionConfig(firebolt.context, {
             startPos,
-            endPos,
-            snap: true
+            endPos
         });
         payload.dragEnd = true;
         behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
