@@ -110,7 +110,7 @@ export const renderAxis = (context, container, height, width) => {
 
     axis.source().config({
         tickFormat: (val, i, data) => context.config().item.text.formatter(val, i, data, context)
-    })
+    });
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
     axis.source().render();

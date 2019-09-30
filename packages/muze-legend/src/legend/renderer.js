@@ -293,7 +293,6 @@ export const renderDiscreteItem = (context, container) => {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
             .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
             .style('margin-left', `${align === HORIZONTAL ? 0 : MARGINBUFFER}px`);
-
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
@@ -357,7 +356,7 @@ export const renderStepItem = (context, container) => {
             const data = d[1].split('-');
             const lowerLimit = +data[0];
             const upperLimit = +data[1];
-            let formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
+            const formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
             selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {

@@ -54,7 +54,7 @@ export const legendIconShapeMapper = (layers, scaleType) => {
     const shape = IS_POINT_MAP[(scaleType === COLOR || scaleType === SIZE)
     && layerMarks.includes(POINT)];
     return shape;
-}
+};
 
 /**
  *
