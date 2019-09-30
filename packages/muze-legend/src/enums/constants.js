@@ -14,6 +14,11 @@ export const CONSOLIDATED = 'consolidated';
 export const FRAGMENTED = 'fragmented';
 export const DEFAULTCOLOR = '#F44336';
 export const DEFAULTSIZE = 50;
+export const MARGINBUFFER = 10;
+export const DEFAULTICONSIZE = { // approximately the (size needed) * Math.PI value
+    circle: 64,
+    square: 45.8
+};
 export const DEFAULTSHAPE = 'circle';
 export const STEP = 'step';
 export const GRADIENT = 'gradient';

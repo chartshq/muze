@@ -16,6 +16,7 @@ import {
 } from 'muze-utils';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
+import UnitBrushBehaviour from './firebolt/behaviours/brush';
 import {
     renderLayers,
     getNearestDimensionalValue,
@@ -171,7 +172,9 @@ export default class VisualUnit {
 
             this.firebolt(new UnitFireBolt(this, {
                 physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
-                behavioural: Object.assign({}, behaviouralActions, fireboltDeps.behaviouralActions),
+                behavioural: Object.assign({}, behaviouralActions, {
+                    BrushBehaviour: UnitBrushBehaviour
+                }, fireboltDeps.behaviouralActions),
                 physicalBehaviouralMap: actionBehaviourMap
             }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
             return this;
@@ -470,12 +473,10 @@ export default class VisualUnit {
      *
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers, mode, parentModel) {
-        if (identifiers === null) {
-            return null;
-        }
+    getDataModelFromIdentifiers (identifiers, mode, parentModel, hasBarLayer) {
+        if (!identifiers) return null;
         const dataModel = parentModel || this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers, mode);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode, hasBarLayer);
     }
 
     /**

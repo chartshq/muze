@@ -46,7 +46,7 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
                     return color;
                 }
                 if (!apply && colorTransform[interactionType][styleType]) {
-                     // unfade selections
+                    // unfade selections
                     colorTransform[interactionType][styleType] = null;
                     return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
                 }
