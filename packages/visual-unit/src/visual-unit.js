@@ -470,10 +470,10 @@ export default class VisualUnit {
      *
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers, mode, parentModel, behaviourType) {
+    getDataModelFromIdentifiers (identifiers, mode, parentModel, hasBarLayer) {
         if (!identifiers) return null;
         const dataModel = parentModel || this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers, mode, behaviourType);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode, hasBarLayer);
     }
 
     /**

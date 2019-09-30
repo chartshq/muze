@@ -1,6 +1,5 @@
-import { clone, retrieveNearestGroupByReducers, getEvent, getD3Drag } from 'muze-utils';
+import { clone, retrieveNearestGroupByReducers } from 'muze-utils';
 import * as SELECTION from '../enums/selection';
-import { D3_DRAG_EVENTS } from '../enums/constants';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;

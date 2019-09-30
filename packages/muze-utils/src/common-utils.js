@@ -983,7 +983,7 @@ const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
  * @param {*} identifiers
  *
  */
-const getDataModelFromIdentifiers = (dataModel, identifiers, mode, behaviourType) => {
+const getDataModelFromIdentifiers = (dataModel, identifiers, mode, hasBarLayer) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
         const fieldsConfig = dataModel.getFieldsConfig();
@@ -1012,7 +1012,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode, behaviourType
             });
         }
     } else {
-        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode, behaviourType);
+        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode, hasBarLayer);
     }
     return filteredDataModel;
 };
