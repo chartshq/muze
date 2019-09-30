@@ -348,7 +348,11 @@ export const renderStepItem = (context, container) => {
     const dataArr = container.data();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
-            selectElement(this).text(formatter(d[1], i, dataArr, context));
+            const data = d[1].split('-');
+            const lowerLimit = +data[0];
+            const upperLimit = +data[1];
+            let formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
+            selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {
                 classPrefix,
