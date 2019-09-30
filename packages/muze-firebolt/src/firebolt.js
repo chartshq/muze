@@ -412,6 +412,19 @@ export default class Firebolt {
         return this._propagationInf;
     }
 
+    getAddSetFromCriteria (criteria, propagationInf = {}) {
+        const context = this.context;
+        const hasBarLayer = !!context.layers().find(f => f.constructor.name === 'BarLayer');
+        const filteredDataModel = propagationInf.data ? propagationInf.data :
+            context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
+
+        return {
+            model: filteredDataModel,
+            uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids()) : null
+        };
+    }
+
     getSelectionSets (action) {
         const sourceId = this.context.id();
         const propagationInf = this._propagationInf || {};

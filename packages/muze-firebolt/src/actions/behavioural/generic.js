@@ -31,25 +31,13 @@ export default class GenericBehaviour {
         const {
             model: filteredDataModel,
             uids
-        } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
+        } = this.firebolt.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
         const entryExitSets = selectionSets.map((selectionSet) => {
             this.setSelectionSet(uids, selectionSet);
             return this.getEntryExitSet(selectionSet, filteredDataModel, payload);
         });
 
         return entryExitSets;
-    }
-
-    getAddSetFromCriteria (criteria, propagationInf = {}) {
-        const context = this.firebolt.context;
-        const filteredDataModel = propagationInf.data ? propagationInf.data :
-            context.getDataModelFromIdentifiers(criteria, 'all');
-
-        return {
-            model: filteredDataModel,
-            uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
-                filteredDataModel[0].getUids()) : null
-        };
     }
 
     /**

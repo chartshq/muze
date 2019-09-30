@@ -173,32 +173,3 @@ export const unionSets = (firebolt, behaviours) => {
     });
     return combinedSet;
 };
-
-export const attachEventListeners = (firebolt, eventListeners, targetElements) => {
-    const { context } = firebolt;
-    const d3Drag = getD3Drag()();
-
-    targetElements.forEach((targetEl) => {
-        let isDragEvent = true;
-
-        for (const event in eventListeners) {
-            const handler = eventListeners[event];
-            const dragEvent = /drag/.test(event);
-
-            isDragEvent = isDragEvent && dragEvent;
-
-            const fn = (data) => {
-                const e = getEvent();
-                const pos = context.getRelativePositionFromEvent(e);
-
-                handler({
-                    originalEvent: e,
-                    pos,
-                    elemData: data
-                });
-            };
-            isDragEvent ? d3Drag.on(D3_DRAG_EVENTS[event], fn) : targetEl.on(event, fn);
-        }
-        isDragEvent && targetEl.call(d3Drag);
-    });
-};
