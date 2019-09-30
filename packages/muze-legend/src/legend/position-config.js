@@ -9,7 +9,8 @@ import {
     VERTICAL,
     CENTER,
     SHAPE,
-    VALUE
+    VALUE,
+    MARGINBUFFER
 } from '../enums/constants';
 
 const legendOrientation = {
@@ -25,11 +26,11 @@ const legendOrientation = {
             } = measurement;
             return {
                 row: {
-                    width: `${width}px`,
+                    width: `${width + itemSpaces.length * MARGINBUFFER}px`,
                     padding: `${0}px`
                 },
                 column: {
-                    width: (d, i) => `${itemSpaces[i].width}px`,
+                    width: (d, i) => `${itemSpaces[i].width + MARGINBUFFER}px`,
                     padding: `${0}px`
                 }
             };
@@ -59,11 +60,11 @@ const legendOrientation = {
 
             return {
                 row: {
-                    width: `${width}px`,
+                    width: `${width + MARGINBUFFER}px`,
                     padding: `${padding}px`
                 },
                 column: {
-                    width: `${width}px`,
+                    width: `${width + MARGINBUFFER}px`,
                     padding: `${0}px`
                 }
             };

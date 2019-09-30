@@ -8,7 +8,10 @@ import {
     VALUE,
     RECT,
     LEFT,
-    RIGHT
+    RIGHT,
+    DEFAULTICONSIZE,
+    MARGINBUFFER,
+    HORIZONTAL
 } from '../enums/constants';
 
 /**
@@ -161,11 +164,11 @@ const checkPath = (str) => {
  * @param {*} d
  * @param {*} elem
  */
-const createShape = function (d, elem, defaultIcon, width, height) {
+const createShape = function (d, elem, defaultIcon) {
     const groupElement = elem;
     // const { shape, size, update } = d;
-    const size = d[3] || Math.min(width, height) * Math.PI;
     const shape = d[1] || defaultIcon;
+    const size = d[3] || DEFAULTICONSIZE[shape] * Math.PI;
 
     if (shape instanceof Promise) {
         shape.then((res) => {
@@ -222,7 +225,6 @@ export const renderIcon = (icon, container, datum, context) => {
     const {
         classPrefix,
         iconHeight,
-        iconWidth,
         maxIconWidth,
         padding,
         color
@@ -235,7 +237,7 @@ export const renderIcon = (icon, container, datum, context) => {
 
     if (icon !== RECT) {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
-        createShape(datum, group, datum[3] ? 'circle' : 'square', iconWidth, iconHeight)
+        createShape(datum, group, icon)
                         .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
                         .attr('fill', datum[2] || color);
     } else {
@@ -258,7 +260,9 @@ export const renderDiscreteItem = (context, container) => {
     const labelManager = context._labelManager;
     const {
            item,
-           classPrefix
+           classPrefix,
+           shape,
+           align
     } = context.config();
     const {
         maxIconWidth,
@@ -287,12 +291,14 @@ export const renderDiscreteItem = (context, container) => {
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
-                            .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px');
+            .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
+            .style('margin-left', `${align === HORIZONTAL ? 0 : MARGINBUFFER}px`);
+
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
             selectElement(this).classed(`${classPrefix}-${className}-${i}`, true);
-            renderIcon('circle', selectElement(this), d, {
+            renderIcon(shape, selectElement(this), d, {
                 classPrefix,
                 iconWidth,
                 // iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
