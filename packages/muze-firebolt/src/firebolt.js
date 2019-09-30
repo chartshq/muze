@@ -416,10 +416,11 @@ export default class Firebolt {
         const context = this.context;
         const filteredDataModel = propagationInf.data ? propagationInf.data :
             context.getDataModelFromIdentifiers(criteria, 'all');
+
         return {
             model: filteredDataModel,
-            uids: criteria === null ? null : (propagationInf.data ? propagationInf.entryRowIds :
-                filteredDataModel[0].getUids())
+            uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids()) : null
         };
     }
 

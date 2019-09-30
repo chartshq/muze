@@ -945,18 +945,29 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  * @param {*} criteria
  *
  */
-const getDataModelFromRange = (dataModel, criteria, mode) => {
-    if (criteria === null) {
-        return null;
-    }
+const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
+    if (criteria === null) return null;
+
     const selFields = Object.keys(criteria);
     const selFn = fields => selFields.every((field) => {
-        const val = fields[field].internalValue;
+        let fieldValue = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
+
         if (typeof range[0] === STRING) {
-            return range.find(d => d === val) !== undefined;
+            return range.find(d => d === fieldValue) !== undefined;
         }
-        return range ? val >= range[0] && val <= range[1] : true;
+
+        if (range) {
+            // Check if the selected bar value lies inside the selection box
+            let isFieldSelected = fieldValue >= range[0] && fieldValue <= range[1];
+            if (hasBarLayer && !isFieldSelected) {
+                // Check if the selection box overlaps the bar, if overlap bar is selected
+                fieldValue = [0, fieldValue];
+                isFieldSelected = fieldValue[0] <= range[1] && range[0] <= fieldValue[1];
+            }
+            return isFieldSelected;
+        }
+        return true;
     });
 
     return dataModel.select(selFn, {
@@ -972,7 +983,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
  * @param {*} identifiers
  *
  */
-const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
+const getDataModelFromIdentifiers = (dataModel, identifiers, mode, hasBarLayer) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
         const fieldsConfig = dataModel.getFieldsConfig();
@@ -1001,7 +1012,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
             });
         }
     } else {
-        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
+        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode, hasBarLayer);
     }
     return filteredDataModel;
 };

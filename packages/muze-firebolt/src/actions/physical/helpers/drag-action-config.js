@@ -1,51 +1,31 @@
-import { DimensionSubtype, MeasureSubtype } from 'muze-utils';
-/**
- * Gets the drag action configuration
- * @param {VisualUnit} instance instance of visual unit
- * @param {Object} config x y positions
- * @return {Object} Payload of behaviour
-*/
-/* istanbul ignore next */ const getDragActionConfig = (sourceInfo, config, fieldsConfig) => {
-    if (!(sourceInfo.axes.x || sourceInfo.axes.y)) {
-        return {
-            criteria: null
+import { DimensionSubtype, COORD_TYPES } from 'muze-utils';
+
+const dragCriteriaRetriever = {
+    [COORD_TYPES.CARTESIAN]: (context, sourceInfo, { startPos, endPos }) => {
+        const fieldsConfig = context.data().getFieldsConfig();
+        const axes = sourceInfo.axes;
+        const xAxis = axes.x[0];
+        const yAxis = axes.y[0];
+        const axisFields = sourceInfo.fields;
+        const xField = axisFields.x[0].getMembers()[0];
+        const yField = axisFields.y[0].getMembers()[0];
+        const xFieldType = fieldsConfig[xField].def.subtype;
+        const yFieldType = fieldsConfig[yField].def.subtype;
+        const dimensions = {};
+
+        const isXDimension = xFieldType === DimensionSubtype.CATEGORICAL;
+        const isYDimension = yFieldType === DimensionSubtype.CATEGORICAL;
+        const xRange = xAxis.invertExtent(startPos.x, endPos.x);
+        const yRange = yAxis.invertExtent(startPos.y, endPos.y);
+        const selectedDomains = {
+            x: isXDimension ? xRange : xRange.sort((a, b) => a - b),
+            y: isYDimension ? yRange : yRange.sort((a, b) => a - b)
         };
-    }
+        const rangeObj = {};
 
-    const axes = sourceInfo.axes;
-    const xAxis = axes.x[0];
-    const yAxis = axes.y[0];
-    const axisFields = sourceInfo.fields;
-    const xField = axisFields.x[0].getMembers()[0];
-    const yField = axisFields.y[0].getMembers()[0];
-    const xFieldType = fieldsConfig[xField].def.subtype;
-    const yFieldType = fieldsConfig[yField].def.subtype;
-    const dimensions = {};
-    const stPos = config.startPos;
-    const endPos = config.endPos;
+        if (selectedDomains.x) rangeObj[xField] = selectedDomains.x;
+        if (selectedDomains.y) rangeObj[yField] = selectedDomains.y;
 
-    if (stPos.x === endPos.x && stPos.y === endPos.y) {
-        return {
-            criteria: null
-        };
-    }
-
-    const dragDim = xFieldType === MeasureSubtype.CONTINUOUS ? (yFieldType === MeasureSubtype.CONTINUOUS ?
-        ['x', 'y'] : ['y']) : ['x'];
-    const criteria = {};
-    const isXDimension = xFieldType === DimensionSubtype.CATEGORICAL;
-    const isYDimension = yFieldType === DimensionSubtype.CATEGORICAL;
-    const xRange = xAxis.invertExtent(stPos.x, endPos.x);
-    const yRange = yAxis.invertExtent(stPos.y, endPos.y);
-    const selectedDomains = {
-        x: stPos.x === endPos.x ? [] : (isXDimension ? xRange : xRange.sort((a, b) => a - b)),
-        y: stPos.y === endPos.y ? [] : (isYDimension ? yRange : yRange.sort((a, b) => a - b))
-    };
-    const rangeObj = {};
-
-    if (dragDim.length === 2) {
-        rangeObj[xField] = selectedDomains.x;
-        rangeObj[yField] = selectedDomains.y;
         if (xField === yField) {
             const xdom = selectedDomains.x;
             const ydom = selectedDomains.y;
@@ -56,31 +36,39 @@ import { DimensionSubtype, MeasureSubtype } from 'muze-utils';
             } else {
                 rangeObj[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
             }
-            dimensions.x = [stPos.x, endPos.x];
-            dimensions.y = [stPos.y, endPos.y];
         }
-    } else {
-        criteria[dragDim[0]] = selectedDomains[dragDim[0]] || [];
 
-        if (dragDim[0] === 'x') {
-            rangeObj[xField] = criteria.x;
-            if (xFieldType === DimensionSubtype.CATEGORICAL) {
-                dimensions.x = (config.snap && stPos.x !== endPos.x) ? xAxis.getNearestRange(stPos.x, endPos.x) :
-                    [stPos.x, endPos.x];
-            }
-        } else {
-            rangeObj[yField] = criteria.y;
-            if (yFieldType === DimensionSubtype.CATEGORICAL) {
-                dimensions.y = (config.snap && stPos.y !== endPos.y) ? yAxis.getNearestRange(stPos.y, endPos.y) :
-                    [stPos.y, endPos.y];
-            }
-        }
+        dimensions.x = [startPos.x, endPos.x];
+        dimensions.y = [startPos.y, endPos.y];
+
+        return {
+            criteria: rangeObj,
+            dimensions
+        };
+    },
+    [COORD_TYPES.POLAR]: () => ({
+        criteria: null
+    })
+};
+
+/**
+ * Gets the drag action configuration
+ * @param {VisualUnit} instance instance of visual unit
+ * @param {Object} config x y positions
+ * @return {Object} Payload of behaviour
+*/
+/* istanbul ignore next */ const getDragActionConfig = (context, config) => {
+    const sourceInfo = context.getSourceInfo();
+    const { startPos, endPos } = config;
+    const coordType = context.coord();
+
+    if (startPos.x === endPos.x && startPos.y === endPos.y) {
+        return {
+            criteria: null
+        };
     }
 
-    return {
-        criteria: rangeObj,
-        dimensions
-    };
+    return dragCriteriaRetriever[coordType](context, sourceInfo, config);
 };
 
 export default getDragActionConfig;

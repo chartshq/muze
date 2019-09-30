@@ -125,33 +125,50 @@ export const getSideEffects = (behaviour, behaviourEffectMap) => {
     return sideEffects;
 };
 
-export const unionSets = (context, behaviours) => {
+export const unionSets = (firebolt, behaviours) => {
     let combinedSet = {};
     const models = {
         mergedEnter: null,
         mergedExit: null
     };
+    const uidSet = {
+        mergedEnter: [],
+        mergedExit: []
+    };
+
+    const { context } = firebolt;
     behaviours.forEach((behaviour) => {
-        const entryExitSet = context._entryExitSet[behaviour];
+        const entryExitSet = firebolt._entryExitSet[behaviour];
         if (entryExitSet) {
             combinedSet = Object.assign(combinedSet, clone(entryExitSet));
             ['mergedEnter', 'mergedExit'].forEach((type) => {
-                const model = entryExitSet[type].model;
+                const { model, uids } = entryExitSet[type];
                 let existingModel = models[type];
-                let aggFns = retrieveNearestGroupByReducers(model);
+
                 if (!existingModel) {
                     existingModel = models[type] = model;
+                    uidSet[type] = uids;
                 } else if (`${model.getSchema().map(d => d.name).sort()}` ===
                     `${existingModel.getSchema().map(d => d.name).sort()}`) {
-                    aggFns = Object.assign({}, retrieveNearestGroupByReducers(existingModel));
-                    existingModel = models[type] = model.union(existingModel);
+                    uidSet[type] = [...uidSet[type], ...uids];
                 } else {
                     existingModel = model;
+                    uidSet[type] = uids;
                 }
-                combinedSet[type].model = existingModel;
-                combinedSet[type].aggFns = aggFns;
+                combinedSet[type].uids = [...new Set(uidSet[type])];
             });
         }
+    });
+
+    ['mergedEnter', 'mergedExit'].forEach((type) => {
+        if (behaviours.length > 1) {
+            const uids = combinedSet[type].uids.reduce((acc, v) => {
+                acc[v] = true;
+                return acc;
+            }, {});
+            combinedSet[type].model = context.data().select((f, i) => uids[i], { saveChild: false });
+        }
+        combinedSet[type].aggFns = retrieveNearestGroupByReducers(combinedSet[type].model);
     });
     return combinedSet;
 };
