@@ -50,6 +50,7 @@ d3.json('../data/cars.json', function (data) {
   	.columns(['Horsepower'])
   	.detail(['Name'])
     .size('Cylinders')
+    .subtitle('size: dimension')
     .mount(mountPoint)
 
     env.canvas()
@@ -66,6 +67,7 @@ d3.json('../data/cars.json', function (data) {
     }])
     .width(500)
     .height(500)
+    .subtitle('size: measure + range')
     .mount('#chart1')
 
     env.canvas()
@@ -74,7 +76,7 @@ d3.json('../data/cars.json', function (data) {
     .detail(['Maker'])
     .size({
         field: 'Displacement', // Size retinal encoding with Cylinders
-        intervals: 5
+        // intervals: 5
     })
     .data(rootData)
     .layers([{
@@ -83,4 +85,19 @@ d3.json('../data/cars.json', function (data) {
     .width(500)
     .height(500)
     .mount('#chart2')
+
+    env.canvas()
+    .rows(['Acceleration']) // Acceleration goes in X axis
+    .columns(['Year']) // Displacement goes in Y axis
+    .size({
+        field: 'Cylinders', // Size retinal encoding with Cylinders
+        intervals: 5
+    })
+    .data(rootData)
+    .layers([{
+        mark: 'point'
+    }])
+    .width(500)
+    .height(500)
+    .mount('#chart3')
 });

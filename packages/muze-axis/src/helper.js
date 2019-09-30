@@ -18,3 +18,11 @@ export const resolveAxisConfig = (propVal, defaultVal, context) => {
         return defaultVal;
     }
 };
+
+export const sanitiseConfigIntervals = (userRange, intervals) => {
+    if(userRange)
+        return undefined;
+    if(intervals)
+        return intervals
+    return 5;
+};
