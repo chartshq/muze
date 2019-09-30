@@ -248,8 +248,8 @@ export const getItemMeasures = (context, prop, formatter) => {
     const labelManager = context._labelManager;
 
     data.forEach((item, index) => {
-        const value = prop ? item[prop] : item;
-        let formattedData = formatter(item.range, index, data, context);
+        // const value = prop ? item[prop] : item;
+        const formattedData = formatter(item.range, index, data, context);
         const { height, width } = labelManager.getOriSize(formattedData);
         space[index] = { height: height + 1, width: width + 1 };
     });

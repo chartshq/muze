@@ -83,11 +83,11 @@ const getKeyValue = (params) => {
     });
 };
 
-const getEncodingValues = ({field, axes, fn, val}) => {
+const getEncodingValues = ({ field, axes, fn, val }) => {
     const configField = axes.config().field;
     const values = configField && configField !== field ? null : axes[fn](val);
     return values;
-}
+};
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
     const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target } = context;

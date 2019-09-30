@@ -84,6 +84,7 @@ d3.json('../data/cars.json', function (data) {
     }])
     .width(500)
     .height(500)
+    .subtitle('default')
     .mount('#chart2')
 
     env.canvas()

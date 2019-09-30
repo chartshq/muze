@@ -55,14 +55,15 @@ export const DEFAULT_CONFIG = {
     }
 };
 
-const tempConfig = mergeRecursive({},DEFAULT_CONFIG);
+const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
 
 const ITEM_FORMATTER = {
     item: {
         text: {
-            formatter: val => `${val[0]}-${val[1]}` 
+            formatter: val => `${val[0]}-${val[1]}`
         }
-}}
+    }
+};
 
 export const STEP_DEFAULT_CONFIG = mergeRecursive(tempConfig, ITEM_FORMATTER);
 

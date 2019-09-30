@@ -351,7 +351,7 @@ export const renderStepItem = (context, container) => {
             const data = d[1].split('-');
             const lowerLimit = +data[0];
             const upperLimit = +data[1];
-            let formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
+            const formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
             selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {
