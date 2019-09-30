@@ -305,7 +305,7 @@ export default class SimpleLegend {
      *
      * @param {*} data
      *
-     * @memberof StepLegend
+     * @memberof SimpleLegend
      */
     getCriteriaFromData (data) {
         const fieldName = this.fieldName();

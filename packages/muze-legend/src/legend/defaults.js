@@ -1,4 +1,4 @@
-import { getSymbol } from 'muze-utils';
+import { getSymbol, mergeRecursive } from 'muze-utils';
 import {
     CENTER,
     LEFT,
@@ -54,6 +54,17 @@ export const DEFAULT_CONFIG = {
         }
     }
 };
+
+const tempConfig = mergeRecursive({},DEFAULT_CONFIG);
+
+const ITEM_FORMATTER = {
+    item: {
+        text: {
+            formatter: val => `${val[0]}-${val[1]}` 
+        }
+}}
+
+export const STEP_DEFAULT_CONFIG = mergeRecursive(tempConfig, ITEM_FORMATTER);
 
 /**
  * Creates a map of pre defined icons

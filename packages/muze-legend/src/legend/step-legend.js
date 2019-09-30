@@ -12,6 +12,7 @@ import {
 import { STEP, RECT, LEFT, SIZE, UPPER, LOWER } from '../enums/constants';
 import { stepData } from './position-config';
 import '../styles.scss';
+import { STEP_DEFAULT_CONFIG } from './defaults';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -42,6 +43,17 @@ export default class StepLegend extends SimpleLegend {
      */
     static type () {
         return STEP;
+    }
+
+    /**
+     *
+     *
+     * @static
+     *
+     * @memberof StepLegend
+     */
+    static defaultConfig () {
+        return STEP_DEFAULT_CONFIG;
     }
 
     /**
