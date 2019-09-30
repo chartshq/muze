@@ -10,4 +10,17 @@ export default class BrushBehaviour extends VolatileBehaviour {
     static formalName () {
         return BEHAVIOURNAMES.BRUSH;
     }
+
+    getAddSetFromCriteria (criteria, propagationInf = {}) {
+        const context = this.firebolt.context;
+        const hasBarLayer = !!context.layers().find(f => f.constructor.name === 'BarLayer');
+        const filteredDataModel = propagationInf.data ? propagationInf.data :
+            context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
+
+        return {
+            model: filteredDataModel,
+            uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
+                filteredDataModel[0].getUids()) : null
+        };
+    }
 }

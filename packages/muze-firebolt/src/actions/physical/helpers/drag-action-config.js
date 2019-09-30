@@ -23,8 +23,8 @@ const dragCriteriaRetriever = {
         };
         const rangeObj = {};
 
-        rangeObj[xField] = selectedDomains.x;
-        rangeObj[yField] = selectedDomains.y;
+        if (selectedDomains.x) rangeObj[xField] = selectedDomains.x;
+        if (selectedDomains.y) rangeObj[yField] = selectedDomains.y;
 
         if (xField === yField) {
             const xdom = selectedDomains.x;

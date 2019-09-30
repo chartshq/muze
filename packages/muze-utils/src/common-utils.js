@@ -945,21 +945,29 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  * @param {*} criteria
  *
  */
-const getDataModelFromRange = (dataModel, criteria, mode, behaviourType) => {
+const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
     if (criteria === null) return null;
 
     const selFields = Object.keys(criteria);
     const selFn = fields => selFields.every((field) => {
-        const val = fields[field].internalValue;
+        let fieldValue = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
+
         if (typeof range[0] === STRING) {
-            return range.find(d => d === val) !== undefined;
+            return range.find(d => d === fieldValue) !== undefined;
         }
-        console.log(behaviourType);
-        if (behaviourType) {
-            return range ? (val >= range[0] && val <= range[1]) || (range[1] <= val) : true;
+
+        if (range) {
+            // Check if the selected bar value lies inside the selection box
+            let isFieldSelected = fieldValue >= range[0] && fieldValue <= range[1];
+            if (hasBarLayer && !isFieldSelected) {
+                // Check if the selection box overlaps the bar, if overlap bar is selected
+                fieldValue = [0, fieldValue];
+                isFieldSelected = fieldValue[0] <= range[1] && range[0] <= fieldValue[1];
+            }
+            return isFieldSelected;
         }
-        return range ? val >= range[0] && val <= range[1] : true;
+        return true;
     });
 
     return dataModel.select(selFn, {

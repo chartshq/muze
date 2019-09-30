@@ -9,10 +9,21 @@
     <!-- <link rel="stylesheet" href="./muze.css" /> -->
     <script src="/muze.js"></script>
     <style>
-        #parentdiv {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr);
-            grid-gap: 10px;
+        body,
+        html {
+            font-family: 'Source Sans Pro', "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        #chart-container {
+            overflow-y: auto !important;
+            text-align: center;
+            padding: 0px 10px 10px 10px;
+            height: auto;
+            min-height: 350px;
+        }
+
+        .averageLine path {
+            stroke-width: 2px;
         }
     </style>
 </head>
@@ -32,6 +43,6 @@
         <div id="chart7"></div>
 </div>
     <!-- <script /src="https://d3js.org/d3.v4.js"></script> -->
-    <script src="./js/aa.js"></script>
+    <script src="./js/interactive-layers.js"></script>
 </body>
 </html>
