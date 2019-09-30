@@ -499,6 +499,7 @@ const transformDataModel = (dataModel, config, resolver) => {
     if (resolvedData instanceof DataModel) {
         resolvedData.dispose();
     }
+
     groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
     resolver.data(groupedModel);
     if (!groupBy.disabled) {
@@ -516,6 +517,7 @@ const transformDataModel = (dataModel, config, resolver) => {
     }
     // sort temporal fields if any in the given rows and columns
     groupedModel = sortDmTemporalFields(resolver, groupedModel);
+    resolver.transformedData(groupedModel);
     return groupedModel;
 };
 

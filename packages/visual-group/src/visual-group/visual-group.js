@@ -3,7 +3,8 @@ import localOptions from './local-options';
 import { SimpleGroup } from '../simple-group';
 import {
     MatrixResolver,
-    findInGroup
+    findInGroup,
+    getEncoder
 } from '../group-helper';
 import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices, createLayerState } from './helper';
 import { setupChangeListeners } from './change-listener';
@@ -51,8 +52,8 @@ class VisualGroup extends SimpleGroup {
         // One can get each property by calling the method and can set it
         // by passing paramaters for the same. Thus, one can chain setter
         // getter methods.
-        generateGetterSetters(this, PROPS);
-        generateGetterSetters(this, localOptions);
+        generateGetterSetters(this, this.constructor.getterSetters());
+        generateGetterSetters(this, this.constructor.localOptions());
         // Populate the store with default values
         // initialize group compositions
         this._composition = {};
@@ -63,7 +64,7 @@ class VisualGroup extends SimpleGroup {
         // selection object that takes care of updating of components
         this._selection = {};
         // Create instance of matrix resolver
-        this.resolver(new MatrixResolver(this._dependencies));
+        this.createMatrixResolver();
         // matrix instance store each of the matrices
         setMatrixInstances(this, {});
          // Getting indiviual registered items
@@ -101,6 +102,13 @@ class VisualGroup extends SimpleGroup {
 
     static formalName () {
         return 'VisualGroup';
+    }
+
+    static localOptions () {
+        return localOptions;
+    }
+    static getterSetters () {
+        return PROPS;
     }
 
     /**
@@ -264,6 +272,18 @@ class VisualGroup extends SimpleGroup {
         info.rows = null;
         info.columns = null;
         info.values = null;
+    }
+
+    createEncoderInstance () {
+        const layers = this.layers();
+
+        return getEncoder(layers);
+    }
+
+    createMatrixResolver () {
+        this.resolver(new MatrixResolver(this._dependencies));
+
+        return this;
     }
 }
 
