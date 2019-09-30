@@ -59,7 +59,7 @@ d3.json('../data/cars.json', function (data) {
     .detail(['Maker'])
     .size({
         field: 'Displacement', // Size retinal encoding with Cylinders
-        range: [0,1000,2000,3000,4000,5000,6000]
+        range: [0,1000]
     })
     .data(rootData)
     .layers([{
