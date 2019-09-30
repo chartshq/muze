@@ -1,4 +1,5 @@
 import { VolatileBehaviour } from '@chartshq/muze-firebolt';
+import { LAYER_TYPES } from '@chartshq/visual-layer';
 import { BRUSH } from '../../enums/behaviours';
 /**
  * This is the behaviour for brushing a region on the chart. It accepts a payload
@@ -12,7 +13,7 @@ export default class UnitBrushBehaviour extends VolatileBehaviour {
 
     getAddSetFromCriteria (criteria, propagationInf = {}) {
         const context = this.firebolt.context;
-        const hasBarLayer = !!context.layers().find(f => f.constructor.name === 'BarLayer');
+        const hasBarLayer = !!context.layers().find(layer => layer.config().mark === LAYER_TYPES.BAR_LAYER);
         const filteredDataModel = propagationInf.data ? propagationInf.data :
             context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
 

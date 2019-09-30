@@ -414,9 +414,8 @@ export default class Firebolt {
 
     getAddSetFromCriteria (criteria, propagationInf = {}) {
         const context = this.context;
-        const hasBarLayer = !!context.layers().find(f => f.constructor.name === 'BarLayer');
         const filteredDataModel = propagationInf.data ? propagationInf.data :
-            context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
+            context.getDataModelFromIdentifiers(criteria, 'all');
 
         return {
             model: filteredDataModel,
