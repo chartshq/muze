@@ -239,7 +239,8 @@ export const renderIcon = (icon, container, datum, context) => {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
         createShape(datum, group, icon)
                         .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
-                        .attr('fill', datum[2] || color);
+                        .attr('fill', datum[2] || color)
+                        .attr('stroke', datum[2] || color);
     } else {
         makeElement(svg, RECT, [datum[1]], `${classPrefix}-legend-icon`)
                         .attr('x', 0)
