@@ -1,7 +1,4 @@
 /* eslint-disable*/
-let env = muze();
-const DataModel = muze.DataModel;
-
 d3.json('/data/cars.json', (data) => {
     const schema = [{
         name: 'Name',
