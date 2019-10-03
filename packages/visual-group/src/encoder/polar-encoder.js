@@ -375,6 +375,7 @@ export default class PolarEncoder extends VisualEncoder {
                 !encoding.angle && (encoding.angle = {});
                 const angleField = getObjProp(encoding.angle, 'field');
                 const angle0Field = getObjProp(encoding.angle0, 'field');
+
                 if (!angleField) {
                     Object.assign(encoding.angle, {
                         field: encodingConfigs.color && encodingConfigs.color.field

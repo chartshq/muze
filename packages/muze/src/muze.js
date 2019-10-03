@@ -4,17 +4,13 @@ import {
     enableChainedTransaction,
     LifeCycleManager,
     DataModel,
-    makeElement,
-    getClientPoint,
-    selectElement,
-    getEvent,
-    require,
-    DateTimeFormatter,
     Store
 } from 'muze-utils';
 
+import * as utils from 'muze-utils';
+
 import { VisualUnit, helpers as unitHelpers, enums as unitEnums, UnitFireBolt } from '@chartshq/visual-unit';
-import { VisualGroup } from '@chartshq/visual-group';
+import { VisualGroup, Encoders, encoderHelpers, groupUtils, enums as groupEnums } from '@chartshq/visual-group';
 import {
     SurrogateSideEffect,
     SpawnableSideEffect,
@@ -188,7 +184,11 @@ muze.Components = {
         UnitFireBolt
     },
     VisualGroup: {
-        cls: VisualGroup
+        cls: VisualGroup,
+        Encoders,
+        encoderHelpers,
+        groupUtils,
+        enums: groupEnums
     }
 };
 
@@ -217,13 +217,6 @@ muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
 muze.Operators = operators;
 muze.Behaviours = Behaviours;
-muze.utils = {
-    getClientPoint,
-    getEvent,
-    makeElement,
-    selectElement,
-    DateTimeFormatter,
-    require
-};
+muze.utils = utils;
 muze.Model = new Store().model.constructor;
 export default muze;
