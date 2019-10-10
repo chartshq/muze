@@ -222,7 +222,7 @@ export const renderLayers = (context, container, layers, measurement) => {
     context._lifeCycleManager.notify({ client: layers, action: 'beforedraw', formalName: 'layer' });
     const config = context.config();
     const classPrefix = config.classPrefix;
-    const orderedLayers = context.layers().sort((a, b) => a.config().order - b.config().order);
+    const orderedLayers = layers.sort((a, b) => a.config().order - b.config().order);
     const layerParentGroup = makeElement(container, 'g', [1], `${classPrefix}-layer-group`);
     const layerDepOrder = getDependencyOrder(context._layerDepOrder);
     const groups = {};
@@ -235,7 +235,7 @@ export const renderLayers = (context, container, layers, measurement) => {
         }
     });
 
-    const layerSeq = layerDepOrder.map(name => groups[name]);
+    const layerSeq = layerDepOrder.map(name => groups[name]).filter(d => d !== undefined);
     layerSeq.forEach((o) => {
         const layer = o.layer;
         const group = o.group;

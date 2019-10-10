@@ -1,18 +1,34 @@
-import { AreaLayer } from './layers/area';
-import { ArcLayer } from './layers/arc';
-import { LineLayer } from './layers/line';
-import { TextLayer } from './layers/text';
-import { PointLayer } from './layers/point';
-import { BarLayer } from './layers/bar';
-import { TickLayer } from './layers/tick';
+import { AreaLayer, AreaLayerMixin } from './layers/area';
+import { ArcLayer, ArcLayerMixin } from './layers/arc';
+import { LineLayer, LineLayerMixin } from './layers/line';
+import { TextLayer, TextLayerMixin } from './layers/text';
+import { PointLayer, PointLayerMixin } from './layers/point';
+import { BarLayer, BarLayerMixin } from './layers/bar';
+import { TickLayer, TickLayerMixin } from './layers/tick';
 import { SimpleLayer } from './simple-layer';
-import { BaseLayer } from './base-layer';
+import { BaseLayer, BaseLayerMixin } from './base-layer';
 import * as LAYER_TYPES from './enums/layer-types';
 import layerFactory from './layer-factory';
 import layerRegistry from './layer-registry';
 import { ENCODING } from './enums/constants';
-import * as helpers from './helpers';
+import * as pointLayerHelpers from './layers/point/helper';
+import * as commonHelpers from './helpers';
 import * as enums from './enums';
+
+const helpers = Object.assign(commonHelpers, {
+    pointLayerHelpers
+});
+
+const layerMixins = {
+    BarLayerMixin,
+    BaseLayerMixin,
+    LineLayerMixin,
+    AreaLayerMixin,
+    PointLayerMixin,
+    TextLayerMixin,
+    TickLayerMixin,
+    ArcLayerMixin
+};
 
 export {
     BaseLayer,
@@ -29,5 +45,6 @@ export {
     LAYER_TYPES,
     ENCODING,
     helpers,
-    enums
+    enums,
+    layerMixins
 };

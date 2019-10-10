@@ -101,7 +101,9 @@ export {
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
     sortCategoricalField,
-    intersect
+    intersect,
+    partition,
+    mix
 } from './common-utils';
 
 export {

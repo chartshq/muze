@@ -4,8 +4,7 @@ import {
     transformDataModels,
     getDimensionMeasureMap,
     attachDataToLayers,
-    attachAxisToLayers,
-    unionDomainFromLayers
+    attachAxisToLayers
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
@@ -24,13 +23,6 @@ const removeExitLayers = (layerDefs, context) => {
             delete layersMap[key];
         }
     }
-};
-
-export const calculateDomainListener = (context) => {
-    const { namespace } = context.metaInf();
-    const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
-        context.data().getFieldsConfig());
-    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, domain, namespace);
 };
 
 export const listenerMap = [

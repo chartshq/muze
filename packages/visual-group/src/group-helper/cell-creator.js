@@ -591,13 +591,13 @@ export const computeMatrices = (context, config) => {
     };
 
     resolver.cacheMaps(newCacheMap);
-
+    const { simpleEncoder } = encoders;
     const valueCellContext = {
         config: globalConfig,
-        suppliedLayers: encoders.simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+        suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
         resolver,
         cell: cells.GeomCell,
-        encoder: encoders.simpleEncoder,
+        encoder: simpleEncoder,
         newCacheMap,
         detailFields: config.detail,
         retinalConfig: {
@@ -612,7 +612,7 @@ export const computeMatrices = (context, config) => {
         suppliedLayers: valueCellContext.suppliedLayers,
         groupBy
     }, resolver);
-
+    simpleEncoder.data(groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs

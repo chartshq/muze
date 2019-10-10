@@ -1,12 +1,3 @@
-import {
-    transactor,
-    Smartlabel,
-    enableChainedTransaction,
-    LifeCycleManager,
-    DataModel,
-    Store
-} from 'muze-utils';
-
 import * as utils from 'muze-utils';
 
 import { VisualUnit, helpers as unitHelpers, enums as unitEnums, UnitFireBolt } from '@chartshq/visual-unit';
@@ -32,7 +23,8 @@ import {
     enums,
     SimpleLayer,
     AreaLayer,
-    ArcLayer
+    ArcLayer,
+    layerMixins
 } from '@chartshq/visual-layer';
 import pkg from '../package.json';
 import * as operators from './operators';
@@ -41,6 +33,15 @@ import options from './options';
 import { Canvas } from './canvas';
 import { registry as globalRegistry, SUBREGISTRIES } from './default-registry';
 import './muze.scss';
+
+const {
+    transactor,
+    Smartlabel,
+    enableChainedTransaction,
+    LifeCycleManager,
+    DataModel,
+    Store
+} = utils;
 
 // Cache singleton instances which should be included only once in a page
 const globalCache = {};
@@ -175,7 +176,8 @@ muze.Components = {
             ArcLayer
         },
         helpers,
-        enums
+        enums,
+        layerMixins
     },
     VisualUnit: {
         cls: VisualUnit,

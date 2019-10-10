@@ -173,7 +173,7 @@ export default class PolarEncoder extends VisualEncoder {
         const axes = context.resolver().axes();
         context.matrixInstance().value.each((cell, rIdx, cIdx) => {
             const unit = cell.valueOf();
-            const unitDomains = unit.getDataDomain();
+            const unitDomains = unit.dataDomain();
             const fields = unit.fields();
             setRadiusFactor(unit);
             [RADIUS, ANGLE, ANGLE0].forEach((encType) => {

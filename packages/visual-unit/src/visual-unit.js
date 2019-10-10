@@ -27,16 +27,18 @@ import {
     createSideEffectGroup,
     resolveEncodingTransform,
     createRenderPromise,
-    setAxisRange
+    setAxisRange,
+    unionDomainFromLayers
 } from './helper';
 import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
-import { calculateDomainListener, listenerMap } from './listener-map';
+import { listenerMap } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
 import { initSideEffects, dispatchQueuedSideEffects, clearActionHistory } from './firebolt/helper';
 import './styles.scss';
 import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
+import { REACTIVE_PROPS } from './enums';
 
 const FORMAL_NAME = 'VisualUnit';
 const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
@@ -121,7 +123,10 @@ export default class VisualUnit {
             }), {
                 type: 'registerImmediateListener',
                 props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
-                listener: calculateDomainListener
+                listener: (context) => {
+                    const domain = context.calculateDomainFromData();
+                    context.dataDomain(domain);
+                }
             }, {
                 type: 'registerImmediateListener',
                 props: [`${unitNs[1]}.${WIDTH}`,
@@ -516,8 +521,15 @@ export default class VisualUnit {
         };
     }
 
-    getDataDomain () {
-        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`, this.metaInf().namespace);
+    dataDomain (...params) {
+        const { namespace } = this.metaInf();
+        const store = this.store();
+        const prop = `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${REACTIVE_PROPS.DOMAIN}`;
+        if (params.length) {
+            const domain = params[0];
+            store.commit(prop, domain, namespace);
+        }
+        return store.get(prop, namespace);
     }
 
     getDefaultTargetContainer () {
@@ -715,5 +727,11 @@ export default class VisualUnit {
     removeLayersByType (type) {
         removeLayersBy('type', type);
         return this;
+    }
+
+    calculateDomainFromData () {
+        const domain = unionDomainFromLayers(this.layers(), this.fields(), this._layerAxisIndex,
+            this.data().getFieldsConfig());
+        return domain;
     }
 }

@@ -57,28 +57,28 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     });
 };
 
-export const encodingFieldInfRetriever = {
-    [POLAR]: (encoding, fieldsConfig) => {
-        const encodingInf = {};
-        [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE, TEXT]
-            .forEach((e) => {
-                const field = getObjProp(encoding, e, 'field');
-                encodingInf[`${e}Field`] = field;
-                encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
-            });
-        return encodingInf;
-    },
-    [CARTESIAN]: (encoding, fieldsConfig) => {
-        const encodingInf = {};
-        [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE, TEXT].forEach((e) => {
+export const retrieveEncodingInf = (encoding, fieldsConfig, encodingNames) => {
+    const encodingInf = {};
+
+    encodingNames
+        .forEach((e) => {
             const field = getObjProp(encoding, e, 'field');
             encodingInf[`${e}Field`] = field;
             encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
             encodingInf[`${e}FieldType`] = getObjProp(fieldsConfig, field, 'def', 'type');
             encodingInf[`${e}FieldSubType`] = getObjProp(fieldsConfig, field, 'def', 'subtype');
         });
+    return encodingInf;
+};
 
-        return encodingInf;
+export const encodingFieldInfRetriever = {
+    [POLAR]: (encoding, fieldsConfig) => {
+        const fields = [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE, TEXT];
+        return retrieveEncodingInf(encoding, fieldsConfig, fields);
+    },
+    [CARTESIAN]: (encoding, fieldsConfig) => {
+        const fields = [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE, TEXT];
+        return retrieveEncodingInf(encoding, fieldsConfig, fields);
     }
 };
 

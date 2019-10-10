@@ -1327,7 +1327,20 @@ const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
     return arr1.filter(value => set.has(fn1(value)));
 };
 
+const partition = (array, filterFn) => array.reduce((acc, v, i) => {
+    const pass = filterFn(v, i, array);
+
+    pass ? acc[0].push(v) : acc[1].push(v);
+    return acc;
+}, [[], []]);
+
+const mix = superclass => ({
+    with: (...mixins) => mixins.reduce((cls, mixin) => mixin(cls), superclass)
+});
+
 export {
+    mix,
+    partition,
     getValueParser,
     require,
     intersect,
