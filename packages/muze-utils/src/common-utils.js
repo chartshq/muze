@@ -1338,7 +1338,23 @@ const mix = superclass => ({
     with: (...mixins) => mixins.reduce((cls, mixin) => mixin(cls), superclass)
 });
 
+const componentRegistry = (comps) => {
+    const reg = Object.assign({}, comps);
+    const regObj = {
+        register: (def, customKey) => {
+            const key = customKey || def.formalName();
+
+            reg[key] = def;
+            return regObj;
+        },
+        get: () => reg
+    };
+
+    return regObj;
+};
+
 export {
+    componentRegistry,
     mix,
     partition,
     getValueParser,

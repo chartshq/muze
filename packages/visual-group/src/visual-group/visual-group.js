@@ -44,7 +44,8 @@ class VisualGroup extends SimpleGroup {
 
         const {
             components,
-            componentSubRegistry
+            componentSubRegistry,
+            interactions
         } = registry;
 
         this._dependencies = dependencies;
@@ -69,9 +70,10 @@ class VisualGroup extends SimpleGroup {
         setMatrixInstances(this, {});
          // Getting indiviual registered items
         this.registry({
-            layerRegistry: componentSubRegistry.layerRegistry.get(),
-            cellRegistry: componentSubRegistry.cellRegistry.get(),
-            VisualUnit: components.VisualUnit
+            layerRegistry: componentSubRegistry.layers.get(),
+            cellRegistry: componentSubRegistry.cells.get(),
+            VisualUnit: components.VisualUnit,
+            interactions
         });
     }
 

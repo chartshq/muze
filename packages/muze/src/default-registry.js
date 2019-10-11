@@ -2,6 +2,7 @@ import { cellRegistry, SimpleCell } from '@chartshq/visual-cell';
 import { VisualUnit } from '@chartshq/visual-unit';
 import { layerRegistry } from '@chartshq/visual-layer';
 import { SimpleGroup, VisualGroup } from '@chartshq/visual-group';
+import { registry as interactionRegistry } from '@chartshq/muze-firebolt';
 
 export const COMPONENTS = {
     [VisualGroup.formalName()]: VisualGroup,
@@ -9,8 +10,8 @@ export const COMPONENTS = {
 };
 
 export const SUBREGISTRIES = {
-    cellRegistry,
-    layerRegistry
+    cells: cellRegistry,
+    layers: layerRegistry
 };
 export const INTERFACES = {
     SimpleGroup,
@@ -32,6 +33,7 @@ const componentRegistry = (components = COMPONENTS) => {
 
 export const registry = {
     components: componentRegistry(COMPONENTS),
-    cellRegistry: cellRegistry(),
-    layerRegistry: layerRegistry()
+    cells: cellRegistry(),
+    layers: layerRegistry(),
+    interactions: interactionRegistry
 };

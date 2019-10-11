@@ -66,8 +66,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
 
     const legendInfo = legendCreator(canvas);
     const { invalidValues } = canvas.config();
-
+    const interactionRegistry = canvas.registry().interactions;
     const parser = getValueParser(invalidValues);
+
     legendInfo.forEach((dataInfo, index) => {
         const legendMeasures = {};
         const {
@@ -89,6 +90,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                     labelManager: canvas._dependencies.smartlabel,
                     cells: {
                         AxisCell, TextCell
+                    },
+                    registry: {
+                        interactions: interactionRegistry
                     }
                 });
             }

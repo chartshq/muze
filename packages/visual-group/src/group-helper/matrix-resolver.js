@@ -280,7 +280,7 @@ export default class MatrixResolver {
         } = config;
         const {
             layerRegistry,
-            sideEffectRegistry
+            interactions
         } = componentRegistry;
         const {
             smartlabel: smartLabel,
@@ -304,7 +304,7 @@ export default class MatrixResolver {
 
                 unit = VisualUnit.create({
                     layerRegistry,
-                    sideEffectRegistry
+                    interactions
                 }, {
                     smartLabel,
                     lifeCycleManager,

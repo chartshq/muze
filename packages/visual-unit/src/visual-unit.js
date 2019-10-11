@@ -14,7 +14,7 @@ import {
     toArray,
     STATE_NAMESPACES
 } from 'muze-utils';
-import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
+import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
 import {
     renderLayers,
@@ -188,15 +188,24 @@ export default class VisualUnit {
     }
 
     createFireboltInstance () {
+        const { interactions } = this.registry();
         const { fireboltDeps } = this._dependencies;
 
         this.firebolt(new UnitFireBolt(this, {
-            physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
-            behavioural: Object.assign({}, behaviouralActions, fireboltDeps.behaviouralActions),
-            physicalBehaviouralMap: actionBehaviourMap
-        }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
+            physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
+            behavioural: Object.assign({}, interactions.behaviours.get(), fireboltDeps.behaviouralActions),
+            physicalBehaviouralMap: this.getActionBehaviourMap()
+        }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
 
         return this;
+    }
+
+    getBehaviourEffectMap () {
+        return behaviourEffectMap;
+    }
+
+    getActionBehaviourMap () {
+        return actionBehaviourMap;
     }
 
     /**

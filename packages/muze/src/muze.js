@@ -98,7 +98,8 @@ const muze = () => {
         const settings = globalStore.serialize();
         const canvas = Canvas.withSettings(settings, { /* registry */
             components,
-            componentSubRegistry
+            componentSubRegistry,
+            interactions: globalRegistry.interactions
         }, env.globalDependencies());
 
         // Whenever settings is changed canvas is updated
@@ -157,11 +158,7 @@ const muze = () => {
     return env;
 };
 
-muze.registry = {
-    components: globalRegistry.components,
-    cells: globalRegistry.cellRegistry,
-    layers: globalRegistry.layerRegistry
-};
+muze.registry = globalRegistry;
 
 muze.Components = {
     VisualLayer: {
@@ -221,4 +218,5 @@ muze.Operators = operators;
 muze.Behaviours = Behaviours;
 muze.utils = utils;
 muze.Model = new Store().model.constructor;
+
 export default muze;

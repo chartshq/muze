@@ -103,7 +103,8 @@ export {
     sortCategoricalField,
     intersect,
     partition,
-    mix
+    mix,
+    componentRegistry
 } from './common-utils';
 
 export {
