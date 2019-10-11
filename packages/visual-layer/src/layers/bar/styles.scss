@@ -2,6 +2,8 @@
 
 .#{$prefix}layer-bar {
     fill-opacity: 1;
+    stroke: none;
+    stroke-width: 0;
 }
 
 .#{$prefix}layer-bar-highlight {

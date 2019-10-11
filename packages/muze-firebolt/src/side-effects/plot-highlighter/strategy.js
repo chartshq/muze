@@ -24,9 +24,13 @@ export const strategies = {
         } = set;
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'focus', false);
+            context.applyInteractionStyle(completeSet, {}, 'focusStroke', false);
         } else {
             context.applyInteractionStyle(mergedExit, {}, 'focus', true);
             context.applyInteractionStyle(mergedEnter, {}, 'focus', false);
+
+            context.applyInteractionStyle(mergedExit, {}, 'focusStroke', false);
+            context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
     highlight: (set, context) => {

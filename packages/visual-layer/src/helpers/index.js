@@ -33,26 +33,49 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     const colorAxis = axes.color;
     const apply = config.apply;
     const interactionType = config.interactionType;
+
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
-            elem.style(styleType, ((d) => {
-                const { colorTransform, stateColor, originalColor } = d.meta;
-                colorTransform[interactionType] = colorTransform[interactionType] || {};
-                if (apply && !colorTransform[interactionType][styleType]) {
-                    // fade selections
-                    colorTransform[interactionType][styleType] = style.intensity;
-                    const color = transformColor(colorAxis, d, styleType, style.intensity).color;
-                    return color;
+            const datum = elem.data()[0];
+            const { originalStroke, stateStroke } = datum.meta;
+            stateStroke[interactionType] = stateStroke[interactionType] || {};
+
+            if (interactionType === 'focusStroke') {
+                if (apply && !stateStroke[interactionType][styleType]) {
+                    // apply
+                    stateStroke[interactionType][styleType] = style.props.value;
+                    context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+                    return;
                 }
-                if (!apply && colorTransform[interactionType][styleType]) {
-                    // unfade selections
-                    colorTransform[interactionType][styleType] = null;
-                    return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                if (!apply && stateStroke[interactionType][styleType]) {
+                    // remove
+                    stateStroke[interactionType][styleType] = originalStroke[styleType];
+                    context.removeOverlayPath(elem.node().parentElement, elem.node(), datum, originalStroke);
+                    return;
                 }
-                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
-                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
-            }));
+                stateStroke[interactionType][styleType] =
+                    stateStroke[interactionType][styleType] || originalStroke[styleType];
+            } else {
+                elem.style(styleType, ((d) => {
+                    const { colorTransform, stateColor, originalColor } = d.meta;
+                    colorTransform[interactionType] = colorTransform[interactionType] || {};
+
+                    if (apply && !colorTransform[interactionType][styleType]) {
+                        // fade selections
+                        colorTransform[interactionType][styleType] = style.intensity;
+                        const color = transformColor(colorAxis, d, styleType, style.intensity).color;
+                        return color;
+                    }
+                    if (!apply && colorTransform[interactionType][styleType]) {
+                        // unfade selections
+                        colorTransform[interactionType][styleType] = null;
+                        return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                    }
+                    const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
+                    return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
+                }));
+            }
         });
     });
 };
@@ -551,6 +574,11 @@ export const getColorMetaInf = (colorInf, colorAxis) => ({
         }
         return acc;
     }, {}),
+    originalStroke: {
+        stroke: 0,
+        'stroke-width': 0
+    },
+    stateStroke: {},
     stateColor: {},
     colorTransform: {}
 });

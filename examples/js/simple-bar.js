@@ -71,7 +71,7 @@
         // .detail(['Name'])
         .mount('#chart')
         .height(500)
-        .width(900)
+        .width(500)
         .title('Charts');
     })
 })();

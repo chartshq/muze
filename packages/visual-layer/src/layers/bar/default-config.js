@@ -15,8 +15,23 @@ export const defaultConfig = {
         }],
         focus: [{
             type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }]
+            intensity: [0, 0, 0, -0.5]
+        }],
+        focusStroke: [
+            {
+                type: 'stroke',
+                props: {
+                    value: 'black'
+                }
+            }, {
+                type: 'stroke-width',
+                props: {
+                    value: 2,
+                    position: 'outside'
+                }
+            }
+        ]
+
     },
     transform: {
         type: 'stack'
@@ -45,4 +60,3 @@ export const defaultConfig = {
         }
     }
 };
-

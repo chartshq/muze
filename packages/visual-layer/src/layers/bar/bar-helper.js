@@ -138,6 +138,31 @@ const resolveDimensions = (data, config, axes) => {
     };
 };
 
+export const strokeWidthPositionMap = ({ width, position }) => {
+    const offset = width / 2;
+    const strokeWidthWithOffsetMap = {
+        center: {
+            M: { x: 0, y: 0 },
+            L1: { x: 0, y: 0 },
+            L2: { x: 0, y: 0 },
+            L3: { x: 0, y: 0 }
+        },
+        inside: {
+            M: { x: +offset, y: +offset },
+            L1: { x: -offset, y: +offset },
+            L2: { x: -offset, y: -offset },
+            L3: { x: +offset, y: -offset }
+        },
+        outside: {
+            M: { x: -offset, y: -offset },
+            L1: { x: +offset, y: -offset },
+            L2: { x: +offset, y: +offset },
+            L3: { x: -offset, y: +offset }
+        }
+    };
+    return strokeWidthWithOffsetMap[position];
+};
+
 /**
  * Generates an array of objects containing x, y, width and height of the bars from the data
  * @param  {Array.<Array>} data Data Array
