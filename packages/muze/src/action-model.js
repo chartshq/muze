@@ -1,5 +1,4 @@
 import { mergeRecursive, CommonProps } from 'muze-utils';
-import { registry } from './default-registry';
 
 const defaultPolicy = (registrableComponents) => {
     const aliases = registrableComponents.map(comp => comp.alias());
