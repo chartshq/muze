@@ -3,6 +3,7 @@ import {
     selectElement,
     getQualifiedClassName,
     makeElement,
+    appendElement,
     FieldType,
     Scales
 } from 'muze-utils';
@@ -43,6 +44,7 @@ export default class PointLayer extends BaseLayer {
         super(...args);
         this._voronoi = new Voronoi();
         this._bandScale = Scales.band();
+        this._overlayPath = {};
     }
 
     elemType () {
@@ -262,5 +264,43 @@ export default class PointLayer extends BaseLayer {
             };
         }
         return null;
+    }
+
+    addOverlayPath (container, refElement, data, style) {
+        let pathElement;
+
+        if (this._overlayPath[data.rowId]) {
+            pathElement = this._overlayPath[data.rowId];
+        } else {
+            pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement.style('fill', 'none');
+            pathElement.attr('id', data.rowId);
+            this._overlayPath[data.rowId] = pathElement;
+        }
+
+        if (style.type === 'stroke-width') {
+            const { position } = style.props;
+            let R = Math.sqrt(data.size / Math.PI);
+
+            if (position === 'inside') R -= 1;
+            else if (position === 'outside') R += 1;
+
+            pathElement.attr('d', d =>
+                (`M ${(d.x - R)}, ${d.y}
+                a ${R},${R} 0 1, 0 ${R * 2}, 0
+                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`));
+        }
+
+        pathElement.style(style.type, style.props.value);
+        Object.keys(this._overlayPath).forEach(path => appendElement(container, this._overlayPath[path].node()));
+        // return pathElement;
+    }
+
+    removeOverlayPath (container, refElement, data, style) {
+        const currentPath = this._overlayPath[data.rowId];
+        // currentPath.style('stroke', 0);
+        // currentPath.style('stroke-width', 0);
+        Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+        // return currentPath;
     }
 }

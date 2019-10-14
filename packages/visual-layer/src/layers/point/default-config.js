@@ -17,7 +17,20 @@ export const defaultConfig = {
         focus: [{
             type: 'fill',
             intensity: [0, 0, +20, 0]
-        }
+        }],
+        focusStroke: [
+            {
+                type: 'stroke',
+                props: {
+                    value: 'black'
+                }
+            }, {
+                type: 'stroke-width',
+                props: {
+                    value: 2,
+                    position: 'outside'
+                }
+            }
         ]
     },
     innerPadding: 0.1,
