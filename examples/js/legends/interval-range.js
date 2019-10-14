@@ -91,14 +91,57 @@ d3.json('../data/cars.json', function (data) {
     .rows(['Acceleration']) // Acceleration goes in X axis
     .columns(['Year']) // Displacement goes in Y axis
     .size({
-        field: 'Cylinders', // Size retinal encoding with Cylinders
-        intervals: 5
+        field: 'Displacement'
     })
     .data(rootData)
     .layers([{
         mark: 'point'
     }])
-    .width(500)
-    .height(500)
+    .config({
+        legend: {
+            position: 'bottom'
+        }
+    })
+    .width(700)
+    .height(700)
     .mount('#chart3')
+
+    env.canvas()
+    .rows(['Acceleration']) // Acceleration goes in X axis
+    .columns(['Year']) // Displacement goes in Y axis
+    .size({
+        field: 'Displacement',
+        intervals: 15
+    })
+    .data(rootData)
+    .layers([{
+        mark: 'point'
+    }])
+    .config({
+        legend: {
+            position: 'bottom'
+        }
+    })
+    .width(700)
+    .height(700)
+    .mount('#chart3')
+    env.canvas()
+    .rows(['Acceleration']) // Acceleration goes in X axis
+    .columns(['Year']) // Displacement goes in Y axis
+    .size({
+        field: 'Displacement',
+        intervals: 15
+    })
+    .data(rootData)
+    .layers([{
+        mark: 'point'
+    }])
+    .config({
+        legend: {
+            position: 'bottom'
+        }
+    })
+    .width(1000)
+    .height(1000)
+    .mount('#chart4')
 });
