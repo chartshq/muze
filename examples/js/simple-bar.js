@@ -65,13 +65,14 @@
         // .rows(['maxDays'])
         .columns(['Maker'])
         .rows(['Horsepower'])
-        // .layers([{
-        //     mark: 'line'
-        // }])
+        .color('Origin')
+        .layers([{
+            mark: 'bar'
+        }])
         // .detail(['Name'])
         .mount('#chart')
-        .height(500)
-        .width(500)
+        .height(650)
+        .width(850)
         .title('Charts');
     })
 })();

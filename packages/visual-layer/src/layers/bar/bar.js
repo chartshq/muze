@@ -1,7 +1,6 @@
 import {
     getQualifiedClassName,
     selectElement,
-    createElements,
     clipElement,
     DimensionSubtype,
     FieldType,
@@ -170,13 +169,9 @@ export default class BarLayer extends BaseLayer {
         this._points = this.generateDataPoints(normalizedDataArr, keys);
         this._graphicElems = {};
 
-        createElements({
-            data: this._points,
-            container,
-            selector: 'g',
-            append: 'g',
-            each: (points, group, i) => {
-                const seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
+        makeElement(container, 'g', this._points, null, {
+            update: (group, points) => {
+                const seriesClassName = `${qualifiedClassName[0]}`;
                 group.style('display', 'block');
                 drawRects({
                     layer: this,
@@ -184,11 +179,12 @@ export default class BarLayer extends BaseLayer {
                     points,
                     className: seriesClassName,
                     transition,
-                    style: {},
-                    keyFn: d => dimensions.map(key => d.source[key]).join('-')
+                    keyFn: d => dimensions.map(key => d.source[key]).join('-'),
+                    style: {}
                 });
             }
-        });
+        }, data => dimensions.map(key => data[0].source[key]).join('*'));
+
         return this;
     }
 
@@ -339,15 +335,11 @@ export default class BarLayer extends BaseLayer {
         }
 
         pathElement.style(style.type, style.props.value);
-        Object.keys(this._overlayPath).forEach(path => appendElement(container, this._overlayPath[path].node()));
-        // return pathElement;
+        appendElement(container, pathElement.node());
     }
 
     removeOverlayPath (container, refElement, data, style) {
         const currentPath = this._overlayPath[data.rowId];
-        // currentPath.style('stroke', 0);
-        // currentPath.style('stroke-width', 0);
         Object.keys(style).forEach(s => currentPath.style(s, style[s]));
-        // return currentPath;
     }
 }

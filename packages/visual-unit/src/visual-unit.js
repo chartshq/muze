@@ -238,11 +238,6 @@ export default class VisualUnit {
         return this._timeDiffsByField;
     }
 
-    // Add axis width and height to parent container
-    getOffsetDimension (unit) {
-        return unit + 5.5;
-    }
-
     /**
      * Renders the visual unit. It creates the layout and renders the axes and layers.
      *
@@ -252,8 +247,8 @@ export default class VisualUnit {
         const config = this.config();
         const { className, defClassName, sideEffectClassName, classPrefix } = config;
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
-        const width = this.getOffsetDimension(this.width());
-        const height = this.getOffsetDimension(this.height());
+        const width = this.width();
+        const height = this.height();
         const containerSelection = selectElement(container).style('position', 'relative');
 
         this._rootSvg = makeElement(containerSelection, 'svg', [null], className)
