@@ -285,22 +285,19 @@ export default class PointLayer extends BaseLayer {
             if (position === 'inside') R -= 1;
             else if (position === 'outside') R += 1;
 
-            pathElement.attr('d', d =>
-                (`M ${(d.x - R)}, ${d.y}
+            pathElement.attr('d', () => (
+                `M ${-R}, 0
                 a ${R},${R} 0 1, 0 ${R * 2}, 0
-                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`));
+                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`
+            ));
         }
 
         pathElement.style(style.type, style.props.value);
-        Object.keys(this._overlayPath).forEach(path => appendElement(container, this._overlayPath[path].node()));
-        // return pathElement;
+        appendElement(refElement, pathElement.node());
     }
 
     removeOverlayPath (container, refElement, data, style) {
         const currentPath = this._overlayPath[data.rowId];
-        // currentPath.style('stroke', 0);
-        // currentPath.style('stroke-width', 0);
         Object.keys(style).forEach(s => currentPath.style(s, style[s]));
-        // return currentPath;
     }
 }

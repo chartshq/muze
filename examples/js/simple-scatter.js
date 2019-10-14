@@ -66,9 +66,10 @@
         .columns(['Maker'])
         .rows(['Horsepower'])
         .layers([{
-            mark: 'bar'
+            mark: 'point'
         }])
         .color('Origin')
+        .size('Horsepower')
         // .detail(['Name'])
         .mount('#chart')
         .height(500)
