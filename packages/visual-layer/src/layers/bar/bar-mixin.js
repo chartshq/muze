@@ -3,12 +3,10 @@ import {
     selectElement,
     createElements,
     clipElement,
-    DimensionSubtype,
     FieldType,
-    MeasureSubtype,
     Scales,
-    getNearestValue,
-    getObjProp
+    getObjProp,
+    isSimpleObject
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
@@ -180,73 +178,28 @@ export const BarLayerMixin = superclass => class extends superclass {
      * @param {number} y y position
      * @return {Object} Nearest point.
      */
-    getNearestPoint (x, y) {
+    getNearestPoint (x, y, { event }) {
         if (!this.data()) {
             return null;
         }
-        let axis;
-        let value;
-        let points;
-        let uniqueFieldType;
-        let uniqueFieldIndex;
-        let filterData;
-        let identifiers;
-        let pointFound = null;
-        const dataModel = this.data();
-        const dataObj = dataModel.getData();
-        const fieldsConfig = dataModel.getFieldsConfig();
-        const axes = this.axes();
-        const data = dataObj.data;
-        const pointMap = this._pointMap;
-        const {
-                xField,
-                yField,
-                xFieldSubType,
-                yFieldSubType
-            } = this.encodingFieldsInf();
+        return this.getDataFromEvent(event);
+    }
 
-        if (xFieldSubType === MeasureSubtype.CONTINUOUS) {
-            axis = axes.y;
-            value = axis.invert(y);
-            uniqueFieldIndex = fieldsConfig[yField].index;
-            uniqueFieldType = yFieldSubType;
-        } else {
-            axis = axes.x;
-            value = axis.invert(x);
-            uniqueFieldIndex = fieldsConfig[xField].index;
-            uniqueFieldType = xFieldSubType;
-        }
-
-        if (uniqueFieldType === DimensionSubtype.CATEGORICAL) {
-            points = pointMap[value];
-        }
-
-        if (uniqueFieldType === DimensionSubtype.TEMPORAL) {
-            filterData = [...new Set(data.map(d => d[uniqueFieldIndex]))];
-            value = getNearestValue(filterData, value);
-            points = pointMap[value];
-        }
-        const len = points && points.length;
-        points && points.sort((p1, p2) => p1.update.y - p2.update.y);
-        for (let i = 0; i < len; i++) {
-            const point = points[i];
-            const update = point.update;
-            if (x >= update.x && x <= (update.width + update.x) && y >= update.y && y <= (update.height + update.y)) {
-                pointFound = point;
-                break;
+    getDataFromEvent (event) {
+        const dataPoint = selectElement(event.target).data()[0];
+        if (isSimpleObject(dataPoint)) {
+            const values = dataPoint && dataPoint.source;
+            let identifiers = null;
+            if (values) {
+                identifiers = this.getIdentifiersFromData(values, dataPoint.rowId);
             }
-            pointFound = null;
+            return {
+                dimensions: [dataPoint.update],
+                id: identifiers,
+                layerId: this.id()
+            };
         }
-
-        const values = pointFound && pointFound.source;
-        if (values) {
-            identifiers = this.getIdentifiersFromData(values, pointFound.rowId);
-        }
-        return pointFound ? {
-            dimensions: [pointFound.update],
-            id: identifiers,
-            layerId: this.id()
-        } : pointFound;
+        return null;
     }
 
     getPlotSpan () {

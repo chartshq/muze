@@ -10,7 +10,8 @@ import {
     GenericBehaviour,
     VolatileBehaviour,
     behaviouralActions,
-    GenericSideEffect
+    GenericSideEffect,
+    Firebolt
 } from '@chartshq/muze-firebolt';
 import {
     layerFactory,
@@ -177,17 +178,23 @@ muze.Components = {
         layerMixins
     },
     VisualUnit: {
-        cls: VisualUnit,
+        constructor: VisualUnit,
         helpers: unitHelpers,
         enums: unitEnums,
         UnitFireBolt
     },
     VisualGroup: {
-        cls: VisualGroup,
+        constructor: VisualGroup,
         Encoders,
         encoderHelpers,
         groupUtils,
         enums: groupEnums
+    },
+    Canvas: {
+        constructor: Canvas
+    },
+    Firebolt: {
+        constructor: Firebolt
     }
 };
 

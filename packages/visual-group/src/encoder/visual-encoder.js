@@ -1,6 +1,6 @@
 import { ERROR_MSG, mergeRecursive, generateGetterSetters } from 'muze-utils';
 import { transformFields } from './field-sanitizer';
-import { getHeaderAxisFrom } from '../group-helper/group-utils';
+import { getHeaderAxisFrom, getFieldsFromSuppliedLayers } from '../group-helper/group-utils';
 import { ROW, COLUMN } from '../enums/constants';
 import { PROPS } from './props';
 
@@ -114,5 +114,9 @@ export default class VisualEncoder {
             column: colHeader
         });
         return this;
+    }
+
+    getProjectionFields (layers) {
+        return getFieldsFromSuppliedLayers(layers);
     }
 }

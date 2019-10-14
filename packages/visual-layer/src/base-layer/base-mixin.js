@@ -388,14 +388,6 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} data
-     * @param {*} id
-     *
-     * @memberof BaseLayer
-     */
     getIdentifiersFromData (data) {
         const schema = this.data().getSchema();
         const fieldsConfig = this.data().getFieldsConfig();

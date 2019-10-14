@@ -168,6 +168,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     let domain;
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
+
     switch (fieldType) {
     case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));

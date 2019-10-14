@@ -127,7 +127,7 @@ export default class MatrixResolver {
         return this._projections;
     }
 
-    optionalProjections (config, layerConfig) {
+    optionalProjections (config, layerConfig, schema) {
         const otherEncodings = {};
         const optionalProjections = [];
         const otherEncodingTypes = [SIZE, COLOR, SHAPE];
@@ -144,17 +144,8 @@ export default class MatrixResolver {
             optionalProjections.push(...config.detail);
         }
 
-        if (layerConfig.length) {
-            layerConfig.forEach((layer) => {
-                if (layer.encoding) {
-                    Object.values(layer.encoding).forEach((enc) => {
-                        if (enc && optionalProjections.indexOf(enc.field) === -1) {
-                            optionalProjections.push(enc.field ? enc.field : enc);
-                        }
-                    });
-                }
-            });
-        }
+        const encoder = this.encoder();
+        optionalProjections.push(...encoder.getProjectionFields(layerConfig, schema));
         this.projections({ optionalProjections });
         return otherEncodings;
     }
@@ -390,8 +381,6 @@ export default class MatrixResolver {
     }
 
     createRetinalAxes (fieldsConfig, config, encoders) {
-        const layerConfig = this.layerConfig();
-        this.optionalProjections(config, layerConfig);
         const retinalAxes = encoders.retinalEncoder.createAxis({
             fieldsConfig,
             config,

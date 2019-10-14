@@ -503,7 +503,9 @@ const transformDataModel = (dataModel, config, resolver) => {
     groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
     resolver.data(groupedModel);
     if (!groupBy.disabled) {
-        const fields = getFieldsFromSuppliedLayers(suppliedLayers, groupedModel.getFieldsConfig());
+        const newFieldsConfig = groupedModel.getFieldsConfig();
+        const fields = getFieldsFromSuppliedLayers(suppliedLayers).filter(field =>
+            getObjProp(newFieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
         const allFields = extractFields(facetsAndProjections, fields);
         const dimensions = allFields.filter(field =>
             getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
@@ -549,7 +551,7 @@ export const computeMatrices = (context, config) => {
     const registry = resolver.registry();
     const { fields: normalizedRows } = resolver.horizontalAxis();
     const { fields: normalizedColumns } = resolver.verticalAxis();
-    const otherEncodings = resolver.optionalProjections(config, layerConfig);
+    const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
     const facetsAndProjections = resolver.getAllFields();
     const matrixGnContext = {
         // Configuration to be passed to generate the  different matrices.

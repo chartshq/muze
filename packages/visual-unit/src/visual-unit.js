@@ -190,14 +190,19 @@ export default class VisualUnit {
     createFireboltInstance () {
         const { interactions } = this.registry();
         const { fireboltDeps } = this._dependencies;
+        const Cls = this.getFireboltCls();
 
-        this.firebolt(new UnitFireBolt(this, {
+        this.firebolt(new Cls(this, {
             physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
             behavioural: Object.assign({}, interactions.behaviours.get(), fireboltDeps.behaviouralActions),
             physicalBehaviouralMap: this.getActionBehaviourMap()
         }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
 
         return this;
+    }
+
+    getFireboltCls () {
+        return UnitFireBolt;
     }
 
     getBehaviourEffectMap () {

@@ -40,7 +40,11 @@ export const ArcLayerMixin = superclass => class extends superclass {
     }
 
     getNearestPoint (x, y, config = {}) {
-        const dataPoint = selectElement(config.event.target).data()[0];
+        return this.getDataFromEvent(config.event);
+    }
+
+    getDataFromEvent (event) {
+        const dataPoint = selectElement(event.target).data()[0];
         if (isSimpleObject(dataPoint)) {
             const { source, rowId } = dataPoint;
             return {
