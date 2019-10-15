@@ -273,7 +273,7 @@ const strokeInteractionStyle = (context, elem, apply, interactionType, style) =>
     if (!apply && stateStroke[interactionType][styleType]) {
         // remove
         stateStroke[interactionType][styleType] = originalStroke[styleType];
-        context.removeOverlayPath(elem.node().parentElement, elem.node(), datum, originalStroke);
+        context.removeOverlayPath(datum, originalStroke);
     }
     return true;
 };

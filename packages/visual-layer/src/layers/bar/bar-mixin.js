@@ -245,7 +245,7 @@ export const BarLayerMixin = superclass => class extends superclass {
         appendElement(container, pathElement.node());
     }
 
-    removeOverlayPath (container, refElement, data, style) {
+    removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
         Object.keys(style).forEach(s => currentPath.style(s, style[s]));
     }

@@ -388,6 +388,11 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return this;
     }
 
+    // If a layer does not has specific styles, do nothing and return falsy value
+    getInteractionStyles () {
+        return null;
+    }
+
     applySpecificStyle (styleType, { elem, apply, interactionType, style, colorAxis }) {
         const interactionFn = this.getInteractionStyles(styleType);
         if (!interactionFn) return false;
