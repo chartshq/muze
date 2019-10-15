@@ -18,7 +18,7 @@ import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCEN
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
 
-const transformColor = (colorAxis, datum, styleType, intensity) => {
+export const transformColor = (colorAxis, datum, styleType, intensity) => {
     const meta = datum.meta;
     const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
     const colorInfo = colorAxis.transformColor(stateColor, intensity);
@@ -33,26 +33,39 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     const colorAxis = axes.color;
     const apply = config.apply;
     const interactionType = config.interactionType;
+
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
-            elem.style(styleType, ((d) => {
-                const { colorTransform, stateColor, originalColor } = d.meta;
-                colorTransform[interactionType] = colorTransform[interactionType] || {};
-                if (apply && !colorTransform[interactionType][styleType]) {
-                    // fade selections
-                    colorTransform[interactionType][styleType] = style.intensity;
-                    const color = transformColor(colorAxis, d, styleType, style.intensity).color;
-                    return color;
-                }
-                if (!apply && colorTransform[interactionType][styleType]) {
-                    // unfade selections
-                    colorTransform[interactionType][styleType] = null;
-                    return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
-                }
-                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
-                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
-            }));
+            const isSpecificInteraction = context.applySpecificStyle(styleType, {
+                elem,
+                apply,
+                interactionType,
+                style,
+                colorAxis
+            });
+
+            if (!isSpecificInteraction) {
+                // Common style for all the layers
+                elem.style(styleType, ((d) => {
+                    const { colorTransform, stateColor, originalColor } = d.meta;
+                    colorTransform[interactionType] = colorTransform[interactionType] || {};
+
+                    if (apply && !colorTransform[interactionType][styleType]) {
+                        // fade selections
+                        colorTransform[interactionType][styleType] = style.intensity;
+                        const color = transformColor(colorAxis, d, styleType, style.intensity).color;
+                        return color;
+                    }
+                    if (!apply && colorTransform[interactionType][styleType]) {
+                        // unfade selections
+                        colorTransform[interactionType][styleType] = null;
+                        return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                    }
+                    const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
+                    return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
+                }));
+            }
         });
     });
 };
@@ -503,13 +516,18 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (colorInf, colorAxis) => ({
+export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => ({
     originalColor: Object.keys(colorInf).reduce((acc, key) => {
         if (colorInf[key]) {
             acc[key] = colorAxis.getHslArray(colorInf[key]);
         }
         return acc;
     }, {}),
+    originalStroke: {
+        stroke: auxStyles.stroke,
+        'stroke-width': auxStyles.strokeWidth
+    },
+    stateStroke: {},
     stateColor: {},
     colorTransform: {}
 });

@@ -6,14 +6,16 @@ import {
     FieldType,
     Scales,
     getObjProp,
-    isSimpleObject
+    isSimpleObject,
+    makeElement,
+    appendElement
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
 import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
-import { getTranslatedPoints } from './bar-helper';
+import { getTranslatedPoints, strokeWidthPositionMap, interactionStyleMap } from './bar-helper';
 
 const { MEASURE } = FieldType;
 
@@ -33,6 +35,7 @@ export const BarLayerMixin = superclass => class extends superclass {
             y: 0
         };
         this._pointMap = {};
+        this._overlayPath = {};
     }
 
     elemType () {
@@ -208,6 +211,43 @@ export const BarLayerMixin = superclass => class extends superclass {
 
     hasPlotSpan () {
         return true;
+    }
+
+    getInteractionStyles (styleType) {
+        return interactionStyleMap[styleType];
+    }
+
+    addOverlayPath (container, refElement, data, style) {
+        let pathElement;
+
+        if (this._overlayPath[data.rowId]) {
+            pathElement = this._overlayPath[data.rowId];
+        } else {
+            pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement.style('fill', 'none');
+            pathElement.attr('id', data.rowId);
+            this._overlayPath[data.rowId] = pathElement;
+        }
+
+        if (style.type === 'stroke-width') {
+            const { L1, L2, L3, M } = strokeWidthPositionMap({
+                width: style.props.value,
+                position: style.props.position
+            });
+
+            pathElement.attr('d', d => `M ${d.x + M.x} ${d.y + M.y}
+            L ${d.x + d.width + L1.x} ${d.y + L1.y}
+            L ${d.x + d.width + L2.x} ${d.y + d.height + L2.y}
+            L${d.x + L3.x} ${d.y + d.height + L3.y} Z`);
+        }
+
+        pathElement.style(style.type, style.props.value);
+        appendElement(container, pathElement.node());
+    }
+
+    removeOverlayPath (data, style) {
+        const currentPath = this._overlayPath[data.rowId];
+        Object.keys(style).forEach(s => currentPath.style(s, style[s]));
     }
 };
 

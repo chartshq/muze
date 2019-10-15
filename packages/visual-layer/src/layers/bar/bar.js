@@ -3,7 +3,6 @@ import { BaseLayer } from '../../base-layer';
 import { BAR_LAYER } from '../../enums/constants';
 import { BarLayerMixin } from './bar-mixin';
 import { BaseLayerMixin } from '../../base-layer/base-mixin';
-
 import './styles.scss';
 
 /**
