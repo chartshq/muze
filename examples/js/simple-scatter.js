@@ -66,13 +66,14 @@
         .columns(['Maker'])
         .rows(['Horsepower'])
         .layers([{
-            mark: 'bar'
+            mark: 'point'
         }])
         .color('Origin')
+        .size('Horsepower')
         // .detail(['Name'])
         .mount('#chart')
-        .height(650)
-        .width(850)
+        .height(500)
+        .width(500)
         .title('Charts');
     })
 })();

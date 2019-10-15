@@ -1,5 +1,6 @@
 /* eslint-disable*/
 d3.json('/data/cars.json', (data) => {
+    let env = window.muze();
     const schema = [{
         name: 'Name',
         type: 'dimension'
@@ -32,7 +33,7 @@ d3.json('/data/cars.json', (data) => {
         type: 'dimension'
     }];
     // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);    
+    let rootData = new muze.DataModel(data, schema);    
     
     // Get a canvas instance from Muze where the chart will be rendered.
     let canvas = env.canvas();
@@ -44,7 +45,7 @@ d3.json('/data/cars.json', (data) => {
         field: 'Cylinders', // Size retinal encoding with Cylinders
         range: [50, 360]
     })
-    .color('Origin') 
+    // .color('Origin') 
 	.layers([{
         mark: 'point'
     }])

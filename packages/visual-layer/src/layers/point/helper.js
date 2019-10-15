@@ -92,3 +92,37 @@ export const pointTranslators = {
         return points;
     }
 };
+
+export const getStrokeWidthByPosition = (position, radius) => {
+    const strokeWidthWithOffsetMap = {
+        center: 0,
+        inside: -1,
+        outside: 1
+    };
+    return radius + strokeWidthWithOffsetMap[position];
+};
+
+// This is invoked only on point selection for applying a path around the point
+const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
+    const datum = elem.data()[0];
+    const styleType = style.type;
+    const { originalStroke, stateStroke } = datum.meta;
+    stateStroke[interactionType] = stateStroke[interactionType] || {};
+
+    if (apply && !stateStroke[interactionType][styleType]) {
+        // apply
+        stateStroke[interactionType][styleType] = style.props.value;
+        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+    }
+    if (!apply && stateStroke[interactionType][styleType]) {
+        // remove
+        stateStroke[interactionType][styleType] = originalStroke[styleType];
+        context.removeOverlayPath(datum, originalStroke);
+    }
+    return true;
+};
+
+export const interactionStyleMap = {
+    stroke: (...params) => strokeInteractionStyle(...params),
+    'stroke-width': (...params) => strokeInteractionStyle(...params)
+};

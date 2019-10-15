@@ -31,7 +31,6 @@ export const defaultConfig = {
                 }
             }
         ]
-
     },
     transform: {
         type: 'stack'

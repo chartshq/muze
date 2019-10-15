@@ -3,7 +3,8 @@ import {
     Scales,
     makeElement,
     getQualifiedClassName,
-    selectElement
+    selectElement,
+    appendElement
 } from 'muze-utils';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
@@ -12,9 +13,8 @@ import {
     getPlotMeasurement,
     getMarkId
 } from '../../helpers';
-
 import './styles.scss';
-import { pointTranslators } from './helper';
+import { pointTranslators, interactionStyleMap, getStrokeWidthByPosition } from './helper';
 
 export const PointLayerMixin = superclass => class extends superclass {
     /**
@@ -26,6 +26,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         super(...args);
         this._voronoi = new Voronoi();
         this._bandScale = Scales.band();
+        this._overlayPath = {};
     }
 
     elemType () {
@@ -169,4 +170,40 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    };
+    getInteractionStyles (styleType) {
+        return interactionStyleMap[styleType];
+    }
+
+    addOverlayPath (container, refElement, data, style) {
+        let pathElement;
+
+        if (this._overlayPath[data.rowId]) {
+            pathElement = this._overlayPath[data.rowId];
+        } else {
+            pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement.style('fill', 'none');
+            pathElement.attr('id', data.rowId);
+            this._overlayPath[data.rowId] = pathElement;
+        }
+
+        if (style.type === 'stroke-width') {
+            const { position } = style.props;
+            let R = Math.sqrt(data.size / Math.PI);
+            R = getStrokeWidthByPosition(position, R);
+
+            pathElement.attr('d', () => (
+                `M ${-R}, 0
+                a ${R},${R} 0 1, 0 ${R * 2}, 0
+                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`
+            ));
+        }
+
+        pathElement.style(style.type, style.props.value);
+        appendElement(refElement, pathElement.node());
+    }
+
+    removeOverlayPath (data, style) {
+        const currentPath = this._overlayPath[data.rowId];
+        Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+    }
+};
