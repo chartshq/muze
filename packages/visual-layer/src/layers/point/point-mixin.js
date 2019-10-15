@@ -14,7 +14,7 @@ import {
     getMarkId
 } from '../../helpers';
 import './styles.scss';
-import { pointTranslators, interactionStyleMap } from './helper';
+import { pointTranslators, interactionStyleMap, getStrokeWidthByPosition } from './helper';
 
 export const PointLayerMixin = superclass => class extends superclass {
     /**
@@ -189,9 +189,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         if (style.type === 'stroke-width') {
             const { position } = style.props;
             let R = Math.sqrt(data.size / Math.PI);
-
-            if (position === 'inside') R -= 1;
-            else if (position === 'outside') R += 1;
+            R = getStrokeWidthByPosition(position, R);
 
             pathElement.attr('d', () => (
                 `M ${-R}, 0
