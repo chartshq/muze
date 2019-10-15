@@ -209,10 +209,12 @@ export default class Canvas extends TransactionSupport {
      */
     registry (...params) {
         if (params.length) {
-            const components = Object.assign({}, params[0].components);
-            const componentSubRegistry = Object.assign({}, params[0].componentSubRegistry);
+            const param = params[0];
+            const components = Object.assign({}, param.components);
+            const componentSubRegistry = Object.assign({}, param.componentSubRegistry);
+            const interactionRegistry = Object.assign({}, param.interactions);
 
-            this._registry = { components, componentSubRegistry };
+            this._registry = { components, componentSubRegistry, interactions: interactionRegistry };
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
             this._composition.visualGroup = initedComponents[0];

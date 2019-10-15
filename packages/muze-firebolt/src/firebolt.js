@@ -115,7 +115,7 @@ export default class Firebolt {
             let name;
             const effects = sideEffect.effects;
             const behaviours = sideEffect.behaviours;
-            const combinedSet = unionSets(this, behaviours, selectionSet);
+            const combinedSet = this.mergeSelectionSets(behaviours);
             effects.forEach((effect) => {
                 if (typeof effect === 'object') {
                     name = effect.name;
@@ -458,5 +458,9 @@ export default class Firebolt {
      */
     getEntryExitSet (behaviour) {
         return this._entryExitSet[behaviour];
+    }
+
+    mergeSelectionSets (behaviours) {
+        return unionSets(this, behaviours);
     }
 }

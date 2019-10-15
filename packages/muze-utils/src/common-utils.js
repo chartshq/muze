@@ -168,6 +168,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     let domain;
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
+
     switch (fieldType) {
     case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
@@ -1338,7 +1339,36 @@ const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
     return arr1.filter(value => set.has(fn1(value)));
 };
 
+const partition = (array, filterFn) => array.reduce((acc, v, i) => {
+    const pass = filterFn(v, i, array);
+
+    pass ? acc[0].push(v) : acc[1].push(v);
+    return acc;
+}, [[], []]);
+
+const mix = superclass => ({
+    with: (...mixins) => mixins.reduce((cls, mixin) => mixin(cls), superclass)
+});
+
+const componentRegistry = (comps) => {
+    const reg = Object.assign({}, comps);
+    const regObj = {
+        register: (def, customKey) => {
+            const key = customKey || def.formalName();
+
+            reg[key] = def;
+            return regObj;
+        },
+        get: () => reg
+    };
+
+    return regObj;
+};
+
 export {
+    componentRegistry,
+    mix,
+    partition,
     getValueParser,
     require,
     intersect,

@@ -108,6 +108,7 @@ class ActionModel {
      */
     registerPhysicalActions (action) {
         registerActions(this, 'physicalActions', 'registerPhysicalActions', action);
+
         return this;
     }
 

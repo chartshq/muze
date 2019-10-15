@@ -1,7 +1,7 @@
 import { VisualUnit } from '@chartshq/visual-unit';
 import { STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
-import { getEncoder, getBorders } from '../group-helper';
+import { getBorders } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
 import { registerDomainChangeListener, unsubscribeChangeListeners } from './change-listener';
 import ValueMatrix from './value-matrix';
@@ -101,7 +101,7 @@ export const createMatrices = (context) => {
     // Create the encoders for the group
     const encoders = {};
     encoders.retinalEncoder = new RetinalEncoder();
-    encoders.simpleEncoder = getEncoder(layers);
+    encoders.simpleEncoder = context.createEncoderInstance();
     matrixConfig.coord = encoders.simpleEncoder.constructor.type();
     resolver.encoder(encoders.simpleEncoder);
 
@@ -126,7 +126,7 @@ export const createMatrices = (context) => {
             encoders);
 
     // Domains are evaluated for each of the axes for commonality
-    resolver.setDomains(matrixConfig, placeholderInfo.dataModels, encoders);
+    resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders);
 
     // Create matrix instances
     setMatrixInstances(context, placeholderInfo);

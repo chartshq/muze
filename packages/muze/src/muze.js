@@ -1,18 +1,7 @@
-import {
-    transactor,
-    Smartlabel,
-    enableChainedTransaction,
-    LifeCycleManager,
-    DataModel,
-    makeElement,
-    getClientPoint,
-    selectElement,
-    getEvent,
-    require,
-    DateTimeFormatter,
-    Store
-} from 'muze-utils';
+import * as utils from 'muze-utils';
 
+import { VisualUnit, helpers as unitHelpers, enums as unitEnums, UnitFireBolt } from '@chartshq/visual-unit';
+import { VisualGroup, Encoders, encoderHelpers, groupUtils, enums as groupEnums } from '@chartshq/visual-group';
 import {
     SurrogateSideEffect,
     SpawnableSideEffect,
@@ -21,25 +10,48 @@ import {
     GenericBehaviour,
     VolatileBehaviour,
     behaviouralActions,
-    GenericSideEffect
+    GenericSideEffect,
+    Firebolt
 } from '@chartshq/muze-firebolt';
-import { layerFactory } from '@chartshq/visual-layer';
+import {
+    layerFactory,
+    BaseLayer,
+    LineLayer,
+    TextLayer,
+    TickLayer,
+    PointLayer,
+    helpers,
+    enums,
+    SimpleLayer,
+    AreaLayer,
+    ArcLayer,
+    layerMixins
+} from '@chartshq/visual-layer';
 import pkg from '../package.json';
 import * as operators from './operators';
 import { actionModel as ActionModel } from './action-model';
 import options from './options';
 import { Canvas } from './canvas';
-import { COMPONENTS, SUBREGISTRIES } from './default-registry';
+import { registry as globalRegistry, SUBREGISTRIES } from './default-registry';
 import './muze.scss';
+
+const {
+    transactor,
+    Smartlabel,
+    enableChainedTransaction,
+    LifeCycleManager,
+    DataModel,
+    Store
+} = utils;
 
 // Cache singleton instances which should be included only once in a page
 const globalCache = {};
-const defaultRegistry = COMPONENTS;
+const defaultRegistry = globalRegistry.components;
 
 const overrideRegistryDefinitions = (overrideRegistry, registry) => {
-    for (const prop in overrideRegistry) {
-        registry.set(prop, overrideRegistry[prop]);
-    }
+    overrideRegistry.forEach((def) => {
+        registry.register(def);
+    });
 };
 
 /**
@@ -72,12 +84,13 @@ const overrideRegistryDefinitions = (overrideRegistry, registry) => {
 const muze = () => {
     // Setters and getters will be mounted on this. Object will be mutated.
     const [env, globalStore] = transactor({}, options);
-    const components = Object.assign({}, COMPONENTS);
-    const componentSubRegistryDef = Object.assign(SUBREGISTRIES);
+    const components = Object.assign({}, globalRegistry.components.get());
+    const componentSubRegistryDef = Object.assign({}, SUBREGISTRIES);
+
     const componentSubRegistry = {};
 
     for (const prop in componentSubRegistryDef) {
-        componentSubRegistry[prop] = componentSubRegistryDef[prop]();
+        componentSubRegistry[prop] = componentSubRegistryDef[prop](globalRegistry[prop].get());
     }
 
     // Apart form the setter getter, an instance method is injected to create real renderer instances
@@ -86,7 +99,8 @@ const muze = () => {
         const settings = globalStore.serialize();
         const canvas = Canvas.withSettings(settings, { /* registry */
             components,
-            componentSubRegistry
+            componentSubRegistry,
+            interactions: globalRegistry.interactions
         }, env.globalDependencies());
 
         // Whenever settings is changed canvas is updated
@@ -113,11 +127,12 @@ const muze = () => {
     env.registry = (...overrideRegistry) => {
         // Selectively copy the properties from COMPONENTS
         if (overrideRegistry.length) {
-            for (const prop in overrideRegistry) {
+            overrideRegistry.forEach((def) => {
+                const prop = def.formalName();
                 if (prop in defaultRegistry) {
-                    components[prop] = overrideRegistry[prop];
+                    components[prop] = def;
                 }
-            }
+            });
             return env;
         }
         return components;
@@ -126,7 +141,7 @@ const muze = () => {
     env.cellRegistry = (...overrideRegistry) => {
         const cellRegistry = componentSubRegistry.cellRegistry;
         if (overrideRegistry.length) {
-            overrideRegistryDefinitions(overrideRegistry[0], cellRegistry);
+            overrideRegistryDefinitions(overrideRegistry, cellRegistry);
             return env;
         }
         return cellRegistry.get();
@@ -135,13 +150,52 @@ const muze = () => {
     env.layerRegistry = (...overrideRegistry) => {
         const layerRegistry = componentSubRegistry.layerRegistry;
         if (overrideRegistry.length) {
-            overrideRegistryDefinitions(overrideRegistry[0], layerRegistry);
+            overrideRegistryDefinitions(overrideRegistry, layerRegistry);
             return env;
         }
         return layerRegistry.get();
     };
 
     return env;
+};
+
+muze.registry = globalRegistry;
+
+muze.Components = {
+    VisualLayer: {
+        layers: {
+            BaseLayer,
+            LineLayer,
+            TextLayer,
+            TickLayer,
+            PointLayer,
+            SimpleLayer,
+            AreaLayer,
+            ArcLayer
+        },
+        helpers,
+        enums,
+        layerMixins
+    },
+    VisualUnit: {
+        constructor: VisualUnit,
+        helpers: unitHelpers,
+        enums: unitEnums,
+        UnitFireBolt
+    },
+    VisualGroup: {
+        constructor: VisualGroup,
+        Encoders,
+        encoderHelpers,
+        groupUtils,
+        enums: groupEnums
+    },
+    Canvas: {
+        constructor: Canvas
+    },
+    Firebolt: {
+        constructor: Firebolt
+    }
 };
 
 const SideEffects = {
@@ -169,13 +223,7 @@ muze.ActionModel = ActionModel;
 muze.layerFactory = layerFactory;
 muze.Operators = operators;
 muze.Behaviours = Behaviours;
-muze.utils = {
-    getClientPoint,
-    getEvent,
-    makeElement,
-    selectElement,
-    DateTimeFormatter,
-    require
-};
+muze.utils = utils;
 muze.Model = new Store().model.constructor;
+
 export default muze;
