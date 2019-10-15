@@ -1,4 +1,4 @@
-import { Store, FieldType, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
+import { Store, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
 import { VisualUnit } from '@chartshq/visual-unit';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
@@ -430,12 +430,11 @@ export const getBorders = (matrices, encoder) => {
     return { showRowBorders, showColBorders, showValueBorders };
 };
 
-export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
-    let fields = [];
+export const getFieldsFromSuppliedLayers = (suppliedLayerConfig) => {
     const encodingArr = suppliedLayerConfig.map(conf => (conf.encoding || {}));
-    fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
-    fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
-    return fields;
+    const fields = [].concat(...encodingArr.map(enc => Object.values(enc).map(d => (typeof d === 'object' ?
+        d.field : d))));
+    return [...new Set(fields.filter(d => d))];
 };
 
 export const extractFields = (facetsAndProjections, layerFields) => {

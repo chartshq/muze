@@ -45,7 +45,13 @@ export const defaultConfig = {
         x: {},
         y: {},
         x0: {},
-        y0: {}
+        y0: {},
+        stroke: {
+            value: 0
+        },
+        'stroke-width': {
+            value: 0
+        }
     },
     states: {
         highlight: {

@@ -18,7 +18,11 @@ export const ENCODING = {
     RADIUS: 'radius',
     RADIUS0: 'radius0',
     ANGLE: 'angle',
-    ANGLE0: 'angle0'
+    ANGLE0: 'angle0',
+    COLOR: 'color',
+    SHAPE: 'shape',
+    SIZE: 'size',
+    TEXT: 'text'
 };
 
 export const ASCENDING = 'asc';

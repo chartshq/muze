@@ -1,6 +1,3 @@
-import { VisualUnit } from '@chartshq/visual-unit';
-import { BaseLayer } from '@chartshq/visual-layer';
-
 import { STATE_NAMESPACES } from 'muze-utils';
 
 export const setupChangeListeners = (context) => {
@@ -18,7 +15,8 @@ export const setupChangeListeners = (context) => {
             }));
         });
     });
-
+    const { VisualUnit, layerRegistry } = context.registry();
+    const { base: BaseLayer } = layerRegistry;
     [VisualUnit, BaseLayer].forEach((comp) => {
         const formalName = comp.formalName();
         ['store', 'throwback'].forEach((type) => {

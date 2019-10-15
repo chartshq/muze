@@ -6,9 +6,10 @@ export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defColorStyle: 'stroke',
     interaction: {
+        // TODO: change this to have stroke on highlight
         highlight: [{
-            type: 'stroke',
-            intensity: [0, 0, 0, +1]
+            type: 'fill',
+            intensity: [0, 0, +20, 0]
         }],
         fade: [{
             type: 'fill',

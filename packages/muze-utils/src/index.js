@@ -101,7 +101,10 @@ export {
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
     sortCategoricalField,
-    intersect
+    intersect,
+    partition,
+    mix,
+    componentRegistry
 } from './common-utils';
 
 export {

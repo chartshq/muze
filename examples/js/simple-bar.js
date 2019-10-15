@@ -71,8 +71,8 @@
         .color('Origin')
         // .detail(['Name'])
         .mount('#chart')
-        .height(500)
-        .width(500)
+        .height(650)
+        .width(850)
         .title('Charts');
     })
 })();

@@ -14,7 +14,7 @@ import {
     toArray,
     STATE_NAMESPACES
 } from 'muze-utils';
-import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
+import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
 import UnitBrushBehaviour from './firebolt/behaviours/brush';
 import {
@@ -28,18 +28,20 @@ import {
     createSideEffectGroup,
     resolveEncodingTransform,
     createRenderPromise,
-    setAxisRange
+    setAxisRange,
+    unionDomainFromLayers
 } from './helper';
 import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
-import { calculateDomainListener, listenerMap } from './listener-map';
+import { listenerMap } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
 import { initSideEffects, dispatchQueuedSideEffects, clearActionHistory } from './firebolt/helper';
 import './styles.scss';
 import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
+import { REACTIVE_PROPS } from './enums';
 
-const FORMAL_NAME = 'unit';
+const FORMAL_NAME = 'VisualUnit';
 const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
 const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
 
@@ -78,7 +80,7 @@ export default class VisualUnit {
         this._layerAxisIndex = {};
         this._queuedLayerDefs = [];
         layerFactory.setLayerRegistry(registry.layerRegistry);
-        generateGetterSetters(this, PROPS);
+        generateGetterSetters(this, this.constructor.getterSetters());
         this.registry(registry);
         this.cachedData([]);
     }
@@ -92,11 +94,19 @@ export default class VisualUnit {
             {
                 domain: null
             },
-            Object.keys((localOptions)).reduce((acc, v) => {
+            Object.keys((this.localOptions())).reduce((acc, v) => {
                 acc[v] = localOptions[v].value;
                 return acc;
             }, {})
         ];
+    }
+
+    static getterSetters () {
+        return PROPS;
+    }
+
+    static localOptions () {
+        return localOptions;
     }
 
     static getQualifiedStateProps () {
@@ -114,7 +124,10 @@ export default class VisualUnit {
             }), {
                 type: 'registerImmediateListener',
                 props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
-                listener: calculateDomainListener
+                listener: (context) => {
+                    const domain = context.calculateDomainFromData();
+                    context.dataDomain(domain);
+                }
             }, {
                 type: 'registerImmediateListener',
                 props: [`${unitNs[1]}.${WIDTH}`,
@@ -160,26 +173,48 @@ export default class VisualUnit {
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
-            const { throwback, fireboltDeps } = this._dependencies;
+            const { throwback } = this._dependencies;
             const { namespace } = this.metaInf();
 
             store.addSubNamespace(namespace, FORMAL_NAME, this);
             throwback.addSubNamespace(namespace, FORMAL_NAME, this);
-            transactor(this, localOptions, store, {
+            transactor(this, this.constructor.localOptions(), store, {
                 subNamespace: namespace,
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
             });
+            this.createFireboltInstance();
 
-            this.firebolt(new UnitFireBolt(this, {
-                physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
-                behavioural: Object.assign({}, behaviouralActions, {
-                    BrushBehaviour: UnitBrushBehaviour
-                }, fireboltDeps.behaviouralActions),
-                physicalBehaviouralMap: actionBehaviourMap
-            }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
             return this;
         }
         return this._store;
+    }
+
+    createFireboltInstance () {
+        const { interactions } = this.registry();
+        const { fireboltDeps } = this._dependencies;
+        const Cls = this.getFireboltCls();
+
+        this.firebolt(new Cls(this, {
+            physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
+            behavioural: Object.assign({}, interactions.behaviours.get(), {
+                [UnitBrushBehaviour.formalName()]: UnitBrushBehaviour
+            }, fireboltDeps.behaviouralActions),
+            physicalBehaviouralMap: this.getActionBehaviourMap()
+        }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
+
+        return this;
+    }
+
+    getFireboltCls () {
+        return UnitFireBolt;
+    }
+
+    getBehaviourEffectMap () {
+        return behaviourEffectMap;
+    }
+
+    getActionBehaviourMap () {
+        return actionBehaviourMap;
     }
 
     /**
@@ -238,43 +273,54 @@ export default class VisualUnit {
         return this._timeDiffsByField;
     }
 
-    // Add axis width and height to parent container
-    getOffsetDimension (unit) {
-        return unit + 5.5;
-    }
-
     /**
      * Renders the visual unit. It creates the layout and renders the axes and layers.
      *
      * @return {VisualUnit} Instance of visual unit.
      */
     render (container) {
-        const config = this.config();
-        const { className, defClassName, sideEffectClassName, classPrefix } = config;
-        const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
-        const width = this.getOffsetDimension(this.width());
-        const height = this.getOffsetDimension(this.height());
-        const containerSelection = selectElement(container).style('position', 'relative');
+        this.createRootContainers(container);
 
+        setAxisRange(this);
+        this.renderLayers();
+        const node = this._rootSvg.node();
+        const { sideEffectClassName, classPrefix } = this.config();
+        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
+        const firebolt = this.firebolt();
+        initSideEffects(firebolt.sideEffects(), firebolt);
+        return this;
+    }
+
+    createRootContainers (container) {
+        const config = this.config();
+        const { className, defClassName } = config;
+        const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
+        const width = this.width();
+        const height = this.height();
+        const containerSelection = selectElement(container).style('position', 'relative');
         this._rootSvg = makeElement(containerSelection, 'svg', [null], className)
                         .style('width', `${width}px`).style('height', `${height}px`);
 
         const node = this._rootSvg.node();
+
         setAttrs(node, {
             width,
             height,
             class: qualifiedClassName.join(' ')
         });
+        return this;
+    }
 
-        setAxisRange(this);
+    renderLayers () {
+        const width = this.width();
+        const height = this.height();
+        const node = this._rootSvg.node();
+
         renderGridLineLayers(this, node);
         renderLayers(this, node, this.layers(), {
             width,
             height
         });
-        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
-        const firebolt = this.firebolt();
-        initSideEffects(firebolt.sideEffects(), firebolt);
         return this;
     }
 
@@ -447,12 +493,6 @@ export default class VisualUnit {
         return layers;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     remove () {
         const formalName = this.constructor.formalName();
         const { lifeCycleManager, throwback } = this._dependencies;
@@ -496,12 +536,6 @@ export default class VisualUnit {
         return this;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     getSourceInfo () {
         return {
             dimensionMeasureMap: this._dimensionMeasureMap,
@@ -511,16 +545,17 @@ export default class VisualUnit {
         };
     }
 
-    getDataDomain () {
-        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`, this.metaInf().namespace);
+    dataDomain (...params) {
+        const { namespace } = this.metaInf();
+        const store = this.store();
+        const prop = `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${REACTIVE_PROPS.DOMAIN}`;
+        if (params.length) {
+            const domain = params[0];
+            store.commit(prop, domain, namespace);
+        }
+        return store.get(prop, namespace);
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     getDefaultTargetContainer () {
         const { classPrefix, defClassName } = this.config();
         return [`.${classPrefix}-${defClassName}`];
@@ -716,5 +751,11 @@ export default class VisualUnit {
     removeLayersByType (type) {
         removeLayersBy('type', type);
         return this;
+    }
+
+    calculateDomainFromData () {
+        const domain = unionDomainFromLayers(this.layers(), this.fields(), this._layerAxisIndex,
+            this.data().getFieldsConfig());
+        return domain;
     }
 }
