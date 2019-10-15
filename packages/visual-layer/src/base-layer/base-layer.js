@@ -308,6 +308,12 @@ export default class BaseLayer extends SimpleLayer {
         return transformData(dataModel, config, transformType, encodingFieldsInf);
     }
 
+    applySpecificStyle (styleType, { elem, apply, interactionType, style, colorAxis }) {
+        const interactionFn = this.getInteractionStyles(styleType);
+        if (!interactionFn) return false;
+        return interactionFn(this, elem, apply, interactionType, style, colorAxis);
+    }
+
     /**
      * Calculates the domain from the data.
      * It checks the type of field and calculates the domain based on that. For example, if it

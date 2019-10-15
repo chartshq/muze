@@ -16,7 +16,7 @@ import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
 import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
-import { getTranslatedPoints, strokeWidthPositionMap } from './bar-helper';
+import { getTranslatedPoints, strokeWidthPositionMap, interactionStyleMap } from './bar-helper';
 
 const MEASURE = FieldType.MEASURE;
 const scaleBand = Scales.band;
@@ -124,6 +124,10 @@ export default class BarLayer extends BaseLayer {
         return domain;
     }
 
+    getInteractionStyles (styleType) {
+        return interactionStyleMap[styleType] || null;
+    }
+
     /**
      * Generates an array of objects containing x, y, width and height of the bars from the data
      * @param  {Array.<Array>} data Data Array
@@ -183,7 +187,7 @@ export default class BarLayer extends BaseLayer {
                     style: {}
                 });
             }
-        }, data => dimensions.map(key => data[0].source[key]).join('*'));
+        }, data => dimensions.map(key => data[0].source[key]).join('-'));
 
         return this;
     }

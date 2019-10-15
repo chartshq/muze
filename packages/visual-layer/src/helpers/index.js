@@ -18,7 +18,7 @@ import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCEN
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
 
-const transformColor = (colorAxis, datum, styleType, intensity) => {
+export const transformColor = (colorAxis, datum, styleType, intensity) => {
     const meta = datum.meta;
     const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
     const colorInfo = colorAxis.transformColor(stateColor, intensity);
@@ -37,26 +37,16 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
-            const datum = elem.data()[0];
-            const { originalStroke, stateStroke } = datum.meta;
-            stateStroke[interactionType] = stateStroke[interactionType] || {};
+            const isSpecificInteraction = context.applySpecificStyle(styleType, {
+                elem,
+                apply,
+                interactionType,
+                style,
+                colorAxis
+            });
 
-            if (interactionType === 'focusStroke') {
-                if (apply && !stateStroke[interactionType][styleType]) {
-                    // apply
-                    stateStroke[interactionType][styleType] = style.props.value;
-                    context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
-                    return;
-                }
-                if (!apply && stateStroke[interactionType][styleType]) {
-                    // remove
-                    stateStroke[interactionType][styleType] = originalStroke[styleType];
-                    context.removeOverlayPath(elem.node().parentElement, elem.node(), datum, originalStroke);
-                    return;
-                }
-                stateStroke[interactionType][styleType] =
-                    stateStroke[interactionType][styleType] || originalStroke[styleType];
-            } else {
+            if (!isSpecificInteraction) {
+                // Common style for all the layers
                 elem.style(styleType, ((d) => {
                     const { colorTransform, stateColor, originalColor } = d.meta;
                     colorTransform[interactionType] = colorTransform[interactionType] || {};
@@ -567,7 +557,7 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (colorInf, colorAxis) => ({
+export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => ({
     originalColor: Object.keys(colorInf).reduce((acc, key) => {
         if (colorInf[key]) {
             acc[key] = colorAxis.getHslArray(colorInf[key]);
@@ -575,8 +565,8 @@ export const getColorMetaInf = (colorInf, colorAxis) => ({
         return acc;
     }, {}),
     originalStroke: {
-        stroke: 0,
-        'stroke-width': 0
+        stroke: auxStyles.stroke,
+        'stroke-width': auxStyles.strokeWidth
     },
     stateStroke: {},
     stateColor: {},

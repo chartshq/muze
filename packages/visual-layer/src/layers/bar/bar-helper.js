@@ -1,6 +1,11 @@
 import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
-import { positionPoints, getIndividualClassName, getColorMetaInf, resolveEncodingValues } from '../../helpers';
+import {
+    positionPoints,
+    getIndividualClassName,
+    getColorMetaInf,
+    resolveEncodingValues
+} from '../../helpers';
 
 const positionRetriever = {
     x: (xPx, isNegativeVal, barBasePos) => (isNegativeVal ? [xPx, barBasePos] : [barBasePos, xPx]),
@@ -176,6 +181,8 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const encoding = context.config().encoding;
     const axes = context.axes();
     const colorAxis = axes.color;
+    const stroke = encoding.stroke.value;
+    const strokeWidth = encoding['stroke-width'].value;
     const sizeEncoding = encoding.size || {};
     const {
             x0Field,
@@ -220,6 +227,10 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
         const style = {
             fill: color
         };
+        const auxiliaryStyles = {
+            stroke,
+            strokeWidth
+        };
 
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
@@ -234,7 +245,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 source: d.source,
                 rowId: d.rowId,
                 style,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: getColorMetaInf(style, colorAxis, auxiliaryStyles)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);
@@ -245,4 +256,29 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
 
     points = positionPoints(context, points);
     return points;
+};
+
+// This is invoked only on bar selection for creation of path around the bar
+const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
+    const datum = elem.data()[0];
+    const styleType = style.type;
+    const { originalStroke, stateStroke } = datum.meta;
+    stateStroke[interactionType] = stateStroke[interactionType] || {};
+
+    if (apply && !stateStroke[interactionType][styleType]) {
+        // apply
+        stateStroke[interactionType][styleType] = style.props.value;
+        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+    }
+    if (!apply && stateStroke[interactionType][styleType]) {
+        // remove
+        stateStroke[interactionType][styleType] = originalStroke[styleType];
+        context.removeOverlayPath(elem.node().parentElement, elem.node(), datum, originalStroke);
+    }
+    return true;
+};
+
+export const interactionStyleMap = {
+    stroke: (...params) => strokeInteractionStyle(...params),
+    'stroke-width': (...params) => strokeInteractionStyle(...params)
 };
