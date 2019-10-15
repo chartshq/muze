@@ -115,7 +115,7 @@ export default class CartesianEncoder extends VisualEncoder {
             for (let cIdx = 0, len2 = unitsArr.length; cIdx < len2; cIdx++) {
                 const unit = unitsArr[cIdx];
                 const axisFields = unit.fields();
-                const encodingDomains = unit.getDataDomain();
+                const encodingDomains = unit.dataDomain();
                 ['x', 'y'].forEach((axisType, axisTypeIndex) => {
                     const fieldArr = axisFields[axisType];
                     fieldArr.forEach((field, axisIndex) => {

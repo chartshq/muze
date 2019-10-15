@@ -1,7 +1,8 @@
-import { ERROR_MSG, mergeRecursive } from 'muze-utils';
+import { ERROR_MSG, mergeRecursive, generateGetterSetters } from 'muze-utils';
 import { transformFields } from './field-sanitizer';
-import { getHeaderAxisFrom } from '../group-helper/group-utils';
+import { getHeaderAxisFrom, getFieldsFromSuppliedLayers } from '../group-helper/group-utils';
 import { ROW, COLUMN } from '../enums/constants';
+import { PROPS } from './props';
 
 /**
  *
@@ -10,6 +11,10 @@ import { ROW, COLUMN } from '../enums/constants';
  * @class VisualEncoder
  */
 export default class VisualEncoder {
+
+    constructor () {
+        generateGetterSetters(this, PROPS);
+    }
 
     /**
      *
@@ -109,5 +114,9 @@ export default class VisualEncoder {
             column: colHeader
         });
         return this;
+    }
+
+    getProjectionFields (layers) {
+        return getFieldsFromSuppliedLayers(layers);
     }
 }

@@ -9,7 +9,8 @@ import { DEFAULT_PLACEHOLDERS } from './defaults';
 const cellRegistry = () => {
     const reg = DEFAULT_PLACEHOLDERS;
     return {
-        set: (key, def) => {
+        register: (def) => {
+            const key = def.formalName();
             if (key in reg) {
                 reg[key] = def;
             }

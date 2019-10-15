@@ -6,7 +6,6 @@ import {
     generateGetterSetters,
     mergeRecursive
 } from 'muze-utils';
-import { behaviouralActions } from '@chartshq/muze-firebolt';
 import * as legendBehaviours from '../firebolt/behavioural';
 
 import { LegendFireBolt } from '../firebolt/legend-firebolt';
@@ -33,6 +32,7 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     constructor (dependencies) {
+        const { interactions } = dependencies.registry;
         this._data = [];
         this._metaData = [];
         this._mount = null;
@@ -53,7 +53,7 @@ export default class SimpleLegend {
             `${this.config().classPrefix}-legend-item-info`);
 
         this._firebolt = new LegendFireBolt(this, {
-            behavioural: Object.assign({}, behaviouralActions, legendBehaviours),
+            behavioural: Object.assign({}, interactions.behaviours.get(), legendBehaviours),
             physical: physicalActions,
             physicalBehaviouralMap: actionBehaviourMap
         }, sideEffects, behaviourEffectMap);

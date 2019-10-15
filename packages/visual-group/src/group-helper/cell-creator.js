@@ -499,10 +499,13 @@ const transformDataModel = (dataModel, config, resolver) => {
     if (resolvedData instanceof DataModel) {
         resolvedData.dispose();
     }
+
     groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
     resolver.data(groupedModel);
     if (!groupBy.disabled) {
-        const fields = getFieldsFromSuppliedLayers(suppliedLayers, groupedModel.getFieldsConfig());
+        const newFieldsConfig = groupedModel.getFieldsConfig();
+        const fields = getFieldsFromSuppliedLayers(suppliedLayers).filter(field =>
+            getObjProp(newFieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
         const allFields = extractFields(facetsAndProjections, fields);
         const dimensions = allFields.filter(field =>
             getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
@@ -516,6 +519,7 @@ const transformDataModel = (dataModel, config, resolver) => {
     }
     // sort temporal fields if any in the given rows and columns
     groupedModel = sortDmTemporalFields(resolver, groupedModel);
+    resolver.transformedData(groupedModel);
     return groupedModel;
 };
 
@@ -547,7 +551,7 @@ export const computeMatrices = (context, config) => {
     const registry = resolver.registry();
     const { fields: normalizedRows } = resolver.horizontalAxis();
     const { fields: normalizedColumns } = resolver.verticalAxis();
-    const otherEncodings = resolver.optionalProjections(config, layerConfig);
+    const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
     const facetsAndProjections = resolver.getAllFields();
     const matrixGnContext = {
         // Configuration to be passed to generate the  different matrices.
@@ -565,10 +569,10 @@ export const computeMatrices = (context, config) => {
         resolver
     };
     const cells = {
-        GeomCell: resolver.getCellDef(registry.GeomCell),
-        AxisCell: resolver.getCellDef(registry.AxisCell),
-        BlankCell: resolver.getCellDef(registry.BlankCell),
-        TextCell: resolver.getCellDef(registry.TextCell)
+        GeomCell: resolver.getCellDef(registry.cells.GeomCell),
+        AxisCell: resolver.getCellDef(registry.cells.AxisCell),
+        BlankCell: resolver.getCellDef(registry.cells.BlankCell),
+        TextCell: resolver.getCellDef(registry.cells.TextCell)
     };
     const isRowSizeEqual = isDistributionEqual(normalizedRows);
     const isColumnSizeEqual = isDistributionEqual(normalizedColumns);
@@ -589,13 +593,13 @@ export const computeMatrices = (context, config) => {
     };
 
     resolver.cacheMaps(newCacheMap);
-
+    const { simpleEncoder } = encoders;
     const valueCellContext = {
         config: globalConfig,
-        suppliedLayers: encoders.simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+        suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
         resolver,
         cell: cells.GeomCell,
-        encoder: encoders.simpleEncoder,
+        encoder: simpleEncoder,
         newCacheMap,
         detailFields: config.detail,
         retinalConfig: {
@@ -610,7 +614,7 @@ export const computeMatrices = (context, config) => {
         suppliedLayers: valueCellContext.suppliedLayers,
         groupBy
     }, resolver);
-
+    simpleEncoder.data(groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs

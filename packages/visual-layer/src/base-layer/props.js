@@ -22,5 +22,9 @@ export const props = {
 
             return constructor.defaultPolicy(newConf, config);
         }
-    }
+    },
+    encodingTransform: {},
+    encodingFieldsInf: {},
+    dependencies: {},
+    dataProps: {}
 };

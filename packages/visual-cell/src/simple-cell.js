@@ -4,6 +4,7 @@ import {
     mergeRecursive
 } from 'muze-utils';
 import { SIMPLE } from './enums/cell-type';
+import { SIMPLE_CELL } from './constants';
 
 /**
  * This file declares a class that is used as an interface to create new
@@ -41,6 +42,10 @@ class SimpleCell {
      */
     get type () {
         return SIMPLE;
+    }
+
+    static formalName () {
+        return SIMPLE_CELL;
     }
 
     /**

@@ -14,6 +14,7 @@ import GenericSideEffect from './side-effects/generic';
 import * as sideEffects from './side-effects';
 import SelectionSet from './selection-set';
 import { behaviourEffectMap } from './behaviour-effect-map';
+import { registry } from './registry';
 
 export {
     behaviouralActions,
@@ -31,5 +32,6 @@ export {
     SpawnableSideEffect,
     GenericSideEffect,
     SELECTION,
-    SIDE_EFFECTS
+    SIDE_EFFECTS,
+    registry
 };
