@@ -9,6 +9,7 @@ import { DEFAULT_CONFIG } from './defaults';
 import { SIZE, CONTINOUS, DISCRETE } from '../enums/constants';
 import { strategyGetter } from './size-strategy';
 import { PROPS } from './props';
+import { sanitiseConfigIntervals } from '../helper';
 
 /**
 * This class is used to instantiate a SimpleAxis.
@@ -25,10 +26,15 @@ export default class SizeAxis {
         generateGetterSetters(this, PROPS);
 
         this._id = getUniqueId();
-        this._config = Object.assign({}, this.constructor.defaultConfig(), config);
+        this.config(this.constructor.defaultConfig());
+        this.config(config);
         // @todo: Will use configuration override using scale decorator
         this._domainType = this._config.type === 'linear' ? CONTINOUS : DISCRETE;
-        this._rangeType = CONTINOUS;
+
+        this._config.range = this._userRange ? this._userRange : this._config.range;
+
+        this._config.intervals = sanitiseConfigIntervals(this._config.intervals);
+        this._rangeType = this._config.type === 'linear' && !!this._config.intervals ? DISCRETE : CONTINOUS;
 
         this._sizeStrategy = this.setStrategy(this._domainType, this._rangeType);
         this._scale = this.createScale(this._sizeStrategy);

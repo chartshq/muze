@@ -108,6 +108,9 @@ const createLegendSkeleton = (container, classPrefix, data) => {
 export const renderAxis = (context, container, height, width) => {
     const axis = context.axis();
 
+    axis.source().config({
+        tickFormat: (val, i, data) => context.config().item.text.formatter(val, i, data, context)
+    });
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
     axis.source().render();

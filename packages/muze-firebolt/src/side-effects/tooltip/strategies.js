@@ -83,6 +83,12 @@ const getKeyValue = (params) => {
     });
 };
 
+const getEncodingValues = ({ field, axes, fn, val }) => {
+    const configField = axes.config().field;
+    const values = configField && configField !== field ? null : axes[fn](val);
+    return values;
+};
+
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
     const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target } = context;
     const { classPrefix, margin, separator } = config;
@@ -98,9 +104,15 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         const measuresArr = dimensionMeasureMap[retField];
         const icon = {
             type: 'icon',
-            color: colorAxis.getColor(retinalFieldValue),
-            shape: shapeAxis.getShape(retinalFieldValue),
-            size: sizeAxis.getSize(retinalFieldValue) * config.iconScale
+            color: getEncodingValues({
+                field: retField, axes: colorAxis, fn: 'getColor', val: retinalFieldValue
+            }),
+            shape: getEncodingValues({
+                field: retField, axes: shapeAxis, fn: 'getShape', val: retinalFieldValue
+            }),
+            size: getEncodingValues({
+                field: retField, axes: sizeAxis, fn: 'getSize', val: retinalFieldValue
+            })
         };
         const { displayName, fn } = fieldInf[retField];
         const formattedRetinalValue = fn(retinalFieldValue);

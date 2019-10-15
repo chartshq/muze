@@ -16,6 +16,7 @@ import {
 } from 'muze-utils';
 import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
+import UnitBrushBehaviour from './firebolt/behaviours/brush';
 import {
     renderLayers,
     getNearestDimensionalValue,
@@ -182,6 +183,7 @@ export default class VisualUnit {
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
             });
             this.createFireboltInstance();
+
             return this;
         }
         return this._store;
@@ -194,7 +196,9 @@ export default class VisualUnit {
 
         this.firebolt(new Cls(this, {
             physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
-            behavioural: Object.assign({}, interactions.behaviours.get(), fireboltDeps.behaviouralActions),
+            behavioural: Object.assign({}, interactions.behaviours.get(), {
+                [UnitBrushBehaviour.formalName()]: UnitBrushBehaviour
+            }, fireboltDeps.behaviouralActions),
             physicalBehaviouralMap: this.getActionBehaviourMap()
         }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
 
@@ -279,6 +283,9 @@ export default class VisualUnit {
 
         setAxisRange(this);
         this.renderLayers();
+        const node = this._rootSvg.node();
+        const { sideEffectClassName, classPrefix } = this.config();
+        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
         const firebolt = this.firebolt();
         initSideEffects(firebolt.sideEffects(), firebolt);
         return this;
@@ -286,7 +293,7 @@ export default class VisualUnit {
 
     createRootContainers (container) {
         const config = this.config();
-        const { className, defClassName, sideEffectClassName, classPrefix } = config;
+        const { className, defClassName } = config;
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
         const width = this.width();
         const height = this.height();
@@ -301,8 +308,6 @@ export default class VisualUnit {
             height,
             class: qualifiedClassName.join(' ')
         });
-
-        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
         return this;
     }
 
@@ -506,12 +511,17 @@ export default class VisualUnit {
         return this;
     }
 
-    getDataModelFromIdentifiers (identifiers, mode, parentModel) {
-        if (identifiers === null) {
-            return null;
-        }
+    /**
+     *
+     *
+     * @param {*} identifiers
+     *
+     * @memberof VisualUnit
+     */
+    getDataModelFromIdentifiers (identifiers, mode, parentModel, hasBarLayer) {
+        if (!identifiers) return null;
         const dataModel = parentModel || this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers, mode);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode, hasBarLayer);
     }
 
     /**

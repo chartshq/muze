@@ -1,4 +1,4 @@
-import { getSymbol } from 'muze-utils';
+import { getSymbol, mergeRecursive } from 'muze-utils';
 import {
     CENTER,
     LEFT,
@@ -49,11 +49,23 @@ export const DEFAULT_CONFIG = {
             className: 'legend-icon',
             height: 20,
             width: 20,
-            color: 'rgba(0,0,0,.5)',
+            color: 'rgba(192,192,192,0.6)',
             type: 'square'
         }
     }
 };
+
+const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
+
+const ITEM_FORMATTER = {
+    item: {
+        text: {
+            formatter: val => `${val[0]}-${val[1]}`
+        }
+    }
+};
+
+export const STEP_DEFAULT_CONFIG = mergeRecursive(tempConfig, ITEM_FORMATTER);
 
 /**
  * Creates a map of pre defined icons

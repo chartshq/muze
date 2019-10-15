@@ -31,13 +31,17 @@ export default class GenericBehaviour {
         const {
             model: filteredDataModel,
             uids
-        } = this.firebolt.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
+        } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
         const entryExitSets = selectionSets.map((selectionSet) => {
             this.setSelectionSet(uids, selectionSet);
             return this.getEntryExitSet(selectionSet, filteredDataModel, payload);
         });
 
         return entryExitSets;
+    }
+
+    getAddSetFromCriteria (...params) {
+        return this.firebolt.getAddSetFromCriteria(...params);
     }
 
     /**

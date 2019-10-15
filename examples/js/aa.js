@@ -4,61 +4,41 @@
     let env = window.muze();
     const DataModel = window.muze.DataModel;
 
-    d3.json('/data/cars.json', (data) => {
+    d3.csv('/data/weather.csv', (data) => {
+        const share = muze.Operators.share;
         const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'maxDays',
         type: 'measure'
     }, {
-        name: 'Displacement',
+        name: 'minDays',
         type: 'measure'
     }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
+        name: 'time',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
     }];
 
     let rootData = new DataModel(data, schema)
 
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
+    // rootData.sort([
+    //     ['Cylinders', 'asc'],
+    //     ['Maker', 'desc'],
+    // ])
 
     const canvas = env.canvas();
     
     canvas
         .data(rootData)
-        .columns(['Cylinders', 'Horsepower'])
-        .rows(['Acceleration'])
-        .color('Maker')
+        // .rows(['maxDays'])
+        .rows([share('maxDays', 'minDays')])
+        .columns(['time'])
+        .layers([{ mark: 'tick', encoding: { y: 'maxDays', y0: 'minDays' } } ])
+        // .layers([{
+        //     mark: 'area'
+        // }])
+        // .detail(['Name'])
         .mount('#chart')
         .height(500)
+        .width(900)
         .title('Charts');
-     
-    setTimeout(() => {
-        canvas.data(canvas.data().select(() => false))
-    }, 1000);
     })
 })();
