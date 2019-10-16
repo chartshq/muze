@@ -170,8 +170,8 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    getInteractionStyles (styleType) {
-        return interactionStyleMap[styleType];
+    getInteractionStyles (interactionType, styleType) {
+        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     addOverlayPath (container, refElement, data, style) {

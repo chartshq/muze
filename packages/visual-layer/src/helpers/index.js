@@ -523,11 +523,16 @@ export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => ({
         }
         return acc;
     }, {}),
-    originalStroke: {
-        stroke: auxStyles.stroke,
-        'stroke-width': auxStyles.strokeWidth
+    originalStrokeOnSelect: {
+        stroke: (auxStyles.select || {}).stroke,
+        'stroke-width': (auxStyles.select || {}).strokeWidth
     },
-    stateStroke: {},
+    originalStrokeOnHighlight: {
+        stroke: (auxStyles.highlight || {}).stroke,
+        'stroke-width': (auxStyles.highlight || {}).strokeWidth
+    },
+    stateStrokeOnSelect: {},
+    stateStrokeOnHighlight: {},
     stateColor: {},
     colorTransform: {}
 });

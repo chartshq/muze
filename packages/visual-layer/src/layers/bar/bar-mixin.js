@@ -213,8 +213,8 @@ export const BarLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    getInteractionStyles (styleType) {
-        return interactionStyleMap[styleType];
+    getInteractionStyles (interactionType, styleType) {
+        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     addOverlayPath (container, refElement, data, style) {

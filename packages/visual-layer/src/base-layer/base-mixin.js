@@ -394,7 +394,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
     }
 
     applySpecificStyle (styleType, { elem, apply, interactionType, style, colorAxis }) {
-        const interactionFn = this.getInteractionStyles(styleType);
+        const interactionFn = this.getInteractionStyles(interactionType, styleType);
         if (!interactionFn) return false;
         return interactionFn(this, elem, apply, interactionType, style, colorAxis);
     }

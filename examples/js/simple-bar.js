@@ -63,8 +63,8 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
         .rows(['Horsepower'])
+        .columns(['Maker'])
         .layers([{
             mark: 'bar'
         }])
