@@ -113,9 +113,9 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
     return values;
 };
 
-const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
+export const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
 
-const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
+export const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
     const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target, stackedSum } = context;

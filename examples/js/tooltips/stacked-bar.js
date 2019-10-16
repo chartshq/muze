@@ -55,7 +55,7 @@ d3.json('../../data/cars.json', (data) => {
       .data(rootData4)
       .width(750)
       .height(550)
-      .detail  ('Cylinders')
+      .detail('Cylinders')
       .title('Stacked Bar Chart')
       .mount("#chart5");
 });
