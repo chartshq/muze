@@ -54,8 +54,8 @@ d3.json('../../data/cars.json', (data) => {
       .columns(['Year']) // Horsepower goes in Y-Axis
       .color('Origin') // Color the points from using Origin
       .data(rootData4)
-      .width(450)
-      .height(350)
+      .width(750)
+      .height(550)
       .title('Stacked Bar Chart')
       .mount("#chart5");
 });
