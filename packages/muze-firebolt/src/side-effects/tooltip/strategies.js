@@ -44,22 +44,21 @@ const getTabularData = (dataObj, fieldInf) => {
     return rows;
 };
 
-const isSingleValue = (dataLen, stackedSum) => {
-    return dataLen === 1  && !stackedSum
-}
+const isSingleValue = (dataLen, stackedSum) => dataLen === 1 && !stackedSum;
+
 const getStackedKeyValue = (params) => {
-    const { field, value, classPrefix} = params;
-        return ({
-            className: `${classPrefix}-tooltip-stacked-row` ,
-            data: [{
-                value: field,
-                className: `${classPrefix}-tooltip-stacked-row-key`
-            }, {
-                value: `${value}`,
-                className: `${classPrefix}-tooltip-stacked-row-value`
-            }]
-        })
-}
+    const { field, value, classPrefix } = params;
+    return ({
+        className: `${classPrefix}-tooltip-stacked-row`,
+        data: [{
+            value: field,
+            className: `${classPrefix}-tooltip-stacked-row-key`
+        }, {
+            value: `${value}`,
+            className: `${classPrefix}-tooltip-stacked-row-value`
+        }]
+    });
+};
 
 const getKeyValue = (params) => {
     const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum, stackedValue } = params;
@@ -74,7 +73,7 @@ const getKeyValue = (params) => {
             className: `${classPrefix}-tooltip-value`
         };
         const stackedValueObj = {
-            value: stackedSum ? `(${(stackedValue*100/stackedSum).toFixed(2)} %)` : undefined,
+            value: stackedSum ? `(${(stackedValue * 100 / stackedSum).toFixed(2)} %)` : undefined,
             className: `${classPrefix}-tooltip-stacked-percentage`
         };
 
@@ -88,15 +87,13 @@ const getKeyValue = (params) => {
             stackedValueObj.style = {
                 'margin-left': `${margin}px`
             };
-            
         }
 
         return ({
             className: isSelected ? `${classPrefix}-tooltip-row ${classPrefix}-tooltip-selected-row`
                 : `${classPrefix}-tooltip-row`,
-            data: stackedSum ? [keyObj, stackedValueObj, valueObj]: [keyObj, valueObj]
-        }
-        );
+            data: stackedSum ? [keyObj, stackedValueObj, valueObj] : [keyObj, valueObj]
+        });
     }
     return ({
         data: [{
@@ -116,14 +113,9 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
     return values;
 };
 
-const getStackedSum = (values, index) => {
-    const sum = values.reduce((a, b) => a + b[index], 0);
-    return sum;
-}
+const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
 
-const isStackedBar = (layers) => {
-    return layers.some(d => d.transformType() === STACK);
-}
+const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
     const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target, stackedSum } = context;
@@ -238,8 +230,10 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const filteredDimensions = dimensions.filter(field => !retinalFields[field.name]);
         const indices = filteredDimensions.map(dim => fieldsConfig[dim.name].index);
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
-        const isStacked = isStackedBar(context.firebolt.context.layers())
-        const filteredMeasures = !isSingleValue(dataLen, isStacked) ? measures.filter(d => allMeasures.indexOf(d.name) === -1) : measures;
+        const isStacked = isStackedBar(context.firebolt.context.layers());
+        const filteredMeasures = !isSingleValue(dataLen, isStacked)
+            ? measures.filter(d => allMeasures.indexOf(d.name) === -1)
+            : measures;
 
         nestedDataObj = nestCollection({
             data,
@@ -273,14 +267,14 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 if (values[0] && values[0].key) {
                     generateTooltipContent(values, index + 1, content);
                 } else {
-                    const stackedSum =  getStackedSum(
+                    const stackedSum = getStackedSum(
                         values,
                         fieldsConfig[measures[0].name].index
                     );
                     const nf = measures[0].numberFormat;
                     isStacked && content.push(getStackedKeyValue({
                         field: `${'Total'}${separator}`,
-                        value: nf ? nf(stackedSum.toFixed(2)): stackedSum.toFixed(2),
+                        value: nf ? nf(stackedSum.toFixed(2)) : stackedSum.toFixed(2),
                         classPrefix
                     }));
                     for (let j = 0, len2 = values.length; j < len2; j++) {
