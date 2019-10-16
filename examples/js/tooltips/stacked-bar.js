@@ -16,7 +16,6 @@ d3.json('../../data/cars.json', (data) => {
         name: 'Miles_per_Gallon',
         type: 'measure'
     },
-
     {
         name: 'Displacement',
         type: 'measure'
@@ -56,6 +55,7 @@ d3.json('../../data/cars.json', (data) => {
       .data(rootData4)
       .width(750)
       .height(550)
+      .detail  ('Cylinders')
       .title('Stacked Bar Chart')
       .mount("#chart5");
 });

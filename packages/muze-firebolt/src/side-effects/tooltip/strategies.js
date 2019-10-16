@@ -17,6 +17,7 @@ import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strate
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
 const FIRST_VALUE_MARGIN = '10px';
+const STACK = 'stack';
 const SINGLE_DATA_MARGIN = 10;
 
 const formatters = (formatter, interval, valueParser) => ({
@@ -43,8 +44,25 @@ const getTabularData = (dataObj, fieldInf) => {
     return rows;
 };
 
+const isSingleValue = (dataLen, stackedSum) => {
+    return dataLen === 1  && !stackedSum
+}
+const getStackedKeyValue = (params) => {
+    const { field, value, classPrefix} = params;
+        return ({
+            className: `${classPrefix}-tooltip-stacked-row` ,
+            data: [{
+                value: field,
+                className: `${classPrefix}-tooltip-stacked-row-key`
+            }, {
+                value: `${value}`,
+                className: `${classPrefix}-tooltip-stacked-row-value`
+            }]
+        })
+}
+
 const getKeyValue = (params) => {
-    const { field, value, classPrefix, margin, isSelected, removeKey } = params;
+    const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum, stackedValue } = params;
 
     if (!removeKey) {
         const keyObj = {
@@ -55,6 +73,11 @@ const getKeyValue = (params) => {
             value,
             className: `${classPrefix}-tooltip-value`
         };
+        const stackedValueObj = {
+            value: stackedSum ? `(${(stackedValue*100/stackedSum).toFixed(2)} %)` : undefined,
+            className: `${classPrefix}-tooltip-stacked-percentage`
+        };
+
         if (margin !== undefined) {
             keyObj.style = {
                 'margin-left': `${margin}px`
@@ -62,12 +85,16 @@ const getKeyValue = (params) => {
             valueObj.style = {
                 'margin-left': `${margin}px`
             };
+            stackedValueObj.style = {
+                'margin-left': `${margin}px`
+            };
+            
         }
 
         return ({
             className: isSelected ? `${classPrefix}-tooltip-row ${classPrefix}-tooltip-selected-row`
                 : `${classPrefix}-tooltip-row`,
-            data: [keyObj, valueObj]
+            data: stackedSum ? [keyObj, stackedValueObj, valueObj]: [keyObj, valueObj]
         }
         );
     }
@@ -89,8 +116,17 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
     return values;
 };
 
+const getStackedSum = (values, index) => {
+    const sum = values.reduce((a, b) => a + b[index], 0);
+    return sum;
+}
+
+const isStackedBar = (layers) => {
+    return layers.some(d => d.transformType() === STACK);
+}
+
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
-    const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target } = context;
+    const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target, stackedSum } = context;
     const { classPrefix, margin, separator } = config;
     const colorAxis = axes.color[0];
     const shapeAxis = axes.shape[0];
@@ -117,7 +153,7 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         const { displayName, fn } = fieldInf[retField];
         const formattedRetinalValue = fn(retinalFieldValue);
 
-        if (dataLen === 1) {
+        if (isSingleValue(dataLen, stackedSum)) {
             content.push(getKeyValue({
                 field: displayName,
                 value: formattedRetinalValue,
@@ -138,7 +174,9 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
                     value,
                     classPrefix,
                     margin: hasMultipleMeasures ? margin : undefined,
-                    isSelected
+                    isSelected,
+                    stackedSum,
+                    stackedValue: valueArr[measureIndex].toFixed(2)
                 });
                 if (!hasMultipleMeasures) {
                     keyValue.data = [icon, ...keyValue.data];
@@ -200,7 +238,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const filteredDimensions = dimensions.filter(field => !retinalFields[field.name]);
         const indices = filteredDimensions.map(dim => fieldsConfig[dim.name].index);
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
-        const filteredMeasures = dataLen > 1 ? measures.filter(d => allMeasures.indexOf(d.name) === -1) : measures;
+        const isStacked = isStackedBar(context.firebolt.context.layers())
+        const filteredMeasures = !isSingleValue(dataLen, isStacked) ? measures.filter(d => allMeasures.indexOf(d.name) === -1) : measures;
 
         nestedDataObj = nestCollection({
             data,
@@ -220,7 +259,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 if (field) {
                     const { displayName, fn } = fieldInf[field];
                     const formattedValue = fn(key);
-                    const removeKey = values.length > 1;
+                    const removeKey = !isSingleValue(dataLen, isStacked);
                     content.push(getKeyValue({
                         field: `${displayName}${separator}`,
                         value: formattedValue,
@@ -234,6 +273,16 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 if (values[0] && values[0].key) {
                     generateTooltipContent(values, index + 1, content);
                 } else {
+                    const stackedSum =  getStackedSum(
+                        values,
+                        fieldsConfig[measures[0].name].index
+                    );
+                    const nf = measures[0].numberFormat;
+                    isStacked && content.push(getStackedKeyValue({
+                        field: `${'Total'}${separator}`,
+                        value: nf ? nf(stackedSum.toFixed(2)): stackedSum.toFixed(2),
+                        classPrefix
+                    }));
                     for (let j = 0, len2 = values.length; j < len2; j++) {
                         const valueArr = values[j];
                         generateRetinalFieldsValues(valueArr, retinalFields, content, {
@@ -243,9 +292,9 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             fieldsConfig,
                             dimensionMeasureMap,
                             dataLen,
-                            target: context.payload.target
+                            target: context.payload.target,
+                            stackedSum
                         });
-
                         filteredMeasures.forEach((measure) => {
                             const { name } = measure;
                             const { displayName, fn } = fieldInf[name];
