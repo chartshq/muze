@@ -65,9 +65,9 @@
         // .rows(['maxDays'])
         .columns(['Maker'])
         .rows(['Horsepower'])
-        .layers([{
-            mark: 'bar'
-        }])
+        // .layers([{
+        //     mark: 'point'
+        // }])
         .color('Origin')
         // .detail(['Name'])
         .mount('#chart')

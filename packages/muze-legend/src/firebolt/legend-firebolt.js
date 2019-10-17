@@ -54,4 +54,8 @@ export class LegendFireBolt extends Firebolt {
     getFullData () {
         return null;
     }
+
+    onDataModelPropagation () {
+        return (data, config) => console.log(data, config);
+    }
 }
