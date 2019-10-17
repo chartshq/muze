@@ -52,32 +52,30 @@
         ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
     
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
+        .rows(['Acceleration'])
         .columns(['Maker'])
-        .rows(['Horsepower'])
         .layers([{
-            mark: 'point'
+            mark: 'area'
         }])
-        .color('Origin')
-        .size('Horsepower')
-        .shape({
-            field: 'Origin',
-            range : ['square', 'cross', 'triangle']
-        })
+        // .color('Origin')
         // .detail(['Name'])
         .mount('#chart')
-        .height(700)
-        .width(1100)
+        .height(450)
+        .width(650)
         .title('Charts');
+
+        setTimeout(() => {
+            var element = document.getElementById('chart');
+            canvas.firebolt().dispatchBehaviour('brush', {
+                criteria: {
+                    Acceleration: [200, 700]
+                }
+            });
+            element.classList.add('animateon');
+        }, 2000);
     })
 })();

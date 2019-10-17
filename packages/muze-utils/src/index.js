@@ -32,6 +32,7 @@ export {
     rgbToHsv,
     hexToHsv,
     hsvToRgb,
+    hslaToRgb,
     escapeHTML,
     angleToRadian,
     generateGetterSetters,

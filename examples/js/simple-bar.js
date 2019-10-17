@@ -64,15 +64,15 @@
         .data(rootData)
         // .rows(['maxDays'])
         .rows(['Horsepower'])
-        .columns(['Maker'])
+        .columns(['Origin'])
         .layers([{
             mark: 'bar'
         }])
         .color('Origin')
         // .detail(['Name'])
         .mount('#chart')
-        .height(650)
-        .width(850)
+        .height(450)
+        .width(650)
         .title('Charts');
     })
 })();
