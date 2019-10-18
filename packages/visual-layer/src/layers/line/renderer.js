@@ -15,18 +15,18 @@ const filterFn = (d) => {
 };
 
 const getELementsForLine = (params) => {
-    const { mount, data, className, layer, strokeStyle, linepath, transition } = params
+    const { mount, data, className, layer, strokeStyle, linepath, transition } = params;
     let element = makeElement(mount, 'path', data.length ? [data[0].className] : [], `.${className}`);
-    element.attr('d', linepath(data))
+    element.attr('d', linepath(data));
     element.attr('class', d => d);
     if (!transition.disabled) {
         element = element.transition()
             .duration(transition.duration)
             .on('end', layer.registerAnimationDoneHook());
     }
-    const styleKey = strokeStyle ? STROKE_DASHARRAY : 'fill-opacity'; 
-    const styleValue = strokeStyle ? strokeStyle : 0 ; 
-    element.attr('d', linepath(data)).style(styleKey, (styleValue))
+    const styleKey = strokeStyle ? STROKE_DASHARRAY : 'fill-opacity';
+    const styleValue = strokeStyle || 0;
+    element.attr('d', linepath(data)).style(styleKey, (styleValue));
     return element;
 };
 
