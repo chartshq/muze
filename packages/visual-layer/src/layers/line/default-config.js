@@ -35,6 +35,8 @@ export const defaultConfig = {
         effect: 'cubic',
         duration: 1000
     },
-    connectNullData: false
+    connectNullData: false,
+    nullDataLineStyle:{
+        'stroke-dasharray' : '0'
+    }
 };
-
