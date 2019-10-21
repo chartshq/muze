@@ -68,8 +68,13 @@
         // .layers([{
         //     mark: 'point'
         // }])
-        .color('Origin')
+        // .color('Origin')
+        .color({
+            field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+            stops: 6
+        })
         // .detail(['Name'])
+        // .size('Horsepower')
         .mount('#chart')
         .height(650)
         .width(850)

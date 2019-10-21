@@ -1,6 +1,8 @@
 import SimpleLegend from './simple-legend';
 import { getScaleInfo, getInterpolatedData, getInterpolatedArrayData } from './legend-helper';
 import { GRADIENT, LEFT, SIZE } from '../enums/constants';
+import { HIGHLIGHT } from '../enums/behaviours';
+import { Marker } from '../enums/side-effects';
 import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
 
@@ -150,6 +152,10 @@ export default class GradientLegend extends SimpleLegend {
         renderGradient(this, legendContainer);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
+        firebolt.mapSideEffects({
+            [HIGHLIGHT]: [Marker]
+        });
+
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }

@@ -10,7 +10,8 @@ import './styles.scss';
  * selection in the canvas.
  * @class SelectionBox
  */
-/* istanbul ignore next */ class SelectionBox extends SpawnableSideEffect {
+/* istanbul ignore next */
+class SelectionBox extends SpawnableSideEffect {
     static formalName () {
         return SELECTIONBOX;
     }
