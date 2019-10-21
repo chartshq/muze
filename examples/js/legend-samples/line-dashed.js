@@ -47,7 +47,9 @@ d3.json('/data/cars-with-null.json', (data) => {
         mark: 'line',
         connectNullData: true,
         nullDataLineStyle:{
-            'stroke-dasharray' : '8,4'
+            'stroke-dasharray' : ("8,4"),
+            'stroke-width': 4,
+            'stroke': 'pink'
         }
     }])
     .width(500)
