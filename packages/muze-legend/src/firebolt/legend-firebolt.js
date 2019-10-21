@@ -58,7 +58,6 @@ export class LegendFireBolt extends Firebolt {
 
     onDataModelPropagation () {
         return (data, config) => {
-            debugger;
             const context = this.context;
             if (!context.mount()) {
                 return;

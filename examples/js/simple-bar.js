@@ -63,12 +63,12 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
+        .columns(['Origin'])
         .rows(['Horsepower'])
         // .layers([{
         //     mark: 'point'
         // }])
-        // .color('Origin')
+        //.color('Origin')
         .color({
             field: 'Acceleration', // A measure in color encoding channel creates gradient legend
             stops: 6
