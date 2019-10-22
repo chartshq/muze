@@ -36,5 +36,6 @@ export const defaultConfig = {
         duration: 1000
     },
     connectNullData: false,
-    nullDataLineStyle: {}
+    nullDataLineStyle: {},
+    nullDataLineClass: 'null'
 };

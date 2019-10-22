@@ -14,18 +14,23 @@ const filterFn = (d) => {
     return update.y !== null && update.x !== null;
 };
 
-const putIndexePrevOrNext = (arr, index, indexesObj) => {
-    const updateNext = arr[index + 1].update;
-    const updatePrevious = arr[index - 1].update;
-    if (updatePrevious.y !== null && updatePrevious.x !== null) {
-        indexesObj.prevOfNull.push(index - 1);
+const settIndexHelper = (elem, index) => {
+    const {x, y} = elem ? elem.update : {};
+    if (x !== null && y !== null) {
+        return index;
     }
-    if (updateNext.y !== null && updateNext.x !== null) {
-        indexesObj.nextOfNull.push(index + 1);
-    }
+    return -1;
+}
+
+const settIndexPrevOrNext = (arr, index, indexesObj) => {
+    const prev = settIndexHelper(arr[index - 1], index - 1);
+    const next = settIndexHelper(arr[index + 1], index + 1);
+
+    prev >= 0  && indexesObj.prevOfNull.push(prev);
+    next >= 0 && indexesObj.nextOfNull.push(next);
 };
 
-const getSideIndexes = (arr) => {
+const getborderIndexes = (arr) => {
     const indexes = {
         prevOfNull: [],
         nextOfNull: []
@@ -33,42 +38,43 @@ const getSideIndexes = (arr) => {
     arr.forEach((value, index) => {
         const { update } = value;
         if (update.y === null || update.x === null) {
-            putIndexePrevOrNext(arr, index, indexes);
+            settIndexPrevOrNext(arr, index, indexes);
         }
     });
     return indexes;
 };
 
-const makeStartEndPair = (arr, sideIndexes) => {
-    const pairsArray = [];
-    const length = sideIndexes.prevOfNull.length;
+const makeStartEndPair = (arr, borderIndexes) => {
+    const pairArray = [];
+    const { prevOfNull, nextOfNull} = borderIndexes;
+    const length = prevOfNull.length;
     if (!length) {
-        return pairsArray;
+        return pairArray;
     }
 
     for (let i = 0; i < length; i++) {
         const pair = [];
-        const prevValue = arr[sideIndexes.prevOfNull[i]];
-        const nextValue = arr[sideIndexes.nextOfNull[i]];
+        const prevValue = arr[prevOfNull[i]];
+        const nextValue = arr[nextOfNull[i]];
         if (prevValue) {
             pair.push(prevValue);
         }
         if (nextValue) {
             pair.push(nextValue);
         }
-        pairsArray.push(pair);
+        pairArray.push(pair);
     }
-    return pairsArray;
+    return pairArray;
 };
 
 const sanitizeNullConfig = (arr) => {
-    const sideIndexes = getSideIndexes(arr);
-    return makeStartEndPair(arr, sideIndexes);
+    const borderIndexes = getborderIndexes(arr);
+    return makeStartEndPair(arr, borderIndexes);
 };
 
 const getELementsForLine = (params) => {
     const { mount, data, className, layer, strokeStyle, linepath, transition } = params;
-    let element = makeElement(mount, 'path', data.length ? [data[0].className] : [], `.${className}`);
+    let element = makeElement(mount, 'path', data.length ? [data[0].className] : [], className);
     element.attr('d', linepath(data));
     element.attr('class', d => d);
     setStyles(element, strokeStyle);
@@ -89,6 +95,7 @@ const getELementsForLine = (params) => {
 export const drawLine = (context) => {
     const { layer, container, points, interpolate, connectNullData, className, style, transition } = context;
     const strokeStyle = layer.config().nullDataLineStyle;
+    const nullDataLineClass = layer.config().nullDataLineClass;
     const mount = selectElement(container).attr('class', className);
     const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
@@ -109,11 +116,12 @@ export const drawLine = (context) => {
     });
     const sanitizedPoints = sanitizeNullConfig(points);
     sanitizedPoints.map((d) => {
-        if (connectNullData) {
-            d.length > 1 && getELementsForLine({
+        if (connectNullData && d.length > 1) {
+            getELementsForLine({
                 mount,
                 data: d,
                 strokeStyle,
+                className:`.${className}-${nullDataLineClass}`,
                 layer,
                 linepath,
                 transition
