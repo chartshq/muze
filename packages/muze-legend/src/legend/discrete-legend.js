@@ -53,7 +53,7 @@ export default class DiscreteLegend extends SimpleLegend {
         let domainForLegend = [...new Set(domain)];
         const field = this.metaData().getFieldspace().fields[0];
         const { type, subtype } = field.schema();
-
+        const len = domainForLegend.length;
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;
@@ -61,7 +61,7 @@ export default class DiscreteLegend extends SimpleLegend {
             if (type === FieldType.MEASURE) {
                 value = (+domainForLegend[i]).toFixed(0);
                 const nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
-                range = [value, nextVal.toFixed(0)];
+                range = [value, i === len - 1 ? nextVal.toFixed(0) : nextVal.toFixed(0) - 1];
             } else {
                 let domainVal = rawVal;
                 if (subtype === DimensionSubtype.TEMPORAL) {

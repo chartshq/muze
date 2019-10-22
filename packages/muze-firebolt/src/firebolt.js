@@ -165,17 +165,17 @@ export default class Firebolt {
         this._propagationInf = propagationInfo;
 
         if (action) {
-            const selectionSet = action.dispatch(payload);
-            const propagationSelectionSet = this.getPropagationSelectionSet(selectionSet);
-            this._entryExitSet[behaviour] = propagationSelectionSet;
+            action.dispatch(payload);
+            this._entryExitSet[behaviour] = action.entryExitSet();
             const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
 
             if (propagate) {
-                this.propagate(behaviour, payload, selectionSet.find(d => d.sourceSelectionSet), sideEffects);
+                this.propagate(behaviour, payload, action.propagationIdentifiers(), sideEffects);
             }
+
             if (shouldApplySideEffects) {
                 const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
-                this.applySideEffects(applicableSideEffects, propagationSelectionSet, payload);
+                this.applySideEffects(applicableSideEffects, this.getEntryExitSet(behaviour), payload);
             }
         }
 
@@ -462,5 +462,9 @@ export default class Firebolt {
 
     mergeSelectionSets (behaviours) {
         return unionSets(this, behaviours);
+    }
+
+    data () {
+        return this.context.data();
     }
 }
