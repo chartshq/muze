@@ -758,4 +758,19 @@ export default class VisualUnit {
             this.data().getFieldsConfig());
         return domain;
     }
+
+    getValueFromId (id, fields, fieldsConfig) {
+        const { idValuesMap } = this._cachedValuesMap();
+        const row = idValuesMap[id];
+        const filteredRow = fields.map(d => row[fieldsConfig[d].index]);
+
+        return filteredRow;
+    }
+
+    getRangeFromIdentifiers ({ criteria, fields }) {
+        return fields.reduce((acc, v) => {
+            acc[v] = criteria[v];
+            return acc;
+        }, {});
+    }
 }
