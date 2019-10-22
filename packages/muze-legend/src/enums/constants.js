@@ -18,11 +18,7 @@ export const MARGINBUFFER = 10;
 export const DEFAULTICONSIZE = { // approximately the (size needed) * Math.PI value
     circle: 64,
     square: 45.8,
-    diamond: 42.8,
-    cross: 42.8,
-    star:42.8,
-    wye: 42.8,
-    triangle: 42.8
+    default: 42.8
 };
 export const DEFAULTSHAPE = 'circle';
 export const STEP = 'step';
@@ -52,4 +48,5 @@ export const END = 'end';
 export const SIZE = 'size';
 export const DISCRETE = 'discrete';
 export const MEASURE = 'measure';
+export const DEFAULT = 'default';
 

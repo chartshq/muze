@@ -10,10 +10,10 @@ import {
     createItemSkeleton,
     renderStepItem
 } from './renderer';
-import { STEP, RECT, LEFT, SIZE, UPPER, LOWER, HORIZONTAL, VERTICAL } from '../enums/constants';
+import { STEP, RECT, LEFT, SIZE, UPPER, LOWER, HORIZONTAL } from '../enums/constants';
 import { stepData } from './position-config';
 import '../styles.scss';
-import { STEP_DEFAULT_CONFIG } from './defaults';
+import { STEP_DEFAULT_CONFIG, DEFAULT_MEASUREMENT } from './defaults';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -145,7 +145,9 @@ export default class StepLegend extends SimpleLegend {
             item
         } = this.config();
         super.getLabelSpaces();
-        return getItemMeasures(this, 'range', item.text.formatter);}
+        const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2
+        return getItemMeasures(this, 'range', item.text.formatter, stepItemBuffer);
+    }
 
     /**
      *

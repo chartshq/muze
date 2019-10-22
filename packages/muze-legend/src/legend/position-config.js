@@ -28,7 +28,7 @@ const legendOrientation = {
             } = config;
             return {
                 row: {
-                    width: `${width + itemSpaces.length * buffer[HORIZONTAL]||1}px`,
+                    width: `${width + itemSpaces.length * buffer[HORIZONTAL] || 1}px`,
                     padding: `${0}px`
                 },
                 column: {
