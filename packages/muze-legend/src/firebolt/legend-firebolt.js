@@ -54,4 +54,8 @@ export class LegendFireBolt extends Firebolt {
     getFullData () {
         return null;
     }
+
+    data () {
+        return this.context.metaData();
+    }
 }

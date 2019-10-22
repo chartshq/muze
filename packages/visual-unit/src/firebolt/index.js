@@ -6,9 +6,9 @@ import { propagateValues } from './data-propagator';
 
 const sideEffectPolicy = (propPayload, context, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
-    const fieldsConfig = sourceIdentifiers.getFieldsConfig();
-    const sourceIdentifierFields = Object.keys(fieldsConfig).filter(field =>
-        fieldsConfig[field].def.type !== FieldType.MEASURE);
+    const fields = sourceIdentifiers.fields;
+    const sourceIdentifierFields = Object.keys(fields).filter(field =>
+        field.type !== FieldType.MEASURE);
     const propFields = Object.keys(propagationData[0].getFieldsConfig());
     const hasCommonCanvas = propPayload.sourceCanvas === context.parentAlias();
     return intersect(sourceIdentifierFields, propFields).length || hasCommonCanvas;
@@ -34,10 +34,10 @@ export default class UnitFireBolt extends Firebolt {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
         });
     }
-    propagate (behaviour, payload, selectionSet, sideEffects) {
+    propagate (behaviour, payload, identifiers, sideEffects) {
         propagateValues(this, behaviour, {
             payload,
-            selectionSet,
+            identifiers,
             sideEffects,
             propagationFields: this._propagationFields
         });

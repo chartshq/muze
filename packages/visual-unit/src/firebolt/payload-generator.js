@@ -56,7 +56,7 @@ export const payloadGenerator = {
         const sourceFields = schema.map(d => d.name);
         payload.criteria = !sourceIdentifiers && selectionDataModel[0].isEmpty() ? null :
             [sourceFields, ...data];
-        payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.getSchema().map(d => d.name) : [];
+        payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(d => d.name) : [];
         return payload;
     }
 };

@@ -300,7 +300,8 @@ export default class SimpleLegend {
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
-  /**
+
+    /**
      *
      *
      * @param {*} data
@@ -316,5 +317,33 @@ export default class SimpleLegend {
             };
         }
         return [[fieldName], [data.rawVal]];
+    }
+
+    getValueFromId (id, fields = []) {
+        const data = this.data();
+        if (fields.length) {
+            id = Number(id);
+            return [data.find(d => id === d.id).rawVal];
+        }
+
+        return [];
+    }
+
+    getRangeFromIdentifiers ({ fields, entrySet }) {
+        const data = this.data();
+        const idRangeMap = data.reduce((acc, v) => {
+            acc[v.id] = v;
+            return acc;
+        }, {});
+
+        return fields.reduce((acc, v) => {
+            acc[v] = entrySet.reduce((ranges, id) => {
+                if (id in idRangeMap) {
+                    ranges.push(idRangeMap[id].range);
+                }
+                return ranges;
+            }, []);
+            return acc;
+        }, {});
     }
 }
