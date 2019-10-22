@@ -15,18 +15,18 @@ const filterFn = (d) => {
 };
 
 const settIndexHelper = (elem, index) => {
-    const {x, y} = elem ? elem.update : {};
+    const { x, y } = elem ? elem.update : {};
     if (x !== null && y !== null) {
         return index;
     }
     return -1;
-}
+};
 
 const settIndexPrevOrNext = (arr, index, indexesObj) => {
     const prev = settIndexHelper(arr[index - 1], index - 1);
     const next = settIndexHelper(arr[index + 1], index + 1);
 
-    prev >= 0  && indexesObj.prevOfNull.push(prev);
+    prev >= 0 && indexesObj.prevOfNull.push(prev);
     next >= 0 && indexesObj.nextOfNull.push(next);
 };
 
@@ -46,7 +46,7 @@ const getborderIndexes = (arr) => {
 
 const makeStartEndPair = (arr, borderIndexes) => {
     const pairArray = [];
-    const { prevOfNull, nextOfNull} = borderIndexes;
+    const { prevOfNull, nextOfNull } = borderIndexes;
     const length = prevOfNull.length;
     if (!length) {
         return pairArray;
@@ -121,7 +121,7 @@ export const drawLine = (context) => {
                 mount,
                 data: d,
                 strokeStyle,
-                className:`.${className}-${nullDataLineClass}`,
+                className: `.${className}-${nullDataLineClass}`,
                 layer,
                 linepath,
                 transition
