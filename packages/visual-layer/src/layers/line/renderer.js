@@ -102,7 +102,6 @@ export const drawLine = (context) => {
     const elementWithNullData = getELementsForLine({
         mount,
         data: points,
-        className: 'p1',
         strokeStyle: undefined,
         layer,
         linepath,
@@ -114,7 +113,6 @@ export const drawLine = (context) => {
             d.length > 1 && getELementsForLine({
                 mount,
                 data: d,
-                className: 'p2',
                 strokeStyle,
                 layer,
                 linepath,

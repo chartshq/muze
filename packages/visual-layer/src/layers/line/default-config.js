@@ -36,7 +36,5 @@ export const defaultConfig = {
         duration: 1000
     },
     connectNullData: false,
-    nullDataLineStyle: {
-        'stroke-dasharray': '0'
-    }
+    nullDataLineStyle: {}
 };
