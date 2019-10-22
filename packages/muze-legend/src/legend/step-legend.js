@@ -2,14 +2,15 @@ import SimpleLegend from './simple-legend';
 import {
     getScaleInfo,
     getInterpolatedData,
-    getDomainBounds
+    getDomainBounds,
+    getItemMeasures
 } from './legend-helper';
 import {
     createLegendSkeleton,
     createItemSkeleton,
     renderStepItem
 } from './renderer';
-import { STEP, RECT, LEFT, SIZE, UPPER, LOWER } from '../enums/constants';
+import { STEP, RECT, LEFT, SIZE, UPPER, LOWER, HORIZONTAL, VERTICAL } from '../enums/constants';
 import { stepData } from './position-config';
 import '../styles.scss';
 import { STEP_DEFAULT_CONFIG } from './defaults';
@@ -53,6 +54,7 @@ export default class StepLegend extends SimpleLegend {
      * @memberof StepLegend
      */
     static defaultConfig () {
+        STEP_DEFAULT_CONFIG.buffer[HORIZONTAL] = 0;
         return STEP_DEFAULT_CONFIG;
     }
 
@@ -131,7 +133,7 @@ export default class StepLegend extends SimpleLegend {
      *
      * @memberof Legend
      */
-    getLabelSpaces (effPadding, align) {
+    getLabelSpaces () {
         this.config({
             item: {
                 text: {
@@ -139,8 +141,11 @@ export default class StepLegend extends SimpleLegend {
                 }
             }
         });
-        return super.getLabelSpaces(effPadding, align);
-    }
+        const {
+            item
+        } = this.config();
+        super.getLabelSpaces();
+        return getItemMeasures(this, 'range', item.text.formatter);}
 
     /**
      *

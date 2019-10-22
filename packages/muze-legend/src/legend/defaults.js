@@ -30,6 +30,10 @@ export const LEGEND_TITLE = {
 };
 
 export const DEFAULT_CONFIG = {
+    buffer:{
+        [ALIGN.HORIZONTAL]: 10,
+        [ALIGN.VERTICAL]: 10
+    },
     classPrefix: 'muze',
     borderStyle: 'solid',
     borderColor: 'rgba(0,0,0,0)',

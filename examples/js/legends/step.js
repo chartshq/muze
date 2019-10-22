@@ -61,10 +61,14 @@ d3.json('../data/cars.json', function (data) {
         mark: 'bar'
     }])
     .width(800)
+    .config({
+        legend: {
+            position: 'bottom'
+    }})
     .height(600)
     .color({
         field: 'Horsepower',
-        stops:5,
+        stops:8,
         step:true
     })
     .mount('#chart6')

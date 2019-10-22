@@ -46,34 +46,30 @@
         {
             name: 'Year',
             type: 'dimension',
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
         }
         ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
     
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
-        .columns(['Maker'])
-        .rows(['Horsepower'])
+        .columns(['Acceleration'])
+        .rows(['Year'])
         .layers([{
             mark: 'point'
         }])
-        .color('Origin')
-        .size('Horsepower')
-        // .detail(['Name'])
+        .size('Origin')
+        .color('Maker')
+        .config({
+            legend: {
+                position: 'bottom'
+        }})
         .mount('#chart')
         .height(500)
-        .width(500)
+        .width(900)
         .title('Charts');
     })
 })();
