@@ -3,3 +3,9 @@
 .#{$prefix}anchors-group {
     pointer-events: none;
 }
+
+.#{$prefix}persistent-anchors {
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
+}

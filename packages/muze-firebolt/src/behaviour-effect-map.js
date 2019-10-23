@@ -20,7 +20,7 @@ export const behaviourEffectMap = {
         options: {
             strategy: 'highlight'
         }
-    }, {
+    }, 'crossline', {
         name: 'tooltip',
         options: {
             order: 9999

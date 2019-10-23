@@ -48,7 +48,9 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
 
             if (!isSpecificInteraction) {
                 // Common style for all the layers
-                elem.style(styleType, ((d) => {
+                elem.style(styleType, ((d, i) => {
+                    d = Array.isArray(d) ? d[i] : d;
+
                     const { colorTransform, stateColor, originalColor } = d.meta;
                     colorTransform[interactionType] = colorTransform[interactionType] || {};
                     let h;

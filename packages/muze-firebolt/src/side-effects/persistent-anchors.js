@@ -18,4 +18,10 @@ export default class PersistentAnchors extends AnchorEffect {
             disabled: true
         };
     }
+
+    // offset value by which anchor size is changed
+    // Applied only on select interaction
+    getAnchorSizeonInteraction () {
+        return 50;
+    }
 }

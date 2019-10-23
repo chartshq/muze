@@ -34,9 +34,18 @@ export const drawLine = (context) => {
         filteredPoints = points.filter(filterFn);
     }
 
+    const graphicElems = layer._graphicElems;
+    const updateFns = {
+        update: (group, d) => {
+            d.forEach((dd) => {
+                graphicElems[dd.rowId] = selectElement(group.node().parentElement);
+            });
+        }
+    };
+
     updateStyle(mount, style);
-    let element = makeElement(mount, 'path', points.length ? [points[0].className] : []);
-    element.attr('class', d => d);
+    let element = makeElement(mount, 'path', points.length ? [points] : [], null, updateFns);
+    element.attr('class', (d, i) => d[i].className);
     if (!transition.disabled) {
         element = element.transition()
         .duration(transition.duration)

@@ -4,7 +4,8 @@ import {
     makeElement,
     getQualifiedClassName,
     selectElement,
-    appendElement
+    appendElement,
+    getSymbol
 } from 'muze-utils';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
@@ -191,11 +192,9 @@ export const PointLayerMixin = superclass => class extends superclass {
             let R = Math.sqrt(data.size / Math.PI);
             R = getStrokeWidthByPosition(position, R);
 
-            pathElement.attr('d', () => (
-                `M ${-R}, 0
-                a ${R},${R} 0 1, 0 ${R * 2}, 0
-                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`
-            ));
+            const size = data.size + R;
+            const path = getSymbol(data.shape).size(size);
+            pathElement.attr('d', path);
         }
 
         pathElement.style(style.type, style.props.value);

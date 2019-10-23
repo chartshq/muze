@@ -19,7 +19,7 @@ import {
     resolveEncodingValues,
     sortData
 } from '../../helpers';
-
+import { interactionStyleMap } from './helper';
 import './styles.scss';
 
 /**
@@ -83,6 +83,10 @@ export const LineLayerMixin = superclass => class extends superclass {
         return true;
     }
 
+    getInteractionStyles (interactionType, styleType) {
+        return (interactionStyleMap[interactionType] || {})[styleType];
+    }
+
     /**
      * Generates the x and y positions for each point
      * @param {Array} data Data Array
@@ -116,21 +120,21 @@ export const LineLayerMixin = superclass => class extends superclass {
                 data: d
             }, i, data, this);
 
+            const style = {
+                stroke: resolvedEncodings.color,
+                'fill-opacity': 0
+            };
+
             const point = {
                 enter: {},
                 update: {
                     x: d.x instanceof InvalidAwareTypes ? null : resolvedEncodings.x,
                     y: d.y instanceof InvalidAwareTypes ? null : resolvedEncodings.y
                 },
-                style: {
-                    stroke: resolvedEncodings.color,
-                    'fill-opacity': 0
-                },
+                style,
                 rowId: d.rowId,
                 source: d.source,
-                meta: getColorMetaInf({
-                    stroke: resolvedEncodings.color
-                }, colorAxis)
+                meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
@@ -151,10 +155,6 @@ export const LineLayerMixin = superclass => class extends superclass {
      * @return {LineLayer} instance of line layer
      */
     render (container) {
-        let points;
-        let seriesClassName;
-        let style;
-
         const config = this.config();
         const {
             encoding,
@@ -177,7 +177,26 @@ export const LineLayerMixin = superclass => class extends superclass {
         this._pointMap = {};
         containerSelection.classed(qualifiedClassName.join(' '), true);
         containerSelection.classed(className, true);
-        makeElement(container, 'g', normalizedData, null, {
+
+        const translatedPoints = normalizedData.map((data, i) => {
+            let color;
+            const colorValFn = encoding.color.value;
+            const colorVal = data.find(d => d.source[colorFieldIndex] !== null &&
+                    d.source[colorFieldIndex] !== undefined);
+
+            if (colorValFn) {
+                color = colorValFn(data, i, normalizedData);
+            } else {
+                color = axes.color.getColor(colorVal && colorVal.source[colorFieldIndex]);
+            }
+
+            return {
+                data: this.translatePoints(data),
+                style: this.getPathStyle(color)
+            };
+        });
+
+        makeElement(container, 'g', translatedPoints.map(point => point.data), null, {
             enter: (group) => {
                 animateGroup(group, {
                     transition,
@@ -193,22 +212,11 @@ export const LineLayerMixin = superclass => class extends superclass {
                 });
             },
             update: (group, dataArr, i) => {
-                points = this.translatePoints(dataArr);
+                const points = translatedPoints[i].data;
+                const seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
+                const style = translatedPoints[i].style;
+
                 this._points.push(points);
-                seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
-
-                let color;
-                const colorValFn = encoding.color.value;
-                const colorVal = points.find(d => d.source[colorFieldIndex] !== null &&
-                        d.source[colorFieldIndex] !== undefined);
-
-                if (colorValFn) {
-                    color = colorValFn(dataArr, i, normalizedData);
-                } else {
-                    color = axes.color.getColor(colorVal && colorVal.source[colorFieldIndex]);
-                }
-
-                style = this.getPathStyle(color);
                 this.getDrawFn()({
                     layer: this,
                     container: group.node(),
