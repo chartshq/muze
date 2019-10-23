@@ -2,7 +2,7 @@ import { isSimpleObject, DimensionSubtype, partition, FieldType, ReservedFields 
 import { getMergedSet, getSourceFields } from '../../helper';
 
 export const getIdentifiersFromSet = (set, context, { fieldsConfig, fields }) => {
-    const data = [[], []];
+    const data = [[]];
 
     if (fields.length) {
         data[0] = fields;

@@ -1,5 +1,9 @@
-export const addFacetData = ({ identifiers: data, fields }, facetData, propFields) => {
-    const fieldsWithFacets = data[0].length ? [...fields, ...facetData[0].map(d => d.getSchemaDef())] : [];
+export const addFacetData = ({ identifiers: data }, facetData, propFields) => {
+    const fieldsWithFacets = data[0].length ? [...data[0].map((d, i) => ({
+        name: d,
+        index: i
+    })), ...facetData[0].map(d => d.getSchemaDef())] : [];
+
     const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
         acc[v.name] = i;
         return acc;

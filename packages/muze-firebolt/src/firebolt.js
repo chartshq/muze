@@ -184,10 +184,6 @@ export default class Firebolt {
         return this;
     }
 
-    getBehavioursFromPhysical (name) {
-        return this._actionBehaviourMap[name].behaviours.map(d => this._actions.behavioural[d]);
-    }
-
     getPropagationSelectionSet (selectionSet) {
         return selectionSet.find(d => !d.sourceSelectionSet);
     }
