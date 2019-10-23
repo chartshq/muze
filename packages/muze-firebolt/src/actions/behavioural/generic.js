@@ -1,4 +1,12 @@
-import { getSetInfo, getMergedSet, getSourceFields } from '../../helper';
+import { isSimpleObject, DimensionSubtype, partition, FieldType } from 'muze-utils';
+import { getMergedSet, getSourceFields } from '../../helper';
+
+export const getIdentifiersFromSet = (set, context, { fieldsConfig, fields }) => {
+    const data = [fields];
+
+    set.forEach(id => data.push(context.getValueFromId(id, fields, fieldsConfig)));
+    return data;
+};
 
 /**
  * This is the base class has all the common functionalities needed for all behavioural actions. Any other behavioural
@@ -32,12 +40,16 @@ export default class GenericBehaviour {
             model: filteredDataModel,
             uids
         } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
-        const entryExitSets = selectionSets.map((selectionSet) => {
-            this.setSelectionSet(uids, selectionSet);
-            return this.getEntryExitSet(selectionSet, filteredDataModel, payload);
-        });
 
-        return entryExitSets;
+        selectionSets.forEach((selectionSet) => {
+            this.setSelectionSet(uids, selectionSet, {
+                filteredDataModel,
+                payload
+            });
+
+            selectionSet._volatile && this.propagationIdentifiers(selectionSet, payload);
+            this.entryExitSet(selectionSet, filteredDataModel, payload);
+        });
     }
 
     getAddSetFromCriteria (...params) {
@@ -58,32 +70,90 @@ export default class GenericBehaviour {
         return this;
     }
 
-    getEntryExitSet (selectionSet, filteredDataModel, payload) {
-        const {
-            entrySet,
-            exitSet,
-            completeSet
-        } = selectionSet.getSets();
-        const propagationInf = this.firebolt.getPropagationInf();
-        const dataModel = this.firebolt.getFullData();
-        const setConfig = {
-            dataModel,
-            filteredDataModel,
-            propagationData: propagationInf.data,
-            selectionSet
-        };
+    entryExitSet (...params) {
+        if (params.length) {
+            const [selectionSet, filteredDataModel, payload] = params;
+            const {
+                entrySet,
+                exitSet,
+                completeSet
+            } = selectionSet.getSets();
+            const propagationInf = this.firebolt.getPropagationInf();
+
+            this._entryExitSet = {
+                entrySet: [this.getSetInfo('oldEntry', entrySet[0], filteredDataModel),
+                    this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
+                exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel),
+                    this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
+                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel),
+                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel),
+                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel),
+                fields: getSourceFields(propagationInf, payload.criteria)
+            };
+
+            return this;
+        }
+        return this._entryExitSet;
+    }
+
+    getSetInfo (type, set, filteredDataModel) {
+        let model = null;
+
+        if (type === 'mergedEnter') {
+            model = filteredDataModel ? filteredDataModel[0] : null;
+        } else if (type === 'mergedExit') {
+            model = filteredDataModel ? filteredDataModel[1] : null;
+        }
 
         return {
-            entrySet: [getSetInfo('oldEntry', entrySet[0], setConfig),
-                getSetInfo('newEntry', entrySet[1], setConfig)],
-            exitSet: [getSetInfo('oldEntry', exitSet[0], setConfig),
-                getSetInfo('newExit', exitSet[1], setConfig)],
-            mergedEnter: getSetInfo('mergedEnter', getMergedSet(entrySet), setConfig),
-            mergedExit: getSetInfo('mergedExit', getMergedSet(exitSet), setConfig),
-            completeSet: getSetInfo('complete', completeSet, setConfig),
-            fields: getSourceFields(propagationInf, payload.criteria),
-            sourceSelectionSet: selectionSet._volatile === true
+            uids: set,
+            length: set.length,
+            model
         };
+    }
+
+    propagationIdentifiers (...params) {
+        if (params.length) {
+            let propData = null;
+            const [selectionSet, payload] = params;
+            const { context } = this.firebolt;
+            const fieldsConfig = this.firebolt.data().getFieldsConfig();
+            const { criteria } = payload;
+
+            if (selectionSet.resetted() || criteria === null) {
+                propData = null;
+            } else if (isSimpleObject(criteria)) {
+                const fields = isSimpleObject(criteria) ? Object.keys(criteria) : criteria[0];
+                // const fields = Object.keys(criteria);
+                const [dims, otherFields] =
+                    partition(fields, (d => fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL));
+
+                propData = {
+                    fields: fields.map(d => fieldsConfig[d].def),
+                    range: context.getRangeFromIdentifiers({
+                        criteria,
+                        entrySet: selectionSet.getMergedEntrySet(),
+                        fields: otherFields
+                    }),
+                    identifiers: getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
+                        fields: dims,
+                        fieldsConfig
+                    })
+                };
+            } else {
+                const data = getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
+                    fields: criteria[0].filter(field => fieldsConfig[field].def.type === FieldType.DIMENSION),
+                    fieldsConfig
+                });
+                propData = {
+                    fields: data[0].map(d => fieldsConfig[d].def),
+                    identifiers: data
+                };
+            }
+            this._propagationIdentifiers = propData;
+            return this;
+        }
+        return this._propagationIdentifiers;
     }
 
     static mutates () {

@@ -1,8 +1,7 @@
 import { Firebolt } from '@chartshq/muze-firebolt';
-import { propagate } from './helper';
+import { propagate, payloadGenerator } from './helper';
 import { STEP, GRADIENT } from '../enums/constants';
 import { HIGHLIGHT } from '../enums/behaviours';
-import { payloadGenerator } from './payload-generator';
 /**
  * This class manages the interactions of legend.
  * @export
@@ -72,4 +71,7 @@ export class LegendFireBolt extends Firebolt {
         };
     }
 
+    data () {
+        return this.context.metaData();
+    }
 }
