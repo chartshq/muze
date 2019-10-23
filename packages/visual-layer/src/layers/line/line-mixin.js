@@ -177,6 +177,7 @@ export const LineLayerMixin = superclass => class extends superclass {
         this._pointMap = {};
         containerSelection.classed(qualifiedClassName.join(' '), true);
         containerSelection.classed(className, true);
+
         makeElement(container, 'g', normalizedData, null, {
             enter: (group) => {
                 animateGroup(group, {

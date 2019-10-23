@@ -1,7 +1,12 @@
+import { COMMON_INTERACTION, INDIVIDUAL_INTERACTION } from './constants';
+
 export const DEFAULT_CONFIG = {
     classPrefix: 'muze',
     interaction: {
-        sideEffect: 'individual'
+        sideEffect: INDIVIDUAL_INTERACTION,
+        behaviours: {
+            select: COMMON_INTERACTION
+        }
     },
     pagination: 'scroll',
     scrollBar: {

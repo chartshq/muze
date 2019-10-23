@@ -1,10 +1,13 @@
-import { isSimpleObject, DimensionSubtype, partition, FieldType } from 'muze-utils';
+import { isSimpleObject, DimensionSubtype, partition, FieldType, ReservedFields } from 'muze-utils';
 import { getMergedSet, getSourceFields } from '../../helper';
 
 export const getIdentifiersFromSet = (set, context, { fieldsConfig, fields }) => {
-    const data = [fields];
+    const data = [[], []];
 
-    set.forEach(id => data.push(context.getValueFromId(id, fields, fieldsConfig)));
+    if (fields.length) {
+        data[0] = fields;
+        set.forEach(id => data.push(context.getValueFromId(id, fields, fieldsConfig)));
+    }
     return data;
 };
 
@@ -142,11 +145,13 @@ export default class GenericBehaviour {
                 };
             } else {
                 const data = getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
-                    fields: criteria[0].filter(field => fieldsConfig[field].def.type === FieldType.DIMENSION),
+                    fields: criteria[0].filter(field => field === ReservedFields.ROW_ID ||
+                        fieldsConfig[field].def.type === FieldType.DIMENSION),
                     fieldsConfig
                 });
                 propData = {
-                    fields: data[0].map(d => fieldsConfig[d].def),
+                    fields: data[0].map(d => (d === ReservedFields.ROW_ID ? { name: ReservedFields.ROW_ID } :
+                        fieldsConfig[d].def)),
                     identifiers: data
                 };
             }

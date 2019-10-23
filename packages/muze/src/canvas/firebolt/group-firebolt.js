@@ -2,41 +2,37 @@ import {
     getDataModelFromIdentifiers,
     FieldType,
     mergeRecursive,
-    isSimpleObject,
     CommonProps
 } from 'muze-utils';
-import { Firebolt } from '@chartshq/muze-firebolt';
+import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 
 import { applyInteractionPolicy } from '../helper';
+import { addFacetData } from '../../../../visual-unit/src';
+import { COMMON_INTERACTION } from '../../constants';
 
-const defaultInteractionPolicy = (valueMatrix, firebolt) => {
-    const isMeasure = field => field.type() === FieldType.MEASURE;
-    const canvas = firebolt.context;
-    const visualGroup = canvas.composition().visualGroup;
-    const xFields = [].concat(...visualGroup.getFieldsFromChannel('x'));
-    const yFields = [].concat(...visualGroup.getFieldsFromChannel('y'));
-    const colDim = xFields.every(field => field.type() === FieldType.DIMENSION);
-    const fieldInf = visualGroup.resolver().getAllFields();
-    const rowFacets = fieldInf.rowFacets;
-    const colFacets = fieldInf.colFacets;
-    valueMatrix.each((cell) => {
-        const unitFireBolt = cell.valueOf().firebolt();
-        if (!(xFields.every(isMeasure) && yFields.every(isMeasure))) {
-            const facetFields = cell.valueOf().facetByFields()[0];
-            const unitColFacets = facetFields.filter(d => colFacets.findIndex(v => v.equals(d)) !== -1);
-            const unitRowFacets = facetFields.filter(d => rowFacets.findIndex(v => v.equals(d)) !== -1);
-            let propFields;
-            if (colDim) {
-                propFields = unitColFacets.map(d => `${d}`);
-            } else {
-                propFields = unitRowFacets.map(d => `${d}`);
+const unionData = (d1, d2) => {
+    const dataMap = {};
+    const dataArr = [];
+
+    const prepareData = (data) => {
+        const fields = data[0];
+
+        for (let i = 1; i < data.length; i++) {
+            const row = data[i];
+            const key = `${fields.map((d, idx) => row[idx])}`;
+
+            if (!dataMap[key]) {
+                dataArr.push(row);
+                dataMap[key] = row;
             }
-
-            unitFireBolt.propagateWith('*', propFields, true);
         }
-    });
-};
+    };
 
+    prepareData(d1);
+    prepareData(d2);
+
+    return [d1[0], ...dataArr];
+};
 const defaultCrossInteractionPolicy = {
     behaviours: {
         '*': (propagationPayload, context) => {
@@ -82,7 +78,7 @@ export default class GroupFireBolt extends Firebolt {
     }
 
     static defaultInteractionPolicy () {
-        return defaultInteractionPolicy;
+        return () => {};
     }
 
     static defaultCrossInteractionPolicy () {
@@ -99,9 +95,11 @@ export default class GroupFireBolt extends Firebolt {
 
     crossInteractionPolicy (...policy) {
         if (policy.length) {
+            const context = this.context;
+
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
-            const context = this.context;
+
             applyInteractionPolicy(this);
             context._throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
                 applyInteractionPolicy(this);
@@ -158,23 +156,19 @@ export default class GroupFireBolt extends Firebolt {
         const propPayload = Object.assign(payload);
         const criteria = propPayload.criteria;
         const data = this.context.composition().visualGroup.getGroupByData();
-        const fieldsConfig = data.getFieldsConfig();
         const model = getDataModelFromIdentifiers(data, criteria);
         const behaviouralAction = this._actions.behavioural[behaviour];
 
         if (behaviouralAction) {
-            const fields = isSimpleObject(criteria) ? Object.keys(criteria) : (criteria ? criteria[0] : []);
-            const validFields = fields.filter(field => field in fieldsConfig);
             const mutates = behaviouralAction.constructor.mutates();
             const propConfig = {
                 payload: propPayload,
                 action: behaviour,
                 criteria: model,
                 sourceId: this.context.alias(),
-                isMutableAction: mutates,
-                propagateInterpolatedValues: validFields.every(field => fieldsConfig[field].def.type ===
-                    FieldType.MEASURE)
+                isMutableAction: mutates
             };
+
             data.propagate(model, propConfig, true);
         }
         return this;
@@ -185,5 +179,85 @@ export default class GroupFireBolt extends Firebolt {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
         return this;
+    }
+
+    mapActionsAndBehaviour () {
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+
+        unitMatrix.each((unit) => {
+            const firebolt = unit.source().firebolt();
+            firebolt.mapActionsAndBehaviour();
+        });
+
+        this.registerPhysicalActionHandlers();
+    }
+
+    getUnionedSet (behaviour, sourceUnit) {
+        let model = sourceUnit.firebolt()._actions.behavioural[behaviour].propagationIdentifiers();
+        let unionedModel = model ? Object.assign(model, {
+            identifiers: addFacetData(model, sourceUnit.facetByFields())
+        }) : null;
+
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+        const sourceFacets = `${sourceUnit.facetByFields()[1]}`;
+
+        unitMatrix.each((cell) => {
+            const unit = cell.source();
+            const facetVals = `${unit.facetByFields()[1]}`;
+
+            model = unit.firebolt()._actions.behavioural[behaviour].propagationIdentifiers();
+
+            if (model) {
+                let { identifiers } = model;
+                const { fields } = model;
+                const hasMeasures = fields.some(field => field.type === FieldType.MEASURE);
+
+                if (facetVals !== sourceFacets || hasMeasures) {
+                    identifiers = addFacetData(model, unit.facetByFields());
+                    unionedModel = {
+                        identifiers: unionData(identifiers, unionedModel.identifiers),
+                        fields: model.fields
+                    };
+                }
+            }
+        });
+        return unionedModel;
+    }
+
+    registerPhysicalActionHandlers () {
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+
+        unitMatrix.each((cell) => {
+            const unit = cell.source();
+            const firebolt = unit.firebolt();
+
+            firebolt.onPhysicalAction('*', (event, payload) => {
+                this.handlePhysicalAction(event, payload, unit);
+            });
+        });
+
+        return this;
+    }
+
+    handlePhysicalAction (event, payload, unit) {
+        const firebolt = unit.firebolt();
+        const { behaviours } = firebolt._actionBehaviourMap[event];
+        const { interaction: { behaviours: behaviourConf } } = this.context.config();
+
+        behaviours.forEach((action) => {
+            let mergedModel = null;
+            firebolt.dispatchBehaviour(action, payload, { propagate: false }, { applySideEffect: false });
+
+            const identifiers = firebolt._actions.behavioural[action].propagationIdentifiers();
+
+            if (identifiers !== null) {
+                mergedModel = behaviourConf[action] === COMMON_INTERACTION ? this.getUnionedSet(action, unit) :
+                    Object.assign(identifiers, {
+                        identifiers: addFacetData(identifiers, unit.facetByFields())
+                    });
+            }
+
+            firebolt.propagate(action, payload, mergedModel, getSideEffects(action, firebolt._behaviourEffectMap));
+        });
     }
 }

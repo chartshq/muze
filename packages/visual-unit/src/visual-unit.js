@@ -12,7 +12,8 @@ import {
     transposeArray,
     CommonProps,
     toArray,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    ReservedFields
 } from 'muze-utils';
 import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -409,7 +410,6 @@ export default class VisualUnit {
         if (mount.length) {
             this._mount = mount[0];
             this.render(mount[0]);
-            this.firebolt().mapActionsAndBehaviour();
             return this;
         }
         return this._mount;
@@ -762,7 +762,7 @@ export default class VisualUnit {
     getValueFromId (id, fields, fieldsConfig) {
         const { idValuesMap } = this._cachedValuesMap();
         const row = idValuesMap[id];
-        const filteredRow = fields.map(d => row[fieldsConfig[d].index]);
+        const filteredRow = fields.map(d => (d === ReservedFields.ROW_ID ? id : row[fieldsConfig[d].index]));
 
         return filteredRow;
     }

@@ -316,6 +316,8 @@ export default class Canvas extends TransactionSupport {
 
         // setLabelRotation
         setLabelRotationForAxes(this);
+
+        this.firebolt().mapActionsAndBehaviour();
     }
 
     /**

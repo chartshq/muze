@@ -7,7 +7,7 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-/* istanbul ignore next */ const hover = firebolt => (targetEl, behaviours) => {
+/* istanbul ignore next */ const hover = firebolt => (targetEl) => {
     const dispatchBehaviour = function (args) {
         const event = getEvent();
         const context = firebolt.context;
@@ -26,17 +26,16 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
             position: pos,
             mode
         };
-
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction('hover', payload);
         event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
-                        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
+                        firebolt.triggerPhysicalAction('hover', {
                             criteria: null
-                        }));
+                        });
                     });
 };
 

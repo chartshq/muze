@@ -6,8 +6,8 @@ import { attachDragEvent } from './helpers/drag-event';
  * @param {SVGElement} targetEl Element on which brushing action is needed.
  * @param {Array} behaviours Array of behaviours
  */
-/* istanbul ignore next */ const drag = firebolt => (targetEl, behaviours) => {
-    attachDragEvent(targetEl, behaviours, firebolt);
+/* istanbul ignore next */ const drag = firebolt => (targetEl) => {
+    attachDragEvent(targetEl, 'drag', firebolt);
 };
 
 export default drag;

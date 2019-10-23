@@ -15,8 +15,10 @@ import * as sideEffects from './side-effects';
 import SelectionSet from './selection-set';
 import { behaviourEffectMap } from './behaviour-effect-map';
 import { registry } from './registry';
+import { initializePhysicalActions, getSideEffects } from './helper';
 
 export {
+    initializePhysicalActions,
     behaviouralActions,
     VolatileBehaviour,
     GenericBehaviour,
@@ -28,6 +30,7 @@ export {
     sideEffects,
     SelectionSet,
     behaviourEffectMap,
+    getSideEffects,
     SurrogateSideEffect,
     SpawnableSideEffect,
     GenericSideEffect,

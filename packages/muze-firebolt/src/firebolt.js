@@ -33,6 +33,7 @@ export default class Firebolt {
         this._sideEffectDefinitions = {};
         this._sideEffects = {};
         this._propagationInf = {};
+        this._sourceSelectionSet = {};
         this._actions = {
             behavioural: {},
             physical: {}
@@ -49,6 +50,7 @@ export default class Firebolt {
         this._entryExitSet = {};
         this._actionHistory = {};
         this._queuedSideEffects = {};
+        this._handlers = {};
 
         this.mapSideEffects(behaviourEffectMap);
         this.registerBehaviouralActions(actions.behavioural);
@@ -156,7 +158,7 @@ export default class Firebolt {
         return this;
     }
 
-    dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
+    dispatchBehaviour (behaviour, payload, propagationInfo = {}, config = {}) {
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
         const behaviouralActions = this._actions.behavioural;
         const action = behaviouralActions[behaviour];
@@ -167,7 +169,7 @@ export default class Firebolt {
         if (action) {
             action.dispatch(payload);
             this._entryExitSet[behaviour] = action.entryExitSet();
-            const shouldApplySideEffects = this.shouldApplySideEffects(propagate);
+            const shouldApplySideEffects = this.shouldApplySideEffects(propagationInfo, config);
 
             if (propagate) {
                 this.propagate(behaviour, payload, action.propagationIdentifiers(), sideEffects);
@@ -180,6 +182,10 @@ export default class Firebolt {
         }
 
         return this;
+    }
+
+    getBehavioursFromPhysical (name) {
+        return this._actionBehaviourMap[name].behaviours.map(d => this._actions.behavioural[d]);
     }
 
     getPropagationSelectionSet (selectionSet) {
@@ -293,6 +299,7 @@ export default class Firebolt {
                 this._entryExitSet[key] = null;
             }
         }
+
         this._volatileSelectionSet = volatileSelectionSet;
         this.selectionSet(selectionSet);
         return this;
@@ -312,8 +319,8 @@ export default class Firebolt {
         return this;
     }
 
-    registerPhysicalActions (actions) {
-        const initedActions = initializePhysicalActions(this, actions);
+    registerPhysicalActions (actions, context = this) {
+        const initedActions = initializePhysicalActions(context, actions);
         Object.assign(this._actions.physical, initedActions);
         return this;
     }
@@ -372,6 +379,7 @@ export default class Firebolt {
                     target, mapObj.behaviours);
             }
         }
+        this.registerPhysicalActionHandlers();
         return this;
     }
 
@@ -466,5 +474,30 @@ export default class Firebolt {
 
     data () {
         return this.context.data();
+    }
+
+    triggerPhysicalAction (event, payload) {
+        const handlers = this._handlers[event] || [];
+        const genericHandlers = this._handlers['*'];
+
+        [...handlers, ...genericHandlers].forEach((fn) => {
+            fn(event, payload);
+        });
+
+        return this;
+    }
+
+    onPhysicalAction (event, fn) {
+        !this._handlers[event] && (this._handlers[event] = []);
+        this._handlers[event].push(fn);
+
+        return this;
+    }
+
+    registerPhysicalActionHandlers () {
+        this.onPhysicalAction('*', (event, payload) => {
+            const { behaviours } = this._actionBehaviourMap[event];
+            behaviours.forEach(beh => this.dispatchBehaviour(beh, payload));
+        });
     }
 }

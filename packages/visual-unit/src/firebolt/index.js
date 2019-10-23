@@ -28,7 +28,8 @@ export default class UnitFireBolt extends Firebolt {
             BRUSH_ANCHORS,
             PERSISTENT_ANCHORS
         } = SIDE_EFFECTS;
-
+        this._handlers = {};
+        this._propagationIdentifiers = {};
         const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
         disabledSideEffects.forEach((sideEffect) => {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
@@ -84,8 +85,8 @@ export default class UnitFireBolt extends Firebolt {
         return applicableSideEffects;
     }
 
-    shouldApplySideEffects (propagate) {
-        return propagate === false;
+    shouldApplySideEffects (propInf, config = {}) {
+        return propInf.propagate === false && config.applySideEffect !== false;
     }
 
     onDataModelPropagation () {
@@ -158,6 +159,31 @@ export default class UnitFireBolt extends Firebolt {
 
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
+        return this;
+    }
+
+    triggerPhysicalAction (event, payload) {
+        const handlers = this._handlers[event] || [];
+        const genericHandlers = this._handlers['*'];
+
+        [...handlers, ...genericHandlers].forEach((fn) => {
+            fn(event, payload);
+        });
+    }
+
+    onPhysicalAction (event, fn) {
+        !this._handlers[event] && (this._handlers[event] = []);
+        this._handlers[event].push(fn);
+    }
+
+    propagationIdentifiers (action, identifiers) {
+        if (identifiers) {
+            this._propagationIdentifiers = identifiers;
+        }
+        return this._propagationIdentifiers[action];
+    }
+
+    registerPhysicalActionHandlers () {
         return this;
     }
 }

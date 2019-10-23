@@ -1,12 +1,10 @@
-import { FieldType, ReservedFields } from 'muze-utils';
-
-const addFacetData = ({ identifiers: data, fields }, facetData, propFields) => {
-    const fieldsWithFacets = [...fields, ...facetData[0].map(d => d.getSchemaDef())];
+export const addFacetData = ({ identifiers: data, fields }, facetData, propFields) => {
+    const fieldsWithFacets = data[0].length ? [...fields, ...facetData[0].map(d => d.getSchemaDef())] : [];
     const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
         acc[v.name] = i;
         return acc;
     }, {});
-
+    propFields = propFields || fieldsWithFacets.map(d => d.name);
     const dataWithFacets = [
         propFields
     ];
@@ -24,7 +22,6 @@ const addFacetData = ({ identifiers: data, fields }, facetData, propFields) => {
 };
 
 export const propagateValues = (instance, action, config = {}) => {
-    let propagateInterpolatedValues = false;
     let propFields = [];
     const { payload, identifiers, propagationFields } = config;
     const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
@@ -51,11 +48,6 @@ export const propagateValues = (instance, action, config = {}) => {
                 identifiers: addFacetData(identifiers, facetByFields, propFields)
             });
         }
-
-        if (propFields.length && propFields.every(field => field.type === FieldType.MEASURE) ||
-            propFields.some(field => field === ReservedFields.ROW_ID)) {
-            propagateInterpolatedValues = true;
-        }
     }
 
     const groupId = context.parentAlias();
@@ -74,7 +66,6 @@ export const propagateValues = (instance, action, config = {}) => {
         action,
         criteria: identifiers,
         isMutableAction,
-        propagateInterpolatedValues,
         groupId,
         sourceId: isMutableAction ? groupId : sourceId,
         filterFn,

@@ -46,8 +46,8 @@
         {
             name: 'Year',
             type: 'dimension',
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
         }
         ];
 
@@ -59,20 +59,35 @@
     // ])
 
     const canvas = env.canvas();
-    
+
+    const rows = ['Origin', 'Horsepower', 'Acceleration'];
+
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
-        .rows(['Horsepower'])
-        .layers([{
-            mark: 'bar'
-        }])
-        .color('Origin')
-        // .detail(['Name'])
+        .rows(rows)
+        // .columns(rows.reverse())
+        .columns(['Cylinders', 'Year'])
         .mount('#chart')
         .height(650)
-        .width(850)
+        .width(450)
+        // .detail(['Name'])
         .title('Charts');
+
+    window.canvas2 = env.canvas()
+        .data(rootData)
+        // .rows(['maxDays'])
+        .rows(['Acceleration'])
+        .columns(['Year'])
+        // .detail(['Name'])
+        .mount('#chart2')
+        .height(650)
+        .width(450)
+        .title('Charts');
+
+    muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
+        .registerPropagationBehaviourMap({
+            brush: 'filter'
+        })
     })
 })();

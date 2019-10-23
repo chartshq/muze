@@ -399,18 +399,12 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return interactionFn(this, elem, apply, interactionType, style, colorAxis);
     }
 
-    getIdentifiersFromData (data) {
+    getIdentifiersFromData (data, rowId) {
         const schema = this.data().getSchema();
         const fieldsConfig = this.data().getFieldsConfig();
         const identifiers = [[], []];
-        const {
-                xFieldType,
-                yFieldType,
-                xField,
-                yField
-            } = this.encodingFieldsInf();
 
-        const [xMeasure, yMeasure] = [xFieldType, yFieldType].map(type => type === FieldType.MEASURE);
+        const allMeasures = schema.every(field => field.type === FieldType.MEASURE);
         schema.forEach((d, i) => {
             const name = d.name;
             if (fieldsConfig[name].def.type === FieldType.DIMENSION) {
@@ -419,12 +413,11 @@ export const BaseLayerMixin = superclass => class extends superclass {
             }
         });
 
-        if (xMeasure && yMeasure) {
-            const xMeasureIndex = fieldsConfig[xField].index;
-            const yMeasureIndex = fieldsConfig[yField].index;
-            identifiers[0].push(...[xField, yField]);
-            identifiers[1].push(...[data[xMeasureIndex], data[yMeasureIndex]]);
+        if (allMeasures) {
+            identifiers[0].push(...[ReservedFields.ROW_ID]);
+            identifiers[1].push(...[rowId]);
         }
+
         return identifiers;
     }
 
