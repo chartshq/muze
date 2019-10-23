@@ -72,8 +72,8 @@
         .size('Horsepower')
         // .detail(['Name'])
         .mount('#chart')
-        .height(500)
-        .width(500)
+        .height(700)
+        .width(1000)
         .title('Charts');
     })
 })();

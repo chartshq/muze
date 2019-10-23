@@ -1,3 +1,22 @@
+import { getArrayDiff } from 'muze-utils';
+
+/**
+ * @private
+ * @param {Object} set Points set
+ * @param {Array.<number>} selectedPointsId array of id of selected points
+ * @return {Object} Returns the set with the selected points removed
+ */
+const getFormattedSet = (set, selectedPointsId) => {
+    const formattedSet = getArrayDiff(set.uids, selectedPointsId);
+    return {
+        ...set,
+        ...{
+            uids: formattedSet,
+            length: formattedSet.length
+        }
+    };
+};
+
 const fadeFn = (set, context, strategy) => {
     const {
         mergedEnter,
@@ -33,6 +52,7 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
+    // Apply highlight only if the point is not already selected
     highlight: (set, context) => {
         const {
             mergedEnter,
@@ -41,11 +61,21 @@ export const strategies = {
             exitSet,
             completeSet
         } = set;
+
+        // Selected points
+        const selectedPoints = context.firebolt.getEntryExitSet('select') || {};
+        const selectedPointsIds = (selectedPoints.mergedEnter || {}).uids || [];
+
+        // Get all sets excluding the selected points
+        const formattedCompleteSet = getFormattedSet(completeSet, selectedPointsIds);
+        const formattedEntrySet = getFormattedSet(entrySet[1], selectedPointsIds);
+        const formattedExitSet = getFormattedSet(exitSet[1], selectedPointsIds);
+
         if (!mergedEnter.length && !mergedExit.length) {
-            context.applyInteractionStyle(completeSet, {}, 'highlight', false);
+            context.applyInteractionStyle(formattedCompleteSet, {}, 'highlight', false);
         } else {
-            context.applyInteractionStyle(entrySet[1], {}, 'highlight', true);
-            context.applyInteractionStyle(exitSet[1], {}, 'highlight', false);
+            context.applyInteractionStyle(formattedEntrySet, {}, 'highlight', true);
+            context.applyInteractionStyle(formattedExitSet, {}, 'highlight', false);
         }
     }
 };
