@@ -78,3 +78,7 @@ export const ICON_MAP = (icon) => {
         return getSymbol(icon);
     } return icon;
 };
+
+export const LEGEND_MARKER_PROPS = {
+    size: 10
+};

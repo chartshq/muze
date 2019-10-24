@@ -64,10 +64,10 @@
         .data(rootData)
         // .rows(['maxDays'])
         .columns(['Maker'])
-        .rows(['Horsepower'])
+        .rows(['Displacement'])
         .color({
             field: 'Displacement', // A measure in color encoding channel creates gradient legend
-            stops: 6,
+            stops: 10,
             // step:true
         })
     //    .color('Maker')
@@ -78,13 +78,7 @@
         .width(850)
         .config({
             legend: {
-                color: {
-                item: {
-                    text: {
-                        orientation: 'left',
-                    }
-                }
-            }
+                // position : 'bottom'
             }
         })
         .title('Charts');

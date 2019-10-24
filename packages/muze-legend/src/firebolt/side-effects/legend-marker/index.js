@@ -2,6 +2,7 @@ import { GenericSideEffect } from '@chartshq/muze-firebolt';
 import { makeElement, getSymbol } from 'muze-utils';
 import { Marker } from '../../../enums/side-effects';
 import { CLASSPREFIX, HEIGHT, WIDTH, HORIZONTAL, RECT } from '../../../enums/constants';
+import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
 import './styles.scss';
 
 export default class LegendMarker extends GenericSideEffect {
@@ -28,9 +29,6 @@ export default class LegendMarker extends GenericSideEffect {
     apply (selectionSet, payload, options = {}) {
         const className = `${this.config().classPrefix}-${this.config().className}`;
         if (payload.criteria && payload.criteria.length) {
-            let x;
-            let y;
-
             const physicalAction = function () {
             // Register physical action on marker gere
             };
@@ -53,12 +51,18 @@ export default class LegendMarker extends GenericSideEffect {
                                                 [1],
                                                 `${config.classPrefix}-${config.className}-group`);
 
+            let x;
+            let y;
+            let rotateAngle;
+
             if (firebolt.context.config().align === HORIZONTAL) {
-                x = range - rangeShifter || 0;
+                x = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2);
                 y = 0;
+                rotateAngle = 180;
             } else {
-                y = range - rangeShifter || 0;
-                x = 10;
+                y = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2) + 1;
+                x = 0;
+                rotateAngle = 90;
             }
 
             if (!this._markerElement) {
@@ -66,10 +70,11 @@ export default class LegendMarker extends GenericSideEffect {
                                     'path', [{ value: null }], className, { enter: physicalAction });
             }
 
+            debugger;
             this._markerElement
                     .data([{ value: payload.criteria }])
-                    .attr('transform', `translate(${x},${y}) rotate(90)`)
-                    .attr('d', getSymbol('triangle').size(100)())
+                    .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
+                    .attr('d', getSymbol('triangle').size(LEGEND_MARKER_PROPS.size * LEGEND_MARKER_PROPS.size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
         } else {
