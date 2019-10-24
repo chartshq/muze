@@ -35,8 +35,7 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
-    // Apply highlight only if the point is not already selected
-    highlight: (set, context) => {
+    highlight: (set, context, strategy, excludeSetIds) => {
         const {
             mergedEnter,
             mergedExit,
@@ -45,20 +44,16 @@ export const strategies = {
             completeSet
         } = set;
 
-        // Selected points
-        const selectedPoints = context.firebolt.getEntryExitSet('select') || {};
-        const selectedPointsIds = (selectedPoints.mergedEnter || {}).uids || [];
-
-        // Get all sets excluding the selected points
-        const formattedCompleteSet = getFormattedSet(completeSet, selectedPointsIds);
-        const formattedEntrySet = getFormattedSet(entrySet[1], selectedPointsIds);
-        const formattedExitSet = getFormattedSet(exitSet[1], selectedPointsIds);
+        // Get all sets except the excludeSet points
+        const formattedCompleteSet = getFormattedSet(completeSet, excludeSetIds);
+        const formattedEntrySet = getFormattedSet(entrySet[1], excludeSetIds);
+        const formattedExitSet = getFormattedSet(exitSet[1], excludeSetIds);
 
         if (!mergedEnter.length && !mergedExit.length) {
-            context.applyInteractionStyle(formattedCompleteSet, {}, 'highlight', false);
+            context.applyInteractionStyle(formattedCompleteSet, {}, strategy, false);
         } else {
-            context.applyInteractionStyle(formattedEntrySet, {}, 'highlight', true);
-            context.applyInteractionStyle(formattedExitSet, {}, 'highlight', false);
+            context.applyInteractionStyle(formattedEntrySet, {}, strategy, true);
+            context.applyInteractionStyle(formattedExitSet, {}, strategy, false);
         }
     }
 };

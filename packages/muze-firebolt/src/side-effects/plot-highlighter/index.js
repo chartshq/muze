@@ -17,10 +17,28 @@ export default class PlotHighlighter extends SurrogateSideEffect {
         return 'visual-unit';
     }
 
-    apply (selectionSet, payload, options = {}) {
-        const strategy = this._strategies[options.strategy || this._strategy];
+    getExcludeSetIds (excludeSet) {
+        // Get excludeSetIds if excludeSet is a function
+        if (excludeSet instanceof Function) {
+            return excludeSet(this.firebolt.getEntryExitSet);
+        }
+        // Get excludeSetIds if excludeSet is not a function
+        return excludeSet.reduce((acc, behaviour) => {
+            const selectedPoints = this.firebolt.getEntryExitSet(behaviour) || {};
+            const selectedPointsIds = (selectedPoints.mergedEnter || {}).uids;
+            if (selectedPointsIds) acc.push(...selectedPointsIds);
+            return acc;
+        }, []);
+    }
 
-        strategy(selectionSet, this, options.strategy || this._strategy);
+    apply (selectionSet, payload, options = {}) {
+        const { excludeSet = [] } = options;
+        const strategy = options.strategy || this._strategy;
+
+        const currentStrategy = this._strategies[strategy];
+        const excludeSetIds = this.getExcludeSetIds(excludeSet);
+
+        currentStrategy(selectionSet, this, strategy, excludeSetIds);
 
         return this;
     }
