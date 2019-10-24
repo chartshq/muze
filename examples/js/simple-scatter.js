@@ -70,6 +70,7 @@
         }])
         .color('Origin')
         .size('Horsepower')
+        // .shape('Origin')
         // .detail(['Name'])
         .mount('#chart')
         .height(700)
