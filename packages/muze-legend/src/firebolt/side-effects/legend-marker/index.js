@@ -34,17 +34,13 @@ export default class LegendMarker extends GenericSideEffect {
             const physicalAction = function () {
             // Register physical action on marker gere
             };
+            console.log(payload);
             const firebolt = this.firebolt;
             const context = firebolt.context;
             const config = this.config();
             const axis = context.axis().source();
 
-            const axisScale = axis.scale();
             const range = payload.criteria[0] ? axis.getScaleValue(payload.criteria[1]) : 0;
-
-            const axisType = context.config().align === HORIZONTAL ? 'x' : 'y';
-
-            const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
 
             const legendGradContainer = context.getDrawingContext().svgContainer;
 
@@ -59,11 +55,11 @@ export default class LegendMarker extends GenericSideEffect {
 
             if (firebolt.context.config().align === HORIZONTAL) {
                 x = range - (Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) + AXIS_STROKE;
-                y = 0;
+                y = 5;
                 rotateAngle = 180;
             } else {
                 y = range + Math.sqrt(LEGEND_MARKER_PROPS.size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
-                x = 0;
+                x = 5;
                 rotateAngle = 90;
             }
 
@@ -78,10 +74,10 @@ export default class LegendMarker extends GenericSideEffect {
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
         } else {
-            this._markerElement
-                .data([{ value: null }])
-                .classed(`${className}-show`, false)
-                .classed(`${className}-hide`, true);
+            // this._markerElement
+            //     .data([{ value: null }])
+            //     .classed(`${className}-show`, false)
+            //     .classed(`${className}-hide`, true);
         }
     }
 }

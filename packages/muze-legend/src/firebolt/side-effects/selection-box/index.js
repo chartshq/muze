@@ -57,11 +57,11 @@ class SelectionBox extends SpawnableSideEffect {
 
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
-            y = LEGEND_MARKER_PROPS.size;
+            y = LEGEND_MARKER_PROPS.size + 4;
             width = range[1] - range[0] || 0;
             height = gradientDimension;
         } else {
-            x = LEGEND_MARKER_PROPS.size;
+            x = LEGEND_MARKER_PROPS.size + 4;
             y = range[1] - rangeShifter || 0;
             height = range[0] - range[1] || 0;
             width = gradientDimension;

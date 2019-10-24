@@ -160,7 +160,7 @@ export const renderGradient = (context, container) => {
         gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
         linearGradient.attr('x2', '100%').attr('y1', '0%');
-        legendGradCont.attr('transform', `translate( ${labelDim.width / 2} ${LEGEND_MARKER_PROPS.size})`);
+        legendGradCont.attr('transform', `translate( ${labelDim.width / 2} ${LEGEND_MARKER_PROPS.size + 4})`);
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
 
         applyStyle(legendContainer, {
@@ -175,7 +175,7 @@ export const renderGradient = (context, container) => {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
         gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
-        legendGradCont.attr('transform', `translate(${LEGEND_MARKER_PROPS.size} ${labelDim.height / 2})`);
+        legendGradCont.attr('transform', `translate(${LEGEND_MARKER_PROPS.size + 4} ${labelDim.height / 2})`);
         renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
 
         applyStyle(legendContainer, {
@@ -189,16 +189,16 @@ export const renderGradient = (context, container) => {
 
     // Apply Styles to the legend plot area
     applyStyle(legendGradSvg, {
-        height: `${gradientDimensions.height + LEGEND_MARKER_PROPS.size}px`,
-        width: `${gradientDimensions.width + LEGEND_MARKER_PROPS.size}px`
+        height: `${gradientDimensions.height + LEGEND_MARKER_PROPS.size + 4}px`,
+        width: `${gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4}px`
     });
 
         // Apply styles to the legend rect
     applyStyle(legendRect, {
         fill: 'url(#linear-gradient)'
     });
-    legendGradSvg.attr('height', gradientDimensions.height + LEGEND_MARKER_PROPS.size);
-    legendGradSvg.attr('width', gradientDimensions.width + LEGEND_MARKER_PROPS.size);
+    legendGradSvg.attr('height', gradientDimensions.height + LEGEND_MARKER_PROPS.size + 4);
+    legendGradSvg.attr('width', gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4);
 
     context.measurement({
         gradientDimensions

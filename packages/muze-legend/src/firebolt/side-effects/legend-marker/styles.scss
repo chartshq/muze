@@ -1,6 +1,8 @@
 $prefix: muze-;
 .#{$prefix}legend-marker{
-  
+  stroke: #E2E2E2;
+  stroke-width: 1px;
+  fill: #797474;
 }
 
 .#{$prefix}legend-marker-show{
