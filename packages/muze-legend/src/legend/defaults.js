@@ -80,5 +80,5 @@ export const ICON_MAP = (icon) => {
 };
 
 export const LEGEND_MARKER_PROPS = {
-    size: 10
+    size: 25
 };

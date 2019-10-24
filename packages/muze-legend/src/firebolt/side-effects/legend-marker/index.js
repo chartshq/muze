@@ -62,8 +62,7 @@ export default class LegendMarker extends GenericSideEffect {
                 y = 0;
                 rotateAngle = 180;
             } else {
-                y = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2) +
-                    (2 * Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) - AXIS_STROKE;
+                y = range + Math.sqrt(LEGEND_MARKER_PROPS.size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 0;
                 rotateAngle = 90;
             }
