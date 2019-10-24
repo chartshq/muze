@@ -1,10 +1,12 @@
 import { GenericSideEffect } from '@chartshq/muze-firebolt';
 import { makeElement, getSymbol } from 'muze-utils';
 import { Marker } from '../../../enums/side-effects';
-import { CLASSPREFIX, HEIGHT, WIDTH, HORIZONTAL, RECT } from '../../../enums/constants';
+import { CLASSPREFIX, HORIZONTAL } from '../../../enums/constants';
 import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
 import './styles.scss';
 
+const SYMBOL_PADDING = (Math.sqrt(3) * 3);
+const AXIS_STROKE = 1;
 export default class LegendMarker extends GenericSideEffect {
     constructor (...params) {
         super(...params);
@@ -26,7 +28,7 @@ export default class LegendMarker extends GenericSideEffect {
         };
     }
 
-    apply (selectionSet, payload, options = {}) {
+    apply (selectionSet, payload) {
         const className = `${this.config().classPrefix}-${this.config().className}`;
         if (payload.criteria && payload.criteria.length) {
             const physicalAction = function () {
@@ -56,11 +58,12 @@ export default class LegendMarker extends GenericSideEffect {
             let rotateAngle;
 
             if (firebolt.context.config().align === HORIZONTAL) {
-                x = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2);
+                x = range - (Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) + AXIS_STROKE;
                 y = 0;
                 rotateAngle = 180;
             } else {
-                y = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2) + 1;
+                y = range - rangeShifter + (LEGEND_MARKER_PROPS.size / 2) +
+                    (2 * Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 0;
                 rotateAngle = 90;
             }
@@ -69,8 +72,6 @@ export default class LegendMarker extends GenericSideEffect {
                 this._markerElement = makeElement(legendmarkerGroup,
                                     'path', [{ value: null }], className, { enter: physicalAction });
             }
-
-            debugger;
             this._markerElement
                     .data([{ value: payload.criteria }])
                     .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
