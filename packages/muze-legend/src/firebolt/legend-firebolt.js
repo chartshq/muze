@@ -67,7 +67,7 @@ export class LegendFireBolt extends Firebolt {
                 data,
                 sourceId: config.propagationSourceId
             };
-            this.dispatchBehaviour(HIGHLIGHT, payload, propagationInf);
+            this.dispatchBehaviour(config.action, payload, propagationInf);
         };
     }
 
