@@ -1,6 +1,7 @@
 import SurrogateSideEffect from '../surrogate';
 import { strategies } from './strategy';
 import { HIGHLIGHTER } from '../../enums/side-effects';
+import { getFormattedSet } from './helper';
 
 export default class PlotHighlighter extends SurrogateSideEffect {
     constructor (...params) {
@@ -17,7 +18,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
         return 'visual-unit';
     }
 
-    getExcludeSetIds (excludeSet) {
+    getExcludeSetIds (excludeSet = []) {
         // Get excludeSetIds if excludeSet is a function
         if (excludeSet instanceof Function) {
             return excludeSet(this.firebolt.getEntryExitSet);
@@ -32,13 +33,18 @@ export default class PlotHighlighter extends SurrogateSideEffect {
     }
 
     apply (selectionSet, payload, options = {}) {
-        const { excludeSet = [] } = options;
-        const strategy = options.strategy || this._strategy;
+        const currentStrategy = this._strategies[options.strategy || this._strategy];
+        const excludeSetIds = this.getExcludeSetIds(options.excludeSet);
+        const { entrySet, exitSet, completeSet } = selectionSet;
 
-        const currentStrategy = this._strategies[strategy];
-        const excludeSetIds = this.getExcludeSetIds(excludeSet);
+        // Get all sets except the excludeSet points
+        const formattedSet = {
+            completeSet: getFormattedSet(completeSet, excludeSetIds),
+            entrySet: getFormattedSet(entrySet[1], excludeSetIds),
+            exitSet: getFormattedSet(exitSet[1], excludeSetIds)
+        };
 
-        currentStrategy(selectionSet, this, strategy, excludeSetIds);
+        currentStrategy(selectionSet, this, formattedSet);
 
         return this;
     }
