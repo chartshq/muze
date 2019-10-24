@@ -189,11 +189,13 @@ export const PointLayerMixin = superclass => class extends superclass {
 
         if (style.type === 'stroke-width') {
             const { position } = style.props;
-            let R = Math.sqrt(data.size / Math.PI);
-            R = getStrokeWidthByPosition(position, R);
+            // get radius as per stroke position
+            let radius = Math.sqrt(data.size / Math.PI);
+            radius = getStrokeWidthByPosition(position, radius);
 
-            const size = data.size + R;
+            const size = data.size + radius;
             const path = getSymbol(data.shape).size(size);
+
             pathElement.attr('d', path);
         }
 

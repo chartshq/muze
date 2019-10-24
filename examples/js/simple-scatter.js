@@ -70,14 +70,11 @@
         }])
         .color('Origin')
         .size('Horsepower')
-        .shape({
-            field: 'Origin',
-            range : ['square', 'cross', 'triangle']
-        })
+        // .shape('Origin')
         // .detail(['Name'])
         .mount('#chart')
         .height(700)
-        .width(1100)
+        .width(1000)
         .title('Charts');
     })
 })();
