@@ -1,6 +1,6 @@
 import { DataModel, getObjProp, mergeRecursive } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
-import { ANCHORS, PERSISTENT_ANCHORS } from '../../enums/side-effects';
+import { ANCHORS } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 import './styles.scss';
 
@@ -56,6 +56,22 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
+        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+            const layers = this.firebolt.context.layers();
+            this.setAnchorLayerStyle(layers);
+        });
+    }
+
+    setAnchorLayerStyle (layers) {
+        // return null;
+        const anchorLayer = layers.filter(l => l.config().groupId === 'anchors')[0];
+        if (anchorLayer) {
+            // Execute focusStroke interaction of anchor point layer
+            const ids = anchorLayer.data().getUids();
+            const layerName = this.constructor.formalName();
+            const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
+            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+        }
     }
 
     static target () {
@@ -106,12 +122,15 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const layers = context.layers().filter(layer => layer.config().groupId === formalName);
 
         layers.forEach((layer) => {
+            console.log(layer);
             const linkedLayer = context.getLayerByName(layer.config().owner);
             const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
             const transformedDataModel = new DataModel(transformedData, schema);
             const anchorSizeConfig = {
                 encoding: {
-                    size: { value: () => this.defaultSizeValue() + this.getAnchorSizeonInteraction() }
+                    size: {
+                        value: () => this.defaultSizeValue() + this.getAnchorSizeonInteraction()
+                    }
                 }
             };
             const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
@@ -119,19 +138,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
             layer
                 .data(transformedDataModel)
                 .config(newConfig);
-
-            this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
-                if (this.constructor.formalName() === PERSISTENT_ANCHORS) {
-                    const anchorLayer = this.firebolt.context.layers().filter(l =>
-                        l.config().groupId === PERSISTENT_ANCHORS
-                    )[0];
-                    if (anchorLayer) {
-                        // Execute focusStroke interaction of anchor point layer
-                        const ids = anchorLayer.data().getUids();
-                        anchorLayer.applyInteractionStyle('focusStroke', ids, true);
-                    }
-                }
-            });
 
             return this;
         });

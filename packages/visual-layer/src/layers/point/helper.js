@@ -131,18 +131,12 @@ const highlightStrokeOnInteraction = (context, elem, apply, interactionType, sty
     if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
         // apply
         stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
-        // Apply highlight only when bar is not selected
-        if (!datum.isSelected) {
-            context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
-        }
+        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
     }
     if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
         // remove
         stateStrokeOnHighlight[interactionType][styleType] = originalStrokeOnHighlight[styleType];
-        // Remove highlight only when bar is not selected
-        if (!datum.isSelected) {
-            context.removeOverlayPath(datum, originalStrokeOnHighlight);
-        }
+        context.removeOverlayPath(datum, originalStrokeOnHighlight);
     }
     return true;
 };

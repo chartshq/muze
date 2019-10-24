@@ -53,25 +53,7 @@ export const defaultConfig = {
         x: {},
         y: {},
         x0: {},
-        y0: {},
-        interactions: {
-            select: {
-                stroke: {
-                    value: 0
-                },
-                'stroke-width': {
-                    value: 0
-                }
-            },
-            highlight: {
-                stroke: {
-                    value: 0
-                },
-                'stroke-width': {
-                    value: 0
-                }
-            }
-        }
+        y0: {}
     },
     states: {
         highlight: {

@@ -61,7 +61,7 @@ d3.json('../../../data/cars.json', (data) => {
 		.color("Origin")
 		// .shape("Maker")
 		.layers([{
-			mark: 'line'
+			mark: 'bar'
 		}])
 		.mount(document.getElementById('chart'));
 })

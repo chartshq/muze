@@ -72,23 +72,9 @@ export const defaultConfig = {
         fillOpacity: {
             value: 0.5
         },
-        interactions: {
-            select: {
-                stroke: {
-                    value: 0
-                },
-                'stroke-width': {
-                    value: 0
-                }
-            },
-            highlight: {
-                stroke: {
-                    value: 0
-                },
-                'stroke-width': {
-                    value: 0
-                }
-            }
+        interaction: {
+            anchors: 'highlight',
+            'persistent-anchors': 'focusStroke'
         }
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],

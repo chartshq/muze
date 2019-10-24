@@ -19,6 +19,17 @@ export default class PersistentAnchors extends AnchorEffect {
         };
     }
 
+    setAnchorLayerStyle (layers) {
+        const anchorLayer = layers.filter(l => l.config().groupId === PERSISTENT_ANCHORS)[0];
+        if (anchorLayer) {
+            // Execute focusStroke interaction of anchor point layer
+            const ids = anchorLayer.data().getUids();
+            const layerName = this.constructor.formalName();
+            const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
+            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+        }
+    }
+
     // offset value by which anchor size is changed
     // Applied only on select interaction
     getAnchorSizeonInteraction () {

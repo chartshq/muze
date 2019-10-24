@@ -149,6 +149,25 @@ export const LineLayerMixin = superclass => class extends superclass {
         return points;
     }
 
+    getTranslatedData (normalizedData, colorValFn, colorFieldIndex, axes) {
+        return normalizedData.map((data, i) => {
+            let color;
+            const colorVal = data.find(d => d.source[colorFieldIndex] !== null &&
+                    d.source[colorFieldIndex] !== undefined);
+
+            if (colorValFn) {
+                color = colorValFn(data, i, normalizedData);
+            } else {
+                color = axes.color.getColor(colorVal && colorVal.source[colorFieldIndex]);
+            }
+
+            return {
+                data: this.translatePoints(data),
+                style: this.getPathStyle(color)
+            };
+        });
+    }
+
     /**
      * Renders the line plot
      * @param {SVGElement} container svg element
@@ -178,25 +197,10 @@ export const LineLayerMixin = superclass => class extends superclass {
         containerSelection.classed(qualifiedClassName.join(' '), true);
         containerSelection.classed(className, true);
 
-        const translatedPoints = normalizedData.map((data, i) => {
-            let color;
-            const colorValFn = encoding.color.value;
-            const colorVal = data.find(d => d.source[colorFieldIndex] !== null &&
-                    d.source[colorFieldIndex] !== undefined);
+        const colorValFn = encoding.color.value;
+        const translatedPoints = this.getTranslatedData(normalizedData, colorValFn, colorFieldIndex, axes);
 
-            if (colorValFn) {
-                color = colorValFn(data, i, normalizedData);
-            } else {
-                color = axes.color.getColor(colorVal && colorVal.source[colorFieldIndex]);
-            }
-
-            return {
-                data: this.translatePoints(data),
-                style: this.getPathStyle(color)
-            };
-        });
-
-        makeElement(container, 'g', translatedPoints.map(point => point.data), null, {
+        makeElement(container, 'g', translatedPoints, null, {
             enter: (group) => {
                 animateGroup(group, {
                     transition,
@@ -212,9 +216,9 @@ export const LineLayerMixin = superclass => class extends superclass {
                 });
             },
             update: (group, dataArr, i) => {
-                const points = translatedPoints[i].data;
+                const points = dataArr.data;
                 const seriesClassName = `${qualifiedClassName[0]}-${keys[i] || i}`.toLowerCase();
-                const style = translatedPoints[i].style;
+                const style = dataArr.style;
 
                 this._points.push(points);
                 this.getDrawFn()({
@@ -228,7 +232,7 @@ export const LineLayerMixin = superclass => class extends superclass {
                     connectNullData: config.connectNullData
                 });
             }
-        }, d => d[0].source[colorFieldIndex] || d[0].rowId);
+        }, d => d.data[0].source[colorFieldIndex] || d.data[0].rowId);
 
         attachDataToVoronoi(this._voronoi, this._points);
         return this;
