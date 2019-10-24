@@ -35,16 +35,16 @@ export default class PlotHighlighter extends SurrogateSideEffect {
     apply (selectionSet, payload, options = {}) {
         const currentStrategy = this._strategies[options.strategy || this._strategy];
         const excludeSetIds = this.getExcludeSetIds(options.excludeSet);
-        const { entrySet, exitSet, completeSet } = selectionSet;
 
         // Get all sets except the excludeSet points
         const formattedSet = {
-            completeSet: getFormattedSet(completeSet, excludeSetIds),
-            entrySet: getFormattedSet(entrySet[1], excludeSetIds),
-            exitSet: getFormattedSet(exitSet[1], excludeSetIds)
+            ...selectionSet,
+            completeSet: getFormattedSet(selectionSet.completeSet, excludeSetIds),
+            entrySet: getFormattedSet(selectionSet.entrySet[1], excludeSetIds),
+            exitSet: getFormattedSet(selectionSet.exitSet[1], excludeSetIds)
         };
 
-        currentStrategy(selectionSet, this, formattedSet);
+        currentStrategy(formattedSet, this);
 
         return this;
     }

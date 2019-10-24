@@ -9,7 +9,7 @@ const fadeFn = (set, context) => {
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, {}, 'fade', false);
     } else {
-        context.applyInteractionStyle(exitSet[1], {}, 'fade', true);
+        context.applyInteractionStyle(exitSet, {}, 'fade', true);
         context.applyInteractionStyle(mergedEnter, {}, 'fade', false);
     }
 };
@@ -33,10 +33,14 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
-    highlight: (set, context, formattedSet) => {
-        const { mergedEnter, mergedExit } = set;
-        // Apply highlight on formatted set only
-        const { entrySet, exitSet, completeSet } = formattedSet;
+    highlight: (set, context) => {
+        const {
+            mergedEnter,
+            mergedExit,
+            entrySet,
+            exitSet,
+            completeSet
+        } = set;
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'highlight', false);
