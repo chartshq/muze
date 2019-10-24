@@ -1168,6 +1168,14 @@ const nestCollection = (params) => {
     return nestFn.entries(params.data);
 };
 
+/**
+ * Returns array difference, elements in array A, not in Array B
+ * @param { Array.<number> } arr Data which needs to be grouped
+ * @param { Array.<number> } arr1 Field indices by which the data will be grouped
+ * @return { Array.<number> } Returns the array difference (A - B)
+ */
+const getArrayDiff = (arr, arr1) => arr.filter(el => arr1.indexOf(el) < 0);
+
 const pathInterpolators = {
     curveLinear,
     curveStepAfter,
@@ -1377,6 +1385,7 @@ export {
     pathInterpolators,
     stack,
     nestCollection,
+    getArrayDiff,
     getSymbol,
     transformColors,
     detectColor,
