@@ -1,5 +1,4 @@
 import { clone, retrieveNearestGroupByReducers } from 'muze-utils';
-import * as SELECTION from '../enums/selection';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
@@ -64,50 +63,13 @@ export const getSourceFields = (propagationInf, criteria = {}) => {
     const sourceIdentifiers = propagationInf.sourceIdentifiers;
     let sourceFields;
     if (sourceIdentifiers) {
-        sourceFields = sourceIdentifiers.getSchema().map(d => d.name);
+        sourceFields = sourceIdentifiers.fields.map(d => d.name);
     } else if (criteria instanceof Array) {
         sourceFields = criteria[0];
     } else {
         sourceFields = Object.keys(criteria || {});
     }
     return sourceFields;
-};
-
-const conditionsMap = {
-    mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
-    mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
-    complete: []
-};
-
-export const getModelFromSet = (type, model, set) => {
-    const conditions = conditionsMap[type];
-    if (model && conditions) {
-        return model.select((fields, i) =>
-           (conditions.some(condition => set[i] === condition)), {
-               saveChild: false
-           });
-    }
-    return null;
-};
-
-export const getSetInfo = (type, set, config) => {
-    let model = null;
-    const filteredDataModel = config.filteredDataModel;
-    const selectionSet = config.selectionSet;
-    if (!config.propagationData) {
-        if (selectionSet.resetted()) {
-            model = null;
-        } else if (type === 'mergedEnter') {
-            model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
-        }
-    } else if (filteredDataModel) {
-        model = type === 'mergedEnter' ? filteredDataModel[0] : filteredDataModel[1];
-    }
-    return {
-        uids: set,
-        length: set.length,
-        model
-    };
 };
 
 export const getSideEffects = (behaviour, behaviourEffectMap) => {

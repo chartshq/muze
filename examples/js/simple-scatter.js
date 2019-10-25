@@ -61,6 +61,7 @@
         .layers([{
             mark: 'point'
         }])
+<<<<<<< HEAD
         .size('Origin')
         .color('Maker')
         .config({
@@ -70,6 +71,15 @@
         .mount('#chart')
         .height(500)
         .width(900)
+=======
+        .color('Origin')
+        .size('Horsepower')
+        // .shape('Origin')
+        // .detail(['Name'])
+        .mount('#chart')
+        .height(700)
+        .width(1000)
+>>>>>>> a9f5de67e62ef3cb0cb64873ff7c5447d0b48fdf
         .title('Charts');
     })
 })();

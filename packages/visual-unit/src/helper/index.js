@@ -234,6 +234,7 @@ export const renderLayers = (context, container, layers, measurement) => {
             };
         }
     });
+    makeElement(layerParentGroup, 'g', [1], `${classPrefix}-overlay-paths`);
 
     const layerSeq = layerDepOrder.map(name => groups[name]).filter(d => d !== undefined);
     layerSeq.forEach((o) => {
@@ -342,16 +343,18 @@ const getKey = (arr, row) => {
 };
 
 export const getValuesMap = (model, context) => {
-    const valuesMap = {};
+    const idValuesMap = {};
+    const valuesIdMap = {};
     const { data: dataArr, schema, uids } = model.getData();
     const fieldsConfig = model.getFieldsConfig();
     const fieldIndices = isXandYMeasures(context) ? schema.map((d, i) => i) :
                             Object.keys(model.getFieldspace().getDimension()).map(d => fieldsConfig[d].index);
     dataArr.forEach((row, i) => {
         const key = getKey(fieldIndices, row);
-        valuesMap[key] = uids[i];
+        valuesIdMap[key] = uids[i];
+        idValuesMap[uids[i]] = row;
     });
-    return valuesMap;
+    return { valuesIdMap, idValuesMap, fieldsConfig };
 };
 
 export const getSelectionRejectionModel = (model, propModel, measures, propValuesMap) => {
@@ -362,13 +365,15 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
 
     if (schema.length) {
         const fieldMap = model.getFieldsConfig();
+        const { valuesIdMap } = propValuesMap;
+
         const rowIdsObj = {};
         const filteredSchema = measures ? schema.map((d, idx) => idx) :
             Object.keys(model.getFieldspace().getDimension()).map(d => fieldMap[d].index);
         data.forEach((row) => {
             const key = getKey(filteredSchema, row);
-            const id = propValuesMap[key];
-            if (key in propValuesMap) {
+            const id = valuesIdMap[key];
+            if (key in valuesIdMap) {
                 entryRowIds.push(id);
                 rowIdsObj[id] = 1;
             }

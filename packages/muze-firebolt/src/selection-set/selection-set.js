@@ -323,6 +323,30 @@ class SelectionSet {
 
         return this;
     }
+
+    getMergedEntrySet () {
+        const set = this._set;
+        const mergedEnter = [];
+
+        for (const key in set) {
+            if (set[key] === SELECTION_NEW_ENTRY || set[key] === SELECTION_OLD_ENTRY) {
+                mergedEnter.push(key);
+            }
+        }
+        return mergedEnter;
+    }
+
+    getMergedExitSet () {
+        const set = this._set;
+        const mergedExit = [];
+
+        for (const key in set) {
+            if (set[key] === SELECTION_NEW_EXIT || set[key] === SELECTION_OLD_EXIT) {
+                mergedExit.push(key);
+            }
+        }
+        return mergedExit;
+    }
 }
 
 export default SelectionSet;
