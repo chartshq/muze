@@ -224,7 +224,9 @@ export const BarLayerMixin = superclass => class extends superclass {
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];
         } else {
-            pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            const pathGroup = makeElement(container, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement = makeElement(pathGroup, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+
             pathElement.style('fill', 'none');
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;

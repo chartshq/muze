@@ -253,7 +253,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
 };
 
 // This is invoked only on bar selection for creation of path around the bar
-const selectStrokeOnInteraction = (context, elem, apply, interactionType, style) => {
+const selectStrokeOnInteraction = (context, elem, apply, interactionType, style, mountPoint) => {
     const datum = elem.data()[0];
     const styleType = style.type;
     const { originalStrokeOnSelect, stateStrokeOnSelect } = datum.meta;
@@ -262,7 +262,7 @@ const selectStrokeOnInteraction = (context, elem, apply, interactionType, style)
     if (apply && !stateStrokeOnSelect[interactionType][styleType]) {
         // apply
         stateStrokeOnSelect[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+        context.addOverlayPath(mountPoint, elem.node(), datum, style);
     }
     if (!apply && stateStrokeOnSelect[interactionType][styleType]) {
         // remove
@@ -272,7 +272,7 @@ const selectStrokeOnInteraction = (context, elem, apply, interactionType, style)
     return true;
 };
 
-const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style) => {
+const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style, mountPoint) => {
     const datum = elem.data()[0];
     const styleType = style.type;
     const { originalStrokeOnHighlight, stateStrokeOnHighlight } = datum.meta;
@@ -281,7 +281,7 @@ const highlightStrokeOnInteraction = (context, elem, apply, interactionType, sty
     if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
         // apply
         stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+        context.addOverlayPath(mountPoint, elem.node(), datum, style);
     }
     if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
         // remove
