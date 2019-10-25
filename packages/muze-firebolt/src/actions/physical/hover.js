@@ -14,7 +14,7 @@ import { getClientPoint, getEvent } from 'muze-utils';
         const mode = tooltipConf.mode;
         const pos = getClientPoint(context.getDrawingContext().svgContainer, event);
         const nearestPoint = context.getNearestPoint(pos.x, pos.y, {
-            getAllPoints: false,
+            getAllPoints: true,
             data: args,
             event
         });
