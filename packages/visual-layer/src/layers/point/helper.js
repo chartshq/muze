@@ -95,11 +95,11 @@ export const pointTranslators = {
 
 export const getStrokeWidthByPosition = (position, radius) => {
     const strokeWidthWithOffsetMap = {
-        center: 0,
-        inside: -1,
-        outside: 1
+        center: -radius,
+        inside: -(radius * Math.PI),
+        outside: +(radius * Math.PI)
     };
-    return radius + strokeWidthWithOffsetMap[position];
+    return strokeWidthWithOffsetMap[position];
 };
 
 // This is invoked only on point selection for applying a path around the point

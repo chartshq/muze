@@ -104,7 +104,8 @@ export {
     intersect,
     partition,
     mix,
-    componentRegistry
+    componentRegistry,
+    getArrayDiff
 } from './common-utils';
 
 export {
