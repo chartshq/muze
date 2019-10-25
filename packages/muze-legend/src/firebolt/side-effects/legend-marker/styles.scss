@@ -13,3 +13,7 @@ $prefix: muze-;
 .#{$prefix}legend-marker-hide{
   display: none;
 }
+
+.#{$prefix}legend-marker-text-container{
+  position: absolute;
+}

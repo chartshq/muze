@@ -1,5 +1,6 @@
 import { GenericSideEffect } from '@chartshq/muze-firebolt';
-import { makeElement, getSymbol } from 'muze-utils';
+import { makeElement, getSymbol, selectElement } from 'muze-utils';
+import { TextCell } from '@chartshq/visual-cell';
 import { Marker } from '../../../enums/side-effects';
 import { CLASSPREFIX, HORIZONTAL } from '../../../enums/constants';
 import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
@@ -7,6 +8,19 @@ import './styles.scss';
 
 const SYMBOL_PADDING = (Math.sqrt(3) * 3);
 const AXIS_STROKE = 1;
+
+const createTextCell = (className, labelManagerRef) => {
+    const cell = new TextCell(
+        {
+            type: 'text',
+            className: `${className}-text`
+        }, {
+            labelManager: labelManagerRef()
+        }).config({ maxLines: 1 });
+    cell._minTickDiff = { height: 0, width: 0 };
+
+    return cell;
+};
 export default class LegendMarker extends GenericSideEffect {
     constructor (...params) {
         super(...params);
@@ -34,8 +48,8 @@ export default class LegendMarker extends GenericSideEffect {
             const physicalAction = function () {
             // Register physical action on marker gere
             };
-            console.log(payload);
             const firebolt = this.firebolt;
+            const labelManager = firebolt.context.labelManager;
             const context = firebolt.context;
             const config = this.config();
             const axis = context.axis().source();
@@ -44,10 +58,15 @@ export default class LegendMarker extends GenericSideEffect {
 
             const legendGradContainer = context.getDrawingContext().svgContainer;
 
+            const { top, left } = legendGradContainer.node().getBoundingClientRect();
+
+            debugger;
+
             const legendmarkerGroup = makeElement(legendGradContainer,
                                                 'g',
                                                 [1],
                                                 `${config.classPrefix}-${config.className}-group`);
+            const legendmarkerTextContainer = makeElement(selectElement('#chart'), 'div', [1], `${className}-text-container`);
 
             let x;
             let y;
@@ -67,12 +86,21 @@ export default class LegendMarker extends GenericSideEffect {
                 this._markerElement = makeElement(legendmarkerGroup,
                                     'path', [{ value: null }], className, { enter: physicalAction });
             }
+
+            this._textElement = createTextCell(className, labelManager);
             this._markerElement
                     .data([{ value: payload.criteria }])
                     .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
                     .attr('d', getSymbol('triangle').size(LEGEND_MARKER_PROPS.size * LEGEND_MARKER_PROPS.size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
+
+            this._textElement.source(payload.criteria[1]);
+            this._textElement.render(legendmarkerTextContainer.node());
+            legendmarkerTextContainer.attr('style', ` top: ${top + y - 23}px; left:${x + left}px`).classed(`${className}-show`, true)
+            .classed(`${className}-hide`, false);
+
+            console.log(this._textElement.getLogicalSpace());
         } else {
             // this._markerElement
             //     .data([{ value: null }])
