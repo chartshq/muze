@@ -113,12 +113,12 @@ export default class Firebolt {
         const actionHistory = this._actionHistory;
         const queuedSideEffects = this._queuedSideEffects;
         sideEffects.forEach((sideEffect) => {
-            let options;
-            let name;
             const effects = sideEffect.effects;
             const behaviours = sideEffect.behaviours;
             const combinedSet = this.mergeSelectionSets(behaviours);
             effects.forEach((effect) => {
+                let options;
+                let name;
                 if (typeof effect === 'object') {
                     name = effect.name;
                     options = effect.options;
@@ -266,9 +266,9 @@ export default class Firebolt {
         return sideEffects;
     }
 
-    attachPropagationListener (dataModel) {
+    attachPropagationListener (dataModel, handler = this.onDataModelPropagation()) {
         dataModel.unsubscribe('propagation');
-        dataModel.on('propagation', this.onDataModelPropagation());
+        dataModel.on('propagation', handler);
         return this;
     }
 
@@ -313,6 +313,10 @@ export default class Firebolt {
         const sideEffectDefinitions = this._sideEffectDefinitions;
         this.sideEffects(initializeSideEffects(this, sideEffectDefinitions));
         return this;
+    }
+
+    target () {
+        return 'all';
     }
 
     registerPhysicalActions (actions, context = this) {

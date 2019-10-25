@@ -71,7 +71,7 @@ export const propagateValues = (instance, action, config = {}) => {
         criteria: identifiers,
         isMutableAction,
         groupId,
-        sourceId: isMutableAction ? groupId : sourceId,
+        sourceId: action === 'select' ? groupId : sourceId,
         filterFn,
         enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
             propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)

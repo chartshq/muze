@@ -30,11 +30,13 @@ export default class UnitFireBolt extends Firebolt {
         } = SIDE_EFFECTS;
         this._handlers = {};
         this._propagationIdentifiers = {};
+        this.sideEffects().tooltip.disable();
         const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
         disabledSideEffects.forEach((sideEffect) => {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
         });
     }
+
     propagate (behaviour, payload, identifiers, sideEffects) {
         propagateValues(this, behaviour, {
             payload,
@@ -145,6 +147,16 @@ export default class UnitFireBolt extends Firebolt {
                     isMutableAction
                 };
                 this.dispatchBehaviour(action, payload, propagationInf);
+                const { throwback } = this.context._dependencies;
+                // const propInfo = throwback.get('propagationInfo');
+                throwback.commit('propagationInfo', {
+                    action,
+                    sourceIdentifiers,
+                    propagationSourceId: config.propagationSourceId,
+                    data: propagationData,
+                    payload
+                }
+                );
             }
         };
     }
@@ -155,6 +167,10 @@ export default class UnitFireBolt extends Firebolt {
             this.createSelectionSet(data.getData().uids, behaviours);
         }
         return this;
+    }
+
+    target () {
+        return 'visual-unit';
     }
 
     remove () {

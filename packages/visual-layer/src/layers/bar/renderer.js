@@ -61,5 +61,5 @@ const barEnterFn = (elem, d) => {
             group.attr('class', `${className}-${d.rowId}`);
             group.classed(d.className, true);
         }
-    }, data => data.rowId);
+    }, keyFn);
 };

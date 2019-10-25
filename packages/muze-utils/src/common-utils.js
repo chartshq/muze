@@ -1119,15 +1119,15 @@ const concatModels = (dm1, dm2) => {
                 const dm1Key = dim1Values.join();
                 const dm2Key = dim2Values.join();
                 if (!commonTuples[dm1Key]) {
-                    !tuples1[dm1Key] && (tuples1[dm1Key] = {});
+                    !commonTuples[dm1Key] && (commonTuples[dm1Key] = {});
                     row1.forEach((value, idx) => {
-                        tuples1[dm1Key][schema1[idx].name] = value;
+                        commonTuples[dm1Key][schema1[idx].name] = value;
                     });
                 }
                 if (!commonTuples[dm2Key]) {
-                    !tuples2[dm2Key] && (tuples2[dm2Key] = {});
+                    !commonTuples[dm2Key] && (commonTuples[dm2Key] = {});
                     row2.forEach((value, idx) => {
-                        tuples2[dm2Key][schema2[idx].name] = value;
+                        commonTuples[dm2Key][schema2[idx].name] = value;
                     });
                 }
             }

@@ -2,7 +2,10 @@ import {
     getDataModelFromIdentifiers,
     FieldType,
     mergeRecursive,
-    CommonProps
+    CommonProps,
+    concatModels,
+    DataModel,
+    retrieveNearestGroupByReducers
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 
@@ -101,9 +104,41 @@ export default class GroupFireBolt extends Firebolt {
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
 
             applyInteractionPolicy(this);
-            context._throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
+            const throwback = context._throwback;
+            throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
                 applyInteractionPolicy(this);
             });
+            throwback.registerChangeListener(['propagationInfo'], ([, propagationInfo]) => {
+                const { action, payload, propagationSourceId } = propagationInfo;
+                const behaviourEffectMap = this._behaviourEffectMap;
+                const sideEffects = getSideEffects(action, behaviourEffectMap);
+                const sideEffectInstances = this.sideEffects();
+                const { sideEffects: sideEffectConf } = this.context.config().interaction;
+                let selectionSet;
+                let unit = this.context.composition().visualGroup.matrixInstance().value.findPlaceHolderById(payload.sourceUnit);
+                if (unit) {
+                    unit = unit.instance;
+                    sideEffects.forEach(({ effects }) => {
+                        effects.filter(effect => sideEffectConf[effect.name || effect] === COMMON_INTERACTION)
+                            .forEach((effect) => {
+                                let name;
+                                let options;
+                                if (typeof effect === 'object') {
+                                    name = effect.name;
+                                    options = effect.options;
+                                } else {
+                                    name = effect;
+                                }
+                                selectionSet = selectionSet || this.unionDataModels(action);
+                                const inst = sideEffectInstances[name];
+                                inst.sourceInfo(() => unit.getSourceInfo());
+                                inst.plotPointsFromIdentifiers((...params) => unit.getPlotPointsFromIdentifiers(...params));
+                                inst.drawingContext(() => unit.getDrawingContext()).apply(selectionSet, payload, options);
+                            });
+                    });
+                }
+            });
+
             return this;
         }
         return this._crossInteractionPolicy;
@@ -178,7 +213,12 @@ export default class GroupFireBolt extends Firebolt {
         for (const key in sideEffects) {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
+        this.initializeSideEffects();
         return this;
+    }
+
+    target () {
+        return 'visual-group';
     }
 
     mapActionsAndBehaviour () {
@@ -221,7 +261,32 @@ export default class GroupFireBolt extends Firebolt {
                 }
             }
         });
+
         return unionedModel;
+    }
+
+    unionDataModels (behaviour) {
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+        let unionedModel = null;
+        unitMatrix.each((cell) => {
+            const unit = cell.source();
+            const selectionSet = unit.firebolt().getEntryExitSet(behaviour);
+            const { mergedEnter: { model } } = selectionSet || {};
+            if (model && !model.isEmpty()) {
+                if (!unionedModel) {
+                    unionedModel = model;
+                } else {
+                    const [data, schema] = concatModels(model, unionedModel);
+                    unionedModel = new DataModel(data, schema);
+                }
+            }
+        });
+        return {
+            mergedEnter: {
+                model: unionedModel,
+                aggFns: retrieveNearestGroupByReducers(unionedModel)
+            }
+        };
     }
 
     registerPhysicalActionHandlers () {
@@ -256,7 +321,6 @@ export default class GroupFireBolt extends Firebolt {
                         identifiers: addFacetData(identifiers, unit.facetByFields())
                     });
             }
-
             firebolt.propagate(action, payload, mergedModel, getSideEffects(action, firebolt._behaviourEffectMap));
         });
     }

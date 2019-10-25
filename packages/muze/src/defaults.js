@@ -1,9 +1,11 @@
-import { COMMON_INTERACTION, INDIVIDUAL_INTERACTION } from './constants';
+import { COMMON_INTERACTION } from './constants';
 
 export const DEFAULT_CONFIG = {
     classPrefix: 'muze',
     interaction: {
-        sideEffect: INDIVIDUAL_INTERACTION,
+        sideEffects: {
+            tooltip: COMMON_INTERACTION
+        },
         behaviours: {
             select: COMMON_INTERACTION
         }

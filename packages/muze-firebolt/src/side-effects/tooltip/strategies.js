@@ -127,7 +127,7 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         } else {
             const hasMultipleMeasures = measuresArr.length > 1;
             hasMultipleMeasures && (content.push({ data: [icon, formattedRetinalValue] }));
-            const selectedContext = target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
+            const selectedContext = target && target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
             const isSelected = selectedContext === retinalFieldValue;
             measuresArr.forEach((measure) => {
                 const measureIndex = fieldsConfig[measure].index;
@@ -172,7 +172,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const { data, schema } = dataModel.getData();
     const fieldspace = dataModel.getFieldspace();
     const fieldsConfig = dataModel.getFieldsConfig();
-    const { color, shape, size } = context.firebolt.context.retinalFields();
+    const { color, shape, size } = context.retinalFields;
     const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
@@ -272,6 +272,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
 export const strategies = {
     [SELECTION_SUMMARY]: (dm, config, context) => {
         const { selectionSet } = context;
+        const { classPrefix } = config;
         const aggFns = selectionSet.mergedEnter.aggFns;
         const dataObj = dm.getData();
         const measures = dataObj.schema.filter(d => d.type === FieldType.MEASURE);
@@ -282,31 +283,31 @@ export const strategies = {
             saveChild: false
         }));
         const fieldsConf = aggregatedModel.getFieldsConfig();
-        let values = [[{
-            value: `${dataObj.data.length}`,
-            style: {
-                'font-weight': 'bold'
-            }
-        }, 'Items Selected']];
+        const values = [{
+            className: `${classPrefix}-tooltip-row`,
+            data: [{
+                value: `${dataObj.data.length}`,
+                style: {
+                    'font-weight': 'bold'
+                }
+            }, 'Items Selected']
+        }];
         const measureNames = measures.map(d => d.name);
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
             const value = data[0][fieldsConf[measure].index];
-            value instanceof InvalidAwareTypes ? values.push([]) : values.push([`(${aggFns[measure].toUpperCase()})`,
-                `${retrieveFieldDisplayName(dm, measure)}`,
-                {
+            value instanceof InvalidAwareTypes ? values.push([]) : values.push({
+                className: `${classPrefix}-tooltip-row`,
+                data: [`(${aggFns[measure].toUpperCase()})`, `${retrieveFieldDisplayName(dm, measure)}`, {
                     value: `${value.toFixed(2)}`,
                     style: {
                         'font-weight': 'bold'
                     }
-                }]);
+                }]
+            });
         });
-        if (measureNames.length === 1) {
-            values = [[...values[0], ...values[1]]];
-        }
-        return ([{
-            data: values[0]
-        }]);
+
+        return values;
     },
     [HIGHLIGHT_SUMMARY]: (data, config, context) => buildTooltipData(data, config, context)
 };

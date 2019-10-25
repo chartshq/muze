@@ -1,4 +1,4 @@
-import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue } from 'muze-utils';
+import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue, isSimpleObject } from 'muze-utils';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -8,6 +8,9 @@ import {
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
+import { BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { TOOLTIP, FRAGMENTED_TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
@@ -93,7 +96,27 @@ export const listenerMap = [
         props: [PROPS.CONFIG],
         listener: (context, [, config]) => {
             if (config) {
-                context.firebolt().config(config.interaction);
+                const firebolt = context.firebolt();
+                const { interaction } = config;
+                firebolt.config(interaction);
+                const { mode } = interaction.tooltip;
+                if (mode === FRAGMENTED) {
+                    const map = firebolt._behaviourEffectMap;
+                    for (const key in map) {
+                        const sideEffects = map[key];
+
+                        map[key] = sideEffects.map((val) => {
+                            let name = val;
+                            if (isSimpleObject(val)) {
+                                name = val.name;
+                            }
+                            if (name === TOOLTIP) {
+                                return FRAGMENTED_TOOLTIP;
+                            }
+                            return val;
+                        });
+                    }
+                }
                 createGridLineLayer(context);
             }
         }
