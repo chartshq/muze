@@ -122,7 +122,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const layers = context.layers().filter(layer => layer.config().groupId === formalName);
 
         layers.forEach((layer) => {
-            console.log(layer);
             const linkedLayer = context.getLayerByName(layer.config().owner);
             const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
             const transformedDataModel = new DataModel(transformedData, schema);
