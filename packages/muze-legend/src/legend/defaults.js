@@ -30,6 +30,10 @@ export const LEGEND_TITLE = {
 };
 
 export const DEFAULT_CONFIG = {
+    buffer: {
+        [ALIGN.HORIZONTAL]: 10,
+        [ALIGN.VERTICAL]: 10
+    },
     classPrefix: 'muze',
     borderStyle: 'solid',
     borderColor: 'rgba(0,0,0,0)',
@@ -60,7 +64,7 @@ const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
 const ITEM_FORMATTER = {
     item: {
         text: {
-            formatter: val => `${val[0]}-${val[1]}`
+            formatter: val => `${Math.ceil(val[0])} - ${Math.ceil(val[1])}`
         }
     }
 };
