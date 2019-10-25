@@ -153,7 +153,8 @@ export default class GradientLegend extends SimpleLegend {
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
- /**
+
+    /**
      *
      *
      * @param {*} data
@@ -162,5 +163,12 @@ export default class GradientLegend extends SimpleLegend {
      */
     getCriteriaFromData (data) {
         return [[this.fieldName()], [data.value]];
+    }
+
+    getRangeFromIdentifiers ({ fields, criteria }) {
+        return fields.reduce((range, v) => {
+            range[v] = criteria[v];
+            return range;
+        }, {});
     }
 }
