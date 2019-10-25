@@ -121,6 +121,8 @@ export const BarLayerMixin = superclass => class extends superclass {
 
         this._points = this.generateDataPoints(normalizedDataArr, keys);
         this._graphicElems = {};
+        const paths = Object.keys(this._overlayPath);
+        paths.forEach(path => this._overlayPath[path].remove());
         this._overlayPath = {};
 
         createElements({
