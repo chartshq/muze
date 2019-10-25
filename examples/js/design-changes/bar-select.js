@@ -46,32 +46,44 @@
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
-        }];
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
+        }
+        ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
     
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
-        .rows(['Horsepower'])
-        .columns(['Year'])
+        .rows(['Acceleration'])
+        .columns(['Maker'])
         .layers([{
-            mark: 'line'
+            mark: 'bar'
         }])
+        // .size('Maker')
         .color('Origin')
-        // .detail(['Name'])
+        .size('Acceleration')
         .mount('#chart')
-        .height(650)
-        .width(950)
+        .height(450)
+        .width(650)
         .title('Charts');
+
+        setTimeout(() => {
+            var element = document.getElementById('chart');
+            canvas.firebolt().dispatchBehaviour('select', {
+                criteria: {
+                    // Acceleration: [400, 500],
+                    Maker: ['ford', 'toyota', 'mercury']
+                }
+            });
+            canvas.firebolt().dispatchBehaviour('highlight', {
+                criteria: {
+                    // Acceleration: [400, 500],
+                    Maker: ['volkswagen']
+                }
+            });
+            element.classList.add('animateon');
+        }, 2000);
     })
 })();

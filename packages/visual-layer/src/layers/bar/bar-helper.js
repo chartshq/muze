@@ -181,8 +181,6 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
     const encoding = context.config().encoding;
     const axes = context.axes();
     const colorAxis = axes.color;
-    const stroke = encoding.stroke.value;
-    const strokeWidth = encoding['stroke-width'].value;
     const sizeEncoding = encoding.size || {};
     const {
             x0Field,
@@ -227,10 +225,6 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
         const style = {
             fill: color
         };
-        const auxiliaryStyles = {
-            stroke,
-            strokeWidth
-        };
 
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
@@ -245,7 +239,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 source: d.source,
                 rowId: d.rowId,
                 style,
-                meta: getColorMetaInf(style, colorAxis, auxiliaryStyles)
+                meta: getColorMetaInf(style, colorAxis, encoding.interactions)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);
@@ -259,26 +253,51 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
 };
 
 // This is invoked only on bar selection for creation of path around the bar
-const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
+const selectStrokeOnInteraction = (context, elem, apply, interactionType, style, mountPoint) => {
     const datum = elem.data()[0];
     const styleType = style.type;
-    const { originalStroke, stateStroke } = datum.meta;
-    stateStroke[interactionType] = stateStroke[interactionType] || {};
+    const { originalStrokeOnSelect, stateStrokeOnSelect } = datum.meta;
+    stateStrokeOnSelect[interactionType] = stateStrokeOnSelect[interactionType] || {};
 
-    if (apply && !stateStroke[interactionType][styleType]) {
+    if (apply && !stateStrokeOnSelect[interactionType][styleType]) {
         // apply
-        stateStroke[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+        stateStrokeOnSelect[interactionType][styleType] = style.props.value;
+        context.addOverlayPath(mountPoint, elem.node(), datum, style);
     }
-    if (!apply && stateStroke[interactionType][styleType]) {
+    if (!apply && stateStrokeOnSelect[interactionType][styleType]) {
         // remove
-        stateStroke[interactionType][styleType] = originalStroke[styleType];
-        context.removeOverlayPath(datum, originalStroke);
+        stateStrokeOnSelect[interactionType][styleType] = originalStrokeOnSelect[styleType];
+        context.removeOverlayPath(datum, originalStrokeOnSelect);
+    }
+    return true;
+};
+
+const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style, mountPoint) => {
+    const datum = elem.data()[0];
+    const styleType = style.type;
+    const { originalStrokeOnHighlight, stateStrokeOnHighlight } = datum.meta;
+    stateStrokeOnHighlight[interactionType] = stateStrokeOnHighlight[interactionType] || {};
+
+    if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
+        // apply
+        stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
+        context.addOverlayPath(mountPoint, elem.node(), datum, style);
+    }
+    if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
+        // remove
+        stateStrokeOnHighlight[interactionType][styleType] = originalStrokeOnHighlight[styleType];
+        context.removeOverlayPath(datum, originalStrokeOnHighlight);
     }
     return true;
 };
 
 export const interactionStyleMap = {
-    stroke: (...params) => strokeInteractionStyle(...params),
-    'stroke-width': (...params) => strokeInteractionStyle(...params)
+    focusStroke: {
+        stroke: (...params) => selectStrokeOnInteraction(...params),
+        'stroke-width': (...params) => selectStrokeOnInteraction(...params)
+    },
+    highlight: {
+        stroke: (...params) => highlightStrokeOnInteraction(...params),
+        'stroke-width': (...params) => highlightStrokeOnInteraction(...params)
+    }
 };
