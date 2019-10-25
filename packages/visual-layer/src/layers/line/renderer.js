@@ -56,6 +56,9 @@ const makeStartEndPair = (arr, borderIndexes) => {
         const pair = [];
         const prevValue = arr[prevOfNull[i]];
         const nextValue = arr[nextOfNull[i]];
+        if(prevOfNull[i] > nextOfNull[i]){
+            continue;
+        }
         if (prevValue) {
             pair.push(prevValue);
         }
