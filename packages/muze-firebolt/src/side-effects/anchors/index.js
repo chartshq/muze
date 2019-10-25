@@ -1,8 +1,7 @@
-import { DataModel, getObjProp } from 'muze-utils';
+import { DataModel, getObjProp, mergeRecursive } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import { ANCHORS } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
-
 import './styles.scss';
 
 const addLayer = (layerRegistry, context, sideEffect) => {
@@ -22,7 +21,7 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                         color: getObjProp(depLayerEncoding, 'color', 'field'),
                         size: {
                             field: getObjProp(depLayerEncoding, 'size', 'field'),
-                            value: sideEffect.defaultSizeValue()
+                            value: () => sideEffect.defaultSizeValue()
                         }
                     };
                     const commonName = sideEffect.constructor.formalName();
@@ -57,6 +56,22 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
+        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+            const layers = this.firebolt.context.layers();
+            this.setAnchorLayerStyle(layers);
+        });
+    }
+
+    setAnchorLayerStyle (layers) {
+        // return null;
+        const anchorLayer = layers.filter(l => l.config().groupId === 'anchors')[0];
+        if (anchorLayer) {
+            // Execute focusStroke interaction of anchor point layer
+            const ids = anchorLayer.data().getUids();
+            const layerName = this.constructor.formalName();
+            const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
+            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+        }
     }
 
     static target () {
@@ -95,10 +110,14 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 100;
     }
 
+    // Default offset by which anchor size is changed
+    getAnchorSizeonInteraction () {
+        return 0;
+    }
+
     apply (selectionSet) {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
-
         const context = this.firebolt.context;
         const layers = context.layers().filter(layer => layer.config().groupId === formalName);
 
@@ -106,9 +125,20 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const linkedLayer = context.getLayerByName(layer.config().owner);
             const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
             const transformedDataModel = new DataModel(transformedData, schema);
+            const anchorSizeConfig = {
+                encoding: {
+                    size: {
+                        value: () => this.defaultSizeValue() + this.getAnchorSizeonInteraction()
+                    }
+                }
+            };
+            const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
 
-            layer.data(transformedDataModel);
+            layer
+                .data(transformedDataModel)
+                .config(newConfig);
+
+            return this;
         });
-        return this;
     }
 }

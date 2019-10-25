@@ -39,16 +39,20 @@ d3.json('/data/cars.json', (data) => {
     let canvas = env.canvas();
 
     canvas = canvas
-    .rows(['Acceleration']) // Acceleration goes in X axis
-    .columns(['Displacement']) // Displacement goes in Y axis
+    .rows(['Horsepower']) // Acceleration goes in X axis
+    .columns(['Acceleration']) // Displacement goes in Y axis
     .size({
-        field: 'Cylinders', // Size retinal encoding with Cylinders
+        field: 'Displacement', // Size retinal encoding with Cylinders
         range: [50, 360]
     })
     // .color('Origin') 
 	.layers([{
         mark: 'point'
     }])
+    .config({
+        legend: {
+            position: 'bottom'
+    }})
     .width(500)
     .height(500)
     .data(rootData)

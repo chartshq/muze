@@ -2,4 +2,13 @@
 
 .#{$prefix}anchors-group {
     pointer-events: none;
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
+}
+
+.#{$prefix}persistent-anchors {
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
 }

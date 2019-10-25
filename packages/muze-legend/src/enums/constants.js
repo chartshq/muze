@@ -17,7 +17,8 @@ export const DEFAULTSIZE = 50;
 export const MARGINBUFFER = 10;
 export const DEFAULTICONSIZE = { // approximately the (size needed) * Math.PI value
     circle: 64,
-    square: 45.8
+    square: 45.8,
+    default: 42.8
 };
 export const DEFAULTSHAPE = 'circle';
 export const STEP = 'step';
@@ -47,4 +48,5 @@ export const END = 'end';
 export const SIZE = 'size';
 export const DISCRETE = 'discrete';
 export const MEASURE = 'measure';
+export const DEFAULT = 'default';
 

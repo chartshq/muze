@@ -71,6 +71,10 @@ export const defaultConfig = {
         },
         fillOpacity: {
             value: 0.5
+        },
+        interaction: {
+            anchors: 'highlight',
+            'persistent-anchors': 'focusStroke'
         }
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],

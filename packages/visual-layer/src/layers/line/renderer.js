@@ -21,7 +21,8 @@ const filterFn = (d) => {
 export const drawLine = (context) => {
     let filteredPoints;
     const { layer, container, points, interpolate, connectNullData, className, style, transition } = context;
-    const mount = selectElement(container).attr('class', className);
+    const containerSelection = selectElement(container);
+    const mount = containerSelection.attr('class', className);
     const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
                 .curve(curveInterpolatorFn)
@@ -34,9 +35,18 @@ export const drawLine = (context) => {
         filteredPoints = points.filter(filterFn);
     }
 
+    const graphicElems = layer._graphicElems;
+    const updateFns = {
+        update: (group, d) => {
+            d.forEach((dd) => {
+                graphicElems[dd.rowId] = containerSelection;
+            });
+        }
+    };
+
     updateStyle(mount, style);
-    let element = makeElement(mount, 'path', points.length ? [points[0].className] : []);
-    element.attr('class', d => d);
+    let element = makeElement(mount, 'path', points.length ? [points] : [], null, updateFns);
+    element.attr('class', (d, i) => d[i].className);
     if (!transition.disabled) {
         element = element.transition()
         .duration(transition.duration)

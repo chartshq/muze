@@ -106,23 +106,48 @@ export const getStrokeWidthByPosition = (position, radius) => {
 const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
     const datum = elem.data()[0];
     const styleType = style.type;
-    const { originalStroke, stateStroke } = datum.meta;
-    stateStroke[interactionType] = stateStroke[interactionType] || {};
+    const { originalStrokeOnSelect, stateStrokeOnSelect } = datum.meta;
+    stateStrokeOnSelect[interactionType] = stateStrokeOnSelect[interactionType] || {};
 
-    if (apply && !stateStroke[interactionType][styleType]) {
+    if (apply && !stateStrokeOnSelect[interactionType][styleType]) {
         // apply
-        stateStroke[interactionType][styleType] = style.props.value;
+        stateStrokeOnSelect[interactionType][styleType] = style.props.value;
         context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
     }
-    if (!apply && stateStroke[interactionType][styleType]) {
+    if (!apply && stateStrokeOnSelect[interactionType][styleType]) {
         // remove
-        stateStroke[interactionType][styleType] = originalStroke[styleType];
-        context.removeOverlayPath(datum, originalStroke);
+        stateStrokeOnSelect[interactionType][styleType] = originalStrokeOnSelect[styleType];
+        context.removeOverlayPath(datum, originalStrokeOnSelect);
+    }
+    return true;
+};
+
+const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style) => {
+    const datum = elem.data()[0];
+    const styleType = style.type;
+    const { originalStrokeOnHighlight, stateStrokeOnHighlight } = datum.meta;
+    stateStrokeOnHighlight[interactionType] = stateStrokeOnHighlight[interactionType] || {};
+
+    if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
+        // apply
+        stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
+        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+    }
+    if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
+        // remove
+        stateStrokeOnHighlight[interactionType][styleType] = originalStrokeOnHighlight[styleType];
+        context.removeOverlayPath(datum, originalStrokeOnHighlight);
     }
     return true;
 };
 
 export const interactionStyleMap = {
-    stroke: (...params) => strokeInteractionStyle(...params),
-    'stroke-width': (...params) => strokeInteractionStyle(...params)
+    focusStroke: {
+        stroke: (...params) => strokeInteractionStyle(...params),
+        'stroke-width': (...params) => strokeInteractionStyle(...params)
+    },
+    highlight: {
+        stroke: (...params) => highlightStrokeOnInteraction(...params),
+        'stroke-width': (...params) => highlightStrokeOnInteraction(...params)
+    }
 };
