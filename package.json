@@ -91,7 +91,7 @@
     "autotest:dev": "node scripts/run-autotest.js --mode development",
     "autotest": "npm run autotest:dev",
     "upload": "node scripts/upload-build.js",
-    "postinstall": "lerna bootstrap"
+    "postinstall": "lerna bootstrap --no-ci"
   },
   "browserslist": [
     "last 10 major versions",
