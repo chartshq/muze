@@ -145,7 +145,7 @@ export default class StepLegend extends SimpleLegend {
             item
         } = this.config();
         super.getLabelSpaces();
-        const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2
+        const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2;
         return getItemMeasures(this, 'range', item.text.formatter, stepItemBuffer);
     }
 

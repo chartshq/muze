@@ -14,7 +14,7 @@ const filterFn = (d) => {
     return update.y !== null && update.x !== null;
 };
 
-const containsNull = (elem, index) => {
+const containsNull = (elem) => {
     const { x, y } = elem ? elem.update : {};
     if (x === null || y === null) {
         return true;
