@@ -1,11 +1,9 @@
 /* global describe, it */
 
 import { expect } from 'chai';
-import { DataModel } from 'muze-utils';
-import { 
-    strategies,
-    getStackedSum,
-    isStackedBar 
+import {
+  getStackedSum,
+  isStackedBar
 } from './strategies';
 
 describe('#tooltipstrategy', () => {
@@ -38,29 +36,30 @@ describe('#tooltipstrategy', () => {
     it('# getStackedSum', () => {
         const array = [
             [
-              315.5,
-              "1970-01-01",
-              "USA"
+                315.5,
+                '1970-01-01',
+                'USA'
             ],
             [
-              100,
-              "1970-01-01",
-              "European Union"
+                100,
+                '1970-01-01',
+                'European Union'
             ],
             [
-              29.5,
-              "1970-01-01",
-              "Japan"
+                29.5,
+                '1970-01-01',
+                'Japan'
             ]
-          ]
+        ];
         let sum = 0;
-        array.map(a => {
-            sum = sum + a[0];
-        })
+        array.map((a) => {
+            sum += a[0];
+            return a;
+        });
         expect(getStackedSum(array, 0)).to.equals(sum);
     });
     it('#isStackedBar', () => {
-        const transformType = () => 'stack'
-        expect(isStackedBar([{transformType}])).to.equals(true);
+        const transformType = () => 'stack';
+        expect(isStackedBar([{ transformType }])).to.equals(true);
     });
 });

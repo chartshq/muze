@@ -1,29 +1,34 @@
 /* eslint-disable*/
 let env = muze();
 const DataModel = muze.DataModel;
-const  data = [{
-    Acceleration: 2344,
-    Year: 1970
-}, {
-    Acceleration: 2844,
-    Year: 1971
-},
-{
-    Acceleration: 2439,
-    Year: 1972
-},
-{
-    Acceleration: null,
-    Year: 1973
-},
-{
-    Acceleration: 2439,
-    Year: 1974
-}
-];
-const schema = [{
+d3.json('/data/cars-with-null.json', (data) => {
+    const schema = [{
+        name: 'Name',
+        type: 'dimension'
+    }, {
+        name: 'Maker',
+        type: 'dimension'
+    }, {
+        name: 'Miles_per_Gallon',
+        type: 'measure'
+    }, {
+        name: 'Displacement',
+        type: 'measure'
+    }, {
+        name: 'Horsepower',
+        type: 'measure'
+    }, {
+        name: 'Weight_in_lbs',
+        type: 'measure'
+    }, {
         name: 'Acceleration',
         type: 'measure'
+    }, {
+        name: 'Origin',
+        type: 'dimension'
+    }, {
+        name: 'Cylinders',
+        type: 'dimension'
     }, {
         name: 'Year',
         type: 'dimension'
@@ -37,6 +42,7 @@ const schema = [{
     canvas = canvas
     .rows(['Acceleration']) // Acceleration goes in X axis
     .columns(['Year'])
+    .color('Origin') 
 	.layers([{
         mark: 'line',
         connectNullData: true,
@@ -51,3 +57,5 @@ const schema = [{
     .data(rootData)
     .title('Line Chart With Connected Null Data', { position: 'top', align: 'left' })
     .mount('#chart');
+});
+
