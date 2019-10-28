@@ -126,8 +126,7 @@ export const drawLine = (context) => {
         updateFns
     });
     const sanitizedPoints = sanitizeNullConfig(points);
-    console.log('-----------------> 1 ', points);
-    console.log('-----------------> 1 ', sanitizedPoints);
+
     sanitizedPoints.map((d) => {
         if (connectNullData && d.length > 1) {
             getELementsForLine({
