@@ -73,17 +73,17 @@ const sanitizeNullConfig = (arr) => {
 };
 
 const getELementsForLine = (params) => {
-    const { mount, data, className, layer, strokeStyle, linepath, transition } = params;
-    let element = makeElement(mount, 'path', data.length ? [data[0].className] : [], className);
-    element.attr('d', linepath(data));
-    element.attr('class', d => d);
+    const { mount, data, className, layer, strokeStyle, linepath, transition, updateFns } = params;
+    let element = makeElement(mount, 'path', data.length ? [data] : [], className, updateFns);
+    element.attr('class', (d, i) => d[i].className);
     setStyles(element, strokeStyle);
     if (!transition.disabled) {
         element = element.transition()
-            .duration(transition.duration)
-            .on('end', layer.registerAnimationDoneHook());
+        .duration(transition.duration)
+        .on('end', layer.registerAnimationDoneHook());
     }
-    element.attr('d', linepath(data)).style('fill-opacity', 0);
+    element.attr('d', linepath(data))
+                    .style('fill-opacity', 0);
     return element;
 };
 
@@ -94,15 +94,25 @@ const getELementsForLine = (params) => {
  */
 export const drawLine = (context) => {
     const { layer, container, points, interpolate, connectNullData, className, style, transition } = context;
+    const containerSelection = selectElement(container);
     const strokeStyle = layer.config().nullDataLineStyle;
     const nullDataLineClass = layer.config().nullDataLineClass;
-    const mount = selectElement(container).attr('class', className);
+    const mount = containerSelection.attr('class', className);
     const curveInterpolatorFn = pathInterpolators[interpolate];
     const linepath = line()
         .curve(curveInterpolatorFn)
         .x(d => d.update.x)
         .y(d => d.update.y)
         .defined(filterFn);
+
+    const graphicElems = layer._graphicElems;
+    const updateFns = {
+        update: (group, d) => {
+            d.forEach((dd) => {
+                graphicElems[dd.rowId] = containerSelection;
+            });
+        }
+    };
 
     updateStyle(mount, style);
 
@@ -112,7 +122,8 @@ export const drawLine = (context) => {
         strokeStyle: undefined,
         layer,
         linepath,
-        transition
+        transition,
+        updateFns
     });
     const sanitizedPoints = sanitizeNullConfig(points);
     sanitizedPoints.map((d) => {
@@ -124,7 +135,8 @@ export const drawLine = (context) => {
                 className: `.${className}-${nullDataLineClass}`,
                 layer,
                 linepath,
-                transition
+                transition,
+                updateFns
             });
         }
         return null;

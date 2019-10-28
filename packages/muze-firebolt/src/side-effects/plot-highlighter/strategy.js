@@ -1,4 +1,4 @@
-const fadeFn = (set, context, strategy) => {
+const fadeFn = (set, context) => {
     const {
         mergedEnter,
         mergedExit,
@@ -7,10 +7,10 @@ const fadeFn = (set, context, strategy) => {
     } = set;
 
     if (!mergedEnter.length && !mergedExit.length) {
-        context.applyInteractionStyle(completeSet, {}, strategy, false);
+        context.applyInteractionStyle(completeSet, {}, 'fade', false);
     } else {
-        context.applyInteractionStyle(exitSet[1], {}, strategy, true);
-        context.applyInteractionStyle(mergedEnter, {}, strategy, false);
+        context.applyInteractionStyle(exitSet, {}, 'fade', true);
+        context.applyInteractionStyle(mergedEnter, {}, 'fade', false);
     }
 };
 
@@ -41,11 +41,12 @@ export const strategies = {
             exitSet,
             completeSet
         } = set;
+
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'highlight', false);
         } else {
-            context.applyInteractionStyle(entrySet[1], {}, 'highlight', true);
-            context.applyInteractionStyle(exitSet[1], {}, 'highlight', false);
+            context.applyInteractionStyle(entrySet, {}, 'highlight', true);
+            context.applyInteractionStyle(exitSet, {}, 'highlight', false);
         }
     }
 };

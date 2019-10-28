@@ -46,10 +46,9 @@
         {
             name: 'Year',
             type: 'dimension',
-            // subtype: 'temporal',
-            // format: '%Y-%m-%d'
-        }
-        ];
+            subtype: 'temporal',
+            format: '%Y-%m-%d'
+        }];
 
     let rootData = new DataModel(data, schema)
 
@@ -63,16 +62,16 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
         .rows(['Horsepower'])
+        .columns(['Year'])
         .layers([{
-            mark: 'bar'
+            mark: 'line'
         }])
         .color('Origin')
         // .detail(['Name'])
         .mount('#chart')
         .height(650)
-        .width(850)
+        .width(950)
         .title('Charts');
     })
 })();
