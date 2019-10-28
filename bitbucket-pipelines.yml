@@ -8,4 +8,5 @@ pipelines:
                 - apt-get update
                 - apt-get install zip
                 - npm install --unsafe-perm
+                - npm run test
                 - npm run autotest:prod

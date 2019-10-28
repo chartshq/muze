@@ -109,7 +109,7 @@ const uploadBuild = async (tag) => {
 
 const createAutoTestPayload = (reqId, tag) => {
     const testsPath = path.resolve(__dirname, '..', 'sherlock-test.json');
-    if (!fs.existsSync(testsPath)) {
+    if (fs.existsSync(testsPath)) {
         const { groups } = fs.readJsonSync(testsPath);
         return {
             requestId: reqId,
