@@ -15,6 +15,9 @@ const FormData = require('form-data');
 const axios = require('axios');
 const prompt = require('prompt');
 
+/* eslint-disable no-console, max-len */
+
+const isCI = process.env.CI;
 const mycroftProtocol = process.env.MYCROFT_PROTOCOL;
 const mycroftHost = process.env.MYCROFT_HOST;
 const mycroftPort = process.env.MYCROFT_PORT;
@@ -25,12 +28,16 @@ const currentPrintStream = process.stdout;
 const initiateStatusInterval = 1000;
 let cursorRelYPos = 0;
 
+if (isCI) {
+    console.log(JSON.stringify({ mycroftHost, mycroftPort, mycroftProtocol, mollyHost, mollyPort, mollyProtocol }, null, 2));
+}
+
 program
     .option('-m, --mode <mode>', 'The muze build mode')
     .option('-l, --lib <lib>', 'The library name to be uploaded to sherlock')
     .parse(process.argv);
 
-let { mode, lib } = program;
+let { mode } = program;
 if (!mode) {
     mode = 'production';
 }
@@ -45,7 +52,7 @@ const log = (text) => {
 };
 
 const makeBuild = buildMode => new Promise((res, rej) => {
-    shell.exec(`./scripts/make-build.sh "${buildMode}"`, { async: true, silent: true }, (code, stdout, stderr) => {
+    shell.exec(`./scripts/make-build.sh "${buildMode}"`, { async: true, silent: !isCI }, (code, stdout, stderr) => {
         if (code) {
             const err = new Error();
             err.stdout = stdout;
@@ -58,7 +65,7 @@ const makeBuild = buildMode => new Promise((res, rej) => {
 });
 
 const currBranch = () => new Promise((res, rej) => {
-    shell.exec('git branch | grep \\* | cut -d \' \' -f2', { async: true, silent: true }, (code, stdout, stderr) => {
+    shell.exec('git branch | grep \\* | cut -d \' \' -f2', { async: true, silent: !isCI }, (code, stdout, stderr) => {
         if (code) {
             const err = new Error();
             err.stdout = stdout;
@@ -73,13 +80,14 @@ const currBranch = () => new Promise((res, rej) => {
 const generateBuildTag = async (v) => {
     let tag;
     const muzeVersion = `v${v}`;
-    const currentBranch = await currBranch();
-    const m = currentBranch.match(/^(.+)\/#(\d+)-(.+)$/);
+    let currentBranch = await currBranch();
 
-    if (m) {
-        tag = semver.valid(`${muzeVersion}-${m[1]}-${m[2]}-${m[3].slice(0, 30)}`);
+    if (isCI) {
+        console.log(JSON.stringify({ currentBranch }, null, 2));
     }
 
+    currentBranch = currentBranch.replace(/[^\w]+/g, '-');
+    tag = semver.valid(`${muzeVersion}-${currentBranch}`);
     tag = tag || semver.valid(`${muzeVersion}-${uuid().replace(/-/g, '')}`);
 
     return `v${tag}`;
@@ -99,14 +107,28 @@ const uploadBuild = async (tag) => {
     return uploadRes;
 };
 
-const initiateAutoTest = async (tag) => {
-    const reqId = uuid();
-    const testcaseInitiateURL = `${mycroftProtocol}://${mycroftHost}:${mycroftPort}/api/v1/autotest/initiate`;
-    const payload = {
+const createAutoTestPayload = (reqId, tag) => {
+    const testsPath = path.resolve(__dirname, '..', 'sherlock-test.json');
+    if (!fs.existsSync(testsPath)) {
+        const { groups } = fs.readJsonSync(testsPath);
+        return {
+            requestId: reqId,
+            libVersion: tag,
+            groups
+        };
+    }
+
+    return {
         requestId: reqId,
         libVersion: tag,
         all: true
     };
+};
+
+const initiateAutoTest = async (tag) => {
+    const reqId = uuid();
+    const testcaseInitiateURL = `${mycroftProtocol}://${mycroftHost}:${mycroftPort}/api/v1/autotest/initiate`;
+    const payload = createAutoTestPayload(reqId, tag);
     await axios.post(testcaseInitiateURL, payload);
     return reqId;
 };
@@ -204,21 +226,26 @@ const printAutotestSummery = async (tag) => {
 };
 
 const run = async () => {
-    prompt.message = '';
-    prompt.start();
+    let tag = null;
 
-    let { tag } = await promisify(prompt.get.bind(prompt))({
-        properties: {
-            tag: {
-                conform: value => !!semver.valid(value),
-                message: 'Should be semver value',
-                description: 'Enter tag name[current branch]',
-                type: 'string',
-                required: false,
-                before: value => (value ? `v${semver.valid(value)}` : '')
+    if (!isCI) {
+        prompt.message = '';
+        prompt.start();
+
+        const resp = await promisify(prompt.get.bind(prompt))({
+            properties: {
+                tag: {
+                    conform: value => !!semver.valid(value),
+                    message: 'Should be semver value',
+                    description: 'Enter tag name[current branch]',
+                    type: 'string',
+                    required: false,
+                    before: value => (value ? `v${semver.valid(value)}` : '')
+                }
             }
-        }
-    });
+        });
+        tag = resp.tag;
+    }
 
     const muzePkg = await fs.readJSON(path.resolve('packages/muze/package.json'));
     tag = tag || await generateBuildTag(muzePkg.version);

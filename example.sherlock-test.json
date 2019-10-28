@@ -1,0 +1,6 @@
+{
+    "groups": {
+		"groupNames":["color"] ,
+		"subGroups":["*"]
+	}
+}
