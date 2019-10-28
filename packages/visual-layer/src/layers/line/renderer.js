@@ -14,20 +14,20 @@ const filterFn = (d) => {
     return update.y !== null && update.x !== null;
 };
 
-const settIndexHelper = (elem, index) => {
+const containsNull = (elem, index) => {
     const { x, y } = elem ? elem.update : {};
-    if (x !== null && y !== null) {
-        return index;
+    if (x === null || y === null) {
+        return true;
     }
-    return -1;
+    return false;
 };
 
 const settIndexPrevOrNext = (arr, index, indexesObj) => {
-    const prev = settIndexHelper(arr[index - 1], index - 1);
-    const next = settIndexHelper(arr[index + 1], index + 1);
+    const prevContainsNull = containsNull(arr[index - 1], index - 1);
+    const nextContainsNull = containsNull(arr[index + 1], index + 1);
 
-    prev >= 0 && indexesObj.prevOfNull.push(prev);
-    next >= 0 && indexesObj.nextOfNull.push(next);
+    !prevContainsNull && indexesObj.prevOfNull.push(index - 1);
+    !nextContainsNull && indexesObj.nextOfNull.push(index + 1);
 };
 
 const getborderIndexes = (arr) => {
@@ -56,9 +56,6 @@ const makeStartEndPair = (arr, borderIndexes) => {
         const pair = [];
         const prevValue = arr[prevOfNull[i]];
         const nextValue = arr[nextOfNull[i]];
-        if(prevOfNull[i] > nextOfNull[i]){
-            continue;
-        }
         if (prevValue) {
             pair.push(prevValue);
         }
@@ -129,6 +126,8 @@ export const drawLine = (context) => {
         updateFns
     });
     const sanitizedPoints = sanitizeNullConfig(points);
+    console.log('-----------------> 1 ', points);
+    console.log('-----------------> 1 ', sanitizedPoints);
     sanitizedPoints.map((d) => {
         if (connectNullData && d.length > 1) {
             getELementsForLine({
