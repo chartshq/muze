@@ -11,7 +11,8 @@ import {
     RIGHT,
     DEFAULTICONSIZE,
     MARGINBUFFER,
-    HORIZONTAL
+    HORIZONTAL,
+    DEFAULT
 } from '../enums/constants';
 
 /**
@@ -168,7 +169,8 @@ const createShape = function (d, elem, defaultIcon) {
     const groupElement = elem;
     // const { shape, size, update } = d;
     const shape = d[1] || defaultIcon;
-    const size = d[3] || DEFAULTICONSIZE[shape] * Math.PI;
+    const defaultIconSize = DEFAULTICONSIZE[shape] || DEFAULTICONSIZE[DEFAULT];
+    const size = d[3] || defaultIconSize * Math.PI;
 
     if (shape instanceof Promise) {
         shape.then((res) => {

@@ -121,6 +121,9 @@ export const BarLayerMixin = superclass => class extends superclass {
 
         this._points = this.generateDataPoints(normalizedDataArr, keys);
         this._graphicElems = {};
+        const paths = Object.keys(this._overlayPath);
+        paths.forEach(path => this._overlayPath[path].remove());
+        this._overlayPath = {};
 
         createElements({
             data: this._points,
@@ -213,8 +216,8 @@ export const BarLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    getInteractionStyles (styleType) {
-        return interactionStyleMap[styleType];
+    getInteractionStyles (interactionType, styleType) {
+        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     addOverlayPath (container, refElement, data, style) {
@@ -223,7 +226,9 @@ export const BarLayerMixin = superclass => class extends superclass {
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];
         } else {
-            pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            const pathGroup = makeElement(container, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement = makeElement(pathGroup, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+
             pathElement.style('fill', 'none');
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;

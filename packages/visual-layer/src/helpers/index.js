@@ -9,7 +9,8 @@ import {
     getObjProp,
     COORD_TYPES,
     CommonProps,
-    defaultValue
+    defaultValue,
+    hslaToRgb
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -37,33 +38,42 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
+            const pathMountPoint = selectElement(context.mount().parentElement).select('.muze-overlay-paths').node();
+
             const isSpecificInteraction = context.applySpecificStyle(styleType, {
                 elem,
                 apply,
                 interactionType,
                 style,
+                mountPoint: pathMountPoint,
                 colorAxis
             });
 
             if (!isSpecificInteraction) {
                 // Common style for all the layers
-                elem.style(styleType, ((d) => {
+                elem.style(styleType, ((d, i) => {
+                    // d = d.data[i] || d;
+                    d = Array.isArray(d.data) ? d.data[i] : d;
+
                     const { colorTransform, stateColor, originalColor } = d.meta;
                     colorTransform[interactionType] = colorTransform[interactionType] || {};
+                    let h;
+                    let s;
+                    let l;
+                    let a;
 
                     if (apply && !colorTransform[interactionType][styleType]) {
                         // fade selections
                         colorTransform[interactionType][styleType] = style.intensity;
-                        const color = transformColor(colorAxis, d, styleType, style.intensity).color;
-                        return color;
-                    }
-                    if (!apply && colorTransform[interactionType][styleType]) {
+                        [h, s, l, a] = transformColor(colorAxis, d, styleType, style.intensity).hsla;
+                    } else if (!apply && colorTransform[interactionType][styleType]) {
                         // unfade selections
                         colorTransform[interactionType][styleType] = null;
-                        return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
+                        [h, s, l, a] = transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).hsla;
+                    } else {
+                        [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
                     }
-                    const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
-                    return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
+                    return hslaToRgb(h, s, l, a);
                 }));
             }
         });
@@ -523,11 +533,16 @@ export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => ({
         }
         return acc;
     }, {}),
-    originalStroke: {
-        stroke: auxStyles.stroke,
-        'stroke-width': auxStyles.strokeWidth
+    originalStrokeOnSelect: {
+        stroke: (auxStyles.select || {}).stroke,
+        'stroke-width': (auxStyles.select || {}).strokeWidth
     },
-    stateStroke: {},
+    originalStrokeOnHighlight: {
+        stroke: (auxStyles.highlight || {}).stroke,
+        'stroke-width': (auxStyles.highlight || {}).strokeWidth
+    },
+    stateStrokeOnSelect: {},
+    stateStrokeOnHighlight: {},
     stateColor: {},
     colorTransform: {}
 });

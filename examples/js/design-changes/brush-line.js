@@ -46,32 +46,36 @@
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
-        }];
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
+        }
+        ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
-
+    
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
-        .rows(['Horsepower'])
-        .columns(['Year'])
+        .rows(['Displacement'])
+        .columns(['Maker'])
         .layers([{
             mark: 'line'
         }])
-        .color('Origin')
+        // .color('Origin')
         // .detail(['Name'])
         .mount('#chart')
-        .height(650)
-        .width(950)
+        .height(450)
+        .width(650)
         .title('Charts');
+
+        setTimeout(() => {
+            var element = document.getElementById('chart');
+            canvas.firebolt().dispatchBehaviour('brush', {
+                criteria: {
+                    Displacement: [0, 400]
+                }
+            });
+            element.classList.add('animateon');
+        }, 2000);
     })
 })();

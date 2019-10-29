@@ -25,6 +25,8 @@ export const ENCODING = {
     TEXT: 'text'
 };
 
+export const STROKE_DASHARRAY = 'stroke-dasharray';
+
 export const ASCENDING = 'asc';
 
 export const AGG_FN_SUM = 'sum';
