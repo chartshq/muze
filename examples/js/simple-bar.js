@@ -59,16 +59,13 @@
     // ])
 
     const canvas = env.canvas();
-    
+
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
-        .rows(['Horsepower'])
-        .layers([{
-            mark: 'bar'
-        }])
-        .color('Origin')
+        .rows(['Origin', 'Horsepower'])
+        .columns(['Year'])
+        .color('Horsepower')
         // .detail(['Name'])
         .mount('#chart')
         .height(650)

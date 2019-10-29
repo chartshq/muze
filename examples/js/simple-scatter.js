@@ -59,18 +59,18 @@
     // ])
 
     const canvas = env.canvas();
-    
+
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
-        .columns(['Maker'])
-        .rows(['Horsepower'])
+        .columns(['Displacement', 'Horsepower'])
+        .rows(['Horsepower', 'Acceleration'])
         .layers([{
             mark: 'point'
         }])
-        .color('Origin')
-        .size('Horsepower')
-        // .detail(['Name'])
+        .color('Horsepower')
+        // .size('Horsepower')
+        // .shape('Origin')
+        .detail(['Name'])
         .mount('#chart')
         .height(500)
         .width(500)

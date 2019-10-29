@@ -5,20 +5,20 @@ const html = muze.Operators.html;
 d3.csv('../data/wildfires.csv', (data) => {
     const schema = [
         {
-            'name': 'year',
+            name: 'year',
             type: 'dimension'
         },
         {
             name: 'gis_acres',
-            'type': 'measure',
+            type: 'measure',
             defAggFn: 'avg'
         },
         {
             name: 'fire_name',
-            'type': 'dimension'
+            type: 'dimension'
         },
         {
-            'name': 'alarm_date',
+            name: 'alarm_date',
             type: 'dimension'
         }
     ];
@@ -45,57 +45,57 @@ d3.csv('../data/wildfires.csv', (data) => {
                     .detail(['fire_name'])
                     .color({ value: 'rgba(255, 156, 25, 0.5)' })
                     .size({
-            field: 'gis_acres',
-            range: [1, 450]
-        })
+                        field: 'gis_acres',
+                        range: [1, 450]
+                    })
                     .layers([{ mark: 'point' }])
                     .title('Wildfires over the year for different months')
                     .subtitle('Use data operators to transform data and visualize it and size (retinal) encoding channel to encode more information')
                     .config({
-            autoGroupBy: { disabled: true },
-            gridLines: {
-                y: { show: true }
-            },
-            border: {
-                showValueBorders: { left: false, bottom: false }
-            },
-            axes: {
-                y: {
-                    tickValues: [1950, 1970, 1990, 2010],
-                    showAxisName: false
-                },
-                x: {
-                    tickFormat: val => months[new Date(val).getMonth()],
-                    showInnerTicks: false,
-                    showAxisName: false
-                }
-            },
-            interaction: {
-                tooltip: {
-                    formatter: (dataModel, context) => {
-                        const tooltipData = dataModel.getData().data;
-                        const fieldConfig = dataModel.getFieldsConfig();
+                        autoGroupBy: { disabled: true },
+                        gridLines: {
+                            y: { show: true }
+                        },
+                        border: {
+                            showValueBorders: { left: false, bottom: false }
+                        },
+                        axes: {
+                            y: {
+                                tickValues: [1950, 1970, 1990, 2010],
+                                showAxisName: false
+                            },
+                            x: {
+                                tickFormat: val => months[new Date(val).getMonth()],
+                                showInnerTicks: false,
+                                showAxisName: false
+                            }
+                        },
+                        interaction: {
+                            tooltip: {
+                                formatter: (dataModel, context) => {
+                                    const tooltipData = dataModel.getData().data;
+                                    const fieldConfig = dataModel.getFieldsConfig();
 
-                        let tooltipContent = '';
-                        tooltipData.forEach((dataArray, i) => {
-                            const fireName = dataArray[fieldConfig.fire_name.index];
-                            const monthsOfFire = new Date(dataArray[fieldConfig['Months of Fire'].index]);
-                            const year = dataArray[fieldConfig.year.index];
-                            const acres = dataArray[fieldConfig.gis_acres.index];
+                                    let tooltipContent = '';
+                                    tooltipData.forEach((dataArray, i) => {
+                                        const fireName = dataArray[fieldConfig.fire_name.index];
+                                        const monthsOfFire = new Date(dataArray[fieldConfig['Months of Fire'].index]);
+                                        const year = dataArray[fieldConfig.year.index];
+                                        const acres = dataArray[fieldConfig.gis_acres.index];
 
-                            const date = monthsOfFire.getDate();
-                            const month = months[monthsOfFire.getMonth()];
+                                        const date = monthsOfFire.getDate();
+                                        const month = months[monthsOfFire.getMonth()];
 
-                            tooltipContent += `<p>The <b>${fireName}</b> fire on <b>${date} ${month}, ${year}</b>
+                                        tooltipContent += `<p>The <b>${fireName}</b> fire on <b>${date} ${month}, ${year}</b>
                                         affected <b>${acres.toFixed(2)}</b> acres of land</p>`;
-                        });
-                        return html`${tooltipContent}`;
-                    }
-                }
-            },
-            legend: {
-                size: { show: false }
-            }
-        })
-                    .mount('#chart-container');
+                                    });
+                                    return html`${tooltipContent}`;
+                                }
+                            }
+                        },
+                        legend: {
+                            size: { show: false }
+                        }
+                    })
+                    .mount('#chart');
 });
