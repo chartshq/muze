@@ -53,7 +53,7 @@
 
     let rootData = new DataModel(data, schema)
     const canvas = env.canvas();
-    
+
     canvas
         .data(rootData)
         .columns(['Acceleration'])

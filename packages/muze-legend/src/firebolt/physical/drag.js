@@ -54,7 +54,7 @@ import {
         endPos.y = Math.max(0, Math.min(endPos.y, boundingBox.height));
         if (startPos[axisType] === endPos[axisType]) {
             payload = {
-                criteria: {}
+                criteria: null
             };
         } else {
             payload = {

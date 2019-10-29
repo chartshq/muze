@@ -11,6 +11,13 @@ import './styles.scss';
  * @class SelectionBox
  */
 /* istanbul ignore next */ class SelectionBox extends SpawnableSideEffect {
+    constructor (...params) {
+        super(...params);
+        this._graphicElems = {
+            rect: null
+        };
+    }
+
     static formalName () {
         return SELECTIONBOX;
     }
@@ -39,8 +46,15 @@ import './styles.scss';
         const config = this.config();
         const axis = context.axis().source();
         const className = `${config.classPrefix}-${config.className}`;
+        const { criteria } = payload;
+        const { rect } = this._graphicElems;
 
-        const domain = payload.criteria[firebolt.context.fieldName()];
+        if (criteria === null) {
+            rect && rect.remove();
+            return this;
+        }
+
+        const domain = criteria[firebolt.context.fieldName()];
         const axisScale = axis.scale();
         const range = domain ? [axis.getScaleValue(domain[0]), axis.getScaleValue(domain[1])] : [];
 
@@ -73,6 +87,8 @@ import './styles.scss';
                         .attr('x', x)
                         .attr(WIDTH, width)
                         .attr(HEIGHT, height);
+        this._graphicElems.rect = selBox;
+        return this;
     }
 }
 

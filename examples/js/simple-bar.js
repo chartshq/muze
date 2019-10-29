@@ -58,7 +58,7 @@
     // ])
 
     const canvas = env.canvas();
-    
+
     canvas
         .data(rootData)
         // .rows(['maxDays'])
