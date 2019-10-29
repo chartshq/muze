@@ -267,16 +267,19 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                 if (values[0] && values[0].key) {
                     generateTooltipContent(values, index + 1, content);
                 } else {
-                    const stackedSum = getStackedSum(
-                        values,
-                        fieldsConfig[measures[0].name].index
-                    );
-                    const nf = measures[0].numberFormat;
-                    isStacked && content.push(getStackedKeyValue({
-                        field: `${'Total'}${separator}`,
-                        value: nf ? nf(stackedSum.toFixed(2)) : stackedSum.toFixed(2),
-                        classPrefix
-                    }));
+                    let stackedSum = 0;
+                    if(isStacked){
+                        stackedSum = getStackedSum(
+                            values,
+                            fieldsConfig[measures[0].name].index
+                        );
+                        const nf = measures[0].numberFormat;
+                        content.push(getStackedKeyValue({
+                            field: `${'Total'}${separator}`,
+                            value: nf ? nf(stackedSum.toFixed(2)) : stackedSum.toFixed(2),
+                            classPrefix
+                        }));
+                    }
                     for (let j = 0, len2 = values.length; j < len2; j++) {
                         const valueArr = values[j];
                         generateRetinalFieldsValues(valueArr, retinalFields, content, {
