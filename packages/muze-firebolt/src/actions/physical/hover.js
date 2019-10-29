@@ -1,4 +1,5 @@
 import { getClientPoint, getEvent } from 'muze-utils';
+import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
 
 /**
  * Adds mouse interactions to target element.
@@ -14,7 +15,7 @@ import { getClientPoint, getEvent } from 'muze-utils';
         const mode = tooltipConf.mode;
         const pos = getClientPoint(context.getDrawingContext().svgContainer, event);
         const nearestPoint = context.getNearestPoint(pos.x, pos.y, {
-            getAllPoints: true,
+            getAllPoints: mode === CONSOLIDATED || mode === FRAGMENTED,
             data: args,
             event
         });

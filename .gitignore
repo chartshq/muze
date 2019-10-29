@@ -104,7 +104,7 @@ typings/
 .serverless
 
 packages/*/.nsi.json
-
+package-lock.json
 packages/*/node_modules/
 */**/package-lock.json
 dist.zip
