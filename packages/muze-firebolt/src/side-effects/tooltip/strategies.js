@@ -268,7 +268,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                     generateTooltipContent(values, index + 1, content);
                 } else {
                     let stackedSum = 0;
-                    if(isStacked){
+                    if (isStacked) {
                         stackedSum = getStackedSum(
                             values,
                             fieldsConfig[measures[0].name].index
