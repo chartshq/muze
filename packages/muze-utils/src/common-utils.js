@@ -886,6 +886,18 @@ const hexToHsv = (hex) => {
     return result ? rgbToHsv(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)) : '';
 };
 
+const RGBAtoRGB = (r, g, b, a, r2 = 255, g2 = 255, b2 = 255) => {
+    const r3 = Math.round(((1 - a) * r2) + (a * r));
+    const g3 = Math.round(((1 - a) * g2) + (a * g));
+    const b3 = Math.round(((1 - a) * b2) + (a * b));
+    return `rgb(${r3},${g3},${b3})`;
+};
+
+const hslaToRgb = (h, s, l, a) => {
+    const [r, g, b, a1] = hslToRgb(h, s, l, a);
+    return RGBAtoRGB(r, g, b, a1);
+};
+
 const detectColor = (col) => {
     const matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
@@ -1168,6 +1180,14 @@ const nestCollection = (params) => {
     return nestFn.entries(params.data);
 };
 
+/**
+ * Returns array difference, elements in array A, not in Array B
+ * @param { Array.<number> } arr Data which needs to be grouped
+ * @param { Array.<number> } arr1 Field indices by which the data will be grouped
+ * @return { Array.<number> } Returns the array difference (A - B)
+ */
+const getArrayDiff = (arr, arr1) => arr.filter(el => arr1.indexOf(el) < 0);
+
 const pathInterpolators = {
     curveLinear,
     curveStepAfter,
@@ -1377,6 +1397,7 @@ export {
     pathInterpolators,
     stack,
     nestCollection,
+    getArrayDiff,
     getSymbol,
     transformColors,
     detectColor,
@@ -1384,6 +1405,7 @@ export {
     hslToRgb,
     rgbToHsv,
     hsvToRgb,
+    hslaToRgb,
     concatModels,
     toArray,
     angleToRadian,

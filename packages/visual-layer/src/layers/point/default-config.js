@@ -6,11 +6,20 @@ export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defColorStyle: 'stroke',
     interaction: {
-        // TODO: change this to have stroke on highlight
-        highlight: [{
-            type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }],
+        highlight: [
+            {
+                type: 'stroke',
+                props: {
+                    value: 'black'
+                }
+            }, {
+                type: 'stroke-width',
+                props: {
+                    value: 1,
+                    position: 'center'
+                }
+            }
+        ],
         fade: [{
             type: 'fill',
             intensity: [0, 0, +20, 0]
@@ -62,6 +71,10 @@ export const defaultConfig = {
         },
         fillOpacity: {
             value: 0.5
+        },
+        interaction: {
+            anchors: 'highlight',
+            'persistent-anchors': 'focusStroke'
         }
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],

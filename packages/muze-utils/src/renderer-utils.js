@@ -191,17 +191,14 @@ const setStyles = (element, styles) => {
 const createElements = (params) => {
     const container = select(params.container);
     let data;
-    let sel;
 
     data = params.data;
     if (typeof data === 'number') {
         data = Array(data).fill().map((d, i) => i);
     }
-    sel = container.selectAll(params.selector).data(data);
-
-    sel = container.selectAll(params.selector).filter(function () {
+    const sel = container.selectAll(params.selector).filter(function () {
         return this.parentNode === container.node();
-    }).data(params.data);
+    }).data(data);
 
     const selectionMerge = sel.enter().append(params.append).merge(sel).each(function (d, i) {
         params.each(d, select(this), i);

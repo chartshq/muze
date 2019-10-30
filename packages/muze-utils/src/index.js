@@ -32,6 +32,7 @@ export {
     rgbToHsv,
     hexToHsv,
     hsvToRgb,
+    hslaToRgb,
     escapeHTML,
     angleToRadian,
     generateGetterSetters,
@@ -104,7 +105,8 @@ export {
     intersect,
     partition,
     mix,
-    componentRegistry
+    componentRegistry,
+    getArrayDiff
 } from './common-utils';
 
 export {

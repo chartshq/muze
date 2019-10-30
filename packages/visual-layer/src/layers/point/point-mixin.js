@@ -4,7 +4,8 @@ import {
     makeElement,
     getQualifiedClassName,
     selectElement,
-    appendElement
+    appendElement,
+    getSymbol
 } from 'muze-utils';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
@@ -170,8 +171,8 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    getInteractionStyles (styleType) {
-        return interactionStyleMap[styleType];
+    getInteractionStyles (interactionType, styleType) {
+        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     addOverlayPath (container, refElement, data, style) {
@@ -188,14 +189,14 @@ export const PointLayerMixin = superclass => class extends superclass {
 
         if (style.type === 'stroke-width') {
             const { position } = style.props;
-            let R = Math.sqrt(data.size / Math.PI);
-            R = getStrokeWidthByPosition(position, R);
+            // get radius as per stroke position
+            let radius = Math.sqrt(data.size / Math.PI);
+            radius = getStrokeWidthByPosition(position, radius);
 
-            pathElement.attr('d', () => (
-                `M ${-R}, 0
-                a ${R},${R} 0 1, 0 ${R * 2}, 0
-                a ${R},${R} 0 1, 0 ${-(R * 2)}, 0`
-            ));
+            const size = data.size + radius;
+            const path = getSymbol(data.shape).size(size);
+
+            pathElement.attr('d', path);
         }
 
         pathElement.style(style.type, style.props.value);

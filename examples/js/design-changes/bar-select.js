@@ -46,45 +46,44 @@
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
-        }];
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
+        }
+        ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
-
+    
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
+        .rows(['Acceleration'])
         .columns(['Maker'])
-        .rows(['Displacement'])
-        .color({
-            field: 'Displacement', // A measure in color encoding channel creates gradient legend
-            stops: 10,
-            // step:true
-        })
-    //    .color('Maker')
-        // .detail(['Name'])
-        // .size('Horsepower')
+        .layers([{
+            mark: 'bar'
+        }])
+        // .size('Maker')
+        .color('Origin')
+        .size('Acceleration')
         .mount('#chart')
-        .height(650)
-        .width(850)
-        .config({
-            legend: {
-                position : 'bottom'
-            }
-        })
+        .height(450)
+        .width(650)
         .title('Charts');
+
+        setTimeout(() => {
+            var element = document.getElementById('chart');
+            canvas.firebolt().dispatchBehaviour('select', {
+                criteria: {
+                    // Acceleration: [400, 500],
+                    Maker: ['ford', 'toyota', 'mercury']
+                }
+            });
+            canvas.firebolt().dispatchBehaviour('highlight', {
+                criteria: {
+                    // Acceleration: [400, 500],
+                    Maker: ['volkswagen']
+                }
+            });
+            element.classList.add('animateon');
+        }, 2000);
     })
 })();
-
-
-// item: {
-//     text: {
-//         orientation: 'right',
