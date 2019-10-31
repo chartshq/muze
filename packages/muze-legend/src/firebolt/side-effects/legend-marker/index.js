@@ -25,6 +25,7 @@ export default class LegendMarker extends GenericSideEffect {
     constructor (...params) {
         super(...params);
         this._markerElement = null;
+        this._legendmarkerTextContainer = null;
     }
 
     static formalName () {
@@ -59,32 +60,46 @@ export default class LegendMarker extends GenericSideEffect {
             const legendGradContainer = context.getDrawingContext().svgContainer;
 
             const { top, left } = legendGradContainer.node().getBoundingClientRect();
-
-            debugger;
-
-            const legendmarkerGroup = makeElement(legendGradContainer,
-                                                'g',
-                                                [1],
-                                                `${config.classPrefix}-${config.className}-group`);
-            const legendmarkerTextContainer = makeElement(selectElement('#chart'), 'div', [1], `${className}-text-container`);
+            const { oriTextHeight, oriTextWidth } = labelManager().getSmartText(payload.criteria[1]);
 
             let x;
             let y;
             let rotateAngle;
+            const lableConfig = {
+                top: 0,
+                left: 0
+            };
 
             if (firebolt.context.config().align === HORIZONTAL) {
                 x = range - (Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) + AXIS_STROKE;
                 y = 5;
                 rotateAngle = 180;
+                lableConfig.top = top + y - 23;
+                lableConfig.left = x + left - (oriTextWidth / 2);
             } else {
                 y = range + Math.sqrt(LEGEND_MARKER_PROPS.size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 5;
                 rotateAngle = 90;
+                lableConfig.top = top + y - 23 + (oriTextHeight / 2);
+                lableConfig.left = x + left - oriTextWidth - 3;
             }
+
+            const legendmarkerGroup = makeElement(legendGradContainer,
+                                                'g',
+                                                [1],
+                                                `${config.classPrefix}-${config.className}-group`);
 
             if (!this._markerElement) {
                 this._markerElement = makeElement(legendmarkerGroup,
                                     'path', [{ value: null }], className, { enter: physicalAction });
+            }
+
+            if (!this._legendmarkerTextContainer) {
+                this._legendmarkerTextContainer = makeElement(
+                                                    selectElement('#chart'),
+                                                    'div',
+                                                    [1],
+                                                    `${className}-text-container`);
             }
 
             this._textElement = createTextCell(className, labelManager);
@@ -96,16 +111,19 @@ export default class LegendMarker extends GenericSideEffect {
                     .classed(`${className}-hide`, false);
 
             this._textElement.source(payload.criteria[1]);
-            this._textElement.render(legendmarkerTextContainer.node());
-            legendmarkerTextContainer.attr('style', ` top: ${top + y - 23}px; left:${x + left}px`).classed(`${className}-show`, true)
-            .classed(`${className}-hide`, false);
-
-            console.log(this._textElement.getLogicalSpace());
+            this._textElement.render(this._legendmarkerTextContainer.node());
+            this._legendmarkerTextContainer.attr('style', ` top: ${lableConfig.top}px; left:${lableConfig.left}px`)
+                                     .classed(`${className}-show`, true)
+                                     .classed(`${className}-hide`, false);
         } else {
-            // this._markerElement
-            //     .data([{ value: null }])
-            //     .classed(`${className}-show`, false)
-            //     .classed(`${className}-hide`, true);
+            this._markerElement
+                .data([{ value: null }])
+                .classed(`${className}-show`, false)
+                .classed(`${className}-hide`, true);
+            this._legendmarkerTextContainer
+                .classed(`${className}-show`, false)
+                .classed(`${className}-hide`, true);
         }
     }
+
 }
