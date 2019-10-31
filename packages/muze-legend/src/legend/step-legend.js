@@ -14,9 +14,6 @@ import { STEP, RECT, LEFT, SIZE, UPPER, LOWER, HORIZONTAL } from '../enums/const
 import { stepData } from './position-config';
 import '../styles.scss';
 import { STEP_DEFAULT_CONFIG, DEFAULT_MEASUREMENT } from './defaults';
-import { HIGHLIGHT } from '../enums/behaviours';
-import { Marker } from '../enums/side-effects';
-import { createAxis } from './gradient-helper';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -128,21 +125,6 @@ export default class StepLegend extends SimpleLegend {
         return domainLeg;
     }
 
-    /**
-     *
-     *
-     * @param {*} axis
-     *
-     * @memberof GradientLegend
-     */
-    axis (...axis) {
-        if (axis.length) {
-            this._axis = axis[0];
-            return this;
-        }
-        return this._axis;
-    }
-
      /**
      *
      *
@@ -162,8 +144,6 @@ export default class StepLegend extends SimpleLegend {
         const {
             item
         } = this.config();
-        const axis = createAxis(this, { isStep: true });
-        this.axis(axis);
         super.getLabelSpaces();
         const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2;
         return getItemMeasures(this, 'range', item.text.formatter, stepItemBuffer);
@@ -200,9 +180,6 @@ export default class StepLegend extends SimpleLegend {
         renderStepItem(this, itemSkeleton);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
-        firebolt.mapSideEffects({
-            [HIGHLIGHT]: [Marker]
-        });
         firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }

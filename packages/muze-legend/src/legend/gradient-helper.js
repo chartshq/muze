@@ -18,11 +18,6 @@ export const getGradientDomain = (data) => {
     }
     return data.map(e => e.value);
 };
-
-function getStepDomain (data = []) {
-    return [-455, 350];
-}
-
 /**
  *
  *
@@ -51,9 +46,8 @@ export const makeLinearGradient = (container, data, domain) => {
  * @return {AxisCell} Instance of Axis Cell for the gradient axis
  * @memberof Legend
  */
-export const createAxis = (context, options = {}) => {
+export const createAxis = (context) => {
     const data = context.data();
-    const { isStep } = options;
     const { align } = context.config();
     const AxisCell = context._cells.AxisCell;
     const newAxis = new ContinousAxis({
@@ -69,7 +63,7 @@ export const createAxis = (context, options = {}) => {
         }
     }, { labelManager: context._labelManager });
 
-    newAxis.domain(!isStep ? getGradientDomain(data) : getStepDomain(data));
+    newAxis.domain(getGradientDomain(data));
     newAxis.range([1, 1]);
     return new AxisCell().source(newAxis).config({
         margin: { left: 0, bottom: 0, top: 0, right: 0 }
