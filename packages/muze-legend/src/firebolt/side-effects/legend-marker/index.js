@@ -46,6 +46,7 @@ export default class LegendMarker extends GenericSideEffect {
     apply (selectionSet, payload) {
         const className = `${this.config().classPrefix}-${this.config().className}`;
         if (payload.criteria && payload.criteria.length) {
+            debugger;
             const physicalAction = function () {
             // Register physical action on marker gere
             };
@@ -80,7 +81,7 @@ export default class LegendMarker extends GenericSideEffect {
                 y = range + Math.sqrt(LEGEND_MARKER_PROPS.size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 5;
                 rotateAngle = 90;
-                lableConfig.top = top + y - 23 + (oriTextHeight / 2);
+                lableConfig.top = top + y - 21 + (oriTextHeight / 2);
                 lableConfig.left = x + left - oriTextWidth - 3;
             }
 

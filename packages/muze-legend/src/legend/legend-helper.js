@@ -179,7 +179,9 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
 
     // scaling the axis based on steps provided
     for (let i = 0; i <= steps; i++) {
-        domainForLegend[i] = interpolatedFn(i / steps);
+        console.log(i / steps);
+        const f = i / steps;
+        domainForLegend[i] = interpolatedFn(f.toFixed(2));
     }
     return domainForLegend;
 };

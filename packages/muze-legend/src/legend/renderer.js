@@ -114,7 +114,6 @@ export const createItemSkeleton = (context, container) => {
         item
     } = context.config();
     const textOrientation = item.text.orientation;
-    debugger;
     const stack = itemStack[textOrientation];
     const itemSkeleton = makeElement(container, 'div', (d, i) => stack.map(e => [e, d[e], d.color, d.size,
         d.value, context.fieldName(), i]), `${classPrefix}-legend-item-info`);

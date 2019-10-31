@@ -89,6 +89,7 @@ export default class GradientLegend extends SimpleLegend {
         }
         domainForLegend = [...new Set(domainForLegend)].sort((a, b) => a - b);
 
+        debugger;
         return domainForLegend.map((ele, i) => {
             const value = domainForLegend[i];
             return {
