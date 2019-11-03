@@ -268,20 +268,25 @@ export default class SimpleLegend {
             maxHeight,
             width,
             height,
-            margin,
-            border
+            border,
+            marginHorizontal
+        } = this.measurement();
+        let {
+            margin
         } = this.measurement();
         const legendContainer = makeElement(selectElement(this.mount()), 'div', [1], `${classPrefix}-legend-box`);
         let marginPosition;
         switch (position) {
         case TOP:
             marginPosition = `margin-${BOTTOM}`;
+            margin = marginHorizontal;
             break;
         case LEFT:
             marginPosition = `margin-${RIGHT}`;
             break;
         case BOTTOM:
             marginPosition = `margin-${TOP}`;
+            margin = marginHorizontal;
             break;
         default:
             marginPosition = `margin-${LEFT}`;

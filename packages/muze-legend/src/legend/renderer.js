@@ -35,6 +35,7 @@ export const getItemContainers = (container, data, legendInstance) => {
         position
     } = config;
     const positionObj = positionConfig[position];
+    console.log('-----------------> 1 ', position, positionConfig);
     const datasets = positionObj.datasets(data);
     const measures = positionObj.itemContainerMeasures(measurement, config);
 
@@ -143,6 +144,7 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
+
     return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
 };
 
@@ -277,7 +279,6 @@ export const renderDiscreteItem = (context, container) => {
             color,
             className
         } = item.icon;
-
     const textOrientation = item.text.orientation;
     const formatter = item.text.formatter;
 

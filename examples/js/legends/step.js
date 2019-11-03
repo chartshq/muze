@@ -83,13 +83,12 @@ d3.json('../data/cars.json', function (data) {
     .width(800)
     .config({
         legend: {
-            position: 'top'
+            position: 'bottom'
     }})
     .height(600)
-    .color({
+    .size({
         field: 'Horsepower',
-        stops:7,
-        step:true
+        stops:7
     })
     .mount('#chart5')
 
