@@ -55,4 +55,29 @@ d3.json('../data/cars.json', function (data) {
     .width(500)
     .height(500)
     .mount(mountPoint)
+
+    env.canvas()
+    .height(650)
+    .rows(['Acceleration'])
+    .columns(['Year'])
+    .color({
+        field: 'Acceleration',
+        step: true,
+        stops: 5
+    })
+    .config({
+        legend: {
+            position: 'bottom',
+            color: {
+                item: {
+                    text: {
+                        formatter: (val, i) => {
+                            return `${val[0]}$ - ${val[1]}$`;
+                        }
+                    }
+                }
+            }
+        }
+    })
+    .mount('#chart5')
 });
