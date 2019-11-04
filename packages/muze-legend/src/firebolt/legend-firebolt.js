@@ -1,7 +1,6 @@
 import { Firebolt } from '@chartshq/muze-firebolt';
 import { propagate, payloadGenerator } from './helper';
 import { STEP, GRADIENT } from '../enums/constants';
-import { HIGHLIGHT } from '../enums/behaviours';
 /**
  * This class manages the interactions of legend.
  * @export

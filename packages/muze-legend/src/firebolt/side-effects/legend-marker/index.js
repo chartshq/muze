@@ -45,8 +45,8 @@ export default class LegendMarker extends GenericSideEffect {
 
     apply (selectionSet, payload) {
         const className = `${this.config().classPrefix}-${this.config().className}`;
-        if (payload.criteria && payload.criteria.length) {
-            debugger;
+        debugger;
+        if (payload.criteria && payload.criteria.length === 2) {
             const physicalAction = function () {
             // Register physical action on marker gere
             };
