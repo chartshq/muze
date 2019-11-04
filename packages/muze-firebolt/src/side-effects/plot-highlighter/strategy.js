@@ -33,7 +33,7 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
-    highlight: (set, context) => {
+    highlight: (set, context, payload) => {
         const {
             mergedEnter,
             mergedExit,
@@ -45,7 +45,7 @@ export const strategies = {
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'highlight', false);
         } else {
-            context.applyInteractionStyle(entrySet, {}, 'highlight', true);
+            context.applyInteractionStyle(entrySet, {}, 'highlight', true, payload);
             context.applyInteractionStyle(exitSet, {}, 'highlight', false);
         }
     }

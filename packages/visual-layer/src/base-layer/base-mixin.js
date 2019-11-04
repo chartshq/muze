@@ -322,7 +322,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    applyInteractionStyle (interactionType, selectionSet, apply, styles) {
+    applyInteractionStyle (interactionType, selectionSet, apply, styles, payload) {
         const interactionConfig = this.config().interaction || {};
 
         let interactionStyles = interactionConfig[interactionType];
@@ -331,7 +331,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
             applyInteractionStyle(this, selectionSet, interactionStyles, {
                 apply,
                 interactionType
-            });
+            }, payload);
         }
     }
 

@@ -10,7 +10,8 @@ import {
     COORD_TYPES,
     CommonProps,
     defaultValue,
-    hslaToRgb
+    hslaToRgb,
+    arraysEqual
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -28,7 +29,14 @@ export const transformColor = (colorAxis, datum, styleType, intensity) => {
     return colorInfo;
 };
 
-export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
+export const applyInteractionStyle = (context, selectionSet, interactionStyles, config, payload) => {
+    // const currentSet = selectionSet;
+    // if (currentSet.length > 0 && arraysEqual(context.formattedUids, currentSet)) {
+    //     currentSet = [];
+    // } else {
+    //     context.formattedUids = currentSet;
+    // }
+
     const elements = context.getPlotElementsFromSet(selectionSet);
     const axes = context.axes();
     const colorAxis = axes.color;

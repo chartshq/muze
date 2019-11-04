@@ -132,6 +132,7 @@ const highlightStrokeOnInteraction = (context, elem, apply, interactionType, sty
         // apply
         stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
         context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+        console.log('here');
     }
     if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
         // remove

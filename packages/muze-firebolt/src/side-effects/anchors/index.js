@@ -56,22 +56,43 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
-        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
-            const layers = this.firebolt.context.layers();
-            this.setAnchorLayerStyle(layers);
-        });
+        // this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+        //     const layers = this.firebolt.context.layers();
+        //     this.setAnchorLayerStyle(layers);
+        // });
     }
 
-    setAnchorLayerStyle (layers) {
-        // return null;
+    setAnchorLayerStyle (layers, payload) {
         const anchorLayer = layers.filter(l => l.config().groupId === 'anchors')[0];
         if (anchorLayer) {
             // Execute focusStroke interaction of anchor point layer
             const ids = anchorLayer.data().getUids();
             const layerName = this.constructor.formalName();
             const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
-            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+            const data = anchorLayer.data();
+            let formattedUids = [];
+
+            if (payload && payload.target && payload.target[0].length > 1) {
+                const { target } = payload;
+                const data1 = data.select((d) => {
+                    if (payload.target[0].length === 2) {
+                        return d[target[0][0]].internalValue === target[1][0] &&
+                        d[target[0][1]].internalValue === target[1][1];
+                    }
+                    return d[target[0][0]].internalValue === target[1][0];
+                });
+                formattedUids = data1.getUids();
+                // context.data(data1);
+            }
+
+            console.log('ids', formattedUids);
+            if (!formattedUids.length) {
+                anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, false);
+            } else {
+                anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], formattedUids, true, null, payload);
+            }
         }
+        return true;
     }
 
     static target () {
@@ -115,7 +136,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 0;
     }
 
-    apply (selectionSet) {
+    apply (selectionSet, payload) {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;
@@ -137,6 +158,25 @@ export default class AnchorEffect extends SpawnableSideEffect {
             layer
                 .data(transformedDataModel)
                 .config(newConfig);
+
+            // if (payload.target[0].length === 1) {
+            //     debugger;
+            // }
+
+            this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+                const layers1 = this.firebolt.context.layers();
+                // console.log(payload.target);
+                // debugger;
+                // let isEqual = false;
+
+                // if (this._previousTarget && this._previousTarget.length) {
+                //     isEqual = arraysEqual(this._previousTarget, payload.target || []);
+                // } else {
+                //     this._previousTarget = payload.target;
+                // }
+                // if (isEqual) return false;
+                this.setAnchorLayerStyle(layers1, payload);
+            });
 
             return this;
         });

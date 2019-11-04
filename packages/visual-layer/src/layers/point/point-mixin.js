@@ -28,6 +28,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         this._voronoi = new Voronoi();
         this._bandScale = Scales.band();
         this._overlayPath = {};
+        this.formattedUids = [];
     }
 
     elemType () {
@@ -177,6 +178,7 @@ export const PointLayerMixin = superclass => class extends superclass {
 
     addOverlayPath (container, refElement, data, style) {
         let pathElement;
+        // debugger;
 
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];

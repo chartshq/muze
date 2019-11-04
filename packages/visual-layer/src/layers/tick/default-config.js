@@ -5,10 +5,20 @@ export const defaultConfig = {
     className: '',
     classPrefix: CLASSPREFIX,
     interaction: {
-        highlight: [{
-            type: 'stroke',
-            intensity: [0, 0, -15, 0]
-        }],
+        highlight: [
+            {
+                type: 'stroke',
+                props: {
+                    value: 'black'
+                }
+            }, {
+                type: 'stroke-width',
+                props: {
+                    value: 1,
+                    position: 'center'
+                }
+            }
+        ],
         fade: [{
             type: 'stroke',
             intensity: [0, 0, 15, 0]
