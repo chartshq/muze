@@ -5,8 +5,7 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: [sideEffects.SELECTIONBOX, {
         name: sideEffects.Highlighter,
         options: {
-            strategy: 'fade',
-            marker: false
+            strategy: 'fade'
         }
     }],
     [BEHAVIOURS.SELECT]: [{
@@ -27,8 +26,7 @@ export const propagationSideEffects = {
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: sideEffects.Highlighter,
         options: {
-            strategy: 'fade',
-            marker: false
+            strategy: 'fade'
         }
     }],
     [BEHAVIOURS.SELECT]: ['filter']
