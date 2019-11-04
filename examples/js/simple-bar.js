@@ -77,7 +77,7 @@
         .width(850)
         .config({
             legend: {
-                position : 'right'
+                position : 'bottom'
             }
         })
         .title('Charts');

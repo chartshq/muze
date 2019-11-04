@@ -1,6 +1,5 @@
 import { GenericSideEffect } from '@chartshq/muze-firebolt';
 import { makeElement, getSymbol, selectElement } from 'muze-utils';
-import { TextCell } from '@chartshq/visual-cell';
 import { Marker } from '../../../enums/side-effects';
 import { CLASSPREFIX, HORIZONTAL } from '../../../enums/constants';
 import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
@@ -9,7 +8,8 @@ import './styles.scss';
 const SYMBOL_PADDING = (Math.sqrt(3) * 3);
 const AXIS_STROKE = 1;
 
-const createTextCell = (className, labelManagerRef) => {
+const createTextCell = (className, labelManagerRef, cells) => {
+    const { TextCell } = cells;
     const cell = new TextCell(
         {
             type: 'text',
@@ -103,7 +103,7 @@ export default class LegendMarker extends GenericSideEffect {
                                                     `${className}-text-container`);
             }
 
-            this._textElement = createTextCell(className, labelManager);
+            this._textElement = createTextCell(className, labelManager, context._cells);
             this._markerElement
                     .data([{ value: payload.criteria }])
                     .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
