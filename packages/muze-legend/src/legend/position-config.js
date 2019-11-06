@@ -58,15 +58,15 @@ const legendOrientation = {
             const {
                 width
             } = measurement;
-            const { padding, buffer } = config;
+            const { padding } = config;
 
             return {
                 row: {
-                    width: `${width + buffer[VERTICAL]}px`,
+                    width: `${width}px`,
                     padding: `${padding}px`
                 },
                 column: {
-                    width: `${width + buffer[VERTICAL]}px`,
+                    width: `${width}px`,
                     padding: `${0}px`
                 }
             };

@@ -337,11 +337,13 @@ export const strategies = {
         const measureNames = measures.map(d => d.name);
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
-            const value = data[0][fieldsConf[measure].index];
+            const { numberFormat } = fieldsConf[measure].def;
+            const value = data[0][fieldsConf[measure].index].toFixed(2);
+
             value instanceof InvalidAwareTypes ? values.push([]) : values.push([`(${aggFns[measure].toUpperCase()})`,
                 `${retrieveFieldDisplayName(dm, measure)}`,
                 {
-                    value: `${value.toFixed(2)}`,
+                    value: numberFormat ? numberFormat(value) : value,
                     style: {
                         'font-weight': 'bold'
                     }
