@@ -78,7 +78,7 @@ d3.json('../data/cars.json', function (data) {
     .columns(columns)
     .data(rootData)
     .layers([{
-        mark: 'bar'
+        mark: 'point'
     }])
     .width(800)
     .config({
@@ -87,8 +87,12 @@ d3.json('../data/cars.json', function (data) {
     }})
     .height(600)
     .size({
+<<<<<<< HEAD
         field: 'Horsepower',
         stops:7
+=======
+        field: 'Horsepower'
+>>>>>>> d99157487d10ee32e8f0115dbba16c65d5314bdb
     })
     .mount('#chart5')
 
@@ -97,7 +101,7 @@ d3.json('../data/cars.json', function (data) {
     .columns(columns)
     .data(rootData)
     .layers([{
-        mark: 'bar'
+        mark: 'point'
     }])
     .width(800)
     .config({

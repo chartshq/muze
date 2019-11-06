@@ -354,12 +354,10 @@ export const renderStepItem = (context, container) => {
 
     labelManager.setStyle(context._computedStyle);
     const dataArr = context.metaData();
+    const data = context.data();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
-            const data = d[1].split('-');
-            const lowerLimit = +data[0];
-            const upperLimit = +data[1];
-            const formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
+            const formattedData = formatter([data[d[6]].range[0], data[d[6]].range[1]], i, dataArr, context);
             selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {
