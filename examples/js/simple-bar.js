@@ -28,7 +28,8 @@
         },
         {
             name: 'Weight_in_lbs',
-            type: 'measure'
+            type: 'measure',
+			numberFormat: (val) => "￡" + val
         },
         {
             name: 'Acceleration',
@@ -62,10 +63,10 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .rows(['Horsepower'])
+        .rows(['Weight_in_lbs'])
         .columns(['Year'])
         .layers([{
-            mark: 'line'
+            mark: 'bar'
         }])
         .color('Origin')
         // .detail(['Name'])
