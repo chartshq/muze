@@ -152,9 +152,8 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
         return `${maxIconWidth}px`;
     } else if (align === HORIZONTAL) {
         return `${maxIconWidth}px`;
-    } else {
-        return `${iconSpaces[item[6]][measureType] - diff}px`;
-    }
+    } 
+    return `${iconSpaces[item[6]][measureType] - diff}px`;
 };
 
 /**
@@ -235,7 +234,7 @@ export const getLegendIcon = (datum, width, height, defaultIcon) => {
  *
  */
 export const renderIcon = (icon, container, datum, context) => {
-    let {
+    const {
         classPrefix,
         iconHeight,
         padding,
@@ -246,8 +245,8 @@ export const renderIcon = (icon, container, datum, context) => {
 
     let { maxIconWidth } = context;
 
-    if (align === HORIZONTAL){
-        maxIconWidth =  iconWidth + 2 * padding;
+    if (align === HORIZONTAL) {
+        maxIconWidth = iconWidth + 2 * padding;
     }
     const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-icon-svg`)
     .attr(WIDTH, maxIconWidth)
@@ -255,7 +254,7 @@ export const renderIcon = (icon, container, datum, context) => {
     .style(WIDTH, `${Math.ceil(maxIconWidth)}px`)
     .style(HEIGHT, `${iconHeight}px`);
 
-    let transalate =  maxIconWidth / 2 - padding;
+    const transalate = maxIconWidth / 2 - padding;
 
     if (icon !== RECT) {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
