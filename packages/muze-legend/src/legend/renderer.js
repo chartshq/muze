@@ -12,6 +12,7 @@ import {
     DEFAULTICONSIZE,
     MARGINBUFFER,
     HORIZONTAL,
+    VERTICAL,
     DEFAULT
 } from '../enums/constants';
 
@@ -138,13 +139,22 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
         iconSpaces,
         maxIconWidth
     } = context.measurement();
+
+    const { align } = context.config().align;
+
     const diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
 
-    return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
+    if (measureType === 'width' && !stepColorCheck && align === VERTICAL) {
+        return `${maxIconWidth}px`;
+    } else if (align === HORIZONTAL) {
+        return `${maxIconWidth}px`;
+    } else {
+        return `${iconSpaces[item[6]][measureType] - diff}px`;
+    }
 };
 
 /**
@@ -225,23 +235,32 @@ export const getLegendIcon = (datum, width, height, defaultIcon) => {
  *
  */
 export const renderIcon = (icon, container, datum, context) => {
-    const {
+    let {
         classPrefix,
         iconHeight,
-        maxIconWidth,
         padding,
-        color
+        color,
+        iconWidth,
+        align
     } = context;
+
+    let { maxIconWidth } = context;
+
+    if (align === HORIZONTAL){
+        maxIconWidth =  iconWidth + 2 * padding;
+    }
     const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-icon-svg`)
     .attr(WIDTH, maxIconWidth)
     .attr(HEIGHT, iconHeight)
-    .style(WIDTH, `${maxIconWidth}px`)
+    .style(WIDTH, `${Math.ceil(maxIconWidth)}px`)
     .style(HEIGHT, `${iconHeight}px`);
+
+    let transalate =  maxIconWidth / 2 - padding;
 
     if (icon !== RECT) {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
         createShape(datum, group, icon)
-                        .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
+                        .attr('transform', `translate(${transalate} ${iconHeight / 2})`)
                         .attr('fill', datum[2] || color)
                         .attr('stroke', datum[2] || color);
     } else {
@@ -295,19 +314,20 @@ export const renderDiscreteItem = (context, container) => {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
             .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
-            .style('margin-left', `${align === HORIZONTAL ? 0 : MARGINBUFFER}px`);
+            .style('margin-left', `${align === HORIZONTAL ? 2 : MARGINBUFFER}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
             selectElement(this).classed(`${classPrefix}-${className}-${i}`, true);
             renderIcon(shape, selectElement(this), d, {
                 classPrefix,
-                iconWidth,
-                // iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
+                // iconWidth,
+                iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
                 iconHeight,
                 maxIconWidth,
                 padding,
-                color
+                color,
+                align
             });
         }
     });

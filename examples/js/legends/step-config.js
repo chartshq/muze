@@ -64,7 +64,7 @@ d3.json('../data/cars.json', function (data) {
             color: {
                 item: {
                     text: {
-                        formatter: (val, i, dm) => {
+                        formatter: (val) => {
                             return `${val[0]}$ - ${val[1]}$`;
                         }
                     }
