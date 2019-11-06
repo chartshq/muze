@@ -152,7 +152,7 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
         return `${maxIconWidth}px`;
     } else if (align === HORIZONTAL) {
         return `${maxIconWidth}px`;
-    } 
+    }
     return `${iconSpaces[item[6]][measureType] - diff}px`;
 };
 
