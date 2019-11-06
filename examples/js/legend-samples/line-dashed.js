@@ -1,6 +1,7 @@
 /* eslint-disable*/
-d3.json('/data/cars.json', (data) => {
-    let env = window.muze();
+let env = muze();
+const DataModel = muze.DataModel;
+d3.json('/data/cars-with-null.json', (data) => {
     const schema = [{
         name: 'Name',
         type: 'dimension'
@@ -33,31 +34,28 @@ d3.json('/data/cars.json', (data) => {
         type: 'dimension'
     }];
     // Create an instance of DataModel using the data and schema.
-    let rootData = new muze.DataModel(data, schema);    
+    let rootData = new DataModel(data, schema);    
     
     // Get a canvas instance from Muze where the chart will be rendered.
     let canvas = env.canvas();
 
     canvas = canvas
-    .rows(['Horsepower']) // Acceleration goes in X axis
-    .columns(['Acceleration']) // Displacement goes in Y axis
-    .size({
-        field: 'Displacement', // Size retinal encoding with Cylinders
-        range: [50, 360]
-    })
-    // .color('Origin') 
+    .rows(['Acceleration']) // Acceleration goes in X axis
+    .columns(['Year'])
+    .color('Origin') 
 	.layers([{
-        mark: 'point'
+        mark: 'line',
+        connectNullData: true,
+        nullDataLineStyle:{
+            'stroke-dasharray' : ("8,4"),
+            'stroke-width': 4,
+            'stroke': 'pink'
+        }
     }])
-    .config({
-        legend: {
-            position: 'bottom'
-    }})
     .width(500)
     .height(500)
     .data(rootData)
-    .title('Scatter plot with retinal encodings', { position: 'top', align: 'left' })
-    .subtitle('Acceleration vs Displacement with color and shape axis', { position: 'top', align: 'left' })
+    .title('Line Chart With Connected Null Data', { position: 'top', align: 'left' })
     .mount('#chart');
 });
 

@@ -46,49 +46,39 @@
         {
             name: 'Year',
             type: 'dimension',
-            subtype: 'temporal',
-            format: '%Y-%m-%d'
+            // subtype: 'temporal',
+            // format: '%Y-%m-%d'
         }
         ];
 
     let rootData = new DataModel(data, schema)
-
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
-
     const canvas = env.canvas();
-
+    
     canvas
         .data(rootData)
-        // .rows(['maxDays'])
-        .rows(['Horsepower'])
-        .columns(['Year'])
-        .layers([{
-            mark: 'line'
-        }])
-        .color('Origin')
-        // .detail(['Name'])
-        .mount('#chart')
-        .height(650)
-        .width(950)
-        .title('Charts');
-
-    window.canvas2 = env.canvas()
-        .data(rootData)
-        // .rows(['maxDays'])
         .rows(['Acceleration'])
-        .columns(['Year'])
-        // .detail(['Name'])
-        .mount('#chart2')
-        .height(650)
-        .width(450)
+        .columns(['Maker'])
+        .layers([{
+            mark: 'point'
+        }])
+        // .size('Maker')
+        // .color('Origin')
+        .size('Acceleration')
+        .mount('#chart')
+        .height(450)
+        .width(650)
         .title('Charts');
 
-    muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
-        .registerPropagationBehaviourMap({
-            brush: 'filter'
-        })
+    setTimeout(() => {
+        var element = document.getElementById('chart');
+        canvas.firebolt().dispatchBehaviour('select', {
+            criteria: {
+                Acceleration: [400, 500],
+                Maker: ['amc']
+            }
+        });
+        element.classList.add('animateon');
+    }, 2000);
+
     })
 })();

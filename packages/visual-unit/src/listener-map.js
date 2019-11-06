@@ -1,4 +1,6 @@
 import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue, isSimpleObject } from 'muze-utils';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
+import { TOOLTIP, FRAGMENTED_TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -8,9 +10,6 @@ import {
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
-import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
-import { BEHAVIOURS } from '@chartshq/muze-firebolt';
-import { TOOLTIP, FRAGMENTED_TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;

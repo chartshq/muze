@@ -147,11 +147,7 @@ export default class Tooltip extends SpawnableSideEffect {
             detailFields: [],
             timeDiffsByField: {},
             valueParser: val => val,
-            selectionSet,
-            retinalFields: { color: { field: 'Origin', type: 'ordinal' },
-                shape: { type: 'ordinal' },
-                size: { field: 'Horsepower', type: 'linear' } }
-
+            selectionSet
         });
 
         tooltipInst.context(sourceInf);

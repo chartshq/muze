@@ -109,13 +109,14 @@ export default class GroupFireBolt extends Firebolt {
                 applyInteractionPolicy(this);
             });
             throwback.registerChangeListener(['propagationInfo'], ([, propagationInfo]) => {
-                const { action, payload, propagationSourceId } = propagationInfo;
+                const { action, payload } = propagationInfo;
                 const behaviourEffectMap = this._behaviourEffectMap;
                 const sideEffects = getSideEffects(action, behaviourEffectMap);
                 const sideEffectInstances = this.sideEffects();
                 const { sideEffects: sideEffectConf } = this.context.config().interaction;
                 let selectionSet;
-                let unit = this.context.composition().visualGroup.matrixInstance().value.findPlaceHolderById(payload.sourceUnit);
+                let unit = this.context.composition().visualGroup.matrixInstance()
+                    .value.findPlaceHolderById(payload.sourceUnit);
                 if (unit) {
                     unit = unit.instance;
                     sideEffects.forEach(({ effects }) => {
@@ -132,8 +133,10 @@ export default class GroupFireBolt extends Firebolt {
                                 selectionSet = selectionSet || this.unionDataModels(action);
                                 const inst = sideEffectInstances[name];
                                 inst.sourceInfo(() => unit.getSourceInfo());
-                                inst.plotPointsFromIdentifiers((...params) => unit.getPlotPointsFromIdentifiers(...params));
-                                inst.drawingContext(() => unit.getDrawingContext()).apply(selectionSet, payload, options);
+                                inst.plotPointsFromIdentifiers((...params) =>
+                                    unit.getPlotPointsFromIdentifiers(...params));
+                                inst.drawingContext(() =>
+                                    unit.getDrawingContext()).apply(selectionSet, payload, options);
                             });
                     });
                 }

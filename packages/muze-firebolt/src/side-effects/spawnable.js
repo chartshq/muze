@@ -1,4 +1,4 @@
-import { makeElement, generateGetterSetters } from 'muze-utils';
+import { makeElement } from 'muze-utils';
 
 import GenericSideEffect from './generic';
 

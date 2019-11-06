@@ -6,8 +6,16 @@ export const defaultConfig = {
     className: '',
     interaction: {
         highlight: [{
-            type: 'fill',
-            intensity: [0, 0, -15, 0]
+            type: 'stroke',
+            props: {
+                value: 'black'
+            }
+        }, {
+            type: 'stroke-width',
+            props: {
+                value: 1,
+                position: 'outside'
+            }
         }],
         fade: [{
             type: 'fill',
@@ -45,13 +53,7 @@ export const defaultConfig = {
         x: {},
         y: {},
         x0: {},
-        y0: {},
-        stroke: {
-            value: 0
-        },
-        'stroke-width': {
-            value: 0
-        }
+        y0: {}
     },
     states: {
         highlight: {

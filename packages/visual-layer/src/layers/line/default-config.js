@@ -9,18 +9,28 @@ export const defaultConfig = {
         type: 'group'
     },
     interaction: {
-        highlight: [{
-            type: 'stroke',
-            intensity: [0, 0, -15, 0]
-        }],
-        fade: [{
-            type: 'stroke',
-            intensity: [0, 0, +15, 0]
-        }],
+        // fade: [{
+        //     type: 'stroke',
+        //     intensity: [0, 0, 0, -0.5]
+        // }],
         focus: [{
             type: 'stroke',
-            intensity: [0, 0, +15, 0]
-        }]
+            intensity: [0, 0, 0, -0.5]
+        }],
+        focusStroke: [
+            {
+                type: 'stroke',
+                props: {
+                    value: 'black'
+                }
+            }, {
+                type: 'stroke-width',
+                props: {
+                    value: 2,
+                    position: 'inside'
+                }
+            }
+        ]
     },
     nearestPointThreshold: 20,
     encoding: {
@@ -35,6 +45,7 @@ export const defaultConfig = {
         effect: 'cubic',
         duration: 1000
     },
-    connectNullData: false
+    connectNullData: false,
+    nullDataLineStyle: {},
+    nullDataLineClass: 'null'
 };
-

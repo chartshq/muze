@@ -17,7 +17,10 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
         options: {
-            strategy: 'highlight'
+            strategy: 'highlight',
+            // behaviours for which the current strategy won't apply
+            // accepts an array or fn
+            excludeSet: [BEHAVIOURS.SELECT]
         }
     }, 'crossline', {
         name: 'tooltip',

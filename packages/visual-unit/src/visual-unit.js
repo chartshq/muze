@@ -541,7 +541,9 @@ export default class VisualUnit {
             dimensionMeasureMap: this._dimensionMeasureMap,
             fields: this.fields(),
             data: this.data(),
-            axes: this.axes()
+            axes: this.axes(),
+            retinalFields: this.retinalFields(),
+            layers: this.layers()
         };
     }
 

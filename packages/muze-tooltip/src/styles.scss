@@ -20,6 +20,27 @@
     padding-top: 2px;
     overflow: auto;
 }
+.#{$prefix}tooltip-stacked-row{
+    color:#828282;
+    margin-left: 10px;
+    font-size: 12px ;
+    font-weight: 600;
+    line-height: '15px'
+}
+.#{$prefix}tooltip-stacked-row-key{
+    margin-left: 10px;
+}
+.#{$prefix}tooltip-stacked-row-value{
+    margin-left: 2px;
+}
+.#{$prefix}tooltip-stacked-percentage{
+    font-size: 10px;
+    color:#828282;
+    margin-left: -20px;
+    margin-right: 20px;
+    float: right;
+    line-height: 17px;
+}
 .#{$prefix}tooltip-selected-row{
     background-color:#ebebeb
 }

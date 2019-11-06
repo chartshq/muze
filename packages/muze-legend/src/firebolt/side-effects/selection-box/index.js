@@ -13,8 +13,11 @@ import './styles.scss';
 /* istanbul ignore next */ class SelectionBox extends SpawnableSideEffect {
     constructor (...params) {
         super(...params);
-        this._graphicElems = {};
+        this._graphicElems = {
+            rect: null
+        };
     }
+
     static formalName () {
         return SELECTIONBOX;
     }
@@ -44,48 +47,50 @@ import './styles.scss';
         const axis = context.axis().source();
         const className = `${config.classPrefix}-${config.className}`;
         const { criteria } = payload;
+        const { rect } = this._graphicElems;
 
-        if (criteria) {
-            const domain = criteria[firebolt.context.fieldName()];
-            const axisScale = axis.scale();
-            const range = domain ? [axis.getScaleValue(domain[0]), axis.getScaleValue(domain[1])] : [];
-
-            const axisType = context.config().align === HORIZONTAL ? 'x' : 'y';
-
-            const gradientDimension = firebolt.context.measurement().gradientDimensions[axisType === 'x' ?
-                HEIGHT : WIDTH];
-
-            const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
-            const legendGradContainer = context.getDrawingContext().svgContainer;
-            const legendSelGroup = makeElement(legendGradContainer, 'g', [1],
-                `${config.classPrefix}-selection-box-group`);
-
-            if (firebolt.context.config().align === HORIZONTAL) {
-                x = range[0] - rangeShifter || 0;
-                y = 0;
-                width = range[1] - range[0] || 0;
-                height = gradientDimension;
-            } else {
-                x = 0;
-                y = range[1] - rangeShifter || 0;
-                height = range[0] - range[1] || 0;
-                width = gradientDimension;
-            }
-            const enterFn = function (el) {
-                selectionBoxDrag(firebolt)(el, ['brush']);
-            };
-            const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,
-                { enter: enterFn });
-            selBox.attr('y', y)
-                            .attr('x', x)
-                            .attr(WIDTH, width)
-                            .attr(HEIGHT, height);
-            this._graphicElems = {
-                rect: selBox
-            };
-        } else {
-            this._graphicElems.rect.remove();
+        if (criteria === null) {
+            rect && rect.remove();
+            return this;
         }
+
+        const domain = criteria[firebolt.context.fieldName()];
+        const axisScale = axis.scale();
+        const range = domain ? [axis.getScaleValue(domain[0]), axis.getScaleValue(domain[1])] : [];
+
+        const axisType = context.config().align === HORIZONTAL ? 'x' : 'y';
+
+        const gradientDimension = firebolt.context.measurement().gradientDimensions[axisType === 'x' ?
+            HEIGHT : WIDTH];
+
+        const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
+        const legendGradContainer = context.getDrawingContext().svgContainer;
+        const legendSelGroup = makeElement(legendGradContainer, 'g', [1],
+            `${config.classPrefix}-selection-box-group`);
+
+        if (firebolt.context.config().align === HORIZONTAL) {
+            x = range[0] - rangeShifter || 0;
+            y = 0;
+            width = range[1] - range[0] || 0;
+            height = gradientDimension;
+        } else {
+            x = 0;
+            y = range[1] - rangeShifter || 0;
+            height = range[0] - range[1] || 0;
+            width = gradientDimension;
+        }
+        const enterFn = function (el) {
+            selectionBoxDrag(firebolt)(el, ['brush']);
+        };
+
+        const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,
+            { enter: enterFn });
+        selBox.attr('y', y)
+                        .attr('x', x)
+                        .attr(WIDTH, width)
+                        .attr(HEIGHT, height);
+        this._graphicElems.rect = selBox;
+        return this;
     }
 }
 
