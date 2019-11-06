@@ -1,5 +1,7 @@
 /* eslint-disable*/
-
+/* eslint-disable*/
+let env = muze();
+const DataModel = muze.DataModel;
 d3.csv('/data/cars.csv', (data) => {
     const schema = [{
         name: 'Name',
@@ -53,7 +55,7 @@ canvas.rows(['Acceleration'])
         .width(800)
         .height(400)
         .data(dm)
-        .color('Maker')
+        .color('Origin')
         .layers([{
             mark: 'area'
         }])
