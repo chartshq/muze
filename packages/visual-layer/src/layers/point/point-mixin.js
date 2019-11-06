@@ -178,7 +178,6 @@ export const PointLayerMixin = superclass => class extends superclass {
 
     addOverlayPath (container, refElement, data, style) {
         let pathElement;
-        // debugger;
 
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];
@@ -196,9 +195,10 @@ export const PointLayerMixin = superclass => class extends superclass {
             radius = getStrokeWidthByPosition(position, radius);
 
             const size = data.size + radius;
-            const path = getSymbol(data.shape).size(size);
-
-            pathElement.attr('d', path);
+            if (typeof data.shape === 'string') {
+                const path = getSymbol(data.shape).size(size);
+                pathElement.attr('d', path);
+            }
         }
 
         pathElement.style(style.type, style.props.value);

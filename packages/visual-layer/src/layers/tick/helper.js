@@ -15,5 +15,9 @@ export const interactionStyleMap = {
     highlight: {
         stroke: () => true,
         'stroke-width': () => true
+    },
+    focusStroke: {
+        stroke: () => true,
+        'stroke-width': () => true
     }
 };

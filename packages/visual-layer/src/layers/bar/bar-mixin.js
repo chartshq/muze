@@ -125,9 +125,11 @@ export const BarLayerMixin = superclass => class extends superclass {
         paths.forEach(path => this._overlayPath[path].remove());
         this._overlayPath = {};
 
+        const barContainer = makeElement(containerSelection, 'g', [1], 'muze-layer-bars', {}, null);
+        makeElement(containerSelection, 'g', [1], 'muze-overlay-paths', {}, null);
         createElements({
             data: this._points,
-            container,
+            container: barContainer.node(),
             selector: 'g',
             append: 'g',
             each: (points, group, i) => {
@@ -144,6 +146,7 @@ export const BarLayerMixin = superclass => class extends superclass {
                 });
             }
         });
+
         return this;
     }
 

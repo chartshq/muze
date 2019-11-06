@@ -21,6 +21,7 @@ export const defaultConfig = {
             intensity: [0, 0, +15, 0]
         }]
     },
+    crossline: true,
     transition: {
         effect: 'cubic',
         duration: 1000

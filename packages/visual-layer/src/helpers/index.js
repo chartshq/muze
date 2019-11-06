@@ -10,8 +10,7 @@ import {
     COORD_TYPES,
     CommonProps,
     defaultValue,
-    hslaToRgb,
-    arraysEqual
+    hslaToRgb
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -29,14 +28,7 @@ export const transformColor = (colorAxis, datum, styleType, intensity) => {
     return colorInfo;
 };
 
-export const applyInteractionStyle = (context, selectionSet, interactionStyles, config, payload) => {
-    // const currentSet = selectionSet;
-    // if (currentSet.length > 0 && arraysEqual(context.formattedUids, currentSet)) {
-    //     currentSet = [];
-    // } else {
-    //     context.formattedUids = currentSet;
-    // }
-
+export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
     const axes = context.axes();
     const colorAxis = axes.color;
@@ -46,7 +38,7 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
-            const pathMountPoint = selectElement(context.mount().parentElement).select('.muze-overlay-paths').node();
+            const pathMountPoint = selectElement('.muze-overlay-paths').node();
 
             const isSpecificInteraction = context.applySpecificStyle(styleType, {
                 elem,
