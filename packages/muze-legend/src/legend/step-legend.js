@@ -104,7 +104,7 @@ export default class StepLegend extends SimpleLegend {
                 value = ele.toFixed(1);
             }
             return {
-                [scaleType]: scaleType === SIZE 
+                [scaleType]: scaleType === SIZE
                 ? scale[scaleFn](ele) * scale.getScaleFactor()
                 : scale[scaleFn](ele),
                 value,
