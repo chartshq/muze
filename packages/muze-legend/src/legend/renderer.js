@@ -35,7 +35,6 @@ export const getItemContainers = (container, data, legendInstance) => {
         position
     } = config;
     const positionObj = positionConfig[position];
-    console.log('-----------------> 1 ', position, positionConfig);
     const datasets = positionObj.datasets(data);
     const measures = positionObj.itemContainerMeasures(measurement, config);
 
@@ -291,7 +290,7 @@ export const renderDiscreteItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
@@ -354,7 +353,7 @@ export const renderStepItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             const data = d[1].split('-');

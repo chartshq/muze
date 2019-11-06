@@ -249,7 +249,7 @@ export const getItemMeasures = (context, prop, formatter, stepBuffer = 0) => {
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const formattedData = formatter(value, index, data, context);
+        const formattedData = formatter(value, index, context.metaData(), context);
         const { height, width } = labelManager.getOriSize(formattedData);
         space[index] = { height: height + 1 + stepBuffer, width: width + 1 + stepBuffer };
     });
