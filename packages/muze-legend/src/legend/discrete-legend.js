@@ -102,7 +102,6 @@ export default class DiscreteLegend extends SimpleLegend {
         renderDiscreteItem(this, itemSkeleton);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
-        firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
 }

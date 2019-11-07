@@ -65,7 +65,7 @@ export default class Tooltip extends SpawnableSideEffect {
     apply (selectionSet, payload, options = {}) {
         const dataModel = selectionSet.mergedEnter.model;
 
-        if ((payload.criteria === null || dataModel.isEmpty())) {
+        if ((payload.criteria === null || (dataModel && dataModel.isEmpty()))) {
             this.hide(options, null);
             return this;
         }
@@ -145,7 +145,7 @@ export default class Tooltip extends SpawnableSideEffect {
             payload,
             firebolt: this.firebolt,
             detailFields: [],
-            timeDiffsByField: {},
+            timeDiffs: sourceInf.timeDiffs,
             valueParser: val => val,
             selectionSet
         });

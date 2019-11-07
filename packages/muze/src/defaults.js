@@ -7,7 +7,9 @@ export const DEFAULT_CONFIG = {
             tooltip: COMMON_INTERACTION
         },
         behaviours: {
-            select: COMMON_INTERACTION
+            highlight: COMMON_INTERACTION,
+            select: COMMON_INTERACTION,
+            brush: COMMON_INTERACTION
         }
     },
     pagination: 'scroll',

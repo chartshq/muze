@@ -127,7 +127,8 @@ export const unionSets = (firebolt, behaviours) => {
 
     ['mergedEnter', 'mergedExit'].forEach((type) => {
         if (behaviours.length > 1) {
-            const uids = combinedSet[type].uids.reduce((acc, v) => {
+            const uidsArr = combinedSet[type].uids.map(d => d[0]);
+            const uids = uidsArr.reduce((acc, v) => {
                 acc[v] = true;
                 return acc;
             }, {});

@@ -13,6 +13,7 @@ import {
     CommonProps,
     toArray,
     STATE_NAMESPACES,
+    FieldType,
     ReservedFields
 } from 'muze-utils';
 import { behaviourEffectMap } from '@chartshq/muze-firebolt';
@@ -543,7 +544,8 @@ export default class VisualUnit {
             data: this.data(),
             axes: this.axes(),
             retinalFields: this.retinalFields(),
-            layers: this.layers()
+            layers: this.layers(),
+            timeDiffs: this.timeDiffsByField()
         };
     }
 
@@ -625,8 +627,17 @@ export default class VisualUnit {
         });
 
         if (dimValue !== null && config.getAllPoints) {
+            dimValue[0].push(ReservedFields.MEASURE_NAMES);
             pointObj.id = dimValue;
             const pointInf = this.getMarkInfFromLayers(x, y, config);
+            const layers = this.layers();
+            layers.forEach((layer) => {
+                const measures = layer.data().getSchema()
+                    .filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+                for (let i = 1, len = dimValue.length; i < len; i++) {
+                    dimValue[i].push(measures.join());
+                }
+            });
             pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
             return pointObj;
         }

@@ -24,7 +24,7 @@ const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
         formatTemporal(Number(value), interval)),
     [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
-        formatter(value.toFixed(2))),
+        formatter(`${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`)),
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
@@ -329,26 +329,28 @@ export const strategies = {
             saveChild: false
         }));
         const fieldsConf = aggregatedModel.getFieldsConfig();
+        const entryUids = selectionSet.mergedEnter.uids;
         const values = [{
             className: `${classPrefix}-tooltip-row`,
             data: [{
-                value: `${dataObj.data.length}`,
+                value: `${entryUids.length}`,
                 style: {
                     'font-weight': 'bold'
                 }
             }, 'Items Selected']
         }];
-        const measureNames = measures.map(d => d.name);
+        const measureNames = [...new Set(entryUids.map(d => d[1]).flat())];
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
             const value = data[0][fieldsConf[measure].index];
             value instanceof InvalidAwareTypes ? values.push([]) : values.push({
                 className: `${classPrefix}-tooltip-row`,
                 data: [`(${aggFns[measure].toUpperCase()})`, `${retrieveFieldDisplayName(dm, measure)}`, {
-                    value: `${value.toFixed(2)}`,
+                    value: `${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`,
                     style: {
                         'font-weight': 'bold'
-                    }
+                    },
+                    className: `${classPrefix}-tooltip-value`
                 }]
             });
         });

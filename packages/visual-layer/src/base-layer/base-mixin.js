@@ -407,11 +407,17 @@ export const BaseLayerMixin = superclass => class extends superclass {
         const allMeasures = schema.every(field => field.type === FieldType.MEASURE);
         schema.forEach((d, i) => {
             const name = d.name;
-            if (fieldsConfig[name].def.type === FieldType.DIMENSION) {
+            const { type } = fieldsConfig[name].def;
+            if (type === FieldType.DIMENSION) {
                 identifiers[0].push(name);
                 identifiers[1].push(data[i]);
             }
         });
+
+        const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+
+        identifiers[0].push(ReservedFields.MEASURE_NAMES);
+        identifiers[1].push(measures.join());
 
         if (allMeasures) {
             identifiers[0].push(...[ReservedFields.ROW_ID]);

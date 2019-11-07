@@ -1,41 +1,78 @@
 import {
-    getDataModelFromIdentifiers,
     FieldType,
     mergeRecursive,
     CommonProps,
-    concatModels,
-    DataModel,
-    retrieveNearestGroupByReducers
+    ReservedFields
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 
 import { applyInteractionPolicy } from '../helper';
-import { addFacetData } from '../../../../visual-unit/src';
-import { COMMON_INTERACTION } from '../../constants';
+import { payloadGenerator } from '../../../../visual-unit/src/firebolt/payload-generator';
+import { propagateValues, sanitizePayloadCriteria } from './helper';
 
-const unionData = (d1, d2) => {
-    const dataMap = {};
-    const dataArr = [];
+const getKeysFromData = (group, dataModel) => {
+    const valueMatrix = group.matrixInstance().value;
+    const dimensions = Object.values(dataModel.getFieldsConfig()).filter(d => d.def.type === FieldType.DIMENSION);
+    const keys = {};
+    const dimsMap = {};
+    valueMatrix.each((cell) => {
+        const unit = cell.source();
+        const facetFieldsMap = unit.facetFieldsMap();
+        const dm = unit.data();
+        const { data } = dm.getData();
+        const uids = dm.getUids();
+        const layers = unit.layers();
+        const fieldsConfig = dm.getFieldsConfig();
 
-    const prepareData = (data) => {
-        const fields = data[0];
+        Object.assign(keys, data.reduce((acc, row, i) => {
+            const dims = dimensions.map((d) => {
+                if (d.def.name in fieldsConfig) {
+                    return row[fieldsConfig[d.def.name].index];
+                }
+                return facetFieldsMap[d.def.name];
+            });
+            const uid = uids[i];
 
-        for (let i = 1; i < data.length; i++) {
-            const row = data[i];
-            const key = `${fields.map((d, idx) => row[idx])}`;
+            layers.forEach((layer) => {
+                const measureNames = layer.data().getSchema().filter(d => d.type === FieldType.MEASURE)
+                    .map(d => d.name);
+                const key2 = dims.length ? `${dims},${measureNames}` : `${uid},${measureNames}`;
+                acc[key2] = acc[key2] || {};
+                acc[key2] = {
+                    dims,
+                    measureNames,
+                    uid
+                };
+            });
 
-            if (!dataMap[key]) {
-                dataArr.push(row);
-                dataMap[key] = row;
-            }
-        }
+            return acc;
+        }, keys));
+        Object.assign(dimsMap, data.reduce((acc, row) => {
+            const dims = dimensions.map((d) => {
+                if (d.def.name in fieldsConfig) {
+                    return row[fieldsConfig[d.def.name].index];
+                }
+                return facetFieldsMap[d.def.name];
+            });
+
+            layers.forEach((layer) => {
+                const measureNames = layer.data().getSchema().filter(d => d.type === FieldType.MEASURE)
+                    .map(d => d.name);
+                acc[dims] = acc[dims] || [];
+                acc[dims].push(measureNames);
+            });
+
+            return acc;
+        }, dimsMap));
+    });
+
+    return {
+        keys,
+        dimsMap,
+        fields: [...dimensions.map(d => d.def.name)]
     };
-
-    prepareData(d1);
-    prepareData(d2);
-
-    return [d1[0], ...dataArr];
 };
+
 const defaultCrossInteractionPolicy = {
     behaviours: {
         '*': (propagationPayload, context) => {
@@ -99,7 +136,6 @@ export default class GroupFireBolt extends Firebolt {
     crossInteractionPolicy (...policy) {
         if (policy.length) {
             const context = this.context;
-
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
 
@@ -107,109 +143,65 @@ export default class GroupFireBolt extends Firebolt {
             const throwback = context._throwback;
             throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
                 applyInteractionPolicy(this);
-            });
-            throwback.registerChangeListener(['propagationInfo'], ([, propagationInfo]) => {
-                const { action, payload } = propagationInfo;
-                const behaviourEffectMap = this._behaviourEffectMap;
-                const sideEffects = getSideEffects(action, behaviourEffectMap);
-                const sideEffectInstances = this.sideEffects();
-                const { sideEffects: sideEffectConf } = this.context.config().interaction;
-                let selectionSet;
-                let unit = this.context.composition().visualGroup.matrixInstance()
-                    .value.findPlaceHolderById(payload.sourceUnit);
-                if (unit) {
-                    unit = unit.instance;
-                    sideEffects.forEach(({ effects }) => {
-                        effects.filter(effect => sideEffectConf[effect.name || effect] === COMMON_INTERACTION)
-                            .forEach((effect) => {
-                                let name;
-                                let options;
-                                if (typeof effect === 'object') {
-                                    name = effect.name;
-                                    options = effect.options;
-                                } else {
-                                    name = effect;
-                                }
-                                selectionSet = selectionSet || this.unionDataModels(action);
-                                const inst = sideEffectInstances[name];
-                                inst.sourceInfo(() => unit.getSourceInfo());
-                                inst.plotPointsFromIdentifiers((...params) =>
-                                    unit.getPlotPointsFromIdentifiers(...params));
-                                inst.drawingContext(() =>
-                                    unit.getDrawingContext()).apply(selectionSet, payload, options);
+                const group = this.context.composition().visualGroup;
+                if (group) {
+                    const valueMatrix = group.matrixInstance().value;
+                    const units = group.resolver().units();
+                    const { keys, fields, dimsMap } = getKeysFromData(group, group.getGroupByData());
+                    this._dimensionsMap = dimsMap;
+                    this._dimensionsSet = fields;
+                    this.createSelectionSet({ keys, fields });
+                    group.getGroupByData().on('propagation', (data, config) => {
+                        const propagationData = data;
+                        const {
+                            enabled: enabledFn,
+                            sourceIdentifiers,
+                            action,
+                            payload: propPayload
+                        } = config;
+                        const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+                        const payload = payloadFn(this, propagationData, config);
+                        let enabled;
+                        if (enabledFn) {
+                            enabled = enabledFn(config, this);
+                        }
+
+                        if (enabled) {
+                            const propagationInf = {
+                                propagate: false,
+                                data: propagationData,
+                                propPayload,
+                                sourceIdentifiers,
+                                sourceId: config.propagationSourceId,
+                                isMutableAction: config.isMutableAction
+                            };
+
+                            const behaviourEffectMap = this._behaviourEffectMap;
+                            const sideEffects = getSideEffects(action, behaviourEffectMap);
+                            const sideEffectInstances = this.sideEffects();
+                            const { instance: unit = units[0][0] } =
+                                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
+                            sideEffects.forEach(({ effects }) => {
+                                effects.forEach((effect) => {
+                                    const name = effect.name;
+                                    const inst = sideEffectInstances[name];
+
+                                    if (inst) {
+                                        inst.sourceInfo(() => unit.getSourceInfo());
+                                        inst.plotPointsFromIdentifiers((...params) =>
+                                            unit.getPlotPointsFromIdentifiers(...params));
+                                        inst.drawingContext(() => unit.getDrawingContext());
+                                    }
+                                });
                             });
+                            this.dispatchBehaviour(action, payload, propagationInf);
+                        }
                     });
                 }
             });
-
             return this;
         }
         return this._crossInteractionPolicy;
-    }
-
-    /**
-     * Dispatches a behavioural action with a payload. It takes the name of the behavioural action and a payload
-     * object which contains the criteria aend an array of side effects which determines what side effects are
-     * going to be shown in each visual unit of the canvas. It prepares the datamodel from the given criteria
-     * and initiates a propagation from the datamodel of canvas. Then all the visual units of canvas which listens
-     * to the propagation gets informed on which rows got selected and dispatches the behavioural action sent during
-     * propagation.
-     *
-     * To dispatch a behavioural action on the canvas
-     * ```
-     *  // Get the firebolt instance of the canvas
-     *  const firebolt = canvas.firebolt();
-     *  // Dispatch a brush behaviour
-     *  firebolt.dispatchBehaviour('brush', {
-     *      // Selects all the rows with Horsepower having range between 100 and 200.
-     *      criteria: {
-     *          Horsepower: [100, 200]
-     *      }
-     *  });
-     * // On dispatch of this behavioural action, a selection box gets created and plots gets faded out which are the
-     * // default side effects mapped to this behavioural action.
-     * ```
-     *
-     * ```
-     * Additionally, it can also be passed an array of side effects in the payload.
-     *  // Dispatch a select behaviour with only crossline as side effect.
-     *  firebolt.dispatchBehaviour('select', {
-     *      criteria: {
-     *          Cylinders: ['8']
-     *      },
-     *      sideEffects: ['crossline']
-     *  });
-     * ```
-     *
-     * @public
-     *
-     * @param {string} behaviour Name of the behavioural action
-     * @param {Object} payload Object which contains the interaction information.
-     * @param {Object | Array.<Array>} payload.criteria Identifiers by which the selection happens.
-     * @param {Array.<string|Object>} payload.sideEffects Side effects which needs to be shown.
-     *
-     * @return {GroupFireBolt} Instance of firebolt.
-     */
-    dispatchBehaviour (behaviour, payload) {
-        const propPayload = Object.assign(payload);
-        const criteria = propPayload.criteria;
-        const data = this.context.composition().visualGroup.getGroupByData();
-        const model = getDataModelFromIdentifiers(data, criteria);
-        const behaviouralAction = this._actions.behavioural[behaviour];
-
-        if (behaviouralAction) {
-            const mutates = behaviouralAction.constructor.mutates();
-            const propConfig = {
-                payload: propPayload,
-                action: behaviour,
-                criteria: model,
-                sourceId: this.context.alias(),
-                isMutableAction: mutates
-            };
-
-            data.propagate(model, propConfig, true);
-        }
-        return this;
     }
 
     registerSideEffects (sideEffects) {
@@ -235,63 +227,6 @@ export default class GroupFireBolt extends Firebolt {
         this.registerPhysicalActionHandlers();
     }
 
-    getUnionedSet (behaviour, sourceUnit) {
-        let model = sourceUnit.firebolt()._actions.behavioural[behaviour].propagationIdentifiers();
-        let unionedModel = model ? Object.assign(model, {
-            identifiers: addFacetData(model, sourceUnit.facetByFields())
-        }) : null;
-
-        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
-        const sourceFacets = `${sourceUnit.facetByFields()[1]}`;
-
-        unitMatrix.each((cell) => {
-            const unit = cell.source();
-            const facetVals = `${unit.facetByFields()[1]}`;
-
-            model = unit.firebolt()._actions.behavioural[behaviour].propagationIdentifiers();
-
-            if (model) {
-                let { identifiers } = model;
-                const { fields } = model;
-                const hasMeasures = fields.some(field => field.type === FieldType.MEASURE);
-
-                if (facetVals !== sourceFacets || hasMeasures) {
-                    identifiers = addFacetData(model, unit.facetByFields());
-                    unionedModel = {
-                        identifiers: unionData(identifiers, unionedModel.identifiers),
-                        fields: model.fields
-                    };
-                }
-            }
-        });
-
-        return unionedModel;
-    }
-
-    unionDataModels (behaviour) {
-        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
-        let unionedModel = null;
-        unitMatrix.each((cell) => {
-            const unit = cell.source();
-            const selectionSet = unit.firebolt().getEntryExitSet(behaviour);
-            const { mergedEnter: { model } } = selectionSet || {};
-            if (model && !model.isEmpty()) {
-                if (!unionedModel) {
-                    unionedModel = model;
-                } else {
-                    const [data, schema] = concatModels(model, unionedModel);
-                    unionedModel = new DataModel(data, schema);
-                }
-            }
-        });
-        return {
-            mergedEnter: {
-                model: unionedModel,
-                aggFns: retrieveNearestGroupByReducers(unionedModel)
-            }
-        };
-    }
-
     registerPhysicalActionHandlers () {
         const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
 
@@ -310,21 +245,52 @@ export default class GroupFireBolt extends Firebolt {
     handlePhysicalAction (event, payload, unit) {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
-        const { interaction: { behaviours: behaviourConf } } = this.context.config();
 
         behaviours.forEach((action) => {
-            let mergedModel = null;
-            firebolt.dispatchBehaviour(action, payload, { propagate: false }, { applySideEffect: false });
+            const fireboltInst = this;
+            const fields = [...this._dimensionsSet, ReservedFields.MEASURE_NAMES];
+            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, this.data());
 
-            const identifiers = firebolt._actions.behavioural[action].propagationIdentifiers();
+            fireboltInst.dispatchBehaviour(action, payload, {
+                propagate: false,
+                applySideEffect: false
+            });
 
-            if (identifiers !== null) {
-                mergedModel = behaviourConf[action] === COMMON_INTERACTION ? this.getUnionedSet(action, unit) :
-                    Object.assign(identifiers, {
-                        identifiers: addFacetData(identifiers, unit.facetByFields())
-                    });
-            }
-            firebolt.propagate(action, payload, mergedModel, getSideEffects(action, firebolt._behaviourEffectMap));
+            const identifiers = fireboltInst._actions.behavioural[action].propagationIdentifiers();
+
+            fireboltInst.propagate(action, payload, identifiers, {
+                sideEffects: getSideEffects(action, firebolt._behaviourEffectMap),
+                sourceUnitId: unit.id()
+            });
         });
+    }
+
+    id () {
+        return this.context.alias();
+    }
+
+    shouldApplySideEffects (propInf) {
+        return propInf.applySideEffect !== false;
+    }
+
+    data () {
+        return this.context.composition().visualGroup.getGroupByData();
+    }
+
+    getRangeFromIdentifiers ({ criteria, fields }) {
+        return fields.reduce((acc, v) => {
+            acc[v] = criteria[v];
+            return acc;
+        }, {});
+    }
+
+    propagate (behaviour, payload, identifiers, auxConfig = {}) {
+        propagateValues(this, behaviour, Object.assign({
+            payload,
+            identifiers,
+            propagationFields: this._propagationFields,
+            sourceId: this.id(),
+            sourceCanvasId: this.id()
+        }, auxConfig));
     }
 }

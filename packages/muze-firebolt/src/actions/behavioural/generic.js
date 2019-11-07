@@ -1,12 +1,12 @@
-import { isSimpleObject, DimensionSubtype, partition, FieldType, ReservedFields } from 'muze-utils';
+import { isSimpleObject, DimensionSubtype, partition, ReservedFields } from 'muze-utils';
 import { getMergedSet, getSourceFields } from '../../helper';
 
-export const getIdentifiersFromSet = (set, context, { fieldsConfig, fields }) => {
+export const getIdentifiersFromSet = (set, context, { fields }) => {
     const data = [[]];
 
     if (fields.length) {
         data[0] = fields;
-        set.forEach(id => data.push(context.getValueFromId(id, fields, fieldsConfig)));
+        set.forEach(id => data.push(id));
     }
     return data;
 };
@@ -88,9 +88,11 @@ export default class GenericBehaviour {
                     this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
                 exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel),
                     this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
-                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel),
-                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel),
-                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel),
+                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel,
+                    selectionSet._fields),
+                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel,
+                    selectionSet._fields),
+                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel, selectionSet._fields),
                 fields: getSourceFields(propagationInf, payload.criteria)
             };
 
@@ -99,13 +101,21 @@ export default class GenericBehaviour {
         return this._entryExitSet;
     }
 
-    getSetInfo (type, set, filteredDataModel) {
+    getSetInfo (type, set, filteredDataModel, setFields) {
         let model = null;
+        const data = this.firebolt.data();
 
         if (type === 'mergedEnter') {
-            model = filteredDataModel ? filteredDataModel[0] : null;
+            model = filteredDataModel || null;
         } else if (type === 'mergedExit') {
-            model = filteredDataModel ? filteredDataModel[1] : null;
+            if (filteredDataModel) {
+                const setKeys = new Set(set.map(d => d[0]));
+                model = data.select((fields, i) => setKeys.has(setFields.map(field =>
+                    (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
+                        saveChild: false
+                    });
+            }
+            model = filteredDataModel || null;
         }
 
         return {
@@ -123,6 +133,7 @@ export default class GenericBehaviour {
             const fieldsConfig = this.firebolt.data().getFieldsConfig();
             const { criteria } = payload;
 
+            const { mergedEnter } = selectionSet.getSets(true);
             if (selectionSet.resetted() || criteria === null) {
                 propData = null;
             } else if (isSimpleObject(criteria)) {
@@ -133,26 +144,23 @@ export default class GenericBehaviour {
 
                 propData = {
                     fields: fields.map(d => fieldsConfig[d].def),
-                    range: context.getRangeFromIdentifiers({
+                    range: this.firebolt.getRangeFromIdentifiers({
                         criteria,
-                        entrySet: selectionSet.getMergedEntrySet(),
+                        entrySet: mergedEnter,
                         fields: otherFields
                     }),
-                    identifiers: getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
+                    identifiers: getIdentifiersFromSet(mergedEnter, context, {
                         fields: dims,
                         fieldsConfig
                     })
                 };
             } else {
-                const data = getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
-                    fields: criteria[0].filter(field => field === ReservedFields.ROW_ID ||
-                        fieldsConfig[field].def.type === FieldType.DIMENSION),
-                    fieldsConfig
-                });
+                const data = criteria;
                 propData = {
-                    fields: data[0].map(d => (d === ReservedFields.ROW_ID ? { name: ReservedFields.ROW_ID } :
-                        fieldsConfig[d].def)),
-                    identifiers: data
+                    fields: data[0].map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
+                        name: d
+                    })),
+                    identifiers: [criteria[0], ...mergedEnter]
                 };
             }
             this._propagationIdentifiers = propData;

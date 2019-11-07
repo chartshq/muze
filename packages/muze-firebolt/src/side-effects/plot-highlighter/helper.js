@@ -1,4 +1,4 @@
-import { getArrayDiff } from 'muze-utils';
+import { difference, intersect } from 'muze-utils';
 
 /**
  * @private
@@ -6,8 +6,10 @@ import { getArrayDiff } from 'muze-utils';
  * @param {Array.<number>} selectedPointsId array of id of selected points
  * @return {Object} Returns the set with the selected points removed
  */
-export const getFormattedSet = (set, selectedPointsId) => {
-    const formattedSet = getArrayDiff(set.uids, selectedPointsId);
+export const getFormattedSet = (set, selectedPointsId, intersection = false) => {
+    const fn = intersection ? intersect : difference;
+    const formattedSet = fn(set.uids, selectedPointsId,
+        [d => d[0], d => d[0]]);
     return {
         ...set,
         ...{

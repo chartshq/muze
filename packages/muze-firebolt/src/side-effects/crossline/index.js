@@ -93,4 +93,8 @@ export default class Crossline extends SpawnableSideEffect {
         const drawingInf = this.drawingContext();
         selectElement(drawingInf.sideEffectGroup).selectAll(`.${className}`).remove();
     }
+
+    static target () {
+        return 'visual-unit';
+    }
 }

@@ -11,6 +11,40 @@ import {
 
 import { createGridLineLayer } from './helper/grid-lines';
 
+const getUniqueKeys = (data, dimensions, { layers, uids, map }) => data.reduce((acc, row, i) => {
+    const key = dimensions.map(d => row[d.index]);
+
+    layers.forEach((layer) => {
+        const measureNames = layer.data().getSchema().filter(d => d.type === 'measure').map(d => d.name);
+        const key2 = dimensions.length ? `${key},${measureNames}` :
+                `${uids[i]},${measureNames}`;
+        if (map) {
+            acc[key] = acc[key] || [];
+            acc[key].push(measureNames);
+        } else {
+            acc[key2] = acc[key2] || {};
+            acc[key2] = {
+                dims: key,
+                measureNames,
+                uid: uids[i]
+            };
+        }
+    });
+    return acc;
+}, {});
+
+const getKeysFromData = (dataModel, unit) => {
+    const { data, uids } = dataModel.getData();
+    const dimensions = Object.values(dataModel.getFieldsConfig()).filter(d => d.def.type === 'dimension');
+    const layers = unit.layers();
+
+    return {
+        keys: getUniqueKeys(data, dimensions, { layers, uids }),
+        fields: dimensions.map(d => d.def.name),
+        dimMap: getUniqueKeys(data, dimensions, { layers, uids, map: true })
+    };
+};
+
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
     const markSet = {};
@@ -85,7 +119,10 @@ export const listenerMap = [
                 context._timeDiffs = timeDiffs;
                 const firebolt = context.firebolt();
                 const originalData = context.cachedData()[0];
-                firebolt.createSelectionSet(context.data().getUids());
+                const { keys, dimMap, fields } = getKeysFromData(context.data(), context);
+                firebolt._dimensionsMap = dimMap;
+                firebolt._dimensionsSet = fields;
+                firebolt.createSelectionSet({ keys, fields });
                 firebolt.attachPropagationListener(originalData);
             }
         }

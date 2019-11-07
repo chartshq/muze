@@ -989,6 +989,10 @@ const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
     });
 };
 
+const getArrayIndexMap = arr => arr.reduce((acc, value, i) => {
+    acc[value] = i;
+    return acc;
+}, {});
 /**
  *
  *
@@ -1361,6 +1365,12 @@ const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
     return arr1.filter(value => set.has(fn1(value)));
 };
 
+const difference = (arr1, arr2, accessors = [v => v, v => v]) => {
+    const [fn1, fn2] = accessors;
+    const set = new Set(arr2.map(v => fn2(v)));
+    return arr1.filter(value => !set.has(fn1(value)));
+};
+
 const partition = (array, filterFn) => array.reduce((acc, v, i) => {
     const pass = filterFn(v, i, array);
 
@@ -1391,9 +1401,11 @@ export {
     componentRegistry,
     mix,
     partition,
+    getArrayIndexMap,
     getValueParser,
     require,
     intersect,
+    difference,
     Scales,
     Symbols,
     pathInterpolators,

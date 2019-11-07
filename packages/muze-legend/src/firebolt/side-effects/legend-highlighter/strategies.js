@@ -4,9 +4,10 @@ export const strategies = (firebolt) => {
     const context = firebolt.context;
     const classed = (set, className, change) => {
         const classPrefix = context.config().classPrefix;
+        const uids = set.uids.map(d => d[0]);
         selectElement(context.mount())
                         .selectAll(`.${classPrefix}-legend-columns`)
-                        .filter(d => set.uids.indexOf(d.id) !== -1)
+                        .filter(d => uids.indexOf(d.id) !== -1)
                         .selectAll('div')
                         .classed(className, change);
     };
