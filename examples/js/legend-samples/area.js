@@ -1,38 +1,15 @@
 /* eslint-disable*/
-
-d3.csv('/data/cars.csv', (data) => {
+/* eslint-disable*/
+d3.csv('/data/areaData.csv', (data) => {
     const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'Profit',
         type: 'measure'
     }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
+        name: 'Type',
         type: 'dimension'
     }, {
         name: 'Year',
-        type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
+        type: 'dimension'
     }];;
     // Create an instance of DataModel using the data and schema.
     let dm = new DataModel(data, schema);    
@@ -48,12 +25,12 @@ d3.csv('/data/cars.csv', (data) => {
         }
     };
 
-canvas.rows(['Acceleration'])
+canvas.rows(['Profit'])
         .columns(['Year'])
         .width(800)
-        .height(400)
+        .height(600)
         .data(dm)
-        .color('Maker')
+        .color('Type')
         .layers([{
             mark: 'area'
         }])
