@@ -17,6 +17,8 @@ export const DEFAULT_MEASUREMENT = {
     maxHeight: Infinity,
     padding: 2,
     margin: 2,
+    marginHorizontal: 3,
+    paddingRight: 4,
     border: 1
 };
 

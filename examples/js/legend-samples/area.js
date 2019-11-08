@@ -1,7 +1,5 @@
 /* eslint-disable*/
 /* eslint-disable*/
-let env = muze();
-const DataModel = muze.DataModel;
 d3.csv('/data/areaData.csv', (data) => {
     const schema = [{
         name: 'Profit',
@@ -30,7 +28,7 @@ d3.csv('/data/areaData.csv', (data) => {
 canvas.rows(['Profit'])
         .columns(['Year'])
         .width(800)
-        .height(400)
+        .height(600)
         .data(dm)
         .color('Type')
         .layers([{

@@ -249,7 +249,7 @@ export const getItemMeasures = (context, prop, formatter) => {
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const formattedData = formatter(value, index, data, context);
+        const formattedData = formatter(value, index, context.metaData(), context);
         const { height, width } = labelManager.getOriSize(formattedData);
         space[index] = { height, width };
     });
@@ -333,20 +333,21 @@ export const computeItemSpaces = (config, measures, data) => {
         itemSpaces.push(itemSpace);
         iconSpaces.push(iconSpace);
     });
+
     itemSpaces.forEach((itemSpace, i) => {
         if (align === 'horizontal') {
             itemSpace.height = totalHeight;
-            iconSpaces[i].width = maxIconWidth;
+            // iconSpaces[i].width = maxIconWidth;
             if (textOrientation === LEFT || textOrientation === RIGHT) {
                 labelSpaces[i].height = totalHeight;
                 iconSpaces[i].height = totalHeight;
-                itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
+                itemSpaces[i].width = labelSpaces[i].width + iconSpaces[i].width + 2 * effPadding;
             } else {
-                labelSpaces[i].width = maxIconWidth;
-                itemSpaces[i].width = maxIconWidth;
-                labelSpaces[i].width = maxIconWidth;
+                labelSpaces[i].width = iconSpaces[i].width;
+                itemSpaces[i].width = iconSpaces[i].width;
+                labelSpaces[i].width = iconSpaces[i].width;
             }
-            totalWidth = Math.max(totalWidth + itemSpaces[i].width);
+            totalWidth += itemSpaces[i].width;
         } else {
             itemSpace.width = Math.max(totalWidth, maxWidth);
             if (textOrientation === TOP || textOrientation === BOTTOM) {
