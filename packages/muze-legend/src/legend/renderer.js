@@ -10,7 +10,8 @@ import {
     LEFT,
     RIGHT,
     DEFAULTICONSIZE,
-    MARGINBUFFER,
+    VERTICAL_BUFFER,
+    HORIZONTAL_BUFFER,
     HORIZONTAL,
     VERTICAL,
     DEFAULT
@@ -313,7 +314,7 @@ export const renderDiscreteItem = (context, container) => {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
             .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
-            .style('margin-left', `${align === HORIZONTAL ? 2 : MARGINBUFFER}px`);
+            .style('margin-left', `${align === HORIZONTAL ? HORIZONTAL_BUFFER : VERTICAL_BUFFER}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);

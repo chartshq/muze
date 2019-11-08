@@ -14,7 +14,8 @@ export const CONSOLIDATED = 'consolidated';
 export const FRAGMENTED = 'fragmented';
 export const DEFAULTCOLOR = '#F44336';
 export const DEFAULTSIZE = 50;
-export const MARGINBUFFER = 10;
+export const VERTICAL_BUFFER = 10;
+export const HORIZONTAL_BUFFER = 2;
 export const DEFAULTICONSIZE = { // approximately the (size needed) * Math.PI value
     circle: 64,
     square: 45.8,
