@@ -33,8 +33,8 @@ export default class SizeAxis {
 
         this._config.range = this._userRange ? this._userRange : this._config.range;
 
-        this._config.intervals = sanitiseConfigIntervals(this._config.intervals);
-        this._rangeType = this._config.type === 'linear' && !!this._config.intervals ? DISCRETE : CONTINOUS;
+        this._config.stops = sanitiseConfigIntervals(this._config.stops);
+        this._rangeType = this._config.type === 'linear' && !!this._config.stops ? DISCRETE : CONTINOUS;
 
         this._sizeStrategy = this.setStrategy(this._domainType, this._rangeType);
         this._scale = this.createScale(this._sizeStrategy);
@@ -127,7 +127,7 @@ export default class SizeAxis {
         if (domain) {
             const domainFn = this._sizeStrategy.domain;
 
-            const domainInfo = domainFn(domain, this.config().intervals);
+            const domainInfo = domainFn(domain, this.config().stops);
 
             this.domain(domainInfo.domain);
             this.uniqueValues(domainInfo.uniqueVals);

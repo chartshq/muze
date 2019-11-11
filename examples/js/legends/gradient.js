@@ -61,10 +61,70 @@ d3.json('../data/cars.json', function (data) {
         mark: 'bar'
     }])
     .width(800)
+    .config({
+        legend: {
+            position: 'bottom'
+    }})
     .height(600)
     .color({
         field: 'Horsepower',
-        stops:5
+        stops:6
     })
-    .mount('#chart4')
+    .mount('#chart6')
+
+    env.canvas()
+    .rows(rows)
+    .columns(columns)
+    .data(rootData)
+    .layers([{
+        mark: 'point'
+    }])
+    .width(800)
+    .config({
+        legend: {
+            position: 'top'
+    }})
+    .height(600)
+    .size({
+        field: 'Horsepower'
+    })
+    .mount('#chart5')
+
+    env.canvas()
+    .rows(rows)
+    .columns(columns)
+    .data(rootData)
+    .layers([{
+        mark: 'point'
+    }])
+    .width(800)
+    .config({
+        legend: {
+            position: 'right'
+    }})
+    .height(600)
+    .color({
+        field: 'Horsepower',
+        stops:6
+    })
+    .mount('#chart5')
+
+    env.canvas()
+    .rows(rows)
+    .columns(columns)
+    .data(rootData)
+    .layers([{
+        mark: 'bar'
+    }])
+    .width(800)
+    .config({
+        legend: {
+            position: 'left'
+    }})
+    .height(600)
+    .color({
+        field: 'Horsepower',
+        stops:6
+    })
+    .mount('#chart5')
 });

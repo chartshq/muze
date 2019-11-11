@@ -28,7 +28,8 @@
         },
         {
             name: 'Weight_in_lbs',
-            type: 'measure'
+            type: 'measure',
+			numberFormat: (val) => "￡" + val
         },
         {
             name: 'Acceleration',

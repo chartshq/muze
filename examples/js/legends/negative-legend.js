@@ -32,7 +32,7 @@ d3.json('../data/cars.json', function (data) {
         type: 'dimension'
     }, {
         name: 'Year',
-        type: 'dimension',
+        type: 'dimension'
         //{subtype}
         // subtype: 'temporal',
         // format: '%Y-%m-%d'
@@ -41,55 +41,43 @@ d3.json('../data/cars.json', function (data) {
 
     env = env.data(rootData)
     var mountPoint = document.getElementById('chart');
-    window.canvas = env.canvas();
-
-    rootData = rootData.groupBy(['Year', 'Origin'], {
-        Horsepower: 'mean',
-        Acceleration: 'mean'
-    });
-
-    var mountPoint = document.getElementById('chart');
-    window.canvas = env.canvas();
-    var rows = [['Acceleration']],
-        columns = [['Year']];
 
     env.canvas()
-    .rows(rows)
-    .columns(columns)
-    .data(rootData)
-    .layers([{
-        mark: 'point'
-    }])
-    .width(800)
-    .config({
-        legend: {
-            position: 'bottom'
-    }})
-    .height(600)
-    .size({
-        field: 'Horsepower',
-        stops:16,
-        step:true
+    .rows(['Acceleration'])
+    .columns(['Year'])
+    .detail(['Maker'])
+    .color({
+        field: 'Displacement',
+        step: true,
+        stops: 5
     })
-    .mount('#chart6');
+    .data(rootData)
+    .width(500)
+    .height(500)
+    .mount(mountPoint)
 
     env.canvas()
-    .rows(rows)
-    .columns(columns)
-    .data(rootData)
-    .layers([{
-        mark: 'point'
-    }])
-    .width(800)
+    .height(650)
+    .rows(['Acceleration'])
+    .columns(['Year'])
+    .color({
+        field: 'Acceleration',
+        step: true,
+        stops: 5
+    })
     .config({
         legend: {
-            position: 'left'
-    }})
-    .height(600)
-    .size({
-        field: 'Horsepower',
-        stops:15,
-        step:true
+            position: 'bottom',
+            color: {
+                item: {
+                    text: {
+                        formatter: (val, i) => {
+                            return `${val[0]}$ - ${val[1]}$`;
+                        }
+                    }
+                }
+            }
+        }
     })
-    .mount('#chart6')
+    .mount('#chart5')
 });
