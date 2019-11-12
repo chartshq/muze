@@ -29,8 +29,11 @@ const getRelativePosition = (canvas, legendContainer) => ({
 export default class LegendMarker extends GenericSideEffect {
     constructor (...params) {
         super(...params);
-        this._markerElement = null;
-        this._legendmarkerTextContainer = null;
+        this._graphicElements = {
+            markerElement: null,
+            legendmarkerTextContainer: null,
+            legendmarkerText: null
+        };
     }
 
     static formalName () {
@@ -68,7 +71,6 @@ export default class LegendMarker extends GenericSideEffect {
 
             const { top, left } = getRelativePosition(context._canvasMount, legendGradContainer.node());
             const { oriTextHeight, oriTextWidth } = labelManager().getSmartText(payload.criteria[1]);
-
             let x;
             let y;
             let rotateAngle;
@@ -77,7 +79,6 @@ export default class LegendMarker extends GenericSideEffect {
                 left: 0
             };
 
-            debugger;
             const { size, shape } = config;
             if (context.config().align === HORIZONTAL) {
                 x = range - (Math.sqrt(size / SYMBOL_PADDING)) + AXIS_STROKE;
@@ -98,42 +99,43 @@ export default class LegendMarker extends GenericSideEffect {
                                                 [1],
                                                 `${config.classPrefix}-${config.className}-group`);
 
-            if (!this._markerElement) {
-                this._markerElement = makeElement(legendmarkerGroup,
+            if (!this._graphicElements.markerElement) {
+                this._graphicElements.markerElement = makeElement(legendmarkerGroup,
                                     'path', [{ value: null }], className, { enter: physicalAction });
             }
 
-            if (!this._legendmarkerTextContainer) {
-                this._legendmarkerTextContainer = makeElement(
+            if (!this._graphicElements.legendmarkerTextContainer) {
+                this._graphicElements.legendmarkerTextContainer = makeElement(
                                                     context._canvasMount,
                                                     'div',
                                                     [1],
                                                     `${className}-text-container`);
-                this._legendmarkerText = makeElement(
-                                                    this._legendmarkerTextContainer,
+                this._graphicElements.legendmarkerText = makeElement(
+                                                    this._graphicElements.legendmarkerTextContainer,
                                                     'div',
                                                     [1],
                                                     `${className}-text`);
             }
-            this._textElement = createTextCell(className, labelManager, context._cells);
-            this._markerElement
+            const textElement = createTextCell(className, labelManager, context._cells);
+            this._graphicElements.markerElement
                     .data([{ value: payload.criteria }])
                     .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
                     .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
 
-            this._textElement.source(payload.criteria[1]);
-            this._textElement.render(this._legendmarkerText.node());
-            this._legendmarkerText.attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
+            textElement.source(payload.criteria[1]);
+            textElement.render(this._graphicElements.legendmarkerText.node());
+            this._graphicElements.legendmarkerText
+                        .attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
                                      .classed(`${className}-show`, true)
                                      .classed(`${className}-hide`, false);
         } else {
-            this._markerElement
+            this._graphicElements.markerElement
                 .data([{ value: null }])
                 .classed(`${className}-show`, false)
                 .classed(`${className}-hide`, true);
-            this._legendmarkerText
+            this._graphicElements.legendmarkerText
                 .classed(`${className}-show`, false)
                 .classed(`${className}-hide`, true);
         }
