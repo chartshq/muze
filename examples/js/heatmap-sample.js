@@ -4,7 +4,7 @@
         // share = muze.operators.share,
         // html = muze.operators.html,
         // actionModel = muze.ActionModel;
-    layerFactory = muze.layerFactory;
+        layerFactory = muze.layerFactory;
     const SpawnableSideEffect = muze.SideEffects.SpawnableSideEffect;
 
     d3.json('../../data/cars.json', (data) => {
@@ -23,6 +23,7 @@
                 type: 'dimension'
             },
             {
+
                 name: 'Maker',
                 type: 'dimension'
             },
@@ -41,7 +42,7 @@
             },
             {
                 name: 'Weight_in_lbs',
-                type: 'measure',
+                type: 'measure'
             },
             {
                 name: 'Acceleration',
@@ -57,10 +58,10 @@
             },
             {
                 name: 'Year',
-                type: 'dimension',
+                type: 'dimension'
                 // subtype: 'temporal',
                 // format: '%Y-%m-%d'
-            },
+            }
             ];
 
         layerFactory.composeLayers('heatMapText', [
@@ -71,7 +72,7 @@
                     y: 'heatMapText.encoding.y',
                     x: 'heatMapText.encoding.x',
                     color: 'heatMapText.encoding.color'
-                },
+                }
             },
             {
                 name: 'text',
@@ -80,9 +81,9 @@
                     x: 'heatMapText.encoding.x',
                     y: 'heatMapText.encoding.y',
                     text: 'heatMapText.encoding.text',
-                    color: 'heatMapText.encoding.color',
-                },
-            },
+                    color: 'heatMapText.encoding.color'
+                }
+            }
         ]);
         let rootData = new DataModel(jsonData, schema);
 
@@ -104,6 +105,11 @@
             .data(rootData)
 			.width(1200)
             .height(600)
+            .color({
+                field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+                stops: 10
+                // step:true
+            })
             .layers([{
                 mark: 'heatMapText',
                 encoding: {
@@ -112,7 +118,7 @@
                         color: {
                             value: () => 'red'
                         }
-                    },
+                    }
 
                 }
             }])
@@ -126,7 +132,7 @@
 
             .config({
                 border: {
-                    width: 2,
+                    width: 2
                 },
                 axes: {
                     x: {
@@ -141,6 +147,13 @@
                         // name: 'Acceleration per year',
                         axisNamePadding: 20
                     }
+                },
+                legend: {
+                    position: 'bottom',
+                    // steps:true
+                    text: {
+                        // orientation:'left'
+                    }
                 }
             });
 
@@ -151,10 +164,10 @@
                 text: {
                     position: 'right'
                 }
-            },
+            }
         })
 
-                        .title('The Muze Project', { position: 'top', align: 'left', })
+                        .title('The Muze Project', { position: 'top', align: 'left' })
                         .subtitle('Composable visualisations with a data first approach', { position: 'top', align: 'left' })
                         .mount(document.getElementsByTagName('body')[0]);
     });

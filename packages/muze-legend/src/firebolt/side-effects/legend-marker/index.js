@@ -115,7 +115,6 @@ export default class LegendMarker extends GenericSideEffect {
                                                     [1],
                                                     `${className}-text`);
             }
-            console.log(top, lableConfig);
             this._textElement = createTextCell(className, labelManager, context._cells);
             this._markerElement
                     .data([{ value: payload.criteria }])
@@ -130,13 +129,13 @@ export default class LegendMarker extends GenericSideEffect {
                                      .classed(`${className}-show`, true)
                                      .classed(`${className}-hide`, false);
         } else {
-            // this._markerElement
-            //     .data([{ value: null }])
-            //     .classed(`${className}-show`, false)
-            //     .classed(`${className}-hide`, true);
-            // this._legendmarkerTextContainer
-            //     .classed(`${className}-show`, false)
-            //     .classed(`${className}-hide`, true);
+            this._markerElement
+                .data([{ value: null }])
+                .classed(`${className}-show`, false)
+                .classed(`${className}-hide`, true);
+            this._legendmarkerText
+                .classed(`${className}-show`, false)
+                .classed(`${className}-hide`, true);
         }
     }
 
