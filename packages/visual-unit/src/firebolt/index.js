@@ -2,13 +2,13 @@ import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
 
-const sideEffectPolicy = (propPayload, context, propagationInf) => {
+const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
     const fields = sourceIdentifiers.fields;
     const sourceIdentifierFields = Object.keys(fields).filter(field =>
         field.type !== FieldType.MEASURE);
     const propFields = Object.keys(propagationData.getFieldsConfig());
-    const hasCommonCanvas = propPayload.sourceCanvas === context.parentAlias();
+    const hasCommonCanvas = propPayload.sourceCanvas === firebolt.sourceCanvas();
     return intersect(sourceIdentifierFields, propFields).length || hasCommonCanvas;
 };
 
@@ -60,7 +60,7 @@ export default class UnitFireBolt extends Firebolt {
                     const sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
                     const { sourceIdentifiers, data: propagationData } = propagationInf;
                     return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
-                        checker(propagationInf.propPayload, context, {
+                        checker(propagationInf.propPayload, this, {
                             sourceIdentifiers,
                             propagationData
                         })) : true;
@@ -100,7 +100,7 @@ export default class UnitFireBolt extends Firebolt {
             const payload = payloadFn(this, propagationData, config, context.facetByFields());
             const behaviourPolicies = this._behaviourPolicies;
             const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
-            let enabled = filterFns.every(fn => fn(propPayload || {}, context, {
+            let enabled = filterFns.every(fn => fn(propPayload || {}, this, {
                 sourceIdentifiers,
                 propagationData
             }));

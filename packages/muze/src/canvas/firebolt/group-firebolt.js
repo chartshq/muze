@@ -58,18 +58,18 @@ const getKeysFromData = (group, dataModel) => {
 
 const defaultCrossInteractionPolicy = {
     behaviours: {
-        '*': (propagationPayload, context) => {
+        '*': (propagationPayload, firebolt) => {
             const propagationCanvasAlias = propagationPayload.sourceCanvas;
-            const canvasAlias = context.parentAlias();
+            const canvasAlias = firebolt.sourceCanvas();
             return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
         }
     },
     sideEffects: {
-        tooltip: (propagationPayload, context) => {
+        tooltip: (propagationPayload, firebolt) => {
             const propagationUnit = propagationPayload.sourceUnit;
             const propagationCanvas = propagationPayload.sourceCanvas;
-            const unitId = context.id();
-            const canvasAlias = context.parentAlias();
+            const unitId = firebolt.id();
+            const canvasAlias = firebolt.sourceCanvas();
             if (propagationCanvas) {
                 return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
             }
@@ -147,6 +147,7 @@ export default class GroupFireBolt extends Firebolt {
         const valueMatrix = group.matrixInstance().value;
         const units = group.resolver().units();
         const propagationData = data;
+        // @todo refactor this code
         const {
             enabled: enabledFn,
             sourceIdentifiers,
@@ -161,10 +162,15 @@ export default class GroupFireBolt extends Firebolt {
         const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
         const payload = payloadFn(this, propagationData, config);
 
-        let enabled;
+        const behaviourPolicies = this._behaviourPolicies;
+        const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
+        let enabled = filterFns.every(fn => fn(propPayload || {}, this, {
+            sourceIdentifiers,
+            propagationData
+        }));
 
         if (enabledFn) {
-            enabled = enabledFn(config, this);
+            enabled = enabledFn(config, this) && enabled;
         }
 
         if (enabled) {
