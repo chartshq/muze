@@ -97,19 +97,20 @@
         window.canvas = env.canvas();
         const canvas2 = env.canvas();
         const canvas3 = env.canvas();
-        let rows = ['Cylinders'],
+        let rows = ['Acceleration'],
             columns = [['Year']];
         canvas = canvas
 			.rows(rows)
 			.columns(columns)
             .data(rootData)
+            .color('Cylinders')
 			.width(1200)
             .height(600)
-            .color({
-                field: 'Acceleration', // A measure in color encoding channel creates gradient legend
-                stops: 10
-                // step:true
-            })
+            // .color({
+            //     field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+            //     stops: 10
+            //     // step:true
+            // })
             .layers([{
                 mark: 'heatMapText',
                 encoding: {
