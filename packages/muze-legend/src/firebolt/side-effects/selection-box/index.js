@@ -3,6 +3,7 @@ import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { CLASSPREFIX, HEIGHT, WIDTH, HORIZONTAL, RECT } from '../../../enums/constants';
 import { SELECTIONBOX } from '../../../enums/side-effects';
 import { selectionBoxDrag } from '../../physical/selection-box-drag';
+import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
 import './styles.scss';
 
 /**
@@ -69,11 +70,11 @@ import './styles.scss';
 
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
-            y = 0;
+            y = LEGEND_MARKER_PROPS.size + 4;
             width = range[1] - range[0] || 0;
             height = gradientDimension;
         } else {
-            x = 0;
+            x = LEGEND_MARKER_PROPS.size + 4;
             y = range[1] - rangeShifter || 0;
             height = range[0] - range[1] || 0;
             width = gradientDimension;

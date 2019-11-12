@@ -26,4 +26,8 @@ export default class MuzeComponent extends LayoutComponent {
     setParams () {
         throw Error('set params is not implemented');
     }
+
+    setComponentInfo () {
+        throw Error('setComponentInfo is not implemented');
+    }
 }
