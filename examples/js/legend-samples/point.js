@@ -1,32 +1,25 @@
-var style = 'body,\nhtml {\n    font-family: \'Source Sans Pro\', "Helvetica Neue", Helvetica, Arial, sans-serif;\n    width: 100%;\n    height: 100%;\n}\n\n.muze-layer-text text {\n    alignment-baseline: central;\n}\n\n.chart {\n    margin-left: 20px;\n}\n\n.muze-grid-lines path {\n    opacity: 0.1;\n}\n\n.muze-layer-point {\n    fill-opacity: 0.6 !important;\n    stroke-opacity: 0.6 !important;\n}';
-var node = document.createElement('style');
-node.innerHTML = style;
-document.body.appendChild(node);
-var _templateObject = _taggedTemplateLiteral(['', ''], ['', '']);
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-d3.json('/data/word-freq-bubble.json', function (data) {
-    var schema = [{
-        "name": "f",
-        "type": "measure"
+d3.json('/data/word-freq-bubble.json', (data) => {
+    const schema = [{
+        name: 'f',
+        type: 'measure'
     }, {
-        "name": "index",
-        "type": "dimension"
+        name: 'index',
+        type: 'dimension'
     }, {
-        "name": "word",
-        "type": "dimension"
+        name: 'word',
+        type: 'dimension'
     }, {
-        "name": "x",
-        "type": "measure"
+        name: 'x',
+        type: 'measure'
     }, {
-        "name": "y",
-        "type": "measure"
+        name: 'y',
+        type: 'measure'
     }];
-    var env = window.muze();
-    var DataModel = window.muze.DataModel;
-    var html = muze.Operators.html;
+    const env = window.muze();
+    const DataModel = window.muze.DataModel;
+    const html = muze.Operators.html;
 
-    var rootData = new DataModel(data, schema);
+    let rootData = new DataModel(data, schema);
 
     rootData = rootData.calculateVariable({
         name: 'Used More',
@@ -42,7 +35,7 @@ d3.json('/data/word-freq-bubble.json', function (data) {
         return f > 15000 ? word : '';
     }]);
 
-    var canvas = env.canvas().rows(['y']).columns(['x']).data(rootData).detail(['word']).width(900).height(600).color({
+    const canvas = env.canvas().rows(['y']).columns(['x']).data(rootData).detail(['word']).width(900).height(600).color({
         field: 'Used More',
         range: ['#a9d3f2', '#f4a4c7']
     }).size({
@@ -55,9 +48,9 @@ d3.json('/data/word-freq-bubble.json', function (data) {
         mark: 'text',
         encoding: {
             text: 'displayWord',
-            color: { value: function value() {
-                    return 'black';
-                } }
+            color: { value: function value () {
+                return 'black';
+            } }
         }
     }]).config({
         border: {
@@ -83,23 +76,23 @@ d3.json('/data/word-freq-bubble.json', function (data) {
         },
         interaction: {
             tooltip: {
-                formatter: function formatter(dataModel, context) {
-                    var tooltipData = dataModel.getData().data;
-                    var fieldConfig = dataModel.getFieldsConfig();
+                formatter: function formatter (dataModel, context) {
+                    const tooltipData = dataModel.getData().data;
+                    const fieldConfig = dataModel.getFieldsConfig();
 
-                    var tooltipContent = '';
-                    tooltipData.forEach(function (dataArray, i) {
-                        var usedMore = dataArray[fieldConfig['Used More'].index];
-                        var word = dataArray[fieldConfig['word'].index];
-                        var freq = dataArray[fieldConfig.f.index];
+                    let tooltipContent = '';
+                    tooltipData.forEach((dataArray, i) => {
+                        const usedMore = dataArray[fieldConfig['Used More'].index];
+                        const word = dataArray[fieldConfig.word.index];
+                        const freq = dataArray[fieldConfig.f.index];
 
-                        tooltipContent += '<p>The word <b>' + word + '</b> has been used more by <b>' + usedMore + 's</b> \n                                                         and its frequency of usage is <b>' + freq + '</b> </p>';
+                        tooltipContent += `<p>The word <b>${word}</b> has been used more by <b>${usedMore}s</b> \n                                                         and its frequency of usage is <b>${freq}</b> </p>`;
                     });
-                    return html(_templateObject, tooltipContent);
+                    return html`${tooltipContent}`;
                 }
             }
         }
     })
-    .title('Frequency of usage of words by males and females', {align: 'center'})
-    .mount('#chart')
-})
+    .title('Frequency of usage of words by males and females', { align: 'center' })
+    .mount('#chart');
+});

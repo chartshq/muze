@@ -34,15 +34,15 @@ d3.json('/data/cars-with-null.json', (data) => {
         type: 'dimension'
     }];
     // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);    
-    
+    let rootData = new DataModel(data, schema);
+
     // Get a canvas instance from Muze where the chart will be rendered.
     let canvas = env.canvas();
 
     canvas = canvas
     .rows(['Acceleration']) // Acceleration goes in X axis
     .columns(['Year'])
-    .color('Origin') 
+    .color('Origin')
 	.layers([{
         mark: 'line',
         connectNullData: true,

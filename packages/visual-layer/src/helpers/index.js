@@ -34,12 +34,11 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     const colorAxis = axes.color;
     const apply = config.apply;
     const interactionType = config.interactionType;
+    const pathMountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
 
     interactionStyles.forEach((style) => {
         const styleType = style.type;
         elements.forEach((elem) => {
-            const pathMountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
-
             const isSpecificInteraction = context.applySpecificStyle(styleType, {
                 elem,
                 apply,

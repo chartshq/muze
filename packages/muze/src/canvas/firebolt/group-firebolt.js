@@ -122,6 +122,7 @@ export default class GroupFireBolt extends Firebolt {
             applyInteractionPolicy(this);
             const throwback = context._throwback;
             throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
+                this.config(this.context.config().interaction);
                 applyInteractionPolicy(this);
                 const group = this.context.composition().visualGroup;
                 if (group) {
