@@ -22,7 +22,7 @@ export const behaviourEffectMap = {
             // accepts an array or fn
             excludeSet: [BEHAVIOURS.SELECT]
         }
-    }, {
+    }, 'crossline', {
         name: 'tooltip',
         options: {
             order: 0
