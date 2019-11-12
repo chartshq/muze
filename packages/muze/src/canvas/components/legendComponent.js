@@ -112,4 +112,12 @@ export default class LegendComponent extends MuzeComponent {
         this.alignment(params.config.alignment || alignment);
     }
 
+    setComponentInfo (params) {
+        const { rootNode } = params;
+        this.components.forEach((legendInfo) => {
+            const leg = legendInfo.legend;
+            leg.setParentInfo({ canvasRoot: rootNode });
+        });
+    }
+
 }

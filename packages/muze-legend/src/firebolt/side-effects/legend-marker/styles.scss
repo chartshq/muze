@@ -15,9 +15,13 @@ $prefix: muze-;
 }
 
 .#{$prefix}legend-marker-text-container{
+  position: relative;
+}
+
+.#{$prefix}legend-marker-text{
   position: absolute;
 }
 
-.#{$prefix}legend-marker-text-container div{
+.#{$prefix}legend-marker-text div{
   text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff
 }

@@ -21,6 +21,11 @@ const createTextCell = (className, labelManagerRef, cells) => {
 
     return cell;
 };
+
+const getRelativePosition = (canvas, legendContainer) => ({
+    top: legendContainer.getBoundingClientRect().top - canvas.getBoundingClientRect().top,
+    left: legendContainer.getBoundingClientRect().left - canvas.getBoundingClientRect().left
+});
 export default class LegendMarker extends GenericSideEffect {
     constructor (...params) {
         super(...params);
@@ -39,7 +44,9 @@ export default class LegendMarker extends GenericSideEffect {
     static defaultConfig () {
         return {
             className: 'legend-marker',
-            classPrefix: CLASSPREFIX
+            classPrefix: CLASSPREFIX,
+            size: LEGEND_MARKER_PROPS.size,
+            shape: LEGEND_MARKER_PROPS.shape
         };
     }
 
@@ -59,7 +66,7 @@ export default class LegendMarker extends GenericSideEffect {
 
             const legendGradContainer = context.getDrawingContext().svgContainer;
 
-            const { top, left } = legendGradContainer.node().getBoundingClientRect();
+            const { top, left } = getRelativePosition(context._canvasMount, legendGradContainer.node());
             const { oriTextHeight, oriTextWidth } = labelManager().getSmartText(payload.criteria[1]);
 
             let x;
@@ -70,17 +77,19 @@ export default class LegendMarker extends GenericSideEffect {
                 left: 0
             };
 
-            if (firebolt.context.config().align === HORIZONTAL) {
-                x = range - (Math.sqrt(LEGEND_MARKER_PROPS.size / SYMBOL_PADDING)) + AXIS_STROKE;
+            debugger;
+            const { size, shape } = config;
+            if (context.config().align === HORIZONTAL) {
+                x = range - (Math.sqrt(size / SYMBOL_PADDING)) + AXIS_STROKE;
                 y = 5;
-                rotateAngle = 180;
-                lableConfig.top = top + y - 23;
+                rotateAngle = LEGEND_MARKER_PROPS.ROTATE_HORIZONTAL;
+                lableConfig.top = top + y - 20;
                 lableConfig.left = x + left - (oriTextWidth / 2);
             } else {
-                y = range + Math.sqrt(LEGEND_MARKER_PROPS.size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
+                y = range + Math.sqrt(size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 5;
-                rotateAngle = 90;
-                lableConfig.top = top + y - 21 + (oriTextHeight / 2);
+                rotateAngle = LEGEND_MARKER_PROPS.ROTATE_VERTICAL;
+                lableConfig.top = top + y - 17 + (oriTextHeight / 2);
                 lableConfig.left = x + left - oriTextWidth - 3;
             }
 
@@ -96,33 +105,38 @@ export default class LegendMarker extends GenericSideEffect {
 
             if (!this._legendmarkerTextContainer) {
                 this._legendmarkerTextContainer = makeElement(
-                                                    selectElement('#chart'),
+                                                    context._canvasMount,
                                                     'div',
                                                     [1],
                                                     `${className}-text-container`);
+                this._legendmarkerText = makeElement(
+                                                    this._legendmarkerTextContainer,
+                                                    'div',
+                                                    [1],
+                                                    `${className}-text`);
             }
-
+            console.log(top, lableConfig);
             this._textElement = createTextCell(className, labelManager, context._cells);
             this._markerElement
                     .data([{ value: payload.criteria }])
                     .attr('transform', `translate(${x},${y}) rotate(${rotateAngle})`)
-                    .attr('d', getSymbol('triangle').size(LEGEND_MARKER_PROPS.size * LEGEND_MARKER_PROPS.size)())
+                    .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
 
             this._textElement.source(payload.criteria[1]);
-            this._textElement.render(this._legendmarkerTextContainer.node());
-            this._legendmarkerTextContainer.attr('style', ` top: ${lableConfig.top}px; left:${lableConfig.left}px`)
+            this._textElement.render(this._legendmarkerText.node());
+            this._legendmarkerText.attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
                                      .classed(`${className}-show`, true)
                                      .classed(`${className}-hide`, false);
         } else {
-            this._markerElement
-                .data([{ value: null }])
-                .classed(`${className}-show`, false)
-                .classed(`${className}-hide`, true);
-            this._legendmarkerTextContainer
-                .classed(`${className}-show`, false)
-                .classed(`${className}-hide`, true);
+            // this._markerElement
+            //     .data([{ value: null }])
+            //     .classed(`${className}-show`, false)
+            //     .classed(`${className}-hide`, true);
+            // this._legendmarkerTextContainer
+            //     .classed(`${className}-show`, false)
+            //     .classed(`${className}-hide`, true);
         }
     }
 
