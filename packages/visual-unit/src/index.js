@@ -1,7 +1,8 @@
 import * as helpers from './helper';
 import * as enums from './enums';
 import UnitFireBolt from './firebolt';
-import { addFacetData } from './firebolt/data-propagator';
+import { isSideEffectEnabled } from './firebolt/helper';
+import { payloadGenerator } from './firebolt/payload-generator';
 
 export { default as VisualUnit } from './visual-unit';
-export { helpers, enums, UnitFireBolt, addFacetData };
+export { helpers, enums, UnitFireBolt, isSideEffectEnabled, payloadGenerator };

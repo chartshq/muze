@@ -339,7 +339,7 @@ export const strategies = {
                 }
             }, 'Items Selected']
         }];
-        const measureNames = [...new Set(entryUids.map(d => d[1]).flat())];
+        const measureNames = [...new Set(entryUids.map(d => d[1]).filter(d => d).flat())];
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
             const { numberFormat } = fieldsConf[measure].def;

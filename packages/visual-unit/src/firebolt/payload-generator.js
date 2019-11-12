@@ -114,7 +114,8 @@ export const payloadGenerator = {
                         dataArr.push([...dims, ...measureArr]);
                     });
                 } else {
-                    const measures = instance._dimensionsMap[dims] || [[]];
+                    let measures = instance._dimensionsMap[dims];
+                    measures = measures && measures.length ? measures : [[]];
                     measures.forEach((measureArr) => {
                         dataArr.push([...dims, ...measureArr]);
                     });

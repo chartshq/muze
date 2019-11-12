@@ -57,7 +57,7 @@ export default class SurrogateSideEffect extends GenericSideEffect {
             const { interactive } = layer.config();
             if (interactive !== false) {
                 const layerFields = layer.data().getFieldsConfig();
-                const filteredUids = set.uids.filter(([, measures]) => measures.every(m => m in layerFields))
+                const filteredUids = set.uids.filter(([, measures = []]) => measures.every(m => m in layerFields))
                     .map(d => d[0]);
                 layer.applyInteractionStyle(interactionType, filteredUids, apply);
             }

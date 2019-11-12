@@ -5,9 +5,8 @@ import {
     ReservedFields
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
-
+import { payloadGenerator, isSideEffectEnabled } from '@chartshq/visual-unit';
 import { applyInteractionPolicy } from '../helper';
-import { payloadGenerator } from '../../../../visual-unit/src/firebolt/payload-generator';
 import { propagateValues, sanitizePayloadCriteria } from './helper';
 import { COMMON_INTERACTION } from '../../constants';
 
@@ -66,12 +65,10 @@ const defaultCrossInteractionPolicy = {
     },
     sideEffects: {
         tooltip: (propagationPayload, firebolt) => {
-            const propagationUnit = propagationPayload.sourceUnit;
             const propagationCanvas = propagationPayload.sourceCanvas;
-            const unitId = firebolt.id();
             const canvasAlias = firebolt.sourceCanvas();
             if (propagationCanvas) {
-                return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
+                return propagationCanvas === canvasAlias;
             }
             return true;
         },
@@ -336,5 +333,20 @@ export default class GroupFireBolt extends Firebolt {
 
     sourceCanvas () {
         return this.context.alias();
+    }
+
+    getApplicableSideEffects (sideEffects, payload, propagationInf) {
+        if (payload.sideEffects) {
+            return [{
+                effects: payload.sideEffects,
+                behaviours: [payload.action]
+            }];
+        }
+        sideEffects.forEach((d) => {
+            let mappedEffects = d.effects;
+            mappedEffects = mappedEffects.filter(se => isSideEffectEnabled(this, { se, propagationInf }));
+            d.effects = mappedEffects;
+        });
+        return sideEffects;
     }
 }

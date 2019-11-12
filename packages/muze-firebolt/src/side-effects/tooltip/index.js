@@ -82,6 +82,10 @@ export default class Tooltip extends SpawnableSideEffect {
         return this;
     }
 
+    static target () {
+        return 'all';
+    }
+
     hide (options) {
         const tooltips = this._tooltips;
         for (const key in tooltips) {

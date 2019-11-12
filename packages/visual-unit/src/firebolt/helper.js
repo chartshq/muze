@@ -29,3 +29,14 @@ export const dispatchQueuedSideEffects = (context) => {
     });
     context._queuedSideEffects = {};
 };
+
+export const isSideEffectEnabled = (firebolt, { se, propagationInf }) => {
+    const sideEffectPolicies = firebolt._sideEffectPolicies;
+    const sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
+    const { sourceIdentifiers, data: propagationData } = propagationInf;
+    return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
+        checker(propagationInf.propPayload, firebolt, {
+            sourceIdentifiers,
+            propagationData
+        })) : true;
+};

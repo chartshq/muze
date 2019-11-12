@@ -58,7 +58,7 @@ export const sanitizePayloadCriteria = (data, propFields, facetData = {}, { dm, 
                     }
                 });
                 if (!measureNameField) {
-                    const measuresArr = dimensionsMap[newRowVal];
+                    const measuresArr = dimensionsMap[newRowVal].length ? dimensionsMap[newRowVal] : [[]];
                     measuresArr.forEach((measures) => {
                         dataWithFacets.push([...newRowVal, ...measures]);
                     });

@@ -1,6 +1,7 @@
 import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
+import { isSideEffectEnabled } from './helper';
 
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
@@ -41,7 +42,6 @@ export default class UnitFireBolt extends Firebolt {
         const aliasName = context.parentAlias();
         const propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
         const sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
-        const sideEffectPolicies = this._sideEffectPolicies;
         const sideEffectInstances = this.sideEffects();
         const actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
 
@@ -57,13 +57,7 @@ export default class UnitFireBolt extends Firebolt {
                     return false;
                 }
                 if (!actionOnSource && payload.criteria !== null) {
-                    const sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
-                    const { sourceIdentifiers, data: propagationData } = propagationInf;
-                    return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
-                        checker(propagationInf.propPayload, this, {
-                            sourceIdentifiers,
-                            propagationData
-                        })) : true;
+                    return isSideEffectEnabled(this, { se, propagationInf });
                 }
                 if (propagationSourceCanvas === aliasName || actionOnSource) {
                     return se.applyOnSource !== false;

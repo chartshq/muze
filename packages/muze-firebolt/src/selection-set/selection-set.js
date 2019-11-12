@@ -161,10 +161,12 @@ class SelectionSet {
 
         for (const key in set) {
             let val;
+            const measureNamesArr = measureNames[key] || [];
             if (raw) {
-                val = measureNames[key] ? [...dimVals[key], `${measureNames[key]}`] : [...dimVals[key]];
+                val = measureNamesArr.length ? [...dimVals[key], `${measureNames[key]}`] :
+                    [...dimVals[key]];
             } else {
-                val = measureNames[key] ? [uidMap[key], measureNames[key]] : [uidMap[key]];
+                val = measureNamesArr.length ? [uidMap[key], measureNames[key]] : [uidMap[key]];
             }
 
             if (set[key] > 0) {
