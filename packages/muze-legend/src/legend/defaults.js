@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG = {
     },
     item: {
         text: {
-            orientation: 'right',
+            orientation: 'left',
             width: 10,
             formatter: (val, i, data, context) => context.valueParser()(val)
         },
@@ -83,4 +83,11 @@ export const ICON_MAP = (icon) => {
     if (icon && typeof (icon) === 'string') {
         return getSymbol(icon);
     } return icon;
+};
+
+export const LEGEND_MARKER_PROPS = {
+    size: 8,
+    ROTATE_HORIZONTAL: 180,
+    ROTATE_VERTICAL: 90,
+    shape: 'triangle'
 };

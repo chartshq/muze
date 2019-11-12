@@ -18,7 +18,9 @@ export const PROPS = {
         }
     },
     logicalSpace: {},
-    metaData: {},
+    metaData: {
+        onset: (context, value) => context.firebolt().attachPropagationListener(value)
+    },
     range: {
         sanitization: (context, value) => {
             context.scale().range(value);
