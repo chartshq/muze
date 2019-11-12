@@ -44,7 +44,7 @@ export default class PlotHighlighter extends SurrogateSideEffect {
             exitSet: getFormattedSet(selectionSet.exitSet[1], excludeSetIds)
         };
 
-        currentStrategy(formattedSet, this);
+        currentStrategy(formattedSet, this, payload, excludeSetIds);
 
         return this;
     }

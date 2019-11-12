@@ -34,6 +34,7 @@ export default class UnitFireBolt extends Firebolt {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
         });
     }
+
     propagate (behaviour, payload, identifiers, sideEffects) {
         propagateValues(this, behaviour, {
             payload,

@@ -1,6 +1,6 @@
 /* eslint-disable */
 let env8 = muze();
-const DataModel8 = muze.DataModel8;
+const DataModel = muze.DataModel;
 const share8 = muze.Operators.share;
 const DateTimeFormatter8 = muze.utils.DateTimeFormatter;
 
@@ -189,5 +189,5 @@ d3.csv('../../data/weather.csv', (data8) => {
       }])
       .subtitle('Days at or above 32°C per year from the time you were born')
       .title('Composition of layers')
-      .mount('#chart8');
+      .mount('#chart');
 });

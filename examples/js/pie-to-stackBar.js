@@ -12,7 +12,6 @@ function shuffleArray(array) {
 }
 
 d3.json('../../data/cars.json', (data) => {
-    let jsonData = data;
     const schema = [{
         name: 'Name',
         type: 'dimension'
@@ -60,7 +59,7 @@ d3.json('../../data/cars.json', (data) => {
         // format: '%Y-%m-%d'
     }];
 
-    var rootData = new DataModel(jsonData, schema);
+    var rootData = new DataModel(data, schema);
     rootData = rootData.calculateVariable({
         name: "date",
         type: "dimension",
@@ -70,20 +69,19 @@ d3.json('../../data/cars.json', (data) => {
         return d;
     }]);
 
-    env = muze().data(rootData).minUnitHeight(40).minUnitWidth(40);
+    var env = muze().data(rootData).minUnitHeight(40).minUnitWidth(40);
     var mountPoint = document.getElementById('chart');
     window.canvas = env.canvas();
-    var rows = ['Cylinders', 'Horsepower'],
-        columns = ['Origin', 'Year'];
-    canvas = canvas.rows(rows).columns(columns).height(800).color('Origin')
-    //{initProps}
-    .mount(mountPoint);
+    canvas = canvas.rows([]).columns([]).height(600).width(650).color('Origin').layers([{
+        mark: 'arc',
+        encoding: {
+            angle: 'Year'
+        }
+    }]).mount(mountPoint);
 
-    // setTimeout(() => {
-    //     canvas.rows(['Horsepower', 'Acceleration']).columns(['Acceleration', 'Horsepower']).color('Horsepower').size('Cylinders').detail(['Maker']).width(600).height(600);
-    // //     canvas.once('canvas.animationend').then(function (client) {
-    // //         var element = document.getElementById('chart');
-    // //         element.classList.add('animateon');
-    // //     });
-    // }, 2000);
+    setTimeout(() => {
+        canvas.layers([]).rows(['Acceleration']).columns(['Year']);
+        
+        // canvas.height(600).width(650).color('Origin').mount(mountPoint);
+    }, 3000);
 });
