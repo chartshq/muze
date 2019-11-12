@@ -288,6 +288,32 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
+    getUidsFromPayload ({ model, uids }, targetData) {
+        if (!targetData) {
+            return { model: null, uids: [], length: 0 };
+        }
+
+        const targetFields = targetData[0];
+        const targetVals = targetData.slice(1, targetData.length);
+        const payloadMap = targetVals.reduce((acc, v) => {
+            acc[v] = v;
+            return acc;
+        }, {});
+
+        const dm = model.select((fields) => {
+            const row = `${targetFields.map(d => fields[d].internalValue)}`;
+            return row in payloadMap;
+        });
+        // select uids corresponding to the whole set
+        const currentSetIds = dm.getUids().map(uid => uids[uid]);
+
+        return {
+            model: dm,
+            uids: currentSetIds,
+            length: currentSetIds.length
+        };
+    }
+
     /**
      * Normalizes the transformed data and returns it.
      *

@@ -28,6 +28,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         this._voronoi = new Voronoi();
         this._bandScale = Scales.band();
         this._overlayPath = {};
+        this.formattedUids = [];
     }
 
     elemType () {
@@ -194,9 +195,10 @@ export const PointLayerMixin = superclass => class extends superclass {
             radius = getStrokeWidthByPosition(position, radius);
 
             const size = data.size + radius;
-            const path = getSymbol(data.shape).size(size);
-
-            pathElement.attr('d', path);
+            if (typeof data.shape === 'string') {
+                const path = getSymbol(data.shape).size(size);
+                pathElement.attr('d', path);
+            }
         }
 
         pathElement.style(style.type, style.props.value);

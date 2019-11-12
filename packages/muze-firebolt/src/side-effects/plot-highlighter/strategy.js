@@ -1,3 +1,5 @@
+import { getFormattedSet } from './helper';
+
 const fadeFn = (set, context) => {
     const {
         mergedEnter,
@@ -33,11 +35,10 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
         }
     },
-    highlight: (set, context) => {
+    highlight: (set, context, payload, excludeSetIds) => {
         const {
             mergedEnter,
             mergedExit,
-            entrySet,
             exitSet,
             completeSet
         } = set;
@@ -45,8 +46,17 @@ export const strategies = {
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'highlight', false);
         } else {
-            context.applyInteractionStyle(entrySet, {}, 'highlight', true);
-            context.applyInteractionStyle(exitSet, {}, 'highlight', false);
+            const layers = context.firebolt.context.layers();
+
+            layers.forEach((layer) => {
+                // get uids of only the currently highlighted point
+                const formattedSet = layer.getUidsFromPayload(mergedEnter, payload.target);
+                // get uids of only the currently highlighted point excluding the excludeSet ids
+                const currentHighlightedSet = getFormattedSet(formattedSet, excludeSetIds);
+
+                context.applyInteractionStyle(currentHighlightedSet, {}, 'highlight', true, payload);
+                context.applyInteractionStyle(exitSet, {}, 'highlight', false);
+            });
         }
     }
 };

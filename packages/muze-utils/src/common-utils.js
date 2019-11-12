@@ -1386,6 +1386,7 @@ const componentRegistry = (comps) => {
 };
 
 export {
+    arraysEqual,
     componentRegistry,
     mix,
     partition,

@@ -11,6 +11,7 @@ export const defaultConfig = {
     interaction: {
 
     },
+    crossline: true,
     nearestPointThreshold: 10,
     encoding: {
         color: {},

@@ -56,21 +56,29 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
-        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
-            const layers = this.firebolt.context.layers();
-            this.setAnchorLayerStyle(layers);
-        });
     }
 
-    setAnchorLayerStyle (layers) {
+    setAnchorLayerStyle (layers, payload) {
         const anchorLayer = layers.filter(l => l.config().groupId === 'anchors')[0];
         if (anchorLayer) {
             // Execute focusStroke interaction of anchor point layer
-            const ids = anchorLayer.data().getUids();
+            const data = anchorLayer.data();
+            const ids = data.getUids();
             const layerName = this.constructor.formalName();
             const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
-            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+            const currentInteraction = defaultInteractionLayerEncoding[layerName];
+            const formattedUids = anchorLayer.getUidsFromPayload({
+                model: data,
+                uids: ids
+            }, payload.target).uids;
+
+            if (!formattedUids.length) {
+                anchorLayer.applyInteractionStyle(currentInteraction, ids, false);
+            } else {
+                anchorLayer.applyInteractionStyle(currentInteraction, formattedUids, true);
+            }
         }
+        return true;
     }
 
     static target () {
@@ -114,7 +122,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
         return 0;
     }
 
-    apply (selectionSet) {
+    apply (selectionSet, payload) {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;
@@ -136,6 +144,11 @@ export default class AnchorEffect extends SpawnableSideEffect {
             layer
                 .data(transformedDataModel)
                 .config(newConfig);
+
+            this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+                const currentLayers = this.firebolt.context.layers();
+                this.setAnchorLayerStyle(currentLayers, payload);
+            });
 
             return this;
         });

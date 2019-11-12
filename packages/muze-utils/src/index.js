@@ -106,7 +106,8 @@ export {
     partition,
     mix,
     componentRegistry,
-    getArrayDiff
+    getArrayDiff,
+    arraysEqual
 } from './common-utils';
 
 export {
