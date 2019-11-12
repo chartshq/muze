@@ -61,8 +61,12 @@ d3.json('../data/cars.json', function (data) {
     .columns(columns)
     .data(rootData)
     .layers([{
-        mark: 'bar'
+        mark: 'point'
     }])
+    .config({
+        legend: {
+            position: 'bottom'
+    }})
     .width(800)
     .height(600)
     .color({
