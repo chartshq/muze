@@ -98,6 +98,7 @@ export const payloadGenerator = {
                         dims.push(row[idx]);
                     }
                 });
+
                 const vals = `${sourceIdentifierFields.map((d) => {
                     if (d.name in fieldsConfig) {
                         return row[fieldsConfig[d.name].index];
@@ -106,6 +107,7 @@ export const payloadGenerator = {
                     }
                     return null;
                 }).filter(d => d !== null)}`;
+
                 if (vals in identifierMap) {
                     const measures = identifierMap[vals];
                     measures.forEach((measureArr) => {

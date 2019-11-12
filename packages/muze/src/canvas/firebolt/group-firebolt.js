@@ -25,7 +25,7 @@ const getKeysFromData = (group, dataModel) => {
         const layers = unit.layers();
         const fieldsConfig = dm.getFieldsConfig();
 
-        Object.assign(keys, data.reduce((acc, row, i) => {
+        data.forEach((row, i) => {
             const dims = dimensions.map((d) => {
                 if (d.def.name in fieldsConfig) {
                     return row[fieldsConfig[d.def.name].index];
@@ -37,34 +37,16 @@ const getKeysFromData = (group, dataModel) => {
             layers.forEach((layer) => {
                 const measureNames = layer.data().getSchema().filter(d => d.type === FieldType.MEASURE)
                     .map(d => d.name);
-                const key2 = dims.length ? `${dims},${measureNames}` : `${uid},${measureNames}`;
-                acc[key2] = acc[key2] || {};
-                acc[key2] = {
+                const key = dims.length ? `${[dims, ...measureNames]}` : `${[uid, ...measureNames]}`;
+                keys[key] = keys[key] || {};
+                keys[key] = {
                     dims,
                     measureNames,
                     uid
                 };
+                dimsMap[dims] = measureNames;
             });
-
-            return acc;
-        }, keys));
-        Object.assign(dimsMap, data.reduce((acc, row) => {
-            const dims = dimensions.map((d) => {
-                if (d.def.name in fieldsConfig) {
-                    return row[fieldsConfig[d.def.name].index];
-                }
-                return facetFieldsMap[d.def.name];
-            });
-
-            layers.forEach((layer) => {
-                const measureNames = layer.data().getSchema().filter(d => d.type === FieldType.MEASURE)
-                    .map(d => d.name);
-                acc[dims] = acc[dims] || [];
-                acc[dims].push(measureNames);
-            });
-
-            return acc;
-        }, dimsMap));
+        });
     });
 
     return {
@@ -252,7 +234,7 @@ export default class GroupFireBolt extends Firebolt {
 
             firebolt.onPhysicalAction('*', (event, payload) => {
                 this.handlePhysicalAction(event, payload, unit);
-            });
+            }, this.context.constructor.formalName());
         });
 
         return this;
@@ -262,14 +244,21 @@ export default class GroupFireBolt extends Firebolt {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
         const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
+        const hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
+        const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
+
         behaviours.forEach((action) => {
-            const fields = [...this._dimensionsSet, ReservedFields.MEASURE_NAMES];
+            const fields = [...this._dimensionsSet, ...measureName];
             const mode = behaviourConfs[action];
             let targetFirebolt = firebolt;
+            let facetMap = unit.facetFieldsMap();
             if (mode === COMMON_INTERACTION) {
                 targetFirebolt = this;
+            } else {
+                facetMap = {};
             }
-            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, unit.facetFieldsMap(), {
+
+            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, facetMap, {
                 dm: targetFirebolt.data(),
                 dimensionsMap: targetFirebolt._dimensionsMap
             });
@@ -285,14 +274,16 @@ export default class GroupFireBolt extends Firebolt {
                 sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
                 sourceUnitId: unit.id(),
                 sourceId: targetFirebolt.id(),
-                propagationDataSource: targetFirebolt.data()
+                propagationDataSource: targetFirebolt.getPropagationSource()
             });
         });
     }
 
     dispatchBehaviour (action, payload, propagationInf = {}) {
         const { criteria } = payload;
-        const fields = [...this._dimensionsSet, ReservedFields.MEASURE_NAMES];
+        const hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
+        const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
+        const fields = [...this._dimensionsSet, ...measureName];
         const sanitizedPayload = Object.assign({}, payload,
             {
                 criteria: sanitizePayloadCriteria(criteria, fields, {}, {
@@ -331,5 +322,13 @@ export default class GroupFireBolt extends Firebolt {
             sourceCanvasId: this.id(),
             propagationDataSource: this.data()
         }, auxConfig));
+    }
+
+    getPropagationSource () {
+        return this.data();
+    }
+
+    sourceCanvas () {
+        return this.context.alias();
     }
 }

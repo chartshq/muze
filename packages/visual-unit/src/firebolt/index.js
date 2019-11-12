@@ -153,20 +153,6 @@ export default class UnitFireBolt extends Firebolt {
         return this;
     }
 
-    triggerPhysicalAction (event, payload) {
-        const handlers = this._handlers[event] || [];
-        const genericHandlers = this._handlers['*'];
-
-        [...handlers, ...genericHandlers].forEach((fn) => {
-            fn(event, payload);
-        });
-    }
-
-    onPhysicalAction (event, fn) {
-        !this._handlers[event] && (this._handlers[event] = []);
-        this._handlers[event].push(fn);
-    }
-
     propagationIdentifiers (action, identifiers) {
         if (identifiers) {
             this._propagationIdentifiers = identifiers;
@@ -180,5 +166,13 @@ export default class UnitFireBolt extends Firebolt {
 
     id () {
         return this.context.id();
+    }
+
+    getPropagationSource () {
+        return this.context.cachedData()[0];
+    }
+
+    sourceCanvas () {
+        return this.context.parentAlias();
     }
 }

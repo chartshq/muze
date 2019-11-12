@@ -342,17 +342,22 @@ export const strategies = {
         const measureNames = [...new Set(entryUids.map(d => d[1]).flat())];
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
-            const value = data[0][fieldsConf[measure].index];
+            const { numberFormat } = fieldsConf[measure].def;
+            const value = data[0][fieldsConf[measure].index].toFixed(2);
+
             value instanceof InvalidAwareTypes ? values.push([]) : values.push({
                 className: `${classPrefix}-tooltip-row`,
-                data: [`(${aggFns[measure].toUpperCase()})`, `${retrieveFieldDisplayName(dm, measure)}`, {
-                    value: `${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`,
-                    style: {
-                        'font-weight': 'bold'
-                    },
-                    className: `${classPrefix}-tooltip-value`
-                }]
-            });
+                data: [`(${aggFns[measure].toUpperCase()})`,
+                    `${retrieveFieldDisplayName(dm, measure)}`,
+                    {
+                        value: numberFormat ? numberFormat(value) : value,
+                        style: {
+                            'font-weight': 'bold'
+                        },
+                        className: `${classPrefix}-tooltip-value`
+                    }]
+            }
+            );
         });
 
         return values;

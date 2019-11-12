@@ -234,7 +234,6 @@ export const renderLayers = (context, container, layers, measurement) => {
             };
         }
     });
-    makeElement(layerParentGroup, 'g', [1], `${classPrefix}-overlay-paths`);
 
     const layerSeq = layerDepOrder.map(name => groups[name]).filter(d => d !== undefined);
     layerSeq.forEach((o) => {

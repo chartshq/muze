@@ -73,7 +73,6 @@ export const sanitizePayloadCriteria = (data, propFields, facetData = {}, { dm, 
 
 export const propagateValues = (instance, action, config = {}) => {
     const { payload, identifiers, sourceUnitId, sourceCanvasId, propagationDataSource } = config;
-    // const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
     const dataModel = propagationDataSource;
     const sideEfffects = instance._sideEffectDefinitions;
     const behaviourEffectMap = instance._behaviourEffectMap;
@@ -83,15 +82,6 @@ export const propagateValues = (instance, action, config = {}) => {
     payload.sourceUnit = sourceUnitId;
     payload.action = action;
     payload.sourceCanvas = sourceCanvasId;
-
-    // if (identifiers !== null) {
-    //     propFields = identifiers.fields;
-
-    //     if (propagationFieldNames.length) {
-    //         const fields = identifiers.fields;
-    //         propFields = append ? [...fields.map(d => d.name), ...propagationFieldNames] : propagationFieldNames;
-    //     }
-    // }
 
     const groupId = sourceCanvasId;
 
@@ -113,7 +103,7 @@ export const propagateValues = (instance, action, config = {}) => {
         sourceId: config.sourceId,
         filterFn,
         enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
-            propConf.payload.sourceCanvas === firebolt.context.alias() : true)
+            propConf.payload.sourceCanvas === firebolt.sourceCanvas() : true)
     };
 
     dataModel.propagate(identifiers, propConfig, true);
@@ -127,7 +117,7 @@ export const propagateValues = (instance, action, config = {}) => {
             applyOnSource: false,
             action: propagationBehaviour,
             sourceId: isMutableAction ? groupId : sourceUnitId,
-            enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.alias()
+            enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.sourceCanvas()
         }), true, {
             filterImmutableAction: (actionInf, propInf) => actionInf.groupId !== propInf.groupId
         });

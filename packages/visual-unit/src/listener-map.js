@@ -15,9 +15,8 @@ const getUniqueKeys = (data, dimensions, { layers, uids, map }) => data.reduce((
     const key = dimensions.map(d => row[d.index]);
 
     layers.forEach((layer) => {
-        const measureNames = layer.data().getSchema().filter(d => d.type === 'measure').map(d => d.name);
-        const key2 = dimensions.length ? `${key},${measureNames}` :
-                `${uids[i]},${measureNames}`;
+        const measureNames = Object.keys(layer.data().getFieldspace().getMeasure());
+        const key2 = dimensions.length ? `${[key, ...measureNames]}` : `${[uids[i], ...measureNames]}`;
         if (map) {
             acc[key] = acc[key] || [];
             acc[key].push(measureNames);

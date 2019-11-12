@@ -32,6 +32,7 @@ export const defaultConfig = {
             }
         ]
     },
+    crossline: true,
     nearestPointThreshold: 20,
     encoding: {
         color: {},

@@ -3,9 +3,7 @@ import {
     hasTouch,
     selectElement,
     isSimpleObject,
-    getDataModelFromRange,
-    intersect,
-    FieldType
+    getDataModelFromRange
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -29,17 +27,11 @@ const getKeysFromCriteria = (criteria, firebolt) => {
         if (isSimpleObject(criteria)) {
             const dm = getDataModelFromRange(data, criteria);
             const fieldsConfig = dm.getFieldsConfig();
-            const measureNames = Object.keys(criteria).filter(d => fieldsConfig[d].def.type === FieldType.MEASURE);
             dm.getData().data.forEach((row) => {
                 const dimKey = `${dimArr.map(d => row[fieldsConfig[d].index])}`;
                 const measures = dimensionsMap[dimKey] || [[]];
                 measures.forEach((measureArr) => {
-                    const hasCommonMeasures = intersect(measureArr, measureNames).length;
-                    if (hasCommonMeasures) {
-                        values.push(`${dimKey},${measureArr}`);
-                    } else {
-                        values.push(`${dimKey}`);
-                    }
+                    values.push(`${[dimKey, ...measureArr]}`);
                 });
             });
         } else {
@@ -518,16 +510,17 @@ export default class Firebolt {
         const handlers = this._handlers[event] || [];
         const genericHandlers = this._handlers['*'];
 
-        [...handlers, ...genericHandlers].forEach((fn) => {
+        const allHandlers = [...Object.values(handlers), ...Object.values(genericHandlers)];
+        allHandlers.forEach((fn) => {
             fn(event, payload);
         });
 
         return this;
     }
 
-    onPhysicalAction (event, fn) {
-        !this._handlers[event] && (this._handlers[event] = []);
-        this._handlers[event].push(fn);
+    onPhysicalAction (event, fn, namespace) {
+        !this._handlers[event] && (this._handlers[event] = {});
+        this._handlers[event][namespace] = fn;
 
         return this;
     }

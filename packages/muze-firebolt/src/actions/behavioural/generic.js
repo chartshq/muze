@@ -111,9 +111,9 @@ export default class GenericBehaviour {
             if (filteredDataModel) {
                 const setKeys = new Set(set.map(d => d[0]));
                 model = data.select((fields, i) => setKeys.has(setFields.map(field =>
-                    (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
-                        saveChild: false
-                    });
+                        (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
+                            saveChild: false
+                        });
             }
             model = filteredDataModel || null;
         }

@@ -288,6 +288,47 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return encodingType !== undefined ? domains[encodingType] || [] : domains;
     }
 
+    getUidsFromPayload ({ model, uids }, targetData) {
+        const targetFields = targetData[0];
+        const targetVals = targetData.slice(1, targetData.length);
+        const payloadMap = targetVals.reduce((acc, v) => {
+            acc[v] = v;
+            return acc;
+        }, {});
+        const measures = Object.keys(this.data().getFieldspace().getMeasure());
+
+        const filterFn = (fields) => {
+            const row = `${targetFields.map((field) => {
+                let val;
+                if (field === ReservedFields.MEASURE_NAMES) {
+                    val = measures;
+                } else {
+                    val = fields[field].internalValue;
+                }
+                return val;
+            })}`;
+            return row in payloadMap;
+        };
+
+        const dm = model.select(filterFn, {});
+
+        // Need to find a better way to do this instead of iterating the full data
+        const currentSetIds = this.data().select(filterFn, {
+            saveChild: false
+        }).getUids();
+
+        const uidMap = currentSetIds.reduce((acc, v) => {
+            acc[v] = true;
+            return acc;
+        }, {});
+
+        return {
+            model: dm,
+            uids: uids.filter(d => uidMap[d[0]]),
+            length: currentSetIds.length
+        };
+    }
+
     /**
      * Normalizes the transformed data and returns it.
      *
@@ -415,9 +456,10 @@ export const BaseLayerMixin = superclass => class extends superclass {
         });
 
         const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
-
-        identifiers[0].push(ReservedFields.MEASURE_NAMES);
-        identifiers[1].push(measures.join());
+        if (measures.length) {
+            identifiers[0].push(ReservedFields.MEASURE_NAMES);
+            identifiers[1].push(measures.join());
+        }
 
         if (allMeasures) {
             identifiers[0].push(...[ReservedFields.ROW_ID]);

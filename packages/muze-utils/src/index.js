@@ -108,7 +108,8 @@ export {
     componentRegistry,
     getArrayDiff,
     difference,
-    getArrayIndexMap
+    getArrayIndexMap,
+    arraysEqual
 } from './common-utils';
 
 export {

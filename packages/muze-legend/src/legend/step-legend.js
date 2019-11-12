@@ -99,12 +99,14 @@ export default class StepLegend extends SimpleLegend {
         domainLeg = domainLeg.map((ele, i) => {
             let value = null;
             if (i < domainLeg.length - 1) {
-                value = `${(ele.toFixed(1))} - ${(+domainLeg[i + 1].toFixed(1))}`;
+                value = `${(ele.toFixed(0))} - ${(+domainLeg[i + 1].toFixed(0))}`;
             } else if (domainLeg.length === 1) {
                 value = ele.toFixed(1);
             }
             return {
-                [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele),
+                [scaleType]: scaleType === SIZE
+                ? scale[scaleFn](ele) * scale.getScaleFactor()
+                : scale[scaleFn](ele),
                 value,
                 id: i + 1,
                 range: [ele, domainLeg[i + 1]]
@@ -144,7 +146,6 @@ export default class StepLegend extends SimpleLegend {
         const {
             item
         } = this.config();
-        super.getLabelSpaces();
         const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2;
         return getItemMeasures(this, 'range', item.text.formatter, stepItemBuffer);
     }

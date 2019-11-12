@@ -10,8 +10,10 @@ import {
     LEFT,
     RIGHT,
     DEFAULTICONSIZE,
-    MARGINBUFFER,
+    VERTICAL_BUFFER,
+    HORIZONTAL_BUFFER,
     HORIZONTAL,
+    VERTICAL,
     DEFAULT
 } from '../enums/constants';
 
@@ -138,12 +140,21 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
         iconSpaces,
         maxIconWidth
     } = context.measurement();
+
+    const { align } = context.config().align;
+
     const diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
-    return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
+
+    if (measureType === 'width' && !stepColorCheck && align === VERTICAL) {
+        return `${maxIconWidth}px`;
+    } else if (align === HORIZONTAL) {
+        return `${maxIconWidth}px`;
+    }
+    return `${iconSpaces[item[6]][measureType] - diff}px`;
 };
 
 /**
@@ -227,20 +238,29 @@ export const renderIcon = (icon, container, datum, context) => {
     const {
         classPrefix,
         iconHeight,
-        maxIconWidth,
         padding,
-        color
+        color,
+        iconWidth,
+        align
     } = context;
+
+    let { maxIconWidth } = context;
+
+    if (align === HORIZONTAL) {
+        maxIconWidth = iconWidth + 2 * padding;
+    }
     const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-icon-svg`)
     .attr(WIDTH, maxIconWidth)
     .attr(HEIGHT, iconHeight)
-    .style(WIDTH, `${maxIconWidth}px`)
+    .style(WIDTH, `${Math.ceil(maxIconWidth)}px`)
     .style(HEIGHT, `${iconHeight}px`);
+
+    const transalate = maxIconWidth / 2 - padding;
 
     if (icon !== RECT) {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
         createShape(datum, group, icon)
-                        .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
+                        .attr('transform', `translate(${transalate} ${iconHeight / 2})`)
                         .attr('fill', datum[2] || color)
                         .attr('stroke', datum[2] || color);
     } else {
@@ -277,7 +297,6 @@ export const renderDiscreteItem = (context, container) => {
             color,
             className
         } = item.icon;
-
     const textOrientation = item.text.orientation;
     const formatter = item.text.formatter;
 
@@ -290,24 +309,25 @@ export const renderDiscreteItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
             .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
-            .style('margin-left', `${align === HORIZONTAL ? 0 : MARGINBUFFER}px`);
+            .style('margin-left', `${align === HORIZONTAL ? HORIZONTAL_BUFFER : VERTICAL_BUFFER}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
             selectElement(this).classed(`${classPrefix}-${className}-${i}`, true);
             renderIcon(shape, selectElement(this), d, {
                 classPrefix,
-                iconWidth,
-                // iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
+                // iconWidth,
+                iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
                 iconHeight,
                 maxIconWidth,
                 padding,
-                color
+                color,
+                align
             });
         }
     });
@@ -353,13 +373,11 @@ export const renderStepItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
+    const data = context.data();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
-            const data = d[1].split('-');
-            const lowerLimit = +data[0];
-            const upperLimit = +data[1];
-            const formattedData = formatter([lowerLimit, upperLimit], i, dataArr, context);
+            const formattedData = formatter([data[d[6]].range[0], data[d[6]].range[1]], i, dataArr, context);
             selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {
