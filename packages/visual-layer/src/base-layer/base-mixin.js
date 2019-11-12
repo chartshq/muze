@@ -10,7 +10,8 @@ import {
     STATE_NAMESPACES,
     transactor,
     defaultValue,
-    getObjProp
+    getObjProp,
+    InvalidAwareTypes
 } from 'muze-utils';
 import * as PROPS from '../enums/props';
 import { props } from './props';
@@ -303,7 +304,10 @@ export const BaseLayerMixin = superclass => class extends superclass {
                 if (field === ReservedFields.MEASURE_NAMES) {
                     val = measures;
                 } else {
-                    val = fields[field].internalValue;
+                    const currentField = fields[field];
+                    const isFieldInvalid = currentField instanceof InvalidAwareTypes;
+
+                    val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
                 }
                 return val;
             })}`;
