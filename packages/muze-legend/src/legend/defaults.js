@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG = {
     },
     item: {
         text: {
-            orientation: 'left',
+            orientation: 'right',
             width: 10,
             formatter: (val, i, data, context) => context.valueParser()(val)
         },
