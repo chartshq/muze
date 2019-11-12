@@ -1,5 +1,5 @@
 import { GenericSideEffect } from '@chartshq/muze-firebolt';
-import { makeElement, getSymbol, selectElement } from 'muze-utils';
+import { makeElement, getSymbol } from 'muze-utils';
 import { Marker } from '../../../enums/side-effects';
 import { CLASSPREFIX, HORIZONTAL } from '../../../enums/constants';
 import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
