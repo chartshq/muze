@@ -157,10 +157,12 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
             hasMultipleMeasures && (content.push({ data: [icon, formattedRetinalValue] }));
             const selectedContext = target && target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
             const isSelected = selectedContext === retinalFieldValue;
+
             measuresArr.forEach((measure) => {
                 const measureIndex = fieldsConfig[measure].index;
                 const { displayName: dName, fn: formatterFn } = fieldInf[measure];
-                const value = formatterFn(valueArr[measureIndex]);
+                const currentMeasureValue = valueArr[measureIndex];
+                const value = formatterFn(currentMeasureValue);
                 const keyValue = getKeyValue({
                     field: hasMultipleMeasures ? `${dName}${separator}` : formattedRetinalValue,
                     value,
@@ -168,8 +170,11 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
                     margin: hasMultipleMeasures ? margin : undefined,
                     isSelected,
                     stackedSum,
-                    stackedValue: valueArr[measureIndex].toFixed(2)
+                    stackedValue: currentMeasureValue instanceof InvalidAwareTypes
+                    ? currentMeasureValue.value()
+                    : currentMeasureValue.toFixed(2)
                 });
+
                 if (!hasMultipleMeasures) {
                     keyValue.data = [icon, ...keyValue.data];
                 }
