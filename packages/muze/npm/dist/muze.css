@@ -393,6 +393,26 @@
   cursor: all-scroll;
   pointer-events: all; }
 
+.muze-legend-marker {
+  stroke: #E2E2E2;
+  stroke-width: 1px;
+  fill: #797474; }
+
+.muze-legend-marker-show {
+  display: block; }
+
+.muze-legend-marker-hide {
+  display: none; }
+
+.muze-legend-marker-text-container {
+  position: relative; }
+
+.muze-legend-marker-text {
+  position: absolute; }
+
+.muze-legend-marker-text div {
+  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
+
 .muze-text-cell {
   font-size: 14px;
   text-align: center;

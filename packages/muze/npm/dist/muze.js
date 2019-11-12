@@ -30320,15 +30320,17 @@ var DEFAULT = 'default';
 /*!********************************************************!*\
   !*** ./packages/muze-legend/src/enums/side-effects.js ***!
   \********************************************************/
-/*! exports provided: SELECTIONBOX, Highlighter */
+/*! exports provided: SELECTIONBOX, Highlighter, Marker */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SELECTIONBOX", function() { return SELECTIONBOX; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Highlighter", function() { return Highlighter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Marker", function() { return Marker; });
 var SELECTIONBOX = 'selectionBox';
 var Highlighter = 'highlighter';
+var Marker = 'marker';
 
 /***/ }),
 
@@ -30388,7 +30390,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
   options: {
     strategy: 'fade'
   }
-}]), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["HIGHLIGHT"], [_enums_side_effects__WEBPACK_IMPORTED_MODULE_1__["Highlighter"]]), _defineProperty(_behaviourEffectMap, "select", [{
+}]), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["SELECT"], [{
   name: _enums_side_effects__WEBPACK_IMPORTED_MODULE_1__["Highlighter"],
   options: {
     strategy: 'fade'
@@ -30526,15 +30528,24 @@ function (_PersistentBehaviour) {
 /*!*****************************************************!*\
   !*** ./packages/muze-legend/src/firebolt/helper.js ***!
   \*****************************************************/
-/*! exports provided: propagate */
+/*! exports provided: propagate, payloadGenerator */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "propagate", function() { return propagate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "payloadGenerator", function() { return payloadGenerator; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _action_behaviour_map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./action-behaviour-map */ "./packages/muze-legend/src/firebolt/action-behaviour-map.js");
 /* harmony import */ var _behaviour_effect_map__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./behaviour-effect-map */ "./packages/muze-legend/src/firebolt/behaviour-effect-map.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 
 
 
@@ -30568,6 +30579,23 @@ var propagate = function propagate(firebolt, action, identifiers) {
   };
   data.propagate(identifiers, propConfig, true);
 };
+var payloadGenerator = function payloadGenerator(selectionDataModel, propConfig) {
+  var propPayload = propConfig.payload;
+  var sourceIdentifiers = propConfig.sourceIdentifiers;
+  var dataObj = selectionDataModel.getData();
+  var schema = dataObj.schema;
+  var payload = Object.assign({}, propPayload);
+  schema = dataObj.schema;
+  var data = dataObj.data;
+  var sourceFields = schema.map(function (d) {
+    return d.name;
+  });
+  payload.criteria = !sourceIdentifiers && selectionDataModel.isEmpty() ? null : [sourceFields].concat(_toConsumableArray(data));
+  payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(function (d) {
+    return d.name;
+  }) : [];
+  return payload;
+};
 
 /***/ }),
 
@@ -30584,6 +30612,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helper */ "./packages/muze-legend/src/firebolt/helper.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+/* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/behaviours */ "./packages/muze-legend/src/enums/behaviours.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -30601,6 +30630,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -30689,6 +30719,28 @@ function (_Firebolt) {
     key: "getFullData",
     value: function getFullData() {
       return null;
+    }
+  }, {
+    key: "onDataModelPropagation",
+    value: function onDataModelPropagation() {
+      var _this2 = this;
+
+      return function (data, config) {
+        var context = _this2.context;
+
+        if (!context.mount()) {
+          return;
+        }
+
+        var payload = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["payloadGenerator"])(data, config);
+        var propagationInf = {
+          propagate: false,
+          data: data,
+          sourceId: config.propagationSourceId
+        };
+
+        _this2.dispatchBehaviour(_enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"], payload, propagationInf);
+      };
     }
   }, {
     key: "data",
@@ -31003,7 +31055,7 @@ var selectionBoxDrag = function selectionBoxDrag(firebolt) {
 /*!*****************************************************************!*\
   !*** ./packages/muze-legend/src/firebolt/side-effects/index.js ***!
   \*****************************************************************/
-/*! exports provided: SelectionBox, LegendHighlighter */
+/*! exports provided: SelectionBox, LegendHighlighter, LegendMarker */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31013,6 +31065,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony import */ var _legend_highlighter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./legend-highlighter */ "./packages/muze-legend/src/firebolt/side-effects/legend-highlighter/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LegendHighlighter", function() { return _legend_highlighter__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+
+/* harmony import */ var _legend_marker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./legend-marker */ "./packages/muze-legend/src/firebolt/side-effects/legend-marker/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "LegendMarker", function() { return _legend_marker__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+
 
 
 
@@ -31152,21 +31208,22 @@ var strategies = function strategies(firebolt) {
 
 /***/ }),
 
-/***/ "./packages/muze-legend/src/firebolt/side-effects/selection-box/index.js":
+/***/ "./packages/muze-legend/src/firebolt/side-effects/legend-marker/index.js":
 /*!*******************************************************************************!*\
-  !*** ./packages/muze-legend/src/firebolt/side-effects/selection-box/index.js ***!
+  !*** ./packages/muze-legend/src/firebolt/side-effects/legend-marker/index.js ***!
   \*******************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
-/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../enums/side-effects */ "./packages/muze-legend/src/enums/side-effects.js");
-/* harmony import */ var _physical_selection_box_drag__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../physical/selection-box-drag */ "./packages/muze-legend/src/firebolt/physical/selection-box-drag.js");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-legend/src/firebolt/side-effects/selection-box/styles.scss");
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return LegendMarker; });
+/* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../enums/side-effects */ "./packages/muze-legend/src/enums/side-effects.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+/* harmony import */ var _legend_defaults__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../legend/defaults */ "./packages/muze-legend/src/legend/defaults.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-legend/src/firebolt/side-effects/legend-marker/styles.scss");
 /* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_5__);
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -31185,6 +31242,222 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+
+var SYMBOL_PADDING = Math.sqrt(3) * 3;
+var AXIS_STROKE = 1;
+
+var createTextCell = function createTextCell(className, labelManagerRef, cells) {
+  var TextCell = cells.TextCell;
+  var cell = new TextCell({
+    type: 'text',
+    className: "".concat(className, "-text")
+  }, {
+    labelManager: labelManagerRef()
+  }).config({
+    maxLines: 1
+  });
+  cell._minTickDiff = {
+    height: 0,
+    width: 0
+  };
+  return cell;
+};
+
+var getRelativePosition = function getRelativePosition(canvas, legendContainer) {
+  return {
+    top: legendContainer.getBoundingClientRect().top - canvas.getBoundingClientRect().top,
+    left: legendContainer.getBoundingClientRect().left - canvas.getBoundingClientRect().left
+  };
+};
+
+var LegendMarker =
+/*#__PURE__*/
+function (_GenericSideEffect) {
+  _inherits(LegendMarker, _GenericSideEffect);
+
+  function LegendMarker() {
+    var _getPrototypeOf2;
+
+    var _this;
+
+    _classCallCheck(this, LegendMarker);
+
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(LegendMarker)).call.apply(_getPrototypeOf2, [this].concat(params)));
+    _this._graphicElements = {
+      markerElement: null,
+      legendmarkerTextContainer: null,
+      legendmarkerText: null
+    };
+    return _this;
+  }
+
+  _createClass(LegendMarker, [{
+    key: "apply",
+    value: function apply(selectionSet, payload) {
+      var className = "".concat(this.config().classPrefix, "-").concat(this.config().className);
+
+      if (payload.criteria && payload.criteria.length === 2) {
+        var physicalAction = function physicalAction() {// Register physical action on marker gere
+        };
+
+        var firebolt = this.firebolt;
+        var labelManager = firebolt.context.labelManager;
+        var context = firebolt.context;
+        var config = this.config();
+        var axis = context.axis().source();
+        var range = payload.criteria[0] ? axis.getScaleValue(payload.criteria[1]) : 0;
+        var legendGradContainer = context.getDrawingContext().svgContainer;
+
+        var _getRelativePosition = getRelativePosition(context._canvasMount, legendGradContainer.node()),
+            top = _getRelativePosition.top,
+            left = _getRelativePosition.left;
+
+        var _labelManager$getSmar = labelManager().getSmartText(payload.criteria[1]),
+            oriTextHeight = _labelManager$getSmar.oriTextHeight,
+            oriTextWidth = _labelManager$getSmar.oriTextWidth;
+
+        var x;
+        var y;
+        var rotateAngle;
+        var lableConfig = {
+          top: 0,
+          left: 0
+        };
+        var size = config.size,
+            shape = config.shape;
+
+        if (context.config().align === _enums_constants__WEBPACK_IMPORTED_MODULE_3__["HORIZONTAL"]) {
+          x = range - Math.sqrt(size / SYMBOL_PADDING) + AXIS_STROKE;
+          y = 5;
+          rotateAngle = _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].ROTATE_HORIZONTAL;
+          lableConfig.top = top + y - 20;
+          lableConfig.left = x + left - oriTextWidth / 2;
+        } else {
+          y = range + Math.sqrt(size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
+          x = 5;
+          rotateAngle = _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].ROTATE_VERTICAL;
+          lableConfig.top = top + y - 17 + oriTextHeight / 2;
+          lableConfig.left = x + left - oriTextWidth - 3;
+        }
+
+        var legendmarkerGroup = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"])(legendGradContainer, 'g', [1], "".concat(config.classPrefix, "-").concat(config.className, "-group"));
+
+        if (!this._graphicElements.markerElement) {
+          this._graphicElements.markerElement = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"])(legendmarkerGroup, 'path', [{
+            value: null
+          }], className, {
+            enter: physicalAction
+          });
+        }
+
+        if (!this._graphicElements.legendmarkerTextContainer) {
+          this._graphicElements.legendmarkerTextContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"])(context._canvasMount, 'div', [1], "".concat(className, "-text-container"));
+          this._graphicElements.legendmarkerText = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"])(this._graphicElements.legendmarkerTextContainer, 'div', [1], "".concat(className, "-text"));
+        }
+
+        var textElement = createTextCell(className, labelManager, context._cells);
+
+        this._graphicElements.markerElement.data([{
+          value: payload.criteria
+        }]).attr('transform', "translate(".concat(x, ",").concat(y, ") rotate(").concat(rotateAngle, ")")).attr('d', Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["getSymbol"])(shape).size(size * size)()).classed("".concat(className, "-show"), true).classed("".concat(className, "-hide"), false);
+
+        textElement.source(payload.criteria[1]);
+        textElement.render(this._graphicElements.legendmarkerText.node());
+
+        this._graphicElements.legendmarkerText.attr('style', "top: ".concat(lableConfig.top, "px; left:").concat(lableConfig.left, "px")).classed("".concat(className, "-show"), true).classed("".concat(className, "-hide"), false);
+      } else if (this._graphicElements.markerElement && this._graphicElements.legendmarkerText) {
+        this._graphicElements.markerElement.data([{
+          value: null
+        }]).classed("".concat(className, "-show"), false).classed("".concat(className, "-hide"), true);
+
+        this._graphicElements.legendmarkerText.classed("".concat(className, "-show"), false).classed("".concat(className, "-hide"), true);
+      }
+    }
+  }], [{
+    key: "formalName",
+    value: function formalName() {
+      return _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__["Marker"];
+    }
+    /**
+    * It returns the default configuration needed by legend-marker.
+    * @return {Object} Default configuration of the legend-marker.
+    */
+
+  }, {
+    key: "defaultConfig",
+    value: function defaultConfig() {
+      return {
+        className: 'legend-marker',
+        classPrefix: _enums_constants__WEBPACK_IMPORTED_MODULE_3__["CLASSPREFIX"],
+        size: _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].size,
+        shape: _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].shape
+      };
+    }
+  }]);
+
+  return LegendMarker;
+}(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__["GenericSideEffect"]);
+
+
+
+/***/ }),
+
+/***/ "./packages/muze-legend/src/firebolt/side-effects/legend-marker/styles.scss":
+/*!**********************************************************************************!*\
+  !*** ./packages/muze-legend/src/firebolt/side-effects/legend-marker/styles.scss ***!
+  \**********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+
+/***/ "./packages/muze-legend/src/firebolt/side-effects/selection-box/index.js":
+/*!*******************************************************************************!*\
+  !*** ./packages/muze-legend/src/firebolt/side-effects/selection-box/index.js ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../enums/side-effects */ "./packages/muze-legend/src/enums/side-effects.js");
+/* harmony import */ var _physical_selection_box_drag__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../physical/selection-box-drag */ "./packages/muze-legend/src/firebolt/physical/selection-box-drag.js");
+/* harmony import */ var _legend_defaults__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../legend/defaults */ "./packages/muze-legend/src/legend/defaults.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-legend/src/firebolt/side-effects/selection-box/styles.scss");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_6__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -31260,11 +31533,11 @@ function (_SpawnableSideEffect) {
 
       if (firebolt.context.config().align === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["HORIZONTAL"]) {
         x = range[0] - rangeShifter || 0;
-        y = 0;
+        y = _legend_defaults__WEBPACK_IMPORTED_MODULE_5__["LEGEND_MARKER_PROPS"].size + 4;
         width = range[1] - range[0] || 0;
         height = gradientDimension;
       } else {
-        x = 0;
+        x = _legend_defaults__WEBPACK_IMPORTED_MODULE_5__["LEGEND_MARKER_PROPS"].size + 4;
         y = range[1] - rangeShifter || 0;
         height = range[0] - range[1] || 0;
         width = gradientDimension;
@@ -31354,7 +31627,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!*****************************************************!*\
   !*** ./packages/muze-legend/src/legend/defaults.js ***!
   \*****************************************************/
-/*! exports provided: ALIGN, DEFAULT_MEASUREMENT, LEGEND_TITLE, DEFAULT_CONFIG, STEP_DEFAULT_CONFIG, ICON_MAP */
+/*! exports provided: ALIGN, DEFAULT_MEASUREMENT, LEGEND_TITLE, DEFAULT_CONFIG, STEP_DEFAULT_CONFIG, ICON_MAP, LEGEND_MARKER_PROPS */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31365,6 +31638,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "STEP_DEFAULT_CONFIG", function() { return STEP_DEFAULT_CONFIG; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ICON_MAP", function() { return ICON_MAP; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "LEGEND_MARKER_PROPS", function() { return LEGEND_MARKER_PROPS; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
 var _buffer;
@@ -31411,7 +31685,7 @@ var DEFAULT_CONFIG = {
   },
   item: {
     text: {
-      orientation: 'right',
+      orientation: 'left',
       width: 10,
       formatter: function formatter(val, i, data, context) {
         return context.valueParser()(val);
@@ -31450,6 +31724,12 @@ var ICON_MAP = function ICON_MAP(icon) {
   }
 
   return icon;
+};
+var LEGEND_MARKER_PROPS = {
+  size: 8,
+  ROTATE_HORIZONTAL: 180,
+  ROTATE_VERTICAL: 90,
+  shape: 'triangle'
 };
 
 /***/ }),
@@ -31848,7 +32128,7 @@ var renderGradient = function renderGradient(context, container) {
     gradientDimensions.height = item.icon.height;
     gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
     linearGradient.attr('x2', '100%').attr('y1', '0%');
-    legendGradCont.attr('transform', "translate( ".concat(labelDim.width / 2, " 0)"));
+    legendGradCont.attr('transform', "translate( ".concat(labelDim.width / 2, " ").concat(_defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4, ")"));
     renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(legendContainer, {
       height: "".concat(maxItemSpaces.height + border + padding, "px"),
@@ -31861,7 +32141,7 @@ var renderGradient = function renderGradient(context, container) {
     gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
     gradientDimensions.width = item.icon.width;
     linearGradient.attr('x2', '0%').attr('y1', '100%');
-    legendGradCont.attr('transform', "translate(0 ".concat(labelDim.height / 2, ")"));
+    legendGradCont.attr('transform', "translate(".concat(_defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4, " ").concat(labelDim.height / 2, ")"));
     renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(legendContainer, {
       height: "".concat(Math.min(height, maxHeight), "px"),
@@ -31874,15 +32154,15 @@ var renderGradient = function renderGradient(context, container) {
 
 
   Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(legendGradSvg, {
-    height: "".concat(gradientDimensions.height, "px"),
-    width: "".concat(gradientDimensions.width, "px")
+    height: "".concat(gradientDimensions.height + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4, "px"),
+    width: "".concat(gradientDimensions.width + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4, "px")
   }); // Apply styles to the legend rect
 
   Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(legendRect, {
     fill: 'url(#linear-gradient)'
   });
-  legendGradSvg.attr('height', gradientDimensions.height);
-  legendGradSvg.attr('width', gradientDimensions.width);
+  legendGradSvg.attr('height', gradientDimensions.height + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4);
+  legendGradSvg.attr('width', gradientDimensions.width + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4);
   context.measurement({
     gradientDimensions: gradientDimensions
   });
@@ -31905,9 +32185,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _simple_legend__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./simple-legend */ "./packages/muze-legend/src/legend/simple-legend.js");
 /* harmony import */ var _legend_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./legend-helper */ "./packages/muze-legend/src/legend/legend-helper.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
-/* harmony import */ var _gradient_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./gradient-helper */ "./packages/muze-legend/src/legend/gradient-helper.js");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../styles.scss */ "./packages/muze-legend/src/styles.scss");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/behaviours */ "./packages/muze-legend/src/enums/behaviours.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../enums/side-effects */ "./packages/muze-legend/src/enums/side-effects.js");
+/* harmony import */ var _gradient_helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./gradient-helper */ "./packages/muze-legend/src/legend/gradient-helper.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../styles.scss */ "./packages/muze-legend/src/styles.scss");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_6__);
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -31939,6 +32221,8 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
 
 
 
@@ -32060,7 +32344,7 @@ function (_SimpleLegend) {
           }
         }
       });
-      var axis = Object(_gradient_helper__WEBPACK_IMPORTED_MODULE_3__["createAxis"])(this);
+      var axis = Object(_gradient_helper__WEBPACK_IMPORTED_MODULE_5__["createAxis"])(this);
       var axisSpace = axis.getLogicalSpace();
       var space = {
         width: axisSpace.width - effPadding,
@@ -32101,9 +32385,10 @@ function (_SimpleLegend) {
       var legendContainer = _get(_getPrototypeOf(GradientLegend.prototype), "render", this).call(this, this.mount()); // create Legend
 
 
-      Object(_gradient_helper__WEBPACK_IMPORTED_MODULE_3__["renderGradient"])(this, legendContainer);
+      Object(_gradient_helper__WEBPACK_IMPORTED_MODULE_5__["renderGradient"])(this, legendContainer);
       legendContainer.selectAll('div').style('float', _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"]);
       firebolt.mapActionsAndBehaviour();
+      firebolt.mapSideEffects(_defineProperty({}, _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"], [_enums_side_effects__WEBPACK_IMPORTED_MODULE_4__["Marker"]]));
       firebolt.createSelectionSet(this.data().map(function (d) {
         return d.id;
       }));
@@ -32762,7 +33047,11 @@ var PROPS = {
     }
   },
   logicalSpace: {},
-  metaData: {},
+  metaData: {
+    onset: function onset(context, value) {
+      return context.firebolt().attachPropagationListener(value);
+    }
+  },
   range: {
     sanitization: function sanitization(context, value) {
       context.scale().range(value);
@@ -33589,6 +33878,11 @@ function () {
         }, []);
         return acc;
       }, {});
+    }
+  }, {
+    key: "setParentInfo",
+    value: function setParentInfo(info) {
+      this._canvasMount = info.canvasRoot;
     }
   }], [{
     key: "create",
@@ -59730,6 +60024,17 @@ function (_MuzeComponent) {
       this.alignWith(params.config.alignWith || alignWith);
       this.alignment(params.config.alignment || alignment);
     }
+  }, {
+    key: "setComponentInfo",
+    value: function setComponentInfo(params) {
+      var rootNode = params.rootNode;
+      this.components.forEach(function (legendInfo) {
+        var leg = legendInfo.legend;
+        leg.setParentInfo({
+          canvasRoot: rootNode
+        });
+      });
+    }
   }]);
 
   return LegendComponent;
@@ -60100,6 +60405,11 @@ function (_LayoutComponent) {
     key: "setParams",
     value: function setParams() {
       throw Error('set params is not implemented');
+    }
+  }, {
+    key: "setComponentInfo",
+    value: function setComponentInfo() {
+      throw Error('setComponentInfo is not implemented');
     }
   }]);
 
@@ -61801,9 +62111,17 @@ var fixScrollBarConfig = function fixScrollBarConfig(config) {
 var setLayoutInfForUnits = function setLayoutInfForUnits(context) {
   var layoutManager = context._layoutManager;
   var gridLayout = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_2__["GRID"]);
+  var legend = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_2__["LEGEND"]);
   var boundBox = gridLayout && gridLayout.getBoundBox();
   var valueMatrix = context.composition().visualGroup.matrixInstance().value;
   var parentContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])("#".concat(layoutManager.getRootNodeId())).node();
+
+  if (legend) {
+    legend.setComponentInfo({
+      rootNode: parentContainer
+    });
+  }
+
   valueMatrix.each(function (cell) {
     cell.valueOf().parentContainerInf({
       el: parentContainer,

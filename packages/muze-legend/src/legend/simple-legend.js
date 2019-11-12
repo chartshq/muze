@@ -351,4 +351,8 @@ export default class SimpleLegend {
             return acc;
         }, {});
     }
+
+    setParentInfo (info) {
+        this._canvasMount = info.canvasRoot;
+    }
 }

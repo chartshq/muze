@@ -8,8 +8,7 @@ export const behaviourEffectMap = {
             strategy: 'fade'
         }
     }],
-    [BEHAVIOURS.HIGHLIGHT]: [sideEffects.Highlighter],
-    select: [{
+    [BEHAVIOURS.SELECT]: [{
         name: sideEffects.Highlighter,
         options: {
             strategy: 'fade'

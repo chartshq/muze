@@ -64,16 +64,28 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .rows(['Weight_in_lbs'])
-        .columns(['Year'])
-        .layers([{
-            mark: 'bar'
-        }])
-        .color('Origin')
+        .columns(['Maker'])
+        .rows(['Displacement'])
+        .color({
+            field: 'Displacement', // A measure in color encoding channel creates gradient legend
+            stops: 10,
+            // step:true
+        })
+    //    .color('Maker')
         // .detail(['Name'])
+        // .size('Horsepower')
         .mount('#chart')
         .height(650)
-        .width(950)
+        .width(850)
+        .config({
+            legend: {
+                position : 'bottom',
+                // steps:true
+                text : {
+                    // orientation:'left'
+                }
+            }
+        })
         .title('Charts');
 
     window.canvas2 = env.canvas()
@@ -93,3 +105,8 @@
         })
     })
 })();
+
+
+// item: {
+//     text: {
+//         orientation: 'right',
