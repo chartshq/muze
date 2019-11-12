@@ -4,7 +4,8 @@ import {
     selectElement,
     isSimpleObject,
     getDataModelFromRange,
-    intersect
+    intersect,
+    FieldType
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -28,8 +29,7 @@ const getKeysFromCriteria = (criteria, firebolt) => {
         if (isSimpleObject(criteria)) {
             const dm = getDataModelFromRange(data, criteria);
             const fieldsConfig = dm.getFieldsConfig();
-            const measureNames = Object.keys(criteria).filter(d =>
-                fieldsConfig[d].def.type === 'measure');
+            const measureNames = Object.keys(criteria).filter(d => fieldsConfig[d].def.type === FieldType.MEASURE);
             dm.getData().data.forEach((row) => {
                 const dimKey = `${dimArr.map(d => row[fieldsConfig[d].index])}`;
                 const measures = dimensionsMap[dimKey] || [[]];

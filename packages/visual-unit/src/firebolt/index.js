@@ -177,4 +177,8 @@ export default class UnitFireBolt extends Firebolt {
     registerPhysicalActionHandlers () {
         return this;
     }
+
+    id () {
+        return this.context.id();
+    }
 }

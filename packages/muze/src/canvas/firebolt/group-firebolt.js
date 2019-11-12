@@ -9,6 +9,7 @@ import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 import { applyInteractionPolicy } from '../helper';
 import { payloadGenerator } from '../../../../visual-unit/src/firebolt/payload-generator';
 import { propagateValues, sanitizePayloadCriteria } from './helper';
+import { COMMON_INTERACTION } from '../../constants';
 
 const getKeysFromData = (group, dataModel) => {
     const valueMatrix = group.matrixInstance().value;
@@ -145,63 +146,78 @@ export default class GroupFireBolt extends Firebolt {
                 applyInteractionPolicy(this);
                 const group = this.context.composition().visualGroup;
                 if (group) {
-                    const valueMatrix = group.matrixInstance().value;
-                    const units = group.resolver().units();
                     const { keys, fields, dimsMap } = getKeysFromData(group, group.getGroupByData());
                     this._dimensionsMap = dimsMap;
                     this._dimensionsSet = fields;
                     this.createSelectionSet({ keys, fields });
                     group.getGroupByData().on('propagation', (data, config) => {
-                        const propagationData = data;
-                        const {
-                            enabled: enabledFn,
-                            sourceIdentifiers,
-                            action,
-                            payload: propPayload
-                        } = config;
-                        const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
-                        const payload = payloadFn(this, propagationData, config);
-                        let enabled;
-                        if (enabledFn) {
-                            enabled = enabledFn(config, this);
-                        }
-
-                        if (enabled) {
-                            const propagationInf = {
-                                propagate: false,
-                                data: propagationData,
-                                propPayload,
-                                sourceIdentifiers,
-                                sourceId: config.propagationSourceId,
-                                isMutableAction: config.isMutableAction
-                            };
-
-                            const behaviourEffectMap = this._behaviourEffectMap;
-                            const sideEffects = getSideEffects(action, behaviourEffectMap);
-                            const sideEffectInstances = this.sideEffects();
-                            const { instance: unit = units[0][0] } =
-                                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
-                            sideEffects.forEach(({ effects }) => {
-                                effects.forEach((effect) => {
-                                    const name = effect.name;
-                                    const inst = sideEffectInstances[name];
-
-                                    if (inst) {
-                                        inst.sourceInfo(() => unit.getSourceInfo());
-                                        inst.plotPointsFromIdentifiers((...params) =>
-                                            unit.getPlotPointsFromIdentifiers(...params));
-                                        inst.drawingContext(() => unit.getDrawingContext());
-                                    }
-                                });
-                            });
-                            this.dispatchBehaviour(action, payload, propagationInf);
-                        }
+                        this.handleDataModelPropagation(data, config);
                     });
                 }
             });
             return this;
         }
         return this._crossInteractionPolicy;
+    }
+
+    handleDataModelPropagation (data, config) {
+        const group = this.context.composition().visualGroup;
+        const valueMatrix = group.matrixInstance().value;
+        const units = group.resolver().units();
+        const propagationData = data;
+        const {
+            enabled: enabledFn,
+            sourceIdentifiers,
+            action,
+            payload: propPayload
+        } = config;
+        const { interaction: { behaviours: behaviourConfs = {} } } = this.context.config();
+        const mode = behaviourConfs[action];
+        if (mode !== COMMON_INTERACTION) {
+            return this;
+        }
+        const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+        const payload = payloadFn(this, propagationData, config);
+
+        let enabled;
+
+        if (enabledFn) {
+            enabled = enabledFn(config, this);
+        }
+
+        if (enabled) {
+            const propagationInf = {
+                propagate: false,
+                data: propagationData,
+                propPayload,
+                sourceIdentifiers,
+                sourceId: config.propagationSourceId,
+                isMutableAction: config.isMutableAction
+            };
+
+            const behaviourEffectMap = this._behaviourEffectMap;
+            const sideEffects = getSideEffects(action, behaviourEffectMap);
+            const sideEffectInstances = this.sideEffects();
+            const { instance: unit = units[0][0] } =
+                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
+
+            sideEffects.forEach(({ effects }) => {
+                effects.forEach((effect) => {
+                    const name = effect.name;
+                    const inst = sideEffectInstances[name];
+
+                    if (inst) {
+                        inst.sourceInfo(() => unit.getSourceInfo());
+                        inst.plotPointsFromIdentifiers((...params) =>
+                            unit.getPlotPointsFromIdentifiers(...params));
+                        inst.drawingContext(() => unit.getDrawingContext());
+                    }
+                });
+            });
+            this.dispatchBehaviour(action, payload, propagationInf);
+        }
+
+        return this;
     }
 
     registerSideEffects (sideEffects) {
@@ -245,24 +261,46 @@ export default class GroupFireBolt extends Firebolt {
     handlePhysicalAction (event, payload, unit) {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
-
+        const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
         behaviours.forEach((action) => {
-            const fireboltInst = this;
             const fields = [...this._dimensionsSet, ReservedFields.MEASURE_NAMES];
-            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, this.data());
+            const mode = behaviourConfs[action];
+            let targetFirebolt = firebolt;
+            if (mode === COMMON_INTERACTION) {
+                targetFirebolt = this;
+            }
+            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, unit.facetFieldsMap(), {
+                dm: targetFirebolt.data(),
+                dimensionsMap: targetFirebolt._dimensionsMap
+            });
 
-            fireboltInst.dispatchBehaviour(action, payload, {
+            targetFirebolt.dispatchBehaviour(action, payload, {
                 propagate: false,
                 applySideEffect: false
             });
 
-            const identifiers = fireboltInst._actions.behavioural[action].propagationIdentifiers();
+            const identifiers = targetFirebolt._actions.behavioural[action].propagationIdentifiers();
 
-            fireboltInst.propagate(action, payload, identifiers, {
-                sideEffects: getSideEffects(action, firebolt._behaviourEffectMap),
-                sourceUnitId: unit.id()
+            this.propagate(action, payload, identifiers, {
+                sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
+                sourceUnitId: unit.id(),
+                sourceId: targetFirebolt.id(),
+                propagationDataSource: targetFirebolt.data()
             });
         });
+    }
+
+    dispatchBehaviour (action, payload, propagationInf = {}) {
+        const { criteria } = payload;
+        const fields = [...this._dimensionsSet, ReservedFields.MEASURE_NAMES];
+        const sanitizedPayload = Object.assign({}, payload,
+            {
+                criteria: sanitizePayloadCriteria(criteria, fields, {}, {
+                    dm: this.data(),
+                    dimensionsMap: this._dimensionsMap
+                })
+            });
+        super.dispatchBehaviour(action, sanitizedPayload, propagationInf);
     }
 
     id () {
@@ -290,7 +328,8 @@ export default class GroupFireBolt extends Firebolt {
             identifiers,
             propagationFields: this._propagationFields,
             sourceId: this.id(),
-            sourceCanvasId: this.id()
+            sourceCanvasId: this.id(),
+            propagationDataSource: this.data()
         }, auxConfig));
     }
 }

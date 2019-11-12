@@ -137,13 +137,14 @@ export default class GenericBehaviour {
             if (selectionSet.resetted() || criteria === null) {
                 propData = null;
             } else if (isSimpleObject(criteria)) {
-                const fields = isSimpleObject(criteria) ? Object.keys(criteria) : criteria[0];
-                // const fields = Object.keys(criteria);
+                const fields = Object.keys(criteria);
                 const [dims, otherFields] =
                     partition(fields, (d => fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL));
 
                 propData = {
-                    fields: fields.map(d => fieldsConfig[d].def),
+                    fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
+                        name: d
+                    })),
                     range: this.firebolt.getRangeFromIdentifiers({
                         criteria,
                         entrySet: mergedEnter,

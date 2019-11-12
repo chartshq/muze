@@ -1,17 +1,38 @@
-import { isSimpleObject, getArrayIndexMap } from 'muze-utils';
+import { isSimpleObject, FieldType, ReservedFields, getObjProp } from 'muze-utils';
 
-export const sanitizePayloadCriteria = (criteria, propFields, dm) => {
-    if (criteria === null) {
-        return null;
-    }
-    if (isSimpleObject(criteria)) {
-        return criteria;
+export const sanitizePayloadCriteria = (data, propFields, facetData = {}, { dm, dimensionsMap }) => {
+    if (data === null) {
+        return data;
     }
 
-    const criteriaFields = criteria[0] || [];
-    const fieldIndexMap = getArrayIndexMap(criteriaFields);
+    const facets = Object.keys(facetData);
+    const facetVals = Object.values(facetData);
+    const facetLen = facets.length;
+    if (isSimpleObject(data)) {
+        return Object.assign({}, Object.keys(facetData).reduce((acc, v) => {
+            acc[v] = [facetData[v]];
+            return acc;
+        }, {}), data);
+    }
+    const criteriaFields = data[0];
+    const fieldsWithFacets = criteriaFields.length ? [...facets.map(d => ({ name: d, type: FieldType.DIMENSION })),
+        ...criteriaFields.map((d, i) => ({
+            name: d,
+            index: i + facetLen
+        }))] : [];
+
+    const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
+        acc[v.name] = i;
+        return acc;
+    }, {});
+
+    propFields = propFields || fieldsWithFacets.map(d => d.name);
+    const dataWithFacets = [
+        propFields
+    ];
+    const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
     const fieldsConfig = dm.getFieldsConfig();
-    const propDims = criteriaFields.filter(field => field in fieldsConfig);
+    const propDims = fieldsWithFacets.filter(d => d.name in fieldsConfig).map(d => d.name);
 
     const dimsMap = dm.getData().data.reduce((acc, row) => {
         const key = propDims.map(d => row[fieldsConfig[d].index]);
@@ -20,15 +41,10 @@ export const sanitizePayloadCriteria = (criteria, propFields, dm) => {
         return acc;
     }, {});
 
-    const dataWithFacets = [
-        propFields
-    ];
-
-    for (let i = 1, len = criteria.length; i < len; i++) {
-        const row = criteria[i];
+    for (let i = 1, len = data.length; i < len; i++) {
+        const row = [...facetVals, ...data[i]];
         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
         const origRow = dimsMap[dimKey];
-
         if (origRow) {
             origRow.forEach((rowVal) => {
                 const newRowVal = [];
@@ -37,12 +53,18 @@ export const sanitizePayloadCriteria = (criteria, propFields, dm) => {
                         const idx = fieldIndexMap[field];
                         newRowVal.push(row[idx]);
                     } else {
-                        const idx = fieldsConfig[field].index;
-                        newRowVal.push(rowVal[idx]);
+                        const idx = getObjProp(fieldsConfig[field], 'index');
+                        idx !== undefined && newRowVal.push(rowVal[idx]);
                     }
                 });
-
-                dataWithFacets.push(newRowVal);
+                if (!measureNameField) {
+                    const measuresArr = dimensionsMap[newRowVal];
+                    measuresArr.forEach((measures) => {
+                        dataWithFacets.push([...newRowVal, ...measures]);
+                    });
+                } else {
+                    dataWithFacets.push(newRowVal);
+                }
             });
         }
     }
@@ -50,9 +72,9 @@ export const sanitizePayloadCriteria = (criteria, propFields, dm) => {
 };
 
 export const propagateValues = (instance, action, config = {}) => {
-    const { payload, identifiers, sourceUnitId, sourceCanvasId } = config;
+    const { payload, identifiers, sourceUnitId, sourceCanvasId, propagationDataSource } = config;
     // const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
-    const dataModel = instance.data();
+    const dataModel = propagationDataSource;
     const sideEfffects = instance._sideEffectDefinitions;
     const behaviourEffectMap = instance._behaviourEffectMap;
     const propagationBehaviourMap = instance._propagationBehaviourMap;
