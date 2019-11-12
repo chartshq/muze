@@ -130,7 +130,7 @@ export default class LegendMarker extends GenericSideEffect {
                         .attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
                                      .classed(`${className}-show`, true)
                                      .classed(`${className}-hide`, false);
-        } else {
+        } else if (this._graphicElements.markerElement && this._graphicElements.legendmarkerText) {
             this._graphicElements.markerElement
                 .data([{ value: null }])
                 .classed(`${className}-show`, false)
