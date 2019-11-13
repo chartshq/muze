@@ -107,6 +107,8 @@ export {
     mix,
     componentRegistry,
     getArrayDiff,
+    difference,
+    getArrayIndexMap,
     arraysEqual
 } from './common-utils';
 

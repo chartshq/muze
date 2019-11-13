@@ -12,7 +12,9 @@ import {
     transposeArray,
     CommonProps,
     toArray,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    FieldType,
+    ReservedFields
 } from 'muze-utils';
 import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
@@ -409,7 +411,6 @@ export default class VisualUnit {
         if (mount.length) {
             this._mount = mount[0];
             this.render(mount[0]);
-            this.firebolt().mapActionsAndBehaviour();
             return this;
         }
         return this._mount;
@@ -541,7 +542,10 @@ export default class VisualUnit {
             dimensionMeasureMap: this._dimensionMeasureMap,
             fields: this.fields(),
             data: this.data(),
-            axes: this.axes()
+            axes: this.axes(),
+            retinalFields: this.retinalFields(),
+            layers: this.layers(),
+            timeDiffs: this.timeDiffsByField()
         };
     }
 
@@ -623,8 +627,17 @@ export default class VisualUnit {
         });
 
         if (dimValue !== null && config.getAllPoints) {
+            dimValue[0].push(ReservedFields.MEASURE_NAMES);
             pointObj.id = dimValue;
             const pointInf = this.getMarkInfFromLayers(x, y, config);
+            const layers = this.layers();
+            layers.forEach((layer) => {
+                const measures = layer.data().getSchema()
+                    .filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+                for (let i = 1, len = dimValue.length; i < len; i++) {
+                    dimValue[i].push(measures.join());
+                }
+            });
             pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
             return pointObj;
         }
@@ -762,7 +775,7 @@ export default class VisualUnit {
     getValueFromId (id, fields, fieldsConfig) {
         const { idValuesMap } = this._cachedValuesMap();
         const row = idValuesMap[id];
-        const filteredRow = fields.map(d => row[fieldsConfig[d].index]);
+        const filteredRow = fields.map(d => (d === ReservedFields.ROW_ID ? id : row[fieldsConfig[d].index]));
 
         return filteredRow;
     }

@@ -1,16 +1,15 @@
 import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
-import { isXandYMeasures, getSelectionRejectionModel } from '../helper';
 import { payloadGenerator } from './payload-generator';
-import { propagateValues } from './data-propagator';
+import { isSideEffectEnabled } from './helper';
 
-const sideEffectPolicy = (propPayload, context, propagationInf) => {
+const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
     const fields = sourceIdentifiers.fields;
     const sourceIdentifierFields = Object.keys(fields).filter(field =>
         field.type !== FieldType.MEASURE);
-    const propFields = Object.keys(propagationData[0].getFieldsConfig());
-    const hasCommonCanvas = propPayload.sourceCanvas === context.parentAlias();
+    const propFields = Object.keys(propagationData.getFieldsConfig());
+    const hasCommonCanvas = propPayload.sourceCanvas === firebolt.sourceCanvas();
     return intersect(sourceIdentifierFields, propFields).length || hasCommonCanvas;
 };
 
@@ -28,19 +27,12 @@ export default class UnitFireBolt extends Firebolt {
             BRUSH_ANCHORS,
             PERSISTENT_ANCHORS
         } = SIDE_EFFECTS;
-
+        this._handlers = {};
+        this._propagationIdentifiers = {};
+        this.sideEffects().tooltip.disable();
         const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
         disabledSideEffects.forEach((sideEffect) => {
             this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
-        });
-    }
-
-    propagate (behaviour, payload, identifiers, sideEffects) {
-        propagateValues(this, behaviour, {
-            payload,
-            identifiers,
-            sideEffects,
-            propagationFields: this._propagationFields
         });
     }
 
@@ -50,7 +42,6 @@ export default class UnitFireBolt extends Firebolt {
         const aliasName = context.parentAlias();
         const propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
         const sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
-        const sourceSideEffects = this._sourceSideEffects;
         const sideEffectInstances = this.sideEffects();
         const actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
 
@@ -66,13 +57,7 @@ export default class UnitFireBolt extends Firebolt {
                     return false;
                 }
                 if (!actionOnSource && payload.criteria !== null) {
-                    const sideEffectCheckers = Object.values(sourceSideEffects[se.name || se] || {});
-                    const { sourceIdentifiers, data: propagationData } = propagationInf;
-                    return sideEffectCheckers.length ? sideEffectCheckers.every(checker =>
-                        checker(propagationInf.propPayload, context, {
-                            sourceIdentifiers,
-                            propagationData
-                        })) : true;
+                    return isSideEffectEnabled(this, { se, propagationInf });
                 }
                 if (propagationSourceCanvas === aliasName || actionOnSource) {
                     return se.applyOnSource !== false;
@@ -85,8 +70,8 @@ export default class UnitFireBolt extends Firebolt {
         return applicableSideEffects;
     }
 
-    shouldApplySideEffects (propagate) {
-        return propagate === false;
+    shouldApplySideEffects (propInf) {
+        return propInf.propagate === false && propInf.applySideEffect !== false;
     }
 
     onDataModelPropagation () {
@@ -96,11 +81,8 @@ export default class UnitFireBolt extends Firebolt {
             if (!context.mount()) {
                 return;
             }
-            const {
-                model: propagationData,
-                entryRowIds,
-                exitRowIds
-            } = getSelectionRejectionModel(context.data(), data, isXandYMeasures(context), context._cachedValuesMap());
+            const propagationData = data;
+
             const {
                 enabled: enabledFn,
                 sourceIdentifiers,
@@ -109,10 +91,10 @@ export default class UnitFireBolt extends Firebolt {
             } = config;
 
             const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
-            const payload = payloadFn(context, propagationData, config);
-            const sourceBehaviours = this._sourceBehaviours;
-            const filterFns = Object.values(sourceBehaviours[action] || sourceBehaviours['*'] || {});
-            let enabled = filterFns.every(fn => fn(propPayload || {}, context, {
+            const payload = payloadFn(this, propagationData, config, context.facetByFields());
+            const behaviourPolicies = this._behaviourPolicies;
+            const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
+            let enabled = filterFns.every(fn => fn(propPayload || {}, this, {
                 sourceIdentifiers,
                 propagationData
             }));
@@ -130,8 +112,6 @@ export default class UnitFireBolt extends Firebolt {
                 const propagationInf = {
                     propagate: false,
                     data: propagationData,
-                    entryRowIds,
-                    exitRowIds,
                     propPayload,
                     sourceIdentifiers,
                     persistent: false,
@@ -144,6 +124,7 @@ export default class UnitFireBolt extends Firebolt {
                     propagationInf,
                     isMutableAction
                 };
+
                 this.dispatchBehaviour(action, payload, propagationInf);
             }
         };
@@ -157,8 +138,35 @@ export default class UnitFireBolt extends Firebolt {
         return this;
     }
 
+    target () {
+        return 'visual-unit';
+    }
+
     remove () {
         this.context.cachedData()[0].unsubscribe('propagation');
         return this;
+    }
+
+    propagationIdentifiers (action, identifiers) {
+        if (identifiers) {
+            this._propagationIdentifiers = identifiers;
+        }
+        return this._propagationIdentifiers[action];
+    }
+
+    registerPhysicalActionHandlers () {
+        return this;
+    }
+
+    id () {
+        return this.context.id();
+    }
+
+    getPropagationSource () {
+        return this.context.cachedData()[0];
+    }
+
+    sourceCanvas () {
+        return this.context.parentAlias();
     }
 }

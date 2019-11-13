@@ -181,17 +181,9 @@ export default class StepLegend extends SimpleLegend {
         renderStepItem(this, itemSkeleton);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
-        firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
 
-    /**
-     *
-     *
-     * @param {*} data
-     *
-     * @memberof StepLegend
-     */
     getCriteriaFromData (data) {
         const fieldName = this.fieldName();
         return {

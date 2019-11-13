@@ -16,7 +16,7 @@ import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
 import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM } from '../enums/constants';
 import { PROPS } from './props';
 import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
-import { getItemMeasures, titleCreator, computeItemSpaces } from './legend-helper';
+import { getItemMeasures, titleCreator, computeItemSpaces, prepareSelectionSetData } from './legend-helper';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -302,7 +302,7 @@ export default class SimpleLegend {
 
         // create title
         this.renderTitle(legendContainer);
-        firebolt.createSelectionSet(this.data().map(d => d.id));
+        firebolt.createSelectionSet(prepareSelectionSetData(this.data(), this.fieldName(), this.metaData()));
         return legendContainer;
     }
 

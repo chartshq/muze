@@ -11,9 +11,9 @@ export default class PersistentBehaviour extends GenericBehaviour {
             // new add set
             const existingAddSet = addSet.filter(d => selectionSet._set[d] === SELECTION.SELECTION_NEW_ENTRY
                 || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
-            if (propagationInf.propagate === false) {
+            if (propagationInf.sourceId) {
                 selectionSet.updateExit();
-                const { entrySet } = selectionSet.getSets();
+                const { entrySet } = selectionSet.getSets(true);
                 selectionSet.reset(getMergedSet(entrySet));
                 selectionSet.add(addSet);
                 selectionSet.update(existingAddSet);
@@ -26,7 +26,7 @@ export default class PersistentBehaviour extends GenericBehaviour {
                     selectionSet.updateEntry();
                     selectionSet.add(addSet);
                 }
-                const { exitSet } = selectionSet.getSets();
+                const { exitSet } = selectionSet.getSets(true);
                 const mergedExitSet = getMergedSet(exitSet);
                 const completeSetCount = selectionSet.getCompleteSet().length;
                 if (mergedExitSet.length === completeSetCount) {

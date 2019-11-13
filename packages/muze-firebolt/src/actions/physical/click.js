@@ -7,11 +7,11 @@ import { generatePayloadFromEvent } from './helpers';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-/* istanbul ignore next */ const click = firebolt => (targetEl, behaviours) => {
+/* istanbul ignore next */ const click = firebolt => (targetEl) => {
     const dispatchBehaviour = function (args) {
         const event = getEvent();
         const payload = generatePayloadFromEvent(args, event, firebolt);
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction('click', payload);
         event.stopPropagation();
     };
 

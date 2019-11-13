@@ -1,6 +1,6 @@
 /* eslint-disable */
-var env = muze();
-var DataModel = muze.DataModel;
+// var env = muze();
+// var DataModel = muze.DataModel;
 d3.json('../data/cars.json', function (data) {
     var jsonData = data,
         schema = [{

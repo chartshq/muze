@@ -50,7 +50,8 @@ export const strategies = {
 
             layers.forEach((layer) => {
                 // get uids of only the currently highlighted point
-                const formattedSet = layer.getUidsFromPayload(mergedEnter, payload.target);
+                const formattedSet = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
+                    mergedEnter;
                 // get uids of only the currently highlighted point excluding the excludeSet ids
                 const currentHighlightedSet = getFormattedSet(formattedSet, excludeSetIds);
 

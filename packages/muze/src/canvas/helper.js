@@ -179,6 +179,15 @@ export const setupChangeListener = (context) => {
     }, true);
 };
 
+const applyPropagationPolicy = (firebolt, { behaviours, sideEffects }) => {
+    for (const key in behaviours) {
+        firebolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+    }
+    for (const key in sideEffects) {
+        firebolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+    }
+};
+
 export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
@@ -191,13 +200,9 @@ export const applyInteractionPolicy = (firebolt) => {
         const sideEffects = crossInteractionPolicy.sideEffects;
         valueMatrix.each((cell) => {
             const unitFireBolt = cell.valueOf().firebolt();
-            for (const key in behaviours) {
-                unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
-            }
-            for (const key in sideEffects) {
-                unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
-            }
+            applyPropagationPolicy(unitFireBolt, { behaviours, sideEffects });
         });
+        applyPropagationPolicy(firebolt, { behaviours, sideEffects });
     }
 };
 

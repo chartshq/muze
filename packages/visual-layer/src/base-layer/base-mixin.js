@@ -10,7 +10,8 @@ import {
     STATE_NAMESPACES,
     transactor,
     defaultValue,
-    getObjProp
+    getObjProp,
+    InvalidAwareTypes
 } from 'muze-utils';
 import * as PROPS from '../enums/props';
 import { props } from './props';
@@ -289,27 +290,45 @@ export const BaseLayerMixin = superclass => class extends superclass {
     }
 
     getUidsFromPayload ({ model, uids }, targetData) {
-        if (!targetData) {
-            return { model: null, uids: [], length: 0 };
-        }
-
         const targetFields = targetData[0];
         const targetVals = targetData.slice(1, targetData.length);
         const payloadMap = targetVals.reduce((acc, v) => {
             acc[v] = v;
             return acc;
         }, {});
+        const measures = Object.keys(this.data().getFieldspace().getMeasure());
 
-        const dm = model.select((fields) => {
-            const row = `${targetFields.map(d => fields[d].internalValue)}`;
+        const filterFn = (fields) => {
+            const row = `${targetFields.map((field) => {
+                let val;
+                if (field === ReservedFields.MEASURE_NAMES) {
+                    val = measures;
+                } else {
+                    const currentField = fields[field];
+                    const isFieldInvalid = currentField instanceof InvalidAwareTypes;
+
+                    val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+                }
+                return val;
+            })}`;
             return row in payloadMap;
-        });
-        // select uids corresponding to the whole set
-        const currentSetIds = dm.getUids().map(uid => uids[uid]);
+        };
+
+        const dm = model.select(filterFn, {});
+
+        // Need to find a better way to do this instead of iterating the full data
+        const currentSetIds = this.data().select(filterFn, {
+            saveChild: false
+        }).getUids();
+
+        const uidMap = currentSetIds.reduce((acc, v) => {
+            acc[v] = true;
+            return acc;
+        }, {});
 
         return {
             model: dm,
-            uids: currentSetIds,
+            uids: uids.filter(d => uidMap[d[0]]),
             length: currentSetIds.length
         };
     }
@@ -425,32 +444,32 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return interactionFn(this, elem, apply, interactionType, style, mountPoint);
     }
 
-    getIdentifiersFromData (data) {
+    getIdentifiersFromData (data, rowId) {
         const schema = this.data().getSchema();
         const fieldsConfig = this.data().getFieldsConfig();
         const identifiers = [[], []];
-        const {
-                xFieldType,
-                yFieldType,
-                xField,
-                yField
-            } = this.encodingFieldsInf();
 
-        const [xMeasure, yMeasure] = [xFieldType, yFieldType].map(type => type === FieldType.MEASURE);
+        const allMeasures = schema.every(field => field.type === FieldType.MEASURE);
         schema.forEach((d, i) => {
             const name = d.name;
-            if (fieldsConfig[name].def.type === FieldType.DIMENSION) {
+            const { type } = fieldsConfig[name].def;
+            if (type === FieldType.DIMENSION) {
                 identifiers[0].push(name);
                 identifiers[1].push(data[i]);
             }
         });
 
-        if (xMeasure && yMeasure) {
-            const xMeasureIndex = fieldsConfig[xField].index;
-            const yMeasureIndex = fieldsConfig[yField].index;
-            identifiers[0].push(...[xField, yField]);
-            identifiers[1].push(...[data[xMeasureIndex], data[yMeasureIndex]]);
+        const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+        if (measures.length) {
+            identifiers[0].push(ReservedFields.MEASURE_NAMES);
+            identifiers[1].push(measures.join());
         }
+
+        if (allMeasures) {
+            identifiers[0].push(...[ReservedFields.ROW_ID]);
+            identifiers[1].push(...[rowId]);
+        }
+
         return identifiers;
     }
 

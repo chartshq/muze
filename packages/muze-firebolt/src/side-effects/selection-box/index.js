@@ -74,7 +74,7 @@ class SelectionBox extends SpawnableSideEffect {
             return this;
         }
 
-        const sourceInf = firebolt.context.getSourceInfo();
+        const sourceInf = this.sourceInfo();
         const { dimension, direction } =
             getBoxDimensionsFromPayload(payload, sourceInf.axes, sourceInf.fields);
         const transition = payload.dragEnd && config.transition;

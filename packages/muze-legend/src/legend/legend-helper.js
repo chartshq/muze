@@ -1,4 +1,4 @@
-import { makeElement, numberInterpolator } from 'muze-utils';
+import { makeElement, numberInterpolator, FieldType } from 'muze-utils';
 
 import {
     SCALE_FUNCTIONS,
@@ -398,5 +398,32 @@ export const getDomainBounds = (type, scaleInfo, domainInfo) => {
         value: domainBounds[type],
         id: type === 'lower' ? 0 : domainLeg.length + 2,
         range: [ele, step]
+    };
+};
+
+export const prepareSelectionSetData = (data, fieldName, dm) => {
+    const fieldType = dm.getFieldsConfig()[fieldName].def.type;
+    if (fieldType === FieldType.DIMENSION) {
+        return {
+            keys: data.reduce((acc, d) => {
+                acc[d.rawVal] = {
+                    uid: d.id,
+                    dims: [d.rawVal]
+
+                };
+                return acc;
+            }, {}),
+            fields: [fieldName]
+        };
+    }
+    return {
+        keys: data.reduce((acc, d) => {
+            acc[d.id] = {
+                uid: d.id,
+                dims: [d.id]
+            };
+            return acc;
+        }, {}),
+        fields: [fieldName]
     };
 };

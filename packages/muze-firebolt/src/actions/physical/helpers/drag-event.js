@@ -10,7 +10,7 @@ import getDragActionConfig from './drag-action-config';
  * @param {SVGElement} targetEl Element on which brushing action is needed.
  * @param {Array} behaviours Array of behaviours
  */
-export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
+export const attachDragEvent = (targetEl, action, firebolt, touch) => {
     let startPos = {};
     let endPos = {};
     let drawingInf;
@@ -41,7 +41,7 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
             startPos,
             endPos
         });
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction(action, payload);
     }).on('end', () => {
         const event = getEvent();
         endPos = {
@@ -61,7 +61,7 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
             endPos
         });
         payload.dragEnd = true;
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction(action, payload);
     }));
 };
 

@@ -56,6 +56,15 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
+
+        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
+            const currentLayers = this.firebolt.context.layers();
+            const payload = this._currentPayload;
+            if (payload) {
+                this.setAnchorLayerStyle(currentLayers, payload);
+            }
+            this._currentPayload = null;
+        });
     }
 
     setAnchorLayerStyle (layers, payload) {
@@ -67,10 +76,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const layerName = this.constructor.formalName();
             const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
             const currentInteraction = defaultInteractionLayerEncoding[layerName];
-            const formattedUids = anchorLayer.getUidsFromPayload({
+            const formattedUids = payload.target ? anchorLayer.getUidsFromPayload({
                 model: data,
                 uids: ids
-            }, payload.target).uids;
+            }, payload.target).uids : [];
 
             if (!formattedUids.length) {
                 anchorLayer.applyInteractionStyle(currentInteraction, ids, false);
@@ -139,17 +148,14 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     }
                 }
             };
+
             const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
 
             layer
                 .data(transformedDataModel)
                 .config(newConfig);
 
-            this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
-                const currentLayers = this.firebolt.context.layers();
-                this.setAnchorLayerStyle(currentLayers, payload);
-            });
-
+            this._currentPayload = payload;
             return this;
         });
     }

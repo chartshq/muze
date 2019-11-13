@@ -1,4 +1,6 @@
-import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue } from 'muze-utils';
+import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue, isSimpleObject } from 'muze-utils';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
+import { TOOLTIP, FRAGMENTED_TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
@@ -8,6 +10,39 @@ import {
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
+
+const getUniqueKeys = (data, dimensions, { layers, uids, map }) => data.reduce((acc, row, i) => {
+    const key = dimensions.map(d => row[d.index]);
+
+    layers.forEach((layer) => {
+        const measureNames = Object.keys(layer.data().getFieldspace().getMeasure());
+        const key2 = dimensions.length ? `${[key, ...measureNames]}` : `${[uids[i], ...measureNames]}`;
+        if (map) {
+            acc[key] = acc[key] || [];
+            acc[key].push(measureNames);
+        } else {
+            acc[key2] = acc[key2] || {};
+            acc[key2] = {
+                dims: key,
+                measureNames,
+                uid: uids[i]
+            };
+        }
+    });
+    return acc;
+}, {});
+
+const getKeysFromData = (dataModel, unit) => {
+    const { data, uids } = dataModel.getData();
+    const dimensions = Object.values(dataModel.getFieldsConfig()).filter(d => d.def.type === 'dimension');
+    const layers = unit.layers();
+
+    return {
+        keys: getUniqueKeys(data, dimensions, { layers, uids }),
+        fields: dimensions.map(d => d.def.name),
+        dimMap: getUniqueKeys(data, dimensions, { layers, uids, map: true })
+    };
+};
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
@@ -83,7 +118,10 @@ export const listenerMap = [
                 context._timeDiffs = timeDiffs;
                 const firebolt = context.firebolt();
                 const originalData = context.cachedData()[0];
-                firebolt.createSelectionSet(context.data().getUids());
+                const { keys, dimMap, fields } = getKeysFromData(context.data(), context);
+                firebolt._dimensionsMap = dimMap;
+                firebolt._dimensionsSet = fields;
+                firebolt.createSelectionSet({ keys, fields });
                 firebolt.attachPropagationListener(originalData);
             }
         }
@@ -93,7 +131,27 @@ export const listenerMap = [
         props: [PROPS.CONFIG],
         listener: (context, [, config]) => {
             if (config) {
-                context.firebolt().config(config.interaction);
+                const firebolt = context.firebolt();
+                const { interaction } = config;
+                firebolt.config(interaction);
+                const { mode } = interaction.tooltip;
+                if (mode === FRAGMENTED) {
+                    const map = firebolt._behaviourEffectMap;
+                    for (const key in map) {
+                        const sideEffects = map[key];
+
+                        map[key] = sideEffects.map((val) => {
+                            let name = val;
+                            if (isSimpleObject(val)) {
+                                name = val.name;
+                            }
+                            if (name === TOOLTIP) {
+                                return FRAGMENTED_TOOLTIP;
+                            }
+                            return val;
+                        });
+                    }
+                }
                 createGridLineLayer(context);
             }
         }

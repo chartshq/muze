@@ -58,7 +58,7 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import { dataSelect } from './DataSystem';
-import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
+import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING, ReservedFields } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
 const { CATEGORICAL, TEMPORAL } = DimensionSubtype;
@@ -989,6 +989,10 @@ const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
     });
 };
 
+const getArrayIndexMap = arr => arr.reduce((acc, value, i) => {
+    acc[value] = i;
+    return acc;
+}, {});
 /**
  *
  *
@@ -1005,11 +1009,11 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode, hasBarLayer) 
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
         } else if (identifiers instanceof Array && identifiers[0].length) {
-            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig);
-            filteredDataModel = dataModel.select((fields) => {
+            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === ReservedFields.ROW_ID);
+            filteredDataModel = dataModel.select((fields, rowId) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    const value = fields[propField].internalValue;
+                    const value = propField === ReservedFields.ROW_ID ? rowId : fields[propField].internalValue;
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });
@@ -1130,14 +1134,16 @@ const concatModels = (dm1, dm2) => {
             } else {
                 const dm1Key = dim1Values.join();
                 const dm2Key = dim2Values.join();
-                if (!commonTuples[dm1Key] && !commonTuples[dm2Key]) {
-                    !tuples1[dm1Key] && (tuples1[dm1Key] = {});
-                    !tuples2[dm2Key] && (tuples2[dm2Key] = {});
+                if (!commonTuples[dm1Key]) {
+                    !commonTuples[dm1Key] && (commonTuples[dm1Key] = {});
                     row1.forEach((value, idx) => {
-                        tuples1[dm1Key][schema1[idx].name] = value;
+                        commonTuples[dm1Key][schema1[idx].name] = value;
                     });
+                }
+                if (!commonTuples[dm2Key]) {
+                    !commonTuples[dm2Key] && (commonTuples[dm2Key] = {});
                     row2.forEach((value, idx) => {
-                        tuples2[dm2Key][schema2[idx].name] = value;
+                        commonTuples[dm2Key][schema2[idx].name] = value;
                     });
                 }
             }
@@ -1359,6 +1365,12 @@ const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
     return arr1.filter(value => set.has(fn1(value)));
 };
 
+const difference = (arr1, arr2, accessors = [v => v, v => v]) => {
+    const [fn1, fn2] = accessors;
+    const set = new Set(arr2.map(v => fn2(v)));
+    return arr1.filter(value => !set.has(fn1(value)));
+};
+
 const partition = (array, filterFn) => array.reduce((acc, v, i) => {
     const pass = filterFn(v, i, array);
 
@@ -1390,9 +1402,11 @@ export {
     componentRegistry,
     mix,
     partition,
+    getArrayIndexMap,
     getValueParser,
     require,
     intersect,
+    difference,
     Scales,
     Symbols,
     pathInterpolators,

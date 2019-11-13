@@ -1,7 +1,7 @@
 @import './prefix.scss';
 
 .#{$prefix}tooltip-box {
-    opacity: 0.9;
+    opacity: 1;
     border: 1px solid rgba(151,151,151,.19);
     background: #fbfbfb;
     box-shadow: 2px 2px 3px 0px rgba(211,211,211,.5);
@@ -116,9 +116,6 @@
     left: -12px;
 };
 
-.#{$prefix}tooltip-content-container {
-    float: none !important;
-}
 .#{$prefix}tooltip-html-container {
     margin-left: 10px;
     margin-right: 10px;

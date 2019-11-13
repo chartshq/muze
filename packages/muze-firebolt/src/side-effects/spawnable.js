@@ -27,6 +27,11 @@ import GenericSideEffect from './generic';
  * @module SpawnableSideEffect
  */
 export default class SpawnableSideEffect extends GenericSideEffect {
+    constructor (...params) {
+        super(...params);
+        this.sourceInfo(() => this.firebolt.context.getSourceInfo());
+        this.plotPointsFromIdentifiers((...args) => this.firebolt.context.getPlotPointsFromIdentifiers(...args));
+    }
     /**
      * Creates a html or svg element in the container.
      *
@@ -61,6 +66,22 @@ export default class SpawnableSideEffect extends GenericSideEffect {
             return this;
         }
         return this._drawingContext();
+    }
+
+    sourceInfo (...sourceInfo) {
+        if (sourceInfo.length) {
+            this._sourceInfo = sourceInfo[0];
+            return this;
+        }
+        return this._sourceInfo();
+    }
+
+    plotPointsFromIdentifiers (...params) {
+        if (params.length && params[0] instanceof Function) {
+            this._plotPointsFromIdentifiers = params[0];
+            return this;
+        }
+        return this._plotPointsFromIdentifiers(...params);
     }
 
     show () {

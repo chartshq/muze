@@ -5,8 +5,11 @@ export const initializeSideEffects = (context, sideEffects) => {
     sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
     sideEffects.forEach((SideEffect) => {
         const formalName = SideEffect.formalName();
-        const sideEffectInstance = sideEffectsMap[formalName];
-        sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+        const target = SideEffect.target();
+        if (target === context.target() || target === 'all') {
+            const sideEffectInstance = sideEffectsMap[formalName];
+            sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+        }
     });
     return sideEffectsMap;
 };
@@ -124,7 +127,8 @@ export const unionSets = (firebolt, behaviours) => {
 
     ['mergedEnter', 'mergedExit'].forEach((type) => {
         if (behaviours.length > 1) {
-            const uids = combinedSet[type].uids.reduce((acc, v) => {
+            const uidsArr = combinedSet[type].uids.map(d => d[0]);
+            const uids = uidsArr.reduce((acc, v) => {
                 acc[v] = true;
                 return acc;
             }, {});

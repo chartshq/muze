@@ -66,7 +66,8 @@ import './styles.scss';
 
         const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
         const legendGradContainer = context.getDrawingContext().svgContainer;
-        const legendSelGroup = makeElement(legendGradContainer, 'g', [1], `${config.classPrefix}-selection-box-group`);
+        const legendSelGroup = makeElement(legendGradContainer, 'g', [1],
+            `${config.classPrefix}-selection-box-group`);
 
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
@@ -82,6 +83,7 @@ import './styles.scss';
         const enterFn = function (el) {
             selectionBoxDrag(firebolt)(el, ['brush']);
         };
+
         const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,
             { enter: enterFn });
         selBox.attr('y', y)

@@ -29,8 +29,8 @@ const schema = [{
         type: 'dimension'
     }];
     // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);    
-    
+    let rootData = new DataModel(data, schema);
+
     // Get a canvas instance from Muze where the chart will be rendered.
     let canvas = env.canvas();
 

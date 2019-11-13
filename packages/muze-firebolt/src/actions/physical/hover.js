@@ -1,5 +1,4 @@
 import { getClientPoint, getEvent } from 'muze-utils';
-import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
 
 /**
  * Adds mouse interactions to target element.
@@ -7,7 +6,7 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-/* istanbul ignore next */ const hover = firebolt => (targetEl, behaviours) => {
+/* istanbul ignore next */ const hover = firebolt => (targetEl) => {
     const dispatchBehaviour = function (args) {
         const event = getEvent();
         const context = firebolt.context;
@@ -15,28 +14,28 @@ import { CONSOLIDATED, FRAGMENTED } from '../../enums/constants';
         const mode = tooltipConf.mode;
         const pos = getClientPoint(context.getDrawingContext().svgContainer, event);
         const nearestPoint = context.getNearestPoint(pos.x, pos.y, {
-            getAllPoints: mode === CONSOLIDATED || mode === FRAGMENTED,
+            getAllPoints: true,
             data: args,
             event
         });
         const payload = {
             criteria: nearestPoint ? nearestPoint.id : null,
+            getAllPoints: false,
             showInPosition: nearestPoint.showInPosition,
             target: nearestPoint.target,
             position: pos,
             mode
         };
-
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction('hover', payload);
         event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
-                        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
+                        firebolt.triggerPhysicalAction('hover', {
                             criteria: null
-                        }));
+                        });
                     });
 };
 

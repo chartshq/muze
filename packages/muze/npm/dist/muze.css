@@ -123,7 +123,7 @@
   pointer-events: all; }
 
 .muze-tooltip-box {
-  opacity: 0.9;
+  opacity: 1;
   border: 1px solid rgba(151, 151, 151, 0.19);
   background: #fbfbfb;
   -webkit-box-shadow: 2px 2px 3px 0px rgba(211, 211, 211, 0.5);
@@ -233,9 +233,6 @@
   right: 0;
   left: -12px; }
 
-.muze-tooltip-content-container {
-  float: none !important; }
-
 .muze-tooltip-html-container {
   margin-left: 10px;
   margin-right: 10px; }
@@ -263,11 +260,15 @@
 .muze-tooltip-table-row-0 {
   font-weight: bold; }
 
-.muze-tooltip-content-container {
-  border-bottom: 1px solid #E9E9E9; }
-
 .muze-tooltip-content-parent-container :last-child {
   border-bottom: none; }
+
+.muze-tooltip-content-container-highlightSummary {
+  border-right: 1px solid #E9E9E9;
+  float: left; }
+
+.muze-tooltip-content-container-selectionSummary {
+  float: left; }
 
 .muze-crossband {
   stroke-opacity: 0;

@@ -11,8 +11,7 @@ export const behaviourEffectMap = {
         name: 'tooltip',
         options: {
             strategy: 'selectionSummary',
-            order: 0,
-            filter: context => context.config().mode === 'fragmented'
+            order: 1
         }
     }],
     [BEHAVIOURS.HIGHLIGHT]: [{
@@ -26,7 +25,7 @@ export const behaviourEffectMap = {
     }, 'crossline', {
         name: 'tooltip',
         options: {
-            order: 9999
+            order: 0
         }
     }, 'anchors'],
     [BEHAVIOURS.FILTER]: ['filter'],

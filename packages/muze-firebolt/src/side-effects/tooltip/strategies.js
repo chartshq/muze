@@ -24,7 +24,7 @@ const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
         formatTemporal(Number(value), interval)),
     [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
-        formatter(value.toFixed(2))),
+        formatter(`${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`)),
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
@@ -155,12 +155,14 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         } else {
             const hasMultipleMeasures = measuresArr.length > 1;
             hasMultipleMeasures && (content.push({ data: [icon, formattedRetinalValue] }));
-            const selectedContext = target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
+            const selectedContext = target && target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
             const isSelected = selectedContext === retinalFieldValue;
+
             measuresArr.forEach((measure) => {
                 const measureIndex = fieldsConfig[measure].index;
                 const { displayName: dName, fn: formatterFn } = fieldInf[measure];
-                const value = formatterFn(valueArr[measureIndex]);
+                const currentMeasureValue = valueArr[measureIndex];
+                const value = formatterFn(currentMeasureValue);
                 const keyValue = getKeyValue({
                     field: hasMultipleMeasures ? `${dName}${separator}` : formattedRetinalValue,
                     value,
@@ -168,8 +170,11 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
                     margin: hasMultipleMeasures ? margin : undefined,
                     isSelected,
                     stackedSum,
-                    stackedValue: valueArr[measureIndex].toFixed(2)
+                    stackedValue: currentMeasureValue instanceof InvalidAwareTypes
+                    ? currentMeasureValue.value()
+                    : currentMeasureValue.toFixed(2)
                 });
+
                 if (!hasMultipleMeasures) {
                     keyValue.data = [icon, ...keyValue.data];
                 }
@@ -202,7 +207,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const { data, schema } = dataModel.getData();
     const fieldspace = dataModel.getFieldspace();
     const fieldsConfig = dataModel.getFieldsConfig();
-    const { color, shape, size } = context.firebolt.context.retinalFields();
+    const { color, shape, size } = context.retinalFields;
     const detailFields = context.detailFields || [];
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
@@ -230,7 +235,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const filteredDimensions = dimensions.filter(field => !retinalFields[field.name]);
         const indices = filteredDimensions.map(dim => fieldsConfig[dim.name].index);
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
-        const isStacked = isStackedBar(context.firebolt.context.layers());
+        const isStacked = isStackedBar(context.layers);
         const filteredMeasures = !isSingleValue(dataLen, isStacked)
             ? measures.filter(d => allMeasures.indexOf(d.name) === -1)
             : measures;
@@ -318,6 +323,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
 export const strategies = {
     [SELECTION_SUMMARY]: (dm, config, context) => {
         const { selectionSet } = context;
+        const { classPrefix } = config;
         const aggFns = selectionSet.mergedEnter.aggFns;
         const dataObj = dm.getData();
         const measures = dataObj.schema.filter(d => d.type === FieldType.MEASURE);
@@ -328,33 +334,38 @@ export const strategies = {
             saveChild: false
         }));
         const fieldsConf = aggregatedModel.getFieldsConfig();
-        let values = [[{
-            value: `${dataObj.data.length}`,
-            style: {
-                'font-weight': 'bold'
-            }
-        }, 'Items Selected']];
-        const measureNames = measures.map(d => d.name);
+        const entryUids = selectionSet.mergedEnter.uids;
+        const values = [{
+            className: `${classPrefix}-tooltip-row`,
+            data: [{
+                value: `${entryUids.length}`,
+                style: {
+                    'font-weight': 'bold'
+                }
+            }, 'Items Selected']
+        }];
+        const measureNames = [...new Set(entryUids.map(d => d[1]).filter(d => d).flat())];
         const data = aggregatedModel.getData().data;
         measureNames.forEach((measure) => {
             const { numberFormat } = fieldsConf[measure].def;
             const value = data[0][fieldsConf[measure].index].toFixed(2);
 
-            value instanceof InvalidAwareTypes ? values.push([]) : values.push([`(${aggFns[measure].toUpperCase()})`,
-                `${retrieveFieldDisplayName(dm, measure)}`,
-                {
-                    value: numberFormat ? numberFormat(value) : value,
-                    style: {
-                        'font-weight': 'bold'
-                    }
-                }]);
+            value instanceof InvalidAwareTypes ? values.push([]) : values.push({
+                className: `${classPrefix}-tooltip-row`,
+                data: [`(${aggFns[measure].toUpperCase()})`,
+                    `${retrieveFieldDisplayName(dm, measure)}`,
+                    {
+                        value: numberFormat ? numberFormat(value) : value,
+                        style: {
+                            'font-weight': 'bold'
+                        },
+                        className: `${classPrefix}-tooltip-value`
+                    }]
+            }
+            );
         });
-        if (measureNames.length === 1) {
-            values = [[...values[0], ...values[1]]];
-        }
-        return ([{
-            data: values[0]
-        }]);
+
+        return values;
     },
     [HIGHLIGHT_SUMMARY]: (data, config, context) => buildTooltipData(data, config, context)
 };

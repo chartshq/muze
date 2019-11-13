@@ -24510,6 +24510,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return GenericBehaviour; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../helper */ "./packages/muze-firebolt/src/helper/index.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -24527,12 +24535,16 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 var getIdentifiersFromSet = function getIdentifiersFromSet(set, context, _ref) {
-  var fieldsConfig = _ref.fieldsConfig,
-      fields = _ref.fields;
-  var data = [fields];
-  set.forEach(function (id) {
-    return data.push(context.getValueFromId(id, fields, fieldsConfig));
-  });
+  var fields = _ref.fields;
+  var data = [[]];
+
+  if (fields.length) {
+    data[0] = fields;
+    set.forEach(function (id) {
+      return data.push(id);
+    });
+  }
+
   return data;
 };
 /**
@@ -24633,9 +24645,9 @@ function () {
         this._entryExitSet = {
           entrySet: [this.getSetInfo('oldEntry', entrySet[0], filteredDataModel), this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
           exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel), this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
-          mergedEnter: this.getSetInfo('mergedEnter', Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(entrySet), filteredDataModel),
-          mergedExit: this.getSetInfo('mergedExit', Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(exitSet), filteredDataModel),
-          completeSet: this.getSetInfo('complete', completeSet, filteredDataModel),
+          mergedEnter: this.getSetInfo('mergedEnter', Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(entrySet), filteredDataModel, selectionSet._fields),
+          mergedExit: this.getSetInfo('mergedExit', Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(exitSet), filteredDataModel, selectionSet._fields),
+          completeSet: this.getSetInfo('complete', completeSet, filteredDataModel, selectionSet._fields),
           fields: Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getSourceFields"])(propagationInf, payload.criteria)
         };
         return this;
@@ -24645,13 +24657,27 @@ function () {
     }
   }, {
     key: "getSetInfo",
-    value: function getSetInfo(type, set, filteredDataModel) {
+    value: function getSetInfo(type, set, filteredDataModel, setFields) {
       var model = null;
+      var data = this.firebolt.data();
 
       if (type === 'mergedEnter') {
-        model = filteredDataModel ? filteredDataModel[0] : null;
+        model = filteredDataModel || null;
       } else if (type === 'mergedExit') {
-        model = filteredDataModel ? filteredDataModel[1] : null;
+        if (filteredDataModel) {
+          var setKeys = new Set(set.map(function (d) {
+            return d[0];
+          }));
+          model = data.select(function (fields, i) {
+            return setKeys.has(setFields.map(function (field) {
+              return field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID ? i : fields[field].value;
+            }));
+          }, {
+            saveChild: false
+          });
+        }
+
+        model = filteredDataModel || null;
       }
 
       return {
@@ -24675,10 +24701,13 @@ function () {
         var fieldsConfig = this.firebolt.data().getFieldsConfig();
         var criteria = payload.criteria;
 
+        var _selectionSet$getSets2 = selectionSet.getSets(true),
+            mergedEnter = _selectionSet$getSets2.mergedEnter;
+
         if (selectionSet.resetted() || criteria === null) {
           propData = null;
         } else if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(criteria)) {
-          var fields = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(criteria) ? Object.keys(criteria) : criteria[0]; // const fields = Object.keys(criteria);
+          var fields = Object.keys(criteria);
 
           var _partition = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["partition"])(fields, function (d) {
             return fieldsConfig[d].def.subtype === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
@@ -24689,30 +24718,29 @@ function () {
 
           propData = {
             fields: fields.map(function (d) {
-              return fieldsConfig[d].def;
+              return fieldsConfig[d] ? fieldsConfig[d].def : {
+                name: d
+              };
             }),
-            range: context.getRangeFromIdentifiers({
+            range: this.firebolt.getRangeFromIdentifiers({
               criteria: criteria,
-              entrySet: selectionSet.getMergedEntrySet(),
+              entrySet: mergedEnter,
               fields: otherFields
             }),
-            identifiers: getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
+            identifiers: getIdentifiersFromSet(mergedEnter, context, {
               fields: dims,
               fieldsConfig: fieldsConfig
             })
           };
         } else {
-          var data = getIdentifiersFromSet(selectionSet.getMergedEntrySet(), context, {
-            fields: criteria[0].filter(function (field) {
-              return fieldsConfig[field].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
-            }),
-            fieldsConfig: fieldsConfig
-          });
+          var data = criteria;
           propData = {
             fields: data[0].map(function (d) {
-              return fieldsConfig[d].def;
+              return fieldsConfig[d] ? fieldsConfig[d].def : {
+                name: d
+              };
             }),
-            identifiers: data
+            identifiers: [criteria[0]].concat(_toConsumableArray(mergedEnter))
           };
         }
 
@@ -24895,10 +24923,10 @@ function (_GenericBehaviour) {
           return selectionSet._set[d] === _enums_selection__WEBPACK_IMPORTED_MODULE_2__["SELECTION_NEW_ENTRY"] || selectionSet._set[d] === _enums_selection__WEBPACK_IMPORTED_MODULE_2__["SELECTION_OLD_ENTRY"];
         });
 
-        if (propagationInf.propagate === false) {
+        if (propagationInf.sourceId) {
           selectionSet.updateExit();
 
-          var _selectionSet$getSets = selectionSet.getSets(),
+          var _selectionSet$getSets = selectionSet.getSets(true),
               entrySet = _selectionSet$getSets.entrySet;
 
           selectionSet.reset(Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(entrySet));
@@ -24914,7 +24942,7 @@ function (_GenericBehaviour) {
             selectionSet.add(addSet);
           }
 
-          var _selectionSet$getSets2 = selectionSet.getSets(),
+          var _selectionSet$getSets2 = selectionSet.getSets(true),
               exitSet = _selectionSet$getSets2.exitSet;
 
           var mergedExitSet = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(exitSet);
@@ -25055,7 +25083,7 @@ function (_GenericBehaviour) {
         });
         selectionSet.updateExit();
 
-        var _selectionSet$getSets = selectionSet.getSets(),
+        var _selectionSet$getSets = selectionSet.getSets(true),
             entrySet = _selectionSet$getSets.entrySet;
 
         selectionSet.reset(Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getMergedSet"])(entrySet));
@@ -25097,13 +25125,11 @@ __webpack_require__.r(__webpack_exports__);
 /* istanbul ignore next */
 
 var click = function click(firebolt) {
-  return function (targetEl, behaviours) {
+  return function (targetEl) {
     var dispatchBehaviour = function dispatchBehaviour(args) {
       var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
       var payload = Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["generatePayloadFromEvent"])(args, event, firebolt);
-      behaviours.forEach(function (beh) {
-        return firebolt.dispatchBehaviour(beh, payload);
-      });
+      firebolt.triggerPhysicalAction('click', payload);
       event.stopPropagation();
     };
 
@@ -25136,8 +25162,8 @@ __webpack_require__.r(__webpack_exports__);
 /* istanbul ignore next */
 
 var drag = function drag(firebolt) {
-  return function (targetEl, behaviours) {
-    Object(_helpers_drag_event__WEBPACK_IMPORTED_MODULE_0__["attachDragEvent"])(targetEl, behaviours, firebolt);
+  return function (targetEl) {
+    Object(_helpers_drag_event__WEBPACK_IMPORTED_MODULE_0__["attachDragEvent"])(targetEl, 'drag', firebolt);
   };
 };
 
@@ -25262,7 +25288,7 @@ __webpack_require__.r(__webpack_exports__);
  * @param {Array} behaviours Array of behaviours
  */
 
-var attachDragEvent = function attachDragEvent(targetEl, behaviours, firebolt, touch) {
+var attachDragEvent = function attachDragEvent(targetEl, action, firebolt, touch) {
   var startPos = {};
   var endPos = {};
   var drawingInf;
@@ -25293,9 +25319,7 @@ var attachDragEvent = function attachDragEvent(targetEl, behaviours, firebolt, t
       startPos: startPos,
       endPos: endPos
     });
-    behaviours.forEach(function (beh) {
-      return firebolt.dispatchBehaviour(beh, payload);
-    });
+    firebolt.triggerPhysicalAction(action, payload);
   }).on('end', function () {
     var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
     endPos = {
@@ -25315,9 +25339,7 @@ var attachDragEvent = function attachDragEvent(targetEl, behaviours, firebolt, t
       endPos: endPos
     });
     payload.dragEnd = true;
-    behaviours.forEach(function (beh) {
-      return firebolt.dispatchBehaviour(beh, payload);
-    });
+    firebolt.triggerPhysicalAction(action, payload);
   }));
 };
 
@@ -25362,8 +25384,6 @@ var generatePayloadFromEvent = function generatePayloadFromEvent(args, event, fi
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/constants */ "./packages/muze-firebolt/src/enums/constants.js");
-
 
 /**
  * Adds mouse interactions to target element.
@@ -25375,7 +25395,7 @@ __webpack_require__.r(__webpack_exports__);
 /* istanbul ignore next */
 
 var hover = function hover(firebolt) {
-  return function (targetEl, behaviours) {
+  return function (targetEl) {
     var dispatchBehaviour = function dispatchBehaviour(args) {
       var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
       var context = firebolt.context;
@@ -25383,28 +25403,25 @@ var hover = function hover(firebolt) {
       var mode = tooltipConf.mode;
       var pos = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getClientPoint"])(context.getDrawingContext().svgContainer, event);
       var nearestPoint = context.getNearestPoint(pos.x, pos.y, {
-        getAllPoints: mode === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CONSOLIDATED"] || mode === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["FRAGMENTED"],
+        getAllPoints: true,
         data: args,
         event: event
       });
       var payload = {
         criteria: nearestPoint ? nearestPoint.id : null,
+        getAllPoints: false,
         showInPosition: nearestPoint.showInPosition,
         target: nearestPoint.target,
         position: pos,
         mode: mode
       };
-      behaviours.forEach(function (beh) {
-        return firebolt.dispatchBehaviour(beh, payload);
-      });
+      firebolt.triggerPhysicalAction('hover', payload);
       event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour).on('mousemove', dispatchBehaviour).on('mouseout', function () {
-      behaviours.forEach(function (beh) {
-        return firebolt.dispatchBehaviour(beh, {
-          criteria: null
-        });
+      firebolt.triggerPhysicalAction('hover', {
+        criteria: null
       });
     });
   };
@@ -25638,10 +25655,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
   name: 'tooltip',
   options: {
     strategy: 'selectionSummary',
-    order: 0,
-    filter: function filter(context) {
-      return context.config().mode === 'fragmented';
-    }
+    order: 1
   }
 }]), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["HIGHLIGHT"], [{
   name: 'highlighter',
@@ -25651,10 +25665,10 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
     // accepts an array or fn
     excludeSet: [_enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["SELECT"]]
   }
-}, 'crossline', {
+}, {
   name: 'tooltip',
   options: {
-    order: 9999
+    order: 0
   }
 }, 'anchors']), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["FILTER"], ['filter']), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["SELECT"], [{
   name: 'highlighter',
@@ -25758,7 +25772,7 @@ var SELECTION_OLD_EXIT = -2;
 /*!**********************************************************!*\
   !*** ./packages/muze-firebolt/src/enums/side-effects.js ***!
   \**********************************************************/
-/*! exports provided: ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS, FILTER, HIGHLIGHTER, CROSSLINE, TOOLTIP */
+/*! exports provided: ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS, FILTER, HIGHLIGHTER, CROSSLINE, TOOLTIP, FRAGMENTED_TOOLTIP */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -25770,6 +25784,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HIGHLIGHTER", function() { return HIGHLIGHTER; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CROSSLINE", function() { return CROSSLINE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TOOLTIP", function() { return TOOLTIP; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FRAGMENTED_TOOLTIP", function() { return FRAGMENTED_TOOLTIP; });
 var ANCHORS = 'anchors';
 var TOOLTIP = 'tooltip';
 var BRUSH_ANCHORS = 'brush-anchors';
@@ -25777,6 +25792,7 @@ var PERSISTENT_ANCHORS = 'persistent-anchors';
 var FILTER = 'filter';
 var HIGHLIGHTER = 'highlighter';
 var CROSSLINE = 'crossline';
+var FRAGMENTED_TOOLTIP = 'fragmented-tooltip';
 
 
 /***/ }),
@@ -25813,6 +25829,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/helper/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -25821,16 +25843,41 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 
 
 
 
+var getKeysFromCriteria = function getKeysFromCriteria(criteria, firebolt) {
+  if (criteria) {
+    var data = firebolt.data();
+    var dimensionsMap = firebolt._dimensionsMap;
+    var dimArr = firebolt._dimensionsSet;
+    var values = [];
+
+    if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(criteria)) {
+      var dm = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getDataModelFromRange"])(data, criteria);
+      var fieldsConfig = dm.getFieldsConfig();
+      dm.getData().data.forEach(function (row) {
+        var dimKey = "".concat(dimArr.map(function (d) {
+          return row[fieldsConfig[d].index];
+        }));
+        var measures = dimensionsMap[dimKey] || [[]];
+        measures.forEach(function (measureArr) {
+          values.push("".concat([dimKey].concat(_toConsumableArray(measureArr))));
+        });
+      });
+    } else {
+      values = criteria.slice(1, criteria.length).map(function (d) {
+        return "".concat(d);
+      });
+    }
+
+    return values;
+  }
+
+  return null;
+};
 /**
  * This class is responsible for dispatching behavioural actions and side effects. It also keeps the information of
  * registered physical actions, behavioural actions and side effects. Also, it keeps the map of physical and behavioural
@@ -25843,6 +25890,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  * @module Firebolt
  */
 
+
 var Firebolt =
 /*#__PURE__*/
 function () {
@@ -25853,6 +25901,7 @@ function () {
     this._sideEffectDefinitions = {};
     this._sideEffects = {};
     this._propagationInf = {};
+    this._sourceSelectionSet = {};
     this._actions = {
       behavioural: {},
       physical: {}
@@ -25860,15 +25909,16 @@ function () {
     this._selectionSet = {};
     this._volatileSelectionSet = {};
     this._propagationFields = {};
-    this._sourceSideEffects = {};
+    this._sideEffectPolicies = {};
     this._propagationBehaviourMap = {};
-    this._sourceBehaviours = {};
+    this._behaviourPolicies = {};
     this._actionBehaviourMap = {};
     this._config = {};
     this._behaviourEffectMap = {};
     this._entryExitSet = {};
     this._actionHistory = {};
     this._queuedSideEffects = {};
+    this._handlers = {};
     this.mapSideEffects(behaviourEffectMap);
     this.registerBehaviouralActions(actions.behavioural);
     this.registerSideEffects(sideEffects);
@@ -25905,6 +25955,15 @@ function () {
             effectNames = sideEffects;
           }
 
+          effectNames = effectNames.map(function (effect) {
+            if (!Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(effect)) {
+              return {
+                name: effect
+              };
+            }
+
+            return effect;
+          });
           !behaviourEffectMap[key] && (behaviourEffectMap[key] = []);
           this._behaviourEffectMap[key] = _toConsumableArray(new Set(preventDefaultActions ? effectNames : [].concat(_toConsumableArray(behaviourEffectMap[key]), _toConsumableArray(effectNames))));
         }
@@ -25944,14 +26003,15 @@ function () {
       var actionHistory = this._actionHistory;
       var queuedSideEffects = this._queuedSideEffects;
       sideEffects.forEach(function (sideEffect) {
-        var options;
-        var name;
         var effects = sideEffect.effects;
         var behaviours = sideEffect.behaviours;
 
         var combinedSet = _this.mergeSelectionSets(behaviours);
 
         effects.forEach(function (effect) {
+          var options;
+          var name;
+
           if (_typeof(effect) === 'object') {
             name = effect.name;
             options = effect.options;
@@ -25961,7 +26021,7 @@ function () {
 
           var sideEffectInstance = sideEffectStore[name];
 
-          if (sideEffectInstance.isEnabled()) {
+          if (sideEffectInstance && sideEffectInstance.isEnabled()) {
             if (!sideEffectInstance.constructor.mutates() && Object.values(actionHistory).some(function (d) {
               return d.isMutableAction;
             })) {
@@ -26011,10 +26071,12 @@ function () {
       if (action) {
         action.dispatch(payload);
         this._entryExitSet[behaviour] = action.entryExitSet();
-        var shouldApplySideEffects = this.shouldApplySideEffects(propagate);
+        var shouldApplySideEffects = this.shouldApplySideEffects(propagationInfo);
 
         if (propagate) {
-          this.propagate(behaviour, payload, action.propagationIdentifiers(), sideEffects);
+          this.propagate(behaviour, payload, action.propagationIdentifiers(), {
+            sideEffects: sideEffects
+          });
         }
 
         if (shouldApplySideEffects) {
@@ -26041,7 +26103,7 @@ function () {
     key: "changeBehaviourStateOnPropagation",
     value: function changeBehaviourStateOnPropagation(behaviour, value) {
       var key = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'default';
-      var behaviourConditions = this._sourceBehaviours[behaviour] || (this._sourceBehaviours[behaviour] = {});
+      var behaviourConditions = this._behaviourPolicies[behaviour] || (this._behaviourPolicies[behaviour] = {});
 
       if (value instanceof Function) {
         behaviourConditions[key] = value;
@@ -26057,7 +26119,7 @@ function () {
     key: "changeSideEffectStateOnPropagation",
     value: function changeSideEffectStateOnPropagation(sideEffect, value) {
       var key = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'default';
-      var sideEffectConditions = this._sourceSideEffects[sideEffect] || (this._sourceSideEffects[sideEffect] = {});
+      var sideEffectConditions = this._sideEffectPolicies[sideEffect] || (this._sideEffectPolicies[sideEffect] = {});
 
       if (value instanceof Function) {
         sideEffectConditions[key] = value;
@@ -26070,13 +26132,13 @@ function () {
   }, {
     key: "removeSideEffectPolicy",
     value: function removeSideEffectPolicy(sideEffect, key) {
-      delete this._sourceSideEffects[sideEffect][key];
+      delete this._sideEffectPolicies[sideEffect][key];
       return this;
     }
   }, {
     key: "removeBehaviourPolicy",
     value: function removeBehaviourPolicy(behaviour, key) {
-      delete this._sourceBehaviours[behaviour][key];
+      delete this._behaviourPolicies[behaviour][key];
       return this;
     }
   }, {
@@ -26140,8 +26202,9 @@ function () {
   }, {
     key: "attachPropagationListener",
     value: function attachPropagationListener(dataModel) {
+      var handler = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.onDataModelPropagation();
       dataModel.unsubscribe('propagation');
-      dataModel.on('propagation', this.onDataModelPropagation());
+      dataModel.on('propagation', handler);
       return this;
     }
   }, {
@@ -26195,9 +26258,15 @@ function () {
       return this;
     }
   }, {
+    key: "target",
+    value: function target() {
+      return 'all';
+    }
+  }, {
     key: "registerPhysicalActions",
     value: function registerPhysicalActions(actions) {
-      var initedActions = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["initializePhysicalActions"])(this, actions);
+      var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this;
+      var initedActions = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["initializePhysicalActions"])(context, actions);
       Object.assign(this._actions.physical, initedActions);
       return this;
     }
@@ -26265,6 +26334,7 @@ function () {
         }
       }
 
+      this.registerPhysicalActionHandlers();
       return this;
     }
   }, {
@@ -26317,17 +26387,15 @@ function () {
     key: "getAddSetFromCriteria",
     value: function getAddSetFromCriteria(criteria) {
       var propagationInf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var context = this.context;
-      var filteredDataModel = propagationInf.data ? propagationInf.data : context.getDataModelFromIdentifiers(criteria, 'all');
       return {
-        model: filteredDataModel,
-        uids: criteria ? propagationInf.data ? propagationInf.entryRowIds : filteredDataModel[0].getUids() : null
+        model: propagationInf.data ? propagationInf.data : null,
+        uids: criteria ? getKeysFromCriteria(criteria, this) : null
       };
     }
   }, {
     key: "getSelectionSets",
     value: function getSelectionSets(action) {
-      var sourceId = this.context.id();
+      var sourceId = this.id();
       var propagationInf = this._propagationInf || {};
       var propagationSource = propagationInf.sourceId;
       var applicableSelectionSets = [];
@@ -26377,6 +26445,48 @@ function () {
     value: function data() {
       return this.context.data();
     }
+  }, {
+    key: "triggerPhysicalAction",
+    value: function triggerPhysicalAction(event, payload) {
+      var handlers = this._handlers[event] || [];
+      var genericHandlers = this._handlers['*'];
+      var allHandlers = [].concat(_toConsumableArray(Object.values(handlers)), _toConsumableArray(Object.values(genericHandlers)));
+      allHandlers.forEach(function (fn) {
+        fn(event, payload);
+      });
+      return this;
+    }
+  }, {
+    key: "onPhysicalAction",
+    value: function onPhysicalAction(event, fn, namespace) {
+      !this._handlers[event] && (this._handlers[event] = {});
+      this._handlers[event][namespace] = fn;
+      return this;
+    }
+  }, {
+    key: "registerPhysicalActionHandlers",
+    value: function registerPhysicalActionHandlers() {
+      var _this4 = this;
+
+      this.onPhysicalAction('*', function (event, payload) {
+        var behaviours = _this4._actionBehaviourMap[event].behaviours;
+        behaviours.forEach(function (beh) {
+          return _this4.dispatchBehaviour(beh, payload);
+        });
+      });
+    }
+  }, {
+    key: "id",
+    value: function id() {
+      return this.context.id();
+    }
+  }, {
+    key: "getRangeFromIdentifiers",
+    value: function getRangeFromIdentifiers() {
+      var _this$context;
+
+      return (_this$context = this.context).getRangeFromIdentifiers.apply(_this$context, arguments);
+    }
   }]);
 
   return Firebolt;
@@ -26419,8 +26529,12 @@ var initializeSideEffects = function initializeSideEffects(context, sideEffects)
   sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
   sideEffects.forEach(function (SideEffect) {
     var formalName = SideEffect.formalName();
-    var sideEffectInstance = sideEffectsMap[formalName];
-    sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+    var target = SideEffect.target();
+
+    if (target === context.target() || target === 'all') {
+      var sideEffectInstance = sideEffectsMap[formalName];
+      sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+    }
   });
   return sideEffectsMap;
 };
@@ -26549,7 +26663,10 @@ var unionSets = function unionSets(firebolt, behaviours) {
   });
   ['mergedEnter', 'mergedExit'].forEach(function (type) {
     if (behaviours.length > 1) {
-      var uids = combinedSet[type].uids.reduce(function (acc, v) {
+      var uidsArr = combinedSet[type].uids.map(function (d) {
+        return d[0];
+      });
+      var uids = uidsArr.reduce(function (acc, v) {
         acc[v] = true;
         return acc;
       }, {});
@@ -26571,7 +26688,7 @@ var unionSets = function unionSets(firebolt, behaviours) {
 /*!*********************************************!*\
   !*** ./packages/muze-firebolt/src/index.js ***!
   \*********************************************/
-/*! exports provided: behaviouralActions, VolatileBehaviour, GenericBehaviour, PersistentBehaviour, physicalActions, Firebolt, BEHAVIOURS, ACTIONS, sideEffects, SelectionSet, behaviourEffectMap, SurrogateSideEffect, SpawnableSideEffect, GenericSideEffect, SELECTION, SIDE_EFFECTS, registry */
+/*! exports provided: initializePhysicalActions, behaviouralActions, VolatileBehaviour, GenericBehaviour, PersistentBehaviour, physicalActions, Firebolt, BEHAVIOURS, ACTIONS, sideEffects, SelectionSet, behaviourEffectMap, getSideEffects, SurrogateSideEffect, SpawnableSideEffect, GenericSideEffect, SELECTION, SIDE_EFFECTS, registry */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26620,6 +26737,12 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony import */ var _registry__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./registry */ "./packages/muze-firebolt/src/registry.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "registry", function() { return _registry__WEBPACK_IMPORTED_MODULE_16__["registry"]; });
+
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/helper/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "initializePhysicalActions", function() { return _helper__WEBPACK_IMPORTED_MODULE_17__["initializePhysicalActions"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getSideEffects", function() { return _helper__WEBPACK_IMPORTED_MODULE_17__["getSideEffects"]; });
+
 
 
 
@@ -26705,6 +26828,14 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _enums_selection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/selection */ "./packages/muze-firebolt/src/enums/selection.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -26732,17 +26863,29 @@ function () {
    *
    * @param {Array.<string>} completeSet Set of unique ids.
    */
-  function SelectionSet(completeSet, _volatile) {
+  function SelectionSet(_ref, _volatile) {
+    var keys = _ref.keys,
+        fields = _ref.fields;
+
     _classCallCheck(this, SelectionSet);
 
-    this.completeSet = completeSet;
-    this._set = completeSet.reduce(function (obj, key) {
-      obj[key] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NULL"];
-      return obj;
-    }, {});
+    this.completeSet = keys;
+    this._set = {};
+    this._uidMap = {};
+    this._measureNames = {};
+    this._dimVals = {};
+
+    for (var key in keys) {
+      this._set[key] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NULL"];
+      this._uidMap[key] = keys[key].uid;
+      this._measureNames[key] = keys[key].measureNames;
+      this._dimVals[key] = keys[key].dims;
+    }
+
     this._volatile = _volatile;
-    this._completeSetCount = completeSet.length;
+    this._completeSetCount = Object.keys(keys).length;
     this._lockedSelection = {};
+    this._fields = fields;
     this._resetted = true;
   }
   /**
@@ -26762,7 +26905,9 @@ function () {
       var set = this._set; // from exitset to entryset
 
       ids.forEach(function (i) {
-        set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"];
+        if (i in set) {
+          set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"];
+        }
       });
 
       for (var key in set) {
@@ -26787,7 +26932,9 @@ function () {
       var set = this._set; // from exitset to entryset
 
       ids.forEach(function (i) {
-        set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"];
+        if (i in set) {
+          set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"];
+        }
       });
       return this;
     }
@@ -26847,7 +26994,7 @@ function () {
       this._resetted = false;
       var set = this._set;
       ids.forEach(function (i) {
-        set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"];
+        i in set && (set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]);
       });
 
       for (var key in set) {
@@ -26860,32 +27007,57 @@ function () {
     }
   }, {
     key: "getSets",
-    value: function getSets() {
+    value: function getSets(raw) {
       var set = this._set;
+      var uidMap = this._uidMap;
       var retObj = {
         entrySet: [[], []],
         exitSet: [[], []],
+        mergedEnter: [],
+        mergedExit: [],
         completeSet: []
+      };
+      var measureNames = this._measureNames;
+      var dimVals = this._dimVals;
+
+      var _loop = function _loop(key) {
+        var val = void 0;
+
+        if (raw) {
+          val = measureNames[key] ? [].concat(_toConsumableArray(dimVals[key]), ["".concat(measureNames[key])]) : _toConsumableArray(dimVals[key]);
+        } else {
+          val = measureNames[key] ? [uidMap[key], measureNames[key]] : [uidMap[key]];
+        }
+
+        if (set[key] > 0) {
+          [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"]].forEach(function (v, i) {
+            if (set[key] === v) {
+              retObj.entrySet[i].push(val);
+            }
+          });
+
+          if (set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"] || set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"]) {
+            retObj.mergedEnter.push(val);
+          }
+        } else if (set[key] < 0) {
+          [_enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"], _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]].forEach(function (v, i) {
+            if (set[key] === v) {
+              retObj.exitSet[i].push(val);
+            }
+          });
+
+          if (set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"] || set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"]) {
+            retObj.mergedExit.push(val);
+          }
+        }
+
+        retObj.completeSet.push(val);
       };
 
       for (var key in set) {
-        if (set[key] > 0) {
-          set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"] && retObj.entrySet[0].push(key);
-          set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"] && retObj.entrySet[1].push(key);
-        } else if (set[key] < 0) {
-          set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"] && retObj.exitSet[0].push(key);
-          set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"] && retObj.exitSet[1].push(key);
-        }
-
-        retObj.completeSet.push(key);
+        _loop(key);
       }
 
-      ['entrySet', 'exitSet'].forEach(function (type) {
-        retObj[type] = retObj[type].map(function (e) {
-          return e.map(Number);
-        });
-      });
-      retObj.completeSet = retObj.completeSet.map(Number);
       return retObj;
     }
     /**
@@ -26906,7 +27078,7 @@ function () {
 
       if (ids) {
         ids.forEach(function (i) {
-          set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NULL"];
+          i in set && (set[i] = _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NULL"]);
         });
       } else {
         var lockedSel = this._lockedSelection;
@@ -27083,13 +27255,18 @@ function () {
     }
   }, {
     key: "getMergedEntrySet",
-    value: function getMergedEntrySet() {
+    value: function getMergedEntrySet(raw) {
       var set = this._set;
       var mergedEnter = [];
+      var uidMap = this._uidMap;
+      var measureNames = this._measureNames;
+      var dimVals = this._dimVals;
 
       for (var key in set) {
+        var val = raw ? [].concat(_toConsumableArray(dimVals[key]), ["".concat(measureNames[key])]) : [uidMap[key], measureNames[key]];
+
         if (set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_ENTRY"] || set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_ENTRY"]) {
-          mergedEnter.push(key);
+          mergedEnter.push(val);
         }
       }
 
@@ -27097,13 +27274,18 @@ function () {
     }
   }, {
     key: "getMergedExitSet",
-    value: function getMergedExitSet() {
+    value: function getMergedExitSet(raw) {
       var set = this._set;
       var mergedExit = [];
+      var uidMap = this._uidMap;
+      var measureNames = this._measureNames;
+      var dimVals = this._dimVals;
 
       for (var key in set) {
+        var val = raw ? [].concat(_toConsumableArray(dimVals[key]), ["".concat(measureNames[key])]) : [uidMap[key], measureNames[key]];
+
         if (set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_NEW_EXIT"] || set[key] === _enums_selection__WEBPACK_IMPORTED_MODULE_0__["SELECTION_OLD_EXIT"]) {
-          mergedExit.push(key);
+          mergedExit.push(val);
         }
       }
 
@@ -27240,6 +27422,18 @@ function (_SpawnableSideEffect) {
 
     _this.addAnchorLayers();
 
+    _this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', function () {
+      var currentLayers = _this.firebolt.context.layers();
+
+      var payload = _this._currentPayload;
+
+      if (payload) {
+        _this.setAnchorLayerStyle(currentLayers, payload);
+      }
+
+      _this._currentPayload = null;
+    });
+
     return _this;
   }
 
@@ -27257,10 +27451,10 @@ function (_SpawnableSideEffect) {
         var layerName = this.constructor.formalName();
         var defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
         var currentInteraction = defaultInteractionLayerEncoding[layerName];
-        var formattedUids = anchorLayer.getUidsFromPayload({
+        var formattedUids = payload.target ? anchorLayer.getUidsFromPayload({
           model: data,
           uids: ids
-        }, payload.target).uids;
+        }, payload.target).uids : [];
 
         if (!formattedUids.length) {
           anchorLayer.applyInteractionStyle(currentInteraction, ids, false);
@@ -27333,13 +27527,7 @@ function (_SpawnableSideEffect) {
         };
         var newConfig = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(layer.config(), anchorSizeConfig);
         layer.data(transformedDataModel).config(newConfig);
-
-        _this2.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', function () {
-          var currentLayers = _this2.firebolt.context.layers();
-
-          _this2.setAnchorLayerStyle(currentLayers, payload);
-        });
-
+        _this2._currentPayload = payload;
         return _this2;
       });
     }
@@ -27630,6 +27818,11 @@ function (_SpawnableSideEffect) {
     value: function formalName() {
       return _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__["CROSSLINE"];
     }
+  }, {
+    key: "target",
+    value: function target() {
+      return 'visual-unit';
+    }
   }]);
 
   return Crossline;
@@ -27725,6 +27918,179 @@ function (_SurrogateSideEffect) {
 
   return FilterEffect;
 }(_surrogate__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./packages/muze-firebolt/src/side-effects/fragmented-tooltip/index.js":
+/*!*****************************************************************************!*\
+  !*** ./packages/muze-firebolt/src/side-effects/fragmented-tooltip/index.js ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FragmentedTooltip; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper */ "./packages/muze-firebolt/src/side-effects/helper/index.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
+/* harmony import */ var _tooltip__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../tooltip */ "./packages/muze-firebolt/src/side-effects/tooltip/index.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+var FragmentedTooltip =
+/*#__PURE__*/
+function (_Tooltip) {
+  _inherits(FragmentedTooltip, _Tooltip);
+
+  function FragmentedTooltip() {
+    _classCallCheck(this, FragmentedTooltip);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(FragmentedTooltip).apply(this, arguments));
+  }
+
+  _createClass(FragmentedTooltip, [{
+    key: "createTooltip",
+    value: function createTooltip(dataModel, props) {
+      var totalHeight = 0;
+      var totalWidth = 0;
+      var config = this.config();
+      var payload = props.payload;
+      var context = this.firebolt.context;
+      var drawingInf = this.drawingContext();
+      var tooltips = this._tooltips;
+      var boundBox = {
+        width: drawingInf.width,
+        height: drawingInf.height
+      };
+      var pad = config.padding;
+      var dataModels = [];
+      var sourceInf = context.getSourceInfo();
+      var fields = sourceInf.fields;
+      var xFieldDim = fields.x[0] ? fields.x[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION : false;
+      var showVertically = !!xFieldDim;
+      var boxes = [];
+      var uids = dataModel.getUids();
+      dataModels.push.apply(dataModels, _toConsumableArray(uids.map(function (d) {
+        return dataModel.select(function (fieldsArr, i) {
+          return i === d;
+        }, {
+          saveChild: false
+        });
+      })));
+      var enter = {};
+
+      for (var i = 0, len = dataModels.length; i < len; i++) {
+        var dm = dataModels[i];
+        var dimensions = dm.getData().schema.filter(function (d) {
+          return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+        }).map(function (d) {
+          return d.name;
+        });
+        var plotDim = context.getPlotPointsFromIdentifiers(dm.project(dimensions), {
+          getBBox: true
+        });
+
+        _get(_getPrototypeOf(FragmentedTooltip.prototype), "createTooltip", this).call(this, dm, props, plotDim, i);
+
+        var tooltipInst = this._tooltips[i];
+        enter[i] = this._tooltips[i];
+        var position = tooltipInst._position;
+
+        var tooltipBoundBox = tooltipInst._tooltipContainer.node().getBoundingClientRect();
+
+        totalHeight += tooltipBoundBox.height + pad;
+        totalWidth += tooltipBoundBox.width + pad;
+
+        if (showVertically ? totalHeight > drawingInf.height : totalWidth > drawingInf.width) {
+          break;
+        }
+
+        boxes.push({
+          x: position.x,
+          y: position.y,
+          width: tooltipBoundBox.width,
+          height: tooltipBoundBox.height,
+          tooltip: tooltipInst
+        });
+      }
+
+      for (var key in tooltips) {
+        if (!enter[key]) {
+          var tooltip = tooltips[key];
+          tooltip.content(payload.action, null);
+
+          if (!tooltip.getContents().length) {
+            tooltip.remove();
+            delete tooltips[key];
+          }
+        }
+      }
+
+      Object(_helper__WEBPACK_IMPORTED_MODULE_1__["spaceOutBoxes"])(boxes, boundBox, showVertically);
+      boxes.forEach(function (box) {
+        return box.tooltip.position(box.x, box.y, {
+          repositionArrow: true
+        });
+      });
+      return this;
+    }
+  }, {
+    key: "hide",
+    value: function hide(options) {
+      var tooltips = this._tooltips;
+
+      for (var key in tooltips) {
+        if ({}.hasOwnProperty.call(tooltips, key)) {
+          var strategy = options.strategy || this._strategy;
+          tooltips[key].content(strategy, null);
+          tooltips[key].hide();
+        }
+      }
+    }
+  }], [{
+    key: "formalName",
+    value: function formalName() {
+      return _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__["FRAGMENTED_TOOLTIP"];
+    }
+  }]);
+
+  return FragmentedTooltip;
+}(_tooltip__WEBPACK_IMPORTED_MODULE_3__["default"]);
 
 
 
@@ -28013,7 +28379,7 @@ var spaceOutBoxes = function spaceOutBoxes(boxes, extent, showVertically) {
 /*!**********************************************************!*\
   !*** ./packages/muze-firebolt/src/side-effects/index.js ***!
   \**********************************************************/
-/*! exports provided: SelectionBox, Tooltip, Crossline, PlotHighlighter, FilterEffect, PersistentAnchors, BrushAnchors, AnchorEffect */
+/*! exports provided: SelectionBox, Tooltip, FragmentedTooltip, Crossline, PlotHighlighter, FilterEffect, PersistentAnchors, BrushAnchors, AnchorEffect */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28024,23 +28390,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tooltip__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tooltip */ "./packages/muze-firebolt/src/side-effects/tooltip/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Tooltip", function() { return _tooltip__WEBPACK_IMPORTED_MODULE_1__["default"]; });
 
-/* harmony import */ var _crossline__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./crossline */ "./packages/muze-firebolt/src/side-effects/crossline/index.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Crossline", function() { return _crossline__WEBPACK_IMPORTED_MODULE_2__["default"]; });
+/* harmony import */ var _fragmented_tooltip__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./fragmented-tooltip */ "./packages/muze-firebolt/src/side-effects/fragmented-tooltip/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FragmentedTooltip", function() { return _fragmented_tooltip__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _plot_highlighter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./plot-highlighter */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/index.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PlotHighlighter", function() { return _plot_highlighter__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+/* harmony import */ var _crossline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./crossline */ "./packages/muze-firebolt/src/side-effects/crossline/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Crossline", function() { return _crossline__WEBPACK_IMPORTED_MODULE_3__["default"]; });
 
-/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./filter */ "./packages/muze-firebolt/src/side-effects/filter/index.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FilterEffect", function() { return _filter__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+/* harmony import */ var _plot_highlighter__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./plot-highlighter */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PlotHighlighter", function() { return _plot_highlighter__WEBPACK_IMPORTED_MODULE_4__["default"]; });
 
-/* harmony import */ var _persistent_anchors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./persistent-anchors */ "./packages/muze-firebolt/src/side-effects/persistent-anchors.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PersistentAnchors", function() { return _persistent_anchors__WEBPACK_IMPORTED_MODULE_5__["default"]; });
+/* harmony import */ var _filter__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./filter */ "./packages/muze-firebolt/src/side-effects/filter/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "FilterEffect", function() { return _filter__WEBPACK_IMPORTED_MODULE_5__["default"]; });
 
-/* harmony import */ var _brush_anchors__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./brush-anchors */ "./packages/muze-firebolt/src/side-effects/brush-anchors.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BrushAnchors", function() { return _brush_anchors__WEBPACK_IMPORTED_MODULE_6__["default"]; });
+/* harmony import */ var _persistent_anchors__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./persistent-anchors */ "./packages/muze-firebolt/src/side-effects/persistent-anchors.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "PersistentAnchors", function() { return _persistent_anchors__WEBPACK_IMPORTED_MODULE_6__["default"]; });
 
-/* harmony import */ var _anchors__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./anchors */ "./packages/muze-firebolt/src/side-effects/anchors/index.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnchorEffect", function() { return _anchors__WEBPACK_IMPORTED_MODULE_7__["default"]; });
+/* harmony import */ var _brush_anchors__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./brush-anchors */ "./packages/muze-firebolt/src/side-effects/brush-anchors.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "BrushAnchors", function() { return _brush_anchors__WEBPACK_IMPORTED_MODULE_7__["default"]; });
+
+/* harmony import */ var _anchors__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./anchors */ "./packages/muze-firebolt/src/side-effects/anchors/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnchorEffect", function() { return _anchors__WEBPACK_IMPORTED_MODULE_8__["default"]; });
+
 
 
 
@@ -28173,7 +28543,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  */
 
 var getFormattedSet = function getFormattedSet(set, selectedPointsId) {
-  var formattedSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getArrayDiff"])(set.uids, selectedPointsId);
+  var intersection = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var fn = intersection ? muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"] : muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"];
+  var formattedSet = fn(set.uids, selectedPointsId, [function (d) {
+    return d[0];
+  }, function (d) {
+    return d[0];
+  }]);
   return _objectSpread({}, set, {
     uids: formattedSet,
     length: formattedSet.length
@@ -28283,7 +28659,9 @@ function (_SurrogateSideEffect) {
       var formattedSet = _objectSpread({}, selectionSet, {
         completeSet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.completeSet, excludeSetIds),
         entrySet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.entrySet[1], excludeSetIds),
-        exitSet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.exitSet[1], excludeSetIds)
+        exitSet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.exitSet[1], excludeSetIds),
+        mergedEnter: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.mergedEnter, excludeSetIds),
+        mergedExit: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.mergedExit, excludeSetIds)
       });
 
       currentStrategy(formattedSet, this, payload, excludeSetIds);
@@ -28364,7 +28742,7 @@ var strategies = {
       var layers = context.firebolt.context.layers();
       layers.forEach(function (layer) {
         // get uids of only the currently highlighted point
-        var formattedSet = layer.getUidsFromPayload(mergedEnter, payload.target); // get uids of only the currently highlighted point excluding the excludeSet ids
+        var formattedSet = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) : mergedEnter; // get uids of only the currently highlighted point excluding the excludeSet ids
 
         var currentHighlightedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_0__["getFormattedSet"])(formattedSet, excludeSetIds);
         context.applyInteractionStyle(currentHighlightedSet, {}, 'highlight', true, payload);
@@ -28614,7 +28992,7 @@ function (_SpawnableSideEffect) {
         return this;
       }
 
-      var sourceInf = firebolt.context.getSourceInfo();
+      var sourceInf = this.sourceInfo();
 
       var _getBoxDimensionsFrom = Object(_helper__WEBPACK_IMPORTED_MODULE_5__["getBoxDimensionsFromPayload"])(payload, sourceInf.axes, sourceInf.fields),
           dimension = _getBoxDimensionsFrom.dimension,
@@ -28778,25 +29156,45 @@ function (_GenericSideEffect) {
   _inherits(SpawnableSideEffect, _GenericSideEffect);
 
   function SpawnableSideEffect() {
+    var _getPrototypeOf2;
+
+    var _this;
+
     _classCallCheck(this, SpawnableSideEffect);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(SpawnableSideEffect).apply(this, arguments));
+    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+      params[_key] = arguments[_key];
+    }
+
+    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(SpawnableSideEffect)).call.apply(_getPrototypeOf2, [this].concat(params)));
+
+    _this.sourceInfo(function () {
+      return _this.firebolt.context.getSourceInfo();
+    });
+
+    _this.plotPointsFromIdentifiers(function () {
+      var _this$firebolt$contex;
+
+      return (_this$firebolt$contex = _this.firebolt.context).getPlotPointsFromIdentifiers.apply(_this$firebolt$contex, arguments);
+    });
+
+    return _this;
   }
+  /**
+   * Creates a html or svg element in the container.
+   *
+   * @public
+   * @param {SVGElement|HTMLElement} container Container where the dom element will be rendered.
+   * @param {string} elemType Type of dom element.
+   * @param {Array} data Array of objects with which the dom elements will be binded.
+   * @param {string} className class name of the element.
+   *
+   * @return {Selection} D3 Selection of the element.
+   */
+
 
   _createClass(SpawnableSideEffect, [{
     key: "createElement",
-
-    /**
-     * Creates a html or svg element in the container.
-     *
-     * @public
-     * @param {SVGElement|HTMLElement} container Container where the dom element will be rendered.
-     * @param {string} elemType Type of dom element.
-     * @param {Array} data Array of objects with which the dom elements will be binded.
-     * @param {string} className class name of the element.
-     *
-     * @return {Selection} D3 Selection of the element.
-     */
     value: function createElement(container, elemType, data, className, callbacks) {
       return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, elemType, data, className, callbacks);
     }
@@ -28823,6 +29221,26 @@ function (_GenericSideEffect) {
       }
 
       return this._drawingContext();
+    }
+  }, {
+    key: "sourceInfo",
+    value: function sourceInfo() {
+      if (arguments.length) {
+        this._sourceInfo = arguments.length <= 0 ? undefined : arguments[0];
+        return this;
+      }
+
+      return this._sourceInfo();
+    }
+  }, {
+    key: "plotPointsFromIdentifiers",
+    value: function plotPointsFromIdentifiers() {
+      if (arguments.length && (arguments.length <= 0 ? undefined : arguments[0]) instanceof Function) {
+        this._plotPointsFromIdentifiers = arguments.length <= 0 ? undefined : arguments[0];
+        return this;
+      }
+
+      return this._plotPointsFromIdentifiers.apply(this, arguments);
     }
   }, {
     key: "show",
@@ -28855,6 +29273,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return SurrogateSideEffect; });
 /* harmony import */ var _generic__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./generic */ "./packages/muze-firebolt/src/side-effects/generic/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -28942,10 +29368,25 @@ function (_GenericSideEffect) {
       var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       var interactionType = arguments.length > 2 ? arguments[2] : undefined;
       var apply = arguments.length > 3 ? arguments[3] : undefined;
-      var payload = arguments.length > 4 ? arguments[4] : undefined;
       var layers = this.firebolt.context.layers();
       layers.forEach(function (layer) {
-        return layer.config().interactive !== false && layer.applyInteractionStyle(interactionType, set.uids, apply, null, payload);
+        var _layer$config = layer.config(),
+            interactive = _layer$config.interactive;
+
+        if (interactive !== false) {
+          var layerFields = layer.data().getFieldsConfig();
+          var filteredUids = set.uids.filter(function (_ref) {
+            var _ref2 = _slicedToArray(_ref, 2),
+                measures = _ref2[1];
+
+            return measures.every(function (m) {
+              return m in layerFields;
+            });
+          }).map(function (d) {
+            return d[0];
+          });
+          layer.applyInteractionStyle(interactionType, filteredUids, apply);
+        }
       });
       return this;
     }
@@ -28970,25 +29411,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Tooltip; });
 /* harmony import */ var _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-tooltip */ "./packages/muze-tooltip/src/index.js");
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper */ "./packages/muze-firebolt/src/side-effects/helper/index.js");
-/* harmony import */ var _strategies__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./strategies */ "./packages/muze-firebolt/src/side-effects/tooltip/strategies.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../enums/constants */ "./packages/muze-firebolt/src/enums/constants.js");
-/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
-/* harmony import */ var _spawnable__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../spawnable */ "./packages/muze-firebolt/src/side-effects/spawnable.js");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-firebolt/src/side-effects/tooltip/styles.scss");
-/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../enums/tooltip-strategies */ "./packages/muze-firebolt/src/enums/tooltip-strategies.js");
+/* harmony import */ var _strategies__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./strategies */ "./packages/muze-firebolt/src/side-effects/tooltip/strategies.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
+/* harmony import */ var _spawnable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../spawnable */ "./packages/muze-firebolt/src/side-effects/spawnable.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-firebolt/src/side-effects/tooltip/styles.scss");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../enums/tooltip-strategies */ "./packages/muze-firebolt/src/enums/tooltip-strategies.js");
 var _configResolvers;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -28999,6 +29430,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
@@ -29015,9 +29450,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-
-
-var configResolvers = (_configResolvers = {}, _defineProperty(_configResolvers, _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_8__["HIGHLIGHT_SUMMARY"], function (specificConf, config) {
+var configResolvers = (_configResolvers = {}, _defineProperty(_configResolvers, _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_6__["HIGHLIGHT_SUMMARY"], function (specificConf, config) {
   return Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(specificConf, config);
 }), _defineProperty(_configResolvers, "default", function _default(specificConf) {
   return Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(specificConf, {});
@@ -29052,8 +29485,8 @@ function (_SpawnableSideEffect) {
 
     _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Tooltip)).call.apply(_getPrototypeOf2, [this].concat(params)));
     _this._tooltips = {};
-    _this._strategies = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["mergeRecursive"])({}, _strategies__WEBPACK_IMPORTED_MODULE_3__["strategies"]);
-    _this._strategy = _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_8__["HIGHLIGHT_SUMMARY"];
+    _this._strategies = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["mergeRecursive"])({}, _strategies__WEBPACK_IMPORTED_MODULE_2__["strategies"]);
+    _this._strategy = _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_6__["HIGHLIGHT_SUMMARY"];
     return _this;
   }
 
@@ -29078,48 +29511,38 @@ function (_SpawnableSideEffect) {
     key: "apply",
     value: function apply(selectionSet, payload) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-      var totalHeight = 0;
-      var totalWidth = 0;
       var dataModel = selectionSet.mergedEnter.model;
-      var context = this.firebolt.context;
-      var drawingInf = this.drawingContext();
 
-      if (dataModel.isEmpty() || payload.criteria === null) {
+      if (payload.criteria === null || dataModel && dataModel.isEmpty()) {
         this.hide(options, null);
         return this;
       }
 
+      var strategy = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(options.strategy, this._strategy);
+      this.createTooltip(dataModel, Object.assign({}, {
+        payload: payload,
+        selectionSet: selectionSet,
+        strategy: strategy,
+        options: options
+      }), null, 0);
+      return this;
+    }
+  }, {
+    key: "hide",
+    value: function hide(options) {
       var tooltips = this._tooltips;
-      var config = this.config();
-      var boundBox = {
-        width: drawingInf.width,
-        height: drawingInf.height
-      };
-      var showInPosition = payload.showInPosition;
-      var pad = config.padding;
-      var dataModels = [];
-      var fragmented = config.mode === _enums_constants__WEBPACK_IMPORTED_MODULE_4__["FRAGMENTED"];
-      var sourceInf = context.getSourceInfo();
-      var fields = sourceInf.fields;
-      var xFieldDim = fields.x[0] ? fields.x[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION : false;
-      var showVertically = !!xFieldDim;
-      var tooltipPos = payload.position;
-      var boxes = [];
-      var enter = {};
-      var uids = dataModel.getData().uids;
 
-      if (fragmented) {
-        dataModels.push.apply(dataModels, _toConsumableArray(uids.map(function (d) {
-          return dataModel.select(function (fieldsArr, i) {
-            return i === d;
-          }, {
-            saveChild: false
-          });
-        })));
-      } else {
-        dataModels.push(dataModel);
+      for (var key in tooltips) {
+        if ({}.hasOwnProperty.call(tooltips, key)) {
+          var strategy = options.strategy || this._strategy;
+          tooltips[key].content(strategy, null);
+          tooltips[key].hide();
+        }
       }
-
+    }
+  }, {
+    key: "getPlotPointsFromIdentifiers",
+    value: function getPlotPointsFromIdentifiers(payload) {
       var target = payload.target;
       var targetFields = [];
 
@@ -29141,133 +29564,75 @@ function (_SpawnableSideEffect) {
         });
       }
 
-      var plotDimensions = context.getPlotPointsFromIdentifiers(target || payload.criteria, {
+      return _get(_getPrototypeOf(Tooltip.prototype), "plotPointsFromIdentifiers", this).call(this, target || payload.criteria, {
         getBBox: true
       });
-      var strategy = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(options.strategy, this._strategy);
-      var strategyConf = config[strategy];
-      var dataTransform = strategyConf.dataTransform,
-          projectFields = strategyConf.fields;
-      var strategyObj = this._strategies; // Show tooltip for each datamodel
-
-      for (var _i = 0; _i < dataModels.length; _i++) {
-        var plotDim = plotDimensions[_i];
-
-        if (fragmented) {
-          var dimensions = dataModels[_i].getData().schema.filter(function (d) {
-            return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].DIMENSION;
-          }).map(function (d) {
-            return d.name;
-          });
-
-          plotDim = context.getPlotPointsFromIdentifiers(dataModels[_i].project(dimensions), {
-            getBBox: true
-          });
-          plotDim = plotDim && plotDim[0];
-        }
-
-        var dt = dataTransform(dataModels[_i], projectFields, this);
-        enter[_i] = true;
-        var layoutContainer = drawingInf.parentContainer,
-            parentContainerDimensions = drawingInf.parentContainerDimensions;
-        var layoutBoundBox = layoutContainer.getBoundingClientRect();
-        var unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
-        var offsetLeft = unitBoundBox.left - layoutBoundBox.left;
-        var offsetTop = unitBoundBox.top - layoutBoundBox.top;
-        var tooltipInst = tooltips[_i] = tooltips[_i] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](layoutContainer, drawingInf.svgContainer);
-        sourceInf.payload = payload;
-        sourceInf.firebolt = this.firebolt;
-        sourceInf.detailFields = context.detailFields();
-        sourceInf.timeDiffs = context.timeDiffsByField();
-        sourceInf.valueParser = context.valueParser();
-        sourceInf.selectionSet = selectionSet;
-        tooltipInst.context(sourceInf);
-        var strategyFn = strategyObj[strategy];
-        tooltipInst.content(strategy, dt, {
-          formatter: strategyFn,
-          order: options.order
-        }).config(this.config()).extent({
-          x: 0,
-          y: 0,
-          width: parentContainerDimensions.width,
-          height: parentContainerDimensions.height
-        }).offset({
-          x: offsetLeft + (config.offset.x || 0),
-          y: offsetTop + (config.offset.y || 0)
-        });
-
-        if (showInPosition) {
-          tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
-        } else if (plotDim) {
-          tooltipInst.positionRelativeTo({
-            x: plotDim.x,
-            y: plotDim.y,
-            width: plotDim.width || 0,
-            height: plotDim.height || 0
-          }, {
-            orientation: fragmented ? showVertically ? 'horizontal' : 'vertical' : undefined
-          });
-        } else {
-          tooltipInst.hide();
-          break;
-        }
-
-        if (fragmented) {
-          var position = tooltipInst._position;
-
-          var tooltipBoundBox = tooltipInst._tooltipContainer.node().getBoundingClientRect();
-
-          totalHeight += tooltipBoundBox.height + pad;
-          totalWidth += tooltipBoundBox.width + pad;
-
-          if (showVertically ? totalHeight > drawingInf.height : totalWidth > drawingInf.width) {
-            break;
-          }
-
-          boxes.push({
-            x: position.x,
-            y: position.y,
-            width: tooltipBoundBox.width,
-            height: tooltipBoundBox.height,
-            tooltip: tooltipInst
-          });
-        }
-      }
-
-      for (var key in tooltips) {
-        if (!enter[key]) {
-          var tooltip = tooltips[key];
-          tooltip.content(payload.action, null);
-
-          if (!tooltip.getContents().length) {
-            tooltip.remove();
-            delete tooltips[key];
-          }
-        }
-      }
-
-      if (fragmented) {
-        Object(_helper__WEBPACK_IMPORTED_MODULE_2__["spaceOutBoxes"])(boxes, boundBox, showVertically);
-        boxes.forEach(function (box) {
-          return box.tooltip.position(box.x, box.y, {
-            repositionArrow: true
-          });
-        });
-      }
-
-      return this;
     }
   }, {
-    key: "hide",
-    value: function hide(options) {
-      var tooltips = this._tooltips;
+    key: "createTooltip",
+    value: function createTooltip(dataModel) {
+      var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var plotDim = arguments.length > 2 ? arguments[2] : undefined;
+      var key = arguments.length > 3 ? arguments[3] : undefined;
+      var drawingInf = this.drawingContext();
+      var sourceInf = this.sourceInfo();
+      var config = this.config();
+      var strategy = props.strategy,
+          options = props.options,
+          payload = props.payload,
+          selectionSet = props.selectionSet;
+      plotDim = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(plotDim, this.getPlotPointsFromIdentifiers(payload));
+      plotDim = plotDim && plotDim[0];
+      var pad = config.padding;
+      var showInPosition = payload.showInPosition,
+          tooltipPos = payload.position;
+      var _config$strategy = config[strategy],
+          projectFields = _config$strategy.fields,
+          dataTransform = _config$strategy.dataTransform;
+      var strategyFn = this._strategies[strategy];
+      var dt = dataTransform(dataModel, projectFields, this);
+      var layoutContainer = drawingInf.parentContainer,
+          parentContainerDimensions = drawingInf.parentContainerDimensions;
+      var layoutBoundBox = layoutContainer.getBoundingClientRect();
+      var unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
+      var offsetLeft = unitBoundBox.left - layoutBoundBox.left;
+      var offsetTop = unitBoundBox.top - layoutBoundBox.top;
+      var tooltipInst = this._tooltips[key] = this._tooltips[key] || new _chartshq_muze_tooltip__WEBPACK_IMPORTED_MODULE_0__["Tooltip"](layoutContainer, drawingInf.svgContainer);
+      Object.assign(sourceInf, {
+        payload: payload,
+        firebolt: this.firebolt,
+        detailFields: [],
+        timeDiffs: sourceInf.timeDiffs,
+        valueParser: function valueParser(val) {
+          return val;
+        },
+        selectionSet: selectionSet
+      });
+      tooltipInst.context(sourceInf);
+      tooltipInst.content(strategy, dt, {
+        formatter: strategyFn,
+        order: options.order
+      }).config(this.config()).extent({
+        x: 0,
+        y: 0,
+        width: parentContainerDimensions.width,
+        height: parentContainerDimensions.height
+      }).offset({
+        x: offsetLeft + (config.offset.x || 0),
+        y: offsetTop + (config.offset.y || 0)
+      });
 
-      for (var key in tooltips) {
-        if ({}.hasOwnProperty.call(tooltips, key)) {
-          var strategy = options.strategy || this._strategy;
-          tooltips[key].content(strategy, null);
-          tooltips[key].hide();
-        }
+      if (showInPosition) {
+        tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
+      } else if (plotDim) {
+        tooltipInst.positionRelativeTo({
+          x: plotDim.x,
+          y: plotDim.y,
+          width: plotDim.width || 0,
+          height: plotDim.height || 0
+        });
+      } else {
+        tooltipInst.hide();
       }
     }
   }], [{
@@ -29280,21 +29645,15 @@ function (_SpawnableSideEffect) {
           y: 0
         },
         highlightSummary: {
-          dataTransform: function dataTransform(dt, fields) {
-            return fields ? dt.project(fields, {
+          dataTransform: function dataTransform(dm, fields) {
+            return fields ? dm.project(fields, {
               saveChild: false
-            }) : dt;
+            }) : dm;
           }
         },
         selectionSummary: {
-          dataTransform: function dataTransform(dt, fields) {
-            var fieldspace = dt.getFieldspace();
-            var dimensions = Object.keys(fieldspace.getDimension());
-            var measures = Object.keys(fieldspace.getMeasure());
-            var projectedFields = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(fields, measures.length ? [measures[0]] : []);
-            return dt.project([].concat(_toConsumableArray(dimensions), _toConsumableArray(projectedFields)), {
-              saveChild: false
-            });
+          dataTransform: function dataTransform(dm) {
+            return dm;
           }
         }
       };
@@ -29302,12 +29661,12 @@ function (_SpawnableSideEffect) {
   }, {
     key: "formalName",
     value: function formalName() {
-      return _enums_side_effects__WEBPACK_IMPORTED_MODULE_5__["TOOLTIP"];
+      return _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__["TOOLTIP"];
     }
   }]);
 
   return Tooltip;
-}(_spawnable__WEBPACK_IMPORTED_MODULE_6__["default"]);
+}(_spawnable__WEBPACK_IMPORTED_MODULE_4__["default"]);
 
 
 
@@ -29363,7 +29722,7 @@ var formatters = function formatters(formatter, interval, valueParser) {
   return _ref = {}, _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL, function (value) {
     return value instanceof InvalidAwareTypes ? valueParser(value) : Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["formatTemporal"])(Number(value), interval);
   }), _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_0__["MeasureSubtype"].CONTINUOUS, function (value) {
-    return value instanceof InvalidAwareTypes ? valueParser(value) : formatter(value.toFixed(2));
+    return value instanceof InvalidAwareTypes ? valueParser(value) : formatter("".concat(value % value.toFixed(0) === 0 ? value : value.toFixed(2)));
   }), _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL, function (value) {
     return valueParser(value);
   }), _ref;
@@ -29542,7 +29901,7 @@ var generateRetinalFieldsValues = function generateRetinalFieldsValues(valueArr,
       hasMultipleMeasures && content.push({
         data: [icon, formattedRetinalValue]
       });
-      var selectedContext = target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
+      var selectedContext = target && target[REF_VALUES_INDEX][target[REF_KEYS_INDEX].indexOf(retField)];
       var isSelected = selectedContext === retinalFieldValue;
       measuresArr.forEach(function (measure) {
         var measureIndex = fieldsConfig[measure].index;
@@ -29607,12 +29966,10 @@ var buildTooltipData = function buildTooltipData(dataModel) {
 
   var fieldspace = dataModel.getFieldspace();
   var fieldsConfig = dataModel.getFieldsConfig();
-
-  var _context$firebolt$con = context.firebolt.context.retinalFields(),
-      color = _context$firebolt$con.color,
-      shape = _context$firebolt$con.shape,
-      size = _context$firebolt$con.size;
-
+  var _context$retinalField = context.retinalFields,
+      color = _context$retinalField.color,
+      shape = _context$retinalField.shape,
+      size = _context$retinalField.size;
   var detailFields = context.detailFields || [];
   var dimensions = schema.filter(function (d) {
     return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
@@ -29648,7 +30005,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
 
     var allMeasures = _toConsumableArray(_construct(Set, _toConsumableArray(Object.values(dimensionMeasureMap))));
 
-    var isStacked = isStackedBar(context.firebolt.context.layers());
+    var isStacked = isStackedBar(context.layers);
     var filteredMeasures = !isSingleValue(dataLen, isStacked) ? measures.filter(function (d) {
       return allMeasures.indexOf(d.name) === -1;
     }) : measures;
@@ -29747,6 +30104,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
 };
 var strategies = (_strategies = {}, _defineProperty(_strategies, _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_2__["SELECTION_SUMMARY"], function (dm, config, context) {
   var selectionSet = context.selectionSet;
+  var classPrefix = config.classPrefix;
   var aggFns = selectionSet.mergedEnter.aggFns;
   var dataObj = dm.getData();
   var measures = dataObj.schema.filter(function (d) {
@@ -29759,34 +30117,37 @@ var strategies = (_strategies = {}, _defineProperty(_strategies, _enums_tooltip_
     saveChild: false
   }));
   var fieldsConf = aggregatedModel.getFieldsConfig();
-  var values = [[{
-    value: "".concat(dataObj.data.length),
-    style: {
-      'font-weight': 'bold'
-    }
-  }, 'Items Selected']];
-  var measureNames = measures.map(function (d) {
-    return d.name;
-  });
+  var entryUids = selectionSet.mergedEnter.uids;
+  var values = [{
+    className: "".concat(classPrefix, "-tooltip-row"),
+    data: [{
+      value: "".concat(entryUids.length),
+      style: {
+        'font-weight': 'bold'
+      }
+    }, 'Items Selected']
+  }];
+
+  var measureNames = _toConsumableArray(new Set(entryUids.map(function (d) {
+    return d[1];
+  }).flat()));
+
   var data = aggregatedModel.getData().data;
   measureNames.forEach(function (measure) {
     var numberFormat = fieldsConf[measure].def.numberFormat;
     var value = data[0][fieldsConf[measure].index].toFixed(2);
-    value instanceof InvalidAwareTypes ? values.push([]) : values.push(["(".concat(aggFns[measure].toUpperCase(), ")"), "".concat(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["retrieveFieldDisplayName"])(dm, measure)), {
-      value: numberFormat ? numberFormat(value) : value,
-      style: {
-        'font-weight': 'bold'
-      }
-    }]);
+    value instanceof InvalidAwareTypes ? values.push([]) : values.push({
+      className: "".concat(classPrefix, "-tooltip-row"),
+      data: ["(".concat(aggFns[measure].toUpperCase(), ")"), "".concat(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["retrieveFieldDisplayName"])(dm, measure)), {
+        value: numberFormat ? numberFormat(value) : value,
+        style: {
+          'font-weight': 'bold'
+        },
+        className: "".concat(classPrefix, "-tooltip-value")
+      }]
+    });
   });
-
-  if (measureNames.length === 1) {
-    values = [[].concat(_toConsumableArray(values[0]), _toConsumableArray(values[1]))];
-  }
-
-  return [{
-    data: values[0]
-  }];
+  return values;
 }), _defineProperty(_strategies, _enums_tooltip_strategies__WEBPACK_IMPORTED_MODULE_2__["HIGHLIGHT_SUMMARY"], function (data, config, context) {
   return buildTooltipData(data, config, context);
 }), _strategies);
@@ -30338,11 +30699,7 @@ function (_Firebolt) {
         values = criteria[1];
 
         if (values) {
-          uniqueIds = this.context.data().filter(function (d) {
-            return values.indexOf(d.rawVal) !== -1;
-          }).map(function (d) {
-            return d.id;
-          });
+          uniqueIds = values;
         } else {
           values = Object.values(criteria);
           uniqueIds = this.context.data().filter(function (d) {
@@ -30539,24 +30896,20 @@ __webpack_require__.r(__webpack_exports__);
 /* istanbul ignore next */
 
 var hover = function hover(firebolt) {
-  return function (targetEl, behaviours) {
+  return function (targetEl) {
     var dispatchBehaviour = function dispatchBehaviour(args) {
       var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
       var payload = {
         criteria: firebolt.context.getCriteriaFromData(args)
       };
-      behaviours.forEach(function (behaviour) {
-        return firebolt.dispatchBehaviour(behaviour, payload);
-      });
+      firebolt.triggerPhysicalAction('hover', payload);
       event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour).on('mousemove', dispatchBehaviour).on('mouseout', function () {
       var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
-      behaviours.forEach(function (behaviour) {
-        return firebolt.dispatchBehaviour(behaviour, {
-          criteria: null
-        });
+      firebolt.triggerPhysicalAction('hover', {
+        criteria: null
       });
       event.stopPropagation();
     });
@@ -30818,8 +31171,11 @@ var strategies = function strategies(firebolt) {
 
   var classed = function classed(set, className, change) {
     var classPrefix = context.config().classPrefix;
+    var uids = set.uids.map(function (d) {
+      return d[0];
+    });
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(context.mount()).selectAll(".".concat(classPrefix, "-legend-columns")).filter(function (d) {
-      return set.uids.indexOf(d.id) !== -1;
+      return uids.indexOf(d.id) !== -1;
     }).selectAll('div').classed(className, change);
   };
 
@@ -31538,9 +31894,6 @@ function (_SimpleLegend) {
       Object(_renderer__WEBPACK_IMPORTED_MODULE_4__["renderDiscreteItem"])(this, itemSkeleton);
       legendContainer.selectAll('div').style('float', _enums_constants__WEBPACK_IMPORTED_MODULE_2__["LEFT"]);
       firebolt.mapActionsAndBehaviour();
-      firebolt.createSelectionSet(this.data().map(function (d) {
-        return d.id;
-      }));
       return legendContainer;
     }
   }], [{
@@ -32133,7 +32486,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!**********************************************************!*\
   !*** ./packages/muze-legend/src/legend/legend-helper.js ***!
   \**********************************************************/
-/*! exports provided: getScaleInfo, getInterpolatedArrayData, getInterpolatedData, titleCreator, getMaxMeasures, getItemMeasures, computeItemSpaces, getDomainBounds */
+/*! exports provided: getScaleInfo, getInterpolatedArrayData, getInterpolatedData, titleCreator, getMaxMeasures, getItemMeasures, computeItemSpaces, getDomainBounds, prepareSelectionSetData */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -32146,6 +32499,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getItemMeasures", function() { return getItemMeasures; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "computeItemSpaces", function() { return computeItemSpaces; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getDomainBounds", function() { return getDomainBounds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prepareSelectionSetData", function() { return prepareSelectionSetData; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -32527,6 +32881,33 @@ var getDomainBounds = function getDomainBounds(type, scaleInfo, domainInfo) {
   var ele = domain[type === 'lower' ? 0 : domain.length - 1];
   var step = steps[type === 'lower' ? 0 : steps.length - 1];
   return _ref = {}, _defineProperty(_ref, scaleType, scaleType === 'size' ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele)), _defineProperty(_ref, "value", domainBounds[type]), _defineProperty(_ref, "id", type === 'lower' ? 0 : domainLeg.length + 2), _defineProperty(_ref, "range", [ele, step]), _ref;
+};
+var prepareSelectionSetData = function prepareSelectionSetData(data, fieldName, dm) {
+  var fieldType = dm.getFieldsConfig()[fieldName].def.type;
+
+  if (fieldType === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
+    return {
+      keys: data.reduce(function (acc, d) {
+        acc[d.rawVal] = {
+          uid: d.id,
+          dims: [d.rawVal]
+        };
+        return acc;
+      }, {}),
+      fields: [fieldName]
+    };
+  }
+
+  return {
+    keys: data.reduce(function (acc, d) {
+      acc[d.id] = {
+        uid: d.id,
+        dims: [d.id]
+      };
+      return acc;
+    }, {}),
+    fields: [fieldName]
+  };
 };
 
 /***/ }),
@@ -33439,9 +33820,7 @@ function () {
       this.legendContainer(legendContainer.node()); // create title
 
       this.renderTitle(legendContainer);
-      firebolt.createSelectionSet(this.data().map(function (d) {
-        return d.id;
-      }));
+      firebolt.createSelectionSet(Object(_legend_helper__WEBPACK_IMPORTED_MODULE_10__["prepareSelectionSetData"])(this.data(), this.fieldName(), this.metaData()));
       return legendContainer;
     }
     /**
@@ -33786,19 +34165,8 @@ function (_SimpleLegend) {
       Object(_renderer__WEBPACK_IMPORTED_MODULE_2__["renderStepItem"])(this, itemSkeleton);
       legendContainer.selectAll('div').style('float', _enums_constants__WEBPACK_IMPORTED_MODULE_3__["LEFT"]);
       firebolt.mapActionsAndBehaviour();
-      firebolt.createSelectionSet(this.data().map(function (d) {
-        return d.id;
-      }));
       return legendContainer;
     }
-    /**
-     *
-     *
-     * @param {*} data
-     *
-     * @memberof StepLegend
-     */
-
   }, {
     key: "getCriteriaFromData",
     value: function getCriteriaFromData(data) {
@@ -53701,7 +54069,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!*************************************************!*\
   !*** ./packages/muze-utils/src/common-utils.js ***!
   \*************************************************/
-/*! exports provided: arraysEqual, componentRegistry, mix, partition, getValueParser, require, intersect, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField */
+/*! exports provided: arraysEqual, componentRegistry, mix, partition, getArrayIndexMap, getValueParser, require, intersect, difference, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -53710,9 +54078,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "componentRegistry", function() { return componentRegistry; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mix", function() { return mix; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "partition", function() { return partition; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getArrayIndexMap", function() { return getArrayIndexMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getValueParser", function() { return getValueParser; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "require", function() { return require; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "intersect", function() { return intersect; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "difference", function() { return difference; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Scales", function() { return Scales; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Symbols", function() { return Symbols; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pathInterpolators", function() { return pathInterpolators; });
@@ -55073,6 +55443,13 @@ var getDataModelFromRange = function getDataModelFromRange(dataModel, criteria, 
     mode: mode
   });
 };
+
+var getArrayIndexMap = function getArrayIndexMap(arr) {
+  return arr.reduce(function (acc, value, i) {
+    acc[value] = i;
+    return acc;
+  }, {});
+};
 /**
  *
  *
@@ -55093,12 +55470,12 @@ var getDataModelFromIdentifiers = function getDataModelFromIdentifiers(dataModel
       filteredDataModel = identifiers(dataModel, {}, false);
     } else if (identifiers instanceof Array && identifiers[0].length) {
       var filteredSchema = identifiers[0].filter(function (d) {
-        return d in fieldsConfig;
+        return d in fieldsConfig || d === _enums__WEBPACK_IMPORTED_MODULE_10__["ReservedFields"].ROW_ID;
       });
-      filteredDataModel = dataModel.select(function (fields) {
+      filteredDataModel = dataModel.select(function (fields, rowId) {
         var include = true;
         filteredSchema.forEach(function (propField, idx) {
-          var value = fields[propField].internalValue;
+          var value = propField === _enums__WEBPACK_IMPORTED_MODULE_10__["ReservedFields"].ROW_ID ? rowId : fields[propField].internalValue;
           var index = dataArr.findIndex(function (d) {
             return d[idx] === value;
           });
@@ -55262,14 +55639,17 @@ var concatModels = function concatModels(dm1, dm2) {
         var dm1Key = dim1Values.join();
         var dm2Key = dim2Values.join();
 
-        if (!commonTuples[dm1Key] && !commonTuples[dm2Key]) {
-          !tuples1[dm1Key] && (tuples1[dm1Key] = {});
-          !tuples2[dm2Key] && (tuples2[dm2Key] = {});
+        if (!commonTuples[dm1Key]) {
+          !commonTuples[dm1Key] && (commonTuples[dm1Key] = {});
           row1.forEach(function (value, idx) {
-            tuples1[dm1Key][schema1[idx].name] = value;
+            commonTuples[dm1Key][schema1[idx].name] = value;
           });
+        }
+
+        if (!commonTuples[dm2Key]) {
+          !commonTuples[dm2Key] && (commonTuples[dm2Key] = {});
           row2.forEach(function (value, idx) {
-            tuples2[dm2Key][schema2[idx].name] = value;
+            commonTuples[dm2Key][schema2[idx].name] = value;
           });
         }
       }
@@ -55536,6 +55916,25 @@ var intersect = function intersect(arr1, arr2) {
   });
 };
 
+var difference = function difference(arr1, arr2) {
+  var accessors = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [function (v) {
+    return v;
+  }, function (v) {
+    return v;
+  }];
+
+  var _accessors2 = _slicedToArray(accessors, 2),
+      fn1 = _accessors2[0],
+      fn2 = _accessors2[1];
+
+  var set = new Set(arr2.map(function (v) {
+    return fn2(v);
+  }));
+  return arr1.filter(function (value) {
+    return !set.has(fn1(value));
+  });
+};
+
 var partition = function partition(array, filterFn) {
   return array.reduce(function (acc, v, i) {
     var pass = filterFn(v, i, array);
@@ -55691,7 +56090,8 @@ var CANVAS_GLOBAL_NAMESPACE = 'app.canvas';
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 var ReservedFields = {
-  ROW_ID: '__id__'
+  ROW_ID: '__id__',
+  MEASURE_NAMES: '__measure_names__'
 };
 /* harmony default export */ __webpack_exports__["default"] = (ReservedFields);
 
@@ -55727,7 +56127,7 @@ var OFFSET_WIGGLE = 'wiggle';
 /*!******************************************!*\
   !*** ./packages/muze-utils/src/index.js ***!
   \******************************************/
-/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, arraysEqual, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS */
+/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, difference, getArrayIndexMap, arraysEqual, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55915,6 +56315,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "componentRegistry", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_5__["componentRegistry"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getArrayDiff", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_5__["getArrayDiff"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "difference", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_5__["difference"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getArrayIndexMap", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_5__["getArrayIndexMap"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_5__["arraysEqual"]; });
 
@@ -58209,7 +58613,7 @@ function (_TransactionSupport) {
     });
     _this._composition.layout = new _chartshq_layout__WEBPACK_IMPORTED_MODULE_0__["GridLayout"]();
     _this._store = new muze_utils__WEBPACK_IMPORTED_MODULE_1__["Store"](_app_state__WEBPACK_IMPORTED_MODULE_9__["APP_INITIAL_STATE"]);
-    _this._throwback = new muze_utils__WEBPACK_IMPORTED_MODULE_1__["Store"]((_ref = {}, _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].MATRIX_CREATED, false), _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].ON_LAYER_DRAW, null), _ref)); // Setters and getters will be mounted on this. The object will be mutated.
+    _this._throwback = new muze_utils__WEBPACK_IMPORTED_MODULE_1__["Store"]((_ref = {}, _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].MATRIX_CREATED, false), _defineProperty(_ref, muze_utils__WEBPACK_IMPORTED_MODULE_1__["CommonProps"].ON_LAYER_DRAW, null), _defineProperty(_ref, "propagationInfo", null), _ref)); // Setters and getters will be mounted on this. The object will be mutated.
 
     var namespace = muze_utils__WEBPACK_IMPORTED_MODULE_1__["STATE_NAMESPACES"].CANVAS_LOCAL_NAMESPACE;
     var allOptions = Object.assign({}, _options__WEBPACK_IMPORTED_MODULE_8__["default"], _local_options__WEBPACK_IMPORTED_MODULE_6__["localOptions"], _local_options__WEBPACK_IMPORTED_MODULE_6__["canvasOptions"]);
@@ -58488,6 +58892,7 @@ function (_TransactionSupport) {
       Object(_helper__WEBPACK_IMPORTED_MODULE_10__["setLayoutInfForUnits"])(this); // setLabelRotation
 
       Object(_helper__WEBPACK_IMPORTED_MODULE_10__["setLabelRotationForAxes"])(this);
+      this.firebolt().mapActionsAndBehaviour();
     }
     /**
      * Returns the instances of x axis of the canvas. It returns the instances in a two dimensional array form.
@@ -60984,6 +61389,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper */ "./packages/muze/src/canvas/helper.js");
+/* harmony import */ var _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../visual-unit/src/firebolt/payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper */ "./packages/muze/src/canvas/firebolt/helper.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../constants */ "./packages/muze/src/constants.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -60995,6 +61403,10 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
@@ -61014,72 +61426,76 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 
 
-var _defaultInteractionPolicy = function defaultInteractionPolicy(valueMatrix, firebolt) {
-  var _ref, _ref2;
 
-  var isMeasure = function isMeasure(field) {
-    return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-  };
 
-  var canvas = firebolt.context;
-  var visualGroup = canvas.composition().visualGroup;
 
-  var xFields = (_ref = []).concat.apply(_ref, _toConsumableArray(visualGroup.getFieldsFromChannel('x')));
-
-  var yFields = (_ref2 = []).concat.apply(_ref2, _toConsumableArray(visualGroup.getFieldsFromChannel('y')));
-
-  var colDim = xFields.every(function (field) {
-    return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+var getKeysFromData = function getKeysFromData(group, dataModel) {
+  var valueMatrix = group.matrixInstance().value;
+  var dimensions = Object.values(dataModel.getFieldsConfig()).filter(function (d) {
+    return d.def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
   });
-  var fieldInf = visualGroup.resolver().getAllFields();
-  var rowFacets = fieldInf.rowFacets;
-  var colFacets = fieldInf.colFacets;
+  var keys = {};
+  var dimsMap = {};
   valueMatrix.each(function (cell) {
-    var unitFireBolt = cell.valueOf().firebolt();
+    var unit = cell.source();
+    var facetFieldsMap = unit.facetFieldsMap();
+    var dm = unit.data();
 
-    if (!(xFields.every(isMeasure) && yFields.every(isMeasure))) {
-      var facetFields = cell.valueOf().facetByFields()[0];
-      var unitColFacets = facetFields.filter(function (d) {
-        return colFacets.findIndex(function (v) {
-          return v.equals(d);
-        }) !== -1;
+    var _dm$getData = dm.getData(),
+        data = _dm$getData.data;
+
+    var uids = dm.getUids();
+    var layers = unit.layers();
+    var fieldsConfig = dm.getFieldsConfig();
+    data.forEach(function (row, i) {
+      var dims = dimensions.map(function (d) {
+        if (d.def.name in fieldsConfig) {
+          return row[fieldsConfig[d.def.name].index];
+        }
+
+        return facetFieldsMap[d.def.name];
       });
-      var unitRowFacets = facetFields.filter(function (d) {
-        return rowFacets.findIndex(function (v) {
-          return v.equals(d);
-        }) !== -1;
+      var uid = uids[i];
+      layers.forEach(function (layer) {
+        var measureNames = layer.data().getSchema().filter(function (d) {
+          return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+        }).map(function (d) {
+          return d.name;
+        });
+        var key = dims.length ? "".concat([dims].concat(_toConsumableArray(measureNames))) : "".concat([uid].concat(_toConsumableArray(measureNames)));
+        keys[key] = keys[key] || {};
+        keys[key] = {
+          dims: dims,
+          measureNames: measureNames,
+          uid: uid
+        };
+        dimsMap[dims] = measureNames;
       });
-      var propFields;
-
-      if (colDim) {
-        propFields = unitColFacets.map(function (d) {
-          return "".concat(d);
-        });
-      } else {
-        propFields = unitRowFacets.map(function (d) {
-          return "".concat(d);
-        });
-      }
-
-      unitFireBolt.propagateWith('*', propFields, true);
-    }
+    });
   });
+  return {
+    keys: keys,
+    dimsMap: dimsMap,
+    fields: _toConsumableArray(dimensions.map(function (d) {
+      return d.def.name;
+    }))
+  };
 };
 
 var _defaultCrossInteractionPolicy = {
   behaviours: {
-    '*': function _(propagationPayload, context) {
+    '*': function _(propagationPayload, firebolt) {
       var propagationCanvasAlias = propagationPayload.sourceCanvas;
-      var canvasAlias = context.parentAlias();
+      var canvasAlias = firebolt.sourceCanvas();
       return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
     }
   },
   sideEffects: {
-    tooltip: function tooltip(propagationPayload, context) {
+    tooltip: function tooltip(propagationPayload, firebolt) {
       var propagationUnit = propagationPayload.sourceUnit;
       var propagationCanvas = propagationPayload.sourceCanvas;
-      var unitId = context.id();
-      var canvasAlias = context.parentAlias();
+      var unitId = firebolt.id();
+      var canvasAlias = firebolt.sourceCanvas();
 
       if (propagationCanvas) {
         return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
@@ -61147,90 +61563,116 @@ function (_Firebolt) {
       var _this2 = this;
 
       if (arguments.length) {
-        this._crossInteractionPolicy = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, this.constructor.defaultCrossInteractionPolicy()), (arguments.length <= 0 ? undefined : arguments[0]) || {});
         var context = this.context;
+        this._crossInteractionPolicy = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, this.constructor.defaultCrossInteractionPolicy()), (arguments.length <= 0 ? undefined : arguments[0]) || {});
         Object(_helper__WEBPACK_IMPORTED_MODULE_2__["applyInteractionPolicy"])(this);
-
-        context._throwback.registerImmediateListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["CommonProps"].MATRIX_CREATED], function () {
+        var throwback = context._throwback;
+        throwback.registerImmediateListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["CommonProps"].MATRIX_CREATED], function () {
           Object(_helper__WEBPACK_IMPORTED_MODULE_2__["applyInteractionPolicy"])(_this2);
-        });
 
+          var group = _this2.context.composition().visualGroup;
+
+          if (group) {
+            var _getKeysFromData = getKeysFromData(group, group.getGroupByData()),
+                keys = _getKeysFromData.keys,
+                fields = _getKeysFromData.fields,
+                dimsMap = _getKeysFromData.dimsMap;
+
+            _this2._dimensionsMap = dimsMap;
+            _this2._dimensionsSet = fields;
+
+            _this2.createSelectionSet({
+              keys: keys,
+              fields: fields
+            });
+
+            group.getGroupByData().on('propagation', function (data, config) {
+              _this2.handleDataModelPropagation(data, config);
+            });
+          }
+        });
         return this;
       }
 
       return this._crossInteractionPolicy;
     }
-    /**
-     * Dispatches a behavioural action with a payload. It takes the name of the behavioural action and a payload
-     * object which contains the criteria aend an array of side effects which determines what side effects are
-     * going to be shown in each visual unit of the canvas. It prepares the datamodel from the given criteria
-     * and initiates a propagation from the datamodel of canvas. Then all the visual units of canvas which listens
-     * to the propagation gets informed on which rows got selected and dispatches the behavioural action sent during
-     * propagation.
-     *
-     * To dispatch a behavioural action on the canvas
-     * ```
-     *  // Get the firebolt instance of the canvas
-     *  const firebolt = canvas.firebolt();
-     *  // Dispatch a brush behaviour
-     *  firebolt.dispatchBehaviour('brush', {
-     *      // Selects all the rows with Horsepower having range between 100 and 200.
-     *      criteria: {
-     *          Horsepower: [100, 200]
-     *      }
-     *  });
-     * // On dispatch of this behavioural action, a selection box gets created and plots gets faded out which are the
-     * // default side effects mapped to this behavioural action.
-     * ```
-     *
-     * ```
-     * Additionally, it can also be passed an array of side effects in the payload.
-     *  // Dispatch a select behaviour with only crossline as side effect.
-     *  firebolt.dispatchBehaviour('select', {
-     *      criteria: {
-     *          Cylinders: ['8']
-     *      },
-     *      sideEffects: ['crossline']
-     *  });
-     * ```
-     *
-     * @public
-     *
-     * @param {string} behaviour Name of the behavioural action
-     * @param {Object} payload Object which contains the interaction information.
-     * @param {Object | Array.<Array>} payload.criteria Identifiers by which the selection happens.
-     * @param {Array.<string|Object>} payload.sideEffects Side effects which needs to be shown.
-     *
-     * @return {GroupFireBolt} Instance of firebolt.
-     */
-
   }, {
-    key: "dispatchBehaviour",
-    value: function dispatchBehaviour(behaviour, payload) {
-      var propPayload = Object.assign(payload);
-      var criteria = propPayload.criteria;
-      var data = this.context.composition().visualGroup.getGroupByData();
-      var fieldsConfig = data.getFieldsConfig();
-      var model = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getDataModelFromIdentifiers"])(data, criteria);
-      var behaviouralAction = this._actions.behavioural[behaviour];
+    key: "handleDataModelPropagation",
+    value: function handleDataModelPropagation(data, config) {
+      var _this3 = this;
 
-      if (behaviouralAction) {
-        var fields = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(criteria) ? Object.keys(criteria) : criteria ? criteria[0] : [];
-        var validFields = fields.filter(function (field) {
-          return field in fieldsConfig;
+      var group = this.context.composition().visualGroup;
+      var valueMatrix = group.matrixInstance().value;
+      var units = group.resolver().units();
+      var propagationData = data; // @todo refactor this code
+
+      var enabledFn = config.enabled,
+          sourceIdentifiers = config.sourceIdentifiers,
+          action = config.action,
+          propPayload = config.payload;
+
+      var _this$context$config = this.context.config(),
+          _this$context$config$ = _this$context$config.interaction.behaviours,
+          behaviourConfs = _this$context$config$ === void 0 ? {} : _this$context$config$;
+
+      var mode = behaviourConfs[action];
+
+      if (mode !== _constants__WEBPACK_IMPORTED_MODULE_5__["COMMON_INTERACTION"]) {
+        return this;
+      }
+
+      var payloadFn = _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"][action] || _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"].__default;
+      var payload = payloadFn(this, propagationData, config);
+      var behaviourPolicies = this._behaviourPolicies;
+      var filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
+      var enabled = filterFns.every(function (fn) {
+        return fn(propPayload || {}, _this3, {
+          sourceIdentifiers: sourceIdentifiers,
+          propagationData: propagationData
         });
-        var mutates = behaviouralAction.constructor.mutates();
-        var propConfig = {
-          payload: propPayload,
-          action: behaviour,
-          criteria: model,
-          sourceId: this.context.alias(),
-          isMutableAction: mutates,
-          propagateInterpolatedValues: validFields.every(function (field) {
-            return fieldsConfig[field].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-          })
+      });
+
+      if (enabledFn) {
+        enabled = enabledFn(config, this) && enabled;
+      }
+
+      if (enabled) {
+        var propagationInf = {
+          propagate: false,
+          data: propagationData,
+          propPayload: propPayload,
+          sourceIdentifiers: sourceIdentifiers,
+          sourceId: config.propagationSourceId,
+          isMutableAction: config.isMutableAction
         };
-        data.propagate(model, propConfig, true);
+        var behaviourEffectMap = this._behaviourEffectMap;
+        var sideEffects = Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, behaviourEffectMap);
+        var sideEffectInstances = this.sideEffects();
+
+        var _ref = valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {},
+            _ref$instance = _ref.instance,
+            unit = _ref$instance === void 0 ? units[0][0] : _ref$instance;
+
+        sideEffects.forEach(function (_ref2) {
+          var effects = _ref2.effects;
+          effects.forEach(function (effect) {
+            var name = effect.name;
+            var inst = sideEffectInstances[name];
+
+            if (inst) {
+              inst.sourceInfo(function () {
+                return unit.getSourceInfo();
+              });
+              inst.plotPointsFromIdentifiers(function () {
+                return unit.getPlotPointsFromIdentifiers.apply(unit, arguments);
+              });
+              inst.drawingContext(function () {
+                return unit.getDrawingContext();
+              });
+            }
+          });
+        });
+        this.dispatchBehaviour(action, payload, propagationInf);
       }
 
       return this;
@@ -61242,12 +61684,153 @@ function (_Firebolt) {
         this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
       }
 
+      this.initializeSideEffects();
       return this;
+    }
+  }, {
+    key: "target",
+    value: function target() {
+      return 'visual-group';
+    }
+  }, {
+    key: "mapActionsAndBehaviour",
+    value: function mapActionsAndBehaviour() {
+      var unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+      unitMatrix.each(function (unit) {
+        var firebolt = unit.source().firebolt();
+        firebolt.mapActionsAndBehaviour();
+      });
+      this.registerPhysicalActionHandlers();
+    }
+  }, {
+    key: "registerPhysicalActionHandlers",
+    value: function registerPhysicalActionHandlers() {
+      var _this4 = this;
+
+      var unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+      unitMatrix.each(function (cell) {
+        var unit = cell.source();
+        var firebolt = unit.firebolt();
+        firebolt.onPhysicalAction('*', function (event, payload) {
+          _this4.handlePhysicalAction(event, payload, unit);
+        }, _this4.context.constructor.formalName());
+      });
+      return this;
+    }
+  }, {
+    key: "handlePhysicalAction",
+    value: function handlePhysicalAction(event, payload, unit) {
+      var _this5 = this;
+
+      var firebolt = unit.firebolt();
+      var behaviours = firebolt._actionBehaviourMap[event].behaviours;
+
+      var _firebolt$context$con = firebolt.context.config(),
+          _firebolt$context$con2 = _firebolt$context$con.interaction.behaviours,
+          behaviourConfs = _firebolt$context$con2 === void 0 ? {} : _firebolt$context$con2;
+
+      var hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
+      var measureName = hasMeasures ? [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] : [];
+      behaviours.forEach(function (action) {
+        var fields = [].concat(_toConsumableArray(_this5._dimensionsSet), measureName);
+        var mode = behaviourConfs[action];
+        var targetFirebolt = firebolt;
+        var facetMap = unit.facetFieldsMap();
+
+        if (mode === _constants__WEBPACK_IMPORTED_MODULE_5__["COMMON_INTERACTION"]) {
+          targetFirebolt = _this5;
+        } else {
+          facetMap = {};
+        }
+
+        payload.criteria = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["sanitizePayloadCriteria"])(payload.criteria, fields, facetMap, {
+          dm: targetFirebolt.data(),
+          dimensionsMap: targetFirebolt._dimensionsMap
+        });
+        targetFirebolt.dispatchBehaviour(action, payload, {
+          propagate: false,
+          applySideEffect: false
+        });
+
+        var identifiers = targetFirebolt._actions.behavioural[action].propagationIdentifiers();
+
+        _this5.propagate(action, payload, identifiers, {
+          sideEffects: Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, targetFirebolt._behaviourEffectMap),
+          sourceUnitId: unit.id(),
+          sourceId: targetFirebolt.id(),
+          propagationDataSource: targetFirebolt.getPropagationSource()
+        });
+      });
+    }
+  }, {
+    key: "dispatchBehaviour",
+    value: function dispatchBehaviour(action, payload) {
+      var propagationInf = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var criteria = payload.criteria;
+      var hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
+      var measureName = hasMeasures ? [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] : [];
+      var fields = [].concat(_toConsumableArray(this._dimensionsSet), measureName);
+      var sanitizedPayload = Object.assign({}, payload, {
+        criteria: Object(_helper__WEBPACK_IMPORTED_MODULE_4__["sanitizePayloadCriteria"])(criteria, fields, {}, {
+          dm: this.data(),
+          dimensionsMap: this._dimensionsMap
+        })
+      });
+
+      _get(_getPrototypeOf(GroupFireBolt.prototype), "dispatchBehaviour", this).call(this, action, sanitizedPayload, propagationInf);
+    }
+  }, {
+    key: "id",
+    value: function id() {
+      return this.context.alias();
+    }
+  }, {
+    key: "shouldApplySideEffects",
+    value: function shouldApplySideEffects(propInf) {
+      return propInf.applySideEffect !== false;
+    }
+  }, {
+    key: "data",
+    value: function data() {
+      return this.context.composition().visualGroup.getGroupByData();
+    }
+  }, {
+    key: "getRangeFromIdentifiers",
+    value: function getRangeFromIdentifiers(_ref3) {
+      var criteria = _ref3.criteria,
+          fields = _ref3.fields;
+      return fields.reduce(function (acc, v) {
+        acc[v] = criteria[v];
+        return acc;
+      }, {});
+    }
+  }, {
+    key: "propagate",
+    value: function propagate(behaviour, payload, identifiers) {
+      var auxConfig = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+      Object(_helper__WEBPACK_IMPORTED_MODULE_4__["propagateValues"])(this, behaviour, Object.assign({
+        payload: payload,
+        identifiers: identifiers,
+        propagationFields: this._propagationFields,
+        sourceId: this.id(),
+        sourceCanvasId: this.id(),
+        propagationDataSource: this.data()
+      }, auxConfig));
+    }
+  }, {
+    key: "getPropagationSource",
+    value: function getPropagationSource() {
+      return this.data();
+    }
+  }, {
+    key: "sourceCanvas",
+    value: function sourceCanvas() {
+      return this.context.alias();
     }
   }], [{
     key: "defaultInteractionPolicy",
     value: function defaultInteractionPolicy() {
-      return _defaultInteractionPolicy;
+      return function () {};
     }
   }, {
     key: "defaultCrossInteractionPolicy",
@@ -61260,6 +61843,188 @@ function (_Firebolt) {
 }(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["Firebolt"]);
 
 
+
+/***/ }),
+
+/***/ "./packages/muze/src/canvas/firebolt/helper.js":
+/*!*****************************************************!*\
+  !*** ./packages/muze/src/canvas/firebolt/helper.js ***!
+  \*****************************************************/
+/*! exports provided: sanitizePayloadCriteria, propagateValues */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitizePayloadCriteria", function() { return sanitizePayloadCriteria; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "propagateValues", function() { return propagateValues; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+
+var sanitizePayloadCriteria = function sanitizePayloadCriteria(data, propFields) {
+  var facetData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+  var _ref = arguments.length > 3 ? arguments[3] : undefined,
+      dm = _ref.dm,
+      dimensionsMap = _ref.dimensionsMap;
+
+  if (data === null) {
+    return data;
+  }
+
+  var facets = Object.keys(facetData);
+  var facetVals = Object.values(facetData);
+  var facetLen = facets.length;
+
+  if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(data)) {
+    return Object.assign({}, Object.keys(facetData).reduce(function (acc, v) {
+      acc[v] = [facetData[v]];
+      return acc;
+    }, {}), data);
+  }
+
+  var criteriaFields = data[0];
+  var fieldsWithFacets = criteriaFields.length ? [].concat(_toConsumableArray(facets.map(function (d) {
+    return {
+      name: d,
+      type: muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION
+    };
+  })), _toConsumableArray(criteriaFields.map(function (d, i) {
+    return {
+      name: d,
+      index: i + facetLen
+    };
+  }))) : [];
+  var fieldIndexMap = fieldsWithFacets.reduce(function (acc, v, i) {
+    acc[v.name] = i;
+    return acc;
+  }, {});
+  propFields = propFields || fieldsWithFacets.map(function (d) {
+    return d.name;
+  });
+  var dataWithFacets = [propFields];
+  var measureNameField = criteriaFields.find(function (field) {
+    return field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES;
+  });
+  var fieldsConfig = dm.getFieldsConfig();
+  var propDims = fieldsWithFacets.filter(function (d) {
+    return d.name in fieldsConfig;
+  }).map(function (d) {
+    return d.name;
+  });
+  var dimsMap = dm.getData().data.reduce(function (acc, row) {
+    var key = propDims.map(function (d) {
+      return row[fieldsConfig[d].index];
+    });
+    acc[key] || (acc[key] = []);
+    acc[key].push(row);
+    return acc;
+  }, {});
+
+  var _loop = function _loop(i, len) {
+    var row = [].concat(_toConsumableArray(facetVals), _toConsumableArray(data[i]));
+    var dimKey = propDims.map(function (field) {
+      return row[fieldIndexMap[field]];
+    });
+    var origRow = dimsMap[dimKey];
+
+    if (origRow) {
+      origRow.forEach(function (rowVal) {
+        var newRowVal = [];
+        propFields.forEach(function (field) {
+          if (field in fieldIndexMap) {
+            var idx = fieldIndexMap[field];
+            newRowVal.push(row[idx]);
+          } else {
+            var _idx = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getObjProp"])(fieldsConfig[field], 'index');
+
+            _idx !== undefined && newRowVal.push(rowVal[_idx]);
+          }
+        });
+
+        if (!measureNameField) {
+          var measuresArr = dimensionsMap[newRowVal];
+          measuresArr.forEach(function (measures) {
+            dataWithFacets.push([].concat(newRowVal, _toConsumableArray(measures)));
+          });
+        } else {
+          dataWithFacets.push(newRowVal);
+        }
+      });
+    }
+  };
+
+  for (var i = 1, len = data.length; i < len; i++) {
+    _loop(i, len);
+  }
+
+  return dataWithFacets;
+};
+var propagateValues = function propagateValues(instance, action) {
+  var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var payload = config.payload,
+      identifiers = config.identifiers,
+      sourceUnitId = config.sourceUnitId,
+      sourceCanvasId = config.sourceCanvasId,
+      propagationDataSource = config.propagationDataSource;
+  var dataModel = propagationDataSource;
+  var sideEfffects = instance._sideEffectDefinitions;
+  var behaviourEffectMap = instance._behaviourEffectMap;
+  var propagationBehaviourMap = instance._propagationBehaviourMap;
+  var propagationBehaviour = propagationBehaviourMap[action] || action;
+  payload.sourceUnit = sourceUnitId;
+  payload.action = action;
+  payload.sourceCanvas = sourceCanvasId;
+  var groupId = sourceCanvasId;
+
+  var filterFn = function filterFn(entry, propagationConf) {
+    var effects = behaviourEffectMap[entry.config.action];
+    var mutates = entry.config.groupId ? effects ? effects.some(function (d) {
+      return sideEfffects[d.name || d].mutates();
+    }) : false : true;
+    return entry.config.groupId !== propagationConf.groupId && mutates;
+  };
+
+  var sourceBehaviour = instance._actions.behavioural[action];
+  var isMutableAction = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
+  var propConfig = {
+    payload: payload,
+    action: action,
+    criteria: identifiers,
+    isMutableAction: isMutableAction,
+    groupId: groupId,
+    sourceId: config.sourceId,
+    filterFn: filterFn,
+    enabled: function enabled(propConf, firebolt) {
+      return action !== propagationBehaviour ? propConf.payload.sourceCanvas === firebolt.sourceCanvas() : true;
+    }
+  };
+  dataModel.propagate(identifiers, propConfig, true);
+
+  if (action !== propagationBehaviour) {
+    var behaviourInstance = instance._actions.behavioural[propagationBehaviour];
+    isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
+    dataModel.propagate(identifiers, Object.assign({}, propConfig, {
+      isMutableAction: isMutableAction,
+      applyOnSource: false,
+      action: propagationBehaviour,
+      sourceId: isMutableAction ? groupId : sourceUnitId,
+      enabled: function enabled(propConf, firebolt) {
+        return propConf.payload.sourceCanvas !== firebolt.sourceCanvas();
+      }
+    }), true, {
+      filterImmutableAction: function filterImmutableAction(actionInf, propInf) {
+        return actionInf.groupId !== propInf.groupId;
+      }
+    });
+  }
+};
 
 /***/ }),
 
@@ -61532,6 +62297,20 @@ var setupChangeListener = function setupChangeListener(context) {
     notifyAnimationEnd(context);
   }, true);
 };
+
+var applyPropagationPolicy = function applyPropagationPolicy(firebolt, _ref) {
+  var behaviours = _ref.behaviours,
+      sideEffects = _ref.sideEffects;
+
+  for (var key in behaviours) {
+    firebolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+  }
+
+  for (var _key2 in sideEffects) {
+    firebolt.changeSideEffectStateOnPropagation(_key2, sideEffects[_key2]);
+  }
+};
+
 var applyInteractionPolicy = function applyInteractionPolicy(firebolt) {
   var canvas = firebolt.context;
   var visualGroup = canvas.composition().visualGroup;
@@ -61545,14 +62324,14 @@ var applyInteractionPolicy = function applyInteractionPolicy(firebolt) {
     var sideEffects = crossInteractionPolicy.sideEffects;
     valueMatrix.each(function (cell) {
       var unitFireBolt = cell.valueOf().firebolt();
-
-      for (var key in behaviours) {
-        unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
-      }
-
-      for (var _key2 in sideEffects) {
-        unitFireBolt.changeSideEffectStateOnPropagation(_key2, sideEffects[_key2]);
-      }
+      applyPropagationPolicy(unitFireBolt, {
+        behaviours: behaviours,
+        sideEffects: sideEffects
+      });
+    });
+    applyPropagationPolicy(firebolt, {
+      behaviours: behaviours,
+      sideEffects: sideEffects
     });
   }
 };
@@ -62513,7 +63292,7 @@ var createHeaders = function createHeaders(context, canvasHeight, canvasWidth) {
 /*!****************************************!*\
   !*** ./packages/muze/src/constants.js ***!
   \****************************************/
-/*! exports provided: ROWS, COLUMNS, DATA, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, MARGIN, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, ORDINAL, MUZE_PREFIX, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, ICON_SHAPES, IS_POINT_MAP, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL, HORIZONTAL_CENTER, VERTICAL_CENTER, HIDDEN, OVERFLOW, OVERFLOW_X, OVERFLOW_Y, AUTO, VISIBLE, VERTICAL_SCROLL_BAR, HORIZONTAL_SCROLL_BAR, GRID, POINT, MESSAGE, NO_DATA_MESSAGE */
+/*! exports provided: ROWS, COLUMNS, DATA, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, MARGIN, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, ORDINAL, MUZE_PREFIX, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, ICON_SHAPES, IS_POINT_MAP, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL, HORIZONTAL_CENTER, VERTICAL_CENTER, HIDDEN, OVERFLOW, OVERFLOW_X, OVERFLOW_Y, AUTO, VISIBLE, VERTICAL_SCROLL_BAR, HORIZONTAL_SCROLL_BAR, GRID, POINT, MESSAGE, NO_DATA_MESSAGE, COMMON_INTERACTION, INDIVIDUAL_INTERACTION */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -62578,6 +63357,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "POINT", function() { return POINT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MESSAGE", function() { return MESSAGE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NO_DATA_MESSAGE", function() { return NO_DATA_MESSAGE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COMMON_INTERACTION", function() { return COMMON_INTERACTION; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "INDIVIDUAL_INTERACTION", function() { return INDIVIDUAL_INTERACTION; });
 /* harmony import */ var _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-legend */ "./packages/muze-legend/src/index.js");
 var _LEGEND_TYPE_MAP;
 
@@ -62654,6 +63435,8 @@ var GRID = 'grid';
 var POINT = 'point';
 var MESSAGE = 'message';
 var NO_DATA_MESSAGE = 'No data to display';
+var COMMON_INTERACTION = 'common';
+var INDIVIDUAL_INTERACTION = 'individual';
 
 /***/ }),
 
@@ -62728,10 +63511,18 @@ var registry = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./packages/muze/src/constants.js");
+
 var DEFAULT_CONFIG = {
   classPrefix: 'muze',
   interaction: {
-    sideEffect: 'individual'
+    sideEffects: {
+      tooltip: _constants__WEBPACK_IMPORTED_MODULE_0__["COMMON_INTERACTION"]
+    },
+    behaviours: {
+      highlight: _constants__WEBPACK_IMPORTED_MODULE_0__["COMMON_INTERACTION"],
+      select: _constants__WEBPACK_IMPORTED_MODULE_0__["COMMON_INTERACTION"]
+    }
   },
   pagination: 'scroll',
   scrollBar: {
@@ -72091,14 +72882,6 @@ function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _co
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -72106,6 +72889,14 @@ function _nonIterableRest() { throw new TypeError("Invalid attempt to destructur
 function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -72347,34 +73138,43 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
         value: function getUidsFromPayload(_ref, targetData) {
           var model = _ref.model,
               uids = _ref.uids;
-
-          if (!targetData) {
-            return {
-              model: null,
-              uids: [],
-              length: 0
-            };
-          }
-
           var targetFields = targetData[0];
           var targetVals = targetData.slice(1, targetData.length);
           var payloadMap = targetVals.reduce(function (acc, v) {
             acc[v] = v;
             return acc;
           }, {});
-          var dm = model.select(function (fields) {
-            var row = "".concat(targetFields.map(function (d) {
-              return fields[d].internalValue;
+          var measures = Object.keys(this.data().getFieldspace().getMeasure());
+
+          var filterFn = function filterFn(fields) {
+            var row = "".concat(targetFields.map(function (field) {
+              var val;
+
+              if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES) {
+                val = measures;
+              } else {
+                val = fields[field].internalValue;
+              }
+
+              return val;
             }));
             return row in payloadMap;
-          }); // select uids corresponding to the whole set
+          };
 
-          var currentSetIds = dm.getUids().map(function (uid) {
-            return uids[uid];
-          });
+          var dm = model.select(filterFn, {}); // Need to find a better way to do this instead of iterating the full data
+
+          var currentSetIds = this.data().select(filterFn, {
+            saveChild: false
+          }).getUids();
+          var uidMap = currentSetIds.reduce(function (acc, v) {
+            acc[v] = true;
+            return acc;
+          }, {});
           return {
             model: dm,
-            uids: currentSetIds,
+            uids: uids.filter(function (d) {
+              return uidMap[d[0]];
+            }),
             length: currentSetIds.length
           };
         }
@@ -72516,42 +73316,39 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
         }
       }, {
         key: "getIdentifiersFromData",
-        value: function getIdentifiersFromData(data) {
+        value: function getIdentifiersFromData(data, rowId) {
           var schema = this.data().getSchema();
           var fieldsConfig = this.data().getFieldsConfig();
           var identifiers = [[], []];
-
-          var _this$encodingFieldsI = this.encodingFieldsInf(),
-              xFieldType = _this$encodingFieldsI.xFieldType,
-              yFieldType = _this$encodingFieldsI.yFieldType,
-              xField = _this$encodingFieldsI.xField,
-              yField = _this$encodingFieldsI.yField;
-
-          var _map = [xFieldType, yFieldType].map(function (type) {
-            return type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-          }),
-              _map2 = _slicedToArray(_map, 2),
-              xMeasure = _map2[0],
-              yMeasure = _map2[1];
-
+          var allMeasures = schema.every(function (field) {
+            return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+          });
           schema.forEach(function (d, i) {
             var name = d.name;
+            var type = fieldsConfig[name].def.type;
 
-            if (fieldsConfig[name].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
+            if (type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
               identifiers[0].push(name);
               identifiers[1].push(data[i]);
             }
           });
+          var measures = schema.filter(function (d) {
+            return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+          }).map(function (d) {
+            return d.name;
+          });
 
-          if (xMeasure && yMeasure) {
+          if (measures.length) {
+            identifiers[0].push(muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES);
+            identifiers[1].push(measures.join());
+          }
+
+          if (allMeasures) {
             var _identifiers$, _identifiers$2;
 
-            var xMeasureIndex = fieldsConfig[xField].index;
-            var yMeasureIndex = fieldsConfig[yField].index;
+            (_identifiers$ = identifiers[0]).push.apply(_identifiers$, [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID]);
 
-            (_identifiers$ = identifiers[0]).push.apply(_identifiers$, [xField, yField]);
-
-            (_identifiers$2 = identifiers[1]).push.apply(_identifiers$2, [data[xMeasureIndex], data[yMeasureIndex]]);
+            (_identifiers$2 = identifiers[1]).push.apply(_identifiers$2, [rowId]);
           }
 
           return identifiers;
@@ -72686,11 +73483,11 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
           var normalizedData = this._normalizedData;
           var fieldsConfig = this.data().getFieldsConfig();
 
-          var _this$encodingFieldsI2 = this.encodingFieldsInf(),
-              yField = _this$encodingFieldsI2.yField,
-              xField = _this$encodingFieldsI2.xField,
-              yFieldType = _this$encodingFieldsI2.yFieldType,
-              xFieldType = _this$encodingFieldsI2.xFieldType;
+          var _this$encodingFieldsI = this.encodingFieldsInf(),
+              yField = _this$encodingFieldsI.yField,
+              xField = _this$encodingFieldsI.xField,
+              yFieldType = _this$encodingFieldsI.yFieldType,
+              xFieldType = _this$encodingFieldsI.xFieldType;
 
           var measureIndex;
           var enc;
@@ -79603,8 +80400,7 @@ var actionBehaviourMap = (_actionBehaviourMap = {}, _defineProperty(_actionBehav
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return UnitBrushBehaviour; });
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
-/* harmony import */ var _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/visual-layer */ "./packages/visual-layer/src/index.js");
-/* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../enums/behaviours */ "./packages/visual-unit/src/enums/behaviours.js");
+/* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/behaviours */ "./packages/visual-unit/src/enums/behaviours.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -79623,7 +80419,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-
+ // import { LAYER_TYPES } from '@chartshq/visual-layer';
 
 
 /**
@@ -79643,25 +80439,22 @@ function (_VolatileBehaviour) {
     return _possibleConstructorReturn(this, _getPrototypeOf(UnitBrushBehaviour).apply(this, arguments));
   }
 
-  _createClass(UnitBrushBehaviour, [{
-    key: "getAddSetFromCriteria",
-    value: function getAddSetFromCriteria(criteria) {
-      var propagationInf = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var context = this.firebolt.context;
-      var hasBarLayer = !!context.layers().find(function (layer) {
-        return layer.config().mark === _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__["LAYER_TYPES"].BAR_LAYER;
-      });
-      var filteredDataModel = propagationInf.data ? propagationInf.data : context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
-      return {
-        model: filteredDataModel,
-        uids: criteria ? propagationInf.data ? propagationInf.entryRowIds : filteredDataModel[0].getUids() : null
-      };
-    }
-  }], [{
+  _createClass(UnitBrushBehaviour, null, [{
     key: "formalName",
     value: function formalName() {
-      return _enums_behaviours__WEBPACK_IMPORTED_MODULE_2__["BRUSH"];
-    }
+      return _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"];
+    } // getAddSetFromCriteria (criteria, propagationInf = {}) {
+    //     const context = this.firebolt.context;
+    //     const hasBarLayer = !!context.layers().find(layer => layer.config().mark === LAYER_TYPES.BAR_LAYER);
+    //     const filteredDataModel = propagationInf.data ? propagationInf.data :
+    //         context.getDataModelFromIdentifiers(criteria, 'all', undefined, hasBarLayer);
+    //     return {
+    //         model: filteredDataModel,
+    //         uids: criteria ? (propagationInf.data ? propagationInf.entryRowIds :
+    //             filteredDataModel[0].getUids()) : null
+    //     };
+    // }
+
   }]);
 
   return UnitBrushBehaviour;
@@ -79675,144 +80468,132 @@ function (_VolatileBehaviour) {
 /*!**************************************************************!*\
   !*** ./packages/visual-unit/src/firebolt/data-propagator.js ***!
   \**************************************************************/
-/*! exports provided: propagateValues */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*! no static exports found */
+/***/ (function(module, exports) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "propagateValues", function() { return propagateValues; });
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
-
-
-var addFacetData = function addFacetData(_ref, facetData, propFields) {
-  var data = _ref.identifiers,
-      fields = _ref.fields;
-  var fieldsWithFacets = [].concat(_toConsumableArray(fields), _toConsumableArray(facetData[0].map(function (d) {
-    return d.getSchemaDef();
-  })));
-  var fieldIndexMap = fieldsWithFacets.reduce(function (acc, v, i) {
-    acc[v.name] = i;
-    return acc;
-  }, {});
-  var dataWithFacets = [propFields];
-
-  var _loop = function _loop(i, len) {
-    var row = [].concat(_toConsumableArray(data[i]), _toConsumableArray(facetData[1]));
-    var newRow = [];
-    propFields.forEach(function (field) {
-      var idx = fieldIndexMap[field];
-      newRow.push(row[idx]);
-    });
-    dataWithFacets.push(newRow);
-  };
-
-  for (var i = 1, len = data.length; i < len; i++) {
-    _loop(i, len);
-  }
-
-  return dataWithFacets;
-};
-
-var propagateValues = function propagateValues(instance, action) {
-  var config = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var propagateInterpolatedValues = false;
-  var propFields = [];
-  var payload = config.payload,
-      identifiers = config.identifiers,
-      propagationFields = config.propagationFields;
-
-  var _ref2 = propagationFields[action] || {},
-      _ref2$fields = _ref2.fields,
-      propagationFieldNames = _ref2$fields === void 0 ? [] : _ref2$fields,
-      append = _ref2.append;
-
-  var context = instance.context;
-  var dataModel = context.cachedData()[0];
-  var sourceId = context.id();
-  var sideEfffects = instance.sideEffects();
-  var behaviourEffectMap = instance._behaviourEffectMap;
-  var propagationBehaviourMap = instance._propagationBehaviourMap;
-  var propagationBehaviour = propagationBehaviourMap[action] || action;
-  var facetByFields = context.facetByFields();
-  payload.sourceUnit = sourceId;
-  payload.action = action;
-  payload.sourceCanvas = context.parentAlias();
-
-  if (identifiers !== null) {
-    propFields = identifiers.fields;
-
-    if (propagationFieldNames.length) {
-      var fields = identifiers.fields;
-      propFields = append ? [].concat(_toConsumableArray(fields.map(function (d) {
-        return d.name;
-      })), _toConsumableArray(propagationFieldNames)) : propagationFieldNames;
-      Object.assign(identifiers, {
-        identifiers: addFacetData(identifiers, facetByFields, propFields)
-      });
-    }
-
-    if (propFields.length && propFields.every(function (field) {
-      return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-    }) || propFields.some(function (field) {
-      return field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID;
-    })) {
-      propagateInterpolatedValues = true;
-    }
-  }
-
-  var groupId = context.parentAlias();
-
-  var filterFn = function filterFn(entry, propagationConf) {
-    var effects = behaviourEffectMap[entry.config.action];
-    var mutates = entry.config.groupId ? effects ? effects.some(function (d) {
-      return sideEfffects[d.name || d].constructor.mutates();
-    }) : false : true;
-    return entry.config.groupId !== propagationConf.groupId && mutates;
-  };
-
-  var sourceBehaviour = instance._actions.behavioural[action];
-  var isMutableAction = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
-  var propConfig = {
-    payload: payload,
-    action: action,
-    criteria: identifiers,
-    isMutableAction: isMutableAction,
-    propagateInterpolatedValues: propagateInterpolatedValues,
-    groupId: groupId,
-    sourceId: isMutableAction ? groupId : sourceId,
-    filterFn: filterFn,
-    enabled: function enabled(propConf, firebolt) {
-      return action !== propagationBehaviour ? propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true;
-    }
-  };
-  dataModel.propagate(identifiers, propConfig, true);
-
-  if (action !== propagationBehaviour) {
-    var behaviourInstance = instance._actions.behavioural[propagationBehaviour];
-    isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
-    dataModel.propagate(identifiers, Object.assign({}, propConfig, {
-      isMutableAction: isMutableAction,
-      applyOnSource: false,
-      action: propagationBehaviour,
-      sourceId: isMutableAction ? groupId : sourceId,
-      enabled: function enabled(propConf, firebolt) {
-        return propConf.payload.sourceCanvas !== firebolt.context.parentAlias();
-      }
-    }), true, {
-      filterImmutableAction: function filterImmutableAction(actionInf, propInf) {
-        return actionInf.groupId !== propInf.groupId;
-      }
-    });
-  }
-};
+// import { isSimpleObject, FieldType } from 'muze-utils';
+// export const addFacetData = ({ identifiers: data }, facetData, propFields, dm) => {
+//     const facets = Object.keys(facetData);
+//     const facetVals = Object.values(facetData);
+//     const facetLen = facets.length;
+//     if (isSimpleObject(data)) {
+//         return Object.assign({}, Object.keys(facetData).reduce((acc, v) => {
+//             acc[v] = [facetData[v]];
+//             return acc;
+//         }, {}), data);
+//     }
+//     const fieldsWithFacets = data[0].length ? [...facets.map(d => ({ name: d, type: FieldType.DIMENSION })),
+//         ...data[0].map((d, i) => ({
+//             name: d,
+//             index: i + facetLen
+//         }))] : [];
+//     const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
+//         acc[v.name] = i;
+//         return acc;
+//     }, {});
+//     propFields = propFields || fieldsWithFacets.map(d => d.name);
+//     const dataWithFacets = [
+//         propFields
+//     ];
+//     const fieldsConfig = dm.getFieldsConfig();
+//     const propDims = fieldsWithFacets.filter(d => d.name in fieldsConfig).map(d => d.name);
+//     const dimsMap = dm.getData().data.reduce((acc, row) => {
+//         const key = propDims.map(d => row[fieldsConfig[d].index]);
+//         acc[key] || (acc[key] = []);
+//         acc[key].push(row);
+//         return acc;
+//     }, {});
+//     for (let i = 1, len = data.length; i < len; i++) {
+//         const row = [...facetVals, ...data[i]];
+//         const newRow = [];
+//         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
+//         const origRow = dimsMap[dimKey];
+//         if (origRow) {
+//             origRow.forEach((rowVal) => {
+//                 const newRowVal = [];
+//                 propFields.forEach((field) => {
+//                     if (field in fieldIndexMap) {
+//                         const idx = fieldIndexMap[field];
+//                         newRowVal.push(row[idx]);
+//                     } else {
+//                         const idx = fieldsConfig[field].index;
+//                         newRowVal.push(rowVal[idx]);
+//                     }
+//                 });
+//                 dataWithFacets.push(newRowVal);
+//             });
+//         } else {
+//             propFields.forEach((field) => {
+//                 if (field in fieldIndexMap) {
+//                     const idx = fieldIndexMap[field];
+//                     newRow.push(row[idx]);
+//                 }
+//             });
+//             dataWithFacets.push(newRow);
+//         }
+//     }
+//     return dataWithFacets;
+// };
+// export const propagateValues = (instance, action, config = {}) => {
+//     let propFields = [];
+//     const { payload, identifiers, propagationFields } = config;
+//     const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
+//     const context = instance.context;
+//     const dataModel = context.cachedData()[0];
+//     const sourceId = context.id();
+//     const sideEfffects = instance.sideEffects();
+//     const behaviourEffectMap = instance._behaviourEffectMap;
+//     const propagationBehaviourMap = instance._propagationBehaviourMap;
+//     const propagationBehaviour = propagationBehaviourMap[action] || action;
+//     const facetByFields = context.facetByFields();
+//     payload.sourceUnit = sourceId;
+//     payload.action = action;
+//     payload.sourceCanvas = context.parentAlias();
+//     if (identifiers !== null) {
+//         propFields = identifiers.fields;
+//         if (propagationFieldNames.length) {
+//             const fields = identifiers.fields;
+//             propFields = append ? [...fields.map(d => d.name), ...propagationFieldNames] : propagationFieldNames;
+//             Object.assign(identifiers, {
+//                 identifiers: addFacetData(identifiers, facetByFields, propFields)
+//             });
+//         }
+//     }
+//     const groupId = context.parentAlias();
+//     const filterFn = (entry, propagationConf) => {
+//         const effects = behaviourEffectMap[entry.config.action];
+//         const mutates = entry.config.groupId ?
+//             (effects ? effects.some(d => sideEfffects[d.name || d].constructor.mutates()) : false) : true;
+//         return entry.config.groupId !== propagationConf.groupId && mutates;
+//     };
+//     const sourceBehaviour = instance._actions.behavioural[action];
+//     let isMutableAction = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
+//     const propConfig = {
+//         payload,
+//         action,
+//         criteria: identifiers,
+//         isMutableAction,
+//         groupId,
+//         sourceId: config.sourceId,
+//         filterFn,
+//         enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
+//             propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)
+//     };
+//     dataModel.propagate(identifiers, propConfig, true);
+//     if (action !== propagationBehaviour) {
+//         const behaviourInstance = instance._actions.behavioural[propagationBehaviour];
+//         isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
+//         dataModel.propagate(identifiers, Object.assign({}, propConfig, {
+//             isMutableAction,
+//             applyOnSource: false,
+//             action: propagationBehaviour,
+//             sourceId: isMutableAction ? groupId : sourceId,
+//             enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.parentAlias()
+//         }), true, {
+//             filterImmutableAction: (actionInf, propInf) => actionInf.groupId !== propInf.groupId
+//         });
+//     }
+// };
 
 /***/ }),
 
@@ -79881,9 +80662,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return UnitFireBolt; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper */ "./packages/visual-unit/src/helper/index.js");
-/* harmony import */ var _payload_generator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
-/* harmony import */ var _data_propagator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./data-propagator */ "./packages/visual-unit/src/firebolt/data-propagator.js");
+/* harmony import */ var _payload_generator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -79906,17 +80685,15 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
-
-
-var sideEffectPolicy = function sideEffectPolicy(propPayload, context, propagationInf) {
+var sideEffectPolicy = function sideEffectPolicy(propPayload, firebolt, propagationInf) {
   var sourceIdentifiers = propagationInf.sourceIdentifiers,
       propagationData = propagationInf.propagationData;
   var fields = sourceIdentifiers.fields;
   var sourceIdentifierFields = Object.keys(fields).filter(function (field) {
     return field.type !== muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
   });
-  var propFields = Object.keys(propagationData[0].getFieldsConfig());
-  var hasCommonCanvas = propPayload.sourceCanvas === context.parentAlias();
+  var propFields = Object.keys(propagationData.getFieldsConfig());
+  var hasCommonCanvas = propPayload.sourceCanvas === firebolt.sourceCanvas();
   return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(sourceIdentifierFields, propFields).length || hasCommonCanvas;
 };
 /**
@@ -79947,6 +80724,11 @@ function (_Firebolt) {
         ANCHORS = _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["SIDE_EFFECTS"].ANCHORS,
         BRUSH_ANCHORS = _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["SIDE_EFFECTS"].BRUSH_ANCHORS,
         PERSISTENT_ANCHORS = _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["SIDE_EFFECTS"].PERSISTENT_ANCHORS;
+    _this._handlers = {};
+    _this._propagationIdentifiers = {};
+
+    _this.sideEffects().tooltip.disable();
+
     var disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
     disabledSideEffects.forEach(function (sideEffect) {
       _this.changeSideEffectStateOnPropagation(sideEffect, sideEffectPolicy, 'sourceTargetPolicy');
@@ -79955,24 +80737,16 @@ function (_Firebolt) {
   }
 
   _createClass(UnitFireBolt, [{
-    key: "propagate",
-    value: function propagate(behaviour, payload, identifiers, sideEffects) {
-      Object(_data_propagator__WEBPACK_IMPORTED_MODULE_4__["propagateValues"])(this, behaviour, {
-        payload: payload,
-        identifiers: identifiers,
-        sideEffects: sideEffects,
-        propagationFields: this._propagationFields
-      });
-    }
-  }, {
     key: "getApplicableSideEffects",
     value: function getApplicableSideEffects(sideEffects, payload, propagationInf) {
+      var _this2 = this;
+
       var context = this.context;
       var unitId = context.id();
       var aliasName = context.parentAlias();
       var propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
       var sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
-      var sourceSideEffects = this._sourceSideEffects;
+      var sideEffectPolicies = this._sideEffectPolicies;
       var sideEffectInstances = this.sideEffects();
       var actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
       var applicableSideEffects = payload.sideEffects ? [{
@@ -79989,11 +80763,11 @@ function (_Firebolt) {
           }
 
           if (!actionOnSource && payload.criteria !== null) {
-            var sideEffectCheckers = Object.values(sourceSideEffects[se.name || se] || {});
+            var sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
             var sourceIdentifiers = propagationInf.sourceIdentifiers,
                 propagationData = propagationInf.data;
             return sideEffectCheckers.length ? sideEffectCheckers.every(function (checker) {
-              return checker(propagationInf.propPayload, context, {
+              return checker(propagationInf.propPayload, _this2, {
                 sourceIdentifiers: sourceIdentifiers,
                 propagationData: propagationData
               });
@@ -80012,50 +80786,46 @@ function (_Firebolt) {
     }
   }, {
     key: "shouldApplySideEffects",
-    value: function shouldApplySideEffects(propagate) {
-      return propagate === false;
+    value: function shouldApplySideEffects(propInf) {
+      return propInf.propagate === false && propInf.applySideEffect !== false;
     }
   }, {
     key: "onDataModelPropagation",
     value: function onDataModelPropagation() {
-      var _this2 = this;
+      var _this3 = this;
 
       return function (data, config) {
         var isMutableAction = false;
-        var context = _this2.context;
+        var context = _this3.context;
 
         if (!context.mount()) {
           return;
         }
 
-        var _getSelectionRejectio = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getSelectionRejectionModel"])(context.data(), data, Object(_helper__WEBPACK_IMPORTED_MODULE_2__["isXandYMeasures"])(context), context._cachedValuesMap()),
-            propagationData = _getSelectionRejectio.model,
-            entryRowIds = _getSelectionRejectio.entryRowIds,
-            exitRowIds = _getSelectionRejectio.exitRowIds;
-
+        var propagationData = data;
         var enabledFn = config.enabled,
             sourceIdentifiers = config.sourceIdentifiers,
             action = config.action,
             propPayload = config.payload;
-        var payloadFn = _payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"][action] || _payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"].__default;
-        var payload = payloadFn(context, propagationData, config);
-        var sourceBehaviours = _this2._sourceBehaviours;
-        var filterFns = Object.values(sourceBehaviours[action] || sourceBehaviours['*'] || {});
+        var payloadFn = _payload_generator__WEBPACK_IMPORTED_MODULE_2__["payloadGenerator"][action] || _payload_generator__WEBPACK_IMPORTED_MODULE_2__["payloadGenerator"].__default;
+        var payload = payloadFn(_this3, propagationData, config, context.facetByFields());
+        var behaviourPolicies = _this3._behaviourPolicies;
+        var filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
         var enabled = filterFns.every(function (fn) {
-          return fn(propPayload || {}, context, {
+          return fn(propPayload || {}, _this3, {
             sourceIdentifiers: sourceIdentifiers,
             propagationData: propagationData
           });
         });
 
         if (enabledFn) {
-          enabled = enabledFn(config, _this2) && enabled !== false;
+          enabled = enabledFn(config, _this3) && enabled !== false;
         }
 
         if (enabled) {
-          var effects = _this2._behaviourEffectMap[action];
+          var effects = _this3._behaviourEffectMap[action];
 
-          var sideEffectInstances = _this2.sideEffects();
+          var sideEffectInstances = _this3.sideEffects();
 
           isMutableAction = config.groupId ? effects.some(function (d) {
             return sideEffectInstances[d.name || d].constructor.mutates();
@@ -80063,21 +80833,19 @@ function (_Firebolt) {
           var propagationInf = {
             propagate: false,
             data: propagationData,
-            entryRowIds: entryRowIds,
-            exitRowIds: exitRowIds,
             propPayload: propPayload,
             sourceIdentifiers: sourceIdentifiers,
             persistent: false,
             sourceId: config.propagationSourceId,
             isMutableAction: config.isMutableAction
           };
-          _this2._actionHistory[action] = {
+          _this3._actionHistory[action] = {
             payload: payload,
             propagationInf: propagationInf,
             isMutableAction: isMutableAction
           };
 
-          _this2.dispatchBehaviour(action, payload, propagationInf);
+          _this3.dispatchBehaviour(action, payload, propagationInf);
         }
       };
     }
@@ -80093,10 +80861,44 @@ function (_Firebolt) {
       return this;
     }
   }, {
+    key: "target",
+    value: function target() {
+      return 'visual-unit';
+    }
+  }, {
     key: "remove",
     value: function remove() {
       this.context.cachedData()[0].unsubscribe('propagation');
       return this;
+    }
+  }, {
+    key: "propagationIdentifiers",
+    value: function propagationIdentifiers(action, identifiers) {
+      if (identifiers) {
+        this._propagationIdentifiers = identifiers;
+      }
+
+      return this._propagationIdentifiers[action];
+    }
+  }, {
+    key: "registerPhysicalActionHandlers",
+    value: function registerPhysicalActionHandlers() {
+      return this;
+    }
+  }, {
+    key: "id",
+    value: function id() {
+      return this.context.id();
+    }
+  }, {
+    key: "getPropagationSource",
+    value: function getPropagationSource() {
+      return this.context.cachedData()[0];
+    }
+  }, {
+    key: "sourceCanvas",
+    value: function sourceCanvas() {
+      return this.context.parentAlias();
     }
   }]);
 
@@ -80118,6 +80920,14 @@ function (_Firebolt) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "payloadGenerator", function() { return payloadGenerator; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -80130,7 +80940,8 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 var getRangeFromData = function getRangeFromData(instance, selectionDataModel, propConfig) {
   var criteria;
-  var dataObj = selectionDataModel[0].getData();
+  var dataObj = selectionDataModel.getData();
+  var selectionDataFields = selectionDataModel.getFieldsConfig();
   var propCriteria = propConfig.payload.criteria;
   var sourceIdentifiers = propConfig.sourceIdentifiers;
   var schema = dataObj.schema;
@@ -80139,7 +80950,13 @@ var getRangeFromData = function getRangeFromData(instance, selectionDataModel, p
   var isActionSourceSame = instance.id() === propConfig.sourceId;
 
   if (isActionSourceSame) {
-    criteria = propCriteria;
+    criteria = propCriteria ? Object.keys(propCriteria).reduce(function (acc, v) {
+      if (v in selectionDataFields) {
+        acc[v] = propCriteria[v];
+      }
+
+      return acc;
+    }, {}) : null;
   } else {
     criteria = sourceIdentifiers !== null ? schema.reduce(function (acc, obj, index) {
       var range;
@@ -80181,17 +80998,103 @@ var payloadGenerator = {
     return payload;
   },
   __default: function __default(instance, selectionDataModel, propConfig) {
+    var facetByFields = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
     var propPayload = propConfig.payload;
     var sourceIdentifiers = propConfig.sourceIdentifiers;
-    var dataObj = selectionDataModel[0].getData();
+    var dataObj = selectionDataModel.getData();
     var schema = dataObj.schema;
     var payload = Object.assign({}, propPayload);
     schema = dataObj.schema;
     var data = dataObj.data;
-    var sourceFields = schema.map(function (d) {
+    var fieldsConfig = selectionDataModel.getFieldsConfig();
+    var sourceFields = schema.filter(function (d) {
+      return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+    }).map(function (d) {
       return d.name;
     });
-    payload.criteria = !sourceIdentifiers && selectionDataModel[0].isEmpty() ? null : [sourceFields].concat(_toConsumableArray(data));
+
+    if (sourceIdentifiers) {
+      (function () {
+        var _facetByFields = _slicedToArray(facetByFields, 2),
+            _facetByFields$ = _facetByFields[0],
+            facetFields = _facetByFields$ === void 0 ? [] : _facetByFields$,
+            _facetByFields$2 = _facetByFields[1],
+            facetValues = _facetByFields$2 === void 0 ? [] : _facetByFields$2;
+
+        var facetIndices = facetFields.reduce(function (acc, v, i) {
+          acc[v] = i;
+          return acc;
+        }, {});
+        var identifierIdxMap = sourceIdentifiers.fields.reduce(function (acc, v, i) {
+          acc[v.name] = i;
+          return acc;
+        }, {});
+        var identifiers = sourceIdentifiers.identifiers.slice(1, sourceIdentifiers.identifiers.length);
+        var sourceIdentifierFields = sourceIdentifiers.fields.filter(function (d) {
+          return d.name in fieldsConfig || d.name in facetIndices || d.name === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID;
+        });
+        var identifierMap = identifiers.reduce(function (acc, v) {
+          var key = sourceIdentifierFields.map(function (d) {
+            return v[identifierIdxMap[d.name]];
+          });
+          var measureNamesIdx = identifierIdxMap[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES];
+
+          if (measureNamesIdx) {
+            !acc[key] && (acc[key] = []);
+            acc[key].push([v[measureNamesIdx]]);
+          }
+
+          return acc;
+        }, {});
+        var dataArr = [];
+        var selectionSet = instance._selectionSet[propConfig.action];
+        var selectionSetFields = selectionSet._fields;
+
+        var _loop = function _loop(i, len) {
+          var row = data[i];
+          var dims = [];
+          selectionSetFields.forEach(function (field) {
+            if (fieldsConfig[field] && fieldsConfig[field].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
+              var idx = fieldsConfig[field].index;
+              dims.push(row[idx]);
+            }
+          });
+          var vals = "".concat(sourceIdentifierFields.map(function (d) {
+            if (d.name in fieldsConfig) {
+              return row[fieldsConfig[d.name].index];
+            } else if (d.name in facetIndices) {
+              return facetValues[facetIndices[d.name]];
+            }
+
+            return null;
+          }).filter(function (d) {
+            return d !== null;
+          }));
+
+          if (vals in identifierMap) {
+            var measures = identifierMap[vals];
+            measures.forEach(function (measureArr) {
+              dataArr.push([].concat(dims, _toConsumableArray(measureArr)));
+            });
+          } else {
+            var _measures = instance._dimensionsMap[dims] || [[]];
+
+            _measures.forEach(function (measureArr) {
+              dataArr.push([].concat(dims, _toConsumableArray(measureArr)));
+            });
+          }
+        };
+
+        for (var i = 0, len = data.length; i < len; i++) {
+          _loop(i, len);
+        }
+
+        payload.criteria = [[].concat(_toConsumableArray(sourceFields), [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES])].concat(dataArr);
+      })();
+    } else {
+      payload.criteria = null;
+    }
+
     payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(function (d) {
       return d.name;
     }) : [];
@@ -80977,7 +81880,7 @@ var getSelectionRejectionModel = function getSelectionRejectionModel(model, prop
 /*!*******************************************!*\
   !*** ./packages/visual-unit/src/index.js ***!
   \*******************************************/
-/*! exports provided: VisualUnit, helpers, enums, UnitFireBolt */
+/*! exports provided: VisualUnit, helpers, enums, UnitFireBolt, addFacetData */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80989,8 +81892,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _firebolt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./firebolt */ "./packages/visual-unit/src/firebolt/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnitFireBolt", function() { return _firebolt__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _visual_unit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./visual-unit */ "./packages/visual-unit/src/visual-unit.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VisualUnit", function() { return _visual_unit__WEBPACK_IMPORTED_MODULE_3__["default"]; });
+/* harmony import */ var _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./firebolt/data-propagator */ "./packages/visual-unit/src/firebolt/data-propagator.js");
+/* harmony import */ var _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "addFacetData", function() { return _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__["addFacetData"]; });
+
+/* harmony import */ var _visual_unit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./visual-unit */ "./packages/visual-unit/src/visual-unit.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VisualUnit", function() { return _visual_unit__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+
 
 
 
@@ -81011,17 +81919,11 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "listenerMap", function() { return listenerMap; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enums/reactive-props */ "./packages/visual-unit/src/enums/reactive-props.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper */ "./packages/visual-unit/src/helper/index.js");
-/* harmony import */ var _helper_grid_lines__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper/grid-lines */ "./packages/visual-unit/src/helper/grid-lines.js");
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
+/* harmony import */ var _chartshq_muze_firebolt_src_enums_constants__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt/src/enums/constants */ "./packages/muze-firebolt/src/enums/constants.js");
+/* harmony import */ var _chartshq_muze_firebolt_src_enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @chartshq/muze-firebolt/src/enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
+/* harmony import */ var _enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./enums/reactive-props */ "./packages/visual-unit/src/enums/reactive-props.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper */ "./packages/visual-unit/src/helper/index.js");
+/* harmony import */ var _helper_grid_lines__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./helper/grid-lines */ "./packages/visual-unit/src/helper/grid-lines.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -81030,10 +81932,73 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 
 
 
+
+
+
+
+var getUniqueKeys = function getUniqueKeys(data, dimensions, _ref) {
+  var layers = _ref.layers,
+      uids = _ref.uids,
+      map = _ref.map;
+  return data.reduce(function (acc, row, i) {
+    var key = dimensions.map(function (d) {
+      return row[d.index];
+    });
+    layers.forEach(function (layer) {
+      var measureNames = Object.keys(layer.data().getFieldspace().getMeasure());
+      var key2 = dimensions.length ? "".concat([key].concat(_toConsumableArray(measureNames))) : "".concat([uids[i]].concat(_toConsumableArray(measureNames)));
+
+      if (map) {
+        acc[key] = acc[key] || [];
+        acc[key].push(measureNames);
+      } else {
+        acc[key2] = acc[key2] || {};
+        acc[key2] = {
+          dims: key,
+          measureNames: measureNames,
+          uid: uids[i]
+        };
+      }
+    });
+    return acc;
+  }, {});
+};
+
+var getKeysFromData = function getKeysFromData(dataModel, unit) {
+  var _dataModel$getData = dataModel.getData(),
+      data = _dataModel$getData.data,
+      uids = _dataModel$getData.uids;
+
+  var dimensions = Object.values(dataModel.getFieldsConfig()).filter(function (d) {
+    return d.def.type === 'dimension';
+  });
+  var layers = unit.layers();
+  return {
+    keys: getUniqueKeys(data, dimensions, {
+      layers: layers,
+      uids: uids
+    }),
+    fields: dimensions.map(function (d) {
+      return d.def.name;
+    }),
+    dimMap: getUniqueKeys(data, dimensions, {
+      layers: layers,
+      uids: uids,
+      map: true
+    })
+  };
+};
 
 var removeExitLayers = function removeExitLayers(layerDefs, context) {
   var layersMap = context._layersMap;
@@ -81055,10 +82020,10 @@ var removeExitLayers = function removeExitLayers(layerDefs, context) {
 
 var listenerMap = [{
   type: 'registerImmediateListener',
-  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERDEFS"]],
-  listener: function listener(context, _ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        layerDefs = _ref2[1];
+  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["LAYERDEFS"]],
+  listener: function listener(context, _ref2) {
+    var _ref3 = _slicedToArray(_ref2, 2),
+        layerDefs = _ref3[1];
 
     var fieldsVal = context.fields();
 
@@ -81091,27 +82056,27 @@ var listenerMap = [{
   }
 }, {
   type: 'registerImmediateListener',
-  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["DATA"]],
-  listener: function listener(context, _ref3) {
-    var _ref4 = _slicedToArray(_ref3, 2),
-        dataModel = _ref4[1];
+  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["DATA"]],
+  listener: function listener(context, _ref4) {
+    var _ref5 = _slicedToArray(_ref4, 2),
+        dataModel = _ref5[1];
 
     if (dataModel) {
       var axesObj = context.axes();
       var timeDiffs = {};
       var timeDiffsByField = {};
-      Object.entries(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["temporalFields"])(dataModel)).forEach(function (_ref5) {
-        var _ref6 = _slicedToArray(_ref5, 2),
-            fieldName = _ref6[0],
-            fieldObj = _ref6[1];
+      Object.entries(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["temporalFields"])(dataModel)).forEach(function (_ref6) {
+        var _ref7 = _slicedToArray(_ref6, 2),
+            fieldName = _ref7[0],
+            fieldObj = _ref7[1];
 
         timeDiffsByField[fieldName] = fieldObj.minimumConsecutiveDifference();
       });
-      Object.entries(context.fields()).forEach(function (_ref7) {
-        var _ref8 = _slicedToArray(_ref7, 2),
-            type = _ref8[0],
-            _ref8$ = _slicedToArray(_ref8[1], 1),
-            field = _ref8$[0];
+      Object.entries(context.fields()).forEach(function (_ref8) {
+        var _ref9 = _slicedToArray(_ref8, 2),
+            type = _ref9[0],
+            _ref9$ = _slicedToArray(_ref9[1], 1),
+            field = _ref9$[0];
 
         if (field) {
           var timeDiff = timeDiffsByField["".concat(field)];
@@ -81128,47 +82093,83 @@ var listenerMap = [{
       context._timeDiffs = timeDiffs;
       var firebolt = context.firebolt();
       var originalData = context.cachedData()[0];
-      firebolt.createSelectionSet(context.data().getUids());
+
+      var _getKeysFromData = getKeysFromData(context.data(), context),
+          keys = _getKeysFromData.keys,
+          dimMap = _getKeysFromData.dimMap,
+          fields = _getKeysFromData.fields;
+
+      firebolt._dimensionsMap = dimMap;
+      firebolt._dimensionsSet = fields;
+      firebolt.createSelectionSet({
+        keys: keys,
+        fields: fields
+      });
       firebolt.attachPropagationListener(originalData);
     }
   }
 }, {
   type: 'registerImmediateListener',
-  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["CONFIG"]],
-  listener: function listener(context, _ref9) {
-    var _ref10 = _slicedToArray(_ref9, 2),
-        config = _ref10[1];
+  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["CONFIG"]],
+  listener: function listener(context, _ref10) {
+    var _ref11 = _slicedToArray(_ref10, 2),
+        config = _ref11[1];
 
     if (config) {
-      context.firebolt().config(config.interaction);
-      Object(_helper_grid_lines__WEBPACK_IMPORTED_MODULE_3__["createGridLineLayer"])(context);
+      var firebolt = context.firebolt();
+      var interaction = config.interaction;
+      firebolt.config(interaction);
+      var mode = interaction.tooltip.mode;
+
+      if (mode === _chartshq_muze_firebolt_src_enums_constants__WEBPACK_IMPORTED_MODULE_1__["FRAGMENTED"]) {
+        var map = firebolt._behaviourEffectMap;
+
+        for (var key in map) {
+          var sideEffects = map[key];
+          map[key] = sideEffects.map(function (val) {
+            var name = val;
+
+            if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(val)) {
+              name = val.name;
+            }
+
+            if (name === _chartshq_muze_firebolt_src_enums_side_effects__WEBPACK_IMPORTED_MODULE_2__["TOOLTIP"]) {
+              return _chartshq_muze_firebolt_src_enums_side_effects__WEBPACK_IMPORTED_MODULE_2__["FRAGMENTED_TOOLTIP"];
+            }
+
+            return val;
+          });
+        }
+      }
+
+      Object(_helper_grid_lines__WEBPACK_IMPORTED_MODULE_5__["createGridLineLayer"])(context);
     }
   }
 }, {
   type: 'registerImmediateListener',
-  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["DATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["TRANSFORM"]],
-  listener: function listener(context, _ref11, _ref12) {
-    var _ref13 = _slicedToArray(_ref11, 2),
-        dataModel = _ref13[1];
-
+  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["DATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["TRANSFORM"]],
+  listener: function listener(context, _ref12, _ref13) {
     var _ref14 = _slicedToArray(_ref12, 2),
-        transform = _ref14[1];
+        dataModel = _ref14[1];
+
+    var _ref15 = _slicedToArray(_ref13, 2),
+        transform = _ref15[1];
 
     if (dataModel) {
-      var dataModels = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["transformDataModels"])(transform, dataModel);
+      var dataModels = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["transformDataModels"])(transform, dataModel);
       var metaInf = context.metaInf();
-      context.store().commit("".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE, ".").concat(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["TRANSFORMEDDATA"]), dataModels, metaInf.namespace);
+      context.store().commit("".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].UNIT_LOCAL_NAMESPACE, ".").concat(_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["TRANSFORMEDDATA"]), dataModels, metaInf.namespace);
     }
   }
 }, {
   type: 'registerImmediateListener',
-  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["TRANSFORMEDDATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_1__["LAYERS"]],
-  listener: function listener(context, _ref15, _ref16) {
-    var _ref17 = _slicedToArray(_ref15, 2),
-        transformedData = _ref17[1];
-
+  props: [_enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["TRANSFORMEDDATA"], _enums_reactive_props__WEBPACK_IMPORTED_MODULE_3__["LAYERS"]],
+  listener: function listener(context, _ref16, _ref17) {
     var _ref18 = _slicedToArray(_ref16, 2),
-        layers = _ref18[1];
+        transformedData = _ref18[1];
+
+    var _ref19 = _slicedToArray(_ref17, 2),
+        layers = _ref19[1];
 
     var layerAxisIndexVal = context._layerAxisIndex;
     var axesVal = context.axes();
@@ -81181,9 +82182,9 @@ var listenerMap = [{
         formalName: 'layer'
       });
 
-      Object(_helper__WEBPACK_IMPORTED_MODULE_2__["attachDataToLayers"])(layers, dataModel, transformedData);
-      context._dimensionMeasureMap = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["getDimensionMeasureMap"])(layers, dataModel.getFieldsConfig(), context.retinalFields());
-      Object(_helper__WEBPACK_IMPORTED_MODULE_2__["attachAxisToLayers"])(axesVal, layers, layerAxisIndexVal);
+      Object(_helper__WEBPACK_IMPORTED_MODULE_4__["attachDataToLayers"])(layers, dataModel, transformedData);
+      context._dimensionMeasureMap = Object(_helper__WEBPACK_IMPORTED_MODULE_4__["getDimensionMeasureMap"])(layers, dataModel.getFieldsConfig(), context.retinalFields());
+      Object(_helper__WEBPACK_IMPORTED_MODULE_4__["attachAxisToLayers"])(axesVal, layers, layerAxisIndexVal);
 
       context._lifeCycleManager.notify({
         client: layers,
@@ -81300,7 +82301,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-var PROPS = (_PROPS = {}, _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["FACET_BY_FIELDS"], {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["RETINAL_FIELDS"], {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["PARENT_ALIAS"], {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CACHED_DATA"], {}), _defineProperty(_PROPS, "detailFields", {}), _defineProperty(_PROPS, "axes", {
+var PROPS = (_PROPS = {}, _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["FACET_BY_FIELDS"], {
+  onset: function onset(context, facets) {
+    var facetKeys = facets[0].reduce(function (acc, v, i) {
+      acc["".concat(v)] = facets[1][i];
+      return acc;
+    }, {});
+    context.facetFieldsMap(facetKeys);
+  }
+}), _defineProperty(_PROPS, "facetFieldsMap", {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["RETINAL_FIELDS"], {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["PARENT_ALIAS"], {}), _defineProperty(_PROPS, _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CACHED_DATA"], {}), _defineProperty(_PROPS, "detailFields", {}), _defineProperty(_PROPS, "axes", {
   defaultValue: {
     x: [],
     y: []
@@ -81735,7 +82744,6 @@ function () {
       if (arguments.length) {
         this._mount = arguments.length <= 0 ? undefined : arguments[0];
         this.render(arguments.length <= 0 ? undefined : arguments[0]);
-        this.firebolt().mapActionsAndBehaviour();
         return this;
       }
 
@@ -81907,7 +82915,10 @@ function () {
         dimensionMeasureMap: this._dimensionMeasureMap,
         fields: this.fields(),
         data: this.data(),
-        axes: this.axes()
+        axes: this.axes(),
+        retinalFields: this.retinalFields(),
+        layers: this.layers(),
+        timeDiffs: this.timeDiffsByField()
       };
     }
   }, {
@@ -82004,8 +83015,21 @@ function () {
       });
 
       if (dimValue !== null && config.getAllPoints) {
+        dimValue[0].push(muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].MEASURE_NAMES);
         pointObj.id = dimValue;
         var pointInf = this.getMarkInfFromLayers(x, y, config);
+        var layers = this.layers();
+        layers.forEach(function (layer) {
+          var measures = layer.data().getSchema().filter(function (d) {
+            return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_1__["FieldType"].MEASURE;
+          }).map(function (d) {
+            return d.name;
+          });
+
+          for (var i = 1, len = dimValue.length; i < len; i++) {
+            dimValue[i].push(measures.join());
+          }
+        });
         pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
         return pointObj;
       }
@@ -82165,7 +83189,7 @@ function () {
 
       var row = idValuesMap[id];
       var filteredRow = fields.map(function (d) {
-        return row[fieldsConfig[d].index];
+        return d === muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].ROW_ID ? id : row[fieldsConfig[d].index];
       });
       return filteredRow;
     }

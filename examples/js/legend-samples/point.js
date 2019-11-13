@@ -1,63 +1,98 @@
-/* eslint-disable*/
-d3.json('/data/cars.json', (data) => {
-    let env = window.muze();
+d3.json('/data/word-freq-bubble.json', (data) => {
     const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'f',
         type: 'measure'
     }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
+        name: 'index',
         type: 'dimension'
     }, {
-        name: 'Cylinders',
+        name: 'word',
         type: 'dimension'
     }, {
-        name: 'Year',
-        type: 'dimension'
+        name: 'x',
+        type: 'measure'
+    }, {
+        name: 'y',
+        type: 'measure'
     }];
-    // Create an instance of DataModel using the data and schema.
-    let rootData = new muze.DataModel(data, schema);    
-    
-    // Get a canvas instance from Muze where the chart will be rendered.
-    let canvas = env.canvas();
+    const env = window.muze();
+    const DataModel = window.muze.DataModel;
+    const html = muze.Operators.html;
 
-    canvas = canvas
-    .rows(['Horsepower']) // Acceleration goes in X axis
-    .columns(['Acceleration']) // Displacement goes in Y axis
-    .size({
-        field: 'Displacement', // Size retinal encoding with Cylinders
-        range: [50, 360]
-    })
-    // .color('Origin') 
-	.layers([{
+    let rootData = new DataModel(data, schema);
+
+    rootData = rootData.calculateVariable({
+        name: 'Used More',
+        type: 'dimension'
+    }, ['x', function (x) {
+        return x > 0 ? 'Female' : 'Male';
+    }]);
+
+    rootData = rootData.calculateVariable({
+        name: 'displayWord',
+        type: 'dimension'
+    }, ['f', 'word', function (f, word) {
+        return f > 15000 ? word : '';
+    }]);
+
+    const canvas = env.canvas().rows(['y']).columns(['x']).data(rootData).detail(['word']).width(900).height(600).color({
+        field: 'Used More',
+        range: ['#a9d3f2', '#f4a4c7']
+    }).size({
+        field: 'f',
+        range: [1, 2450]
+
+    }).layers([{
         mark: 'point'
-    }])
-    .config({
+    }, {
+        mark: 'text',
+        encoding: {
+            text: 'displayWord',
+            color: { value: function value () {
+                return 'black';
+            } }
+        }
+    }]).config({
+        border: {
+            showValueBorders: {
+                left: false,
+                bottom: false
+            }
+        },
+        axes: {
+            y: {
+                show: false
+            },
+            x: {
+                show: false
+            }
+        }
+    }).config({
         legend: {
-            position: 'bottom'
-    }})
-    .width(500)
-    .height(500)
-    .data(rootData)
-    .title('Scatter plot with retinal encodings', { position: 'top', align: 'left' })
-    .subtitle('Acceleration vs Displacement with color and shape axis', { position: 'top', align: 'left' })
+            position: 'bottom',
+            size: {
+                show: false
+            }
+        },
+        interaction: {
+            tooltip: {
+                formatter: function formatter (dataModel, context) {
+                    const tooltipData = dataModel.getData().data;
+                    const fieldConfig = dataModel.getFieldsConfig();
+
+                    let tooltipContent = '';
+                    tooltipData.forEach((dataArray, i) => {
+                        const usedMore = dataArray[fieldConfig['Used More'].index];
+                        const word = dataArray[fieldConfig.word.index];
+                        const freq = dataArray[fieldConfig.f.index];
+
+                        tooltipContent += `<p>The word <b>${word}</b> has been used more by <b>${usedMore}s</b> \n                                                         and its frequency of usage is <b>${freq}</b> </p>`;
+                    });
+                    return html`${tooltipContent}`;
+                }
+            }
+        }
+    })
+    .title('Frequency of usage of words by males and females', { align: 'center' })
     .mount('#chart');
 });
-

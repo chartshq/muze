@@ -89,4 +89,5 @@ export const GRID = 'grid';
 export const POINT = 'point';
 export const MESSAGE = 'message';
 export const NO_DATA_MESSAGE = 'No data to display';
-
+export const COMMON_INTERACTION = 'common';
+export const INDIVIDUAL_INTERACTION = 'individual';
