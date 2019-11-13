@@ -1,4 +1,3 @@
-import { FieldType } from 'muze-utils';
 import { propagationBehaviourMap } from './action-behaviour-map';
 import { propagationSideEffects } from './behaviour-effect-map';
 

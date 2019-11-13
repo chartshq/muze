@@ -25665,7 +25665,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
     // accepts an array or fn
     excludeSet: [_enums_behaviours__WEBPACK_IMPORTED_MODULE_0__["SELECT"]]
   }
-}, {
+}, 'crossline', {
   name: 'tooltip',
   options: {
     order: 0
@@ -27022,11 +27022,12 @@ function () {
 
       var _loop = function _loop(key) {
         var val = void 0;
+        var measureNamesArr = measureNames[key] || [];
 
         if (raw) {
-          val = measureNames[key] ? [].concat(_toConsumableArray(dimVals[key]), ["".concat(measureNames[key])]) : _toConsumableArray(dimVals[key]);
+          val = measureNamesArr.length ? [].concat(_toConsumableArray(dimVals[key]), ["".concat(measureNames[key])]) : _toConsumableArray(dimVals[key]);
         } else {
-          val = measureNames[key] ? [uidMap[key], measureNames[key]] : [uidMap[key]];
+          val = measureNamesArr.length ? [uidMap[key], measureNames[key]] : [uidMap[key]];
         }
 
         if (set[key] > 0) {
@@ -29377,7 +29378,8 @@ function (_GenericSideEffect) {
           var layerFields = layer.data().getFieldsConfig();
           var filteredUids = set.uids.filter(function (_ref) {
             var _ref2 = _slicedToArray(_ref, 2),
-                measures = _ref2[1];
+                _ref2$ = _ref2[1],
+                measures = _ref2$ === void 0 ? [] : _ref2$;
 
             return measures.every(function (m) {
               return m in layerFields;
@@ -29663,6 +29665,11 @@ function (_SpawnableSideEffect) {
     value: function formalName() {
       return _enums_side_effects__WEBPACK_IMPORTED_MODULE_3__["TOOLTIP"];
     }
+  }, {
+    key: "target",
+    value: function target() {
+      return 'all';
+    }
   }]);
 
   return Tooltip;
@@ -29908,7 +29915,8 @@ var generateRetinalFieldsValues = function generateRetinalFieldsValues(valueArr,
         var _fieldInf$measure = fieldInf[measure],
             dName = _fieldInf$measure.displayName,
             formatterFn = _fieldInf$measure.fn;
-        var value = formatterFn(valueArr[measureIndex]);
+        var currentMeasureValue = valueArr[measureIndex];
+        var value = formatterFn(currentMeasureValue);
         var keyValue = getKeyValue({
           field: hasMultipleMeasures ? "".concat(dName).concat(separator) : formattedRetinalValue,
           value: value,
@@ -29916,7 +29924,7 @@ var generateRetinalFieldsValues = function generateRetinalFieldsValues(valueArr,
           margin: hasMultipleMeasures ? margin : undefined,
           isSelected: isSelected,
           stackedSum: stackedSum,
-          stackedValue: valueArr[measureIndex].toFixed(2)
+          stackedValue: currentMeasureValue instanceof InvalidAwareTypes ? currentMeasureValue.value() : currentMeasureValue.toFixed(2)
         });
 
         if (!hasMultipleMeasures) {
@@ -30130,6 +30138,8 @@ var strategies = (_strategies = {}, _defineProperty(_strategies, _enums_tooltip_
 
   var measureNames = _toConsumableArray(new Set(entryUids.map(function (d) {
     return d[1];
+  }).filter(function (d) {
+    return d;
   }).flat()));
 
   var data = aggregatedModel.getData().data;
@@ -30482,27 +30492,34 @@ function (_PersistentBehaviour) {
       if (addSet === null) {
         selectionSet.reset();
       } else if (addSet.length) {
-        // new add set
+        var propagationInf = this.firebolt._propagationInf; // new add set
+
         var existingRemoveSet = addSet.filter(function (d) {
           return selectionSet._set[d] === _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__["SELECTION"].SELECTION_OLD_EXIT || selectionSet._set[d] === _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__["SELECTION"].SELECTION_NEW_EXIT;
-        }); // existing add set
+        });
 
-        if (existingRemoveSet.length) {
-          selectionSet.updateEntry();
-          selectionSet.add(existingRemoveSet);
-        } else {
-          selectionSet.updateExit();
-          selectionSet.remove(addSet);
-        }
-
-        var _selectionSet$getSets = selectionSet.getSets(),
-            exitSet = _selectionSet$getSets.exitSet;
-
-        var mergedExitSet = [].concat(_toConsumableArray(new Set(exitSet[1])), _toConsumableArray(new Set(exitSet[0])));
-        var completeSetCount = selectionSet.getCompleteSet().length;
-
-        if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
+        if (propagationInf.sourceId) {
           selectionSet.reset();
+          selectionSet.add(addSet);
+        } else {
+          // existing add set
+          if (existingRemoveSet.length) {
+            selectionSet.updateEntry();
+            selectionSet.add(existingRemoveSet);
+          } else {
+            selectionSet.updateExit();
+            selectionSet.remove(addSet);
+          }
+
+          var _selectionSet$getSets = selectionSet.getSets(true),
+              exitSet = _selectionSet$getSets.exitSet;
+
+          var mergedExitSet = [].concat(_toConsumableArray(new Set(exitSet[1])), _toConsumableArray(new Set(exitSet[0])));
+          var completeSetCount = selectionSet.getCompleteSet().length;
+
+          if (exitSet[1].length !== completeSetCount && mergedExitSet.length === completeSetCount) {
+            selectionSet.reset();
+          }
         }
       } else {
         selectionSet.remove(selectionSet.getCompleteSet());
@@ -30553,48 +30570,45 @@ var propagate = function propagate(firebolt, action, identifiers) {
   var context = firebolt.context;
   var data = context.metaData();
   var propPayload = {};
-  var sourceId = context._id;
   propPayload.action = _action_behaviour_map__WEBPACK_IMPORTED_MODULE_1__["propagationBehaviourMap"][action] || action;
   propPayload.sideEffects = _behaviour_effect_map__WEBPACK_IMPORTED_MODULE_2__["propagationSideEffects"][action];
   propPayload.sourceCanvas = context.canvasAlias();
 
   var isMutableAction = firebolt._actions.behavioural[propPayload.action].constructor.mutates();
 
-  var propagateInterpolatedValues = false;
-
-  if (identifiers) {
-    var schema = identifiers.fields;
-    propagateInterpolatedValues = schema.every(function (d) {
-      return d.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-    });
-  }
-
   var propConfig = {
-    sourceId: "legend-".concat(sourceId),
+    sourceId: firebolt.id(),
     payload: propPayload,
     criteria: propPayload.criteria === null ? null : identifiers,
     isMutableAction: isMutableAction,
-    propagateInterpolatedValues: propagateInterpolatedValues,
     action: propPayload.action
   };
-  data.propagate(identifiers, propConfig, true);
+  data.propagate(identifiers, propConfig);
 };
-var payloadGenerator = function payloadGenerator(selectionDataModel, propConfig) {
-  var propPayload = propConfig.payload;
-  var sourceIdentifiers = propConfig.sourceIdentifiers;
-  var dataObj = selectionDataModel.getData();
-  var schema = dataObj.schema;
-  var payload = Object.assign({}, propPayload);
-  schema = dataObj.schema;
-  var data = dataObj.data;
-  var sourceFields = schema.map(function (d) {
-    return d.name;
-  });
-  payload.criteria = !sourceIdentifiers && selectionDataModel.isEmpty() ? null : [sourceFields].concat(_toConsumableArray(data));
-  payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(function (d) {
-    return d.name;
-  }) : [];
-  return payload;
+var payloadGenerator = {
+  __default: function __default(selectionDataModel, propConfig) {
+    var propPayload = propConfig.payload;
+    var sourceIdentifiers = propConfig.sourceIdentifiers;
+    var dataObj = selectionDataModel.getData();
+    var schema = dataObj.schema;
+    var payload = Object.assign({}, propPayload);
+    schema = dataObj.schema;
+    var data = dataObj.data;
+    var sourceFields = schema.map(function (d) {
+      return d.name;
+    });
+    payload.criteria = !sourceIdentifiers && selectionDataModel.isEmpty() ? null : [sourceFields].concat(_toConsumableArray(data));
+    payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(function (d) {
+      return d.name;
+    }) : [];
+    return payload;
+  },
+  brush: function brush(dm, propConfig) {
+    var criteria = propConfig.criteria;
+    return {
+      criteria: criteria ? criteria.range : criteria
+    };
+  }
 };
 
 /***/ }),
@@ -30614,6 +30628,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/constants */ "./packages/muze-legend/src/enums/constants.js");
 /* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/behaviours */ "./packages/muze-legend/src/enums/behaviours.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -30696,10 +30718,13 @@ function (_Firebolt) {
       } else if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["GRADIENT"]) {
         uniqueIds = [];
       } else {
-        values = criteria[1];
+        values = criteria;
 
-        if (values) {
-          uniqueIds = values;
+        if (values instanceof Array) {
+          var _ref;
+
+          values = values.slice(1, criteria.length);
+          uniqueIds = _toConsumableArray(new Set((_ref = []).concat.apply(_ref, _toConsumableArray(values))));
         } else {
           values = Object.values(criteria);
           uniqueIds = this.context.data().filter(function (d) {
@@ -30732,20 +30757,42 @@ function (_Firebolt) {
           return;
         }
 
-        var payload = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["payloadGenerator"])(data, config);
+        var payloadFn = _helper__WEBPACK_IMPORTED_MODULE_1__["payloadGenerator"][config.action] || _helper__WEBPACK_IMPORTED_MODULE_1__["payloadGenerator"].__default;
+        var payload = payloadFn(data, config);
+        var propagationSourceId = config.propagationSourceId;
         var propagationInf = {
           propagate: false,
           data: data,
-          sourceId: config.propagationSourceId
+          sourceId: propagationSourceId
         };
 
-        _this2.dispatchBehaviour(_enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"], payload, propagationInf);
+        var isActionSourceSame = config.sourceId === _this2.id();
+
+        if (!isActionSourceSame && config.action === _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"]) {
+          // @todo make it configurable
+          _this2.dispatchBehaviour(_enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"], payload, propagationInf);
+        }
       };
     }
   }, {
     key: "data",
     value: function data() {
       return this.context.metaData();
+    }
+  }, {
+    key: "id",
+    value: function id() {
+      return "legend-".concat(this.context._id);
+    }
+  }, {
+    key: "sourceCanvas",
+    value: function sourceCanvas() {
+      return this.context.canvasAlias();
+    }
+  }, {
+    key: "shouldApplySideEffects",
+    value: function shouldApplySideEffects() {
+      return true;
     }
   }]);
 
@@ -31685,7 +31732,7 @@ var DEFAULT_CONFIG = {
   },
   item: {
     text: {
-      orientation: 'left',
+      orientation: 'right',
       width: 10,
       formatter: function formatter(val, i, data, context) {
         return context.valueParser()(val);
@@ -61388,8 +61435,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return GroupFireBolt; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper */ "./packages/muze/src/canvas/helper.js");
-/* harmony import */ var _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../visual-unit/src/firebolt/payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
+/* harmony import */ var _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @chartshq/visual-unit */ "./packages/visual-unit/src/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper */ "./packages/muze/src/canvas/helper.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper */ "./packages/muze/src/canvas/firebolt/helper.js");
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../constants */ "./packages/muze/src/constants.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -61492,13 +61539,11 @@ var _defaultCrossInteractionPolicy = {
   },
   sideEffects: {
     tooltip: function tooltip(propagationPayload, firebolt) {
-      var propagationUnit = propagationPayload.sourceUnit;
       var propagationCanvas = propagationPayload.sourceCanvas;
-      var unitId = firebolt.id();
       var canvasAlias = firebolt.sourceCanvas();
 
       if (propagationCanvas) {
-        return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
+        return propagationCanvas === canvasAlias;
       }
 
       return true;
@@ -61565,10 +61610,12 @@ function (_Firebolt) {
       if (arguments.length) {
         var context = this.context;
         this._crossInteractionPolicy = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, this.constructor.defaultCrossInteractionPolicy()), (arguments.length <= 0 ? undefined : arguments[0]) || {});
-        Object(_helper__WEBPACK_IMPORTED_MODULE_2__["applyInteractionPolicy"])(this);
+        Object(_helper__WEBPACK_IMPORTED_MODULE_3__["applyInteractionPolicy"])(this);
         var throwback = context._throwback;
         throwback.registerImmediateListener([muze_utils__WEBPACK_IMPORTED_MODULE_0__["CommonProps"].MATRIX_CREATED], function () {
-          Object(_helper__WEBPACK_IMPORTED_MODULE_2__["applyInteractionPolicy"])(_this2);
+          _this2.config(_this2.context.config().interaction);
+
+          Object(_helper__WEBPACK_IMPORTED_MODULE_3__["applyInteractionPolicy"])(_this2);
 
           var group = _this2.context.composition().visualGroup;
 
@@ -61621,7 +61668,7 @@ function (_Firebolt) {
         return this;
       }
 
-      var payloadFn = _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"][action] || _visual_unit_src_firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"].__default;
+      var payloadFn = _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_2__["payloadGenerator"][action] || _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_2__["payloadGenerator"].__default;
       var payload = payloadFn(this, propagationData, config);
       var behaviourPolicies = this._behaviourPolicies;
       var filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
@@ -61827,6 +61874,30 @@ function (_Firebolt) {
     value: function sourceCanvas() {
       return this.context.alias();
     }
+  }, {
+    key: "getApplicableSideEffects",
+    value: function getApplicableSideEffects(sideEffects, payload, propagationInf) {
+      var _this6 = this;
+
+      if (payload.sideEffects) {
+        return [{
+          effects: payload.sideEffects,
+          behaviours: [payload.action]
+        }];
+      }
+
+      sideEffects.forEach(function (d) {
+        var mappedEffects = d.effects;
+        mappedEffects = mappedEffects.filter(function (se) {
+          return Object(_chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_2__["isSideEffectEnabled"])(_this6, {
+            se: se,
+            propagationInf: propagationInf
+          });
+        });
+        d.effects = mappedEffects;
+      });
+      return sideEffects;
+    }
   }], [{
     key: "defaultInteractionPolicy",
     value: function defaultInteractionPolicy() {
@@ -61949,7 +62020,7 @@ var sanitizePayloadCriteria = function sanitizePayloadCriteria(data, propFields)
         });
 
         if (!measureNameField) {
-          var measuresArr = dimensionsMap[newRowVal];
+          var measuresArr = dimensionsMap[newRowVal].length ? dimensionsMap[newRowVal] : [[]];
           measuresArr.forEach(function (measures) {
             dataWithFacets.push([].concat(newRowVal, _toConsumableArray(measures)));
           });
@@ -73153,7 +73224,9 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
               if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES) {
                 val = measures;
               } else {
-                val = fields[field].internalValue;
+                var currentField = fields[field];
+                var isFieldInvalid = currentField instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"];
+                val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
               }
 
               return val;
@@ -74141,10 +74214,10 @@ var applyInteractionStyle = function applyInteractionStyle(context, selectionSet
   var colorAxis = axes.color;
   var apply = config.apply;
   var interactionType = config.interactionType;
+  var pathMountPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(context.mount()).select('.muze-overlay-paths').node();
   interactionStyles.forEach(function (style) {
     var styleType = style.type;
     elements.forEach(function (elem) {
-      var pathMountPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(context.mount()).select('.muze-overlay-paths').node();
       var isSpecificInteraction = context.applySpecificStyle(styleType, {
         elem: elem,
         apply: apply,
@@ -80464,144 +80537,11 @@ function (_VolatileBehaviour) {
 
 /***/ }),
 
-/***/ "./packages/visual-unit/src/firebolt/data-propagator.js":
-/*!**************************************************************!*\
-  !*** ./packages/visual-unit/src/firebolt/data-propagator.js ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-// import { isSimpleObject, FieldType } from 'muze-utils';
-// export const addFacetData = ({ identifiers: data }, facetData, propFields, dm) => {
-//     const facets = Object.keys(facetData);
-//     const facetVals = Object.values(facetData);
-//     const facetLen = facets.length;
-//     if (isSimpleObject(data)) {
-//         return Object.assign({}, Object.keys(facetData).reduce((acc, v) => {
-//             acc[v] = [facetData[v]];
-//             return acc;
-//         }, {}), data);
-//     }
-//     const fieldsWithFacets = data[0].length ? [...facets.map(d => ({ name: d, type: FieldType.DIMENSION })),
-//         ...data[0].map((d, i) => ({
-//             name: d,
-//             index: i + facetLen
-//         }))] : [];
-//     const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
-//         acc[v.name] = i;
-//         return acc;
-//     }, {});
-//     propFields = propFields || fieldsWithFacets.map(d => d.name);
-//     const dataWithFacets = [
-//         propFields
-//     ];
-//     const fieldsConfig = dm.getFieldsConfig();
-//     const propDims = fieldsWithFacets.filter(d => d.name in fieldsConfig).map(d => d.name);
-//     const dimsMap = dm.getData().data.reduce((acc, row) => {
-//         const key = propDims.map(d => row[fieldsConfig[d].index]);
-//         acc[key] || (acc[key] = []);
-//         acc[key].push(row);
-//         return acc;
-//     }, {});
-//     for (let i = 1, len = data.length; i < len; i++) {
-//         const row = [...facetVals, ...data[i]];
-//         const newRow = [];
-//         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
-//         const origRow = dimsMap[dimKey];
-//         if (origRow) {
-//             origRow.forEach((rowVal) => {
-//                 const newRowVal = [];
-//                 propFields.forEach((field) => {
-//                     if (field in fieldIndexMap) {
-//                         const idx = fieldIndexMap[field];
-//                         newRowVal.push(row[idx]);
-//                     } else {
-//                         const idx = fieldsConfig[field].index;
-//                         newRowVal.push(rowVal[idx]);
-//                     }
-//                 });
-//                 dataWithFacets.push(newRowVal);
-//             });
-//         } else {
-//             propFields.forEach((field) => {
-//                 if (field in fieldIndexMap) {
-//                     const idx = fieldIndexMap[field];
-//                     newRow.push(row[idx]);
-//                 }
-//             });
-//             dataWithFacets.push(newRow);
-//         }
-//     }
-//     return dataWithFacets;
-// };
-// export const propagateValues = (instance, action, config = {}) => {
-//     let propFields = [];
-//     const { payload, identifiers, propagationFields } = config;
-//     const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
-//     const context = instance.context;
-//     const dataModel = context.cachedData()[0];
-//     const sourceId = context.id();
-//     const sideEfffects = instance.sideEffects();
-//     const behaviourEffectMap = instance._behaviourEffectMap;
-//     const propagationBehaviourMap = instance._propagationBehaviourMap;
-//     const propagationBehaviour = propagationBehaviourMap[action] || action;
-//     const facetByFields = context.facetByFields();
-//     payload.sourceUnit = sourceId;
-//     payload.action = action;
-//     payload.sourceCanvas = context.parentAlias();
-//     if (identifiers !== null) {
-//         propFields = identifiers.fields;
-//         if (propagationFieldNames.length) {
-//             const fields = identifiers.fields;
-//             propFields = append ? [...fields.map(d => d.name), ...propagationFieldNames] : propagationFieldNames;
-//             Object.assign(identifiers, {
-//                 identifiers: addFacetData(identifiers, facetByFields, propFields)
-//             });
-//         }
-//     }
-//     const groupId = context.parentAlias();
-//     const filterFn = (entry, propagationConf) => {
-//         const effects = behaviourEffectMap[entry.config.action];
-//         const mutates = entry.config.groupId ?
-//             (effects ? effects.some(d => sideEfffects[d.name || d].constructor.mutates()) : false) : true;
-//         return entry.config.groupId !== propagationConf.groupId && mutates;
-//     };
-//     const sourceBehaviour = instance._actions.behavioural[action];
-//     let isMutableAction = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
-//     const propConfig = {
-//         payload,
-//         action,
-//         criteria: identifiers,
-//         isMutableAction,
-//         groupId,
-//         sourceId: config.sourceId,
-//         filterFn,
-//         enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
-//             propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)
-//     };
-//     dataModel.propagate(identifiers, propConfig, true);
-//     if (action !== propagationBehaviour) {
-//         const behaviourInstance = instance._actions.behavioural[propagationBehaviour];
-//         isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
-//         dataModel.propagate(identifiers, Object.assign({}, propConfig, {
-//             isMutableAction,
-//             applyOnSource: false,
-//             action: propagationBehaviour,
-//             sourceId: isMutableAction ? groupId : sourceId,
-//             enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.parentAlias()
-//         }), true, {
-//             filterImmutableAction: (actionInf, propInf) => actionInf.groupId !== propInf.groupId
-//         });
-//     }
-// };
-
-/***/ }),
-
 /***/ "./packages/visual-unit/src/firebolt/helper.js":
 /*!*****************************************************!*\
   !*** ./packages/visual-unit/src/firebolt/helper.js ***!
   \*****************************************************/
-/*! exports provided: initSideEffects, clearActionHistory, dispatchQueuedSideEffects */
+/*! exports provided: initSideEffects, clearActionHistory, dispatchQueuedSideEffects, isSideEffectEnabled */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80609,6 +80549,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initSideEffects", function() { return initSideEffects; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "clearActionHistory", function() { return clearActionHistory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatchQueuedSideEffects", function() { return dispatchQueuedSideEffects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSideEffectEnabled", function() { return isSideEffectEnabled; });
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -80647,6 +80588,20 @@ var dispatchQueuedSideEffects = function dispatchQueuedSideEffects(context) {
   });
   context._queuedSideEffects = {};
 };
+var isSideEffectEnabled = function isSideEffectEnabled(firebolt, _ref) {
+  var se = _ref.se,
+      propagationInf = _ref.propagationInf;
+  var sideEffectPolicies = firebolt._sideEffectPolicies;
+  var sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
+  var sourceIdentifiers = propagationInf.sourceIdentifiers,
+      propagationData = propagationInf.data;
+  return sideEffectCheckers.length ? sideEffectCheckers.every(function (checker) {
+    return checker(propagationInf.propPayload, firebolt, {
+      sourceIdentifiers: sourceIdentifiers,
+      propagationData: propagationData
+    });
+  }) : true;
+};
 
 /***/ }),
 
@@ -80663,6 +80618,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
 /* harmony import */ var _payload_generator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper */ "./packages/visual-unit/src/firebolt/helper.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -80680,6 +80636,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -80746,7 +80703,6 @@ function (_Firebolt) {
       var aliasName = context.parentAlias();
       var propagationSourceCanvas = propagationInf.propPayload && propagationInf.propPayload.sourceCanvas;
       var sourceUnitId = propagationInf.propPayload && propagationInf.propPayload.sourceUnit;
-      var sideEffectPolicies = this._sideEffectPolicies;
       var sideEffectInstances = this.sideEffects();
       var actionOnSource = sourceUnitId ? sourceUnitId === unitId : true;
       var applicableSideEffects = payload.sideEffects ? [{
@@ -80763,15 +80719,10 @@ function (_Firebolt) {
           }
 
           if (!actionOnSource && payload.criteria !== null) {
-            var sideEffectCheckers = Object.values(sideEffectPolicies[se.name || se] || {});
-            var sourceIdentifiers = propagationInf.sourceIdentifiers,
-                propagationData = propagationInf.data;
-            return sideEffectCheckers.length ? sideEffectCheckers.every(function (checker) {
-              return checker(propagationInf.propPayload, _this2, {
-                sourceIdentifiers: sourceIdentifiers,
-                propagationData: propagationData
-              });
-            }) : true;
+            return Object(_helper__WEBPACK_IMPORTED_MODULE_3__["isSideEffectEnabled"])(_this2, {
+              se: se,
+              propagationInf: propagationInf
+            });
           }
 
           if (propagationSourceCanvas === aliasName || actionOnSource) {
@@ -81077,7 +81028,8 @@ var payloadGenerator = {
               dataArr.push([].concat(dims, _toConsumableArray(measureArr)));
             });
           } else {
-            var _measures = instance._dimensionsMap[dims] || [[]];
+            var _measures = instance._dimensionsMap[dims];
+            _measures = _measures && _measures.length ? _measures : [[]];
 
             _measures.forEach(function (measureArr) {
               dataArr.push([].concat(dims, _toConsumableArray(measureArr)));
@@ -81880,7 +81832,7 @@ var getSelectionRejectionModel = function getSelectionRejectionModel(model, prop
 /*!*******************************************!*\
   !*** ./packages/visual-unit/src/index.js ***!
   \*******************************************/
-/*! exports provided: VisualUnit, helpers, enums, UnitFireBolt, addFacetData */
+/*! exports provided: VisualUnit, helpers, enums, UnitFireBolt, isSideEffectEnabled, payloadGenerator */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -81892,12 +81844,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _firebolt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./firebolt */ "./packages/visual-unit/src/firebolt/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "UnitFireBolt", function() { return _firebolt__WEBPACK_IMPORTED_MODULE_2__["default"]; });
 
-/* harmony import */ var _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./firebolt/data-propagator */ "./packages/visual-unit/src/firebolt/data-propagator.js");
-/* harmony import */ var _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "addFacetData", function() { return _firebolt_data_propagator__WEBPACK_IMPORTED_MODULE_3__["addFacetData"]; });
+/* harmony import */ var _firebolt_helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./firebolt/helper */ "./packages/visual-unit/src/firebolt/helper.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "isSideEffectEnabled", function() { return _firebolt_helper__WEBPACK_IMPORTED_MODULE_3__["isSideEffectEnabled"]; });
 
-/* harmony import */ var _visual_unit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./visual-unit */ "./packages/visual-unit/src/visual-unit.js");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VisualUnit", function() { return _visual_unit__WEBPACK_IMPORTED_MODULE_4__["default"]; });
+/* harmony import */ var _firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./firebolt/payload-generator */ "./packages/visual-unit/src/firebolt/payload-generator.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "payloadGenerator", function() { return _firebolt_payload_generator__WEBPACK_IMPORTED_MODULE_4__["payloadGenerator"]; });
+
+/* harmony import */ var _visual_unit__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./visual-unit */ "./packages/visual-unit/src/visual-unit.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "VisualUnit", function() { return _visual_unit__WEBPACK_IMPORTED_MODULE_5__["default"]; });
+
 
 
 
