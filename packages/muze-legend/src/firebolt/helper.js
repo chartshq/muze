@@ -12,50 +12,37 @@ export const propagate = (firebolt, action, identifiers) => {
     propPayload.sourceCanvas = context.canvasAlias();
     const isMutableAction = firebolt._actions.behavioural[propPayload.action].constructor.mutates();
 
-    let propagateInterpolatedValues = false;
-
-    if (identifiers) {
-        const schema = identifiers.fields;
-        propagateInterpolatedValues = schema.every(d => d.type === FieldType.MEASURE);
-    }
-
     const propConfig = {
         sourceId: firebolt.id(),
         payload: propPayload,
         criteria: propPayload.criteria === null ? null : identifiers,
         isMutableAction,
-        propagateInterpolatedValues,
         action: propPayload.action
     };
 
-    data.propagate(identifiers, Object.assign({}, propConfig, {
-        action,
-        enabled: (propConf, fireboltInst) => propConf.sourceId === fireboltInst.id(),
-        isMutableAction: false
-    }), false);
-
-    if (action !== propPayload.action) {
-        data.propagate(identifiers, Object.assign({}, propConfig, {
-            propagateToSource: false,
-            enabled: (propConf, fireboltInst) => propConf.sourceId !== fireboltInst.id()
-        }), true, {
-            filterImmutableAction: actionInf => actionInf.sourceId !== firebolt.id()
-        });
-    }
+    data.propagate(identifiers, propConfig);
 };
 
-export const payloadGenerator = (selectionDataModel, propConfig) => {
-    const propPayload = propConfig.payload;
-    const sourceIdentifiers = propConfig.sourceIdentifiers;
-    const dataObj = selectionDataModel.getData();
-    let schema = dataObj.schema;
-    const payload = Object.assign({}, propPayload);
-    schema = dataObj.schema;
-    const data = dataObj.data;
-    const sourceFields = schema.map(d => d.name);
-    payload.criteria = !sourceIdentifiers && selectionDataModel.isEmpty() ? null :
-            [sourceFields, ...data];
-    payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(d => d.name) : [];
-    return payload;
+export const payloadGenerator = {
+    __default: (selectionDataModel, propConfig) => {
+        const propPayload = propConfig.payload;
+        const sourceIdentifiers = propConfig.sourceIdentifiers;
+        const dataObj = selectionDataModel.getData();
+        let schema = dataObj.schema;
+        const payload = Object.assign({}, propPayload);
+        schema = dataObj.schema;
+        const data = dataObj.data;
+        const sourceFields = schema.map(d => d.name);
+        payload.criteria = !sourceIdentifiers && selectionDataModel.isEmpty() ? null :
+                [sourceFields, ...data];
+        payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(d => d.name) : [];
+        return payload;
+    },
+    brush: (dm, propConfig) => {
+        const { criteria } = propConfig;
+        return {
+            criteria: criteria ? criteria.range : criteria
+        };
+    }
 };
 

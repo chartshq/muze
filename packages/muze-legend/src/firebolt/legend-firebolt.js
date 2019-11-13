@@ -37,8 +37,9 @@ export class LegendFireBolt extends Firebolt {
         } else if (type === GRADIENT) {
             uniqueIds = [];
         } else {
-            values = criteria.slice(1, criteria.length);
-            if (values) {
+            values = criteria;
+            if (values instanceof Array) {
+                values = values.slice(1, criteria.length);
                 uniqueIds = [...new Set([].concat(...values))];
             } else {
                 values = Object.values(criteria);
@@ -61,23 +62,18 @@ export class LegendFireBolt extends Firebolt {
             if (!context.mount()) {
                 return;
             }
-            const payload = payloadGenerator(data, config);
+            const payloadFn = payloadGenerator[config.action] || payloadGenerator.__default;
+            const payload = payloadFn(data, config);
             const { propagationSourceId } = config;
             const propagationInf = {
                 propagate: false,
                 data,
                 sourceId: propagationSourceId
             };
-            const enabledFn = config.enabled;
             const isActionSourceSame = config.sourceId === this.id();
-            const enabled = enabledFn ? enabledFn(config, this) : true;
-            if (enabled && config.action !== FILTER) {
-                if (isActionSourceSame) {
-                    this.dispatchBehaviour(config.action, payload, propagationInf);
-                } else {
-                    // @todo make it configurable
-                    this.dispatchBehaviour(HIGHLIGHT, payload, propagationInf);
-                }
+            if (!isActionSourceSame && config.action === HIGHLIGHT) {
+                // @todo make it configurable
+                this.dispatchBehaviour(HIGHLIGHT, payload, propagationInf);
             }
         };
     }
@@ -94,7 +90,7 @@ export class LegendFireBolt extends Firebolt {
         return this.context.canvasAlias();
     }
 
-    shouldApplySideEffects (propInf) {
-        return propInf.propagate === false;
+    shouldApplySideEffects () {
+        return true;
     }
 }
