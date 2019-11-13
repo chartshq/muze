@@ -13,6 +13,8 @@ import {
 } from 'muze-utils';
 import { TABLE_FORMAT } from '@chartshq/muze-tooltip';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
+import { BAR } from '../../../../visual-group/src/enums/constants';
+import { NULL, UNDEFINED } from '../../enums/constants';
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
@@ -61,7 +63,8 @@ const getStackedKeyValue = (params) => {
 };
 
 const getKeyValue = (params) => {
-    const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum, stackedValue } = params;
+    const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum } = params;
+    let { stackedValue } = params;
 
     if (!removeKey) {
         const keyObj = {
@@ -72,6 +75,11 @@ const getKeyValue = (params) => {
             value,
             className: `${classPrefix}-tooltip-value`
         };
+
+        if (stackedValue === NULL || stackedValue === UNDEFINED) {
+            stackedValue = 0;
+        }
+
         const stackedValueObj = {
             value: stackedSum ? `(${(stackedValue * 100 / stackedSum).toFixed(2)} %)` : undefined,
             className: `${classPrefix}-tooltip-stacked-percentage`
@@ -113,7 +121,12 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
     return values;
 };
 
-export const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
+export const getStackedSum = (values, index) => values.reduce((a, b) => {
+    if (b[index] instanceof InvalidAwareTypes) {
+        return a + 0
+    }
+    return a + b[index]
+}, 0);
 
 export const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
 

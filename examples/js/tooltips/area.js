@@ -2,7 +2,7 @@
 const env = muze();
 const DataModel = muze.DataModel;
 
-d3.json('../../data/cars.json', (data) => {
+d3.json('../../data/cars-with-null.json', (data) => {
     let jsonData = data;
     const schema = [{
         name: 'Name',
@@ -57,10 +57,9 @@ d3.json('../../data/cars.json', (data) => {
         mark : 'area',
         interpolate: 'catmullRom' /* spline */
       }])
-      .width(450)
-      .height(250)
-      .rows(['Weight_in_lbs'])
-      .columns(['Year'])
+      .color('Origin')
+      .width(850)
+      .height(650)
       .title('Area')
       .mount("#chart1");
 });
