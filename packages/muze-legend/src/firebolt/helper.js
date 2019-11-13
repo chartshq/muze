@@ -7,7 +7,6 @@ export const propagate = (firebolt, action, identifiers) => {
     const data = context.metaData();
 
     const propPayload = {};
-    const sourceId = context._id;
     propPayload.action = propagationBehaviourMap[action] || action;
     propPayload.sideEffects = propagationSideEffects[action];
     propPayload.sourceCanvas = context.canvasAlias();
@@ -21,7 +20,7 @@ export const propagate = (firebolt, action, identifiers) => {
     }
 
     const propConfig = {
-        sourceId: `legend-${sourceId}`,
+        sourceId: firebolt.id(),
         payload: propPayload,
         criteria: propPayload.criteria === null ? null : identifiers,
         isMutableAction,
@@ -29,7 +28,20 @@ export const propagate = (firebolt, action, identifiers) => {
         action: propPayload.action
     };
 
-    data.propagate(identifiers, propConfig, true);
+    data.propagate(identifiers, Object.assign({}, propConfig, {
+        action,
+        enabled: (propConf, fireboltInst) => propConf.sourceId === fireboltInst.id(),
+        isMutableAction: false
+    }), false);
+
+    if (action !== propPayload.action) {
+        data.propagate(identifiers, Object.assign({}, propConfig, {
+            propagateToSource: false,
+            enabled: (propConf, fireboltInst) => propConf.sourceId !== fireboltInst.id()
+        }), true, {
+            filterImmutableAction: actionInf => actionInf.sourceId !== firebolt.id()
+        });
+    }
 };
 
 export const payloadGenerator = (selectionDataModel, propConfig) => {
