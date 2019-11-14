@@ -68,8 +68,8 @@
         .rows(['Displacement'])
         .color({
             field: 'Displacement', // A measure in color encoding channel creates gradient legend
-            stops: 10,
-            // step:true
+            // stops: 8,
+            // // step:true
         })
     //    .color('Maker')
         // .detail(['Name'])
@@ -79,7 +79,7 @@
         .width(850)
         .config({
             legend: {
-                position : 'bottom',
+                position : 'right',
                 // steps:true
                 text : {
                     // orientation:'left'

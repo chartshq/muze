@@ -59,6 +59,7 @@ export const DEFAULT_CONFIG = {
             type: 'square'
         }
     }
+    // stops: 5
 };
 
 const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
