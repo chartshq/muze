@@ -115,7 +115,7 @@ export const encodingFieldInfRetriever = {
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
     const schema = data.schema;
-    const transform = config.transform;
+    const { transform, connectNullData } = config;
     const {
         xField,
         yField,
@@ -123,14 +123,14 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
         yFieldType
     } = encodingFieldInf;
     const uniqueField = xFieldType === FieldType.MEASURE ? yField : xField;
-
     return transformFactory(transformType)(schema, data.data, {
         groupBy: transform.groupBy,
         uniqueField,
         sort: transform.sort || 'none',
         offset: transform.offset,
         orderBy: transform.orderBy,
-        value: yFieldType === FieldType.MEASURE ? yField : xField
+        value: yFieldType === FieldType.MEASURE ? yField : xField,
+        connect: !!connectNullData
     }, data.uids);
 };
 

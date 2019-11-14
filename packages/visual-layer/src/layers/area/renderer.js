@@ -12,8 +12,7 @@ const area = Symbols.area;
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    let filteredPoints;
-    const { layer, container, points, style, transition, className, connectNullData, interpolate } = params;
+    const { layer, container, points, style, transition, className, interpolate } = params;
 
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
@@ -23,19 +22,14 @@ const /* istanbul ignore next */ drawArea = (params) => {
                     .x(d => d[e].x)
                     .y1(d => d[e].y)
                     .y0(d => d[e].y0)
-                    .defined(d => d[e].y !== null
-            ));
+                    .defined(d => d[e].y !== undefined));
 
-    filteredPoints = points;
     mount.attr('class', className);
-    if (connectNullData) {
-        filteredPoints = points.filter(d => d.update.y !== null);
-    }
-    const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(filteredPoints));
+    const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(points));
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
                     .on('end', layer.registerAnimationDoneHook())
-                    .attr('d', updateAreaPath(filteredPoints))
+                    .attr('d', updateAreaPath(points))
                     .each(function (d) {
                         const element = selectElement(this);
                         element.attr('class', d);
