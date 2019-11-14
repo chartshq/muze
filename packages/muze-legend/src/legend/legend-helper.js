@@ -152,7 +152,7 @@ export const getReadableTicks = (domain, alignment, steps) => {
         return orderedDomain;
     }
 
-    const tempScale = scales.scaleQuantize().domain(orderedDomain);
+    const tempScale = scales.scaleQuantize().domain(orderedDomain).nice();
     let tempAxis = null;
     let legendTicks = null;
 
