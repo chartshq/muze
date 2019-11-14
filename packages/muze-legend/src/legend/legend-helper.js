@@ -1,4 +1,4 @@
-import { makeElement, numberInterpolator, FieldType, Symbols, scales } from 'muze-utils';
+import { makeElement, FieldType, Symbols, scales } from 'muze-utils';
 
 import {
     SCALE_FUNCTIONS,
@@ -20,7 +20,6 @@ import {
 export const getScaleInfo = (scale) => {
     const scaleType = scale.constructor.type();
     const domain = scale.uniqueValues();
-    debugger;
     const steps = scale.config().stops || 1;
     const scaleFn = SCALE_FUNCTIONS[scaleType];
 
@@ -146,6 +145,36 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     return domainForLegend;
 };
 
+export const getReadableTicks = (domain, alignment, steps) => {
+    // scaling the axis based on steps provided
+    const orderedDomain = [Math.min(...domain), Math.max(...domain)];
+    if (steps < 3) {
+        return orderedDomain;
+    }
+
+    const tempScale = scales.scaleQuantize().domain(orderedDomain);
+    let tempAxis = null;
+    let legendTicks = null;
+
+    if (alignment === TOP || alignment === BOTTOM) {
+        tempAxis = Symbols.axisBottom().scale(tempScale);
+    } else {
+        tempAxis = Symbols.axisRight().scale(tempScale);
+    }
+
+    legendTicks = tempAxis.scale().ticks(steps);
+
+    if (Math.max(...legendTicks) < orderedDomain[1]) {
+        legendTicks.pop();
+        legendTicks.push(orderedDomain[1]);
+    }
+    if (Math.min(...legendTicks) > orderedDomain[0]) {
+        legendTicks.shift();
+        legendTicks.unshift(orderedDomain[0]);
+    }
+    return legendTicks;
+};
+
 /**
  * function to recalculate steps on providing more number of stops than canvas can accomodate.
  * @param  {Array} domain - Array
@@ -160,9 +189,6 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     const getTickMeasure = scaleParams.smartLabel;
     const { maxWidth, maxHeight } = scaleParams.measures;
     const { alignment } = scaleParams;
-    const domainForLegend = [];
-    const interpolatedFn = numberInterpolator()(domain[0], domain[1]);
-
     // getting tick measure(i.e height and width)
     const tickValue = getTickMeasure.getOriSize(domain[1].toFixed(2));
 
@@ -170,41 +196,15 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     steps = Math.round(steps);
     steps = steps < 1 ? (steps + 1) : steps;
 
-    const tempScale = scales.scaleLinear().domain(domain);
-    let tempAxis = null;
-
     // checking alignment of the Axis
     if (alignment === TOP || alignment === BOTTOM) {
         recomputeSteps = Math.floor(maxWidth / (tickValue.width));
-        tempAxis = Symbols.axisBottom().scale(tempScale);
     } else {
         recomputeSteps = Math.floor(maxHeight / (tickValue.height));
-        tempAxis = Symbols.axisRight().scale(tempScale);
     }
     steps = Math.min(steps, recomputeSteps);
 
-    // scaling the axis based on steps provided
-    if (steps < 3) {
-        return domain;
-    }
-
-    for (let i = 0; i <= steps; i++) {
-        domainForLegend[i] = interpolatedFn(i / steps);
-    }
-    debugger;
-
-    const legendTicks = tempAxis.scale().ticks(Math.min(steps, recomputeSteps));
-    if (Math.max(...legendTicks) < Math.max(...domain)) {
-        legendTicks.pop();
-        legendTicks.push(Math.max(...domain));
-    }
-    if (Math.min(...legendTicks) > Math.min(...domain)) {
-        legendTicks.shift();
-        legendTicks.unshift(Math.min(...domain));
-    }
-    return legendTicks;
-
-        // return domainForLegend;
+    return getReadableTicks(domain, alignment, steps);
 };
 
 /**

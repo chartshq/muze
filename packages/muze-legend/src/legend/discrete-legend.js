@@ -5,7 +5,7 @@ import {
 } from 'muze-utils';
 import SimpleLegend from './simple-legend';
 import { DISCRETE, LEFT, SIZE } from '../enums/constants';
-import { getScaleInfo } from './legend-helper';
+import { getScaleInfo, getReadableTicks } from './legend-helper';
 import { createLegendSkeleton, createItemSkeleton, renderDiscreteItem } from './renderer';
 import '../styles.scss';
 
@@ -50,10 +50,17 @@ export default class DiscreteLegend extends SimpleLegend {
     dataFromScale () {
         const scale = this.scale();
         const { scaleType, domain, scaleFn } = getScaleInfo(scale);
-        let domainForLegend = [...new Set(domain)];
         const field = this.metaData().getFieldspace().fields[0];
         const { type, subtype } = field.schema();
+        let domainForLegend = [];
+        if (scaleType === SIZE && type === FieldType.MEASURE) {
+            domainForLegend = getReadableTicks(domain, this.config().align, domain.length);
+        } else {
+            domainForLegend = [...new Set(domain)];
+        }
+
         const len = domainForLegend.length;
+        debugger;
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;

@@ -64,22 +64,25 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
+        .columns(['Horsepower'])
         .rows(['Displacement'])
-        .color({
-            field: 'Displacement', // A measure in color encoding channel creates gradient legend
-            // stops: 8,
-            // // step:true
-        })
+        // .color({
+        //     field: 'Displacement', // A measure in color encoding channel creates gradient legend
+        //     stops: 5,
+        //     // // step:true
+        // })
     //    .color('Maker')
-        // .detail(['Name'])
-        // .size('Horsepower')
+        .detail(['Name'])
+        .size({
+            field: 'Horsepower',
+            // stops:10
+        })
         .mount('#chart')
         .height(650)
         .width(850)
         .config({
             legend: {
-                position : 'right',
+                // position : 'bottom',
                 // steps:true
                 text : {
                     // orientation:'left'
