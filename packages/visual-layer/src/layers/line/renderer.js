@@ -72,7 +72,7 @@ const sanitizeNullConfig = (arr) => {
     return makeStartEndPair(arr, borderIndexes);
 };
 
-const getELementsForLine = (params) => {
+const getElementsForLine = (params) => {
     const { mount, data, className, layer, strokeStyle, linepath, transition, updateFns } = params;
     let element = makeElement(mount, 'path', data.length ? [data] : [], className, updateFns);
     element.attr('class', (d, i) => d[i].className);
@@ -116,7 +116,7 @@ export const drawLine = (context) => {
 
     updateStyle(mount, style);
 
-    const elementWithNullData = getELementsForLine({
+    const elementWithNullData = getElementsForLine({
         mount,
         data: points,
         strokeStyle: undefined,
@@ -129,7 +129,7 @@ export const drawLine = (context) => {
 
     sanitizedPoints.map((d) => {
         if (connectNullData && d.length > 1) {
-            getELementsForLine({
+            getElementsForLine({
                 mount,
                 data: d,
                 strokeStyle,

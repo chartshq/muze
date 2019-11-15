@@ -9,10 +9,10 @@ export const defaultConfig = {
         type: 'group'
     },
     interaction: {
-        // fade: [{
-        //     type: 'stroke',
-        //     intensity: [0, 0, 0, -0.5]
-        // }],
+        fade: [{
+            type: 'stroke',
+            intensity: [0, 0, 0, -0.5]
+        }],
         focus: [{
             type: 'stroke',
             intensity: [0, 0, 0, -0.5]

@@ -629,8 +629,8 @@ export default class VisualUnit {
         if (dimValue !== null && config.getAllPoints) {
             dimValue[0].push(ReservedFields.MEASURE_NAMES);
             pointObj.id = dimValue;
-            const pointInf = this.getMarkInfFromLayers(x, y, config);
             const layers = this.layers();
+            const pointInf = this.getMarkInfFromLayers(x, y, { ...config, dimValue });
             layers.forEach((layer) => {
                 const measures = layer.data().getSchema()
                     .filter(d => d.type === FieldType.MEASURE).map(d => d.name);

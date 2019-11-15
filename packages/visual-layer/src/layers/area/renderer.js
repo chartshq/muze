@@ -15,10 +15,11 @@ const /* istanbul ignore next */ drawArea = (params) => {
     let filteredPoints;
     const { layer, container, points, style, transition, className, connectNullData, interpolate } = params;
 
+    const graphicElems = layer._graphicElems;
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
     const curveInterpolatorFn = pathInterpolators[interpolate];
-    const selection = mount.selectAll('path').data(points.length ? [points[0].className] : []);
+    const selection = mount.selectAll('path').data(points.length ? [points] : []);
     const [enterAreaPath, updateAreaPath] = ['enter', 'update'].map(e => area().curve(curveInterpolatorFn)
                     .x(d => d[e].x)
                     .y1(d => d[e].y)
@@ -31,7 +32,18 @@ const /* istanbul ignore next */ drawArea = (params) => {
     if (connectNullData) {
         filteredPoints = points.filter(d => d.update.y !== null);
     }
-    const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(filteredPoints));
+    const selectionEnter = selection
+        .enter()
+        .append('path')
+        .attr('d', enterAreaPath(filteredPoints))
+        .each((d) => {
+            d.forEach((dd) => {
+                if (dd.rowId) {
+                    graphicElems[dd.rowId] = mount.select('path');
+                }
+            });
+        });
+
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
                     .on('end', layer.registerAnimationDoneHook())

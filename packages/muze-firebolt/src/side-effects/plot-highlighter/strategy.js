@@ -59,5 +59,37 @@ export const strategies = {
                 context.applyInteractionStyle(exitSet, {}, 'highlight', false);
             });
         }
+    },
+    areaFocus: (set, context) => {
+        const {
+            mergedEnter,
+            mergedExit,
+            completeSet
+        } = set;
+        if (!mergedEnter.length && !mergedExit.length) {
+            context.applyInteractionStyle(completeSet, {}, 'focus', false);
+            context.applyInteractionStyle(completeSet, {}, 'focusStroke', false);
+        } else {
+            context.applyInteractionStyle(mergedExit, {}, 'focus', false);
+            context.applyInteractionStyle(mergedEnter, {}, 'focus', true);
+
+            context.applyInteractionStyle(mergedExit, {}, 'focusStroke', false);
+            context.applyInteractionStyle(mergedEnter, {}, 'focusStroke', true);
+        }
+    },
+    areaFade: (set, context) => {
+        const {
+            mergedEnter,
+            mergedExit,
+            exitSet,
+            completeSet
+        } = set;
+
+        if (!mergedEnter.length && !mergedExit.length) {
+            context.applyInteractionStyle(completeSet, {}, 'fade', false);
+        } else {
+            context.applyInteractionStyle(exitSet, {}, 'fade', false);
+            context.applyInteractionStyle(mergedEnter, {}, 'fade', true);
+        }
     }
 };

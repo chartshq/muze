@@ -67,6 +67,62 @@ export const AreaLayerMixin = superclass => class extends superclass {
         return drawArea;
     }
 
+    getNearestPoint (x, y, config) {
+        let searchRadius = config.searchRadius;
+        const data = this.data();
+
+        if (!data || (data && data.isEmpty())) {
+            return null;
+        }
+
+        searchRadius = searchRadius !== undefined ? searchRadius : this.config().nearestPointThreshold;
+        let point = this._voronoi.find(x, y, searchRadius);
+        let c = 1e10;
+        let index = -1;
+        let nearestPoint = null;
+
+        if (!point && config.dimValue && this._pointMap) {
+            point = this._pointMap[config.dimValue[1]];
+
+            point.forEach((p, i) => {
+                const dis = Math.abs(p.update.y - y);
+                if (dis < c) {
+                    c = dis;
+                    index = i;
+                    nearestPoint = p;
+                }
+            });
+
+            point = {
+                index,
+                data: {
+                    x,
+                    y,
+                    data: nearestPoint
+                }
+            };
+        }
+
+        const dimensions = getObjProp(point, 'data', 'data', 'update');
+
+        if (point) {
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
+            return {
+                id: identifiers,
+                dimensions: [{
+                    x: dimensions.x,
+                    y0: dimensions.y0,
+                    y: dimensions.y,
+                    width: 2,
+                    height: 2
+                }],
+                layerId: this.id()
+            };
+        }
+        return null;
+    }
+
     /**
      * Generates the x and y positions for each point
      * @param {Array} data Data Array

@@ -53,6 +53,7 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
                 elem.style(styleType, ((d, i) => {
                     // d = d.data[i] || d;
                     d = Array.isArray(d.data) ? d.data[i] : d;
+                    d = Array.isArray(d) ? d[i] : d;
 
                     const { colorTransform, stateColor, originalColor } = d.meta;
                     colorTransform[interactionType] = colorTransform[interactionType] || {};
