@@ -123,23 +123,23 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
 
 export const getStackedSum = (values, index) => values.reduce((a, b) => {
     if (b[index] instanceof InvalidAwareTypes) {
-        return a + 0
+        return a + 0;
     }
-    return a + b[index]
+    return a + b[index];
 }, 0);
 
 export const isStackedChart = layers => layers.some(d => d.transformType() === STACK);
 export const isStackedBarChart = layers => layers.some(d => d.transformType() === STACK && d.config().mark === BAR);
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
-    const { 
+    const {
         fieldsConfig,
         dimensionMeasureMap,
         axes,
         config,
         fieldInf,
         dataLen,
-        target, 
+        target,
         stackedSum,
         isStackedBar
     } = context;

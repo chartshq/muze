@@ -27,15 +27,15 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
     const valueFieldIndex = schema.findIndex(d => d.name === valueField);
     const seriesKeyIndex = schema.findIndex(d => d.name === groupBy);
     const seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) => arr.indexOf(item) === pos).sort();
-  
-    seriesKeys.forEach(d => {
-        nullKeys[d] = {}
-    })
+
+    seriesKeys.forEach((d) => {
+        nullKeys[d] = {};
+    });
     const fieldNames = schema.reduce((acc, obj, i) => {
         acc[i] = obj.name;
         return acc;
     }, {});
-    const dataArr = groupedData.map((arr, i) => {
+    const dataArr = groupedData.map((arr, ind) => {
         const tuples = {};
         let nullValue = null;
         const rowObj = arr.values.reduce((acc, row) => {
@@ -66,7 +66,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
             }
         });
         if (nullValue) {
-            nullKeys[nullValue][i] =  true;
+            nullKeys[nullValue][ind] = true;
         }
         return rowObj;
     });
