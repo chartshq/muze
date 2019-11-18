@@ -225,14 +225,14 @@ export function renderAxis (axisInstance) {
     const {
         _tickLabelStyle: tickLabelStyle,
         _tickFormatter: axisTickFormatter
-     } = axisInstance;
+    } = axisInstance;
     const {
         orientation,
         axisNamePadding,
         className,
         id,
         classPrefix
-     } = config;
+    } = config;
     const {
         show,
         xOffset,
@@ -269,13 +269,15 @@ export function renderAxis (axisInstance) {
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
     setFixedBaseline(axisInstance);
-    if (labels.smartTicks === false || tickSize === 0) {
-        selectContainer.transition()
-                        .duration(1000)
-                        .on('end', axisInstance.registerAnimationDoneHook())
-                        .call(axis);
-    } else {
-        selectContainer.call(axis);
+    if (axisInstance.domain().length > 0) {
+        if (labels.smartTicks === false || tickSize === 0) {
+            selectContainer.transition()
+                            .duration(1000)
+                            .on('end', axisInstance.registerAnimationDoneHook())
+                            .call(axis);
+        } else {
+            selectContainer.call(axis);
+        }
     }
     selectContainer.selectAll('.tick').classed(`${classPrefix}-ticks`, true);
     selectContainer.selectAll('.tick line').classed(`${classPrefix}-tick-lines`, true);

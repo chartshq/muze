@@ -13,22 +13,14 @@ var schema = [{
     type: 'dimension'
 }];
 
-var data = [{ Origin:'USA' },{Origin:'China'}];
-var rootData = new DataModel(data, schema, { dataFormat: "FlatJSON" } );
+// var data = [{ Origin:'USA', Horsepower:1, Acceleration:2 },{Origin:'China', Horsepower:2}];
+var data1 = [{ Horsepower:'1', Acceleration:'2' },{Horsepower:'2'}];
+var rootData = new DataModel(data1, schema, { dataFormat: "FlatJSON" } );
 var canvas = env.canvas();
-var rows = [];
-var columns = [];
-canvas.mount(mountPoint).width(600).data(rootData).rows(rows).height(500).columns(columns).layers([{
-    mark: 'arc'
+var rows = [['Acceleration']];
+var columns = ['Origin'];
+canvas.mount(mountPoint).data(rootData).rows(rows).height(400).columns(columns).layers([{
+    mark: 'point',
 }]).color({
     field: 'Origin'
-}).config({
-    axes: {
-        x: {
-            showAxisName: true
-        },
-        y: {
-            showAxisName: true
-        }
-    }
 });
