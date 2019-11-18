@@ -20,7 +20,7 @@ d3.json('../../data/cars-with-null.json', (data) => {
     const DataModel = muze.DataModel;
     let rootData = new DataModel(jsonData, schema);
     const filtered = rootData.select((tuples) => {
-        return tuples.Origin.value === 'USA';
+        return tuples.Origin.value === 'Holland';
     });
 
     env.canvas()      

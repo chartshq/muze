@@ -22,28 +22,22 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
     const groupedData = group(schema, data, {
         groupBy: uniqueField
     });
-    const nullKeys = {};
     const uniqueFieldIndex = schema.findIndex(d => d.name === uniqueField);
     const valueFieldIndex = schema.findIndex(d => d.name === valueField);
     const seriesKeyIndex = schema.findIndex(d => d.name === groupBy);
     const seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) => arr.indexOf(item) === pos).sort();
 
-    seriesKeys.forEach((d) => {
-        nullKeys[d] = {};
-    });
     const fieldNames = schema.reduce((acc, obj, i) => {
         acc[i] = obj.name;
         return acc;
     }, {});
-    const dataArr = groupedData.map((arr, ind) => {
+    const dataArr = groupedData.map((arr) => {
         const tuples = {};
-        let nullValue = null;
         const rowObj = arr.values.reduce((acc, row) => {
             acc = row.reduce((obj, value, i) => {
                 if (i === seriesKeyIndex) {
                     if (row[valueFieldIndex] instanceof InvalidAwareTypes) {
                         row[valueFieldIndex] = null;
-                        nullValue = value;
                     }
                     obj[value] = row[valueFieldIndex];
                     tuples[value] = row;
@@ -65,16 +59,12 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
                 rowObj._tuple[seriesKey] = newArr;
             }
         });
-        if (nullValue) {
-            nullKeys[nullValue][ind] = true;
-        }
         return rowObj;
     });
 
     return {
         data: dataArr,
-        keys: seriesKeys,
-        nullKeys
+        keys: seriesKeys
     };
 };
 
@@ -86,10 +76,9 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
  * @return {Array} stacked data
  */
 export default (schema, data, config) => {
-    const { uniqueField, value: valueField, groupBy, connect } = config;
+    const { uniqueField, value: valueField, groupBy } = config;
     const sort = config.sort || 'descending';
-    const normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy, connect);
-    const nullKeys = normalizedData.nullKeys;
+    const normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy);
     const keys = normalizedData.keys;
     const map = {};
     const orderBy = config.orderBy;
@@ -112,14 +101,11 @@ export default (schema, data, config) => {
     });
 
     stackData.forEach((seriesData) => {
-        seriesData.forEach((dataObj, i) => {
-            if (nullKeys[seriesData.key][i] && !connect) {
-                dataObj[0] = null;
-                dataObj[1] = null;
-            }
+        seriesData.forEach((dataObj) => {
             dataObj.data = dataObj.data._tuple[seriesData.key];
         });
     });
+
     return stackData;
 };
 
