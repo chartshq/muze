@@ -136,7 +136,7 @@ export const AreaLayerMixin = superclass => class extends superclass {
         points = positionPoints(this, points);
         points = points.filter((point) => {
             const update = point.update;
-            return !isNaN(update.x) && !isNaN(update.y);
+            return !isNaN(update.x);
         });
         return points;
     }
