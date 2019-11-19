@@ -96,7 +96,7 @@ export default class StepLegend extends SimpleLegend {
         }
 
         domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
-        debugger;
+        
         domainLeg = domainLeg.map((ele, i) => {
             let value = null;
             if (i < domainLeg.length - 1) {

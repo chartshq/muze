@@ -1,4 +1,6 @@
-import { numberInterpolator, piecewiseInterpolator, hslInterpolator, sanitizeDomainWhenEqual } from 'muze-utils';
+import { piecewiseInterpolator,
+        hslInterpolator,
+        sanitizeDomainWhenEqual, getReadableTicks } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, SEQUENTIAL, ORDINAL, QUANTILE } from '../enums/scale-type';
 import { getHslString } from './props';
@@ -11,14 +13,7 @@ const getStops = (domain, stops) => {
         newStops = stops.slice().sort();
         newStops = [...new Set([domain[0], ...stops, domain[1]])].sort();
     } else {
-        const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i <= stops; i++) {
-            newStops[i] = interpolator(i / stops);
-        }
-    }
-
-    if (newStops[0] < domain[0]) {
-        newStops.shift();
+        newStops = getReadableTicks(domain, stops);
     }
     return { domain, newStops };
 };

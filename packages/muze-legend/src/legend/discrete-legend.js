@@ -1,11 +1,12 @@
 import {
     FieldType,
     DimensionSubtype,
-    formatTemporal
+    formatTemporal,
+    getReadableTicks
 } from 'muze-utils';
 import SimpleLegend from './simple-legend';
 import { DISCRETE, LEFT, SIZE } from '../enums/constants';
-import { getScaleInfo, getReadableTicks } from './legend-helper';
+import { getScaleInfo } from './legend-helper';
 import { createLegendSkeleton, createItemSkeleton, renderDiscreteItem } from './renderer';
 import '../styles.scss';
 
@@ -54,7 +55,7 @@ export default class DiscreteLegend extends SimpleLegend {
         const { type, subtype } = field.schema();
         let domainForLegend = [];
         if (scaleType === SIZE && type === FieldType.MEASURE) {
-            domainForLegend = getReadableTicks(domain, this.config().align, domain.length);
+            domainForLegend = getReadableTicks(domain, domain.length);
         } else {
             domainForLegend = [...new Set(domain)];
         }
@@ -100,7 +101,7 @@ export default class DiscreteLegend extends SimpleLegend {
     render () {
         const firebolt = this.firebolt();
         const data = this.data();
-        debugger;
+
         const { classPrefix } = this.config();
         const legendContainer = super.render(this.mount());
         // create Legend

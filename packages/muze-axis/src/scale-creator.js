@@ -89,7 +89,6 @@ export function getSchemeType (scheme) {
  * @return {Object} instance of scale
  */
 export function createScale (params) {
-    debugger;
     if (!params.type || !scaleMap[params.type]) {
         throw new Error(`${params.type} is not a valid scale type`);
     }

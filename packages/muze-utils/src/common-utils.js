@@ -1,5 +1,6 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
 import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
+import * as scales from './scales';
 import {
     axisLeft,
     axisRight,
@@ -1397,6 +1398,32 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
+const getReadableTicks = (domain, steps) => {
+    // scaling the axis based on steps provided
+    const orderedDomain = [Math.min(...domain), Math.max(...domain)];
+    if (steps < 3) {
+        return orderedDomain;
+    }
+
+    const tempScale = scales.scaleQuantize().domain(orderedDomain).nice();
+    let tempAxis = null;
+    let legendTicks = null;
+
+    tempAxis = Symbols.axisBottom().scale(tempScale);
+
+    legendTicks = tempAxis.scale().ticks(steps);
+
+    if (Math.max(...legendTicks) < orderedDomain[1]) {
+        // legendTicks.pop();
+        legendTicks.push(orderedDomain[1]);
+    }
+    if (Math.min(...legendTicks) > orderedDomain[0]) {
+        // legendTicks.shift();
+        legendTicks.unshift(orderedDomain[0]);
+    }
+    return legendTicks;
+};
+
 export {
     arraysEqual,
     componentRegistry,
@@ -1483,5 +1510,6 @@ export {
     temporalFields,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortCategoricalField
+    sortCategoricalField,
+    getReadableTicks
 };

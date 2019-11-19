@@ -49,8 +49,8 @@
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = ['Horsepower'],
-            columns = ['Displacement'];
+        let rows = ['Year'],
+            columns = ['Acceleration'];
 
         canvas = canvas
                 .rows(rows)
@@ -59,13 +59,12 @@
                 .width(900)
                 .height(600)
                 .color({
-                    field: 'Horsepower',
-                    step: true
-                    // stops: 10
-                    // range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
+                    field: 'Acceleration',
+                    step: true,
+                    stops: 10,
+                    range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
                 })
-                // // .color('Maker')
-                .detail('Maker')
+                // .detail(['Maker'])
                 .config({
                     legend: {
                         position: 'bottom'

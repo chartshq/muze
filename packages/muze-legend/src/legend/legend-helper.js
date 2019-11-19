@@ -1,4 +1,4 @@
-import { makeElement, FieldType, Symbols, scales } from 'muze-utils';
+import { makeElement, FieldType, getReadableTicks } from 'muze-utils';
 
 import {
     SCALE_FUNCTIONS,
@@ -145,36 +145,6 @@ export const getInterpolatedArrayData = (domainForLegend, scaleParams) => {
     return domainForLegend;
 };
 
-export const getReadableTicks = (domain, alignment, steps) => {
-    // scaling the axis based on steps provided
-    const orderedDomain = [Math.min(...domain), Math.max(...domain)];
-    if (steps < 3) {
-        return orderedDomain;
-    }
-
-    const tempScale = scales.scaleQuantize().domain(orderedDomain).nice();
-    let tempAxis = null;
-    let legendTicks = null;
-
-    if (alignment === TOP || alignment === BOTTOM) {
-        tempAxis = Symbols.axisBottom().scale(tempScale);
-    } else {
-        tempAxis = Symbols.axisRight().scale(tempScale);
-    }
-
-    legendTicks = tempAxis.scale().ticks(steps);
-
-    if (Math.max(...legendTicks) < orderedDomain[1]) {
-        // legendTicks.pop();
-        legendTicks.push(orderedDomain[1]);
-    }
-    if (Math.min(...legendTicks) > orderedDomain[0]) {
-        // legendTicks.shift();
-        legendTicks.unshift(orderedDomain[0]);
-    }
-    return legendTicks;
-};
-
 /**
  * function to recalculate steps on providing more number of stops than canvas can accomodate.
  * @param  {Array} domain - Array
@@ -204,7 +174,7 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     }
     steps = Math.min(steps, recomputeSteps);
 
-    return getReadableTicks(domain, alignment, steps);
+    return getReadableTicks(domain, steps);
 };
 
 /**
