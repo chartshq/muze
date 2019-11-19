@@ -104,6 +104,19 @@ export const encodingFieldInfRetriever = {
     }
 };
 
+export const setNullsInStack = (transformedData, schema, value, setNulls) => {
+    const uniqueFieldIndex = schema.findIndex(d => d.name === value);
+    transformedData.forEach((seriesData) => {
+        seriesData.forEach((dataObj) => {
+            if (dataObj.data[uniqueFieldIndex] === null && !setNulls) {
+                dataObj[0] = null;
+                dataObj[1] = null;
+            }
+        });
+    });
+    return transformedData;
+};
+
 /**
  *
  *
@@ -115,7 +128,7 @@ export const encodingFieldInfRetriever = {
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
     const schema = data.schema;
-    const transform = config.transform;
+    const { transform, connectNullData: setNulls } = config;
     const {
         xField,
         yField,
@@ -123,15 +136,20 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
         yFieldType
     } = encodingFieldInf;
     const uniqueField = xFieldType === FieldType.MEASURE ? yField : xField;
-
-    return transformFactory(transformType)(schema, data.data, {
+    const value = yFieldType === FieldType.MEASURE ? yField : xField;
+    let transformedData = transformFactory(transformType)(schema, data.data, {
         groupBy: transform.groupBy,
         uniqueField,
         sort: transform.sort || 'none',
         offset: transform.offset,
         orderBy: transform.orderBy,
-        value: yFieldType === FieldType.MEASURE ? yField : xField
+        value
     }, data.uids);
+
+    if (transformType === STACK) {
+        transformedData = setNullsInStack(transformedData, schema, value, setNulls);
+    }
+    return transformedData;
 };
 
 export const getIndividualClassName = (d, i, data, context) => {
