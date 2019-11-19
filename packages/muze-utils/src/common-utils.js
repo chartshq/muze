@@ -1,6 +1,6 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
 import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
-import * as scales from './scales';
+
 import {
     axisLeft,
     axisRight,
@@ -59,6 +59,7 @@ import {
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import { dataSelect } from './DataSystem';
+import * as scales from './scales';
 import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING, ReservedFields } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
