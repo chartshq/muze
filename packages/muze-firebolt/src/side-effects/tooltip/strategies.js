@@ -13,6 +13,8 @@ import {
 } from 'muze-utils';
 import { TABLE_FORMAT } from '@chartshq/muze-tooltip';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
+import { BAR } from '../../../../visual-group/src/enums/constants';
+import { NULL, UNDEFINED } from '../../enums/constants';
 
 const { SUM, COUNT } = GROUP_BY_FUNCTIONS;
 const { InvalidAwareTypes } = DataModel;
@@ -61,7 +63,8 @@ const getStackedKeyValue = (params) => {
 };
 
 const getKeyValue = (params) => {
-    const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum, stackedValue } = params;
+    const { field, value, classPrefix, margin, isSelected, removeKey, stackedSum, isStackedBar } = params;
+    let { stackedValue } = params;
 
     if (!removeKey) {
         const keyObj = {
@@ -72,6 +75,11 @@ const getKeyValue = (params) => {
             value,
             className: `${classPrefix}-tooltip-value`
         };
+
+        if (stackedValue === NULL || stackedValue === UNDEFINED) {
+            stackedValue = 0;
+        }
+
         const stackedValueObj = {
             value: stackedSum ? `(${(stackedValue * 100 / stackedSum).toFixed(2)} %)` : undefined,
             className: `${classPrefix}-tooltip-stacked-percentage`
@@ -92,7 +100,7 @@ const getKeyValue = (params) => {
         return ({
             className: isSelected ? `${classPrefix}-tooltip-row ${classPrefix}-tooltip-selected-row`
                 : `${classPrefix}-tooltip-row`,
-            data: stackedSum ? [keyObj, stackedValueObj, valueObj] : [keyObj, valueObj]
+            data: stackedSum && isStackedBar ? [keyObj, stackedValueObj, valueObj] : [keyObj, valueObj]
         });
     }
     return ({
@@ -113,12 +121,28 @@ const getEncodingValues = ({ field, axes, fn, val }) => {
     return values;
 };
 
-export const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
+export const getStackedSum = (values, index) => values.reduce((a, b) => {
+    if (b[index] instanceof InvalidAwareTypes) {
+        return a + 0;
+    }
+    return a + b[index];
+}, 0);
 
-export const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
+export const isStackedChart = layers => layers.some(d => d.transformType() === STACK);
+export const isStackedBarChart = layers => layers.some(d => d.transformType() === STACK && d.config().mark === BAR);
 
 const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) => {
-    const { fieldsConfig, dimensionMeasureMap, axes, config, fieldInf, dataLen, target, stackedSum } = context;
+    const {
+        fieldsConfig,
+        dimensionMeasureMap,
+        axes,
+        config,
+        fieldInf,
+        dataLen,
+        target,
+        stackedSum,
+        isStackedBar
+    } = context;
     const { classPrefix, margin, separator } = config;
     const colorAxis = axes.color[0];
     const shapeAxis = axes.shape[0];
@@ -172,7 +196,8 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
                     stackedSum,
                     stackedValue: currentMeasureValue instanceof InvalidAwareTypes
                     ? currentMeasureValue.value()
-                    : currentMeasureValue.toFixed(2)
+                    : currentMeasureValue.toFixed(2),
+                    isStackedBar
                 });
 
                 if (!hasMultipleMeasures) {
@@ -235,7 +260,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
         const filteredDimensions = dimensions.filter(field => !retinalFields[field.name]);
         const indices = filteredDimensions.map(dim => fieldsConfig[dim.name].index);
         const allMeasures = [...new Set(...Object.values(dimensionMeasureMap))];
-        const isStacked = isStackedBar(context.layers);
+        const isStacked = isStackedChart(context.layers);
+        const isStackedBar = isStackedBarChart(context.layers);
         const filteredMeasures = !isSingleValue(dataLen, isStacked)
             ? measures.filter(d => allMeasures.indexOf(d.name) === -1)
             : measures;
@@ -295,7 +321,8 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             dimensionMeasureMap,
                             dataLen,
                             target: context.payload.target,
-                            stackedSum
+                            stackedSum,
+                            isStackedBar
                         });
                         filteredMeasures.forEach((measure) => {
                             const { name } = measure;
