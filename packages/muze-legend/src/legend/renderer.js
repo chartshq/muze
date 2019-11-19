@@ -14,7 +14,9 @@ import {
     HORIZONTAL_BUFFER,
     HORIZONTAL,
     VERTICAL,
-    DEFAULT
+    DEFAULT,
+    TOP,
+    BOTTOM
 } from '../enums/constants';
 
 /**
@@ -307,13 +309,16 @@ export const renderDiscreteItem = (context, container) => {
         padding: `${padding}px`
     });
 
+    const marginHorizontalBuffer = HORIZONTAL_BUFFER;
+    const marginVerticalBuffer = textOrientation === TOP || textOrientation === BOTTOM ? 0 : VERTICAL_BUFFER;
+
     labelManager.setStyle(context._computedStyle);
     const dataArr = context.metaData();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
             .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
-            .style('margin-left', `${align === HORIZONTAL ? HORIZONTAL_BUFFER : VERTICAL_BUFFER}px`);
+            .style('margin-left', `${align === HORIZONTAL ? marginHorizontalBuffer : marginVerticalBuffer}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);

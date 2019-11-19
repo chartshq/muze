@@ -107,12 +107,6 @@ const getKeyValue = (params) => {
     });
 };
 
-const getEncodingValues = ({ field, axes, fn, val }) => {
-    const configField = axes.config().field;
-    const values = configField && configField !== field ? null : axes[fn](val);
-    return values;
-};
-
 export const getStackedSum = (values, index) => values.reduce((a, b) => a + b[index], 0);
 
 export const isStackedBar = layers => layers.some(d => d.transformType() === STACK);
@@ -132,15 +126,9 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         const measuresArr = dimensionMeasureMap[retField];
         const icon = {
             type: 'icon',
-            color: getEncodingValues({
-                field: retField, axes: colorAxis, fn: 'getColor', val: retinalFieldValue
-            }),
-            shape: getEncodingValues({
-                field: retField, axes: shapeAxis, fn: 'getShape', val: retinalFieldValue
-            }),
-            size: getEncodingValues({
-                field: retField, axes: sizeAxis, fn: 'getSize', val: retinalFieldValue
-            })
+            color: colorAxis.getColor(retinalFieldValue),
+            size: sizeAxis.config().value,
+            shape: shapeAxis.getShape(retinalFieldValue)
         };
         const { displayName, fn } = fieldInf[retField];
         const formattedRetinalValue = fn(retinalFieldValue);

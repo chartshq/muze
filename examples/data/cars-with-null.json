@@ -2695,7 +2695,7 @@
     "Displacement": 111,
     "Horsepower": 80,
     "Weight_in_lbs": 2155,
-    "Acceleration": 14.8,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2719,7 +2719,7 @@
     "Displacement": 122,
     "Horsepower": 96,
     "Weight_in_lbs": 2300,
-    "Acceleration": 15.5,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2743,7 +2743,7 @@
     "Displacement": 305,
     "Horsepower": 145,
     "Weight_in_lbs": 3880,
-    "Acceleration": 12.5,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2755,7 +2755,7 @@
     "Displacement": 260,
     "Horsepower": 110,
     "Weight_in_lbs": 4060,
-    "Acceleration": 19,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2767,7 +2767,7 @@
     "Displacement": 318,
     "Horsepower": 145,
     "Weight_in_lbs": 4140,
-    "Acceleration": 13.7,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2779,7 +2779,7 @@
     "Displacement": 302,
     "Horsepower": 130,
     "Weight_in_lbs": 4295,
-    "Acceleration": 14.9,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2791,7 +2791,7 @@
     "Displacement": 250,
     "Horsepower": 110,
     "Weight_in_lbs": 3520,
-    "Acceleration": 16.4,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2803,7 +2803,7 @@
     "Displacement": 231,
     "Horsepower": 105,
     "Weight_in_lbs": 3425,
-    "Acceleration": 16.9,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2815,7 +2815,7 @@
     "Displacement": 225,
     "Horsepower": 100,
     "Weight_in_lbs": 3630,
-    "Acceleration": 17.7,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2827,7 +2827,7 @@
     "Displacement": 250,
     "Horsepower": 98,
     "Weight_in_lbs": 3525,
-    "Acceleration": 19,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2839,7 +2839,7 @@
     "Displacement": 400,
     "Horsepower": 180,
     "Weight_in_lbs": 4220,
-    "Acceleration": 11.1,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2851,7 +2851,7 @@
     "Displacement": 350,
     "Horsepower": 170,
     "Weight_in_lbs": 4165,
-    "Acceleration": 11.4,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2863,7 +2863,7 @@
     "Displacement": 400,
     "Horsepower": 190,
     "Weight_in_lbs": 4325,
-    "Acceleration": 12.2,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2875,7 +2875,7 @@
     "Displacement": 351,
     "Horsepower": 149,
     "Weight_in_lbs": 4335,
-    "Acceleration": 14.5,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2887,7 +2887,7 @@
     "Displacement": 97,
     "Horsepower": 78,
     "Weight_in_lbs": 1940,
-    "Acceleration": 14.5,
+    "Acceleration": 0,
     "Year": "1977-01-01",
     "Origin": "European Union"
   },
@@ -2899,7 +2899,7 @@
     "Displacement": 151,
     "Horsepower": 88,
     "Weight_in_lbs": 2740,
-    "Acceleration": 16,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2911,7 +2911,7 @@
     "Displacement": 97,
     "Horsepower": 75,
     "Weight_in_lbs": 2265,
-    "Acceleration": 18.2,
+    "Acceleration": 0,
     "Year": "1977-01-01",
     "Origin": "Japan"
   },
@@ -2923,7 +2923,7 @@
     "Displacement": 140,
     "Horsepower": 89,
     "Weight_in_lbs": 2755,
-    "Acceleration": 15.8,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2935,7 +2935,7 @@
     "Displacement": 98,
     "Horsepower": 63,
     "Weight_in_lbs": 2051,
-    "Acceleration": 17,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
@@ -2947,7 +2947,7 @@
     "Displacement": 98,
     "Horsepower": 83,
     "Weight_in_lbs": 2075,
-    "Acceleration": 15.9,
+    "Acceleration": null,
     "Year": "1977-01-01",
     "Origin": "USA"
   },
