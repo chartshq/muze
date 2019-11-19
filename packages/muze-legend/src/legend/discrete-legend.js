@@ -60,7 +60,6 @@ export default class DiscreteLegend extends SimpleLegend {
         }
 
         const len = domainForLegend.length;
-        debugger;
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;
@@ -101,6 +100,7 @@ export default class DiscreteLegend extends SimpleLegend {
     render () {
         const firebolt = this.firebolt();
         const data = this.data();
+        debugger;
         const { classPrefix } = this.config();
         const legendContainer = super.render(this.mount());
         // create Legend

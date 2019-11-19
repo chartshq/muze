@@ -122,6 +122,7 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
+        debugger;
         if (this.domain() && domainVal !== undefined) {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;

@@ -165,11 +165,11 @@ export const getReadableTicks = (domain, alignment, steps) => {
     legendTicks = tempAxis.scale().ticks(steps);
 
     if (Math.max(...legendTicks) < orderedDomain[1]) {
-        legendTicks.pop();
+        // legendTicks.pop();
         legendTicks.push(orderedDomain[1]);
     }
     if (Math.min(...legendTicks) > orderedDomain[0]) {
-        legendTicks.shift();
+        // legendTicks.shift();
         legendTicks.unshift(orderedDomain[0]);
     }
     return legendTicks;
