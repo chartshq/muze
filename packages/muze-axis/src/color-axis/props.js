@@ -48,7 +48,7 @@ export const PROPS = {
                 newConfig.range = newConfig.range.map((e, i) => getActualHslColor(e, palette[i]));
                 newConfig.stops = config.stops ?
                                     config.stops :
-                                    config.range.length > 2 ?
+                                    config.range && config.range.length > 2 ?
                                              config.range.length :
                                                 DEFAULT_CONFIG.stops;
             }
