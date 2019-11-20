@@ -96,6 +96,21 @@ const createJoinedKeys = keys => keys.map(e => ({
     joinedKey: e.join(',')
 }));
 
+const setDefaultConfigForFacet = (facetInfo, config) => {
+    if (facetInfo.allFacets.length > 0) {
+        if (!config.facetsUserConfig.isBorderPresent) {
+            config.border.width = config.facetBorder;
+        }
+        if (!config.facetsUserConfig.isGridLinePresent) {
+            config.gridLines = {
+                x: {
+                    show: false
+                }
+            };
+        }
+    }
+};
+
 /**
 *
 *
@@ -309,6 +324,8 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConf
         rowKeys,
         colKeys
     } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
+
+    setDefaultConfigForFacet(facetInfo, globalConfig);
 
     const generalContext = {
         matrix,

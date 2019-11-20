@@ -21,6 +21,18 @@ export const initCanvas = (context) => {
     }, context.dependencies()))];
 };
 
+export const fixFacetBorderConfig = (config) => {
+    config.facetsUserConfig = {};
+    if (config.border && config.border.width) {
+        config.facetsUserConfig.isBorderPresent = true;
+    }
+    if (config.gridLines) {
+        config.facetsUserConfig.isGridLinePresent = {};
+        config.facetsUserConfig.isGridLinePresent.x = !!config.gridLines.x;
+        config.facetsUserConfig.isGridLinePresent.y = !!config.gridLines.y;
+    }
+};
+
 export const fixScrollBarConfig = (config) => {
     config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
     return config;

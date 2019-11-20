@@ -115,12 +115,6 @@ const getKeyValue = (params) => {
     });
 };
 
-const getEncodingValues = ({ field, axes, fn, val }) => {
-    const configField = axes.config().field;
-    const values = configField && configField !== field ? null : axes[fn](val);
-    return values;
-};
-
 export const getStackedSum = (values, index) => values.reduce((a, b) => {
     if (b[index] instanceof InvalidAwareTypes) {
         return a + 0;
