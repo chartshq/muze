@@ -3,68 +3,42 @@
     let DataModel = window.muze.DataModel,
 	    share = window.muze.Operators.share,
 	    html = window.muze.Operators.html;
-
     d3.json('/data/cars.json', (data) => {
-        let jsonData = data,
-		    schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
-        type: 'measure'
-    }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
-        type: 'dimension'
-			// subtype: 'temporal',
-			// format: '%Y-%m-%d'
-    }];
-        let rootData = new DataModel(jsonData, schema);
-
-        rootData = rootData.groupBy(['Year', 'Origin'], {
-            Horsepower: 'mean',
-            Acceleration: 'mean'
-        });
-
+        const jsonData = [{
+            Cylinders: '5',
+            Acceleration: 1
+        }, {
+            Cylinders: '6',
+            Acceleration: 0.4
+        }, {
+            Cylinders: '7',
+            Acceleration: 0.6
+        }, {
+            Cylinders: '9',
+            Acceleration: 0.2
+        }];
+        const schema = [{
+            name: 'Acceleration',
+            type: 'measure'
+        }, {
+            name: 'Cylinders',
+            type: 'dimension'
+        }];
+        const rootData = new DataModel(jsonData, schema);
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
         const mountPoint = document.getElementById('chart');
         window.canvas = env.canvas();
-        let rows = [['Acceleration']],
-		    columns = [['Year']];
+        let rows = ['Acceleration'],
+		    columns = ['Cylinders'];
         canvas = canvas.rows(rows).columns(columns).data(rootData).layers([{
             mark: 'bar'
         }]).width(900).height(600).color({
-            field: 'Horsepower'
-            // interpolate: true
-            // stops: 17,
-            // step: true
+            field: 'Acceleration',
+            step: true
         }).config({
             legend: {
                 position: 'bottom'
             }
-        }).mount(mountPoint).once('canvas.animationend').then((client) => {
-            const element = document.getElementById('chart');
-            element.classList.add('animateon');
-        });
+        }).mount(mountPoint);
     });
 }());

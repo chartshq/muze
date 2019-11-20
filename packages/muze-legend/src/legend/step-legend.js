@@ -75,6 +75,8 @@ export default class StepLegend extends SimpleLegend {
             lower: null, upper: null
         };
 
+        const isFraction = ele => ele % 1 !== 0;
+
         // defining scaleParams
         const scaleParams = {
             smartLabel: this.labelManager(),
@@ -98,18 +100,30 @@ export default class StepLegend extends SimpleLegend {
         domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
         domainLeg = domainLeg.map((ele, i) => {
             let value = null;
+            let range;
             if (i < domainLeg.length - 1) {
-                value = `${(ele.toFixed(0))} - ${(+domainLeg[i + 1].toFixed(0))}`;
+                const left = isFraction(ele) ? ele.toFixed(1) : ele;
+
+                const numRight = +domainLeg[i + 1];
+                const right = isFraction(numRight) ? numRight.toFixed(1) : numRight;
+
+                value = `${left} - ${right}`;
+                range = [left, right];
             } else if (domainLeg.length === 1) {
-                value = ele.toFixed(1);
+                value = isFraction(ele) ? ele.toFixed(1) : ele;
+
+                const numRight = +domainLeg[i + 1];
+                const right = isFraction(numRight) ? numRight.toFixed(1) : numRight;
+                range = [value, right];
             }
+
             return {
                 [scaleType]: scaleType === SIZE
                 ? scale[scaleFn](ele) * scale.getScaleFactor()
                 : scale[scaleFn](ele),
                 value,
                 id: i + 1,
-                range: [ele, domainLeg[i + 1]]
+                range
             };
         }).filter(d => d.value !== null);
         if (domainBounds.lower) {
