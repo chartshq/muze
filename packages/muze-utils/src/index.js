@@ -26,6 +26,7 @@ export {
 export {
     getNearestValue,
     getValueParser,
+    transformColor,
     transformColors,
     detectColor,
     hslToRgb,
@@ -109,7 +110,9 @@ export {
     getArrayDiff,
     difference,
     getArrayIndexMap,
-    arraysEqual
+    arraysEqual,
+    rgbaToHex,
+    transformToHex
 } from './common-utils';
 
 export {

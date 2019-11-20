@@ -918,6 +918,36 @@ const detectColor = (col) => {
     } return col;
 };
 
+const componentToHex = (c) => {
+    const hex = c.toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
+};
+
+const rgbaToHex = (rgbString, rgbArr) => {
+    let r;
+    let g;
+    let b;
+    let a;
+
+    if (!rgbArr) {
+        [r, g, b, a] = rgbString.replace(/[^\d,]/g, '').split(',');
+    } else {
+        [r, g, b, a] = rgbArr;
+    }
+    let hexString = `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
+    if (a) {
+        hexString += componentToHex(a);
+    }
+    return hexString;
+};
+
+const transformToHex = (col) => {
+    if (col.startsWith('rgb')) {
+        return rgbaToHex(col);
+    }
+    return col;
+};
+
 const assembleModelFromIdentifiers = (model, identifiers) => {
     let schema = [];
     let data;
@@ -1397,6 +1427,21 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
+const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, colorAxis, interactionType, styleType) => {
+    console.log(h, s, l, a);
+    const meta = datum.meta;
+    // const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
+
+    const stateColor = defaultValue((meta.currentState[interactionType] || {})[styleType], meta.originalState[styleType]);
+    const colorInfo = colorAxis.transformColor(stateColor, [h, s, l, a]);
+    
+    meta.currentState[interactionType] = meta.currentState[interactionType] || {};
+    meta.currentState[interactionType][styleType] = colorInfo.hsla;
+    const rgbVal = hslToRgb(...colorInfo.hsla);
+    // return rgbaToHex(null, rgbVal);
+    return colorInfo.color;
+};
+
 export {
     arraysEqual,
     componentRegistry,
@@ -1414,11 +1459,14 @@ export {
     nestCollection,
     getArrayDiff,
     getSymbol,
+    transformColor,
     transformColors,
     detectColor,
     hexToHsv,
     hslToRgb,
     rgbToHsv,
+    rgbaToHex,
+    transformToHex,
     hsvToRgb,
     hslaToRgb,
     concatModels,

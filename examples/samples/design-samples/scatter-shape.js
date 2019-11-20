@@ -45,7 +45,7 @@ d3.json('../../../data/cars.json', (data) => {
 	];
 	let DataModel = muze.DataModel;
 	let dm = new DataModel(data, schema);
-	// dm = dm.select(d => d.Origin.value !== 'USA');
+	// dm = dm.select(d => d.Origin.value === 'USA');
 	
     // const makers = ['bmw', 'ford', 'toyota', 'amc'];
     // rootData = rootData.select(fields => makers.indexOf(fields.Maker.value) > -1);
@@ -60,9 +60,9 @@ d3.json('../../../data/cars.json', (data) => {
 		.rows(["Horsepower"])
 		.columns(["Year"])
 		.color("Origin")
-		// .shape("Maker")
+		.size("Horsepower")
 		.layers([{
-			mark: 'line'
+			mark: 'point'
 		}])
 		.mount(document.getElementById('chart'));
 })

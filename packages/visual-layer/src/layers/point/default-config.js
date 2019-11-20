@@ -1,4 +1,5 @@
 import { CLASSPREFIX } from '../../enums/constants';
+import { transformColor } from 'muze-utils';
 
 export const defaultConfig = {
     defClassName: 'layer-point',
@@ -6,42 +7,47 @@ export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defColorStyle: 'stroke',
     interaction: {
-        highlight: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
+        highlight: {
+            className: 'highlight-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': (v) => {
+                    const unit = parseInt(v, 10);
+                    return `${unit}px`;
                 }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 1,
-                    position: 'center'
-                }
-            }
-        ],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }],
-        focusStroke: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 2,
-                    position: 'outside'
-                }
-            }
-        ]
+                // fill: 'red'
+            },
+            strokePosition: 'center'
+        },
+        focusStroke: {
+            className: 'focus-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': 2
+                // fill: 'blue'
+            },
+            strokePosition: 'outside'
+        }
+        // focus: {
+        //     style: {
+        //         fill: (fillColor, datum, colorAxis, apply) => {
+        //             const newHexColor = transformColor(fillColor, {
+        //                 l: apply ? +20 : -20
+        //             }, datum, colorAxis, 'fade', 'fill');
+        //             return newHexColor;
+        //         }
+        //     }
+        // },
+        // fade: {
+        //     style: {
+        //         fill: (fillColor, datum, colorAxis, apply) => {
+        //             const newHexColor = transformColor(fillColor, {
+        //                 l: apply ? +20 : -20
+        //             }, datum, colorAxis, 'fade', 'fill');
+        //             return newHexColor;
+        //         }
+        //     }
+        // }
     },
     innerPadding: 0.1,
     nearestPointThreshold: 10,

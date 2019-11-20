@@ -1,6 +1,7 @@
 import {
     FieldType,
-    COORD_TYPES
+    COORD_TYPES,
+    transformToHex
 } from 'muze-utils';
 import { ENCODING } from '../../enums/constants';
 import {
@@ -32,7 +33,8 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
     ({ shape, size, color } = resolvedEncodings);
     const style = {
         fill: color,
-        stroke: layerEncoding.stroke.value
+        stroke: layerEncoding.stroke.value,
+        'stroke-width': '0px'
     };
     const { x, y } = resolvedEncodings;
     const pos = { x, y };
@@ -102,52 +104,43 @@ export const getStrokeWidthByPosition = (position, radius) => {
     return strokeWidthWithOffsetMap[position];
 };
 
-// This is invoked only on point selection for applying a path around the point
-const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
+const interactionFn = (context, elem, apply, interactionType, style, _, styleType) => {
     const datum = elem.data()[0];
-    const styleType = style.type;
-    const { originalStrokeOnSelect, stateStrokeOnSelect } = datum.meta;
-    stateStrokeOnSelect[interactionType] = stateStrokeOnSelect[interactionType] || {};
+    const datumStyle = elem.style(styleType);
+    const { originalState, currentState } = datum.meta;
+    currentState[interactionType] = currentState[interactionType] || {};
 
-    if (apply && !stateStrokeOnSelect[interactionType][styleType]) {
+    if (apply && !currentState[interactionType][styleType]) {
         // apply
-        stateStrokeOnSelect[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
+        if (typeof style === 'function') {
+            style = style(transformToHex(datumStyle), datum);
+        }
+        currentState[interactionType][styleType] = style;
+        context.addOverlayPath(
+            elem.node(),
+            datum,
+            { type: styleType, value: style },
+            interactionType
+        );
     }
-    if (!apply && stateStrokeOnSelect[interactionType][styleType]) {
+    if (!apply && currentState[interactionType][styleType]) {
         // remove
-        stateStrokeOnSelect[interactionType][styleType] = originalStrokeOnSelect[styleType];
-        context.removeOverlayPath(datum, originalStrokeOnSelect);
-    }
-    return true;
-};
-
-const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style) => {
-    const datum = elem.data()[0];
-    const styleType = style.type;
-    const { originalStrokeOnHighlight, stateStrokeOnHighlight } = datum.meta;
-    stateStrokeOnHighlight[interactionType] = stateStrokeOnHighlight[interactionType] || {};
-
-    if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
-        // apply
-        stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
-    }
-    if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
-        // remove
-        stateStrokeOnHighlight[interactionType][styleType] = originalStrokeOnHighlight[styleType];
-        context.removeOverlayPath(datum, originalStrokeOnHighlight);
+        // currentState[interactionType][styleType] = originalState[styleType];
+        currentState[interactionType][styleType] = undefined;
+        context.removeOverlayPath(datum, originalState);
     }
     return true;
 };
 
 export const interactionStyleMap = {
     focusStroke: {
-        stroke: (...params) => strokeInteractionStyle(...params),
-        'stroke-width': (...params) => strokeInteractionStyle(...params)
+        stroke: (...params) => interactionFn(...params),
+        'stroke-width': (...params) => interactionFn(...params),
+        fill: (...params) => interactionFn(...params)
     },
     highlight: {
-        stroke: (...params) => highlightStrokeOnInteraction(...params),
-        'stroke-width': (...params) => highlightStrokeOnInteraction(...params)
+        stroke: (...params) => interactionFn(...params),
+        'stroke-width': (...params) => interactionFn(...params),
+        fill: (...params) => interactionFn(...params)
     }
 };

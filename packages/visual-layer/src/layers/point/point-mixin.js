@@ -176,7 +176,9 @@ export const PointLayerMixin = superclass => class extends superclass {
         return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
-    addOverlayPath (container, refElement, data, style) {
+    addOverlayPath (refElement, data, style, interactionType) {
+        const container = refElement.parentElement;
+        const interactions = this.config().interaction;
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
@@ -184,12 +186,13 @@ export const PointLayerMixin = superclass => class extends superclass {
         } else {
             pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
             pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;
         }
 
         if (style.type === 'stroke-width') {
-            const { position } = style.props;
+            const position = interactions[interactionType].strokePosition || 'center';
             // get radius as per stroke position
             let radius = Math.sqrt(data.size / Math.PI);
             radius = getStrokeWidthByPosition(position, radius);
@@ -201,7 +204,12 @@ export const PointLayerMixin = superclass => class extends superclass {
             }
         }
 
-        pathElement.style(style.type, style.props.value);
+        let styleVal = style.value;
+        if (typeof styleVal === 'function') {
+            const currentStyle = pathElement.style(style.type);
+            styleVal = styleVal(currentStyle);
+        }
+        pathElement.style(style.type, styleVal);
         appendElement(refElement, pathElement.node());
     }
 
