@@ -93,7 +93,7 @@
         .width(850)
         .config({
             legend: {
-                position : 'bottom',
+                // position : 'bottom',
                 // steps:true
                 text : {
                     // orientation:'left'
