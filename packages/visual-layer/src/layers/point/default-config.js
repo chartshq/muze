@@ -8,46 +8,48 @@ export const defaultConfig = {
     defColorStyle: 'stroke',
     interaction: {
         highlight: {
-            className: 'highlight-class',
+            // className: 'highlight-class',
             style: {
                 stroke: 'black',
                 'stroke-width': (v) => {
                     const unit = parseInt(v, 10);
-                    return `${unit}px`;
-                }
-                // fill: 'red'
+                    return '0.5px';
+                    // return `${unit + 1}px`;
+                },
+                fill: 'red'
             },
             strokePosition: 'center'
         },
         focusStroke: {
-            className: 'focus-stroke-class',
+            // className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
-                'stroke-width': 2
-                // fill: 'blue'
+                'stroke-width': '2px',
+                fill: 'blue'
             },
             strokePosition: 'outside'
-        }
+        },
         // focus: {
         //     style: {
         //         fill: (fillColor, datum, colorAxis, apply) => {
         //             const newHexColor = transformColor(fillColor, {
         //                 l: apply ? +20 : -20
-        //             }, datum, colorAxis, 'fade', 'fill');
-        //             return newHexColor;
-        //         }
-        //     }
-        // },
-        // fade: {
-        //     style: {
-        //         fill: (fillColor, datum, colorAxis, apply) => {
-        //             const newHexColor = transformColor(fillColor, {
-        //                 l: apply ? +20 : -20
-        //             }, datum, colorAxis, 'fade', 'fill');
+        //             }, datum, colorAxis, 'focus', 'fill');
         //             return newHexColor;
         //         }
         //     }
         // }
+        fade: {
+            style: {
+                fill: (hexColor, datum, apply) => {
+                    return apply ? 'black' : hexColor;
+                    // const newHexColor = transformColor(hexColor, {
+                    //     l: +20
+                    // }, datum, apply);
+                    // return newHexColor;
+                }
+            }
+        }
     },
     innerPadding: 0.1,
     nearestPointThreshold: 10,
@@ -64,7 +66,10 @@ export const defaultConfig = {
         },
         color: {},
         stroke: {
-            value: 'hsla(0,0%,0%,0)'
+            value: null
+        },
+        'stroke-width': {
+            value: 0
         },
         fill: {},
         shape: {

@@ -9,8 +9,7 @@ import {
     getObjProp,
     COORD_TYPES,
     CommonProps,
-    defaultValue,
-    transformToHex
+    defaultValue
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -31,58 +30,24 @@ export const transformColor = (colorAxis, datum, styleType, intensity, interacti
 
 export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
-    const axes = context.axes();
-    const colorAxis = axes.color;
+    // const axes = context.axes();
+    // const colorAxis = axes.color;
     const apply = config.apply;
     const interactionType = config.interactionType;
     const pathMountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
 
-    Object.keys(interactionStyles).forEach((key) => {
-        elements.forEach((elem) => {
-            // if (key === 'style') {
-            Object.keys(interactionStyles.style).forEach((styleType) => {
-                const styleVal = interactionStyles[key][styleType];
+    elements.forEach((elem) => {
+        const interactionStylesEntries = Object.entries(interactionStyles.style);
 
-                context.applySpecificStyle(styleType, {
-                    elem,
-                    apply,
-                    interactionType,
-                    style: styleVal,
-                    mountPoint: pathMountPoint,
-                    colorAxis
-                });
-
-                elem.style(styleType, (d) => {
-                    const { colorTransform, currentState, originalState } = d.meta;
-                    colorTransform[interactionType] = colorTransform[interactionType] || {};
-
-                    let color = styleVal;
-                    if (apply && !colorTransform[interactionType][styleType]) {
-                        // fade selections
-                        if (typeof styleVal === 'function') {
-                            const current = elem.style(styleType);
-                            color = styleVal(transformToHex(current), d, colorAxis, true);
-                        }
-                        colorTransform[interactionType][styleType] = color;
-                        elem.classed(interactionStyles.className, true);
-                    } else if (!apply && colorTransform[interactionType][styleType]) {
-                        // unfade selections
-                        if (typeof styleVal === 'function') {
-                            const current = elem.style(styleType);
-                            color = styleVal(transformToHex(current), d, colorAxis, false);
-                        }
-                        elem.classed(interactionStyles.className, false);
-                        colorTransform[interactionType][styleType] = null;
-                    } else {
-                        currentState[interactionType] = currentState[interactionType] || {};
-                        return currentState[interactionType][styleType] ?
-                            currentState[interactionType][styleType] : originalState[styleType];
-                    }
-                    return color;
-                });
+        for (const [styleType, styleValue] of interactionStylesEntries) {
+            context.applyLayerStyle(styleType, {
+                elem,
+                apply,
+                interactionType,
+                styleValue,
+                mountPoint: pathMountPoint
             });
-            // }
-        });
+        }
     });
 };
 
@@ -550,20 +515,11 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => {
-    return {
-        originalState: Object.keys(colorInf).reduce((acc, key) => {
-            if (colorInf[key]) {
-                acc[key] = colorAxis.getHslArray(colorInf[key]);
-                // acc[key] = colorAxis.getColor(colorInf[key]);
-                // acc[key] = colorInf[key];
-            }
-            return acc;
-        }, {}),
-        currentState: {},
-        colorTransform: {}
-    };
-};
+export const getColorMetaInf = (initialStyle, auxStyles = {}) => ({
+    originalStyle: Object.assign({}, initialStyle),
+    currentState: {},
+    interactionOrder: []
+});
 
 const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;
 

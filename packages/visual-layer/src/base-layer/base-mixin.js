@@ -433,15 +433,9 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return this;
     }
 
-    // If a layer does not has specific styles, do nothing and return falsy value
-    getInteractionStyles () {
-        return null;
-    }
-
-    applySpecificStyle (styleType, { elem, apply, interactionType, style, mountPoint }) {
-        const interactionFn = this.getInteractionStyles(interactionType, styleType);
-        if (!interactionFn) return false;
-        return interactionFn(this, elem, apply, interactionType, style, mountPoint, styleType);
+    applyLayerStyle (styleType, { elem, apply, interactionType, styleValue, mountPoint }) {
+        const interactionFn = this.getInteractionStyles();
+        return interactionFn(this, elem, apply, interactionType, styleValue, styleType, mountPoint);
     }
 
     getIdentifiersFromData (data, rowId) {

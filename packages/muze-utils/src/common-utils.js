@@ -52,9 +52,9 @@ import {
     easeElastic
 } from 'd3-ease';
 import {
-   color,
-   rgb,
-   hsl
+    color,
+    rgb,
+    hsl
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import { dataSelect } from './DataSystem';
@@ -777,17 +777,17 @@ function hue2rgb (p, q, t) {
     return p;
 }
 
-  /**
-   * Converts an HSL color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-   * Assumes h, s, and l are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  l       The lightness
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  l       The lightness
+ * @return  Array           The RGB representation
+ */
 const hslToRgb = (h, s, l, a = 1) => {
     let r;
     let g;
@@ -807,17 +807,17 @@ const hslToRgb = (h, s, l, a = 1) => {
     return [r * 255, g * 255, b * 255, a];
 };
 
-  /**
-   * Converts an RGB color value to HSV. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes r, g, and b are contained in the set [0, 255] and
-   * returns h, s, and v in the set [0, 1].
-   *
-   * @param   Number  r       The red color value
-   * @param   Number  g       The green color value
-   * @param   Number  b       The blue color value
-   * @return  Array           The HSV representation
-   */
+/**
+ * Converts an RGB color value to HSV. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and v in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSV representation
+ */
 const rgbToHsv = (r, g, b, a = 1) => {
     r = +r; g = +g; b = +b; a = +a;
     r /= 255; g /= 255; b /= 255;
@@ -843,17 +843,17 @@ const rgbToHsv = (r, g, b, a = 1) => {
     return [h, s, l, a];
 };
 
-  /**
-   * Converts an HSV color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes h, s, and v are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  v       The value
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSV color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes h, s, and v are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  v       The value
+ * @return  Array           The RGB representation
+ */
 const hsvToRgb = (h, s, v, a = 1) => {
     let r;
     let g;
@@ -903,9 +903,9 @@ const detectColor = (col) => {
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
 
     // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchHsla = /^hsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -1201,7 +1201,7 @@ const stackOffsets = {
 
 // eslint-disable-next-line require-jsdoc
 const stack = params => d3Stack().keys(params.keys).offset(stackOffsets[params.offset])
-                .order(stackOrders[params.order])(params.data);
+    .order(stackOrders[params.order])(params.data);
 
 /**
  * Groups the data into a hierarchical tree structure based on one or more fields.
@@ -1427,19 +1427,71 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
-const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, colorAxis, interactionType, styleType) => {
-    console.log(h, s, l, a);
-    const meta = datum.meta;
-    // const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
+function hexToHSL (H) {
+    // Convert hex to RGB first
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    let a = 1;
 
-    const stateColor = defaultValue((meta.currentState[interactionType] || {})[styleType], meta.originalState[styleType]);
-    const colorInfo = colorAxis.transformColor(stateColor, [h, s, l, a]);
-    
-    meta.currentState[interactionType] = meta.currentState[interactionType] || {};
-    meta.currentState[interactionType][styleType] = colorInfo.hsla;
-    const rgbVal = hslToRgb(...colorInfo.hsla);
-    // return rgbaToHex(null, rgbVal);
-    return colorInfo.color;
+    if (H.length === 4) {
+        r = `0x${H[1]}${H[1]}`;
+        g = `0x${H[2]}${H[2]}`;
+        b = `0x${H[3]}${H[3]}`;
+    } else if (H.length === 7) {
+        r = `0x${H[1]}${H[2]}`;
+        g = `0x${H[3]}${H[4]}`;
+        b = `0x${H[5]}${H[6]}`;
+    }
+    // Then to HSL
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    if (delta === 0) {
+        h = 0;
+    } else if (cmax === r) {
+        h = ((g - b) / delta) % 6;
+    } else if (cmax === g) {
+        h = (b - r) / delta + 2;
+    } else {
+        h = (r - g) / delta + 4;
+    }
+
+    h = Math.round(h * 60);
+
+    if (h < 0) { h += 360; }
+
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return {
+        color: `hsl(${h},${s}%,${l}%)`,
+        code: [h, s, l]
+    };
+}
+
+const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, apply) => {
+    const [origH, origS, origL] = hexToHSL(hexColor).code;
+    if (apply) {
+        h = -h;
+        s = -s;
+        l = -l;
+        a = -a;
+    }
+    const newHSL = [origH + h, origS + s, origL + l];
+
+    const rgb1 = hslaToRgb(...newHSL);
+    return rgb1;
 };
 
 export {

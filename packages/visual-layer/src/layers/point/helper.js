@@ -34,7 +34,7 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
     const style = {
         fill: color,
         stroke: layerEncoding.stroke.value,
-        'stroke-width': '0px'
+        'stroke-width': layerEncoding['stroke-width'].value
     };
     const { x, y } = resolvedEncodings;
     const pos = { x, y };
@@ -45,7 +45,7 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
         source,
         rowId,
         style,
-        meta: getColorMetaInf(style, colorAxis),
+        meta: getColorMetaInf(style),
         size
     };
 };
@@ -104,43 +104,76 @@ export const getStrokeWidthByPosition = (position, radius) => {
     return strokeWidthWithOffsetMap[position];
 };
 
-const interactionFn = (context, elem, apply, interactionType, style, _, styleType) => {
-    const datum = elem.data()[0];
-    const datumStyle = elem.style(styleType);
-    const { originalState, currentState } = datum.meta;
-    currentState[interactionType] = currentState[interactionType] || {};
+const getPreviousStyle = (meta, styleType) => {
+    const { originalStyle, currentState, interactionOrder } = meta;
 
-    if (apply && !currentState[interactionType][styleType]) {
-        // apply
-        if (typeof style === 'function') {
-            style = style(transformToHex(datumStyle), datum);
-        }
-        currentState[interactionType][styleType] = style;
-        context.addOverlayPath(
-            elem.node(),
-            datum,
-            { type: styleType, value: style },
-            interactionType
-        );
+    if (interactionOrder.length) {
+        const type = interactionOrder[interactionOrder.length - 1];
+        return currentState[type][styleType];
     }
-    if (!apply && currentState[interactionType][styleType]) {
-        // remove
-        // currentState[interactionType][styleType] = originalState[styleType];
-        currentState[interactionType][styleType] = undefined;
-        context.removeOverlayPath(datum, originalState);
-    }
-    return true;
+    return originalStyle[styleType];
 };
 
-export const interactionStyleMap = {
-    focusStroke: {
-        stroke: (...params) => interactionFn(...params),
-        'stroke-width': (...params) => interactionFn(...params),
-        fill: (...params) => interactionFn(...params)
-    },
-    highlight: {
-        stroke: (...params) => interactionFn(...params),
-        'stroke-width': (...params) => interactionFn(...params),
-        fill: (...params) => interactionFn(...params)
+export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType) => {
+    const datum = elem.data()[0];
+    const datumStyle = elem.style(styleType);
+    const interactions = context.config().interaction;
+    const { originalStyle, currentState, interactionOrder } = datum.meta;
+
+    currentState[interactionType] = currentState[interactionType] || {};
+
+    // Get evaluated value if styleVal is a fn
+    if (typeof styleValue === 'function') {
+        styleValue = styleValue(transformToHex(datumStyle), datum, apply);
     }
+
+    elem.style(styleType, () => {
+        if (apply && !currentState[interactionType][styleType]) {
+            // apply interaction styles
+            currentState[interactionType][styleType] = styleValue;
+
+            // Add to last evaluated style list
+            if (!interactionOrder.includes(interactionType)) {
+                interactionOrder.push(interactionType);
+            }
+
+            // Add/style path border
+            context.addOverlayPath(
+                elem.node(),
+                datum,
+                { type: styleType, value: styleValue },
+                interactionType
+            );
+
+            // Add className to group
+            elem.classed(interactions[interactionType].className || '', true);
+            return styleValue;
+        } else if (!apply && currentState[interactionType][styleType]) {
+            // remove interaction styles
+            if (interactionOrder.includes(interactionType)) {
+                interactionOrder.pop();
+                delete currentState[interactionType];
+            }
+
+            if (interactionOrder.length > 0) {
+                interactionType = interactionOrder[interactionOrder.length - 1];
+            }
+
+            const previousInteractionStyle = getPreviousStyle(datum.meta, styleType);
+            currentState[interactionType] = currentState[interactionType] || {};
+            currentState[interactionType][styleType] = previousInteractionStyle;
+
+            context.removeOverlayPath(datum, currentState[interactionType]);
+
+            elem.classed(interactions[interactionType].className || '', false);
+            return currentState[interactionType][styleType];
+        }
+
+        const styleVal = currentState[interactionType][styleType] ?
+            currentState[interactionType][styleType] :
+            originalStyle[styleType];
+        return styleVal;
+    });
+
+    return true;
 };

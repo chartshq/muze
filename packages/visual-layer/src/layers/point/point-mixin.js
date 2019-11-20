@@ -15,7 +15,7 @@ import {
     getMarkId
 } from '../../helpers';
 import './styles.scss';
-import { pointTranslators, interactionStyleMap, getStrokeWidthByPosition } from './helper';
+import { pointTranslators, getStrokeWidthByPosition, interactionFn } from './helper';
 
 export const PointLayerMixin = superclass => class extends superclass {
     /**
@@ -172,8 +172,8 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
+    getInteractionStyles () {
+        return interactionFn;
     }
 
     addOverlayPath (refElement, data, style, interactionType) {
