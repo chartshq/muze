@@ -123,8 +123,7 @@ export default class LegendMarker extends GenericSideEffect {
                     .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
-
-            textElement.source(payload.criteria[1]);
+            textElement.source(payload.criteria[1][0].toFixed(2));
             textElement.render(this._graphicElements.legendmarkerText.node());
             this._graphicElements.legendmarkerText
                         .attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
