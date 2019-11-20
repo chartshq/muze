@@ -960,8 +960,8 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  */
 const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
     if (criteria === null) return null;
-
-    const selFields = Object.keys(criteria);
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const selFields = Object.keys(criteria).filter(d => d in fieldsConfig);
     const selFn = fields => selFields.every((field) => {
         let fieldValue = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
