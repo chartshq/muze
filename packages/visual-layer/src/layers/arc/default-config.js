@@ -6,18 +6,24 @@ export const defaultConfig = {
     padding: { top: 1, bottom: 1, left: 1, right: 1 },
     className: '',
     interaction: {
-        highlight: [{
-            type: 'fill',
-            intensity: [0, 0, -15, 0]
-        }],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }]
+        highlight: {
+            style: {
+                // L -15
+                fill: 'black'
+            }
+        },
+        fade: {
+            style: {
+                // L +15
+                fill: 'black'
+            }
+        },
+        focus: {
+            style: {
+                // L +15
+                fill: 'black'
+            }
+        }
     },
     height: 100,
     width: 100,

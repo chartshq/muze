@@ -8,18 +8,24 @@ export const defaultConfig = {
         type: 'identity'
     },
     interaction: {
-        highlight: [{
-            type: 'fill',
-            intensity: [0, 0, -15, 0]
-        }],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }]
+        highlight: {
+            style: {
+                // L -15
+                fill: 'black'
+            }
+        },
+        fade: {
+            style: {
+                // L +15
+                fill: 'black'
+            }
+        },
+        focus: {
+            style: {
+                // L +15
+                fill: 'black'
+            }
+        }
     },
     crossline: true,
     transition: {

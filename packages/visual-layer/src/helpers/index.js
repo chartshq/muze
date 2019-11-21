@@ -515,7 +515,7 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (initialStyle, auxStyles = {}) => ({
+export const getColorMetaInf = initialStyle => ({
     originalStyle: Object.assign({}, initialStyle),
     currentState: new Map()
 });

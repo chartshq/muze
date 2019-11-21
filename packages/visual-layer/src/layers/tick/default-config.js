@@ -5,28 +5,25 @@ export const defaultConfig = {
     className: '',
     classPrefix: CLASSPREFIX,
     interaction: {
-        highlight: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 1,
-                    position: 'center'
-                }
+        highlight: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+            },
+            strokePosition: 'center'
+        },
+        fade: {
+            style: {
+                // L +15
+                stroke: 'black'
             }
-        ],
-        fade: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }],
-        focus: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }]
+        },
+        focus: {
+            style: {
+                // L +15
+                stroke: 'black'
+            }
+        }
     },
     innerPadding: 0.1,
     transform: {

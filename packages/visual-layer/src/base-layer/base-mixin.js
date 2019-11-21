@@ -438,6 +438,14 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return interactionFn;
     }
 
+    addOverlayPath () {
+        return null;
+    }
+
+    removeOverlayPath () {
+        return null;
+    }
+
     applyLayerStyle (styleType, { elem, apply, interactionType, styleValue, mountPoint }) {
         const interactionFunction = this.getInteractionStyles();
         return interactionFunction(this, elem, apply, interactionType, styleValue, styleType, mountPoint);

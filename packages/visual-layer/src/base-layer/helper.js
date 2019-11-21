@@ -17,14 +17,10 @@ const getPreviousStyle = (meta, interactionType) => {
 };
 
 export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType) => {
-    const datum = elem.data()[0];
+    let datum = elem.data()[0];
     const datumStyle = elem.style(styleType);
     const interactions = context.config().interaction;
     const className = interactions[interactionType].className || '';
-    const { currentState } = datum.meta;
-
-    const interactionVal = currentState.get(interactionType);
-    currentState.set(interactionType, interactionVal || {});
 
     // Get evaluated value if styleValue is a fn
     if (typeof styleValue === 'function') {
@@ -44,7 +40,13 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
     }
 
     // Apply style on the path elem and the border
-    elem.style(styleType, () => {
+    elem.style(styleType, (d, i) => {
+        datum = Array.isArray(d.data) ? d.data[i] : d;
+
+        const { currentState } = datum.meta;
+        const interactionVal = currentState.get(interactionType);
+        currentState.set(interactionType, interactionVal || {});
+
         const lastInteractionVal = currentState.get(interactionType);
 
         if (apply) {
@@ -52,9 +54,9 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
             lastInteractionVal[styleType] = styleValue;
 
             // Add to last evaluated style list
-            if (!currentState.get(interactionType)) {
-                currentState.set(interactionType, {});
-            }
+            currentState.set(interactionType, {});
+            // if (!currentState.get(interactionType)) {
+            // }
 
             // Add/style path border
             context.addOverlayPath(
@@ -69,9 +71,9 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
         }
 
         // remove interaction styles
-        if (currentState.get(interactionType)) {
-            currentState.delete(interactionType);
-        }
+        // if (currentState.get(interactionType)) {
+        currentState.delete(interactionType);
+        // }
 
         const stylesForCurrentLevel = getPreviousStyle(datum.meta, interactionType);
         context.removeOverlayPath(datum, stylesForCurrentLevel);

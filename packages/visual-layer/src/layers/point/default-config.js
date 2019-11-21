@@ -11,8 +11,8 @@ export const defaultConfig = {
             className: 'highlight-class',
             style: {
                 stroke: 'black',
-                'stroke-width': '1px',
-                fill: 'red'
+                'stroke-width': '1px'
+                // fill: 'red'
             },
             strokePosition: 'center'
         },
@@ -20,8 +20,8 @@ export const defaultConfig = {
             className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
-                'stroke-width': '2px',
-                fill: 'blue'
+                'stroke-width': '2px'
+                // fill: 'blue'
             },
             strokePosition: 'outside'
         },
@@ -33,19 +33,19 @@ export const defaultConfig = {
                     // }, datum, apply);
                     // return newHexColor;
                     console.log('object');
-                    return 'black';
+                    return apply ? 'black' : hexColor;
                 }
             }
         },
         fade: {
             style: {
                 fill: (hexColor, datum, apply) => {
+                    console.log('object');
+                    return apply ? 'black' : hexColor;
                     // const newHexColor = transformColor(hexColor, {
                     //     l: +20
                     // }, datum, apply);
                     // return newHexColor;
-                    console.log('object');
-                    return 'black';
                 }
             }
         }

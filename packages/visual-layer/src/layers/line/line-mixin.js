@@ -19,7 +19,6 @@ import {
     resolveEncodingValues,
     sortData
 } from '../../helpers';
-import { interactionStyleMap } from './helper';
 import './styles.scss';
 
 /**
@@ -81,10 +80,6 @@ export const LineLayerMixin = superclass => class extends superclass {
 
     static shouldDrawAnchors () {
         return true;
-    }
-
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     /**

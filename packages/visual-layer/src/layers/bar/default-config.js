@@ -5,40 +5,32 @@ export const defaultConfig = {
     defClassName: 'layer-bar',
     className: '',
     interaction: {
-        highlight: [{
-            type: 'stroke',
-            props: {
-                value: 'black'
+        highlight: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+            },
+            strokePosition: 'outside'
+        },
+        fade: {
+            style: {
+                // L +15
+                fill: 'black'
             }
-        }, {
-            type: 'stroke-width',
-            props: {
-                value: 1,
-                position: 'outside'
+        },
+        focus: {
+            style: {
+                // L +15
+                fill: 'black'
             }
-        }],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, 0, -0.5]
-        }],
-        focusStroke: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 2,
-                    position: 'outside'
-                }
-            }
-        ]
+        },
+        focusStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        }
     },
     transform: {
         type: 'stack'
