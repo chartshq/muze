@@ -109,7 +109,8 @@ export {
     getArrayDiff,
     difference,
     getArrayIndexMap,
-    arraysEqual
+    arraysEqual,
+    getReadableTicks
 } from './common-utils';
 
 export {
