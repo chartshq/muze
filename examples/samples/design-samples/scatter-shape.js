@@ -45,7 +45,7 @@ d3.json('../../../data/cars.json', (data) => {
 	];
 	let DataModel = muze.DataModel;
 	let dm = new DataModel(data, schema);
-	dm = dm.select(d => d.Year.internalValue === -19800000 || d.Year.internalValue === 31516200000);
+	// dm = dm.select(d => d.Year.internalValue === -19800000 || d.Year.internalValue === 31516200000);
 	
     // const makers = ['bmw', 'ford', 'toyota', 'amc'];
     // rootData = rootData.select(fields => makers.indexOf(fields.Maker.value) > -1);
@@ -55,7 +55,7 @@ d3.json('../../../data/cars.json', (data) => {
 	canvas = env.canvas();
     canvas
 		.data(dm)
-		.width(850)
+		.width(650)
 		.height(650)
 		.rows(["Horsepower"])
 		.columns(["Year"])

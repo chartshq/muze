@@ -27,6 +27,7 @@ import {
 import { localOptions } from './local-options';
 import { listenerMap } from './listener-map';
 import { BASE_LAYER } from '../enums/constants';
+import { interactionFn } from './helper';
 
 const layerNs = [STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE];
 const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
@@ -433,9 +434,13 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return this;
     }
 
+    getInteractionStyles () {
+        return interactionFn;
+    }
+
     applyLayerStyle (styleType, { elem, apply, interactionType, styleValue, mountPoint }) {
-        const interactionFn = this.getInteractionStyles();
-        return interactionFn(this, elem, apply, interactionType, styleValue, styleType, mountPoint);
+        const interactionFunction = this.getInteractionStyles();
+        return interactionFunction(this, elem, apply, interactionType, styleValue, styleType, mountPoint);
     }
 
     getIdentifiersFromData (data, rowId) {

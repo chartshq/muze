@@ -517,8 +517,7 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
 
 export const getColorMetaInf = (initialStyle, auxStyles = {}) => ({
     originalStyle: Object.assign({}, initialStyle),
-    currentState: {},
-    interactionOrder: []
+    currentState: new Map()
 });
 
 const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;

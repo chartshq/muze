@@ -941,11 +941,16 @@ const rgbaToHex = (rgbString, rgbArr) => {
     return hexString;
 };
 
-const transformToHex = (col) => {
-    if (col.startsWith('rgb')) {
-        return rgbaToHex(col);
-    }
-    return col;
+const hslToHex = (h, s, l, a) => {
+    const rgbaArr = hslToRgb(h, s, l, a);
+    return rgbaToHex(null, rgbaArr);
+};
+
+const transformToHex = (datumStyle, colorType) => {
+    if (colorType === 'rgb') return rgbaToHex(datumStyle);
+    else if (colorType === 'hsl') return hslToHex(datumStyle);
+    else if (colorType === 'hex') return rgbaToHex(datumStyle);
+    return null;
 };
 
 const assembleModelFromIdentifiers = (model, identifiers) => {
@@ -1427,7 +1432,7 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
-function hexToHSL (H) {
+function hexAToHSL (H) {
     // Convert hex to RGB first
     let r = 0;
     let g = 0;
@@ -1442,7 +1447,18 @@ function hexToHSL (H) {
         r = `0x${H[1]}${H[2]}`;
         g = `0x${H[3]}${H[4]}`;
         b = `0x${H[5]}${H[6]}`;
+    } else if (H.length === 5) {
+        r = `0x${H[1]}${H[1]}`;
+        g = `0x${H[2]}${H[2]}`;
+        b = `0x${H[3]}${H[3]}`;
+        a = `0x${H[4]}${H[4]}`;
+    } else if (H.length === 9) {
+        r = `0x${H[1]}${H[2]}`;
+        g = `0x${H[3]}${H[4]}`;
+        b = `0x${H[5]}${H[6]}`;
+        a = `0x${H[7]}${H[8]}`;
     }
+
     // Then to HSL
     r /= 255;
     g /= 255;
@@ -1473,25 +1489,27 @@ function hexToHSL (H) {
     s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
     s = +(s * 100).toFixed(1);
     l = +(l * 100).toFixed(1);
+    a = (a / 255).toFixed(3);
 
     return {
-        color: `hsl(${h},${s}%,${l}%)`,
-        code: [h, s, l]
+        color: `hsla(${h},${s}%,${l}%,${a})`,
+        code: [h, s, l, a]
     };
 }
 
 const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, apply) => {
-    const [origH, origS, origL] = hexToHSL(hexColor).code;
-    if (apply) {
+    const [origH, origS, origL, origA] = hexAToHSL(hexColor).code;
+    if (!apply) {
         h = -h;
         s = -s;
         l = -l;
         a = -a;
     }
-    const newHSL = [origH + h, origS + s, origL + l];
+    const newHSL = [origH + h, origS + s, origL + l, origA + a];
 
-    const rgb1 = hslaToRgb(...newHSL);
-    return rgb1;
+    // const rgb1 = hslaToRgb(...newHSL);
+    debugger;
+    return hslToHex(...newHSL);
 };
 
 export {

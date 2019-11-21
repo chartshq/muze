@@ -8,20 +8,16 @@ export const defaultConfig = {
     defColorStyle: 'stroke',
     interaction: {
         highlight: {
-            // className: 'highlight-class',
+            className: 'highlight-class',
             style: {
                 stroke: 'black',
-                'stroke-width': (v) => {
-                    const unit = parseInt(v, 10);
-                    return '0.5px';
-                    // return `${unit + 1}px`;
-                },
+                'stroke-width': '1px',
                 fill: 'red'
             },
             strokePosition: 'center'
         },
         focusStroke: {
-            // className: 'focus-stroke-class',
+            className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
                 'stroke-width': '2px',
@@ -29,24 +25,27 @@ export const defaultConfig = {
             },
             strokePosition: 'outside'
         },
-        // focus: {
-        //     style: {
-        //         fill: (fillColor, datum, colorAxis, apply) => {
-        //             const newHexColor = transformColor(fillColor, {
-        //                 l: apply ? +20 : -20
-        //             }, datum, colorAxis, 'focus', 'fill');
-        //             return newHexColor;
-        //         }
-        //     }
-        // }
-        fade: {
+        focus: {
             style: {
                 fill: (hexColor, datum, apply) => {
-                    return apply ? 'black' : hexColor;
                     // const newHexColor = transformColor(hexColor, {
                     //     l: +20
                     // }, datum, apply);
                     // return newHexColor;
+                    console.log('object');
+                    return 'black';
+                }
+            }
+        },
+        fade: {
+            style: {
+                fill: (hexColor, datum, apply) => {
+                    // const newHexColor = transformColor(hexColor, {
+                    //     l: +20
+                    // }, datum, apply);
+                    // return newHexColor;
+                    console.log('object');
+                    return 'black';
                 }
             }
         }

@@ -1,8 +1,4 @@
-import {
-    FieldType,
-    COORD_TYPES,
-    transformToHex
-} from 'muze-utils';
+import { FieldType, COORD_TYPES } from 'muze-utils';
 import { ENCODING } from '../../enums/constants';
 import {
     getIndividualClassName,
@@ -102,78 +98,4 @@ export const getStrokeWidthByPosition = (position, radius) => {
         outside: +(radius * Math.PI)
     };
     return strokeWidthWithOffsetMap[position];
-};
-
-const getPreviousStyle = (meta, styleType) => {
-    const { originalStyle, currentState, interactionOrder } = meta;
-
-    if (interactionOrder.length) {
-        const type = interactionOrder[interactionOrder.length - 1];
-        return currentState[type][styleType];
-    }
-    return originalStyle[styleType];
-};
-
-export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType) => {
-    const datum = elem.data()[0];
-    const datumStyle = elem.style(styleType);
-    const interactions = context.config().interaction;
-    const { originalStyle, currentState, interactionOrder } = datum.meta;
-
-    currentState[interactionType] = currentState[interactionType] || {};
-
-    // Get evaluated value if styleVal is a fn
-    if (typeof styleValue === 'function') {
-        styleValue = styleValue(transformToHex(datumStyle), datum, apply);
-    }
-
-    elem.style(styleType, () => {
-        if (apply && !currentState[interactionType][styleType]) {
-            // apply interaction styles
-            currentState[interactionType][styleType] = styleValue;
-
-            // Add to last evaluated style list
-            if (!interactionOrder.includes(interactionType)) {
-                interactionOrder.push(interactionType);
-            }
-
-            // Add/style path border
-            context.addOverlayPath(
-                elem.node(),
-                datum,
-                { type: styleType, value: styleValue },
-                interactionType
-            );
-
-            // Add className to group
-            elem.classed(interactions[interactionType].className || '', true);
-            return styleValue;
-        } else if (!apply && currentState[interactionType][styleType]) {
-            // remove interaction styles
-            if (interactionOrder.includes(interactionType)) {
-                interactionOrder.pop();
-                delete currentState[interactionType];
-            }
-
-            if (interactionOrder.length > 0) {
-                interactionType = interactionOrder[interactionOrder.length - 1];
-            }
-
-            const previousInteractionStyle = getPreviousStyle(datum.meta, styleType);
-            currentState[interactionType] = currentState[interactionType] || {};
-            currentState[interactionType][styleType] = previousInteractionStyle;
-
-            context.removeOverlayPath(datum, currentState[interactionType]);
-
-            elem.classed(interactions[interactionType].className || '', false);
-            return currentState[interactionType][styleType];
-        }
-
-        const styleVal = currentState[interactionType][styleType] ?
-            currentState[interactionType][styleType] :
-            originalStyle[styleType];
-        return styleVal;
-    });
-
-    return true;
 };
