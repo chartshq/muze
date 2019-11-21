@@ -59,6 +59,7 @@ export const DEFAULT_CONFIG = {
             type: 'square'
         }
     }
+    // stops: 5
 };
 
 const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
@@ -66,7 +67,7 @@ const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
 const ITEM_FORMATTER = {
     item: {
         text: {
-            formatter: val => `${Math.ceil(val[0])} - ${Math.ceil(val[1])}`
+            formatter: val => `${val[0]} - ${val[1]}`
         }
     }
 };

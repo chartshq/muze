@@ -5,6 +5,20 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
+        data = [{
+            Cylinders: '5',
+            Acceleration: 1
+        }, {
+            Cylinders: '6',
+            Acceleration: 0.4
+        }, {
+            Cylinders: '7',
+            Acceleration: 0.6
+        }, {
+            Cylinders: '9',
+            Acceleration: 0.2
+        }];
+
         const schema = [{
             name: 'Name',
             type: 'dimension'
@@ -29,7 +43,7 @@
         {
             name: 'Weight_in_lbs',
             type: 'measure',
-			numberFormat: (val) => "￡" + val
+			numberFormat: (val) => "ï¿¡" + val
         },
         {
             name: 'Acceleration',
