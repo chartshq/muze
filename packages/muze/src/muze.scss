@@ -163,6 +163,11 @@
     position: relative;
     float: left;
 }
+.#{$prefix}grid-top {
+    position: relative;
+    top: 100%;
+    transform: translateY(-100%);
+}
 
 .#{$prefix}grid div{
     float: left;

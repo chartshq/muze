@@ -15,7 +15,7 @@
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
-import { fixScrollBarConfig, fixFacetBorderConfig } from './canvas/helper';
+import { fixScrollBarConfig, fixFacetConfig } from './canvas/helper';
 import { DEFAULT_CONFIG } from './defaults';
 
 export default {
@@ -63,7 +63,7 @@ export default {
                 // Stores additional config, if passed
                 const { reset = false } = auxConfig;
                 let oldConf = {};
-                fixFacetBorderConfig(config);
+                fixFacetConfig(config);
 
                 if (!reset) {
                     oldConf = mergeRecursive({}, config === null ? {} : oldConfig);

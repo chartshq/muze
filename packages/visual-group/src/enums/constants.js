@@ -287,3 +287,8 @@ export const ASCENDING = 'asc';
  * Ordering type
  */
 export const DESCENDING = 'desc';
+
+export const DARK = 'dark';
+export const NONE = 'none';
+export const NORMAL = 'normal';
+export const DARKER = 'darker';

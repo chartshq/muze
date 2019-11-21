@@ -1,7 +1,7 @@
 import { makeElement } from 'muze-utils';
 import { cellSpanMaker, applySpans } from '../../../../layout/src/grid-layout/span-maker';
 import { applyBorders } from '../../../../layout/src/grid-layout/border-helper';
-
+import '../../border-applier.scss';
 import {
      TOP, CENTER
 } from '../../../../layout/src/enums/constants';
@@ -49,6 +49,8 @@ export default class MatrixComponent extends MuzeComponent {
         const column = this.params.config.column;
         const dimensions = this.params.config.dimensions;
         const border = this.params.config.border;
+        const isFacet = this.params.config.isFacet;
+        const showHeaders = this.params.config.showHeaders;
 
         // Creating containers for each matrix individually
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)
@@ -72,15 +74,21 @@ export default class MatrixComponent extends MuzeComponent {
             cell.placeholder.remove();
         });
 
-        applyBorders(cells, border, row, column);
+        applyBorders({ cells, border, row, column, isFacet, showHeaders });
     }
 
     renderTable (mount, className, rowData) {
         const table = makeElement(mount, 'table', ['layout'], `${className}-table`);
         const body = makeElement(table, 'tbody', ['layout'], `${className}-body`);
         const rows = makeElement(body, 'tr', rowData, `${className}-tr`);
-        const cells = makeElement(rows, 'td', (d, i) => d.filter(e => e !== null).map(e =>
-                                  ({ placeholder: e, rowIndex: i })), `${className}-td`, {}, key => key.placeholder.id);
+        const cells = makeElement(rows, 'td',
+            (d, i) => d.filter(e => e !== null).map(e =>
+                ({ placeholder: e, rowIndex: i })), `${className}-td`, {
+                    update: (elem, cell) => {
+                        const { externalClassname } = cell.placeholder.config();
+                        externalClassname && externalClassname.map(d => elem.classed(`${className}-${d}`, true));
+                    }
+                }, key => key.placeholder.id);
 
         return { table, body, rows, cells };
     }

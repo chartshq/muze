@@ -21,7 +21,7 @@ export const initCanvas = (context) => {
     }, context.dependencies()))];
 };
 
-export const fixFacetBorderConfig = (config) => {
+export const fixFacetConfig = (config) => {
     config.facetsUserConfig = {};
     if (config.border && config.border.width) {
         config.facetsUserConfig.isBorderPresent = true;
@@ -31,6 +31,7 @@ export const fixFacetBorderConfig = (config) => {
         config.facetsUserConfig.isGridLinePresent.x = !!config.gridLines.x;
         config.facetsUserConfig.isGridLinePresent.y = !!config.gridLines.y;
     }
+    config.isFacet = false;
 };
 
 export const fixScrollBarConfig = (config) => {

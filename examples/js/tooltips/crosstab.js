@@ -37,7 +37,7 @@ d3.csv('../../data/coffee.csv', (data) => {
     let canvas7 = env7.canvas();
 
     canvas7 = canvas7
-      .rows(['Market', 'Product Type', 'Product'])
+      .rows([['Market', 'Product Type', 'Product']])
       .columns([['Revenue', 'Expense'], ['Revenue', 'Expense']])
       .data(rootData7)
       .width(750)
