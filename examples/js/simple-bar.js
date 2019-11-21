@@ -5,19 +5,19 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        data = [{
-            Cylinders: '5',
-            Acceleration: 1
-        }, {
-            Cylinders: '6',
-            Acceleration: 0.4
-        }, {
-            Cylinders: '7',
-            Acceleration: 0.6
-        }, {
-            Cylinders: '9',
-            Acceleration: 0.2
-        }];
+        // data = [{
+        //     Cylinders: '5',
+        //     Acceleration: 1
+        // }, {
+        //     Cylinders: '6',
+        //     Acceleration: 0.4
+        // }, {
+        //     Cylinders: '7',
+        //     Acceleration: 0.6
+        // }, {
+        //     Cylinders: '9',
+        //     Acceleration: 0.2
+        // }];
 
         const schema = [{
             name: 'Name',
@@ -78,14 +78,14 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Acceleration'])
-        .rows(['Cylinders'])
-        .color({
-            field: 'Acceleration', // A measure in color encoding channel creates gradient legend
-            // stops: 10,
-            // step:true
-        })
-    //    .color('Maker')
+        .columns(['Cylinders'])
+        .rows(['Acceleration'])
+        // .color({
+        //     field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+        //     // stops: 10,
+        //     // step:true
+        // })
+       .color('Cylinders')
         // .detail(['Name'])
         // .size('Horsepower')
         .mount('#chart')
@@ -104,31 +104,5 @@
             // }
         })
         .title('Charts');
-<<<<<<< Updated upstream
     });
 })();
-=======
-
-    // window.canvas2 = env.canvas()
-    //     .data(rootData)
-    //     // .rows(['maxDays'])
-    //     .rows(['Acceleration'])
-    //     .columns(['Year'])
-    //     // .detail(['Name'])
-    //     .mount('#chart2')
-    //     .height(650)
-    //     .width(450)
-    //     .title('Charts');
-
-    // muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
-    //     .registerPropagationBehaviourMap({
-    //         brush: 'filter'
-    //     })
-    })
-})();
-
-
-// item: {
-//     text: {
-//         orientation: 'right',
->>>>>>> Stashed changes
