@@ -98,8 +98,37 @@
                 text : {
                     // orientation:'left'
                 }
-            }
+            },
+            // sort: {
+            //     Cylinders : 'desc'
+            // }
         })
         .title('Charts');
+<<<<<<< Updated upstream
     });
 })();
+=======
+
+    // window.canvas2 = env.canvas()
+    //     .data(rootData)
+    //     // .rows(['maxDays'])
+    //     .rows(['Acceleration'])
+    //     .columns(['Year'])
+    //     // .detail(['Name'])
+    //     .mount('#chart2')
+    //     .height(650)
+    //     .width(450)
+    //     .title('Charts');
+
+    // muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
+    //     .registerPropagationBehaviourMap({
+    //         brush: 'filter'
+    //     })
+    })
+})();
+
+
+// item: {
+//     text: {
+//         orientation: 'right',
+>>>>>>> Stashed changes
