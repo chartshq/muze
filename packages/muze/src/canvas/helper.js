@@ -98,7 +98,21 @@ const equalityChecker = (props, params) => {
     });
 };
 
-const isEmptyObject = val => val && val.getData().data.every(d => d.map(x => x instanceof InvalidAwareTypes));
+const hasValue = (val) => {
+    let hasOneValue = false;
+    for (let i = 0; i < val.length; i++) {
+        for (let j = 0; j < val[i].length; j++) {
+            if (!(val[i][j] instanceof InvalidAwareTypes)) {
+                hasOneValue = true;
+                break;
+            }
+        }
+        if (hasOneValue) {
+            break;
+        }
+    }
+    return hasOneValue;
+};
 
 const updateChecker = (props, params) => props.every((option, i) => {
     const val = params[i][1];
@@ -108,7 +122,7 @@ const updateChecker = (props, params) => props.every((option, i) => {
         return val !== null;
 
     case DATA:
-        return val && !val.isEmpty() && !isEmptyObject;
+        return val && !val.isEmpty() && hasValue(val.getData().data);
 
     default:
         return true;

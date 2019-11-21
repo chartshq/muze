@@ -97,16 +97,25 @@ export const spaceSetter = (context, spaceConfig) => {
         axisNamePadding,
         tickValues
     } = config;
-    const {
-        tickDimensions,
-        allTickDimensions,
-        axisNameDimensions,
-        tickSize
-    } = context.getAxisDimensions() || {};
-    const {
-        height: tickDimHeight,
-        width: tickDimWidth
-    } = tickDimensions || {};
+
+    let tickDimensions;
+    let allTickDimensions;
+    let axisNameDimensions;
+    let tickSize;
+    let tickDimHeight = 0;
+    let tickDimWidth = 0;
+    if (context.domain().length) {
+        ({
+            tickDimensions,
+            allTickDimensions,
+            axisNameDimensions,
+            tickSize
+        } = context.getAxisDimensions());
+        ({
+            height: tickDimHeight,
+            width: tickDimWidth
+        } = tickDimensions);
+    }
 
     const namePadding = showAxisName ? axisNamePadding : 0;
     const labelConfig = { smartTicks: true, rotation: labels.rotation };
@@ -282,7 +291,7 @@ export const spaceSetter = (context, spaceConfig) => {
             },
             y: () => {
                 labelConfig.smartTicks = false;
-                const tickShifter = tickDimensions && tickDimensions.height / 2;
+                const tickShifter = tickDimHeight / 2;
                 const baseline = fixedBaseline ? 1 : tickShifter;
 
                 setAxisRange(context, 'x', [availHeight - bottom - baseline, tickShifter + top],

@@ -296,6 +296,12 @@ export const calculateBandSpace = (context) => {
  * @return {Object} Width and height occupied by the axis.
  */
 export const calculateContinousSpace = (context) => {
+    if (context.domain().length === 0) {
+        return {
+            width: 0,
+            height: 0
+        };
+    }
     const range = context.range();
     const axisDimensions = context.getAxisDimensions();
     const { orientation } = context.config();

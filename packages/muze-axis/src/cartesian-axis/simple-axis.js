@@ -333,11 +333,7 @@ export default class SimpleAxis {
      */
     getLogicalSpace () {
         if (!this.logicalSpace()) {
-            if (this.domain().length > 0) {
-                this.logicalSpace(calculateContinousSpace(this));
-            } else {
-                this.logicalSpace({ width: 0, height: 0 });
-            }
+            this.logicalSpace(calculateContinousSpace(this));
         }
         setOffset(this);
 
