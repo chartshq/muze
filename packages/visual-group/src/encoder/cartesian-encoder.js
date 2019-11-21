@@ -157,7 +157,9 @@ export default class CartesianEncoder extends VisualEncoder {
                     only if sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
-                    const sortingOrder = config.sort && config.sort[currentFieldName] ? config.sort[currentFieldName] : axes[0].config().defaultSort;
+                    const sortingOrder = config.sort && config.sort[currentFieldName] ?
+                                            config.sort[currentFieldName] :
+                                                axes[0].config().defaultSort;
                     if (sortingOrder) {
                         domains[axisType][key].sort((a, b) => sortCategoricalField(sortingOrder, a, b));
                     }

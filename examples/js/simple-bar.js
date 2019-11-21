@@ -78,16 +78,17 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Cylinders'])
+        .columns(['Horsepower'])
         .rows(['Acceleration'])
         // .color({
         //     field: 'Acceleration', // A measure in color encoding channel creates gradient legend
         //     // stops: 10,
         //     // step:true
         // })
-       .color('Cylinders')
+       .shape('Cylinders')
         // .detail(['Name'])
         // .size('Horsepower')
+        .detail(['Maker'])
         .mount('#chart')
         .height(650)
         .width(850)
