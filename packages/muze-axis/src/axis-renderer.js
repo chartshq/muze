@@ -80,7 +80,6 @@ const rotateAxis = (instance, tickText, labelManager) => {
                             .attr('transform', `translate(${xShift - tickSize}
                                 ${yShift + tickSize}) rotate(${rotation})`);
         }
-        console.log('Hee heee');
         // selectElement(this).transition()
         //                 .duration(1000).text(datum);
     });
@@ -94,7 +93,6 @@ const rotateAxis = (instance, tickText, labelManager) => {
  * @param {*} axisInstance
  */
 const changeTickOrientation = (selectContainer, axisInstance, tickSize) => {
-    debugger;
     const {
         _smartTicks
     } = axisInstance;
@@ -271,17 +269,7 @@ export function renderAxis (axisInstance) {
     // Draw axis ticks
     selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
     setFixedBaseline(axisInstance);
-    // Why labels smart ticks == false on scroll ?
-    // if (labels.smartTicks === false || tickSize === 0) {
-    //     selectContainer.transition()
-    //                     .duration(1000)
-    //                     .on('end', axisInstance.registerAnimationDoneHook())
-    //                     .call(axis);
-    // } else {
-    //     selectContainer.call(axis);
-    //     console.log('Hee haa');
-    // }
-    debugger;
+
     if (!labels.rotation && labels.smartTicks === false) {
         selectContainer.transition()
                         .duration(1000)
