@@ -2,12 +2,20 @@
 
 .#{$prefix}grid-normal {
     border-color: #ebebeb;
+
+    .#{$prefix}axis-name{
+        font-size: 12px;
+        line-height: 15px;
+    }
 }
 
 .#{$prefix}grid-dark {
     border-color: #cbcbcb;
-    font-size: 12px;
-    line-height: 15px;
+
+    .#{$prefix}axis-name{
+        font-size: 12px;
+        line-height: 15px;
+    }
 }
 .#{$prefix}grid-dark-bottom {
     border-bottom-color:#cbcbcb;

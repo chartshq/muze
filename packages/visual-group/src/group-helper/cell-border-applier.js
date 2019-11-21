@@ -7,7 +7,6 @@ import {
     TOP,
     DARKER,
     BOTTOM
-
 } from '../enums/constants';
 
 export const sanitiseHeaderMatrix = (matrices, header) => {
@@ -110,9 +109,13 @@ export const sanitiseFacetValues = (matrices, type) => {
 
 export const sanitiseBorderMatrix = (matrices) => {
     const { leftMatrix, rightMatrix, topMatrix, bottomMatrix } = matrices;
-    const arr = leftMatrix.length > 0 && sanitiseFacetValues(leftMatrix, `${LEFT}`);
-    rightMatrix.length > 0 && sanitiseFacetValues(rightMatrix, `${RIGHT}`);
-    topMatrix.length > 0 && sanitiseHeaderMatrix(topMatrix);
-    bottomMatrix.length > 0 && sanitiseHeaderMatrix(bottomMatrix);
-    return arr;
+    let bottomBorderObj = {};
+    if (rightMatrix.length) {
+        bottomBorderObj = sanitiseFacetValues(rightMatrix, `${RIGHT}`);
+    } else if (leftMatrix.length) {
+        bottomBorderObj = sanitiseFacetValues(leftMatrix, `${LEFT}`);
+    }
+    topMatrix.length && sanitiseHeaderMatrix(topMatrix);
+    bottomMatrix.length && sanitiseHeaderMatrix(bottomMatrix);
+    return bottomBorderObj;
 };
