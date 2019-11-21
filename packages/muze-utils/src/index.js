@@ -112,7 +112,8 @@ export {
     getArrayIndexMap,
     arraysEqual,
     rgbaToHex,
-    transformToHex
+    transformToHex,
+    getReadableTicks
 } from './common-utils';
 
 export {
