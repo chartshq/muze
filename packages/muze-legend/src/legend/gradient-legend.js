@@ -93,8 +93,8 @@ export default class GradientLegend extends SimpleLegend {
             const value = domainForLegend[i];
             return {
                 [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor()
-                    : scale[scaleFn](Math.floor(ele)),
-                value: +value.toFixed(2),
+                    : scale[scaleFn](ele),
+                value: +value.toFixed(1),
                 id: i
             };
         }).filter(d => d.value !== null);

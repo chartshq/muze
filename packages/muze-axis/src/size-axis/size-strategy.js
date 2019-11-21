@@ -1,4 +1,4 @@
-import { numberInterpolator, piecewiseInterpolator } from 'muze-utils';
+import { numberInterpolator, piecewiseInterpolator, getReadableTicks } from 'muze-utils';
 import { CONTINOUS, DISCRETE } from '../enums/constants';
 import { LINEAR, THRESHOLD } from '../enums/scale-type';
 import { treatNullMeasures } from '../helper';
@@ -38,14 +38,15 @@ const steppedDomain = (domain, intervals) => {
     if (intervals instanceof Array) {
         newIntervals = intervals.slice().sort();
     } else {
-        const interpolator = numberInterpolator()(...domain);
-        for (let i = 0; i < intervals; i++) {
-            newIntervals[i] = interpolator(i / (intervals - 1));
-        }
+        // const interpolator = numberInterpolator()(...domain);
+        // for (let i = 0; i < intervals; i++) {
+        //     newIntervals[i] = interpolator(i / (intervals - 1));
+        // }
+        newIntervals = getReadableTicks(domain, intervals);
     }
-    if (newIntervals[0] < domain[0]) {
-        newIntervals.shift();
-    }
+    // if (newIntervals[0] < domain[0]) {
+    //     newIntervals.shift();
+    // }
     const retDomain = newIntervals;
     return { uniqueVals: newIntervals, domain: retDomain, nice: true };
 };
