@@ -14,7 +14,7 @@ var schema = [{
 }];
 
 // var data = [{ Origin:'USA', Horsepower:1, Acceleration:2 },{Origin:'China', Horsepower:2}];
-var data1 = [{ Horsepower:'1', Acceleration:'2' },{Horsepower:'2'}];
+var data1 = [{ Origin:'1'},{Origin:'2'}];
 var rootData = new DataModel(data1, schema, { dataFormat: "FlatJSON" } );
 var canvas = env.canvas();
 var rows = [['Acceleration']];
