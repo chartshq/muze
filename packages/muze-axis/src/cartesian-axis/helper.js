@@ -30,6 +30,7 @@ export const setOffset = (context) => {
     if (orientation === TOP) {
         y = yOffset === undefined ? logicalSpace.height : yOffset;
     }
+
     context.renderConfig({ xOffset: x, yOffset: y });
 };
 
@@ -120,6 +121,7 @@ export const computeAxisDimensions = (context) => {
     let tickDimensions = {};
     const { labels } = context.renderConfig();
     const { smartTicks, rotation } = labels;
+
     const {
         largestTickDimensions,
         axisTicks,
@@ -135,7 +137,14 @@ export const computeAxisDimensions = (context) => {
     // const angle = ((rotation || 0) * Math.PI) / 180;
 
     if (domain.length === 0) {
-        return null;
+        return {
+            allTickDimensions,
+            tickSize,
+            tickDimensions,
+            axisNameDimensions,
+            largestTickDimensions,
+            axisTicks
+        };
     }
 
     if (smartTicks) {
@@ -148,6 +157,7 @@ export const computeAxisDimensions = (context) => {
     if (tickSize === 0) {
         tickDimensions = { width: 0, height: 0 };
     }
+
     return {
         allTickDimensions,
         tickSize,

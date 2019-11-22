@@ -98,24 +98,17 @@ export const spaceSetter = (context, spaceConfig) => {
         tickValues
     } = config;
 
-    let tickDimensions;
-    let allTickDimensions;
-    let axisNameDimensions;
-    let tickSize;
-    let tickDimHeight = 0;
-    let tickDimWidth = 0;
-    if (context.domain().length) {
-        ({
-            tickDimensions,
-            allTickDimensions,
-            axisNameDimensions,
-            tickSize
-        } = context.getAxisDimensions());
-        ({
-            height: tickDimHeight,
-            width: tickDimWidth
-        } = tickDimensions);
-    }
+    const {
+        tickDimensions,
+        allTickDimensions,
+        axisNameDimensions,
+        tickSize
+    } = context.getAxisDimensions();
+
+    const {
+        height: tickDimHeight,
+        width: tickDimWidth
+    } = tickDimensions;
 
     const namePadding = showAxisName ? axisNamePadding : 0;
     const labelConfig = { smartTicks: true, rotation: labels.rotation };
@@ -123,7 +116,7 @@ export const spaceSetter = (context, spaceConfig) => {
     const minTickSpace = context._minTickSpace;
     const minDiff = context._minDiff;
     const domain = context.domain();
-    const axisNameHeight = axisNameDimensions && axisNameDimensions.height;
+    const axisNameHeight = axisNameDimensions.height;
     const minWidthBetweenTicks = minTickDistance.width;
     const minTickWidth = Math.min(minTickSpace.width, tickDimWidth);
     const minTickHeight = Math.min(minTickSpace.height, tickDimHeight);
@@ -279,12 +272,10 @@ export const spaceSetter = (context, spaceConfig) => {
                         context.renderConfig({
                             showInnerTicks: true,
                             showAxisName: false
-
                         });
                     }
                 }
-
-                if (availHeight < axisNameHeight) {
+                if (availHeight < axisNameHeight && domain.length) {
                     context.renderConfig({ show: false });
                 }
                 return labelConfig;
@@ -295,7 +286,7 @@ export const spaceSetter = (context, spaceConfig) => {
                 const baseline = fixedBaseline ? 1 : tickShifter;
 
                 setAxisRange(context, 'x', [availHeight - bottom - baseline, tickShifter + top],
-                    isOffset ? context.domain().length > 0 ? availWidth : availWidth - namePadding : null);
+                    isOffset ? availWidth : null);
 
                 // Remove display of ticks if no space is left
                 if (availWidth < tickDimWidth + axisNameHeight + namePadding) {

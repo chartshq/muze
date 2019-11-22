@@ -1,8 +1,8 @@
-var env = window.muze();
-var DataModel = window.muze.DataModel;
-var mountPoint = document.getElementById('chart');
+const env = window.muze();
+const DataModel = window.muze.DataModel;
+const mountPoint = document.getElementById('chart');
 
-var schema = [{
+const schema = [{
     name: 'Horsepower',
     type: 'measure'
 }, {
@@ -13,14 +13,17 @@ var schema = [{
     type: 'dimension'
 }];
 
-// var data = [{ Origin:'USA', Horsepower:1, Acceleration:2 },{Origin:'China', Horsepower:2}];
-var data1 = [{ Origin:'1'},{Origin:'2'}];
-var rootData = new DataModel(data1, schema, { dataFormat: "FlatJSON" } );
-var canvas = env.canvas();
-var rows = [['Acceleration']];
-var columns = ['Origin'];
-canvas.mount(mountPoint).data(rootData).rows(rows).height(400).columns(columns).layers([{
-    mark: 'point',
-}]).color({
+// const data = [{ Origin:'USA', Horsepower:1, Acceleration:2 },{Origin:'China', Horsepower:2}];
+const data1 = [{ Origin: '1' }, { Origin: '2' }];
+const rootData = new DataModel(data1, schema, { dataFormat: "FlatJSON" } );
+const canvas = env.canvas();
+const rows = [[], ['Acceleration']];
+const columns = ['Origin'];
+canvas.mount(mountPoint).data(rootData).rows(rows).height(400)
+.columns(columns)
+.layers([{
+    mark: 'point'
+}])
+.color({
     field: 'Origin'
 });
