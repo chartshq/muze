@@ -12,11 +12,13 @@ const getPreviousStyle = (meta, interactionType) => {
     if (currentState.size > 0) {
         interactionType = getLastItemInMap(currentState)[0];
         stylesForCurrentLevel = currentState.get(interactionType) || {};
+        // const elemFill = elem.style('fill');
+        // const newStyle = Object.assign({}, stylesForCurrentLevel, { fill: elemFill });
     }
     return stylesForCurrentLevel;
 };
 
-export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType) => {
+export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType, mountPoint) => {
     let datum = elem.data()[0];
     const datumStyle = elem.style(styleType);
     const interactions = context.config().interaction;
@@ -45,35 +47,57 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
 
         const { currentState } = datum.meta;
         const interactionVal = currentState.get(interactionType);
-        currentState.set(interactionType, interactionVal || {});
-
-        const lastInteractionVal = currentState.get(interactionType);
 
         if (apply) {
+            currentState.set(interactionType, interactionVal || {});
+            const lastInteractionVal = currentState.get(interactionType);
+
             // apply interaction styles
             lastInteractionVal[styleType] = styleValue;
 
             // Add to last evaluated style list
-            currentState.set(interactionType, {});
-            // if (!currentState.get(interactionType)) {
-            // }
+            if (!currentState.get(interactionType)) {
+                currentState.set(interactionType, {});
+            }
+
+            if (styleType === 'stroke-width') {
+                const strokePosition = interactions[interactionType].strokePosition || 'center';
+
+                if (strokePosition === 'center') {
+                    // Add className to group
+                    elem.classed(className || '', true);
+                    return styleValue;
+                }
+
+                // Apply stroke only to path and return 0 for the element's strokeWidth
+                context.addOverlayPath(
+                    elem.node(),
+                    datum,
+                    { type: styleType, value: styleValue },
+                    interactionType,
+                    mountPoint
+                );
+                return 0;
+            }
 
             // Add/style path border
             context.addOverlayPath(
                 elem.node(),
                 datum,
                 { type: styleType, value: styleValue },
-                interactionType
+                interactionType,
+                mountPoint
             );
+
             // Add className to group
             elem.classed(className || '', true);
             return styleValue;
         }
 
         // remove interaction styles
-        // if (currentState.get(interactionType)) {
-        currentState.delete(interactionType);
-        // }
+        if (currentState.get(interactionType)) {
+            currentState.delete(interactionType);
+        }
 
         const stylesForCurrentLevel = getPreviousStyle(datum.meta, interactionType);
         context.removeOverlayPath(datum, stylesForCurrentLevel);

@@ -4,7 +4,7 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
         options: {
-            strategy: 'fade'
+            strategy: 'fadeOnBrush'
         }
     }, 'brush-anchors'],
     [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
@@ -20,7 +20,7 @@ export const behaviourEffectMap = {
             strategy: 'highlight',
             // behaviours for which the current strategy won't apply
             // accepts an array or fn
-            excludeSet: [BEHAVIOURS.SELECT]
+            excludeSet: [BEHAVIOURS.SELECT, BEHAVIOURS.BRUSH]
         }
     }, 'crossline', {
         name: 'tooltip',

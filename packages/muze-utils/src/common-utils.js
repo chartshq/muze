@@ -920,31 +920,6 @@ const detectColor = (col) => {
     } return col;
 };
 
-// const componentToHex = (c) => {
-//     const num = parseFloat(c, 10);
-//     const fixedC = num.toFixed(2);
-//     const hex = fixedC.toString(16);
-//     return hex.length === 1 ? `0${hex}` : hex;
-// };
-
-// const rgbaToHex = (rgbString, rgbArr) => {
-//     let r;
-//     let g;
-//     let b;
-//     let a;
-
-//     if (!rgbArr) {
-//         [r, g, b, a] = rgbString.replace(/[^\d,]/g, '').split(',');
-//     } else {
-//         [r, g, b, a] = rgbArr;
-//     }
-//     let hexString = `#${componentToHex(r)}${componentToHex(g)}${componentToHex(b)}`;
-//     if (a) {
-//         hexString += componentToHex(a);
-//     }
-//     return hexString;
-// };
-
 function RGBAToHexA (rgba) {
     const sep = rgba.indexOf(',') > -1 ? ',' : ' ';
     rgba = rgba.substr(5).split(')')[0].split(sep);
@@ -990,57 +965,13 @@ function RGBAToHexA (rgba) {
     // return `#${r}${g}${b}${a}`;
 }
 
-const hslToHex = (h, s, l, a) => {
-    let [r, g, b, aa] = hslToRgb(h, s, l, a);
-    r = r.f;
-    const rgbaString = `rgba(${r}, ${g}, ${b}, ${aa})`;
-    return RGBAToHexA1(rgbaString);
-};
-
-function RGBAToHexA1 (rgba) {
-    const ex = /^rgba\((((((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5]),\s?)){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%,\s?){3}))|(((((1?[1-9]?\d)|10\d|(2[0-4]\d)|25[0-5])\s){3})|(((([1-9]?\d(\.\d+)?)|100|(\.\d+))%\s){3}))\/\s)((0?\.\d+)|[01]|(([1-9]?\d(\.\d+)?)|100|(\.\d+))%)\)$/i;
-    if (ex.test(rgba)) {
-        const sep = rgba.indexOf(',') > -1 ? ',' : ' ';
-        rgba = rgba.substr(5).split(')')[0].split(sep);
-
-		// strip the slash if using space-separated syntax
-        if (rgba.indexOf('/') > -1) { rgba.splice(3, 1); }
-
-        for (const R in rgba) {
-            const r = rgba[R];
-            if (r.indexOf('%') > -1) {
-                const p = r.substr(0, r.length - 1) / 100;
-
-                if (R < 3) {
-                    rgba[R] = Math.round(p * 255);
-                } else {
-                    rgba[R] = p;
-                }
-            }
-        }
-
-        let r = (+rgba[0]).toString(16),
-            g = (+rgba[1]).toString(16),
-            b = (+rgba[2]).toString(16),
-            a = Math.round(+rgba[3] * 255).toString(16);
-
-        if (r.length == 1) { r = `0${r}`; }
-        if (g.length == 1) { g = `0${g}`; }
-        if (b.length == 1) { b = `0${b}`; }
-        if (a.length == 1) { a = `0${a}`; }
-
-        return `#${r}${g}${b}${a}`;
-    }
-    return 'Invalid input color';
-}
-
 const transformToHex = (datumStyle, colorType) => {
     if (colorType === 'rgb') {
         const [r, g, b, a] = datumStyle.replace(/[^\d,]/g, '').split(',');
         const aa = a || 1;
 
         const rgbaString = `rgba(${r}, ${g}, ${b}, ${aa})`;
-        return RGBAToHexA1(rgbaString);
+        return RGBAToHexA(rgbaString);
     }
     // Add methods to handle hsl and hex conversion
     return null;

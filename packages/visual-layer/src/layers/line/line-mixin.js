@@ -93,6 +93,7 @@ export const LineLayerMixin = superclass => class extends superclass {
     translatePoints (data) {
         let points = [];
         const axes = this.axes();
+        const encoding = this.config().encoding;
         const xAxis = axes.x;
         const yAxis = axes.y;
         const colorAxis = axes.color;
@@ -117,7 +118,8 @@ export const LineLayerMixin = superclass => class extends superclass {
 
             const style = {
                 stroke: resolvedEncodings.color,
-                'fill-opacity': 0
+                'fill-opacity': encoding.fillOpacity.value,
+                'stroke-width': encoding.strokeWidth.value
             };
 
             const point = {
@@ -129,7 +131,7 @@ export const LineLayerMixin = superclass => class extends superclass {
                 style,
                 rowId: d.rowId,
                 source: d.source,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: getColorMetaInf(style)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);

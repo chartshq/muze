@@ -9,7 +9,18 @@ export const defaultConfig = {
         type: STACK
     },
     interaction: {
-
+        focus: {
+            style: {
+                // A -0.5
+                fill: 'black'
+            }
+        },
+        fade: {
+            style: {
+                // A -0.5
+                fill: 'black'
+            }
+        }
     },
     crossline: true,
     nearestPointThreshold: 10,
@@ -20,6 +31,9 @@ export const defaultConfig = {
         y0: {},
         strokeOpacity: {
             value: 1
+        },
+        fillOpacity: {
+            value: 0.5
         }
     },
     transition: {

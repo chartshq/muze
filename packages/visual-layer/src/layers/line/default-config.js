@@ -10,24 +10,27 @@ export const defaultConfig = {
     },
     interaction: {
         fade: {
+            className: 'fade-class',
             style: {
                 // alpha -0.5
                 stroke: 'black'
             }
         },
         focus: {
+            className: 'focus-class',
             style: {
                 // alpha -0.5
                 stroke: 'black'
             }
-        },
-        focusStroke: {
-            style: {
-                stroke: 'black',
-                'stroke-width': '2px'
-            },
-            strokePosition: 'inside'
         }
+        // focusStroke: {
+        //     className: 'focusStroke-class',
+        //     style: {
+        //         stroke: 'black',
+        //         'stroke-width': '2px'
+        //     },
+        //     strokePosition: 'inside'
+        // }
     },
     crossline: true,
     nearestPointThreshold: 20,
@@ -37,6 +40,12 @@ export const defaultConfig = {
         y: {},
         strokeOpacity: {
             value: 1
+        },
+        fillOpacity: {
+            value: 0
+        },
+        strokeWidth: {
+            value: '1px'
         }
     },
     transition: {

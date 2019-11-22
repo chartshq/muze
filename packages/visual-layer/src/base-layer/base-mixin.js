@@ -575,7 +575,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
         }).sort((a, b) => a.y - b.y);
     }
 
-    getTransformedDataFromIdentifiers (identifiers) {
+    getTransformedDataFromIdentifiers (identifiers, idx = 0) {
         const { data: identifierData, schema: identifierSchema } = identifiers.getData();
         const normalizedData = this._normalizedData;
         const fieldsConfig = this.data().getFieldsConfig();
@@ -592,7 +592,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
             enc = 'x';
         } else if (yFieldType === FieldType.MEASURE) {
             measureIndex = fieldsConfig[yField].index;
-            enc = 'y';
+            enc = (idx % 2 === 0) ? 'y' : 'y0';
         }
 
         const transformedData = [];

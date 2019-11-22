@@ -46,7 +46,7 @@ d3.json('../../../data/cars.json', (data) => {
 	let DataModel = muze.DataModel;
 	let dm = new DataModel(data, schema);
 	// dm = dm.select(d => d.Year.internalValue === -19800000 || d.Year.internalValue === 31516200000);
-	
+	// dm = dm.select(d => d.Origin.value !== 'European Union');
     // const makers = ['bmw', 'ford', 'toyota', 'amc'];
     // rootData = rootData.select(fields => makers.indexOf(fields.Maker.value) > -1);
 	
@@ -55,14 +55,14 @@ d3.json('../../../data/cars.json', (data) => {
 	canvas = env.canvas();
     canvas
 		.data(dm)
-		.width(650)
+		.width(850)
 		.height(650)
 		.rows(["Horsepower"])
 		.columns(["Year"])
 		.color("Origin")
 		.size("Horsepower")
 		.layers([{
-			mark: 'point'
+			mark: 'line'
 		}])
 		.mount(document.getElementById('chart'));
 })

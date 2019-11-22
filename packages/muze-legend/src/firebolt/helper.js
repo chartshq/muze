@@ -7,6 +7,7 @@ export const propagate = (firebolt, action, identifiers) => {
 
     const propPayload = {};
     propPayload.action = propagationBehaviourMap[action] || action;
+    // @TODO: Change fade propagationSideEffect for area layer
     propPayload.sideEffects = propagationSideEffects[action];
     propPayload.sourceCanvas = context.canvasAlias();
     const isMutableAction = firebolt._actions.behavioural[propPayload.action].constructor.mutates();
