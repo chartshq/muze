@@ -78,28 +78,17 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Acceleration'])
-        .rows(['Cylinders'])
-        .color({
-            field: 'Acceleration', // A measure in color encoding channel creates gradient legend
-            // stops: 10,
-            // step:true
-        })
-    //    .color('Maker')
-        // .detail(['Name'])
-        // .size('Horsepower')
+        .columns(['Maker'])
+        .rows(['Acceleration'])
         .mount('#chart')
-        .height(650)
-        .width(850)
-        .config({
-            legend: {
-                // position : 'bottom',
-                // steps:true
-                text : {
-                    // orientation:'left'
-                }
-            }
-        })
+        .height(850)
+        .width(500)
+        .color('Origin')
         .title('Charts');
-    });
+    })
 })();
+
+
+// item: {
+//     text: {
+//         orientation: 'right',
