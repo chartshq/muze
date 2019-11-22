@@ -62,6 +62,7 @@ export default class RetinalEncoder extends VisualEncoder {
                 }
             }
         });
+
         return axes;
     }
 }

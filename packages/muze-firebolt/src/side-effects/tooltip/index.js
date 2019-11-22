@@ -37,9 +37,11 @@ export default class Tooltip extends SpawnableSideEffect {
                 y: 0
             },
             highlightSummary: {
+                order: 1,
                 dataTransform: (dm, fields) => (fields ? dm.project(fields, { saveChild: false }) : dm)
             },
             selectionSummary: {
+                order: 0,
                 dataTransform: dm => dm
             }
         };
@@ -124,7 +126,6 @@ export default class Tooltip extends SpawnableSideEffect {
         const config = this.config();
         const {
             strategy,
-            options,
             payload,
             selectionSet
         } = props;
@@ -150,14 +151,16 @@ export default class Tooltip extends SpawnableSideEffect {
             firebolt: this.firebolt,
             detailFields: [],
             timeDiffs: sourceInf.timeDiffs,
-            valueParser: val => val,
-            selectionSet
+            valueParser: this.valueParser(),
+            selectionSet,
+            config: config[strategy]
         });
 
         tooltipInst.context(sourceInf);
         tooltipInst.content(strategy, dt, {
             formatter: strategyFn,
-            order: options.order
+            order: config[strategy].order,
+            className: config[strategy].className
         })
                         .config(this.config())
                         .extent({

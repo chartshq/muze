@@ -35,6 +35,10 @@ class SelectionSet {
         this._volatile = _volatile;
         this._completeSetCount = Object.keys(keys).length;
         this._lockedSelection = {};
+        this._fieldIndices = fields.reduce((acc, v, i) => {
+            acc[v] = i;
+            return acc;
+        }, {});
         this._fields = fields;
         this._resetted = true;
     }
@@ -146,7 +150,7 @@ class SelectionSet {
         return this;
     }
 
-    getSets (raw) {
+    getSets (config = {}) {
         const set = this._set;
         const uidMap = this._uidMap;
         const retObj = {
@@ -158,15 +162,23 @@ class SelectionSet {
         };
         const measureNames = this._measureNames;
         const dimVals = this._dimVals;
+        const { keepDims = false, dimensions = this._fields } = config;
+        const fieldIndices = this._fieldIndices;
 
         for (const key in set) {
             let val;
             const measureNamesArr = measureNames[key] || [];
-            if (raw) {
-                val = measureNamesArr.length ? [...dimVals[key], `${measureNames[key]}`] :
-                    [...dimVals[key]];
+            let dims = dimVals[key];
+
+            if (keepDims) {
+                if (measureNamesArr.length) {
+                    dims = dimensions.map(d => dims[fieldIndices[d]]);
+                    val = dims.length ? [...dims, `${measureNamesArr}`] : [uidMap[key], `${measureNamesArr}`];
+                } else {
+                    val = dims.length ? [...dims] : [uidMap[key]];
+                }
             } else {
-                val = measureNamesArr.length ? [uidMap[key], measureNames[key]] : [uidMap[key]];
+                val = measureNamesArr.length ? [uidMap[key], measureNames[key], dims] : [uidMap[key]];
             }
 
             if (set[key] > 0) {

@@ -1,7 +1,7 @@
 import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
-import { isSideEffectEnabled } from './helper';
+import { isSideEffectEnabled, sanitizePayloadCriteria } from './helper';
 
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
@@ -74,6 +74,18 @@ export default class UnitFireBolt extends Firebolt {
         return propInf.propagate === false && propInf.applySideEffect !== false;
     }
 
+    sanitizePayload (payload) {
+        const { criteria } = payload;
+        const { allFields: fields, dimensionsMap } = this._metaData;
+        return Object.assign({}, payload,
+            {
+                criteria: sanitizePayloadCriteria(criteria, fields, {
+                    dm: this.data(),
+                    dimensionsMap
+                })
+            });
+    }
+
     onDataModelPropagation () {
         return (data, config) => {
             let isMutableAction = false;
@@ -114,7 +126,6 @@ export default class UnitFireBolt extends Firebolt {
                     data: propagationData,
                     propPayload,
                     sourceIdentifiers,
-                    persistent: false,
                     sourceId: config.propagationSourceId,
                     isMutableAction: config.isMutableAction
                 };
