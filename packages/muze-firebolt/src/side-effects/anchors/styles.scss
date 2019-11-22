@@ -12,3 +12,10 @@
         fill-opacity: 1;
     }
 }
+
+.#{$prefix}persistent-anchors-lower,
+.#{$prefix}persistent-anchors-upper {
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
+}

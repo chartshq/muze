@@ -203,7 +203,7 @@ export const BarLayerMixin = superclass => class extends superclass {
                 identifiers = this.getIdentifiersFromData(values, dataPoint.rowId);
             }
             return {
-                dimensions: [dataPoint.update],
+                dimensions: [dataPoint],
                 id: identifiers,
                 layerId: this.id()
             };
@@ -219,18 +219,18 @@ export const BarLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    addOverlayPath (refElement, data, style, interactionType) {
-        const container = refElement.parentElement;
+    addOverlayPath (refElement, data, style, interactionType, mountPoint) {
         const interactions = this.config().interaction;
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];
         } else {
-            const pathGroup = makeElement(container, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
-            pathElement = makeElement(pathGroup, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            const pathGroup = makeElement(mountPoint, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement = makeElement(pathGroup, 'path', [data], null, {}, d => `${d.update.x} ${data.rowId}`);
 
             pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;
         }
@@ -242,10 +242,10 @@ export const BarLayerMixin = superclass => class extends superclass {
                 position: strokePosition
             });
 
-            pathElement.attr('d', d => `M ${d.x + M.x} ${d.y + M.y}
-            L ${d.x + d.width + L1.x} ${d.y + L1.y}
-            L ${d.x + d.width + L2.x} ${d.y + d.height + L2.y}
-            L${d.x + L3.x} ${d.y + d.height + L3.y} Z`);
+            pathElement.attr('d', d => `M ${d.update.x + M.x} ${d.update.y + M.y}
+            L ${d.update.x + d.update.width + L1.x} ${d.update.y + L1.y}
+            L ${d.update.x + d.update.width + L2.x} ${d.update.y + d.update.height + L2.y}
+            L${d.update.x + L3.x} ${d.update.y + d.update.height + L3.y} Z`);
         }
 
         let styleVal = style.value;
@@ -254,13 +254,15 @@ export const BarLayerMixin = superclass => class extends superclass {
             styleVal = styleVal(currentStyle);
         }
         pathElement.style(style.type, styleVal);
-        appendElement(container, pathElement.node());
+        appendElement(mountPoint, pathElement.node());
     }
 
     removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
         if (currentPath) {
+            currentPath.node().removeAttribute('style');
             Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
         }
     }
 };

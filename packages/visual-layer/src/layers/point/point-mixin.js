@@ -212,7 +212,9 @@ export const PointLayerMixin = superclass => class extends superclass {
     removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
         if (currentPath) {
+            currentPath.node().removeAttribute('style');
             Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
         }
     }
 };

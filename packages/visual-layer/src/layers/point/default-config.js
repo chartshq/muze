@@ -25,30 +25,40 @@ export const defaultConfig = {
             },
             strokePosition: 'outside'
         },
-        focus: {
+        brushStroke: {
+            className: 'brush-stroke-class',
             style: {
-                fill: (hexColor, datum, apply) => {
-                    // const newHexColor = transformColor(hexColor, {
-                    //     l: +20
-                    // }, datum, apply);
-                    // return newHexColor;
-                    console.log('object');
-                    return apply ? 'black' : hexColor;
-                }
-            }
-        },
-        fade: {
-            style: {
-                fill: (hexColor, datum, apply) => {
-                    console.log('object');
-                    return apply ? 'black' : hexColor;
-                    // const newHexColor = transformColor(hexColor, {
-                    //     l: +20
-                    // }, datum, apply);
-                    // return newHexColor;
-                }
-            }
+                stroke: 'black',
+                'stroke-width': '1px'
+                // fill: 'blue'
+            },
+            strokePosition: 'outside'
         }
+        // focus: {
+        //     style: {
+        //         fill: (hexColor, datum, apply) => {
+        //             // const newHexColor = transformColor(hexColor, {
+        //             //     l: +20
+        //             // }, datum, apply);
+        //             // return newHexColor;
+        //             console.log('object');
+        //             return 'black';
+        //             // return apply ? 'black' : hexColor;
+        //         }
+        //     }
+        // },
+        // fade: {
+        //     style: {
+        //         fill: (hexColor, datum, apply) => {
+        //             console.log('object');
+        //             return apply ? 'black' : hexColor;
+        //             // const newHexColor = transformColor(hexColor, {
+        //             //     l: +20
+        //             // }, datum, apply);
+        //             // return newHexColor;
+        //         }
+        //     }
+        // }
     },
     innerPadding: 0.1,
     nearestPointThreshold: 10,

@@ -5,11 +5,25 @@ import SpawnableSideEffect from '../spawnable';
 import './styles.scss';
 
 const addLayer = (layerRegistry, context, sideEffect) => {
+    // mark -> area (2 layers)
     context.addLayer((layerDefs) => {
         const layers = [];
+        if (layerDefs[0].mark === 'area') {
+            const lowerAnchorLayr = {
+                mark: 'area',
+                order: 1,
+                def: {
+                    mark: 'area',
+                    encoding: layerDefs[0].def.encoding,
+                    name: 'area-0',
+                    order: 1
+                }
+            };
+            layerDefs.push(lowerAnchorLayr);
+        }
 
         if (layerDefs) {
-            layerDefs.forEach((layerDef) => {
+            layerDefs.forEach((layerDef, index) => {
                 const mark = layerDef.mark;
                 const layerCls = layerRegistry[mark];
 
@@ -25,13 +39,15 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                         }
                     };
                     const commonName = sideEffect.constructor.formalName();
-                    const name = `${layerDef.def.name}-${commonName}`;
+                    const name = `${layerDef.def.name}-${commonName}-${index}`;
+                    const defaultClassName = `${sideEffect.constructor.defaultConfig().className}`;
+                    const className = `${defaultClassName}-${index % 2 === 0 ? 'lower' : 'upper'}`;
 
                     layers.push({
                         name,
                         mark: 'point',
                         groupId: commonName,
-                        className: sideEffect.constructor.defaultConfig().className,
+                        className,
                         encoding,
                         transform: {
                             type: 'identity'
@@ -68,25 +84,26 @@ export default class AnchorEffect extends SpawnableSideEffect {
     }
 
     setAnchorLayerStyle (layers, payload) {
-        const anchorLayer = layers.filter(l => l.config().groupId === 'anchors')[0];
-        if (anchorLayer) {
+        const anchorLayers = layers.filter(l => l.config().groupId === 'anchors');
+
+        anchorLayers.forEach((anchor) => {
             // Execute focusStroke interaction of anchor point layer
-            const data = anchorLayer.data();
+            const data = anchor.data();
             const ids = data.getUids();
             const layerName = this.constructor.formalName();
-            const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
+            const defaultInteractionLayerEncoding = anchor.config().encoding.interaction;
             const currentInteraction = defaultInteractionLayerEncoding[layerName];
-            const formattedUids = payload.target ? anchorLayer.getUidsFromPayload({
+            const formattedUids = payload.target ? anchor.getUidsFromPayload({
                 model: data,
-                uids: ids
+                uids: ids.map(id => [id])
             }, payload.target).uids : [];
 
             if (!formattedUids.length) {
-                anchorLayer.applyInteractionStyle(currentInteraction, ids, false);
+                anchor.applyInteractionStyle(currentInteraction, ids, false);
             } else {
-                anchorLayer.applyInteractionStyle(currentInteraction, formattedUids, true);
+                anchor.applyInteractionStyle(currentInteraction, formattedUids, true);
             }
-        }
+        });
         return true;
     }
 
@@ -137,9 +154,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const context = this.firebolt.context;
         const layers = context.layers().filter(layer => layer.config().groupId === formalName);
 
-        layers.forEach((layer) => {
+        layers.forEach((layer, index) => {
             const linkedLayer = context.getLayerByName(layer.config().owner);
-            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel);
+            // selected data -> stacked data -> new dm
+            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
             const transformedDataModel = new DataModel(transformedData, schema);
             const anchorSizeConfig = {
                 encoding: {

@@ -20,14 +20,14 @@ export default class PersistentAnchors extends AnchorEffect {
     }
 
     setAnchorLayerStyle (layers) {
-        const anchorLayer = layers.filter(l => l.config().groupId === PERSISTENT_ANCHORS)[0];
-        if (anchorLayer) {
+        const anchorLayers = layers.filter(l => l.config().groupId === PERSISTENT_ANCHORS);
+        anchorLayers.forEach((anchor) => {
             // Execute focusStroke interaction of anchor point layer
-            const ids = anchorLayer.data().getUids();
+            const ids = anchor.data().getUids();
             const layerName = this.constructor.formalName();
-            const defaultInteractionLayerEncoding = anchorLayer.config().encoding.interaction;
-            anchorLayer.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
-        }
+            const defaultInteractionLayerEncoding = anchor.config().encoding.interaction;
+            anchor.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+        });
     }
 
     // offset value by which anchor size is changed

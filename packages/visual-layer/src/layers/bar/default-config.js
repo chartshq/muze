@@ -10,27 +10,38 @@ export const defaultConfig = {
                 stroke: 'black',
                 'stroke-width': '1px'
             },
-            strokePosition: 'outside'
-        },
-        fade: {
-            style: {
-                // L +15
-                fill: 'black'
-            }
-        },
-        focus: {
-            style: {
-                // L +15
-                fill: 'black'
-            }
+            strokePosition: 'center'
         },
         focusStroke: {
+            className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
                 'stroke-width': '2px'
+                // fill: 'blue'
+            },
+            strokePosition: 'outside'
+        },
+        brushStroke: {
+            className: 'brush-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+                // fill: 'blue'
             },
             strokePosition: 'outside'
         }
+        // fade: {
+        //     style: {
+        //         // L +15
+        //         fill: 'black'
+        //     }
+        // },
+        // focus: {
+        //     style: {
+        //         // L +15
+        //         fill: 'black'
+        //     }
+        // }
     },
     transform: {
         type: 'stack'
@@ -45,7 +56,13 @@ export const defaultConfig = {
         x: {},
         y: {},
         x0: {},
-        y0: {}
+        y0: {},
+        stroke: {
+            value: '#000'
+        },
+        strokeWidth: {
+            value: '0px'
+        }
     },
     states: {
         highlight: {

@@ -111,7 +111,6 @@ export {
     difference,
     getArrayIndexMap,
     arraysEqual,
-    rgbaToHex,
     transformToHex,
     getReadableTicks
 } from './common-utils';

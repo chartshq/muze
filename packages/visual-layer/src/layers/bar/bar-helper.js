@@ -220,10 +220,14 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             },
             data: d
         }, i, data, context);
+        // const layerEncoding = layerInst.config().encoding;
+
         color = resolvedEncodings.color;
         const { x, y, width, height } = resolvedEncodings;
         const style = {
-            fill: color
+            fill: color,
+            stroke: encoding.stroke.value,
+            'stroke-width': encoding.strokeWidth.value
         };
 
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
