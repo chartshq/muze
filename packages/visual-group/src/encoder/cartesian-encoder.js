@@ -101,12 +101,10 @@ export default class CartesianEncoder extends VisualEncoder {
         const store = context.store();
         const resolver = context.resolver();
         const units = resolver.units();
-        debugger;
         const domains = {
             0: {},
             1: {}
         };
-        const config = context.config();
         const fieldsObj = {
             0: {},
             1: {}

@@ -324,7 +324,6 @@ export const getSortingConfig = (context, currentFieldName, axesConfig) => {
     const dataModel = context.data();
 
     let lastSortConfig = null;
-    debugger;
     if (Object.keys(config.sort).length !== 0) {
         return config.sort[currentFieldName];
     }
