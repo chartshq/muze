@@ -68,41 +68,33 @@
 
     let rootData = new DataModel(data, schema)
 
-    // rootData.sort([
-    //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
-    // ])
+    rootData = rootData.sort([
+        ['Cylinders', 'asc'],
+    ])
+
+    rootData = rootData.sort([
+        ['Origin', 'desc'],
+    ])
+
+    rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
     const canvas = env.canvas();
 
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Horsepower'])
+        .columns(['Origin'])
         .rows(['Acceleration'])
-        // .color({
-        //     field: 'Acceleration', // A measure in color encoding channel creates gradient legend
-        //     // stops: 10,
-        //     // step:true
-        // })
-       .shape('Cylinders')
-        // .detail(['Name'])
-        // .size('Horsepower')
-        .detail(['Maker'])
+        .color('Origin')
+        // .detail(['Maker'])
         .mount('#chart')
         .height(650)
         .width(850)
         .config({
-            legend: {
-                // position : 'bottom',
-                // steps:true
-                text : {
-                    // orientation:'left'
-                }
-            },
-            // sort: {
-            //     Cylinders : 'desc'
-            // }
+            sort: {
+                // Maker : 'asc',
+                Origin: 'asc'
+            }
         })
         .title('Charts');
     });
