@@ -123,7 +123,6 @@ export default class LegendMarker extends GenericSideEffect {
                     .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
-
             textElement.source(payload.criteria[1]);
             textElement.render(this._graphicElements.legendmarkerText.node());
             this._graphicElements.legendmarkerText

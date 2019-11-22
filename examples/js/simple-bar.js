@@ -5,6 +5,20 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
+        data = [{
+            Cylinders: '5',
+            Acceleration: 1
+        }, {
+            Cylinders: '6',
+            Acceleration: 0.4
+        }, {
+            Cylinders: '7',
+            Acceleration: 0.6
+        }, {
+            Cylinders: '9',
+            Acceleration: 0.2
+        }];
+
         const schema = [{
             name: 'Name',
             type: 'dimension'
@@ -29,7 +43,7 @@
         {
             name: 'Weight_in_lbs',
             type: 'measure',
-			numberFormat: (val) => "￡" + val
+			numberFormat: (val) => "ï¿¡" + val
         },
         {
             name: 'Acceleration',
@@ -65,44 +79,12 @@
         .data(rootData)
         // .rows(['maxDays'])
         .columns(['Maker'])
-        .rows(['Displacement'])
-        .color({
-            field: 'Displacement', // A measure in color encoding channel creates gradient legend
-            stops: 10,
-            // step:true
-        })
-    //    .color('Maker')
-        // .detail(['Name'])
-        // .size('Horsepower')
-        .mount('#chart')
-        .height(650)
-        .width(850)
-        .config({
-            legend: {
-                position : 'bottom',
-                // steps:true
-                text : {
-                    // orientation:'left'
-                }
-            }
-        })
-        .title('Charts');
-
-    window.canvas2 = env.canvas()
-        .data(rootData)
-        // .rows(['maxDays'])
         .rows(['Acceleration'])
-        .columns(['Year'])
-        // .detail(['Name'])
-        .mount('#chart2')
-        .height(650)
-        .width(450)
+        .mount('#chart')
+        .height(850)
+        .width(500)
+        .color('Origin')
         .title('Charts');
-
-    muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
-        .registerPropagationBehaviourMap({
-            brush: 'filter'
-        })
     })
 })();
 

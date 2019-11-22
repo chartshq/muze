@@ -1,4 +1,4 @@
-import { makeElement, numberInterpolator, FieldType } from 'muze-utils';
+import { makeElement, FieldType, getReadableTicks } from 'muze-utils';
 
 import {
     SCALE_FUNCTIONS,
@@ -159,9 +159,6 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     const getTickMeasure = scaleParams.smartLabel;
     const { maxWidth, maxHeight } = scaleParams.measures;
     const { alignment } = scaleParams;
-    const domainForLegend = [];
-    const interpolatedFn = numberInterpolator()(domain[0], domain[1]);
-
     // getting tick measure(i.e height and width)
     const tickValue = getTickMeasure.getOriSize(domain[1].toFixed(2));
 
@@ -177,11 +174,7 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     }
     steps = Math.min(steps, recomputeSteps);
 
-    // scaling the axis based on steps provided
-    for (let i = 0; i <= steps; i++) {
-        domainForLegend[i] = interpolatedFn(i / steps);
-    }
-    return domainForLegend;
+    return getReadableTicks(domain, steps);
 };
 
 /**
