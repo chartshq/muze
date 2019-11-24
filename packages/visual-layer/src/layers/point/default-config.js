@@ -94,7 +94,8 @@ export const defaultConfig = {
         },
         interaction: {
             anchors: 'highlight',
-            'persistent-anchors': 'focusStroke'
+            'persistent-anchors': 'focusStroke',
+            'brush-anchors': 'brushStroke'
         }
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],

@@ -50,7 +50,7 @@ d3.json('../../../data/cars.json', (data) => {
     // const makers = ['bmw', 'ford', 'toyota', 'amc'];
     // rootData = rootData.select(fields => makers.indexOf(fields.Maker.value) > -1);
 	
-  	let env = muze();
+	let env = muze();
 	
 	canvas = env.canvas();
     canvas
@@ -62,7 +62,7 @@ d3.json('../../../data/cars.json', (data) => {
 		.color("Origin")
 		.size("Horsepower")
 		.layers([{
-			mark: 'line'
+			mark: 'bar',
 		}])
 		.mount(document.getElementById('chart'));
 })

@@ -1522,16 +1522,25 @@ function hexAToHSL (H) {
 }
 
 const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, apply) => {
-    const [origH, origS, origL, origA] = hexAToHSL(hexColor).code;
-    const sanitizedA = parseFloat(origA, 10);
+    let [origH, origS, origL, origA] = hexAToHSL(hexColor).code;
+    let sanitizedA = parseFloat(origA, 10);
     if (!apply) {
-        h = -h;
-        s = -s;
-        l = -l;
-        a = -a;
+        origH += h;
+        origS += s;
+        origL += l;
+        sanitizedA += a;
+    } else {
+        origH += h;
+        origS += s;
+        origL += l;
+        sanitizedA = Math.min(a || 0, 1);
     }
-    const newHSL = [(origH + h) / 360, (origS + s) / 100, (origL + l) / 100, sanitizedA + a];
-    return hslToHex(...newHSL);
+    // const newHSL = [(origH + h) / 360, (origS + s) / 100, (origL + l) / 100, sanitizedA + a];
+    const newHSL = [origH, origS, origL, sanitizedA];
+
+    const [newH, newS, newL, newA] = newHSL;
+    const finalcolor = { color: `hsla(${newH},${newS}%,${newL}%,${newA})`, hsla: [newH / 360, newS / 100, newL / 100, newA] };
+    return finalcolor;
 };
 
 const getReadableTicks = (domain, steps) => {

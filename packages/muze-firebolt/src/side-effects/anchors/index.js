@@ -85,7 +85,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
 
     setAnchorLayerStyle (layers, payload) {
         const anchorLayers = layers.filter(l => l.config().groupId === 'anchors');
-
         anchorLayers.forEach((anchor) => {
             // Execute focusStroke interaction of anchor point layer
             const data = anchor.data();

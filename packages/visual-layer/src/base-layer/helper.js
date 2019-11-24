@@ -7,7 +7,7 @@ const getLastItemInMap = map => Array.from(map)[map.size - 1];
 
 const getPreviousStyle = (meta, interactionType) => {
     const { originalStyle, currentState } = meta;
-    let stylesForCurrentLevel = originalStyle;
+    let stylesForCurrentLevel = Object.assign({}, originalStyle);
 
     if (currentState.size > 0) {
         interactionType = getLastItemInMap(currentState)[0];
@@ -22,6 +22,7 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
     let datum = elem.data()[0];
     const datumStyle = elem.style(styleType);
     const interactions = context.config().interaction;
+    const strokePosition = interactions[interactionType].strokePosition || 'center';
     const className = interactions[interactionType].className || '';
 
     // Get evaluated value if styleValue is a fn
@@ -60,12 +61,11 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
                 currentState.set(interactionType, {});
             }
 
-            if (styleType === 'stroke-width') {
-                const strokePosition = interactions[interactionType].strokePosition || 'center';
+            // Add className to group
+            elem.classed(className || '', true);
 
+            if (styleType === 'stroke-width') {
                 if (strokePosition === 'center') {
-                    // Add className to group
-                    elem.classed(className || '', true);
                     return styleValue;
                 }
 
@@ -89,8 +89,6 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
                 mountPoint
             );
 
-            // Add className to group
-            elem.classed(className || '', true);
             return styleValue;
         }
 
@@ -103,6 +101,9 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
         context.removeOverlayPath(datum, stylesForCurrentLevel);
         elem.classed(className || '', false);
 
+        if (styleType === 'stroke-width') {
+            return 0;
+        }
         return stylesForCurrentLevel[styleType];
     });
 };

@@ -1,4 +1,5 @@
 import { CLASSPREFIX } from '../../enums/constants';
+import { transformColor } from 'muze-utils';
 
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,
@@ -9,6 +10,7 @@ export const defaultConfig = {
             style: {
                 stroke: 'black',
                 'stroke-width': '1px'
+                // fill: 'red'
             },
             strokePosition: 'center'
         },
@@ -26,7 +28,6 @@ export const defaultConfig = {
             style: {
                 stroke: 'black',
                 'stroke-width': '1px'
-                // fill: 'blue'
             },
             strokePosition: 'outside'
         }
@@ -36,6 +37,14 @@ export const defaultConfig = {
         //         fill: 'black'
         //     }
         // },
+        // fade: {
+        //     style: {
+        //         fill: (hexColor, data, apply) => transformColor(hexColor, {
+        //             l: +15
+        //             // a: +0.5
+        //         }, data, apply).color
+        //     }
+        // }
         // focus: {
         //     style: {
         //         // L +15

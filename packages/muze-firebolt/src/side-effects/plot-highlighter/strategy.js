@@ -1,12 +1,13 @@
 import { getFormattedSet } from './helper';
 
 const fadeFn = (set, context) => {
+    const { formattedSet } = set;
     const {
         mergedEnter,
         mergedExit,
         exitSet,
         completeSet
-    } = set;
+    } = formattedSet;
 
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, {}, 'fade', false);
@@ -17,12 +18,13 @@ const fadeFn = (set, context) => {
 };
 
 const fadeOnBrushFn = (set, context) => {
+    const { formattedSet } = set;
     const {
         mergedEnter,
         mergedExit,
         exitSet,
         completeSet
-    } = set;
+    } = formattedSet;
 
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, {}, 'fade', false);
@@ -40,11 +42,13 @@ export const strategies = {
     fade: fadeFn,
     fadeOnBrush: fadeOnBrushFn,
     focus: (set, context) => {
+        const { formattedSet } = set;
         const {
             mergedEnter,
             mergedExit,
             completeSet
-        } = set;
+        } = formattedSet;
+
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'focus', false);
             context.applyInteractionStyle(completeSet, {}, 'focusStroke', false);
@@ -57,12 +61,12 @@ export const strategies = {
         }
     },
     highlight: (set, context, payload, excludeSetIds) => {
+        const { selectionSet, formattedSet } = set;
         const {
             mergedEnter,
             mergedExit,
-            exitSet,
             completeSet
-        } = set;
+        } = formattedSet;
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'highlight', false);
@@ -71,22 +75,23 @@ export const strategies = {
 
             layers.forEach((layer) => {
                 // get uids of only the currently highlighted point
-                const formattedSet = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
+                const actualPoint = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
                     mergedEnter;
                 // get uids of only the currently highlighted point excluding the excludeSet ids
-                const currentHighlightedSet = getFormattedSet(formattedSet, excludeSetIds);
+                const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
 
                 context.applyInteractionStyle(currentHighlightedSet, {}, 'highlight', true, payload);
-                context.applyInteractionStyle(exitSet, {}, 'highlight', false);
+                context.applyInteractionStyle(selectionSet.exitSet[1], {}, 'highlight', false);
             });
         }
     },
     areaFocus: (set, context) => {
+        const { formattedSet } = set;
         const {
             mergedEnter,
             mergedExit,
             completeSet
-        } = set;
+        } = formattedSet;
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'focus', false);
             context.applyInteractionStyle(completeSet, {}, 'focusStroke', false);
@@ -99,12 +104,13 @@ export const strategies = {
         }
     },
     areaFade: (set, context) => {
+        const { formattedSet } = set;
         const {
             mergedEnter,
             mergedExit,
             exitSet,
             completeSet
-        } = set;
+        } = formattedSet;
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, {}, 'fade', false);

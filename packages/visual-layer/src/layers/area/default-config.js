@@ -1,4 +1,5 @@
 import { CLASSPREFIX, STACK } from '../../enums/constants';
+import { transformColor } from 'muze-utils';
 
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,
@@ -9,16 +10,17 @@ export const defaultConfig = {
         type: STACK
     },
     interaction: {
-        focus: {
-            style: {
-                // A -0.5
-                fill: 'black'
-            }
-        },
+        // focus: {
+        //     style: {
+        //         // A -0.5
+        //         fill: 'black'
+        //     }
+        // },
         fade: {
             style: {
-                // A -0.5
-                fill: 'black'
+                fill: (hexColor, data, apply) => transformColor(hexColor, {
+                    a: -0.5
+                }, data, apply).color
             }
         }
     },
