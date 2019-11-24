@@ -333,7 +333,9 @@ export const getSortingConfig = (context, currentFieldName, axesConfig) => {
     while (lastSortConfig = operations.pop()) {
         if (lastSortConfig.op === 'sort') break;
     }
-    if (lastSortConfig.criteria.length && lastSortConfig.criteria[0][0] === currentFieldName) {
+    if (lastSortConfig &&
+        lastSortConfig.criteria.length &&
+        lastSortConfig.criteria[0][0] === currentFieldName) {
         return lastSortConfig.criteria[0][1];
     }
     return axesConfig().defaultSort;

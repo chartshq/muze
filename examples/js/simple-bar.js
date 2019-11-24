@@ -68,15 +68,15 @@
 
     let rootData = new DataModel(data, schema)
 
-    rootData = rootData.sort([
-        ['Cylinders', 'asc'],
-    ])
+    // rootData = rootData.sort([
+    //     ['Cylinders', 'asc'],
+    // ])
 
-    rootData = rootData.sort([
-        ['Origin', 'desc'],
-    ])
+    // rootData = rootData.sort([
+    //     ['Origin', 'desc'],
+    // ])
 
-    rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
+    // rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
     const canvas = env.canvas();
 
@@ -90,12 +90,12 @@
         .mount('#chart')
         .height(650)
         .width(850)
-        .config({
-            sort: {
-                // Maker : 'asc',
-                Origin: 'asc'
-            }
-        })
+        // .config({
+        //     sort: {
+        //         // Maker : 'asc',
+        //         Origin: 'asc'
+        //     }
+        // })
         .title('Charts');
     });
 })();
