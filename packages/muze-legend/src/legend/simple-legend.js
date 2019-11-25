@@ -278,10 +278,6 @@ export default class SimpleLegend {
             position
         } = this.config();
         const {
-            maxWidth,
-            maxHeight,
-            width,
-            height,
             border,
             marginHorizontal
         } = this.measurement();
