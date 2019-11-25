@@ -8,7 +8,6 @@ import {
     VALUE,
     RECT,
     LEFT,
-    RIGHT,
     DEFAULTICONSIZE,
     VERTICAL_BUFFER,
     HORIZONTAL_BUFFER,
@@ -16,7 +15,8 @@ import {
     VERTICAL,
     DEFAULT,
     TOP,
-    BOTTOM
+    BOTTOM,
+    OPPOSITE_POSITION
 } from '../enums/constants';
 
 /**
@@ -97,9 +97,7 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     }
 
     legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
-
-    legendBody.style(WIDTH, `${gradWidth}px`);
-    legendBody.style(HEIGHT, `${gradHeight}px`);
+    legendBody = legendBody.style('display', 'inline-block;');
 
     const legendItem = getItemContainers(legendBody, data, context);
     return { legendItem };
@@ -314,11 +312,12 @@ export const renderDiscreteItem = (context, container) => {
 
     labelManager.setStyle(context._computedStyle);
     const dataArr = context.metaData();
+    const position = OPPOSITE_POSITION[textOrientation] || LEFT;
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
-            .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px')
-            .style('margin-left', `${align === HORIZONTAL ? marginHorizontalBuffer : marginVerticalBuffer}px`);
+            .style(`padding-${position}`, '0px')
+            .style(`margin-${position}`, `${align === HORIZONTAL ? marginHorizontalBuffer : marginVerticalBuffer}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
