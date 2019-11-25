@@ -706,5 +706,8 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return [`${layerNs[1]}.${PROPS.DATA}`, ...['x', 'y', 'radius'].map(type =>
             `${groupNs}.domain.${type}`)];
     }
-};
 
+    getBoundBoxes () {
+        return null;
+    }
+};

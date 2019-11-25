@@ -1,4 +1,4 @@
-import { FieldType, intersect } from 'muze-utils';
+import { FieldType, intersect, isSimpleObject } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
 import { isSideEffectEnabled, sanitizePayloadCriteria } from './helper';
@@ -102,7 +102,8 @@ export default class UnitFireBolt extends Firebolt {
                 payload: propPayload
             } = config;
 
-            const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+            const payloadFn = isSimpleObject(config.payload.criteria) ?
+                payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
             const payload = payloadFn(this, propagationData, config, context.facetByFields());
             const behaviourPolicies = this._behaviourPolicies;
             const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
@@ -179,5 +180,9 @@ export default class UnitFireBolt extends Firebolt {
 
     sourceCanvas () {
         return this.context.parentAlias();
+    }
+
+    getLayers () {
+        return this.context.layers();
     }
 }
