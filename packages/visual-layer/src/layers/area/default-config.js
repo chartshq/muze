@@ -18,6 +18,11 @@ export const defaultConfig = {
             style: {
                 'fill-opacity': 0.7
             }
+        },
+        brushStroke: {
+            style: {
+                'fill-opacity': 0.7
+            }
         }
     },
     crossline: true,

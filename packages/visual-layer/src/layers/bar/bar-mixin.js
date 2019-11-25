@@ -263,6 +263,12 @@ export const BarLayerMixin = superclass => class extends superclass {
             currentPath.node().removeAttribute('style');
             Object.keys(style).forEach(s => currentPath.style(s, style[s]));
             currentPath.style('fill-opacity', 0);
+
+            // Apply the path shape get the correct path position
+            currentPath.attr('d', d => `M ${d.update.x} ${d.update.y}
+            L ${d.update.x + d.update.width} ${d.update.y}
+            L ${d.update.x + d.update.width} ${d.update.y + d.update.height}
+            L${d.update.x} ${d.update.y + d.update.height} Z`);
         }
     }
 };

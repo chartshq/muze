@@ -23,6 +23,13 @@ export const defaultConfig = {
                     a: -0.5
                 }, data, apply).color
             }
+        },
+        brushStroke: {
+            style: {
+                stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
+            }
         }
     },
     crossline: true,

@@ -77,30 +77,30 @@ export const AreaLayerMixin = superclass => class extends superclass {
 
         searchRadius = searchRadius !== undefined ? searchRadius : this.config().nearestPointThreshold;
         let point = this._voronoi.find(x, y, searchRadius);
-        let c = 1e10;
-        let index = -1;
+        let index;
         let nearestPoint = null;
 
         if (!point && config.dimValue && this._pointMap) {
-            point = this._pointMap[config.dimValue[1]];
+            const pointArr = this._pointMap[config.dimValue[1]];
 
-            point.forEach((p, i) => {
-                const dis = Math.abs(p.update.y - y);
-                if (dis < c) {
-                    c = dis;
+            pointArr.forEach((p, i) => {
+                const { y: pointY, y0: pointY0 } = p.update;
+                if ((pointY < y && y < pointY0)) {
                     index = i;
                     nearestPoint = p;
                 }
             });
 
-            point = {
-                index,
-                data: {
-                    x,
-                    y,
-                    data: nearestPoint
-                }
-            };
+            if (index) {
+                point = {
+                    index,
+                    data: {
+                        x,
+                        y,
+                        data: nearestPoint
+                    }
+                };
+            }
         }
 
         const dimensions = getObjProp(point, 'data', 'data', 'update');
@@ -213,4 +213,3 @@ export const AreaLayerMixin = superclass => class extends superclass {
         };
     }
 };
-

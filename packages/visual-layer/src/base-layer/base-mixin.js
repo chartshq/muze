@@ -27,7 +27,7 @@ import {
 import { localOptions } from './local-options';
 import { listenerMap } from './listener-map';
 import { BASE_LAYER } from '../enums/constants';
-import { interactionFn } from './helper';
+import { applyStylesOnInteraction } from './helper';
 
 const layerNs = [STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE];
 const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
@@ -368,15 +368,17 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    applyInteractionStyle (interactionType, selectionSet, apply, styles) {
+    applyInteractionStyle (interactionType, selectionSet, options) {
         const interactionConfig = this.config().interaction || {};
+        const { apply, styles, reset } = options;
 
         let interactionStyles = interactionConfig[interactionType];
         interactionStyles = styles || interactionStyles;
         if (interactionStyles) {
             applyInteractionStyle(this, selectionSet, interactionStyles, {
                 apply,
-                interactionType
+                interactionType,
+                reset
             });
         }
     }
@@ -435,7 +437,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
     }
 
     getInteractionStyles () {
-        return interactionFn;
+        return applyStylesOnInteraction;
     }
 
     addOverlayPath () {
@@ -446,9 +448,9 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    applyLayerStyle (styleType, { elem, apply, interactionType, styleValue, mountPoint }) {
-        const interactionFunction = this.getInteractionStyles();
-        return interactionFunction(this, elem, apply, interactionType, styleValue, styleType, mountPoint);
+    applyLayerStyle (elem, interactionType, style, options) {
+        const interactionFn = this.getInteractionStyles();
+        return interactionFn(this, elem, interactionType, style, options);
     }
 
     getIdentifiersFromData (data, rowId) {

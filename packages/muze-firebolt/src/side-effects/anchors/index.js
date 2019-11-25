@@ -98,9 +98,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
             }, payload.target).uids : [];
 
             if (!formattedUids.length) {
-                anchor.applyInteractionStyle(currentInteraction, ids, false);
+                anchor.applyInteractionStyle(currentInteraction, ids, { apply: false });
             } else {
-                anchor.applyInteractionStyle(currentInteraction, formattedUids, true);
+                anchor.applyInteractionStyle(currentInteraction, formattedUids, { apply: true });
             }
         });
         return true;
@@ -151,7 +151,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
     }
 
     apply (selectionSet, payload) {
-        // this.addAnchorLayers(payload.action);
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;

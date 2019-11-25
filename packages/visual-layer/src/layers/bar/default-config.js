@@ -25,7 +25,14 @@ export const defaultConfig = {
             className: 'brush-stroke-class',
             style: {
                 stroke: 'black',
-                'stroke-width': (val, data, apply, dragEnd) => dragEnd ? '2px' : '1px'
+                'stroke-width': '1px'
+            },
+            strokePosition: 'outside'
+        },
+        doubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
             },
             strokePosition: 'outside'
         },

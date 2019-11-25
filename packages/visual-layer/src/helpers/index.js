@@ -30,23 +30,16 @@ export const transformColor = (colorAxis, datum, styleType, intensity, interacti
 
 export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
-    // const axes = context.axes();
-    // const colorAxis = axes.color;
-    const apply = config.apply;
-    const interactionType = config.interactionType;
-    const pathMountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
+    const { apply, interactionType, reset } = config;
+    const mountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
 
     elements.forEach((elem) => {
         const interactionStylesEntries = Object.entries(interactionStyles.style);
 
-        for (const [styleType, styleValue] of interactionStylesEntries) {
-            context.applyLayerStyle(styleType, {
-                elem,
-                apply,
-                interactionType,
-                styleValue,
-                mountPoint: pathMountPoint
-            });
+        for (const [type, value] of interactionStylesEntries) {
+            const style = { type, value };
+            const options = { mountPoint, apply, reset };
+            context.applyLayerStyle(elem, interactionType, style, options);
         }
     });
 };

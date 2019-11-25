@@ -1,8 +1,3 @@
-// import {
-//     transformToHex,
-//     detectColor
-// } from 'muze-utils';
-
 const getLastItemInMap = map => Array.from(map)[map.size - 1];
 
 const getPreviousStyle = (meta, interactionType) => {
@@ -18,34 +13,29 @@ const getPreviousStyle = (meta, interactionType) => {
     return stylesForCurrentLevel;
 };
 
-export const interactionFn = (context, elem, apply, interactionType, styleValue, styleType, mountPoint) => {
+export const applyStylesOnInteraction = (context, elem, interactionType, style, options) => {
+    let { type, value } = style;
+    const { mountPoint, apply, reset } = options;
+
     let datum = elem.data()[0];
-    const datumStyle = elem.style(styleType);
+    const datumStyle = elem.style(type);
     const interactions = context.config().interaction;
-    // const strokePosition = interactions[interactionType].strokePosition || 'center';
     const className = interactions[interactionType].className || '';
 
     // Get evaluated value if styleValue is a fn
-    if (typeof styleValue === 'function') {
+    if (typeof value === 'function') {
         if (isNaN(datumStyle)) {
             // const colorType = detectColor(datumStyle);
             const rgbaValues = datumStyle.replace(/[^\d,.]/g, '').split(',').map(s => Number(s));
-
-            // const colorHexCode = transformToHex(datumStyle, colorType);
-            // let sanitizedVal = datumStyle;
-
-            // if (colorHexCode) {
-            //     sanitizedVal = colorHexCode;
-            // }
-            styleValue = styleValue(rgbaValues, datum, apply);
+            value = value(rgbaValues, datum, apply);
         } else {
             const numValue = parseFloat(datumStyle, 10);
-            styleValue = styleValue(numValue, datum, apply);
+            value = value(numValue, datum, apply);
         }
     }
 
     // Apply style on the path elem and the border
-    elem.style(styleType, (d, i) => {
+    elem.style(type, (d, i) => {
         if (Array.isArray(d)) {
             datum = d[i];
         } else {
@@ -60,7 +50,7 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
             const lastInteractionVal = currentState.get(interactionType);
 
             // apply interaction styles
-            lastInteractionVal[styleType] = styleValue;
+            lastInteractionVal[type] = value;
 
             // Add to last evaluated style list
             if (!currentState.get(interactionType)) {
@@ -70,12 +60,12 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
             // Add className to group
             elem.classed(className || '', true);
 
-            if (styleType === 'stroke-width') {
+            if (type === 'stroke-width') {
                 // Apply stroke only to path and return 0 for the element's strokeWidth
                 context.addOverlayPath(
                     elem.node(),
                     datum,
-                    { type: styleType, value: styleValue },
+                    { type, value },
                     interactionType,
                     mountPoint
                 );
@@ -86,30 +76,31 @@ export const interactionFn = (context, elem, apply, interactionType, styleValue,
             context.addOverlayPath(
                 elem.node(),
                 datum,
-                { type: styleType, value: styleValue },
+                { type, value },
                 interactionType,
                 mountPoint
             );
 
-            return styleValue;
+            if (reset) {
+                // remove interaction styles
+                // const lastKey = Array.from(currentState.keys())[currentState.size - 1];
+                // currentState.delete(lastKey);
+                currentState.clear();
+            }
+
+            return value;
         }
 
-        // const lastKey = Array.from(currentState.keys())[currentState.size - 1];
-        // const lastVal = currentState.get(lastKey);
-        // currentState.delete(lastKey);
-        // remove interaction styles
-        if (currentState.get(interactionType)) {
-            currentState.delete(interactionType);
-        }
+        currentState.delete(interactionType);
 
         const stylesForCurrentLevel = getPreviousStyle(datum.meta, interactionType);
         context.removeOverlayPath(datum, stylesForCurrentLevel);
         elem.classed(className || '', false);
 
-        if (styleType === 'stroke-width') {
+        if (type === 'stroke-width') {
             return 0;
         }
         const finalStyles = Object.assign({}, originalStyle, stylesForCurrentLevel);
-        return finalStyles[styleType];
+        return finalStyles[type];
     });
 };
