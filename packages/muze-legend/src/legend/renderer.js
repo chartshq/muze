@@ -97,7 +97,6 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     }
 
     legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
-    legendBody = legendBody.style('display', 'inline-block;');
 
     const legendItem = getItemContainers(legendBody, data, context);
     return { legendItem };

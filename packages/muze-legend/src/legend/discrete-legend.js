@@ -110,7 +110,7 @@ export default class DiscreteLegend extends SimpleLegend {
         renderDiscreteItem(this, itemSkeleton);
 
         legendContainer.selectAll('div')
-        .filter((a, b, c) => !c[b].classList.contains(`${classPrefix}-legend-body`))
+        .filter((datum, i, allSelections) => !allSelections[i].classList.contains(`${classPrefix}-legend-body`))
         .style('float', LEFT);
 
         firebolt.mapActionsAndBehaviour();
