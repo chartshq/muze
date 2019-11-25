@@ -298,11 +298,13 @@ export const BaseLayerMixin = superclass => class extends superclass {
         }, {});
         const measures = Object.keys(this.data().getFieldspace().getMeasure());
 
-        const filterFn = (fields) => {
+        const filterFn = (fields, i) => {
             const row = `${targetFields.map((field) => {
                 let val;
                 if (field === ReservedFields.MEASURE_NAMES) {
                     val = measures;
+                } else if (field === ReservedFields.ROW_ID) {
+                    val = i;
                 } else {
                     const currentField = fields[field];
                     const isFieldInvalid = currentField instanceof InvalidAwareTypes;

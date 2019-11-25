@@ -37,6 +37,7 @@ export const defaultConfig = {
     tickFormat: null,
     tickValues: null,
     xOffset: 0,
-    yOffset: 0
+    yOffset: 0,
+    defaultSort: 'asc'
 };
 

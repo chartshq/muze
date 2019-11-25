@@ -318,3 +318,25 @@ export const resolveAxisConfig = (context, fieldInf, axisInfo) => {
         });
     });
 };
+
+export const getSortingConfig = (context, currentFieldName, axesConfig) => {
+    const config = context.config();
+    const dataModel = context.data();
+
+    let lastSortConfig = null;
+    if (Object.keys(config.sort).length !== 0) {
+        return config.sort[currentFieldName];
+    }
+
+    const operations = [...dataModel.getAncestorDerivations(), ...dataModel.getDerivations()];
+
+    while (lastSortConfig = operations.pop()) {
+        if (lastSortConfig.op === 'sort') break;
+    }
+    if (lastSortConfig &&
+        lastSortConfig.criteria.length &&
+        lastSortConfig.criteria[0][0] === currentFieldName) {
+        return lastSortConfig.criteria[0][1];
+    }
+    return axesConfig().defaultSort;
+};

@@ -3,7 +3,9 @@ import {
     hasTouch,
     selectElement,
     isSimpleObject,
-    getDataModelFromRange
+    getDataModelFromRange,
+    ReservedFields,
+    FieldType
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -20,16 +22,23 @@ import {
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
         const data = firebolt.data();
-        const dimensionsMap = firebolt._dimensionsMap;
-        const dimArr = firebolt._dimensionsSet;
+        const { dimensionsMap, dimensions: dimArr } = firebolt._metaData;
 
         let values = [];
         if (isSimpleObject(criteria)) {
             const dm = getDataModelFromRange(data, criteria);
-            const fieldsConfig = dm.getFieldsConfig();
-            dm.getData().data.forEach((row) => {
+            const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
+                [ReservedFields.ROW_ID]: {
+                    index: Object.keys(dm.getFieldsConfig()).length,
+                    def: {
+                        name: ReservedFields.ROW_ID,
+                        type: FieldType.DIMENSION
+                    }
+                }
+            });
+            dm.getData({ withUid: true }).data.forEach((row) => {
                 const dimKey = `${dimArr.map(d => row[fieldsConfig[d].index])}`;
-                const measures = dimensionsMap[dimKey] || [[]];
+                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[dimKey] || [[]];
                 measures.forEach((measureArr) => {
                     values.push(`${[dimKey, ...measureArr]}`);
                 });
@@ -193,6 +202,7 @@ export default class Firebolt {
     }
 
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
+        payload = this.sanitizePayload(payload);
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
         const behaviouralActions = this._actions.behavioural;
         const action = behaviouralActions[behaviour];
@@ -538,5 +548,9 @@ export default class Firebolt {
 
     getRangeFromIdentifiers (...params) {
         return this.context.getRangeFromIdentifiers(...params);
+    }
+
+    sanitizePayload (payload) {
+        return payload;
     }
 }
