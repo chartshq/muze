@@ -125,6 +125,7 @@ export const AreaLayerMixin = superclass => class extends superclass {
                 },
                 source: d.source,
                 rowId: d.rowId,
+                data: d.dataObj,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
                 style,
                 meta: getColorMetaInf(style, colorAxis)

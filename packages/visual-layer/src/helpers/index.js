@@ -198,7 +198,9 @@ export const dataNormalizers = {
             x0FieldIndex,
             y0FieldIndex
         } = encodingFieldInf;
-        const fieldsLen = Object.keys(fieldsConfig).length;
+        const fieldsArr = Object.keys(fieldsConfig);
+        const fieldsLen = fieldsArr.length;
+
         /**
          * Returns normalized data from transformed data. It recursively traverses through
          * the transformed data if there it is nested.
@@ -251,6 +253,11 @@ export const dataNormalizers = {
                         pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
                     });
                 }
+                const source = pointObj.source;
+                pointObj.dataObj = fieldsArr.reduce((acc, name) => {
+                    acc[name] = source[fieldsConfig[name].index];
+                    return acc;
+                }, {});
                 return pointObj;
             });
         }).filter(d => d.length);
@@ -606,3 +613,15 @@ export const sortData = (data, axes) => {
     }
     return data;
 };
+
+export const getBoundBoxes = points => points.map((point) => {
+    const { x, y } = point.update;
+    const data = point.data;
+    return {
+        minX: x,
+        maxX: x,
+        minY: y,
+        maxY: y,
+        data
+    };
+});

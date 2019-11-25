@@ -17,14 +17,20 @@ export const addFacetDataAndMeasureNames = (data, facetData, measureNames) => {
         });
     }
     const criteriaFields = data[0];
-    const fieldsWithFacets = [...facets, ...criteriaFields];
+    const hasMeasureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
+    const fieldsWithFacets = [...facets, ...criteriaFields,
+        ...(hasMeasureNameField ? [] : [ReservedFields.MEASURE_NAMES])];
 
     const dataWithFacets = [
         fieldsWithFacets
     ];
 
     for (let i = 1, len = data.length; i < len; i++) {
-        const row = [...facetVals, ...data[i]];
+        let measureNameArr = [];
+        if (!hasMeasureNameField && measureNames) {
+            measureNameArr = measureNames;
+        }
+        const row = [...facetVals, ...data[i], ...measureNameArr];
         dataWithFacets.push(row);
     }
     return dataWithFacets;
@@ -87,6 +93,52 @@ const isDimension = fields => fields.some(field => field.type() === FieldType.DI
 
 export const isCrosstab = (fields) => {
     const { rowFacets, colFacets, rowProjections, colProjections } = fields;
-    return rowFacets.length || colFacets.length || isDimension(rowProjections.flat()) ||
-        isDimension(colProjections.flat());
+    if (rowFacets.length || colFacets.length) {
+        return true;
+    }
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if ((isDimension(colProj) || isDimension(rowProj)) && (colProj.length > 1 || rowProj.length > 1)) {
+        return true;
+    }
+    return false;
 };
+
+export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
+    const groupFields = firebolt.context.composition().visualGroup.resolver().getAllFields();
+    if (isCrosstab(groupFields)) {
+        const { x, y } = unit.fields();
+        let measureFields;
+
+        if (x[0].type() === FieldType.MEASURE) {
+            measureFields = [`${x[0]}`];
+        } else if (y[0].type() === FieldType.MEASURE) {
+            measureFields = [`${y[0]}`];
+        }
+        payload.selectedMeasures = measureFields;
+    }
+};
+
+// export const unionIdentifiers = (identifiers) => {
+//     let unionedIdentifiers = null;
+//     let fields = [];
+
+//     identifiers.forEach((identifierArr) => {
+//         if (identifierArr) {
+//             const values = identifierArr.identifiers.slice(1, identifierArr.identifiers.length);
+
+//             unionedIdentifiers = [...unionedIdentifiers || [], ...values];
+//             fields = identifierArr.fields;
+//         }
+//     });
+
+//     if (unionedIdentifiers !== null) {
+//         unionedIdentifiers = {
+//             identifiers: [fields.map(d => d.name), ...unionedIdentifiers],
+//             fields
+//         };
+//     }
+
+//     return unionedIdentifiers;
+// };

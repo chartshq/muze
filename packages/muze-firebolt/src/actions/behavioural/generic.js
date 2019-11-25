@@ -1,4 +1,10 @@
-import { isSimpleObject, DimensionSubtype, partition, ReservedFields } from 'muze-utils';
+import {
+    isSimpleObject,
+    DimensionSubtype,
+    partition,
+    ReservedFields,
+    retrieveNearestGroupByReducers
+} from 'muze-utils';
 import { getMergedSet, getSourceFields } from '../../helper';
 
 export const getIdentifiersFromSet = (set, context, { fields }) => {
@@ -43,6 +49,7 @@ export default class GenericBehaviour {
             model: filteredDataModel,
             uids
         } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
+        this._payload = payload;
 
         selectionSets.forEach((selectionSet) => {
             this.setSelectionSet(uids, selectionSet, {
@@ -117,12 +124,14 @@ export default class GenericBehaviour {
             }
             model = filteredDataModel || null;
         }
+        const aggFns = retrieveNearestGroupByReducers(model);
 
         return {
             uids: set,
             length: set.length,
             model,
-            fields: setFields
+            fields: setFields,
+            aggFns
         };
     }
 

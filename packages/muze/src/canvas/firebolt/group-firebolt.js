@@ -2,7 +2,8 @@ import {
     FieldType,
     mergeRecursive,
     CommonProps,
-    ReservedFields
+    ReservedFields,
+    isSimpleObject
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 import {
@@ -14,7 +15,7 @@ import {
 import { TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
 import { applyInteractionPolicy } from '../helper';
-import { propagateValues, addFacetDataAndMeasureNames, isCrosstab } from './helper';
+import { propagateValues, addFacetDataAndMeasureNames, isCrosstab, addSelectedMeasuresInPayload } from './helper';
 import { COMMON_INTERACTION } from '../../constants';
 
 const setSideEffectConfig = (firebolt) => {
@@ -193,7 +194,9 @@ export default class GroupFireBolt extends Firebolt {
         if (mode !== COMMON_INTERACTION) {
             return this;
         }
-        const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+        const criteria = config.payload.criteria;
+        const payloadFn = isSimpleObject(criteria) ?
+            payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
         const payload = payloadFn(this, propagationData, config);
 
         const behaviourPolicies = this._behaviourPolicies;
@@ -237,6 +240,11 @@ export default class GroupFireBolt extends Firebolt {
                     }
                 });
             });
+
+            if (propPayload.sourceUnit) {
+                addSelectedMeasuresInPayload(this, unit, payload);
+            }
+
             this.dispatchBehaviour(action, payload, propagationInf);
         }
 
@@ -294,14 +302,16 @@ export default class GroupFireBolt extends Firebolt {
                 targetFirebolt = this;
             }
 
+            const actions = targetFirebolt._actions.behavioural;
             payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
                 unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
+
             targetFirebolt.dispatchBehaviour(action, payload, {
                 propagate: false,
                 applySideEffect: false
             });
 
-            const identifiers = targetFirebolt._actions.behavioural[action].propagationIdentifiers();
+            const identifiers = actions[action].propagationIdentifiers();
 
             this.propagate(action, payload, identifiers, {
                 sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),

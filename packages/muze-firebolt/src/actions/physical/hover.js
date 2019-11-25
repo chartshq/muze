@@ -26,6 +26,7 @@ import { getClientPoint, getEvent } from 'muze-utils';
             position: pos,
             mode
         };
+
         firebolt.triggerPhysicalAction('hover', payload);
         event.stopPropagation();
     };
