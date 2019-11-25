@@ -155,8 +155,6 @@ export default class GradientLegend extends SimpleLegend {
         firebolt.mapSideEffects({
             [HIGHLIGHT]: [Marker]
         });
-
-        firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
 

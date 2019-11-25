@@ -500,22 +500,22 @@ const transformDataModel = (dataModel, config, resolver) => {
         resolvedData.dispose();
     }
 
-    groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
+    const fields = getFieldsFromSuppliedLayers(suppliedLayers).filter(field =>
+        getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+    const allFields = extractFields(facetsAndProjections, fields);
+
+    groupedModel = dataModel.project(allFields);
     resolver.data(groupedModel);
     if (!groupBy.disabled) {
         const newFieldsConfig = groupedModel.getFieldsConfig();
-        const fields = getFieldsFromSuppliedLayers(suppliedLayers).filter(field =>
-            getObjProp(newFieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
-        const allFields = extractFields(facetsAndProjections, fields);
         const dimensions = allFields.filter(field =>
-            getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+            getObjProp(newFieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
         const aggregationFns = groupBy.measures;
         const measureNames = Object.keys(groupedModel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(groupedModel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
 
-        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns)
-                                            .project(allFields);
+        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns);
     }
     // sort temporal fields if any in the given rows and columns
     groupedModel = sortDmTemporalFields(resolver, groupedModel);

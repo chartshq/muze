@@ -14,7 +14,8 @@ import {
     getIndex,
     getLayerConfFromFields,
     getAdjustedDomain,
-    sanitizeIndividualLayerConfig
+    sanitizeIndividualLayerConfig,
+    getSortingConfig
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
@@ -104,7 +105,6 @@ export default class CartesianEncoder extends VisualEncoder {
             0: {},
             1: {}
         };
-        const config = context.config();
         const fieldsObj = {
             0: {},
             1: {}
@@ -157,8 +157,7 @@ export default class CartesianEncoder extends VisualEncoder {
                     only if sorted by user */
                     key = !axisType ? `0${idx}0` : `${idx}00`;
                     const currentFieldName = fieldsObj[axisType][key].oneVar();
-                    const sortingOrder = config.sort && config.sort[currentFieldName];
-
+                    const sortingOrder = getSortingConfig(context, currentFieldName, axes[0].config);
                     if (sortingOrder) {
                         domains[axisType][key].sort((a, b) => sortCategoricalField(sortingOrder, a, b));
                     }

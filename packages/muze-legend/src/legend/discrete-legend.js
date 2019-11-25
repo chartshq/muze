@@ -87,7 +87,7 @@ export default class DiscreteLegend extends SimpleLegend {
         }).filter(d => d.value !== null);
 
         domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
-            : domainForLegend;
+            : domainForLegend.sort((a, b) => a.value.localeCompare(b.value));
         return domainForLegend;
     }
 
