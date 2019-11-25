@@ -158,17 +158,20 @@ export default class Firebolt {
         sideEffects.forEach((sideEffect) => {
             const effects = sideEffect.effects;
             const behaviours = sideEffect.behaviours;
-            const combinedSet = this.mergeSelectionSets(behaviours);
+            let combinedSet = this.mergeSelectionSets(behaviours);
             effects.forEach((effect) => {
-                let options;
+                let options = {};
                 let name;
                 if (typeof effect === 'object') {
                     name = effect.name;
-                    options = effect.options;
+                    options = effect.options || {};
                 } else {
                     name = effect;
                 }
-
+                const set = options.set;
+                if (set) {
+                    combinedSet = this.mergeSelectionSets(set);
+                }
                 const sideEffectInstance = sideEffectStore[name];
                 if (sideEffectInstance && sideEffectInstance.isEnabled()) {
                     if (!sideEffectInstance.constructor.mutates() &&
@@ -189,11 +192,9 @@ export default class Firebolt {
     dispatchSideEffect (name, selectionSet, payload, options = {}) {
         const sideEffectStore = this.sideEffects();
         const sideEffect = sideEffectStore[name];
-        let disable = false;
-        if (options.filter && options.filter(sideEffect)) {
-            disable = true;
-        }
-        !disable && sideEffectStore[name].apply(selectionSet, payload, options);
+        const { setTransform } = options;
+        selectionSet = setTransform ? setTransform(selectionSet, payload, this) : selectionSet;
+        sideEffect.apply(selectionSet, payload, options);
     }
 
     registerPropagationBehaviourMap (map) {

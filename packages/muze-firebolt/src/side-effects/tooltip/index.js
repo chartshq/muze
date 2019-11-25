@@ -65,9 +65,9 @@ export default class Tooltip extends SpawnableSideEffect {
     }
 
     apply (selectionSet, payload, options = {}) {
-        const dataModel = selectionSet.mergedEnter.model;
+        const dataModel = selectionSet && selectionSet.mergedEnter.model;
 
-        if ((payload.criteria === null || (dataModel && dataModel.isEmpty()))) {
+        if ((payload.criteria === null || (dataModel && dataModel.isEmpty())) || selectionSet === null) {
             this.hide(options, null);
             return this;
         }
@@ -94,7 +94,9 @@ export default class Tooltip extends SpawnableSideEffect {
             if ({}.hasOwnProperty.call(tooltips, key)) {
                 const strategy = options.strategy || this._strategy;
                 tooltips[key].content(strategy, null);
-                tooltips[key].hide();
+                if (!Object.keys(tooltips[key]._contents).length) {
+                    tooltips[key].hide();
+                }
             }
         }
     }

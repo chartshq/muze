@@ -12,7 +12,8 @@ import { defaultConfig } from './default-config';
 import {
     attachDataToVoronoi,
     getPlotMeasurement,
-    getMarkId
+    getMarkId,
+    getBoundBoxes
 } from '../../helpers';
 import './styles.scss';
 import { pointTranslators, interactionStyleMap, getStrokeWidthByPosition } from './helper';
@@ -208,5 +209,9 @@ export const PointLayerMixin = superclass => class extends superclass {
     removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
         Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+    }
+
+    getBoundBoxes () {
+        return getBoundBoxes(this._points.flat());
     }
 };

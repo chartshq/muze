@@ -363,7 +363,13 @@ const capitalizeFirst = (text) => {
  *
  * @param {*} arr
  */
-const unique = arr => ([...new Set(arr)]);
+const unique = (arr, fn = d => d) => {
+    const vals = arr.reduce((acc, v) => {
+        acc[fn(v)] = v;
+        return acc;
+    }, {});
+    return Object.values(vals);
+};
 
 /**
  * Gets the minimum difference between two consecutive numbers  in an array.
@@ -960,12 +966,12 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  * @param {*} criteria
  *
  */
-const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
+const getDataModelFromRange = (dataModel, criteria, mode, criteriaFields) => {
     if (criteria === null) return null;
     const fieldsConfig = dataModel.getFieldsConfig();
-    const selFields = Object.keys(criteria).filter(d => d in fieldsConfig);
+    const selFields = criteriaFields || Object.keys(criteria).filter(d => d in fieldsConfig);
     const selFn = fields => selFields.every((field) => {
-        let fieldValue = fields[field].internalValue;
+        const fieldValue = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
 
         if (typeof range[0] === STRING) {
@@ -973,16 +979,11 @@ const getDataModelFromRange = (dataModel, criteria, mode, hasBarLayer) => {
         }
 
         if (range) {
-            // Check if the selected bar value lies inside the selection box
-            let isFieldSelected = fieldValue >= range[0] && fieldValue <= range[1];
-            if (hasBarLayer && !isFieldSelected) {
-                // Check if the selection box overlaps the bar, if overlap bar is selected
-                fieldValue = [0, fieldValue];
-                isFieldSelected = fieldValue[0] <= range[1] && range[0] <= fieldValue[1];
-            }
-            return isFieldSelected;
+            // Check if the selected bar value lies insid e the selection box
+            return fieldValue >= range[0] && fieldValue <= range[1];
         }
-        return true;
+
+        return false;
     });
 
     return dataModel.select(selFn, {
@@ -1474,6 +1475,7 @@ export {
     unionDomain,
     symbolFns,
     easeFns,
+    unique,
     clone,
     isEqual,
     interpolateArray,

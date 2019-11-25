@@ -58,6 +58,7 @@ const pointTranslators = {
                 style,
                 source: d.source,
                 rowId: d.rowId,
+                data: d,
                 meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, layerInst);
@@ -155,6 +156,7 @@ const pointTranslators = {
                     style,
                     source: row,
                     rowId: d.rowId,
+                    data: d.dataObj,
                     meta: getColorMetaInf(style, colorAxis)
                 };
                 point.className = getIndividualClassName(d, i, data, layerInst);

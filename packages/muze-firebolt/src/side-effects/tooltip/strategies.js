@@ -22,12 +22,13 @@ const { InvalidAwareTypes } = DataModel;
 const FIRST_VALUE_MARGIN = '10px';
 const STACK = 'stack';
 const SINGLE_DATA_MARGIN = 10;
+const defNumberFormat = value => `${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`;
 
 const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
         formatTemporal(Number(value), interval)),
     [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
-        formatter(`${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`)),
+        formatter(defNumberFormat(value))),
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
@@ -235,6 +236,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const fieldsConfig = dataModel.getFieldsConfig();
     const { color, shape, size } = context.retinalFields;
     const detailFields = context.detailFields || [];
+    const { selectedMeasures = [] } = context.payload;
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
     const containsDetailField = !!intersect(schema, detailFields).length;
@@ -330,6 +332,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             const { displayName, fn } = fieldInf[name];
                             content.push(getKeyValue({
                                 field: `${displayName}${separator}`,
+                                isSelected: selectedMeasures.indexOf(name) !== -1,
                                 value: fn(valueArr[fieldsConfig[name].index]),
                                 classPrefix,
                                 margin: SINGLE_DATA_MARGIN
@@ -417,12 +420,12 @@ export const strategies = {
         }
         // Prepare the tooltip content
         measures.forEach((measure) => {
-            const { numberFormat } = fieldsConf[measure].def;
+            const { numberFormat = defNumberFormat } = fieldsConf[measure].def;
             const value = aggregatedValues[measure];
             const rowValues = value instanceof InvalidAwareTypes ? [] : [`(${aggFns[measure].toUpperCase()})`,
                 `${retrieveFieldDisplayName(dm, measure)}:`,
                 {
-                    value: numberFormat ? numberFormat(value) : value,
+                    value: numberFormat(value),
                     style: {
                         'font-weight': 'bold'
                     },
