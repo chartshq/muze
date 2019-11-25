@@ -1456,92 +1456,70 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
-function hexAToHSL (H) {
-    // Convert hex to RGB first
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    let a = 1;
+// function hexAToHSL (H) {
+//     // Convert hex to RGB first
+//     let r = 0;
+//     let g = 0;
+//     let b = 0;
+//     let a = 1;
 
-    if (H.length === 4) {
-        r = `0x${H[1]}${H[1]}`;
-        g = `0x${H[2]}${H[2]}`;
-        b = `0x${H[3]}${H[3]}`;
-    } else if (H.length === 7) {
-        r = `0x${H[1]}${H[2]}`;
-        g = `0x${H[3]}${H[4]}`;
-        b = `0x${H[5]}${H[6]}`;
-    } else if (H.length === 5) {
-        r = `0x${H[1]}${H[1]}`;
-        g = `0x${H[2]}${H[2]}`;
-        b = `0x${H[3]}${H[3]}`;
-        a = `0x${H[4]}${H[4]}`;
-    } else if (H.length === 9) {
-        r = `0x${H[1]}${H[2]}`;
-        g = `0x${H[3]}${H[4]}`;
-        b = `0x${H[5]}${H[6]}`;
-        a = `0x${H[7]}${H[8]}`;
-    }
+//     if (H.length === 4) {
+//         r = `0x${H[1]}${H[1]}`;
+//         g = `0x${H[2]}${H[2]}`;
+//         b = `0x${H[3]}${H[3]}`;
+//     } else if (H.length === 7) {
+//         r = `0x${H[1]}${H[2]}`;
+//         g = `0x${H[3]}${H[4]}`;
+//         b = `0x${H[5]}${H[6]}`;
+//     } else if (H.length === 5) {
+//         r = `0x${H[1]}${H[1]}`;
+//         g = `0x${H[2]}${H[2]}`;
+//         b = `0x${H[3]}${H[3]}`;
+//         a = `0x${H[4]}${H[4]}`;
+//     } else if (H.length === 9) {
+//         r = `0x${H[1]}${H[2]}`;
+//         g = `0x${H[3]}${H[4]}`;
+//         b = `0x${H[5]}${H[6]}`;
+//         a = `0x${H[7]}${H[8]}`;
+//     }
 
-    // Then to HSL
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    const cmin = Math.min(r, g, b);
-    const cmax = Math.max(r, g, b);
-    const delta = cmax - cmin;
+//     // Then to HSL
+//     r /= 255;
+//     g /= 255;
+//     b /= 255;
+//     const cmin = Math.min(r, g, b);
+//     const cmax = Math.max(r, g, b);
+//     const delta = cmax - cmin;
 
-    let h = 0;
-    let s = 0;
-    let l = 0;
+//     let h = 0;
+//     let s = 0;
+//     let l = 0;
 
-    if (delta === 0) {
-        h = 0;
-    } else if (cmax === r) {
-        h = ((g - b) / delta) % 6;
-    } else if (cmax === g) {
-        h = (b - r) / delta + 2;
-    } else {
-        h = (r - g) / delta + 4;
-    }
+//     if (delta === 0) {
+//         h = 0;
+//     } else if (cmax === r) {
+//         h = ((g - b) / delta) % 6;
+//     } else if (cmax === g) {
+//         h = (b - r) / delta + 2;
+//     } else {
+//         h = (r - g) / delta + 4;
+//     }
 
-    h = Math.round(h * 60);
+//     h = Math.round(h * 60);
 
-    if (h < 0) { h += 360; }
+//     if (h < 0) { h += 360; }
 
-    l = (cmax + cmin) / 2;
-    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-    s = +(s * 100).toFixed(1);
-    l = +(l * 100).toFixed(1);
-    a = (a / 255).toFixed(3);
+//     l = (cmax + cmin) / 2;
+//     s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+//     s = +(s * 100).toFixed(1);
+//     l = +(l * 100).toFixed(1);
+//     a = (a / 255).toFixed(3);
 
-    return {
-        color: `hsla(${h},${s}%,${l}%,${a})`,
-        code: [h, s, l, a]
-    };
-}
-
-const transformColor = (hexColor, { h = 0, s = 0, l = 0, a = 0 }, datum, apply) => {
-    let [origH, origS, origL, origA] = hexAToHSL(hexColor).code;
-    let sanitizedA = parseFloat(origA, 10);
-    if (!apply) {
-        origH += h;
-        origS += s;
-        origL += l;
-        sanitizedA += a;
-    } else {
-        origH += h;
-        origS += s;
-        origL += l;
-        sanitizedA = Math.min(a || 0, 1);
-    }
-    // const newHSL = [(origH + h) / 360, (origS + s) / 100, (origL + l) / 100, sanitizedA + a];
-    const newHSL = [origH, origS, origL, sanitizedA];
-
-    const [newH, newS, newL, newA] = newHSL;
-    const finalcolor = { color: `hsla(${newH},${newS}%,${newL}%,${newA})`, hsla: [newH / 360, newS / 100, newL / 100, newA] };
-    return finalcolor;
-};
+//     return {
+//         color: `hsla(${h},${s}%,${l}%,${a})`,
+//         code: [h, s, l, a]
+//     };
+// }
 
 const getReadableTicks = (domain, steps) => {
     // scaling the axis based on steps provided
@@ -1567,6 +1545,71 @@ const getReadableTicks = (domain, steps) => {
         legendTicks.unshift(orderedDomain[0]);
     }
     return legendTicks;
+};
+
+const RGBAToHSLA = (r, g, b, a = 1) => {
+    // Make r, g, and b fractions of 1
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    // Find greatest and smallest channel values
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    // Calculate hue
+    // No difference
+    if (delta === 0) {
+        h = 0;
+    } else if (cmax === r) {
+        // Red is max
+        h = ((g - b) / delta) % 6;
+    } else if (cmax === g) {
+        // Green is max
+        h = (b - r) / delta + 2;
+    } else {
+        // Blue is max
+        h = (r - g) / delta + 4;
+    }
+    h = Math.round(h * 60);
+
+    // Make negative hues positive behind 360°
+    if (h < 0) { h += 360; }
+    // Calculate lightness
+    l = (cmax + cmin) / 2;
+    // Calculate saturation
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    // Multiply l and s by 100
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return {
+        color: `hsla(${h},${s}%,${l}%,${a})`,
+        code: [h, s, l, a]
+    };
+};
+
+const transformColor = (rgbaValues, { h = 0, s = 0, l = 0, a }, datum, apply) => {
+    const [origH, origS, origL, origA] = RGBAToHSLA(...rgbaValues).code;
+    const sanitizedA = parseFloat(a || origA, 10);
+    const newH = origH + h;
+    const newS = origS + s;
+    const newL = origL + l;
+    let newA = sanitizedA + 1;
+
+    if (!apply) {
+        newA = sanitizedA - 1;
+    }
+
+    const finalcolor = {
+        color: `hsla(${newH},${newS}%,${newL}%,${newA})`,
+        hsla: [newH, newS, newL, newA]
+    };
+    return finalcolor;
 };
 
 export {

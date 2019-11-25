@@ -33,32 +33,21 @@ export const defaultConfig = {
                 // fill: 'blue'
             },
             strokePosition: 'outside'
+        },
+        fade: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +20
+                }, data, apply).color
+            }
+        },
+        focus: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
+            }
         }
-        // focus: {
-        //     style: {
-        //         fill: (hexColor, datum, apply) => {
-        //             // const newHexColor = transformColor(hexColor, {
-        //             //     l: +20
-        //             // }, datum, apply);
-        //             // return newHexColor;
-        //             console.log('object');
-        //             return 'black';
-        //             // return apply ? 'black' : hexColor;
-        //         }
-        //     }
-        // },
-        // fade: {
-        //     style: {
-        //         fill: (hexColor, datum, apply) => {
-        //             console.log('object');
-        //             return apply ? 'black' : hexColor;
-        //             // const newHexColor = transformColor(hexColor, {
-        //             //     l: +20
-        //             // }, datum, apply);
-        //             // return newHexColor;
-        //         }
-        //     }
-        // }
     },
     innerPadding: 0.1,
     nearestPointThreshold: 10,

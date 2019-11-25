@@ -27,11 +27,11 @@ const fadeOnBrushFn = (set, context) => {
     } = formattedSet;
 
     if (!mergedEnter.length && !mergedExit.length) {
-        context.applyInteractionStyle(completeSet, {}, 'fade', false);
+        // context.applyInteractionStyle(completeSet, {}, 'fade', false);
         context.applyInteractionStyle(completeSet, {}, 'brushStroke', false);
     } else {
-        context.applyInteractionStyle(exitSet, {}, 'fade', true);
-        context.applyInteractionStyle(mergedEnter, {}, 'fade', false);
+        // context.applyInteractionStyle(exitSet, {}, 'fade', true);
+        // context.applyInteractionStyle(mergedEnter, {}, 'fade', false);
 
         context.applyInteractionStyle(exitSet, {}, 'brushStroke', false);
         context.applyInteractionStyle(mergedEnter, {}, 'brushStroke', true);

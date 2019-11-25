@@ -10,7 +10,6 @@ export const defaultConfig = {
             style: {
                 stroke: 'black',
                 'stroke-width': '1px'
-                // fill: 'red'
             },
             strokePosition: 'center'
         },
@@ -19,7 +18,6 @@ export const defaultConfig = {
             style: {
                 stroke: 'black',
                 'stroke-width': '2px'
-                // fill: 'blue'
             },
             strokePosition: 'outside'
         },
@@ -30,27 +28,21 @@ export const defaultConfig = {
                 'stroke-width': '1px'
             },
             strokePosition: 'outside'
+        },
+        fade: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
+            }
+        },
+        focus: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
+            }
         }
-        // fade: {
-        //     style: {
-        //         // L +15
-        //         fill: 'black'
-        //     }
-        // },
-        // fade: {
-        //     style: {
-        //         fill: (hexColor, data, apply) => transformColor(hexColor, {
-        //             l: +15
-        //             // a: +0.5
-        //         }, data, apply).color
-        //     }
-        // }
-        // focus: {
-        //     style: {
-        //         // L +15
-        //         fill: 'black'
-        //     }
-        // }
     },
     transform: {
         type: 'stack'

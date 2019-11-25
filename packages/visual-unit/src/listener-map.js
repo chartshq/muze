@@ -81,7 +81,6 @@ export const listenerMap = [
                 layerDefArr.forEach((layer) => {
                     if (layer.mark === 'area') {
                         const map = firebolt._behaviourEffectMap;
-
                         map.select.forEach((f) => {
                             if (f.name === 'highlighter') {
                                 f.options.strategy = 'areaFocus';

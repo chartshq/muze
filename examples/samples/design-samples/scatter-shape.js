@@ -60,9 +60,9 @@ d3.json('../../../data/cars.json', (data) => {
 		.rows(["Horsepower"])
 		.columns(["Year"])
 		.color("Origin")
-		.size("Horsepower")
+		// .size('Horsepower')
 		.layers([{
-			mark: 'bar',
+			mark: 'area',
 		}])
 		.mount(document.getElementById('chart'));
 })

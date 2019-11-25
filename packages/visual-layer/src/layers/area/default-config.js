@@ -13,7 +13,6 @@ export const defaultConfig = {
         // focus: {
         //     style: {
         //         // A -0.5
-        //         fill: 'black'
         //     }
         // },
         fade: {
@@ -21,6 +20,11 @@ export const defaultConfig = {
                 fill: (hexColor, data, apply) => transformColor(hexColor, {
                     a: -0.5
                 }, data, apply).color
+            }
+        },
+        focus: {
+            style: {
+                'fill-opacity': 0.7
             }
         }
     },

@@ -35,4 +35,10 @@ export const behaviourEffectMap = {
             strategy: 'focus'
         }
     }, 'persistent-anchors']
+    // [`${BEHAVIOURS.SELECT},${BEHAVIOURS.HIGHLIGHT}`]: [{
+    //     name: 'highlighter',
+    //     options: {
+    //         strategy: 'focusHighlight'
+    //     }
+    // }, 'persistent-anchors']
 };

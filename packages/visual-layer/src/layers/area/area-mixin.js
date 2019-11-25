@@ -208,7 +208,8 @@ export const AreaLayerMixin = superclass => class extends superclass {
      */
     getPathStyle (color) {
         return {
-            fill: color
+            fill: color,
+            'fill-opacity': 0.30
         };
     }
 };

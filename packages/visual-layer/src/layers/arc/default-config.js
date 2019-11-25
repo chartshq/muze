@@ -1,3 +1,4 @@
+import { transformColor } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
@@ -8,20 +9,23 @@ export const defaultConfig = {
     interaction: {
         highlight: {
             style: {
-                // L -15
-                fill: 'black'
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.1
+                }, data, apply).color
             }
         },
         fade: {
             style: {
-                // L +15
-                fill: 'black'
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
             }
         },
         focus: {
             style: {
-                // L +15
-                fill: 'black'
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
             }
         }
     },

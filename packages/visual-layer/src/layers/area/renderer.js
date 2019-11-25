@@ -43,9 +43,8 @@ const /* istanbul ignore next */ drawArea = (params) => {
                     .duration(duration)
                     .on('end', layer.registerAnimationDoneHook())
                     .attr('d', updateAreaPath(points))
-                    .each(function (d) {
+                    .each(function () {
                         const element = selectElement(this);
-                        element.attr('class', d);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
                     });
 };
