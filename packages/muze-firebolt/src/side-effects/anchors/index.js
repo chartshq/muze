@@ -139,15 +139,19 @@ export default class AnchorEffect extends SpawnableSideEffect {
      * @return { number } Default area value of anchor.
      */
     defaultSizeValue () {
-        return 100;
+        return 70;
     }
 
     // Default offset by which anchor size is changed
-    getAnchorSizeonInteraction () {
+    getAnchorSizeOnInteraction ({ dragEnd }) {
+        if (dragEnd) {
+            return 40;
+        }
         return 0;
     }
 
     apply (selectionSet, payload) {
+        // this.addAnchorLayers(payload.action);
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;
@@ -161,7 +165,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const anchorSizeConfig = {
                 encoding: {
                     size: {
-                        value: () => this.defaultSizeValue() + this.getAnchorSizeonInteraction()
+                        value: () => this.defaultSizeValue() + this.getAnchorSizeOnInteraction(payload)
                     }
                 }
             };
