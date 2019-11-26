@@ -275,7 +275,7 @@ export const spaceSetter = (context, spaceConfig) => {
                         });
                     }
                 }
-                if (availHeight < axisNameHeight && domain.length) {
+                if (availHeight < axisNameHeight) {
                     context.renderConfig({ show: false });
                 }
                 return labelConfig;

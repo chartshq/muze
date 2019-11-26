@@ -255,8 +255,8 @@ export default class SimpleAxis {
     setAvailableSpace (width = 0, height, padding, isOffset) {
         let labelConfig = {};
         const {
-            orientation
-        } = this.config();
+           orientation
+       } = this.config();
 
         this.availableSpace({ width, height, padding });
         const type = this.constructor.type();
@@ -490,4 +490,3 @@ export default class SimpleAxis {
         };
     }
 }
-
