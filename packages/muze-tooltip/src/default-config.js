@@ -8,6 +8,7 @@ export const defaultConfig = {
     row: {
         margin: 0
     },
+    spacing: 5,
     content: {
         spacing: 5,
         iconContainerSize: 10,

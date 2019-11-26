@@ -34,6 +34,13 @@ export const defaultConfig = {
             },
             strokePosition: 'outside'
         },
+        doubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        },
         fade: {
             style: {
                 fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {

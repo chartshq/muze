@@ -12,7 +12,8 @@ import { defaultConfig } from './default-config';
 import {
     attachDataToVoronoi,
     getPlotMeasurement,
-    getMarkId
+    getMarkId,
+    getBoundBoxes
 } from '../../helpers';
 import './styles.scss';
 import { pointTranslators, getStrokeWidthByPosition } from './helper';
@@ -215,5 +216,9 @@ export const PointLayerMixin = superclass => class extends superclass {
             Object.keys(style).forEach(s => currentPath.style(s, style[s]));
             currentPath.style('fill-opacity', 0);
         }
+    }
+
+    getBoundBoxes () {
+        return getBoundBoxes(this._points.flat());
     }
 };

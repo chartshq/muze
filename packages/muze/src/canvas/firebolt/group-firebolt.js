@@ -2,56 +2,87 @@ import {
     FieldType,
     mergeRecursive,
     CommonProps,
-    ReservedFields
+    ReservedFields,
+    isSimpleObject
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
-import { payloadGenerator, isSideEffectEnabled } from '@chartshq/visual-unit';
+import {
+    payloadGenerator,
+    isSideEffectEnabled,
+    sanitizePayloadCriteria,
+    prepareSelectionSetMap
+} from '@chartshq/visual-unit';
+import { TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
 import { applyInteractionPolicy } from '../helper';
-import { propagateValues, sanitizePayloadCriteria } from './helper';
+import { propagateValues, addFacetDataAndMeasureNames, isCrosstab, addSelectedMeasuresInPayload } from './helper';
 import { COMMON_INTERACTION } from '../../constants';
 
-const getKeysFromData = (group, dataModel) => {
+const setSideEffectConfig = (firebolt) => {
+    const tooltipSideEffect = firebolt.sideEffects().tooltip;
+    const allFields = firebolt.context.composition().visualGroup.resolver().getAllFields();
+
+    if (isCrosstab(allFields)) {
+        tooltipSideEffect.config({
+            selectionSummary: {
+                order: 1,
+                className: 'tooltip-content-container-selectionSummary-crosstab',
+                showMultipleMeasures: true
+            },
+            highlightSummary: {
+                order: 0,
+                className: 'tooltip-content-container-highlightSummary-crosstab'
+            }
+        });
+    } else {
+        tooltipSideEffect.config({
+            selectionSummary: {
+                className: 'tooltip-content-container-selectionSummary-default'
+            },
+            highlightSummary: {
+                className: 'tooltip-content-container-highlightSummary-default'
+            }
+        });
+    }
+};
+
+const prepareSelectionSetData = (group, dataModel) => {
     const valueMatrix = group.matrixInstance().value;
     const dimensions = Object.values(dataModel.getFieldsConfig()).filter(d => d.def.type === FieldType.DIMENSION);
+    const hasMeasures = Object.keys(dataModel.getFieldspace().getMeasure()).length;
+    const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
+    const { data } = dataModel.getData();
+    const groupDataMap = dataModel.getUids().reduce((acc, uid, i) => {
+        acc[uid] = data[i];
+        return acc;
+    }, {});
     const keys = {};
-    const dimsMap = {};
+    const dimensionsMap = {};
+
     valueMatrix.each((cell) => {
         const unit = cell.source();
-        const facetFieldsMap = unit.facetFieldsMap();
         const dm = unit.data();
-        const { data } = dm.getData();
         const uids = dm.getUids();
         const layers = unit.layers();
-        const fieldsConfig = dm.getFieldsConfig();
-
-        data.forEach((row, i) => {
-            const dims = dimensions.map((d) => {
-                if (d.def.name in fieldsConfig) {
-                    return row[fieldsConfig[d.def.name].index];
-                }
-                return facetFieldsMap[d.def.name];
-            });
-            const uid = uids[i];
-
-            layers.forEach((layer) => {
-                const measureNames = layer.data().getSchema().filter(d => d.type === FieldType.MEASURE)
-                    .map(d => d.name);
-                const key = dims.length ? `${[dims, ...measureNames]}` : `${[uid, ...measureNames]}`;
-                keys[key] = keys[key] || {};
-                keys[key] = {
-                    dims,
-                    measureNames,
-                    uid
-                };
-                dimsMap[dims] = measureNames;
-            });
+        const unitData = uids.map(uid => groupDataMap[uid]);
+        prepareSelectionSetMap({
+            data: unitData,
+            uids,
+            dimensions
+        }, layers, {
+            keys,
+            dimensionsMap
         });
     });
 
+    const dimensionFields = dimensions.length ? [...dimensions.map(d => d.def.name)] :
+        [ReservedFields.ROW_ID];
+
     return {
         keys,
-        dimsMap,
-        fields: [...dimensions.map(d => d.def.name)]
+        dimensionsMap,
+        dimensions: dimensionFields,
+        allFields: [...dimensionFields, ...measureName]
     };
 };
 
@@ -126,10 +157,16 @@ export default class GroupFireBolt extends Firebolt {
                 applyInteractionPolicy(this);
                 const group = this.context.composition().visualGroup;
                 if (group) {
-                    const { keys, fields, dimsMap } = getKeysFromData(group, group.getGroupByData());
-                    this._dimensionsMap = dimsMap;
-                    this._dimensionsSet = fields;
-                    this.createSelectionSet({ keys, fields });
+                    setSideEffectConfig(this);
+
+                    const { keys, dimensions, dimensionsMap, allFields } = prepareSelectionSetData(group,
+                        group.getGroupByData());
+                    this._metaData = {
+                        dimensionsMap,
+                        dimensions,
+                        allFields
+                    };
+                    this.createSelectionSet({ keys, fields: dimensions });
                     group.getGroupByData().on('propagation', (data, config) => {
                         this.handleDataModelPropagation(data, config);
                     });
@@ -157,7 +194,9 @@ export default class GroupFireBolt extends Firebolt {
         if (mode !== COMMON_INTERACTION) {
             return this;
         }
-        const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+        const criteria = config.payload.criteria;
+        const payloadFn = isSimpleObject(criteria) ?
+            payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
         const payload = payloadFn(this, propagationData, config);
 
         const behaviourPolicies = this._behaviourPolicies;
@@ -197,9 +236,15 @@ export default class GroupFireBolt extends Firebolt {
                         inst.plotPointsFromIdentifiers((...params) =>
                             unit.getPlotPointsFromIdentifiers(...params));
                         inst.drawingContext(() => unit.getDrawingContext());
+                        inst.valueParser(unit.valueParser());
                     }
                 });
             });
+
+            if (propPayload.sourceUnit) {
+                addSelectedMeasuresInPayload(this, unit, payload);
+            }
+
             this.dispatchBehaviour(action, payload, propagationInf);
         }
 
@@ -211,6 +256,7 @@ export default class GroupFireBolt extends Firebolt {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
         this.initializeSideEffects();
+
         return this;
     }
 
@@ -248,31 +294,24 @@ export default class GroupFireBolt extends Firebolt {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
         const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
-        const hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
-        const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
 
         behaviours.forEach((action) => {
-            const fields = [...this._dimensionsSet, ...measureName];
             const mode = behaviourConfs[action];
             let targetFirebolt = firebolt;
-            let facetMap = unit.facetFieldsMap();
             if (mode === COMMON_INTERACTION) {
                 targetFirebolt = this;
-            } else {
-                facetMap = {};
             }
 
-            payload.criteria = sanitizePayloadCriteria(payload.criteria, fields, facetMap, {
-                dm: targetFirebolt.data(),
-                dimensionsMap: targetFirebolt._dimensionsMap
-            });
+            const actions = targetFirebolt._actions.behavioural;
+            payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
+                unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
 
             targetFirebolt.dispatchBehaviour(action, payload, {
                 propagate: false,
                 applySideEffect: false
             });
 
-            const identifiers = targetFirebolt._actions.behavioural[action].propagationIdentifiers();
+            const identifiers = actions[action].propagationIdentifiers();
 
             this.propagate(action, payload, identifiers, {
                 sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
@@ -283,19 +322,16 @@ export default class GroupFireBolt extends Firebolt {
         });
     }
 
-    dispatchBehaviour (action, payload, propagationInf = {}) {
+    sanitizePayload (payload) {
         const { criteria } = payload;
-        const hasMeasures = Object.keys(this.data().getFieldspace().getMeasure()).length;
-        const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
-        const fields = [...this._dimensionsSet, ...measureName];
-        const sanitizedPayload = Object.assign({}, payload,
+        const { allFields: fields, dimensionsMap } = this._metaData;
+        return Object.assign({}, payload,
             {
-                criteria: sanitizePayloadCriteria(criteria, fields, {}, {
+                criteria: sanitizePayloadCriteria(criteria, fields, {
                     dm: this.data(),
-                    dimensionsMap: this._dimensionsMap
+                    dimensionsMap
                 })
             });
-        super.dispatchBehaviour(action, sanitizedPayload, propagationInf);
     }
 
     id () {
@@ -343,9 +379,16 @@ export default class GroupFireBolt extends Firebolt {
                 behaviours: [payload.action]
             }];
         }
+        const { mode } = this.context.config().interaction.tooltip;
+        propagationInf.propPayload = propagationInf.propPayload || payload;
         sideEffects.forEach((d) => {
             let mappedEffects = d.effects;
-            mappedEffects = mappedEffects.filter(se => isSideEffectEnabled(this, { se, propagationInf }));
+            mappedEffects = mappedEffects.filter((se) => {
+                if (se.name === TOOLTIP && mode === FRAGMENTED) {
+                    return false;
+                }
+                return isSideEffectEnabled(this, { se, propagationInf });
+            });
             d.effects = mappedEffects;
         });
         return sideEffects;

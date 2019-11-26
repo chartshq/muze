@@ -1,45 +1,32 @@
-import { DimensionSubtype, ReservedFields, FieldType } from 'muze-utils';
+import { ReservedFields, FieldType } from 'muze-utils';
 
 const getRangeFromData = (instance, selectionDataModel, propConfig) => {
-    let criteria;
     const dataObj = selectionDataModel.getData();
-    const selectionDataFields = selectionDataModel.getFieldsConfig();
-    const propCriteria = propConfig.payload.criteria;
     const sourceIdentifiers = propConfig.sourceIdentifiers;
     const schema = dataObj.schema;
     const fieldMap = instance.data().getFieldsConfig();
-    const data = dataObj.data;
-    const isActionSourceSame = instance.id() === propConfig.sourceId;
-
-    if (isActionSourceSame) {
-        criteria = propCriteria ? Object.keys(propCriteria).reduce((acc, v) => {
-            if (v in selectionDataFields) {
-                acc[v] = propCriteria[v];
-            }
-            return acc;
-        }, {}) : null;
-    } else {
-        criteria = (sourceIdentifiers !== null) ? schema.reduce((acc, obj, index) => {
-            let range;
+    const selectionDataFields = selectionDataModel.getFieldspace().fieldsObj();
+    let criteria = null;
+    if (sourceIdentifiers !== null) {
+        criteria = schema.reduce((ranges, obj) => {
             const field = obj.name;
             const fieldObj = fieldMap[field];
-            const type = fieldObj && (fieldObj.def.subtype ? fieldObj.def.subtype : fieldObj.def.type);
-            const isDimension = type === DimensionSubtype.CATEGORICAL;
 
             if (!fieldObj) {
-                return acc;
+                return ranges;
             }
 
-            if (!isDimension) {
-                range = [Math.min(...data.map(d => d[index])), Math.max(...data.map(d => d[index]))];
-            } else {
-                range = data.map(d => d[index]);
-            }
-            acc[field] = range;
-            return acc;
-        }, {}) : null;
+            ranges[field] = selectionDataFields[field].domain();
+            return ranges;
+        }, {});
+        const measureNamesIdx = sourceIdentifiers.identifiers[0]
+            .findIndex(field => field === ReservedFields.MEASURE_NAMES);
+        if (measureNamesIdx !== undefined) {
+            const measureNames = sourceIdentifiers.identifiers.slice(1, sourceIdentifiers.identifiers.length)
+                .map(d => d[measureNamesIdx]);
+            criteria[ReservedFields.MEASURE_NAMES] = measureNames.map(d => [d]);
+        }
     }
-
     return criteria;
 };
 
@@ -55,13 +42,19 @@ export const payloadGenerator = {
     __default: (instance, selectionDataModel, propConfig, facetByFields = []) => {
         const propPayload = propConfig.payload;
         const sourceIdentifiers = propConfig.sourceIdentifiers;
-        const dataObj = selectionDataModel.getData();
-        let schema = dataObj.schema;
+        const dataObj = selectionDataModel.getData({ withUid: true });
         const payload = Object.assign({}, propPayload);
-        schema = dataObj.schema;
         const data = dataObj.data;
-        const fieldsConfig = selectionDataModel.getFieldsConfig();
-        const sourceFields = schema.filter(d => d.type === FieldType.DIMENSION).map(d => d.name);
+        const fieldsConfig = Object.assign({}, selectionDataModel.getFieldsConfig(), {
+            [ReservedFields.ROW_ID]: {
+                index: Object.keys(selectionDataModel.getFieldsConfig()).length,
+                def: {
+                    type: FieldType.DIMENSION
+                }
+            }
+        });
+        const selectionSet = instance._selectionSet[propConfig.action];
+        const selectionSetFields = selectionSet._fields;
         if (sourceIdentifiers) {
             const [facetFields = [], facetValues = []] = facetByFields;
             const facetIndices = facetFields.reduce((acc, v, i) => {
@@ -87,8 +80,6 @@ export const payloadGenerator = {
             }, {});
 
             const dataArr = [];
-            const selectionSet = instance._selectionSet[propConfig.action];
-            const selectionSetFields = selectionSet._fields;
             for (let i = 0, len = data.length; i < len; i++) {
                 const row = data[i];
                 const dims = [];
@@ -111,18 +102,18 @@ export const payloadGenerator = {
                 if (vals in identifierMap) {
                     const measures = identifierMap[vals];
                     measures.forEach((measureArr) => {
-                        dataArr.push([...dims, ...measureArr]);
+                        dataArr.push([...dims, measureArr]);
                     });
                 } else {
-                    let measures = instance._dimensionsMap[dims];
+                    let measures = instance._metaData.dimensionsMap[dims];
                     measures = measures && measures.length ? measures : [[]];
                     measures.forEach((measureArr) => {
-                        dataArr.push([...dims, ...measureArr]);
+                        dataArr.push([...dims, measureArr]);
                     });
                 }
             }
 
-            payload.criteria = [[...sourceFields, ReservedFields.MEASURE_NAMES], ...dataArr];
+            payload.criteria = [[...selectionSetFields, ReservedFields.MEASURE_NAMES], ...dataArr];
         } else {
             payload.criteria = null;
         }

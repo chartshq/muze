@@ -37,9 +37,11 @@ export default class Tooltip extends SpawnableSideEffect {
                 y: 0
             },
             highlightSummary: {
+                order: 1,
                 dataTransform: (dm, fields) => (fields ? dm.project(fields, { saveChild: false }) : dm)
             },
             selectionSummary: {
+                order: 0,
                 dataTransform: dm => dm
             }
         };
@@ -63,9 +65,9 @@ export default class Tooltip extends SpawnableSideEffect {
     }
 
     apply (selectionSet, payload, options = {}) {
-        const dataModel = selectionSet.mergedEnter.model;
+        const dataModel = selectionSet && selectionSet.mergedEnter.model;
 
-        if ((payload.criteria === null || (dataModel && dataModel.isEmpty()))) {
+        if ((payload.criteria === null || (dataModel && dataModel.isEmpty())) || selectionSet === null) {
             this.hide(options, null);
             return this;
         }
@@ -92,7 +94,9 @@ export default class Tooltip extends SpawnableSideEffect {
             if ({}.hasOwnProperty.call(tooltips, key)) {
                 const strategy = options.strategy || this._strategy;
                 tooltips[key].content(strategy, null);
-                tooltips[key].hide();
+                if (!Object.keys(tooltips[key]._contents).length) {
+                    tooltips[key].hide();
+                }
             }
         }
     }
@@ -124,7 +128,6 @@ export default class Tooltip extends SpawnableSideEffect {
         const config = this.config();
         const {
             strategy,
-            options,
             payload,
             selectionSet
         } = props;
@@ -150,14 +153,16 @@ export default class Tooltip extends SpawnableSideEffect {
             firebolt: this.firebolt,
             detailFields: [],
             timeDiffs: sourceInf.timeDiffs,
-            valueParser: val => val,
-            selectionSet
+            valueParser: this.valueParser(),
+            selectionSet,
+            config: config[strategy]
         });
 
         tooltipInst.context(sourceInf);
         tooltipInst.content(strategy, dt, {
             formatter: strategyFn,
-            order: options.order
+            order: config[strategy].order,
+            className: config[strategy].className
         })
                         .config(this.config())
                         .extent({

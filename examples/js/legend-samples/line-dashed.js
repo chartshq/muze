@@ -1,8 +1,8 @@
-/* eslint-disable*/
-let env = muze();
-const DataModel = muze.DataModel;
-d3.json('/data/cars-with-null.json', (data) => {
-    const schema = [{
+var env = window.muze();
+var DataModel = window.muze.DataModel;
+
+d3.json('/data/cars-with-null.json', function (data) {
+    var schema = [{
         name: 'Name',
         type: 'dimension'
     }, {
@@ -34,28 +34,25 @@ d3.json('/data/cars-with-null.json', (data) => {
         type: 'dimension'
     }];
     // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);
+    var rootData = new DataModel(data, schema);
 
     // Get a canvas instance from Muze where the chart will be rendered.
-    let canvas = env.canvas();
+    var canvas = env.canvas();
 
-    canvas = canvas
-    .rows(['Acceleration']) // Acceleration goes in X axis
-    .columns(['Year'])
-    .color('Origin')
-	.layers([{
+    canvas = canvas.rows(['Acceleration']) // Acceleration goes in X axis
+    .columns(['Year']).color('Origin').layers([{
         mark: 'line',
         connectNullData: true,
-        nullDataLineStyle:{
-            'stroke-dasharray' : ("8,4"),
-            'stroke-width': 4,
+        nullDataLineStyle: {
+            'stroke-dasharray': '8,4',
+            'stroke-width': 5,
             'stroke': 'pink'
         }
-    }])
-    .width(500)
-    .height(500)
-    .data(rootData)
-    .title('Line Chart With Connected Null Data', { position: 'top', align: 'left' })
-    .mount('#chart');
+    },{
+        mark: 'point'
+    }]).width(500).height(500).data(rootData).title('Line missing data').mount('#chart').once('canvas.animationend').then(function (client) {
+        var element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
 });
 

@@ -1,7 +1,7 @@
-import { FieldType, intersect } from 'muze-utils';
+import { FieldType, intersect, isSimpleObject } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
-import { isSideEffectEnabled } from './helper';
+import { isSideEffectEnabled, sanitizePayloadCriteria } from './helper';
 
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
@@ -74,6 +74,18 @@ export default class UnitFireBolt extends Firebolt {
         return propInf.propagate === false && propInf.applySideEffect !== false;
     }
 
+    sanitizePayload (payload) {
+        const { criteria } = payload;
+        const { allFields: fields, dimensionsMap } = this._metaData;
+        return Object.assign({}, payload,
+            {
+                criteria: sanitizePayloadCriteria(criteria, fields, {
+                    dm: this.data(),
+                    dimensionsMap
+                })
+            });
+    }
+
     onDataModelPropagation () {
         return (data, config) => {
             let isMutableAction = false;
@@ -90,7 +102,8 @@ export default class UnitFireBolt extends Firebolt {
                 payload: propPayload
             } = config;
 
-            const payloadFn = payloadGenerator[action] || payloadGenerator.__default;
+            const payloadFn = isSimpleObject(config.payload.criteria) ?
+                payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
             const payload = payloadFn(this, propagationData, config, context.facetByFields());
             const behaviourPolicies = this._behaviourPolicies;
             const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
@@ -114,7 +127,6 @@ export default class UnitFireBolt extends Firebolt {
                     data: propagationData,
                     propPayload,
                     sourceIdentifiers,
-                    persistent: false,
                     sourceId: config.propagationSourceId,
                     isMutableAction: config.isMutableAction
                 };
@@ -168,5 +180,9 @@ export default class UnitFireBolt extends Firebolt {
 
     sourceCanvas () {
         return this.context.parentAlias();
+    }
+
+    getLayers () {
+        return this.context.layers();
     }
 }

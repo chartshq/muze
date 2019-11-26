@@ -9,7 +9,8 @@ import {
     retrieveFieldDisplayName,
     nestCollection,
     getObjProp,
-    intersect
+    intersect,
+    ReservedFields
 } from 'muze-utils';
 import { TABLE_FORMAT } from '@chartshq/muze-tooltip';
 import { SELECTION_SUMMARY, HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
@@ -21,12 +22,13 @@ const { InvalidAwareTypes } = DataModel;
 const FIRST_VALUE_MARGIN = '10px';
 const STACK = 'stack';
 const SINGLE_DATA_MARGIN = 10;
+const defNumberFormat = value => `${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`;
 
 const formatters = (formatter, interval, valueParser) => ({
     [DimensionSubtype.TEMPORAL]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
         formatTemporal(Number(value), interval)),
     [MeasureSubtype.CONTINUOUS]: value => (value instanceof InvalidAwareTypes ? valueParser(value) :
-        formatter(`${value % value.toFixed(0) === 0 ? value : value.toFixed(2)}`)),
+        formatter(defNumberFormat(value))),
     [DimensionSubtype.CATEGORICAL]: value => valueParser(value)
 });
 
@@ -115,12 +117,6 @@ const getKeyValue = (params) => {
     });
 };
 
-const getEncodingValues = ({ field, axes, fn, val }) => {
-    const configField = axes.config().field;
-    const values = configField && configField !== field ? null : axes[fn](val);
-    return values;
-};
-
 export const getStackedSum = (values, index) => values.reduce((a, b) => {
     if (b[index] instanceof InvalidAwareTypes) {
         return a + 0;
@@ -156,15 +152,9 @@ const generateRetinalFieldsValues = (valueArr, retinalFields, content, context) 
         const measuresArr = dimensionMeasureMap[retField];
         const icon = {
             type: 'icon',
-            color: getEncodingValues({
-                field: retField, axes: colorAxis, fn: 'getColor', val: retinalFieldValue
-            }),
-            shape: getEncodingValues({
-                field: retField, axes: shapeAxis, fn: 'getShape', val: retinalFieldValue
-            }),
-            size: getEncodingValues({
-                field: retField, axes: sizeAxis, fn: 'getSize', val: retinalFieldValue
-            })
+            color: colorAxis.getColor(retinalFieldValue),
+            size: sizeAxis.config().value,
+            shape: shapeAxis.getShape(retinalFieldValue)
         };
         const { displayName, fn } = fieldInf[retField];
         const formattedRetinalValue = fn(retinalFieldValue);
@@ -234,6 +224,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const fieldsConfig = dataModel.getFieldsConfig();
     const { color, shape, size } = context.retinalFields;
     const detailFields = context.detailFields || [];
+    const { selectedMeasures = [] } = context.payload;
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
     const containsDetailField = !!intersect(schema, detailFields).length;
@@ -329,6 +320,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                             const { displayName, fn } = fieldInf[name];
                             content.push(getKeyValue({
                                 field: `${displayName}${separator}`,
+                                isSelected: selectedMeasures.indexOf(name) !== -1,
                                 value: fn(valueArr[fieldsConfig[name].index]),
                                 classPrefix,
                                 margin: SINGLE_DATA_MARGIN
@@ -347,21 +339,60 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     };
 };
 
+/**
+ * Calculate aggregated values of measures from entry set and datamodel.
+ *
+ * @param {DataModel} dm DataModel instance
+ * @param {EntrySet} entrySet Entry set
+ */
+const getAggregatedValues = (dm, entrySet) => {
+    const fields = entrySet.fields;
+    const aggFns = entrySet.aggFns;
+    // Create a map of all the dimensions and the measures
+    const dimsMap = entrySet.uids.reduce((acc, v) => {
+        const dims = v[2];
+
+        !acc[dims] && (acc[dims] = []);
+        acc[dims].push(v[1]);
+        return acc;
+    }, {});
+    const aggMeasures = Object.keys(dm.getFieldspace().getMeasure());
+    const aggregatedValues = {};
+    aggMeasures.forEach((measure) => {
+        // Filter all the rows which has this measure and dimensions and apply aggregation.
+        const groupedDm = dm.select((dmFields, id) => {
+            const row = `${fields.map(field => (field === ReservedFields.ROW_ID ? id :
+                dmFields[field].internalValue))}`;
+            const measures = dimsMap[row];
+            if (measures) {
+                return measures.find(arr => arr.indexOf(measure) !== -1);
+            }
+            return false;
+        }, {
+            saveChild: false
+        }).groupBy([''], {
+            [measure]: aggFns[measure] === COUNT ? SUM : aggFns[measure]
+        }, {
+            saveChild: false
+        });
+        const fieldsConfig = groupedDm.getFieldsConfig();
+        if (!groupedDm.isEmpty()) {
+            aggregatedValues[measure] = groupedDm.getData().data[0][fieldsConfig[measure].index];
+        }
+    });
+    return aggregatedValues;
+};
+
 export const strategies = {
     [SELECTION_SUMMARY]: (dm, config, context) => {
         const { selectionSet } = context;
         const { classPrefix } = config;
+        const tooltipConf = context.config;
+        const { showMultipleMeasures } = tooltipConf;
         const aggFns = selectionSet.mergedEnter.aggFns;
-        const dataObj = dm.getData();
-        const measures = dataObj.schema.filter(d => d.type === FieldType.MEASURE);
-        const aggregatedModel = dm.groupBy([''], measures.reduce((acc, v) => {
-            acc[v.name] = aggFns[v.name] === COUNT ? SUM : aggFns[v.name];
-            return acc;
-        }, {
-            saveChild: false
-        }));
-        const fieldsConf = aggregatedModel.getFieldsConfig();
         const entryUids = selectionSet.mergedEnter.uids;
+        const fieldsConf = dm.getFieldsConfig();
+        const aggregatedValues = getAggregatedValues(dm, selectionSet.mergedEnter);
         const values = [{
             className: `${classPrefix}-tooltip-row`,
             data: [{
@@ -371,25 +402,31 @@ export const strategies = {
                 }
             }, 'Items Selected']
         }];
-        const measureNames = [...new Set(entryUids.map(d => d[1]).filter(d => d).flat())];
-        const data = aggregatedModel.getData().data;
-        measureNames.forEach((measure) => {
-            const { numberFormat } = fieldsConf[measure].def;
-            const value = data[0][fieldsConf[measure].index].toFixed(2);
-
-            value instanceof InvalidAwareTypes ? values.push([]) : values.push({
-                className: `${classPrefix}-tooltip-row`,
-                data: [`(${aggFns[measure].toUpperCase()})`,
-                    `${retrieveFieldDisplayName(dm, measure)}`,
-                    {
-                        value: numberFormat ? numberFormat(value) : value,
-                        style: {
-                            'font-weight': 'bold'
-                        },
-                        className: `${classPrefix}-tooltip-value`
-                    }]
+        let measures = Object.keys(aggregatedValues);
+        if (!showMultipleMeasures) {
+            measures = measures.slice(0, 1);
+        }
+        // Prepare the tooltip content
+        measures.forEach((measure) => {
+            const { numberFormat = defNumberFormat } = fieldsConf[measure].def;
+            const value = aggregatedValues[measure];
+            const rowValues = value instanceof InvalidAwareTypes ? [] : [`(${aggFns[measure].toUpperCase()})`,
+                `${retrieveFieldDisplayName(dm, measure)}:`,
+                {
+                    value: numberFormat(value),
+                    style: {
+                        'font-weight': 'bold'
+                    },
+                    className: `${classPrefix}-tooltip-value`
+                }];
+            if (showMultipleMeasures) {
+                values.push({
+                    className: `${classPrefix}-tooltip-row`,
+                    data: rowValues
+                });
+            } else {
+                values[0].data.push(...rowValues);
             }
-            );
         });
 
         return values;
