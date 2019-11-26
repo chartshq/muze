@@ -638,7 +638,7 @@ export default class VisualUnit {
                     dimValue[i].push(measures.join());
                 }
             });
-            pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
+            pointObj.target = pointInf && pointInf.id ? pointInf.id : null;
             return pointObj;
         }
 

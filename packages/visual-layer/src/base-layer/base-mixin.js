@@ -713,5 +713,21 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return [`${layerNs[1]}.${PROPS.DATA}`, ...['x', 'y', 'radius'].map(type =>
             `${groupNs}.domain.${type}`)];
     }
+
+    applyStyles ({ strokeStyles, otherStyles, styleObj, elem, mountPoint, applicableStrokePos, datum }) {
+        strokeStyles.forEach((type) => {
+            this.addOverlayPath(
+                elem.node(),
+                datum,
+                { type, value: styleObj[type] },
+                applicableStrokePos,
+                mountPoint
+            );
+        });
+
+        otherStyles.forEach((type) => {
+            elem.style(type, styleObj[type]);
+        });
+    }
 };
 

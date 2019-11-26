@@ -281,4 +281,10 @@ export const LineLayerMixin = superclass => class extends superclass {
         }
         return null;
     }
+
+    applyStyles ({ strokeStyles, otherStyles, styleObj, elem }) {
+        [...otherStyles, ...strokeStyles].forEach((type) => {
+            elem.style(type, styleObj[type]);
+        });
+    }
 };

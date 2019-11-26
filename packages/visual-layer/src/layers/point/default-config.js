@@ -81,6 +81,9 @@ export const defaultConfig = {
         fillOpacity: {
             value: 0.5
         },
+        strokePosition: {
+            value: 'outside'
+        },
         interaction: {
             anchors: 'highlight',
             'persistent-anchors': 'focusStroke',

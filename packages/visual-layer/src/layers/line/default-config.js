@@ -45,7 +45,7 @@ export const defaultConfig = {
             value: 0
         },
         strokeWidth: {
-            value: '1px'
+            value: '2px'
         }
     },
     transition: {

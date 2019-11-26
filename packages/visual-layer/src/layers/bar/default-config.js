@@ -11,7 +11,7 @@ export const defaultConfig = {
                 stroke: 'black',
                 'stroke-width': '1px'
             },
-            strokePosition: 'center'
+            strokePosition: 'outside'
         },
         focusStroke: {
             className: 'focus-stroke-class',
@@ -70,17 +70,9 @@ export const defaultConfig = {
         },
         strokeWidth: {
             value: '0px'
-        }
-    },
-    states: {
-        highlight: {
-            className: `${CLASSPREFIX}-layer-bar-highlight`
         },
-        fadeout: {
-            className: `${CLASSPREFIX}-layer-bar-fadeout`
-        },
-        selected: {
-            className: `${CLASSPREFIX}-layer-bar-selected`
+        strokePosition: {
+            value: 'center'
         }
     }
 };

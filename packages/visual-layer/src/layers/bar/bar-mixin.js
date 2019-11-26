@@ -219,8 +219,7 @@ export const BarLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    addOverlayPath (refElement, data, style, interactionType, mountPoint) {
-        const interactions = this.config().interaction;
+    addOverlayPath (refElement, data, style, strokePosition, mountPoint) {
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
@@ -236,7 +235,6 @@ export const BarLayerMixin = superclass => class extends superclass {
         }
 
         if (style.type === 'stroke-width') {
-            const strokePosition = interactions[interactionType].strokePosition || 'center';
             const { L1, L2, L3, M } = strokeWidthPositionMap({
                 width: parseInt(style.value, 10),
                 position: strokePosition

@@ -26,7 +26,7 @@ export default class PersistentAnchors extends AnchorEffect {
             const ids = anchor.data().getUids();
             const layerName = this.constructor.formalName();
             const defaultInteractionLayerEncoding = anchor.config().encoding.interaction;
-            anchor.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, true);
+            anchor.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, { apply: true });
         });
     }
 

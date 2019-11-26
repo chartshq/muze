@@ -97,20 +97,22 @@ export const strategies = {
             const layers = context.firebolt.context.layers();
 
             layers.forEach((layer) => {
-                // get uids of only the currently highlighted point
-                const actualPoint = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
-                    mergedEnter;
-                // get uids of only the currently highlighted point excluding the excludeSet ids
-                const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
+                if (payload.target) {
+                    // get uids of only the currently highlighted point
+                    const actualPoint = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
+                        mergedEnter;
+                    // get uids of only the currently highlighted point excluding the excludeSet ids
+                    const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
 
-                context.applyInteractionStyle(currentHighlightedSet,
-                    { interactionType: 'highlight', apply: true },
-                    [layer]
-                );
-                context.applyInteractionStyle(selectionSet.exitSet[1],
-                    { interactionType: 'highlight', apply: false },
-                    [layer]
-                );
+                    context.applyInteractionStyle(currentHighlightedSet,
+                        { interactionType: 'highlight', apply: true },
+                        [layer]
+                    );
+                    context.applyInteractionStyle(selectionSet.exitSet[1],
+                        { interactionType: 'highlight', apply: false },
+                        [layer]
+                    );
+                }
             });
         }
     },

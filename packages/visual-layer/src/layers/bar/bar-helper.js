@@ -229,6 +229,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             stroke: encoding.stroke.value,
             'stroke-width': encoding.strokeWidth.value
         };
+        const conf = {
+            strokePosition: encoding.strokePosition.value
+        };
 
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
             let point = null;
@@ -243,7 +246,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 source: d.source,
                 rowId: d.rowId,
                 style,
-                meta: getColorMetaInf(style)
+                meta: getColorMetaInf(style, conf)
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);

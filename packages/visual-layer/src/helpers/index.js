@@ -34,13 +34,16 @@ export const applyInteractionStyle = (context, selectionSet, interactionStyles, 
     const mountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
 
     elements.forEach((elem) => {
-        const interactionStylesEntries = Object.entries(interactionStyles.style);
+        const options = { mountPoint, apply, reset };
+        context.applyLayerStyle(elem, interactionType, interactionStyles, options);
 
-        for (const [type, value] of interactionStylesEntries) {
-            const style = { type, value };
-            const options = { mountPoint, apply, reset };
-            context.applyLayerStyle(elem, interactionType, style, options);
-        }
+        // const interactionStylesEntries = Object.entries(interactionStyles.style);
+
+        // for (const [type, value] of interactionStylesEntries) {
+        //     const style = { type, value };
+        //     const options = { mountPoint, apply, reset };
+        //     context.applyLayerStyle(elem, interactionType, style, options);
+        // }
     });
 };
 
@@ -508,8 +511,10 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = initialStyle => ({
-    originalStyle: Object.assign({}, initialStyle),
+export const getColorMetaInf = (initialStyle, conf = {}) => ({
+    originalStyle: Object.assign({}, {
+        styles: initialStyle
+    }, conf),
     currentState: new Map()
 });
 

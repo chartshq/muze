@@ -96,7 +96,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 model: data,
                 uids: ids.map(id => [id])
             }, payload.target).uids : [];
-
+            if (currentInteraction === 'focusStroke') {
+                debugger;
+            }
             if (!formattedUids.length) {
                 anchor.applyInteractionStyle(currentInteraction, ids, { apply: false });
             } else {

@@ -172,9 +172,8 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    addOverlayPath (refElement, data, style, interactionType) {
+    addOverlayPath (refElement, data, style, strokePosition) {
         const container = refElement.parentElement;
-        const interactions = this.config().interaction;
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
@@ -188,7 +187,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         }
 
         if (style.type === 'stroke-width') {
-            const position = interactions[interactionType].strokePosition || 'center';
+            const position = strokePosition;
             // get radius as per stroke position
             let radius = Math.sqrt(data.size / Math.PI);
             radius = getStrokeWidthByPosition(position, radius);

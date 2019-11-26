@@ -1,3 +1,5 @@
+import { partition } from 'muze-utils';
+
 const getLastItemInMap = map => Array.from(map)[map.size - 1];
 
 const getPreviousStyle = (meta, interactionType) => {
@@ -13,16 +15,13 @@ const getPreviousStyle = (meta, interactionType) => {
     return stylesForCurrentLevel;
 };
 
-export const applyStylesOnInteraction = (context, elem, interactionType, style, options) => {
-    let { type, value } = style;
-    const { mountPoint, apply, reset } = options;
+const strokeProps = {
+    'stroke-width': 1,
+    stroke: 1,
+    'stroke-opacity': 1
+};
 
-    let datum = elem.data()[0];
-    const datumStyle = elem.style(type);
-    const interactions = context.config().interaction;
-    const className = interactions[interactionType].className || '';
-
-    // Get evaluated value if styleValue is a fn
+const parseStyle = (value, { datum, datumStyle }, apply) => {
     if (typeof value === 'function') {
         if (isNaN(datumStyle)) {
             // const colorType = detectColor(datumStyle);
@@ -32,75 +31,63 @@ export const applyStylesOnInteraction = (context, elem, interactionType, style, 
             const numValue = parseFloat(datumStyle, 10);
             value = value(numValue, datum, apply);
         }
+        return value;
+    }
+    return value;
+};
+
+export const applyStylesOnInteraction = (context, elem, interactionType, conf, options) => {
+    const { mountPoint, apply, reset } = options;
+
+    const d = elem.data()[0];
+    let datum;
+
+    if (Array.isArray(d)) {
+        datum = d[0];
+    } else {
+        datum = Array.isArray(d.data) ? d.data[0] : d;
+    }
+    const { currentState, originalStyle } = datum.meta;
+
+    let applicableStyles = {};
+
+    const { style: styles, strokePosition } = conf;
+    let applicableStrokePos = strokePosition;
+
+    if (reset) {
+        currentState.clear();
     }
 
-    // Apply style on the path elem and the border
-    elem.style(type, (d, i) => {
-        if (Array.isArray(d)) {
-            datum = d[i];
-        } else {
-            datum = Array.isArray(d.data) ? d.data[i] : d;
-        }
+    if (apply) {
+        const sanitizedStyles = {};
 
-        const { currentState, originalStyle } = datum.meta;
-        const interactionVal = currentState.get(interactionType);
-
-        if (apply) {
-            currentState.set(interactionType, interactionVal || {});
-            const lastInteractionVal = currentState.get(interactionType);
-
-            // apply interaction styles
-            lastInteractionVal[type] = value;
-
-            // Add to last evaluated style list
-            if (!currentState.get(interactionType)) {
-                currentState.set(interactionType, {});
-            }
-
-            // Add className to group
-            elem.classed(className || '', true);
-
-            if (type === 'stroke-width') {
-                // Apply stroke only to path and return 0 for the element's strokeWidth
-                context.addOverlayPath(
-                    elem.node(),
-                    datum,
-                    { type, value },
-                    interactionType,
-                    mountPoint
-                );
-                return 0;
-            }
-
-            // Add/style path border
-            context.addOverlayPath(
-                elem.node(),
+        for (const type in styles) {
+            const parsedStyleVal = parseStyle(styles[type], {
                 datum,
-                { type, value },
-                interactionType,
-                mountPoint
-            );
+                datumStyle: elem.style(type)
+            }, apply);
 
-            if (reset) {
-                // remove interaction styles
-                // const lastKey = Array.from(currentState.keys())[currentState.size - 1];
-                // currentState.delete(lastKey);
-                currentState.clear();
-            }
-
-            return value;
+            sanitizedStyles[type] = parsedStyleVal;
         }
-
+        currentState.set(interactionType, sanitizedStyles);
+        applicableStyles = sanitizedStyles;
+    } else {
         currentState.delete(interactionType);
+        applicableStyles = getPreviousStyle(datum.meta, interactionType);
+        applicableStyles = Object.assign({}, originalStyle.styles, applicableStyles);
+        applicableStrokePos = applicableStrokePos || originalStyle.strokePosition;
+    }
 
-        const stylesForCurrentLevel = getPreviousStyle(datum.meta, interactionType);
-        context.removeOverlayPath(datum, stylesForCurrentLevel);
-        elem.classed(className || '', false);
+    const styleKeys = Object.keys(applicableStyles);
+    const [strokeStyles, otherStyles] = partition(styleKeys, v => v in strokeProps);
 
-        if (type === 'stroke-width') {
-            return 0;
-        }
-        const finalStyles = Object.assign({}, originalStyle, stylesForCurrentLevel);
-        return finalStyles[type];
+    context.applyStyles({
+        strokeStyles,
+        otherStyles,
+        styleObj: applicableStyles,
+        elem,
+        datum,
+        applicableStrokePos,
+        mountPoint
     });
 };

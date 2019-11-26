@@ -183,7 +183,7 @@ export const AreaLayerMixin = superclass => class extends superclass {
                 rowId: d.rowId,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
                 style,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: getColorMetaInf(style)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
