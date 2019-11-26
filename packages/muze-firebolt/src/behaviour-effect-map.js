@@ -6,7 +6,7 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
         options: {
-            strategy: 'focus'
+            strategy: 'fadeOnBrush'
         }
     }, 'brush-anchors'],
     [BEHAVIOURS.HIGHLIGHT]: [{
