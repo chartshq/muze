@@ -1,12 +1,14 @@
 import * as BEHAVIOURS from './enums/behaviours';
 
 export const behaviourEffectMap = {
-    [BEHAVIOURS.BRUSH]: ['selectionBox', {
-        name: 'highlighter',
-        options: {
-            strategy: 'fadeOnBrush'
-        }
-    }, 'brush-anchors'],
+    [BEHAVIOURS.BRUSH]: ['selectionBox',
+        {
+            name: 'highlighter',
+            options: {
+                strategy: 'fadeOnBrush'
+            }
+        },
+        'brush-anchors'],
     [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
         name: 'tooltip',
         options: {

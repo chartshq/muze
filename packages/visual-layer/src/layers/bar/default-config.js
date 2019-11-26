@@ -11,7 +11,7 @@ export const defaultConfig = {
                 stroke: 'black',
                 'stroke-width': '1px'
             },
-            strokePosition: 'outside'
+            strokePosition: 'center'
         },
         focusStroke: {
             className: 'focus-stroke-class',

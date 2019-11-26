@@ -36,7 +36,7 @@ export const defaultConfig = {
             value: 1
         },
         fillOpacity: {
-            value: 0.5
+            value: 0.3
         }
     },
     transition: {

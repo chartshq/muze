@@ -1,5 +1,5 @@
-import { CLASSPREFIX } from '../../enums/constants';
 import { transformColor } from 'muze-utils';
+import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
     defClassName: 'layer-point',
@@ -76,13 +76,13 @@ export const defaultConfig = {
         x: {},
         y: {},
         strokeOpacity: {
-            value: 0.5
+            value: 1
         },
         fillOpacity: {
             value: 0.5
         },
         strokePosition: {
-            value: 'outside'
+            value: 'center'
         },
         interaction: {
             anchors: 'highlight',

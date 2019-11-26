@@ -59,7 +59,10 @@ export const applyStylesOnInteraction = (context, elem, interactionType, conf, o
     }
 
     if (apply) {
-        const sanitizedStyles = {};
+        const sanitizedStyles = {
+            styles: {},
+            strokePosition
+        };
 
         for (const type in styles) {
             const parsedStyleVal = parseStyle(styles[type], {
@@ -67,15 +70,16 @@ export const applyStylesOnInteraction = (context, elem, interactionType, conf, o
                 datumStyle: elem.style(type)
             }, apply);
 
-            sanitizedStyles[type] = parsedStyleVal;
+            sanitizedStyles.styles[type] = parsedStyleVal;
         }
         currentState.set(interactionType, sanitizedStyles);
-        applicableStyles = sanitizedStyles;
+        applicableStyles = sanitizedStyles.styles;
     } else {
         currentState.delete(interactionType);
-        applicableStyles = getPreviousStyle(datum.meta, interactionType);
-        applicableStyles = Object.assign({}, originalStyle.styles, applicableStyles);
-        applicableStrokePos = applicableStrokePos || originalStyle.strokePosition;
+        const currentStyle = getPreviousStyle(datum.meta, interactionType);
+        applicableStyles = Object.assign({}, originalStyle.styles, currentStyle.styles);
+        applicableStrokePos = currentStyle.strokePosition || originalStyle.strokePosition;
+        console.log(applicableStrokePos);
     }
 
     const styleKeys = Object.keys(applicableStyles);

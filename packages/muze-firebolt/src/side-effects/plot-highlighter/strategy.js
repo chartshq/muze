@@ -49,13 +49,25 @@ const fadeOnBrushFn = (set, context, payload) => {
             // onDrag style
             context.applyInteractionStyle(completeSet, { interactionType: 'brushStroke', apply: false });
         }
-        // Fade the non-brushed points
-        context.applyInteractionStyle(exitSet, { interactionType: 'focus', apply: true });
-        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
+        const layers = context.firebolt.context.layers();
 
-        // dragEnd style
-        context.applyInteractionStyle(exitSet, { interactionType, apply: false });
-        context.applyInteractionStyle(mergedEnter, { interactionType, apply: true });
+        layers.forEach((layer) => {
+            const layerName = layer.constructor.formalName();
+
+            // Apply style only on the hovered layer
+            if (layerName === 'area') {
+                context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: true }, [layer]);
+                context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+            } else {
+                // Fade the non-brushed points
+                context.applyInteractionStyle(exitSet, { interactionType: 'focus', apply: true }, [layer]);
+                context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false }, [layer]);
+
+                // dragEnd style
+                context.applyInteractionStyle(exitSet, { interactionType, apply: false }, [layer]);
+                context.applyInteractionStyle(mergedEnter, { interactionType, apply: true }, [layer]);
+            }
+        });
     }
 };
 
