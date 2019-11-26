@@ -1,6 +1,7 @@
 import SimpleAxis from './simple-axis';
 import { BAND } from '../enums/scale-type';
 import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
+import { selectElement } from 'muze-utils';
 
 export default class BandAxis extends SimpleAxis {
     /**
@@ -140,5 +141,16 @@ export default class BandAxis extends SimpleAxis {
         const p1 = scale(reverse ? extent[extent.length - 1] : extent[0]);
         const p2 = scale(reverse ? extent[0] : extent[extent.length - 1]) + scale.bandwidth();
         return [p1, p2];
+    }
+
+    getTicksBasedOnData (tickData = []) {
+        const mount = this.mount();
+        const allTicks = selectElement(mount).selectAll('.tick');
+        const elementToBeModified = allTicks.filter(tickValue => tickData.includes(tickValue));
+        const elementNotToBeModified = allTicks.filter(tickValue => !tickData.includes(tickValue));
+        return {
+            selectionSet: elementToBeModified,
+            rejectionSet: elementNotToBeModified
+        };
     }
 }

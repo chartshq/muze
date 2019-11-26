@@ -67,6 +67,9 @@ export const behaviourEffectMap = {
                 return null;
             }
         }
+    }, {
+        name: SIDE_EFFECTS.AXIS_LABEL_HIGHLIGHTER,
+        option: {}
     }],
     [BEHAVIOURS.FILTER]: ['filter'],
     [BEHAVIOURS.SELECT]: [
@@ -81,8 +84,5 @@ export const behaviourEffectMap = {
             options: {
                 strategy: 'selectionSummary'
             }
-        }, {
-            name: SIDE_EFFECTS.AXIS_LABEL_HIGHLIGHTER,
-            option: {}
         }]
 };

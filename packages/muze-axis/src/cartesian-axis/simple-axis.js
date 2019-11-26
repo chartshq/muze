@@ -489,5 +489,9 @@ export default class SimpleAxis {
             resolveFn();
         };
     }
+
+    getTicksBasedOnData () {
+        throw Error(`Modify not implemented for ${this.constructor.type()}`);
+    }
 }
 

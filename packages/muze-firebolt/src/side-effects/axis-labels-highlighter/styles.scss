@@ -1,0 +1,11 @@
+@import '../../prefix.scss';
+
+.#{$prefix}axis-ticks-highlight {
+    font-weight: bold;
+    fill: #595959;
+}
+
+.#{$prefix}axis-ticks-unhighlight {
+    font-weight: 400;
+    fill: #858585;
+}
