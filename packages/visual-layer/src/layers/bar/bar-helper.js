@@ -238,6 +238,7 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 },
                 source: d.source,
                 rowId: d.rowId,
+                data: d.dataObj,
                 style,
                 meta: getColorMetaInf(style, colorAxis, encoding.interactions)
             };

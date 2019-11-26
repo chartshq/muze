@@ -78,7 +78,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
             const currentInteraction = defaultInteractionLayerEncoding[layerName];
             const formattedUids = payload.target ? anchorLayer.getUidsFromPayload({
                 model: data,
-                uids: ids
+                uids: ids.map(d => [d])
             }, payload.target).uids : [];
 
             if (!formattedUids.length) {

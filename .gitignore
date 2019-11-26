@@ -109,6 +109,7 @@ packages/*/node_modules/
 */**/package-lock.json
 dist.zip
 sherlock.json
+examples/*
 
 TODO
 # End of https://www.gitignore.io/api/node,macos

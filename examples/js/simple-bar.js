@@ -5,19 +5,19 @@
     const DataModel = window.muze.DataModel;
 
     d3.json('/data/cars.json', (data) => {
-        data = [{
-            Cylinders: '5',
-            Acceleration: 1
-        }, {
-            Cylinders: '6',
-            Acceleration: 0.4
-        }, {
-            Cylinders: '7',
-            Acceleration: 0.6
-        }, {
-            Cylinders: '9',
-            Acceleration: 0.2
-        }];
+        // data = [{
+        //     Cylinders: '5',
+        //     Acceleration: 1
+        // }, {
+        //     Cylinders: '6',
+        //     Acceleration: 0.4
+        // }, {
+        //     Cylinders: '7',
+        //     Acceleration: 0.6
+        // }, {
+        //     Cylinders: '9',
+        //     Acceleration: 0.2
+        // }];
 
         const schema = [{
             name: 'Name',
@@ -68,27 +68,34 @@
 
     let rootData = new DataModel(data, schema)
 
-    // rootData.sort([
+    // rootData = rootData.sort([
     //     ['Cylinders', 'asc'],
-    //     ['Maker', 'desc'],
     // ])
+
+    // rootData = rootData.sort([
+    //     ['Origin', 'desc'],
+    // ])
+
+    // rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
     const canvas = env.canvas();
 
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Maker'])
+        .columns(['Origin'])
         .rows(['Acceleration'])
-        .mount('#chart')
-        .height(850)
-        .width(500)
         .color('Origin')
+        // .detail(['Maker'])
+        .mount('#chart')
+        .height(650)
+        .width(850)
+        // .config({
+        //     sort: {
+        //         // Maker : 'asc',
+        //         Origin: 'asc'
+        //     }
+        // })
         .title('Charts');
-    })
+    });
 })();
-
-
-// item: {
-//     text: {
-//         orientation: 'right',

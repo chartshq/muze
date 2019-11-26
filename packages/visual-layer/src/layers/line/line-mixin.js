@@ -17,7 +17,8 @@ import {
     getIndividualClassName,
     getColorMetaInf,
     resolveEncodingValues,
-    sortData
+    sortData,
+    getBoundBoxes
 } from '../../helpers';
 import { interactionStyleMap } from './helper';
 import './styles.scss';
@@ -134,6 +135,7 @@ export const LineLayerMixin = superclass => class extends superclass {
                 style,
                 rowId: d.rowId,
                 source: d.source,
+                data: d.dataObj,
                 meta: getColorMetaInf(style, colorAxis)
             };
             point.className = getIndividualClassName(d, i, data, this);
@@ -283,5 +285,9 @@ export const LineLayerMixin = superclass => class extends superclass {
             };
         }
         return null;
+    }
+
+    getBoundBoxes () {
+        return getBoundBoxes(this._points.flat());
     }
 };
