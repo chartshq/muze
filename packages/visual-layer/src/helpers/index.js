@@ -9,8 +9,7 @@ import {
     getObjProp,
     COORD_TYPES,
     CommonProps,
-    defaultValue,
-    hslaToRgb
+    defaultValue
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -19,63 +18,32 @@ import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCEN
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
 
-export const transformColor = (colorAxis, datum, styleType, intensity) => {
+export const transformColor = (colorAxis, datum, styleType, intensity, interactionType) => {
     const meta = datum.meta;
-    const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
+    const stateColor = defaultValue(meta.currentState[interactionType][styleType], meta.originalState[styleType]);
     const colorInfo = colorAxis.transformColor(stateColor, intensity);
 
-    meta.stateColor[styleType] = colorInfo.hsla;
+    // meta.stateColor[styleType] = colorInfo.hsla;
+    meta.currentState[interactionType][styleType] = colorInfo.hsla;
     return colorInfo;
 };
 
 export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
-    const axes = context.axes();
-    const colorAxis = axes.color;
-    const apply = config.apply;
-    const interactionType = config.interactionType;
-    const pathMountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
+    const { apply, interactionType, reset } = config;
+    const mountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
 
-    interactionStyles.forEach((style) => {
-        const styleType = style.type;
-        elements.forEach((elem) => {
-            const isSpecificInteraction = context.applySpecificStyle(styleType, {
-                elem,
-                apply,
-                interactionType,
-                style,
-                mountPoint: pathMountPoint,
-                colorAxis
-            });
+    elements.forEach((elem) => {
+        const options = { mountPoint, apply, reset };
+        context.applyLayerStyle(elem, interactionType, interactionStyles, options);
 
-            if (!isSpecificInteraction) {
-                // Common style for all the layers
-                elem.style(styleType, ((d, i) => {
-                    // d = d.data[i] || d;
-                    d = Array.isArray(d.data) ? d.data[i] : d;
+        // const interactionStylesEntries = Object.entries(interactionStyles.style);
 
-                    const { colorTransform, stateColor, originalColor } = d.meta;
-                    colorTransform[interactionType] = colorTransform[interactionType] || {};
-                    let h;
-                    let s;
-                    let l;
-                    let a;
-
-                    if (apply && !colorTransform[interactionType][styleType]) {
-                        // fade selections
-                        colorTransform[interactionType][styleType] = style.intensity;
-                        [h, s, l, a] = transformColor(colorAxis, d, styleType, style.intensity).hsla;
-                    } else if (!apply && colorTransform[interactionType][styleType]) {
-                        // unfade selections
-                        colorTransform[interactionType][styleType] = null;
-                        [h, s, l, a] = transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).hsla;
-                    } else {
-                        [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
-                    }
-                    return hslaToRgb(h, s, l, a);
-                }));
-            }
-        });
+        // for (const [type, value] of interactionStylesEntries) {
+        //     const style = { type, value };
+        //     const options = { mountPoint, apply, reset };
+        //     context.applyLayerStyle(elem, interactionType, style, options);
+        // }
     });
 };
 
@@ -550,25 +518,11 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (colorInf, colorAxis, auxStyles = {}) => ({
-    originalColor: Object.keys(colorInf).reduce((acc, key) => {
-        if (colorInf[key]) {
-            acc[key] = colorAxis.getHslArray(colorInf[key]);
-        }
-        return acc;
-    }, {}),
-    originalStrokeOnSelect: {
-        stroke: (auxStyles.select || {}).stroke,
-        'stroke-width': (auxStyles.select || {}).strokeWidth
-    },
-    originalStrokeOnHighlight: {
-        stroke: (auxStyles.highlight || {}).stroke,
-        'stroke-width': (auxStyles.highlight || {}).strokeWidth
-    },
-    stateStrokeOnSelect: {},
-    stateStrokeOnHighlight: {},
-    stateColor: {},
-    colorTransform: {}
+export const getColorMetaInf = (initialStyle, conf = {}) => ({
+    originalStyle: Object.assign({}, {
+        styles: initialStyle
+    }, conf),
+    currentState: new Map()
 });
 
 const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;

@@ -67,6 +67,62 @@ export const AreaLayerMixin = superclass => class extends superclass {
         return drawArea;
     }
 
+    getNearestPoint (x, y, config) {
+        let searchRadius = config.searchRadius;
+        const data = this.data();
+
+        if (!data || (data && data.isEmpty())) {
+            return null;
+        }
+
+        searchRadius = searchRadius !== undefined ? searchRadius : this.config().nearestPointThreshold;
+        let point = this._voronoi.find(x, y, searchRadius);
+        let index;
+        let nearestPoint = null;
+
+        if (!point && config.dimValue && this._pointMap) {
+            const pointArr = this._pointMap[config.dimValue[1]];
+
+            pointArr.forEach((p, i) => {
+                const { y: pointY, y0: pointY0 } = p.update;
+                if ((pointY < y && y < pointY0)) {
+                    index = i;
+                    nearestPoint = p;
+                }
+            });
+
+            if (index) {
+                point = {
+                    index,
+                    data: {
+                        x,
+                        y,
+                        data: nearestPoint
+                    }
+                };
+            }
+        }
+
+        const dimensions = getObjProp(point, 'data', 'data', 'update');
+
+        if (point) {
+            const { source, rowId } = point.data.data;
+            const identifiers = this.getIdentifiersFromData(source, rowId);
+            return {
+                id: identifiers,
+                dimensions: [{
+                    x: dimensions.x,
+                    y0: dimensions.y0,
+                    y: dimensions.y,
+                    width: 2,
+                    height: 2
+                }],
+                layerId: this.id()
+            };
+        }
+        return null;
+    }
+
     /**
      * Generates the x and y positions for each point
      * @param {Array} data Data Array
@@ -128,7 +184,7 @@ export const AreaLayerMixin = superclass => class extends superclass {
                 data: d.dataObj,
                 className: classNameFn ? classNameFn(d, i, data, this) : '',
                 style,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: getColorMetaInf(style)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
@@ -153,8 +209,8 @@ export const AreaLayerMixin = superclass => class extends superclass {
      */
     getPathStyle (color) {
         return {
-            fill: color
+            fill: color,
+            'fill-opacity': 0.30
         };
     }
 };
-

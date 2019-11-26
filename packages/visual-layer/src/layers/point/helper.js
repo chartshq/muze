@@ -1,7 +1,4 @@
-import {
-    FieldType,
-    COORD_TYPES
-} from 'muze-utils';
+import { FieldType, COORD_TYPES } from 'muze-utils';
 import { ENCODING } from '../../enums/constants';
 import {
     getIndividualClassName,
@@ -32,7 +29,8 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
     ({ shape, size, color } = resolvedEncodings);
     const style = {
         fill: color,
-        stroke: layerEncoding.stroke.value
+        stroke: layerEncoding.stroke.value,
+        'stroke-width': layerEncoding['stroke-width'].value
     };
     const { x, y } = resolvedEncodings;
     const pos = { x, y };
@@ -44,7 +42,9 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
         rowId,
         style,
         data: datum,
-        meta: getColorMetaInf(style, colorAxis),
+        meta: getColorMetaInf(style, {
+            strokePosition: layerEncoding.strokePosition.value
+        }),
         size
     };
 };
@@ -101,54 +101,4 @@ export const getStrokeWidthByPosition = (position, radius) => {
         outside: +(radius * Math.PI)
     };
     return strokeWidthWithOffsetMap[position];
-};
-
-// This is invoked only on point selection for applying a path around the point
-const strokeInteractionStyle = (context, elem, apply, interactionType, style) => {
-    const datum = elem.data()[0];
-    const styleType = style.type;
-    const { originalStrokeOnSelect, stateStrokeOnSelect } = datum.meta;
-    stateStrokeOnSelect[interactionType] = stateStrokeOnSelect[interactionType] || {};
-
-    if (apply && !stateStrokeOnSelect[interactionType][styleType]) {
-        // apply
-        stateStrokeOnSelect[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
-    }
-    if (!apply && stateStrokeOnSelect[interactionType][styleType]) {
-        // remove
-        stateStrokeOnSelect[interactionType][styleType] = originalStrokeOnSelect[styleType];
-        context.removeOverlayPath(datum, originalStrokeOnSelect);
-    }
-    return true;
-};
-
-const highlightStrokeOnInteraction = (context, elem, apply, interactionType, style) => {
-    const datum = elem.data()[0];
-    const styleType = style.type;
-    const { originalStrokeOnHighlight, stateStrokeOnHighlight } = datum.meta;
-    stateStrokeOnHighlight[interactionType] = stateStrokeOnHighlight[interactionType] || {};
-
-    if (apply && !stateStrokeOnHighlight[interactionType][styleType]) {
-        // apply
-        stateStrokeOnHighlight[interactionType][styleType] = style.props.value;
-        context.addOverlayPath(elem.node().parentElement, elem.node(), datum, style);
-    }
-    if (!apply && stateStrokeOnHighlight[interactionType][styleType]) {
-        // remove
-        stateStrokeOnHighlight[interactionType][styleType] = originalStrokeOnHighlight[styleType];
-        context.removeOverlayPath(datum, originalStrokeOnHighlight);
-    }
-    return true;
-};
-
-export const interactionStyleMap = {
-    focusStroke: {
-        stroke: (...params) => strokeInteractionStyle(...params),
-        'stroke-width': (...params) => strokeInteractionStyle(...params)
-    },
-    highlight: {
-        stroke: (...params) => highlightStrokeOnInteraction(...params),
-        'stroke-width': (...params) => highlightStrokeOnInteraction(...params)
-    }
 };

@@ -27,6 +27,7 @@ import {
 import { localOptions } from './local-options';
 import { listenerMap } from './listener-map';
 import { BASE_LAYER } from '../enums/constants';
+import { applyStylesOnInteraction } from './helper';
 
 const layerNs = [STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE];
 const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
@@ -369,15 +370,17 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    applyInteractionStyle (interactionType, selectionSet, apply, styles) {
+    applyInteractionStyle (interactionType, selectionSet, options) {
         const interactionConfig = this.config().interaction || {};
+        const { apply, styles, reset } = options;
 
         let interactionStyles = interactionConfig[interactionType];
         interactionStyles = styles || interactionStyles;
         if (interactionStyles) {
             applyInteractionStyle(this, selectionSet, interactionStyles, {
                 apply,
-                interactionType
+                interactionType,
+                reset
             });
         }
     }
@@ -435,15 +438,21 @@ export const BaseLayerMixin = superclass => class extends superclass {
         return this;
     }
 
-    // If a layer does not has specific styles, do nothing and return falsy value
     getInteractionStyles () {
+        return applyStylesOnInteraction;
+    }
+
+    addOverlayPath () {
         return null;
     }
 
-    applySpecificStyle (styleType, { elem, apply, interactionType, style, mountPoint }) {
-        const interactionFn = this.getInteractionStyles(interactionType, styleType);
-        if (!interactionFn) return false;
-        return interactionFn(this, elem, apply, interactionType, style, mountPoint);
+    removeOverlayPath () {
+        return null;
+    }
+
+    applyLayerStyle (elem, interactionType, style, options) {
+        const interactionFn = this.getInteractionStyles();
+        return interactionFn(this, elem, interactionType, style, options);
     }
 
     getIdentifiersFromData (data, rowId) {
@@ -570,7 +579,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
         }).sort((a, b) => a.y - b.y);
     }
 
-    getTransformedDataFromIdentifiers (identifiers) {
+    getTransformedDataFromIdentifiers (identifiers, idx = 0) {
         const { data: identifierData, schema: identifierSchema } = identifiers.getData();
         const normalizedData = this._normalizedData;
         const fieldsConfig = this.data().getFieldsConfig();
@@ -587,7 +596,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
             enc = 'x';
         } else if (yFieldType === FieldType.MEASURE) {
             measureIndex = fieldsConfig[yField].index;
-            enc = 'y';
+            enc = (idx % 2 === 0) ? 'y' : 'y0';
         }
 
         const transformedData = [];
@@ -705,6 +714,22 @@ export const BaseLayerMixin = superclass => class extends superclass {
     static getRenderProps () {
         return [`${layerNs[1]}.${PROPS.DATA}`, ...['x', 'y', 'radius'].map(type =>
             `${groupNs}.domain.${type}`)];
+    }
+
+    applyStyles ({ strokeStyles, otherStyles, styleObj, elem, mountPoint, applicableStrokePos, datum }) {
+        strokeStyles.forEach((type) => {
+            this.addOverlayPath(
+                elem.node(),
+                datum,
+                { type, value: styleObj[type] },
+                applicableStrokePos,
+                mountPoint
+            );
+        });
+
+        otherStyles.forEach((type) => {
+            elem.style(type, styleObj[type]);
+        });
     }
 
     getBoundBoxes () {

@@ -51,15 +51,17 @@ export default class SurrogateSideEffect extends GenericSideEffect {
      *
      * @return {SurrogateSideEffect} Instance of surrogate side effect.
      */
-    applyInteractionStyle (set, config = {}, interactionType, apply) {
-        const layers = this.firebolt.context.layers();
-        layers.forEach((layer) => {
+    applyInteractionStyle (set, config = {}, layers) {
+        const { interactionType, apply, reset = false } = config;
+        const allLayers = layers || this.firebolt.context.layers();
+        allLayers.forEach((layer) => {
             const { interactive } = layer.config();
             if (interactive !== false) {
                 const layerFields = layer.data().getFieldsConfig();
                 const filteredUids = set.uids.filter(([, measures = []]) => measures.every(m => m in layerFields))
                     .map(d => d[0]);
-                layer.applyInteractionStyle(interactionType, filteredUids, apply);
+                const options = { apply, reset, styles: null };
+                layer.applyInteractionStyle(interactionType, filteredUids, options);
             }
         });
         return this;

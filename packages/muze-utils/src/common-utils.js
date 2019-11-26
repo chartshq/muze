@@ -53,9 +53,9 @@ import {
     easeElastic
 } from 'd3-ease';
 import {
-   color,
-   rgb,
-   hsl
+    color,
+    rgb,
+    hsl
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import { dataSelect } from './DataSystem';
@@ -785,17 +785,17 @@ function hue2rgb (p, q, t) {
     return p;
 }
 
-  /**
-   * Converts an HSL color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-   * Assumes h, s, and l are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  l       The lightness
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  l       The lightness
+ * @return  Array           The RGB representation
+ */
 const hslToRgb = (h, s, l, a = 1) => {
     let r;
     let g;
@@ -815,17 +815,17 @@ const hslToRgb = (h, s, l, a = 1) => {
     return [r * 255, g * 255, b * 255, a];
 };
 
-  /**
-   * Converts an RGB color value to HSV. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes r, g, and b are contained in the set [0, 255] and
-   * returns h, s, and v in the set [0, 1].
-   *
-   * @param   Number  r       The red color value
-   * @param   Number  g       The green color value
-   * @param   Number  b       The blue color value
-   * @return  Array           The HSV representation
-   */
+/**
+ * Converts an RGB color value to HSV. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and v in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSV representation
+ */
 const rgbToHsv = (r, g, b, a = 1) => {
     r = +r; g = +g; b = +b; a = +a;
     r /= 255; g /= 255; b /= 255;
@@ -851,17 +851,17 @@ const rgbToHsv = (r, g, b, a = 1) => {
     return [h, s, l, a];
 };
 
-  /**
-   * Converts an HSV color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes h, s, and v are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  v       The value
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSV color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes h, s, and v are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  v       The value
+ * @return  Array           The RGB representation
+ */
 const hsvToRgb = (h, s, v, a = 1) => {
     let r;
     let g;
@@ -911,9 +911,9 @@ const detectColor = (col) => {
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
 
     // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchHsla = /^hsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -924,6 +924,63 @@ const detectColor = (col) => {
     } else if (matchHex.test(col)) {
         return 'hex';
     } return col;
+};
+
+function RGBAToHexA (rgba) {
+    const sep = rgba.indexOf(',') > -1 ? ',' : ' ';
+    rgba = rgba.substr(5).split(')')[0].split(sep);
+
+  // Strip the slash if using space-separated syntax
+    if (rgba.indexOf('/') > -1) { rgba.splice(3, 1); }
+
+    for (const R in rgba) {
+        const r = rgba[R];
+        if (r.indexOf('%') > -1) {
+            const p = r.substr(0, r.length - 1) / 100;
+
+            if (R < 3) {
+                rgba[R] = Math.round(p * 255);
+            } else {
+                rgba[R] = p;
+            }
+        }
+    }
+
+    let r = (+rgba[0]).toString(16);
+    let g = (+rgba[1]).toString(16);
+    let b = (+rgba[2]).toString(16);
+    let a = Math.round(+rgba[3] * 255).toString(16);
+
+    if (r.length === 1) { r = `0${r}`; }
+    if (g.length === 1) { g = `0${g}`; }
+    if (b.length === 1) { b = `0${b}`; }
+    if (a.length === 1) { a = `0${a}`; }
+
+    return `#${r}${g}${b}${a}`;
+
+    // r = r.toString(16);
+    // g = g.toString(16);
+    // b = b.toString(16);
+    // a = Math.round(a * 255).toString(16);
+
+    // if (r.length === 1) { r = `0${r}`; }
+    // if (g.length === 1) { g = `0${g}`; }
+    // if (b.length === 1) { b = `0${b}`; }
+    // if (a.length === 1) { a = `0${a}`; }
+
+    // return `#${r}${g}${b}${a}`;
+}
+
+const transformToHex = (datumStyle, colorType) => {
+    if (colorType === 'rgb') {
+        const [r, g, b, a] = datumStyle.replace(/[^\d,]/g, '').split(',');
+        const aa = a || 1;
+
+        const rgbaString = `rgba(${r}, ${g}, ${b}, ${aa})`;
+        return RGBAToHexA(rgbaString);
+    }
+    // Add methods to handle hsl and hex conversion
+    return null;
 };
 
 const assembleModelFromIdentifiers = (model, identifiers) => {
@@ -1174,7 +1231,7 @@ const stackOffsets = {
 
 // eslint-disable-next-line require-jsdoc
 const stack = params => d3Stack().keys(params.keys).offset(stackOffsets[params.offset])
-                .order(stackOrders[params.order])(params.data);
+    .order(stackOrders[params.order])(params.data);
 
 /**
  * Groups the data into a hierarchical tree structure based on one or more fields.
@@ -1400,6 +1457,71 @@ const componentRegistry = (comps) => {
     return regObj;
 };
 
+// function hexAToHSL (H) {
+//     // Convert hex to RGB first
+//     let r = 0;
+//     let g = 0;
+//     let b = 0;
+//     let a = 1;
+
+//     if (H.length === 4) {
+//         r = `0x${H[1]}${H[1]}`;
+//         g = `0x${H[2]}${H[2]}`;
+//         b = `0x${H[3]}${H[3]}`;
+//     } else if (H.length === 7) {
+//         r = `0x${H[1]}${H[2]}`;
+//         g = `0x${H[3]}${H[4]}`;
+//         b = `0x${H[5]}${H[6]}`;
+//     } else if (H.length === 5) {
+//         r = `0x${H[1]}${H[1]}`;
+//         g = `0x${H[2]}${H[2]}`;
+//         b = `0x${H[3]}${H[3]}`;
+//         a = `0x${H[4]}${H[4]}`;
+//     } else if (H.length === 9) {
+//         r = `0x${H[1]}${H[2]}`;
+//         g = `0x${H[3]}${H[4]}`;
+//         b = `0x${H[5]}${H[6]}`;
+//         a = `0x${H[7]}${H[8]}`;
+//     }
+
+//     // Then to HSL
+//     r /= 255;
+//     g /= 255;
+//     b /= 255;
+//     const cmin = Math.min(r, g, b);
+//     const cmax = Math.max(r, g, b);
+//     const delta = cmax - cmin;
+
+//     let h = 0;
+//     let s = 0;
+//     let l = 0;
+
+//     if (delta === 0) {
+//         h = 0;
+//     } else if (cmax === r) {
+//         h = ((g - b) / delta) % 6;
+//     } else if (cmax === g) {
+//         h = (b - r) / delta + 2;
+//     } else {
+//         h = (r - g) / delta + 4;
+//     }
+
+//     h = Math.round(h * 60);
+
+//     if (h < 0) { h += 360; }
+
+//     l = (cmax + cmin) / 2;
+//     s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+//     s = +(s * 100).toFixed(1);
+//     l = +(l * 100).toFixed(1);
+//     a = (a / 255).toFixed(3);
+
+//     return {
+//         color: `hsla(${h},${s}%,${l}%,${a})`,
+//         code: [h, s, l, a]
+//     };
+// }
+
 const getReadableTicks = (domain, steps) => {
     // scaling the axis based on steps provided
     const orderedDomain = [Math.min(...domain), Math.max(...domain)];
@@ -1426,6 +1548,71 @@ const getReadableTicks = (domain, steps) => {
     return legendTicks;
 };
 
+const RGBAToHSLA = (r, g, b, a = 1) => {
+    // Make r, g, and b fractions of 1
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    // Find greatest and smallest channel values
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    // Calculate hue
+    // No difference
+    if (delta === 0) {
+        h = 0;
+    } else if (cmax === r) {
+        // Red is max
+        h = ((g - b) / delta) % 6;
+    } else if (cmax === g) {
+        // Green is max
+        h = (b - r) / delta + 2;
+    } else {
+        // Blue is max
+        h = (r - g) / delta + 4;
+    }
+    h = Math.round(h * 60);
+
+    // Make negative hues positive behind 360°
+    if (h < 0) { h += 360; }
+    // Calculate lightness
+    l = (cmax + cmin) / 2;
+    // Calculate saturation
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    // Multiply l and s by 100
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return {
+        color: `hsla(${h},${s}%,${l}%,${a})`,
+        code: [h, s, l, a]
+    };
+};
+
+const transformColor = (rgbaValues, { h = 0, s = 0, l = 0, a }, datum, apply) => {
+    const [origH, origS, origL, origA] = RGBAToHSLA(...rgbaValues).code;
+    const sanitizedA = parseFloat(a || origA, 10);
+    const newH = origH + h;
+    const newS = origS + s;
+    const newL = origL + l;
+    let newA = sanitizedA + 1;
+
+    if (!apply) {
+        newA = sanitizedA - 1;
+    }
+
+    const finalcolor = {
+        color: `hsla(${newH},${newS}%,${newL}%,${newA})`,
+        hsla: [newH, newS, newL, newA]
+    };
+    return finalcolor;
+};
+
 export {
     arraysEqual,
     componentRegistry,
@@ -1443,11 +1630,13 @@ export {
     nestCollection,
     getArrayDiff,
     getSymbol,
+    transformColor,
     transformColors,
     detectColor,
     hexToHsv,
     hslToRgb,
     rgbToHsv,
+    transformToHex,
     hsvToRgb,
     hslaToRgb,
     concatModels,

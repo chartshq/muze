@@ -27,6 +27,7 @@ export {
 export {
     getNearestValue,
     getValueParser,
+    transformColor,
     transformColors,
     detectColor,
     hslToRgb,

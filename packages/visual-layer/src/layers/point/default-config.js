@@ -1,4 +1,5 @@
 import { CLASSPREFIX } from '../../enums/constants';
+import { transformColor } from 'muze-utils';
 
 export const defaultConfig = {
     defClassName: 'layer-point',
@@ -6,42 +7,54 @@ export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defColorStyle: 'stroke',
     interaction: {
-        highlight: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 1,
-                    position: 'center'
-                }
+        highlight: {
+            className: 'highlight-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+                // fill: 'red'
+            },
+            strokePosition: 'center'
+        },
+        focusStroke: {
+            className: 'focus-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+                // fill: 'blue'
+            },
+            strokePosition: 'outside'
+        },
+        brushStroke: {
+            className: 'brush-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+                // fill: 'blue'
+            },
+            strokePosition: 'outside'
+        },
+        doubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        },
+        fade: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +20
+                }, data, apply).color
             }
-        ],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, +20, 0]
-        }],
-        focusStroke: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 2,
-                    position: 'outside'
-                }
+        },
+        focus: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
             }
-        ]
+        }
     },
     innerPadding: 0.1,
     nearestPointThreshold: 10,
@@ -58,7 +71,10 @@ export const defaultConfig = {
         },
         color: {},
         stroke: {
-            value: 'hsla(0,0%,0%,0)'
+            value: null
+        },
+        'stroke-width': {
+            value: 0
         },
         fill: {},
         shape: {
@@ -72,9 +88,13 @@ export const defaultConfig = {
         fillOpacity: {
             value: 0.5
         },
+        strokePosition: {
+            value: 'outside'
+        },
         interaction: {
             anchors: 'highlight',
-            'persistent-anchors': 'focusStroke'
+            'persistent-anchors': 'focusStroke',
+            'brush-anchors': 'brushStroke'
         }
     },
     shapes: ['circle', 'cross', 'diamond', 'square', 'star', 'wye', 'triangle'],
