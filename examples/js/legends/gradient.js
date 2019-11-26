@@ -80,57 +80,38 @@ d3.json('../data/cars.json', function (data) {
 
 
     env = env.data(rootData)
-
-    var mountPoint = document.getElementById('chart');
-
     window.canvas = env.canvas();
-
-
-    rootData = rootData.groupBy(['Year', 'Origin'], {
-
-        Horsepower: 'mean',
-
-        Acceleration: 'mean'
-
-    });
-
-
-    var mountPoint = document.getElementById('chart');
-
-    window.canvas = env.canvas();
-
-    var rows = [['Acceleration']],
-
-        columns = [['Year']];
-
 
     env.canvas()
+        .rows(["Maker"])
+        .height(400)
+        .columns(['Acceleration'])
+        .data(rootData)
+        .color({
+            field: 'Acceleration',
+            stops: 3
+        })
+        .config({
+            legend: {
+                position: 'bottom'
+            }
+        })
+        .mount('#chart1')
 
-    .rows(rows)
-
-    .columns(columns)
-
-    .data(rootData)
-
-    .layers([{
-
-        mark: 'bar'
-
-    }])
-
-    .width(800)
-
-    .height(600)
-
-    .color({
-
-        field: 'Horsepower',
-
-        stops:5
-
-    })
-    .title('Gradient')
-
-    .mount('#chart4')
+    env.canvas()
+        .rows(["Maker"])
+        .height(400)
+        .columns(['Acceleration'])
+        .data(rootData)
+        .color({
+            field: 'Acceleration',
+            stops: 3
+        })
+        .config({
+            legend: {
+                position: 'left'
+            }
+        })
+        .mount('#chart2')
 
 });
