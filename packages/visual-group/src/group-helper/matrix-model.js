@@ -98,9 +98,10 @@ const createJoinedKeys = keys => keys.map(e => ({
     joinedKey: e.join(',')
 }));
 
-const setDefaultConfigForFacet = (facetInfo, config) => {
+const setDefaultConfigForFacet = (facetInfo, projectionInfo, config) => {
     let conf = {};
-    if (facetInfo.allFacets.length > 0) {
+
+    if (facetInfo.allFacets.length || projectionInfo.indices.length > 1) {
         const { facetsUserConfig, border } = config;
         const { isBorderPresent, isGridLinePresent } = facetsUserConfig;
         const gridLinesShowLength = Object.keys(isGridLinePresent).length;
@@ -341,7 +342,7 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConf
         colKeys
     } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
 
-    const defaultConfig = setDefaultConfigForFacet(facetInfo, globalConfig);
+    const defaultConfig = setDefaultConfigForFacet(facetInfo, projectionInfo, globalConfig);
     globalConfig = mergeRecursive(globalConfig, defaultConfig);
 
     const generalContext = {
