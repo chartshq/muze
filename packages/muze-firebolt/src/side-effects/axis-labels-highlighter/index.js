@@ -10,9 +10,9 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
         return AXIS_LABEL_HIGHLIGHTER;
     }
 
-    // static target () {
-    //     return 'visual-unit';
-    // }
+    static target () {
+        return 'visual-unit';
+    }
 
     apply (selectionSet, payload, options = {}) {
         debugger;

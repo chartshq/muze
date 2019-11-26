@@ -1,5 +1,6 @@
 import { intersect } from 'muze-utils';
 import * as BEHAVIOURS from './enums/behaviours';
+import * as SIDE_EFFECTS from './enums/side-effects';
 import { unionSets } from './helper';
 
 export const behaviourEffectMap = {
@@ -80,5 +81,8 @@ export const behaviourEffectMap = {
             options: {
                 strategy: 'selectionSummary'
             }
-        }, 'axis-label-highlighter']
+        }, {
+            name: SIDE_EFFECTS.AXIS_LABEL_HIGHLIGHTER,
+            option: {}
+        }]
 };
