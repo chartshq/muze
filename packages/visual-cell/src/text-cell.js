@@ -131,10 +131,6 @@ class TextCell extends SimpleCell {
             this.logicalSpace(computeTextSpace(this));
         }
         const space = computeTextSpace(this);
-        if (!isTitleSubtitle(this.config().className)) {
-            space.width += 15;
-        }
-
         this.logicalSpace(space);
         return this.logicalSpace();
     }

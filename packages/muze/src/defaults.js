@@ -73,7 +73,6 @@ export const DEFAULT_CONFIG = {
         collapse: true,
         spacing: 0
     },
-    facetBorder: 1,
     autoGroupBy: {
         disabled: false
     },

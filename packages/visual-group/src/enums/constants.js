@@ -279,6 +279,7 @@ export const HEADER = 'header';
  * Field referring to object storing the transforms
  */
 export const FACET = 'facet';
+export const DEFAULT = 'default';
 /**
  * Ordering type
  */

@@ -43,14 +43,7 @@ export default class MatrixComponent extends MuzeComponent {
     }
 
     renderMatrix (mountPoint) {
-        // Creating containers for each matrix individually
-        const classPrefix = this.params.config.classPrefix;
-        const row = this.params.config.row;
-        const column = this.params.config.column;
-        const dimensions = this.params.config.dimensions;
-        const border = this.params.config.border;
-        const isFacet = this.params.config.isFacet;
-        const showHeaders = this.params.config.showHeaders;
+        const { classPrefix, row, column, dimensions, border, isFacet, showHeaders } = this.params.config;
 
         // Creating containers for each matrix individually
         const containerForMatrix = makeElement(mountPoint, 'div', [1], `${classPrefix}-grid-${row}-${column + 1}`)

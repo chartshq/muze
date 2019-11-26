@@ -22,16 +22,24 @@ export const initCanvas = (context) => {
 };
 
 export const fixFacetConfig = (config) => {
-    config.facetsUserConfig = {};
+    let isBorderPresent = false;
+    const isGridLinePresent = {};
+
     if (config.border && config.border.width) {
-        config.facetsUserConfig.isBorderPresent = true;
+        isBorderPresent = true;
     }
     if (config.gridLines) {
-        config.facetsUserConfig.isGridLinePresent = {};
-        config.facetsUserConfig.isGridLinePresent.x = !!config.gridLines.x;
-        config.facetsUserConfig.isGridLinePresent.y = !!config.gridLines.y;
+        isGridLinePresent.x = !!config.gridLines.x;
+        isGridLinePresent.y = !!config.gridLines.y;
     }
-    config.isFacet = false;
+    const facetsUserConfig = {
+        isBorderPresent,
+        isGridLinePresent
+    };
+    return {
+        facetsUserConfig,
+        isFacet: false
+    };
 };
 
 export const fixScrollBarConfig = (config) => {

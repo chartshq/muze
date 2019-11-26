@@ -40,5 +40,5 @@ export const PADDING = 'padding';
 export const HEADER_PADDING = 'headerPadding';
 export const TITLE_PADDING = 'titlePadding';
 
-export const TITLE_CELL = 'title-cell';
-export const SUBTITLE_CELL = 'subtitle-cell';
+export const TITLE = 'title';
+export const SUBTITLE = 'subtitle';

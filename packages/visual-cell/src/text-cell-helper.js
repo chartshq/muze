@@ -4,9 +4,8 @@ import {
     LEFT,
     RIGHT,
     HEADER,
-    TITLE_CELL,
-    CLASSPREFIX,
-    SUBTITLE_CELL
+    TITLE,
+    SUBTITLE
 } from './enums/constants';
 
 export const setSmartText = (context) => {
@@ -37,6 +36,14 @@ export const setSmartText = (context) => {
     rotation && context.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
 
     return context;
+};
+
+export const isTitleSubtitle = (subType) => {
+    let returnVal = false;
+    if (subType === `${TITLE}` || subType === `${SUBTITLE}`) {
+        returnVal = true;
+    }
+    return returnVal;
 };
 
 /**
@@ -88,6 +95,11 @@ export const computeTextSpace = (context) => {
         context.smartText(smartSpace);
     }
 
+    const { subType, headerPadding } = context.config();
+    if (!isTitleSubtitle(subType)) {
+        space.width += headerPadding[LEFT] + headerPadding[RIGHT];
+    }
+
     if (show) {
         return {
             width: Math.ceil(space.width) + paddedWidth,
@@ -97,14 +109,6 @@ export const computeTextSpace = (context) => {
         width: 0,
         height: 0
     };
-};
-
-export const isTitleSubtitle = (className) => {
-    let returnVal = false;
-    if (className === `${CLASSPREFIX}-${TITLE_CELL}` || className === `${CLASSPREFIX}-${SUBTITLE_CELL}`) {
-        returnVal = true;
-    }
-    return returnVal;
 };
 
 export const setPadding = (measures) => {

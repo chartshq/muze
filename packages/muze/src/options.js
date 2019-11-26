@@ -63,7 +63,10 @@ export default {
                 // Stores additional config, if passed
                 const { reset = false } = auxConfig;
                 let oldConf = {};
-                fixFacetConfig(config);
+
+                // handle the default cases for facet, as it is different to other charts
+                const facetDefaultConfig = fixFacetConfig(config);
+                config = mergeRecursive(config, facetDefaultConfig);
 
                 if (!reset) {
                     oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
