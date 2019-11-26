@@ -84,7 +84,7 @@ export const strategies = {
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
-            context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
+            context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false, reset: true });
             // Remove brushed points when clicked on empty chart area
             context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
         } else {
