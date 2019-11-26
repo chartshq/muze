@@ -17,6 +17,23 @@ import {
     setSideEffectConfig
 } from './helper';
 
+const cloneObj = (behaviourEffectMap) => {
+    const keys = Object.keys(behaviourEffectMap);
+
+    return keys.reduce((acc, key) => {
+        const value = behaviourEffectMap[key];
+        const cloned = value.map((d) => {
+            let clonedVal = d;
+            if (isSimpleObject(d)) {
+                clonedVal = mergeRecursive({}, d);
+            }
+            return clonedVal;
+        });
+        acc[key] = cloned;
+        return acc;
+    }, {});
+};
+
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
         const data = firebolt.data();
@@ -78,7 +95,7 @@ export default class Firebolt {
         this._queuedSideEffects = {};
         this._handlers = {};
 
-        this.mapSideEffects(behaviourEffectMap);
+        this.mapSideEffects(cloneObj(behaviourEffectMap));
         this.registerBehaviouralActions(actions.behavioural);
         this.registerSideEffects(sideEffects);
         this.registerPhysicalBehaviouralMap(actions.physicalBehaviouralMap);
