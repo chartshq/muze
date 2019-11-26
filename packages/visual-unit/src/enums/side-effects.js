@@ -1,0 +1,2 @@
+export const Highlighter = 'highlighter';
+

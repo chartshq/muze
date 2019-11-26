@@ -1,126 +1,75 @@
-/* eslint-disable*/
-let env = muze();
-const DataModel = muze.DataModel;
-
-d3.json('/data/cars.json', (data) => {
+d3.csv('../data/heatmap.csv', (data) => {
+    // load data and schema from url
+    // Retrieves the DataModel from muze namespace. Muze recognizes DataModel as a first class source of data.
+    const DataModel = window.muze.DataModel;
     const schema = [{
+        name: 'Month',
+        type: 'dimension'
+    }, {
         name: 'Name',
         type: 'dimension'
     }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'Sales',
         type: 'measure'
-    }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
-        type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
     }];
+
     // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);
+    const rootData = new DataModel(data, schema);
+    // Create a global environment to share common configs across charts
+    const env = window.muze();
+    // Create a canvas from the global environment
+    let canvas = env.canvas();
 
-	env.canvas()
-  		.rows(['Horsepower']) // CountVehicle goes in y axis
-      	.columns(['Acceleration']) // Cylinders goes in x-axis
-      	.color('Origin') // Colors encoding using the Origin field
-        .data(rootData)
-        .config({
-            legend: {
-                color: {
-                    item: {
-                        text: { orientation: 'bottom' }
-                    }
-                },
-                position: 'right'
+    canvas = canvas.rows(['Name']).columns(['Month']).layers([{ // For drawing the heatmap background
+        mark: 'bar'
+    }, { // For drawing the text
+        mark: 'text',
+        encoding: {
+            text: {
+                field: 'Sales',
+                formatter: function formatter (value) {
+                    return `${(value / 1000).toFixed(1)}k`;
+                } // Formats the value of text
+            },
+            color: {
+                value: function value () {
+                    return '#fff';
+                }
             }
-        })
-  		.width(600)
-      	.height(400)
-  		.title('Stacked bar chart', { position: 'top', align: 'right'})
-  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right'})
-        .mount('#chart2');
-    
-    env.canvas()
-  		.rows(['Horsepower']) // CountVehicle goes in y axis
-      	.columns(['Origin']) // Cylinders goes in x-axis
-      	.size('Acceleration') // Colors encoding using the Origin field
-        .data(rootData)
-        .config({
-            legend: {
-                size: {
-                    item: {
-                        text: { orientation: 'right' }
-                    }
-                },
-                position: 'right'
+        },
+        interactive: false
+    }]).config({
+        axes: { // With bar encoding, it normally draws a bar chart without padding. Here its forcefully made zero
+            x: {
+                padding: 0
+            },
+            y: {
+                padding: 0
             }
-        })
-  		.width(600)
-      	.height(400)
-  		.title('Stacked bar chart', { position: 'top', align: 'right'})
-  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right'})
-          .mount('#chart3');
-          
-        env.canvas()
-  		.rows(['Horsepower']) // CountVehicle goes in y axis
-      	.columns(['Origin']) // Cylinders goes in x-axis
-      	.size('Acceleration') // Colors encoding using the Origin field
-        .data(rootData)
-        .config({
-            legend: {
-                // size: {
-                //     item: {
-                //         text: { orientation: 'bottom' }
-                //     }
-                // }
-                position: 'right'
-            }
-        })
-  		.width(600)
-      	.height(400)
-  		.title('Stacked bar chart', { position: 'top', align: 'right'})
-  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right'})
-          .mount('#chart4');
-          
-          env.canvas()
-  		.rows(['Horsepower']) // CountVehicle goes in y axis
-      	.columns(['Origin']) // Cylinders goes in x-axis
-      	.color('Acceleration') // Colors encoding using the Origin field
-        .data(rootData)
-        .config({
-            legend: {
-                // size: {
-                //     item: {
-                //         text: { orientation: 'bottom' }
-                //     }
-                // }
-                position: 'left'
-            }
-        })
-  		.width(600)
-      	.height(400)
-  		.title('Stacked bar chart', { position: 'top', align: 'right'})
-  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right'})
-      	.mount('#chart5');
+        },
+        legend: {
+            position: 'right'
+        }
+    }).data(rootData).color({ // Color encoding
+        field: 'Sales',
+        step: true,
+        range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
+    }).width(750).height(450)
+    // .title('Heatmap', { position: 'top', align: 'right' })
+    .title('The car acceleration respective to origin').subtitle('Sales per month for each sales person', ).mount('#chart');
+
+    canvas.once('canvas.updated').then(() => {
+        // Disable events from legend
+        const legend = canvas.legend().color;
+        legend.firebolt().dissociateBehaviour('highlight', 'hover');
+        legend.firebolt().dissociateBehaviour('select', 'click');
+    });
+
+    // Disable events from legend
+    // muze.ActionModel.for(canvas).dissociateBehaviour(['select', 'click'], ['brush', 'drag']);
+
+    canvas.once('canvas.animationend').then((client) => {
+        const element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
 });
-

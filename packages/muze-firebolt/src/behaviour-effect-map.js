@@ -68,15 +68,17 @@ export const behaviourEffectMap = {
         }
     }],
     [BEHAVIOURS.FILTER]: ['filter'],
-    [BEHAVIOURS.SELECT]: [{
-        name: 'highlighter',
-        options: {
-            strategy: 'focus'
-        }
-    }, 'persistent-anchors', {
-        name: 'tooltip',
-        options: {
-            strategy: 'selectionSummary'
-        }
-    }]
+    [BEHAVIOURS.SELECT]: [
+        {
+            name: 'highlighter',
+            options: {
+                strategy: 'focus'
+            }
+        }, 'persistent-anchors',
+        {
+            name: 'tooltip',
+            options: {
+                strategy: 'selectionSummary'
+            }
+        }, 'axis-label-highlighter']
 };
