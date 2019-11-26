@@ -35,4 +35,8 @@ export default class PersistentAnchors extends AnchorEffect {
     getAnchorSizeonInteraction () {
         return 50;
     }
+
+    getAnchorStroke () {
+        return '2px';
+    }
 }

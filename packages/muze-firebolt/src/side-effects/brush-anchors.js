@@ -29,4 +29,8 @@ export default class BrushAnchors extends AnchorEffect {
             anchor.applyInteractionStyle(defaultInteractionLayerEncoding[layerName], ids, { apply: true });
         });
     }
+
+    getAnchorStroke (payload) {
+        return payload.dragEnd ? '2px' : '1px';
+    }
 }
