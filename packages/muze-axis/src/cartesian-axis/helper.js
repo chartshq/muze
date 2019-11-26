@@ -139,8 +139,8 @@ export const computeAxisDimensions = (context) => {
     if (domain.length === 0) {
         return {
             allTickDimensions,
-            tickSize,
-            tickDimensions,
+            tickSize: 0,
+            tickDimensions: { height: 0, width: 0 },
             axisNameDimensions,
             largestTickDimensions,
             axisTicks
@@ -242,7 +242,7 @@ export const getVerticalAxisSpace = (context, axisDimensions) => {
 
         height = ((max - min) / Math.abs(minTickDiff)) * tickDimHeight;
     }
-    width += (showAxisName ? axisDimHeight : 0) + tickSize + axisNamePadding;
+    width += (showAxisName ? axisDimHeight : 0) + tickSize + (tickValues ? axisNamePadding : 0);
 
     return {
         height,
@@ -306,12 +306,6 @@ export const calculateBandSpace = (context) => {
  * @return {Object} Width and height occupied by the axis.
  */
 export const calculateContinousSpace = (context) => {
-    if (context.domain().length === 0) {
-        return {
-            width: 0,
-            height: 0
-        };
-    }
     const range = context.range();
     const axisDimensions = context.getAxisDimensions();
     const { orientation } = context.config();
