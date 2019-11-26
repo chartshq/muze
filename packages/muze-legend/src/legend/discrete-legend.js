@@ -108,7 +108,11 @@ export default class DiscreteLegend extends SimpleLegend {
         const { legendItem } = createLegendSkeleton(this, legendContainer, classPrefix, data);
         const { itemSkeleton } = createItemSkeleton(this, legendItem);
         renderDiscreteItem(this, itemSkeleton);
-        legendContainer.selectAll('div').style('float', LEFT);
+
+        legendContainer.selectAll('div')
+        .filter((datum, i, allSelections) => !allSelections[i].classList.contains(`${classPrefix}-legend-body`))
+        .style('float', LEFT);
+
         firebolt.mapActionsAndBehaviour();
         return legendContainer;
     }

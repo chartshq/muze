@@ -1,44 +1,55 @@
 import { CLASSPREFIX } from '../../enums/constants';
+import { transformColor } from 'muze-utils';
 
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defClassName: 'layer-bar',
     className: '',
     interaction: {
-        highlight: [{
-            type: 'stroke',
-            props: {
-                value: 'black'
+        highlight: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+            },
+            strokePosition: 'center'
+        },
+        focusStroke: {
+            className: 'focus-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        },
+        brushStroke: {
+            className: 'brush-stroke-class',
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+            },
+            strokePosition: 'outside'
+        },
+        doubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        },
+        fade: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
             }
-        }, {
-            type: 'stroke-width',
-            props: {
-                value: 1,
-                position: 'outside'
+        },
+        focus: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
             }
-        }],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, 0, -0.5]
-        }],
-        focusStroke: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 2,
-                    position: 'outside'
-                }
-            }
-        ]
+        }
     },
     transform: {
         type: 'stack'
@@ -53,17 +64,15 @@ export const defaultConfig = {
         x: {},
         y: {},
         x0: {},
-        y0: {}
-    },
-    states: {
-        highlight: {
-            className: `${CLASSPREFIX}-layer-bar-highlight`
+        y0: {},
+        stroke: {
+            value: '#000'
         },
-        fadeout: {
-            className: `${CLASSPREFIX}-layer-bar-fadeout`
+        strokeWidth: {
+            value: '0px'
         },
-        selected: {
-            className: `${CLASSPREFIX}-layer-bar-selected`
+        strokePosition: {
+            value: 'center'
         }
     }
 };

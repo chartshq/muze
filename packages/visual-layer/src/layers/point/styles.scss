@@ -2,22 +2,4 @@
 
 .#{$prefix}layer-point {
     fill-opacity: 0.5;
-    fill: #1f77b4;
-}
-
-.#{$prefix}layer-point-highlight {
-    stroke-width: 2px !important;
-    fill-opacity: 0;
-    stroke-opacity: 1;
-}
-
-.#{$prefix}layer-point-fadeout {
-    fill-opacity: 0.3 !important;
-    fill: #7f7f7f !important;
-    stroke-opacity: 0.3 !important;
-    stroke: #7f7f7f !important;
-}
-
-.#{$prefix}layer-point-selected {
-    fill: #000 !important;
 }

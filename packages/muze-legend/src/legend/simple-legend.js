@@ -13,7 +13,7 @@ import { actionBehaviourMap } from '../firebolt/action-behaviour-map';
 import { physicalActions } from '../firebolt/physical';
 import * as sideEffects from '../firebolt/side-effects';
 import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
-import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM } from '../enums/constants';
+import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM, POSITION_ALIGNMENT_MAP, HORIZONTAL } from '../enums/constants';
 import { PROPS } from './props';
 import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
 import { getItemMeasures, titleCreator, computeItemSpaces, prepareSelectionSetData } from './legend-helper';
@@ -235,7 +235,20 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     renderTitle (container) {
-        const { titleSpaces, border, padding, width, maxWidth } = this.measurement();
+        const titleWidth = this._labelManager.getOriSize(this._title.text).width;
+        const { titleSpaces, border, padding, maxWidth, maxItemSpaces, margin, itemSpaces } = this.measurement();
+        const { position, buffer } = this.config();
+        const alignment = POSITION_ALIGNMENT_MAP[position];
+        let width = 0;
+
+        if (alignment === HORIZONTAL) {
+            const localBuffer = buffer[alignment];
+            width = itemSpaces.reduce((acc, cur) => acc + cur.width + localBuffer, 0);
+        } else if (maxItemSpaces.width < titleWidth) {
+            width = titleWidth + 2 * margin;
+        } else {
+            width = maxItemSpaces.width;
+        }
         const { borderStyle, borderColor } = this.config();
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
@@ -244,7 +257,8 @@ export default class SimpleLegend {
             border,
             padding,
             borderStyle,
-            borderColor
+            borderColor,
+            alignment
         }, this.config());
     }
 
@@ -264,10 +278,6 @@ export default class SimpleLegend {
             position
         } = this.config();
         const {
-            maxWidth,
-            maxHeight,
-            width,
-            height,
             border,
             marginHorizontal
         } = this.measurement();
@@ -294,9 +304,7 @@ export default class SimpleLegend {
         legendContainer.classed(`${classPrefix}-legend-box-${this._id}`, true);
         legendContainer.style('float', 'left');
         // set height and width
-        legendContainer.style('width', `${Math.min(maxWidth, width) - margin * 2}px`)
-                        .style('height', `${Math.min(maxHeight, height) - margin * 2}px`)
-                        .style(`${marginPosition}`, `${margin}px`)
+        legendContainer.style(`${marginPosition}`, `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 

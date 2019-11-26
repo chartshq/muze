@@ -51,3 +51,15 @@ export const DISCRETE = 'discrete';
 export const MEASURE = 'measure';
 export const DEFAULT = 'default';
 
+export const POSITION_ALIGNMENT_MAP = {
+    [LEFT]: VERTICAL,
+    [RIGHT]: VERTICAL,
+    [TOP]: HORIZONTAL,
+    [BOTTOM]: HORIZONTAL
+};
+
+export const OPPOSITE_POSITION = {
+    [LEFT]: RIGHT,
+    [RIGHT]: LEFT
+};
+

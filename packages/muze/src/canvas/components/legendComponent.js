@@ -85,8 +85,7 @@ export default class LegendComponent extends MuzeComponent {
                             .style('width', `${legWidth}px`);
 
             makeElement(mount, 'div', this.components, `${classPrefix}-legend-components`, {}, d => d.legend.id())
-                            .each(function (d) { d.legend.mount(this); })
-                            .style('width', d => `${d.legend.measurement().width}px`);
+                            .each(function (d) { d.legend.mount(this); });
         }
     }
 
