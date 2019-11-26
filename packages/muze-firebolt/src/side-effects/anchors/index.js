@@ -1,4 +1,4 @@
-import { DataModel, getObjProp, mergeRecursive } from 'muze-utils';
+import { DataModel, getObjProp, mergeRecursive, ReservedFields } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import { ANCHORS } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
@@ -72,38 +72,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
         super(...params);
         this._layersMap = {};
         this.addAnchorLayers();
-
-        this.firebolt.context._dependencies.throwback.registerChangeListener('onLayerDraw', () => {
-            const currentLayers = this.firebolt.context.layers();
-            const payload = this._currentPayload;
-            if (payload) {
-                this.setAnchorLayerStyle(currentLayers, payload);
-            }
-            this._currentPayload = null;
-        });
-    }
-
-    setAnchorLayerStyle (layers, payload) {
-        const anchorLayers = layers.filter(l => l.config().groupId === 'anchors');
-        anchorLayers.forEach((anchor) => {
-            // Execute focusStroke interaction of anchor point layer
-            const data = anchor.data();
-            const ids = data.getUids();
-            const layerName = this.constructor.formalName();
-            const defaultInteractionLayerEncoding = anchor.config().encoding.interaction;
-            const currentInteraction = defaultInteractionLayerEncoding[layerName];
-            const formattedUids = payload.target ? anchor.getUidsFromPayload({
-                model: data,
-                uids: ids.map(d => [d])
-            }, payload.target).uids : [];
-
-            if (!formattedUids.length) {
-                anchor.applyInteractionStyle(currentInteraction, ids, { apply: false });
-            } else {
-                anchor.applyInteractionStyle(currentInteraction, formattedUids, { apply: true });
-            }
-        });
-        return true;
     }
 
     static target () {
@@ -155,16 +123,30 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;
         const layers = context.layers().filter(layer => layer.config().groupId === formalName);
-
+        const target = payload.target;
+        let targetObj = null;
+        if (target) {
+            targetObj = target[1].reduce((acc, v, i) => {
+                const field = target[0][i];
+                if (field !== ReservedFields.MEASURE_NAMES) {
+                    acc[field] = v;
+                }
+                return acc;
+            }, {});
+        }
         layers.forEach((layer, index) => {
             const linkedLayer = context.getLayerByName(layer.config().owner);
             // selected data -> stacked data -> new dm
             const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
             const transformedDataModel = new DataModel(transformedData, schema);
+
             const anchorSizeConfig = {
                 encoding: {
                     size: {
                         value: () => this.defaultSizeValue() + this.getAnchorSizeOnInteraction(payload)
+                    },
+                    'stroke-width': {
+                        value: this.getAnchorStroke(payload, targetObj)
                     }
                 }
             };
@@ -175,8 +157,18 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 .data(transformedDataModel)
                 .config(newConfig);
 
-            this._currentPayload = payload;
             return this;
         });
+    }
+
+    getAnchorStroke (payload, targetObj) {
+        return (d) => {
+            const dataObj = d.data.dataObj;
+            const matchingData = targetObj ? Object.keys(targetObj).every((key) => {
+                const val = dataObj[key];
+                return val === targetObj[key];
+            }) : false;
+            return matchingData ? '1px' : '0px';
+        };
     }
 }
