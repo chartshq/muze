@@ -19,3 +19,17 @@
         fill-opacity: 1;
     }
 }
+
+.#{$prefix}anchors-group-lower,
+.#{$prefix}anchors-group-upper {
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
+}
+
+.#{$prefix}brush-anchors-lower,
+.#{$prefix}brush-anchors-upper {
+    .#{$prefix}layer-point {
+        fill-opacity: 1;
+    }
+}

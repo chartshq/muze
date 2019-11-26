@@ -1,72 +1,37 @@
-import { isSimpleObject, FieldType, ReservedFields, getObjProp } from 'muze-utils';
+import { isSimpleObject, ReservedFields, FieldType } from 'muze-utils';
 
-export const sanitizePayloadCriteria = (data, propFields, facetData = {}, { dm, dimensionsMap }) => {
+export const addFacetDataAndMeasureNames = (data, facetData, measureNames) => {
     if (data === null) {
         return data;
     }
 
     const facets = Object.keys(facetData);
     const facetVals = Object.values(facetData);
-    const facetLen = facets.length;
+
     if (isSimpleObject(data)) {
         return Object.assign({}, Object.keys(facetData).reduce((acc, v) => {
             acc[v] = [facetData[v]];
             return acc;
-        }, {}), data);
+        }, {}), data, {
+            [ReservedFields.MEASURE_NAMES]: measureNames
+        });
     }
     const criteriaFields = data[0];
-    const fieldsWithFacets = criteriaFields.length ? [...facets.map(d => ({ name: d, type: FieldType.DIMENSION })),
-        ...criteriaFields.map((d, i) => ({
-            name: d,
-            index: i + facetLen
-        }))] : [];
+    const hasMeasureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
+    const fieldsWithFacets = [...facets, ...criteriaFields,
+        ...(hasMeasureNameField ? [] : [ReservedFields.MEASURE_NAMES])];
 
-    const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
-        acc[v.name] = i;
-        return acc;
-    }, {});
-
-    propFields = propFields || fieldsWithFacets.map(d => d.name);
     const dataWithFacets = [
-        propFields
+        fieldsWithFacets
     ];
-    const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
-    const fieldsConfig = dm.getFieldsConfig();
-    const propDims = fieldsWithFacets.filter(d => d.name in fieldsConfig).map(d => d.name);
-
-    const dimsMap = dm.getData().data.reduce((acc, row) => {
-        const key = propDims.map(d => row[fieldsConfig[d].index]);
-        acc[key] || (acc[key] = []);
-        acc[key].push(row);
-        return acc;
-    }, {});
 
     for (let i = 1, len = data.length; i < len; i++) {
-        const row = [...facetVals, ...data[i]];
-        const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
-        const origRow = dimsMap[dimKey];
-        if (origRow) {
-            origRow.forEach((rowVal) => {
-                const newRowVal = [];
-                propFields.forEach((field) => {
-                    if (field in fieldIndexMap) {
-                        const idx = fieldIndexMap[field];
-                        newRowVal.push(row[idx]);
-                    } else {
-                        const idx = getObjProp(fieldsConfig[field], 'index');
-                        idx !== undefined && newRowVal.push(rowVal[idx]);
-                    }
-                });
-                if (!measureNameField) {
-                    const measuresArr = dimensionsMap[newRowVal].length ? dimensionsMap[newRowVal] : [[]];
-                    measuresArr.forEach((measures) => {
-                        dataWithFacets.push([...newRowVal, ...measures]);
-                    });
-                } else {
-                    dataWithFacets.push(newRowVal);
-                }
-            });
+        let measureNameArr = [];
+        if (!hasMeasureNameField && measureNames) {
+            measureNameArr = measureNames;
         }
+        const row = [...facetVals, ...data[i], ...measureNameArr];
+        dataWithFacets.push(row);
     }
     return dataWithFacets;
 };
@@ -123,3 +88,57 @@ export const propagateValues = (instance, action, config = {}) => {
         });
     }
 };
+
+const isDimension = fields => fields.some(field => field.type() === FieldType.DIMENSION);
+
+export const isCrosstab = (fields) => {
+    const { rowFacets, colFacets, rowProjections, colProjections } = fields;
+    if (rowFacets.length || colFacets.length) {
+        return true;
+    }
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if ((isDimension(colProj) || isDimension(rowProj)) && (colProj.length > 1 || rowProj.length > 1)) {
+        return true;
+    }
+    return false;
+};
+
+export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
+    const groupFields = firebolt.context.composition().visualGroup.resolver().getAllFields();
+    if (isCrosstab(groupFields)) {
+        const { x, y } = unit.fields();
+        let measureFields;
+
+        if (x[0].type() === FieldType.MEASURE) {
+            measureFields = [`${x[0]}`];
+        } else if (y[0].type() === FieldType.MEASURE) {
+            measureFields = [`${y[0]}`];
+        }
+        payload.selectedMeasures = measureFields;
+    }
+};
+
+// export const unionIdentifiers = (identifiers) => {
+//     let unionedIdentifiers = null;
+//     let fields = [];
+
+//     identifiers.forEach((identifierArr) => {
+//         if (identifierArr) {
+//             const values = identifierArr.identifiers.slice(1, identifierArr.identifiers.length);
+
+//             unionedIdentifiers = [...unionedIdentifiers || [], ...values];
+//             fields = identifierArr.fields;
+//         }
+//     });
+
+//     if (unionedIdentifiers !== null) {
+//         unionedIdentifiers = {
+//             identifiers: [fields.map(d => d.name), ...unionedIdentifiers],
+//             fields
+//         };
+//     }
+
+//     return unionedIdentifiers;
+// };

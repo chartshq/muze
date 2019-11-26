@@ -2,6 +2,7 @@ import { default as DataModel } from 'datamodel';
 import * as scales from './scales';
 import * as colorSchemes from './color-schemes';
 import * as STATE_NAMESPACES from './enums/namespace';
+import RTree from './r-tree';
 
 const InvalidAwareTypes = DataModel.InvalidAwareTypes;
 
@@ -111,8 +112,8 @@ export {
     difference,
     getArrayIndexMap,
     arraysEqual,
-    transformToHex,
-    getReadableTicks
+    getReadableTicks,
+    unique
 } from './common-utils';
 
 export {
@@ -165,4 +166,8 @@ export {
     DM_DERIVATIVES,
     GROUP_BY_FUNCTIONS
 } from 'datamodel';
+
+export {
+    RTree
+};
 

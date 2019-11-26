@@ -9,7 +9,7 @@ import {
 import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM, TOOLTIP_TOP,
     INITIAL_STYLE } from './constants';
 import { defaultConfig } from './default-config';
-import { getArrowPos, placeArrow, reorderContainers } from './helper';
+import { reorderContainers } from './helper';
 import './styles.scss';
 import Content from './content';
 
@@ -37,7 +37,6 @@ export default class Tooltip {
         this._tooltipContainer = container.append('div').style('position', 'absolute');
         this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
         this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
-        this._tooltipArrow = this._tooltipContainer.append('div');
 
         if (!svgContainer) {
             connectorContainer = htmlContainer.append('svg').style('pointer-events', 'none');
@@ -50,7 +49,6 @@ export default class Tooltip {
         const defClassName = tooltipConf.defClassName;
         const qualifiedClassName = getQualifiedClassName(defClassName, id, tooltipConf.classPrefix);
 
-        setStyles(this._tooltipArrow, INITIAL_STYLE);
         setStyles(this._tooltipBackground, INITIAL_STYLE);
         this.addClass(qualifiedClassName.join(' '));
         this.addClass(tooltipConf.className);
@@ -101,10 +99,11 @@ export default class Tooltip {
         const { classPrefix } = config;
         const contentClass = config.content.className;
         const formatter = config.formatter;
-        const className = contentConfig.className || `${classPrefix}-${contentClass}-${name}`;
+        const className = `${classPrefix}-${contentClass}-${name}`;
+        const specificClass = `${classPrefix}-${contentConfig.className}`;
         const content = this._contents[name] = this._contents[name] || new Content();
         const container = makeElement(this._contentContainer, 'div', [contentConfig.order], className);
-        container.attr('class', `${classPrefix}-${contentClass} ${className}`);
+        container.attr('class', `${classPrefix}-${contentClass} ${className} ${specificClass}`);
         reorderContainers(this._contentContainer, `.${classPrefix}-${contentClass}`);
         const contentConf = config.content;
         contentConfig.classPrefix = this._config.classPrefix;
@@ -139,55 +138,40 @@ export default class Tooltip {
      * @param {number} y y position
      * @return {Tooltip} Instance of tooltip.
      */
-    position (x, y, conf = {}) {
+    position (x, y) {
         if (!Object.keys(this._contents).length) {
             this.hide();
             return this;
         }
         this.show();
         const target = this._target;
-        const repositionArrow = conf.repositionArrow;
 
-        if (target && repositionArrow) {
+        if (target) {
             const node = this._tooltipContainer.node();
-            const config = this._config;
-            const arrowDisabled = config.arrow.disabled;
-            const arrowWidth = arrowDisabled ? 0 : config.arrow.size;
-            const arrowOrient = this._arrowOrientation;
-            const outsidePlot = arrowOrient === ARROW_LEFT || arrowOrient === ARROW_RIGHT ?
-                (y + node.offsetHeight - arrowWidth) < target.y || y > (target.y + target.height) :
-                (x + node.offsetWidth - arrowWidth) < target.x || x > (target.x + target.width);
+            const tooltipPos = this._position;
+            const outsidePlot = tooltipPos === TOOLTIP_LEFT || tooltipPos === TOOLTIP_RIGHT ?
+                (y + node.offsetHeight) < target.y || y > (target.y + target.height) :
+                (x + node.offsetWidth) < target.x || x > (target.x + target.width);
 
-            if (!arrowDisabled) {
-                if (outsidePlot) {
-                    let path;
-                    this._tooltipArrow.style('display', 'none');
-                    this._tooltipBackground.style('display', 'none');
-                    this._tooltipConnectorContainer.style('display', 'block');
-                    const connector = this._tooltipConnectorContainer.selectAll('path').data([1]);
-                    const enter = connector.enter().append('path');
-                    if (arrowOrient === ARROW_LEFT) {
-                        path = `M ${x} ${y + node.offsetHeight / 2} L ${target.x + target.width}`
-                            + ` ${target.y + target.height / 2}`;
-                    } else if (arrowOrient === ARROW_RIGHT) {
-                        path = `M ${x + node.offsetWidth} ${y + node.offsetHeight / 2}`
-                                + ` L ${target.x} ${target.y + target.height / 2}`;
-                    } else if (arrowOrient === ARROW_BOTTOM) {
-                        path = `M ${x + node.offsetWidth / 2} ${y + node.offsetHeight}`
-                            + ` L ${target.x + target.width / 2} ${target.y}`;
-                    }
-                    enter.merge(connector).attr('d', path).style('display', 'block');
-                } else {
-                    const arrowPos = getArrowPos(arrowOrient, target, {
-                        x,
-                        y,
-                        boxHeight: node.offsetHeight,
-                        boxWidth: node.offsetWidth
-                    }, this._config);
-
-                    placeArrow(this, this._arrowOrientation, arrowPos);
-                    this._tooltipConnectorContainer.style('display', 'none');
+            if (outsidePlot) {
+                let path;
+                this._tooltipBackground.style('display', 'none');
+                this._tooltipConnectorContainer.style('display', 'block');
+                const connector = this._tooltipConnectorContainer.selectAll('path').data([1]);
+                const enter = connector.enter().append('path');
+                if (tooltipPos === ARROW_LEFT) {
+                    path = `M ${x} ${y + node.offsetHeight / 2} L ${target.x + target.width}`
+                        + ` ${target.y + target.height / 2}`;
+                } else if (tooltipPos === ARROW_RIGHT) {
+                    path = `M ${x + node.offsetWidth} ${y + node.offsetHeight / 2}`
+                            + ` L ${target.x} ${target.y + target.height / 2}`;
+                } else if (tooltipPos === ARROW_BOTTOM) {
+                    path = `M ${x + node.offsetWidth / 2} ${y + node.offsetHeight}`
+                        + ` L ${target.x + target.width / 2} ${target.y}`;
                 }
+                enter.merge(connector).attr('d', path).style('display', 'block');
+            } else {
+                this._tooltipConnectorContainer.style('display', 'none');
             }
         }
 
@@ -224,14 +208,14 @@ export default class Tooltip {
         const offsetHeight = node.offsetHeight + 2;
         const config = this._config;
         const offset = this._offset;
-        const arrowDisabled = config.arrow.disabled;
-        const arrowSize = arrowDisabled ? 0 : config.arrow.size;
+        const spacing = config.spacing;
         const draw = tooltipConf.draw !== undefined ? tooltipConf.draw : true;
         const topSpace = dim.y;
         // When there is no space in right
         const dimX = dim.x + dim.width + offset.x;
         const rightSpace = extent.width - dimX;
         const leftSpace = dim.x + offset.x - extent.x;
+        const arrowSize = spacing;
         const positionTop = topSpace > (offsetHeight + arrowSize);
         const positionRight = rightSpace >= offsetWidth + arrowSize;
         const positionLeft = leftSpace >= offsetWidth + arrowSize;
@@ -256,16 +240,8 @@ export default class Tooltip {
                 y = Math.max(0, dim.y + dim.height / 2 - offsetHeight / 2);
             }
 
-            const arrowPos = getArrowPos(position, dim, {
-                x,
-                y,
-                boxHeight: offsetHeight,
-                boxWidth: offsetWidth
-            }, this._config);
-
             return {
                 position,
-                arrowPos,
                 x,
                 y
             };
@@ -292,16 +268,8 @@ export default class Tooltip {
                 position = TOOLTIP_TOP;
             }
 
-            const arrowPos = getArrowPos(position, dim, {
-                x,
-                y,
-                boxHeight: offsetHeight,
-                boxWidth: offsetWidth
-            }, this._config);
-
             return {
                 position,
-                arrowPos,
                 x,
                 y
             };
@@ -329,14 +297,15 @@ export default class Tooltip {
             y: obj.y
         };
 
-        this._arrowPos = obj.arrowPos;
-        if (!arrowDisabled) {
-            placeArrow(this, obj.position, obj.arrowPos);
-        } else {
-            this._tooltipArrow.style('display', 'none');
-            this._tooltipBackground.style('display', 'none');
-        }
-        this._arrowOrientation = obj.position;
+        // this._arrowPos = obj.arrowPos;
+        // if (!arrowDisabled) {
+        //     // placeArrow(this, obj.position, obj.arrowPos);
+        // } else {
+            // this._tooltipArrow.style('display', 'none');
+        this._tooltipBackground.style('display', 'none');
+        // }
+        this._position = obj.position;
+        // this._arrowOrientation = obj.position;
         draw && this.position(obj.x, obj.y);
         return this;
     }

@@ -1,4 +1,10 @@
-import { isSimpleObject, DimensionSubtype, partition, ReservedFields } from 'muze-utils';
+import {
+    isSimpleObject,
+    DimensionSubtype,
+    partition,
+    ReservedFields,
+    retrieveNearestGroupByReducers
+} from 'muze-utils';
 import { getMergedSet, getSourceFields } from '../../helper';
 
 export const getIdentifiersFromSet = (set, context, { fields }) => {
@@ -43,6 +49,7 @@ export default class GenericBehaviour {
             model: filteredDataModel,
             uids
         } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
+        this._payload = payload;
 
         selectionSets.forEach((selectionSet) => {
             this.setSelectionSet(uids, selectionSet, {
@@ -117,11 +124,14 @@ export default class GenericBehaviour {
             }
             model = filteredDataModel || null;
         }
+        const aggFns = retrieveNearestGroupByReducers(model);
 
         return {
             uids: set,
             length: set.length,
-            model
+            model,
+            fields: setFields,
+            aggFns
         };
     }
 
@@ -129,18 +139,21 @@ export default class GenericBehaviour {
         if (params.length) {
             let propData = null;
             const [selectionSet, payload] = params;
-            const { context } = this.firebolt;
             const fieldsConfig = this.firebolt.data().getFieldsConfig();
             const { criteria } = payload;
 
-            const { mergedEnter } = selectionSet.getSets(true);
             if (selectionSet.resetted() || criteria === null) {
                 propData = null;
             } else if (isSimpleObject(criteria)) {
                 const fields = Object.keys(criteria);
-                const [dims, otherFields] =
-                    partition(fields, (d => fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL));
-
+                const [, otherFields] =
+                    partition(fields, (d => (fieldsConfig[d] ? fieldsConfig[d].def.subtype ===
+                        DimensionSubtype.CATEGORICAL : d === ReservedFields.MEASURE_NAMES)));
+                const allFields = selectionSet._fields.filter(d => d === ReservedFields.ROW_ID ||
+                    fieldsConfig[d].def.subtype ===
+                    DimensionSubtype.CATEGORICAL
+                );
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true, dimensions: allFields });
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d
@@ -150,13 +163,12 @@ export default class GenericBehaviour {
                         entrySet: mergedEnter,
                         fields: otherFields
                     }),
-                    identifiers: getIdentifiersFromSet(mergedEnter, context, {
-                        fields: dims,
-                        fieldsConfig
-                    })
+                    identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]
                 };
             } else {
                 const data = criteria;
+
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true });
                 propData = {
                     fields: data[0].map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d

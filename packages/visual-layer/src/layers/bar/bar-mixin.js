@@ -269,5 +269,21 @@ export const BarLayerMixin = superclass => class extends superclass {
             L${d.update.x} ${d.update.y + d.update.height} Z`);
         }
     }
+
+    getBoundBoxes () {
+        const points = this._points.flat();
+
+        return points.map((point) => {
+            const { x, y, width, height } = point.update;
+            const data = point.data;
+            return {
+                minX: x,
+                maxX: x + width,
+                minY: y,
+                maxY: y + height,
+                data
+            };
+        });
+    }
 };
 

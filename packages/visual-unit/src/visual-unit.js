@@ -31,7 +31,8 @@ import {
     resolveEncodingTransform,
     createRenderPromise,
     setAxisRange,
-    unionDomainFromLayers
+    unionDomainFromLayers,
+    createRTree
 } from './helper';
 import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
 import { listenerMap } from './listener-map';
@@ -156,6 +157,8 @@ export default class VisualUnit {
                     props: [CommonProps.ON_LAYER_DRAW],
                     listener: (context, [, drawn]) => {
                         if (drawn) {
+                            context._rtree = createRTree(context, context._rtree);
+
                             const firebolt = context.firebolt();
                             dispatchQueuedSideEffects(firebolt);
                             clearActionHistory(firebolt);
@@ -785,5 +788,61 @@ export default class VisualUnit {
             acc[v] = criteria[v];
             return acc;
         }, {});
+    }
+
+    getRangeFromPositions ({ startPos, endPos }) {
+        const { x, y } = this.fields();
+        const axes = this.axes();
+        const xField = x[0];
+        const yField = y[0];
+        const xFieldType = x[0].type();
+        const yFieldType = y[0].type();
+        const dimensions = Object.keys(this.data().getFieldspace().getDimension());
+
+        if (xFieldType === FieldType.MEASURE && yFieldType === FieldType.MEASURE) {
+            const dom = {
+                x: axes.x[0].invertExtent(startPos.x, endPos.x).sort((a, b) => a - b),
+                y: axes.y[0].invertExtent(startPos.y, endPos.y).sort((a, b) => a - b)
+            };
+            const range = {};
+            if (`${xField}` === `${yField}`) {
+                const xdom = dom.x;
+                const ydom = dom.y;
+                const min = xdom[0] > ydom[0] ? ydom : xdom;
+                const max = min === ydom ? xdom : ydom;
+                if (min[1] < max[0]) {
+                    range[xField] = [];
+                } else {
+                    range[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
+                }
+            } else {
+                range[xField] = dom.x;
+                range[yField] = dom.y;
+            }
+            return range;
+        } else if (xFieldType === FieldType.DIMENSION || yFieldType === FieldType.DIMENSION) {
+            const points = this._rtree.search({
+                minX: startPos.x,
+                minY: startPos.y,
+                maxX: endPos.x,
+                maxY: endPos.y
+            });
+
+            const criteria = [[]];
+            dimensions.forEach((field) => {
+                criteria[0].push(`${field}`);
+            });
+
+            points.forEach((point) => {
+                const data = point.data;
+                const vals = [];
+                dimensions.forEach((field) => {
+                    vals.push(data[field]);
+                });
+                criteria.push(vals);
+            });
+            return criteria;
+        }
+        return null;
     }
 }
