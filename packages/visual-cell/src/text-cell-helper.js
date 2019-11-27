@@ -89,8 +89,9 @@ export const computeTextSpace = (context) => {
     }
     if (availWidth && availWidth < Math.min(_minTextSpace.width, space.oriTextWidth)) {
         const smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
-        space.width = smartSpace.height;
-        space.height = smartSpace.width;
+        const { height: smHeight, width: smWidth } = smartSpace;
+        space.width = smWidth;
+        space.height = smHeight;
         context.config({ rotation: true });
         context.smartText(smartSpace);
     }
