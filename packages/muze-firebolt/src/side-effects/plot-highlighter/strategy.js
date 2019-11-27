@@ -1,4 +1,4 @@
-import { getFormattedSet } from './helper';
+import { getFormattedSet, highlightSelectIntersection } from './helper';
 
 const fadeFn = (set, context) => {
     const { formattedSet } = set;
@@ -88,6 +88,8 @@ export const strategies = {
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
             context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
+            // Remove all highlight styles
+            context.applyInteractionStyle(completeSet, { interactionType: 'highlight', apply: false });
             // Remove brushed points when clicked on empty chart area
             // context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
         } else {
@@ -95,40 +97,7 @@ export const strategies = {
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
 
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
-            context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
-        }
-    },
-    highlight: (set, context, payload, excludeSetIds) => {
-        const { formattedSet, selectionSet } = set;
-        const {
-            mergedEnter,
-            mergedExit,
-            completeSet
-        } = formattedSet;
-
-        if (!mergedEnter.length && !mergedExit.length) {
-            context.applyInteractionStyle(completeSet, { interactionType: 'highlight', apply: false });
-        } else {
-            const layers = context.firebolt.context.layers();
-
-            layers.forEach((layer) => {
-                if (payload.target) {
-                    // get uids of only the currently highlighted point
-                    const actualPoint = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) :
-                        mergedEnter;
-                    // get uids of only the currently highlighted point excluding the excludeSet ids
-                    const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
-
-                    context.applyInteractionStyle(currentHighlightedSet,
-                        { interactionType: 'highlight', apply: true },
-                        [layer]
-                    );
-                    context.applyInteractionStyle(selectionSet.exitSet[1],
-                        { interactionType: 'highlight', apply: false },
-                        [layer]
-                    );
-                }
-            });
+            context.applyInteractionStyle(formattedSet.entrySet, { interactionType: 'focusStroke', apply: true });
         }
     },
     areaFocus: (set, context) => {
@@ -148,6 +117,56 @@ export const strategies = {
 
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
+        }
+    },
+    highlight: (set, context, payload, excludeSetIds) => {
+        const { formattedSet } = set;
+        const {
+            mergedEnter,
+            mergedExit,
+            completeSet
+        } = formattedSet;
+
+        if (!mergedEnter.length && !mergedExit.length) {
+            // Remove focusStroke on selected but currently non-highlighted set
+            context.applyInteractionStyle(completeSet, { interactionType: 'highlight', apply: false });
+            const selectEntrySet = context.firebolt.getEntryExitSet('select');
+            if (selectEntrySet) {
+                context.applyInteractionStyle(selectEntrySet.mergedEnter,
+                    { interactionType: 'focusStroke', apply: false });
+            }
+        } else {
+            const layers = context.firebolt.context.layers();
+
+            layers.forEach((layer) => {
+                if (payload.target) {
+                    // get uids of only the currently highlighted point
+                    const actualPoint = layer.getUidsFromPayload(mergedEnter, payload.target);
+                    // get uids of only the currently highlighted point excluding the excludeSet ids
+                    const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
+
+                    // Apply highlight on the currently hovered point
+                    context.applyInteractionStyle(currentHighlightedSet,
+                        { interactionType: 'highlight', apply: true },
+                        [layer]
+                    );
+
+                    // Get union of highlighted and selected points
+                    const highlightUnionSel = highlightSelectIntersection(context.firebolt, formattedSet);
+                    const selectEntrySet = context.firebolt.getEntryExitSet('select');
+
+                    // Appy focusStroke on point both hovered and selected
+                    if (highlightUnionSel && highlightUnionSel.mergedEnter.length && selectEntrySet) {
+                        const pointHoveredAndSelected = layer.getUidsFromPayload(
+                            selectEntrySet.mergedEnter, payload.target
+                        );
+                        context.applyInteractionStyle(pointHoveredAndSelected,
+                            { interactionType: 'focusStroke', apply: true },
+                            [layer]
+                        );
+                    }
+                }
+            });
         }
     },
     pseudoFocus: (set, context) => {

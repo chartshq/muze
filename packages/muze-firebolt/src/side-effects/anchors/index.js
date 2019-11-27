@@ -161,9 +161,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 const filterFn = dmMultipleSelection(target, dataModel);
                 const dmFromPayload = dataModel.select(filterFn, {});
 
-                if (isUpperAnchor) {
-                    [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
-                } else {
+                if (!isUpperAnchor) {
                     [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dmFromPayload, index);
                 }
             }

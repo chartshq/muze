@@ -606,7 +606,7 @@ export const BaseLayerMixin = superclass => class extends superclass {
                 const exist = identifierSchema.every((obj, i) =>
                     identifierData.findIndex(d => tupleArr[fieldsConfig[obj.name].index] === d[i]) !== -1);
                 if (exist) {
-                    const transformedVal = dataObj[enc];
+                    const transformedVal = dataObj[enc] || 0;
                     const row = dataObj.source;
                     const tuple = {};
                     for (const key in fieldsConfig) {
