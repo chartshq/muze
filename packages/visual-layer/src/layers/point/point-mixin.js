@@ -16,7 +16,7 @@ import {
     getBoundBoxes
 } from '../../helpers';
 import './styles.scss';
-import { pointTranslators, interactionStyleMap, getStrokeWidthByPosition } from './helper';
+import { pointTranslators, getStrokeWidthByPosition } from './helper';
 
 export const PointLayerMixin = superclass => class extends superclass {
     /**
@@ -173,11 +173,8 @@ export const PointLayerMixin = superclass => class extends superclass {
         return null;
     }
 
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
-    }
-
-    addOverlayPath (container, refElement, data, style) {
+    addOverlayPath (refElement, data, style, strokePosition) {
+        const container = refElement.parentElement;
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
@@ -185,12 +182,13 @@ export const PointLayerMixin = superclass => class extends superclass {
         } else {
             pathElement = makeElement(container, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
             pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;
         }
 
         if (style.type === 'stroke-width') {
-            const { position } = style.props;
+            const position = strokePosition;
             // get radius as per stroke position
             let radius = Math.sqrt(data.size / Math.PI);
             radius = getStrokeWidthByPosition(position, radius);
@@ -202,16 +200,31 @@ export const PointLayerMixin = superclass => class extends superclass {
             }
         }
 
-        pathElement.style(style.type, style.props.value);
+        let styleVal = style.value;
+        if (typeof styleVal === 'function') {
+            const currentStyle = pathElement.style(style.type);
+            styleVal = styleVal(currentStyle);
+        }
+        pathElement.style(style.type, styleVal);
         appendElement(refElement, pathElement.node());
     }
 
     removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
-        Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+        if (currentPath) {
+            currentPath.node().removeAttribute('style');
+            Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
+        }
     }
 
     getBoundBoxes () {
         return getBoundBoxes(this._points.flat());
+    }
+
+    applyElementStyles (elem, styles, styleObj) {
+        styles.forEach((type) => {
+            elem.select('path').style(type, styleObj[type]);
+        });
     }
 };

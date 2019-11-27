@@ -5,7 +5,8 @@ import {
     isSimpleObject,
     getDataModelFromRange,
     ReservedFields,
-    FieldType
+    FieldType,
+    defaultValue
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -18,6 +19,23 @@ import {
     getSideEffects,
     setSideEffectConfig
 } from './helper';
+
+const cloneObj = (behaviourEffectMap) => {
+    const keys = Object.keys(behaviourEffectMap);
+
+    return keys.reduce((acc, key) => {
+        const value = behaviourEffectMap[key];
+        const cloned = value.map((d) => {
+            let clonedVal = d;
+            if (isSimpleObject(d)) {
+                clonedVal = mergeRecursive({}, d);
+            }
+            return clonedVal;
+        });
+        acc[key] = cloned;
+        return acc;
+    }, {});
+};
 
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
@@ -86,8 +104,9 @@ export default class Firebolt {
         this._actionHistory = {};
         this._queuedSideEffects = {};
         this._handlers = {};
+        this._payloadGenerators = {};
 
-        this.mapSideEffects(behaviourEffectMap);
+        this.mapSideEffects(cloneObj(behaviourEffectMap));
         this.registerBehaviouralActions(actions.behavioural);
         this.registerSideEffects(sideEffects);
         this.registerPhysicalBehaviouralMap(actions.physicalBehaviouralMap);
@@ -553,5 +572,19 @@ export default class Firebolt {
 
     sanitizePayload (payload) {
         return payload;
+    }
+
+    payloadGenerators (...params) {
+        if (params.length) {
+            Object.assign(this._payloadGenerators, params[0]);
+        }
+        return this._payloadGenerators;
+    }
+
+    getPayloadGeneratorFor (action) {
+        const defaultFn = this._payloadGenerators.__default;
+        const fn = this._payloadGenerators[action];
+
+        return defaultValue(fn, defaultFn);
     }
 }

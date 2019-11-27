@@ -1,4 +1,5 @@
 import { getClientPoint, getEvent } from 'muze-utils';
+import * as ACTION_NAMES from '../../enums/actions';
 
 /**
  * Adds mouse interactions to target element.
@@ -27,14 +28,14 @@ import { getClientPoint, getEvent } from 'muze-utils';
             mode
         };
 
-        firebolt.triggerPhysicalAction('hover', payload);
+        firebolt.triggerPhysicalAction(ACTION_NAMES.HOVER, payload);
         event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour)
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
-                        firebolt.triggerPhysicalAction('hover', {
+                        firebolt.triggerPhysicalAction(ACTION_NAMES.HOVER, {
                             criteria: null
                         });
                     });

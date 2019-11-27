@@ -1,7 +1,7 @@
-import { FieldType, intersect, isSimpleObject } from 'muze-utils';
+import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
-import { isSideEffectEnabled, sanitizePayloadCriteria } from './helper';
+import { isSideEffectEnabled, sanitizePayloadCriteria, dispatchSecondaryActions } from './helper';
 
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
@@ -29,6 +29,8 @@ export default class UnitFireBolt extends Firebolt {
         } = SIDE_EFFECTS;
         this._handlers = {};
         this._propagationIdentifiers = {};
+        this._connectedBehaviours = {};
+        this.payloadGenerators(payloadGenerator);
         this.sideEffects().tooltip.disable();
         const disabledSideEffects = [TOOLTIP, HIGHLIGHTER, ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS];
         disabledSideEffects.forEach((sideEffect) => {
@@ -102,8 +104,7 @@ export default class UnitFireBolt extends Firebolt {
                 payload: propPayload
             } = config;
 
-            const payloadFn = isSimpleObject(config.payload.criteria) ?
-                payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
+            const payloadFn = this.getPayloadGeneratorFor(action);
             const payload = payloadFn(this, propagationData, config, context.facetByFields());
             const behaviourPolicies = this._behaviourPolicies;
             const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
@@ -138,6 +139,13 @@ export default class UnitFireBolt extends Firebolt {
                 };
 
                 this.dispatchBehaviour(action, payload, propagationInf);
+
+                dispatchSecondaryActions(this, {
+                    action,
+                    propagationInf,
+                    propagationData,
+                    config
+                });
             }
         };
     }
@@ -181,8 +189,5 @@ export default class UnitFireBolt extends Firebolt {
     sourceCanvas () {
         return this.context.parentAlias();
     }
-
-    getLayers () {
-        return this.context.layers();
-    }
 }
+

@@ -101,7 +101,7 @@ export const ArcLayerMixin = superclass => class extends superclass {
                     color,
                     meta: getColorMetaInf({
                         fill: color
-                    }, colorAxis),
+                    }),
                     rowId: uid,
                     _previousInfo: this._prevPieData[uid] ? this._prevPieData[uid][0] :
                         getPreviousPoint(pieIndex, i, this)
