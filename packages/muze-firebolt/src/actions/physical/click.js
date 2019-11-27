@@ -1,5 +1,6 @@
 import { getEvent } from 'muze-utils';
 import { generatePayloadFromEvent } from './helpers';
+import * as ACTION_NAMES from '../../enums/actions';
 
 /**
  * Adds mouse interactions to target element.
@@ -11,7 +12,7 @@ import { generatePayloadFromEvent } from './helpers';
     const dispatchBehaviour = function (args) {
         const event = getEvent();
         const payload = generatePayloadFromEvent(args, event, firebolt);
-        firebolt.triggerPhysicalAction('click', payload);
+        firebolt.triggerPhysicalAction(ACTION_NAMES.CLICK, payload);
         event.stopPropagation();
     };
 
