@@ -21,7 +21,6 @@ export const MESSAGE_CONFIG = {
     upperFontLimit: 24,
     baseSizeLimit: 200,
     upperSizeLimit: 400,
-    fractionFont: 400,
     fractionImage: 0.8,
     fractionChild: 0.7
 };

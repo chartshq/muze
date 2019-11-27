@@ -6,6 +6,7 @@ const FILTER = 'filter';
 const HIGHLIGHTER = 'highlighter';
 const CROSSLINE = 'crossline';
 const FRAGMENTED_TOOLTIP = 'fragmented-tooltip';
+const AXIS_LABEL_HIGHLIGHTER = 'axis-label-highlighter';
 
 export {
     ANCHORS,
@@ -15,5 +16,6 @@ export {
     HIGHLIGHTER,
     CROSSLINE,
     TOOLTIP,
-    FRAGMENTED_TOOLTIP
+    FRAGMENTED_TOOLTIP,
+    AXIS_LABEL_HIGHLIGHTER
 };

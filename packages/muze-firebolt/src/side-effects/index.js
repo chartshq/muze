@@ -7,3 +7,4 @@ export { default as FilterEffect } from './filter';
 export { default as PersistentAnchors } from './persistent-anchors';
 export { default as BrushAnchors } from './brush-anchors';
 export { default as AnchorEffect } from './anchors';
+export { default as AxisLabelHighLighter } from './axis-labels-highlighter';

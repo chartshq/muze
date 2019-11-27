@@ -4,7 +4,8 @@ import { incorrectMessageIcon } from './message-icon';
 import { MESSAGE_CONFIG } from '../defaults';
 
 const formatFontSize = (width, height) => {
-    const { baseFontLimit, upperFontLimit, baseSizeLimit, upperSizeLimit, fractionFont } = MESSAGE_CONFIG;
+    const { baseFontLimit, upperFontLimit, baseSizeLimit, upperSizeLimit } = MESSAGE_CONFIG;
+    const fractionFont = (upperSizeLimit - baseSizeLimit) / (upperFontLimit - baseFontLimit);
     let fontSize = upperFontLimit;
     const dim = width < height ? width : height;
     if (dim <= baseSizeLimit) {
