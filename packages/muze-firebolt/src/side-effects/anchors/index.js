@@ -1,29 +1,15 @@
-import { DataModel, getObjProp, mergeRecursive, ReservedFields } from 'muze-utils';
+import { DataModel, getObjProp, mergeRecursive, ReservedFields, dmMultipleSelection } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 import { ANCHORS } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 import './styles.scss';
 
 const addLayer = (layerRegistry, context, sideEffect) => {
-    // mark -> area (2 layers)
     context.addLayer((layerDefs) => {
         const layers = [];
-        if (layerDefs[0].mark === 'area') {
-            const lowerAnchorLayr = {
-                mark: 'area',
-                order: 1,
-                def: {
-                    mark: 'area',
-                    encoding: layerDefs[0].def.encoding,
-                    name: 'area-0',
-                    order: 1
-                }
-            };
-            layerDefs.push(lowerAnchorLayr);
-        }
 
         if (layerDefs) {
-            layerDefs.forEach((layerDef, index) => {
+            layerDefs.forEach((layerDef) => {
                 const mark = layerDef.mark;
                 const layerCls = layerRegistry[mark];
 
@@ -39,15 +25,15 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                         }
                     };
                     const commonName = sideEffect.constructor.formalName();
-                    const name = `${layerDef.def.name}-${commonName}-${index}`;
+                    const layerOwner = layerDef.def.name;
+                    const name = `${layerOwner}-${commonName}`;
                     const defaultClassName = `${sideEffect.constructor.defaultConfig().className}`;
-                    const className = `${defaultClassName}-${index % 2 === 0 ? 'lower' : 'upper'}`;
 
                     layers.push({
-                        name,
+                        name: `${name}-upper`,
                         mark: 'point',
-                        groupId: commonName,
-                        className,
+                        groupId: `${commonName}-upper`,
+                        className: `${defaultClassName}-upper`,
                         encoding,
                         transform: {
                             type: 'identity'
@@ -60,6 +46,26 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                         interactive: false,
                         owner: layerDef.def.name
                     });
+
+                    if (mark === 'area') {
+                        layers.push({
+                            name: `${name}-lower`,
+                            mark: 'point',
+                            groupId: `${commonName}-lower`,
+                            className: `${defaultClassName}-lower`,
+                            encoding,
+                            transform: {
+                                type: 'identity'
+                            },
+                            calculateDomain: false,
+                            transition: sideEffect.getTransitionConfig(),
+                            source: dm => dm.select(() => false, {
+                                saveChild: false
+                            }),
+                            interactive: false,
+                            owner: layerDef.def.name
+                        });
+                    }
                 }
             });
         }
@@ -122,7 +128,9 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const dataModel = selectionSet.mergedEnter.model;
         const formalName = this.constructor.formalName();
         const context = this.firebolt.context;
-        const layers = context.layers().filter(layer => layer.config().groupId === formalName);
+        const upperAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-upper`);
+        const lowerAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-lower`);
+
         const target = payload.target;
         let targetObj = null;
         if (target) {
@@ -134,12 +142,33 @@ export default class AnchorEffect extends SpawnableSideEffect {
                 return acc;
             }, {});
         }
-        layers.forEach((layer, index) => {
-            const linkedLayer = context.getLayerByName(layer.config().owner);
-            // selected data -> stacked data -> new dm
-            const [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
-            const transformedDataModel = new DataModel(transformedData, schema);
 
+        [...upperAnchors, ...lowerAnchors].forEach((layer, index) => {
+            const linkedLayer = context.getLayerByName(layer.config().owner);
+            const linkedLayerName = linkedLayer.constructor.formalName();
+            const groupId = layer.config().groupId;
+            const isUpperAnchor = groupId === `${formalName}-upper`;
+            let transformedData = [];
+            let schema = [];
+
+            // Only render upper layers for all plots
+            if (isUpperAnchor) {
+                [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
+            }
+
+            // Render both upper and lower anchors for area plot if hovered over an anchor
+            if (linkedLayerName === 'area' && target) {
+                const filterFn = dmMultipleSelection(target, dataModel);
+                const dmFromPayload = dataModel.select(filterFn, {});
+
+                if (isUpperAnchor) {
+                    [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
+                } else {
+                    [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dmFromPayload, index);
+                }
+            }
+
+            const transformedDataModel = new DataModel(transformedData, schema);
             const anchorSizeConfig = {
                 encoding: {
                     size: {
@@ -150,7 +179,6 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     }
                 }
             };
-
             const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
 
             layer

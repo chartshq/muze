@@ -113,7 +113,8 @@ export {
     getArrayIndexMap,
     arraysEqual,
     getReadableTicks,
-    unique
+    unique,
+    dmMultipleSelection
 } from './common-utils';
 
 export {

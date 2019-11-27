@@ -1613,6 +1613,46 @@ const transformColor = (rgbaValues, { h = 0, s = 0, l = 0, a }, datum, apply) =>
     return finalcolor;
 };
 
+/**
+ * Generates a function which performs an intersection (dataModel select)
+ * operation for multiple fields
+ * @param {Array} targetData - Nested array with field and values in the format:
+ * [
+ *  [field1, field2]
+ *  [val1, val2]
+ * ]
+ * @param {Object} dm - The dataModel instance
+ * @return {Function} filter function
+ */
+const dmMultipleSelection = (targetData, dm) => {
+    const targetFields = targetData[0];
+    const targetVals = targetData.slice(1, targetData.length);
+    const payloadMap = targetVals.reduce((acc, v) => {
+        acc[v] = v;
+        return acc;
+    }, {});
+    const measures = Object.keys(dm.getFieldspace().getMeasure());
+
+    const filterFn = (fields, i) => {
+        const row = `${targetFields.map((field) => {
+            let val;
+            if (field === ReservedFields.MEASURE_NAMES) {
+                val = measures;
+            } else if (field === ReservedFields.ROW_ID) {
+                val = i;
+            } else {
+                const currentField = fields[field];
+                const isFieldInvalid = currentField instanceof InvalidAwareTypes;
+
+                val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+            }
+            return val;
+        })}`;
+        return row in payloadMap;
+    };
+    return filterFn;
+};
+
 export {
     arraysEqual,
     componentRegistry,
@@ -1703,5 +1743,6 @@ export {
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
     sortCategoricalField,
-    getReadableTicks
+    getReadableTicks,
+    dmMultipleSelection
 };
