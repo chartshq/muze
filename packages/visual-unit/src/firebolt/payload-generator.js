@@ -1,4 +1,4 @@
-import { ReservedFields, FieldType } from 'muze-utils';
+import { ReservedFields, FieldType, difference, isSimpleObject } from 'muze-utils';
 
 const getRangeFromData = (instance, selectionDataModel, propConfig) => {
     const dataObj = selectionDataModel.getData();
@@ -31,17 +31,22 @@ const getRangeFromData = (instance, selectionDataModel, propConfig) => {
 };
 
 export const payloadGenerator = {
-    brush: (instance, selectionDataModel, propConfig) => {
+    brush: (instance, selectionDataModel, propConfig, facetByFields) => {
         const propPayload = propConfig.payload;
-        const criteria = getRangeFromData(instance, selectionDataModel, propConfig);
-        const payload = Object.assign({}, propPayload);
-        payload.criteria = criteria;
+        let payload;
+        if (isSimpleObject(propPayload.criteria)) {
+            const criteria = getRangeFromData(instance, selectionDataModel, propConfig);
+            payload = Object.assign({}, propPayload);
+            payload.criteria = criteria;
+        } else {
+            payload = payloadGenerator.__default(instance, selectionDataModel, propConfig, facetByFields);
+        }
+
         return payload;
     },
 
     __default: (instance, selectionDataModel, propConfig, facetByFields = []) => {
-        const propPayload = propConfig.payload;
-        const sourceIdentifiers = propConfig.sourceIdentifiers;
+        const { payload: propPayload, sourceIdentifiers, excludeSelectedMeasures } = propConfig;
         const dataObj = selectionDataModel.getData({ withUid: true });
         const payload = Object.assign({}, propPayload);
         const data = dataObj.data;
@@ -101,9 +106,19 @@ export const payloadGenerator = {
 
                 if (vals in identifierMap) {
                     const measures = identifierMap[vals];
-                    measures.forEach((measureArr) => {
-                        dataArr.push([...dims, measureArr]);
-                    });
+                    const allMeasures = instance._metaData.dimensionsMap[dims];
+
+                    if (excludeSelectedMeasures) {
+                        const fn = v => `${v}`;
+                        const diffMeasures = difference(allMeasures, measures, [fn, fn]);
+                        diffMeasures.forEach((measureArr) => {
+                            dataArr.push([...dims, measureArr]);
+                        });
+                    } else {
+                        measures.forEach((measureArr) => {
+                            dataArr.push([...dims, measureArr]);
+                        });
+                    }
                 } else {
                     let measures = instance._metaData.dimensionsMap[dims];
                     measures = measures && measures.length ? measures : [[]];
@@ -120,6 +135,17 @@ export const payloadGenerator = {
 
         payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(d => d.name) : [];
         return payload;
-    }
+    },
+    pseudoSelect: (instance, selectionDataModel, propConfig, facetByFields = []) =>
+        payloadGenerator.__default(instance, selectionDataModel, Object.assign({}, {
+            excludeSelectedMeasures: true
+        }, propConfig), facetByFields)
 };
 
+export const getPayloadGenerator = (action, criteria) => {
+    if (criteria instanceof Array || !payloadGenerator[action]) {
+        return payloadGenerator.__default;
+    }
+
+    return payloadGenerator[action];
+};

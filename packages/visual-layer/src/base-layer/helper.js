@@ -58,30 +58,36 @@ export const applyStylesOnInteraction = (context, elem, interactionType, conf, o
         currentState.clear();
     }
 
-    if (apply) {
-        const sanitizedStyles = {};
+    let applyStyle = true;
 
+    if (apply) {
+        const sanitizedStyles = {
+            styles: {},
+            strokePosition
+        };
         for (const type in styles) {
             const parsedStyleVal = parseStyle(styles[type], {
                 datum,
                 datumStyle: elem.style(type)
             }, apply);
 
-            sanitizedStyles[type] = parsedStyleVal;
+            sanitizedStyles.styles[type] = parsedStyleVal;
         }
         currentState.set(interactionType, sanitizedStyles);
-        applicableStyles = sanitizedStyles;
+        applicableStyles = sanitizedStyles.styles;
+    } else if (!currentState.has(interactionType) && !reset) {
+        applyStyle = false;
     } else {
         currentState.delete(interactionType);
-        applicableStyles = getPreviousStyle(datum.meta, interactionType);
-        applicableStyles = Object.assign({}, originalStyle.styles, applicableStyles);
-        applicableStrokePos = applicableStrokePos || originalStyle.strokePosition;
+        const currentStyle = getPreviousStyle(datum.meta, interactionType);
+        applicableStyles = Object.assign({}, originalStyle.styles, currentStyle.styles);
+        applicableStrokePos = currentStyle.strokePosition || originalStyle.strokePosition;
     }
 
     const styleKeys = Object.keys(applicableStyles);
     const [strokeStyles, otherStyles] = partition(styleKeys, v => v in strokeProps);
 
-    context.applyStyles({
+    applyStyle && context.applyStyles({
         strokeStyles,
         otherStyles,
         styleObj: applicableStyles,

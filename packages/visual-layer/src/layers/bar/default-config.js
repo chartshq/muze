@@ -1,5 +1,5 @@
-import { CLASSPREFIX } from '../../enums/constants';
 import { transformColor } from 'muze-utils';
+import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,
@@ -11,7 +11,7 @@ export const defaultConfig = {
                 stroke: 'black',
                 'stroke-width': '1px'
             },
-            strokePosition: 'outside'
+            strokePosition: 'center'
         },
         focusStroke: {
             className: 'focus-stroke-class',

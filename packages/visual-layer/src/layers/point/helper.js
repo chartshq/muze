@@ -13,24 +13,29 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
     let shape = shapeAxis.getShape(datum.shape);
     let size = sizeAxis.getSize(datum.size);
     let color = colorAxis.getColor(datum.color);
+    const layerEncoding = layerInst.config().encoding;
+    const stroke = layerEncoding.stroke.value;
+    const strokeWidth = layerEncoding['stroke-width'].value;
+
     const resolvedEncodings = resolveEncodingValues({
         values: {
             x: xPx,
             y: yPx,
             color,
+            stroke,
+            'stroke-width': strokeWidth,
             size,
             shape,
             data: datum
         },
         data: datum
     }, i, data, layerInst);
-    const layerEncoding = layerInst.config().encoding;
     const { rowId, source } = datum;
     ({ shape, size, color } = resolvedEncodings);
     const style = {
         fill: color,
-        stroke: layerEncoding.stroke.value,
-        'stroke-width': layerEncoding['stroke-width'].value
+        stroke: resolvedEncodings.stroke,
+        'stroke-width': resolvedEncodings['stroke-width']
     };
     const { x, y } = resolvedEncodings;
     const pos = { x, y };
@@ -41,7 +46,7 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
         source,
         rowId,
         style,
-        data: datum,
+        data: datum.dataObj,
         meta: getColorMetaInf(style, {
             strokePosition: layerEncoding.strokePosition.value
         }),

@@ -7,24 +7,9 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
         options: {
-            strategy: 'focus'
+            strategy: 'fadeOnBrush'
         }
-    }, 'brush-anchors'
-    // {
-    //     name: 'tooltip',
-    //     options: {
-    //         strategy: 'selectionSummary',
-    //         order: 1
-    //     }
-    // }
-    ],
-    // [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
-    //     name: 'tooltip',
-    //     options: {
-    //         strategy: 'selectionSummary',
-    //         order: 1
-    //     }
-    // }],
+    }, 'brush-anchors'],
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
         options: {
@@ -72,17 +57,21 @@ export const behaviourEffectMap = {
         option: {}
     }],
     [BEHAVIOURS.FILTER]: ['filter'],
-    [BEHAVIOURS.SELECT]: [
-        {
-            name: 'highlighter',
-            options: {
-                strategy: 'focus'
-            }
-        }, 'persistent-anchors',
-        {
-            name: 'tooltip',
-            options: {
-                strategy: 'selectionSummary'
-            }
-        }]
+    [BEHAVIOURS.SELECT]: [{
+        name: 'highlighter',
+        options: {
+            strategy: 'focus'
+        }
+    }, 'persistent-anchors', {
+        name: 'tooltip',
+        options: {
+            strategy: 'selectionSummary'
+        }
+    }],
+    pseudoSelect: [{
+        name: 'highlighter',
+        options: {
+            strategy: 'pseudoFocus'
+        }
+    }]
 };

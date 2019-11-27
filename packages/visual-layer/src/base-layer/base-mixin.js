@@ -727,7 +727,11 @@ export const BaseLayerMixin = superclass => class extends superclass {
             );
         });
 
-        otherStyles.forEach((type) => {
+        this.applyElementStyles(elem, otherStyles, styleObj);
+    }
+
+    applyElementStyles (elem, styles, styleObj) {
+        styles.forEach((type) => {
             elem.style(type, styleObj[type]);
         });
     }

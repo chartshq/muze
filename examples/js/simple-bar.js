@@ -78,9 +78,9 @@
 
     // rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
-    const canvas = env.canvas();
+    // const canvas = env.canvas();
 
-    canvas
+    env.canvas()
         .data(rootData)
         // .rows(['maxDays'])
         .columns(['Year'])

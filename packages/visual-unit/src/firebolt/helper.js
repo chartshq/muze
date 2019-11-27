@@ -175,3 +175,16 @@ export const sanitizePayloadCriteria = (data, propFields, { dm, dimensionsMap })
     }
     return dataWithFacets;
 };
+
+export const dispatchSecondaryActions = (firebolt, { action, propagationData, config, propagationInf }) => {
+    const context = firebolt.context;
+
+    const secondaryActions = firebolt._connectedBehaviours[action] || [];
+
+    secondaryActions.forEach((secAction) => {
+        const payloadGeneratorFn = firebolt.getPayloadGeneratorFor(secAction);
+        const generatedPayload = payloadGeneratorFn(firebolt, propagationData, config,
+                        context.facetByFields());
+        firebolt.dispatchBehaviour(secAction, generatedPayload, propagationInf);
+    });
+};

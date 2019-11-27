@@ -43,19 +43,32 @@ const fadeOnBrushFn = (set, context, payload) => {
 
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, { interactionType, apply: false });
+        context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false });
     } else {
         if (dragEnd) {
             interactionType = 'doubleStroke';
             // onDrag style
             context.applyInteractionStyle(completeSet, { interactionType: 'brushStroke', apply: false });
         }
-        // Fade the non-brushed points
-        context.applyInteractionStyle(exitSet, { interactionType: 'focus', apply: true });
-        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
+        const layers = context.firebolt.context.layers();
 
-        // dragEnd style
-        context.applyInteractionStyle(exitSet, { interactionType, apply: false });
-        context.applyInteractionStyle(mergedEnter, { interactionType, apply: true });
+        layers.forEach((layer) => {
+            const layerName = layer.constructor.formalName();
+
+            // Apply style only on the hovered layer
+            if (layerName === 'area') {
+                context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: true }, [layer]);
+                context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+            } else {
+                // Fade the non-brushed points
+                context.applyInteractionStyle(exitSet, { interactionType: 'focus', apply: true }, [layer]);
+                context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false }, [layer]);
+
+                // dragEnd style
+                context.applyInteractionStyle(exitSet, { interactionType, apply: false }, [layer]);
+                context.applyInteractionStyle(mergedEnter, { interactionType, apply: true }, [layer]);
+            }
+        });
     }
 };
 
@@ -76,7 +89,7 @@ export const strategies = {
             // Remove brushed points when clicked on empty chart area
             context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
         } else {
-            context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true, reset: true });
+            context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
 
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
@@ -133,5 +146,13 @@ export const strategies = {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
         }
+    },
+    pseudoFocus: (set, context) => {
+        const { formattedSet } = set;
+        const {
+            mergedEnter
+        } = formattedSet;
+
+        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
     }
 };

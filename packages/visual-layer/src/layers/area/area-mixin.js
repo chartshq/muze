@@ -136,6 +136,7 @@ export const AreaLayerMixin = superclass => class extends superclass {
         const axes = this.axes();
         const colorAxis = axes.color;
         const config = this.config();
+        const encoding = config.encoding;
         const fieldsConfig = this.data().getFieldsConfig();
         const { xField, yField, y0Field } = this.encodingFieldsInf();
         const { x: xAxis, y: yAxis } = axes;
@@ -165,7 +166,8 @@ export const AreaLayerMixin = superclass => class extends superclass {
             }, i, data, this);
             color = resolvedValues.color;
             const style = {
-                fill: color
+                fill: color,
+                'fill-opacity': encoding.fillOpacity.value
             };
 
             const point = {

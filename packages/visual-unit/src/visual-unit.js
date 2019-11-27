@@ -43,6 +43,8 @@ import './styles.scss';
 import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
 import { REACTIVE_PROPS } from './enums';
+import { PSEUDO_SELECT } from './enums/behaviours';
+import PseudoSelectBehaviour from './firebolt/behaviours/pseudo-select';
 
 const FORMAL_NAME = 'VisualUnit';
 const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
@@ -202,7 +204,8 @@ export default class VisualUnit {
         this.firebolt(new Cls(this, {
             physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
             behavioural: Object.assign({}, interactions.behaviours.get(), {
-                [UnitBrushBehaviour.formalName()]: UnitBrushBehaviour
+                [UnitBrushBehaviour.formalName()]: UnitBrushBehaviour,
+                [PSEUDO_SELECT]: PseudoSelectBehaviour
             }, fireboltDeps.behaviouralActions),
             physicalBehaviouralMap: this.getActionBehaviourMap()
         }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
