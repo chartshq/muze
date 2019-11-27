@@ -88,7 +88,6 @@ export const HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
 export const GRID = 'grid';
 export const POINT = 'point';
 export const MESSAGE = 'message';
-export const NO_DATA = 'noData';
 export const ERROR_MESSAGE = 'Insuffient data or incorrect configurations.';
 export const COMMON_INTERACTION = 'common';
 export const INDIVIDUAL_INTERACTION = 'individual';
