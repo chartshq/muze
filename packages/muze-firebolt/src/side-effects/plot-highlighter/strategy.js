@@ -43,6 +43,7 @@ const fadeOnBrushFn = (set, context, payload) => {
 
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, { interactionType, apply: false });
+        context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false });
     } else {
         if (dragEnd) {
             interactionType = 'doubleStroke';
@@ -84,11 +85,11 @@ export const strategies = {
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
-            context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false, reset: true });
+            context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
             // Remove brushed points when clicked on empty chart area
             context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
         } else {
-            context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true, reset: true });
+            context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
 
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
@@ -145,5 +146,13 @@ export const strategies = {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
         }
+    },
+    pseudoFocus: (set, context) => {
+        const { formattedSet } = set;
+        const {
+            mergedEnter
+        } = formattedSet;
+
+        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
     }
 };

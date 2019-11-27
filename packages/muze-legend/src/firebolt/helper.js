@@ -20,7 +20,7 @@ export const propagate = (firebolt, action, identifiers) => {
         action: propPayload.action
     };
 
-    data.propagate(identifiers, propConfig);
+    data.propagate(identifiers, propConfig, true);
 };
 
 export const payloadGenerator = {

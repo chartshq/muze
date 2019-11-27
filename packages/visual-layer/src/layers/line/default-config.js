@@ -1,5 +1,5 @@
-import { CLASSPREFIX } from '../../enums/constants';
 import { transformColor } from 'muze-utils';
+import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,

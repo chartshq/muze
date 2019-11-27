@@ -58,12 +58,13 @@ export const applyStylesOnInteraction = (context, elem, interactionType, conf, o
         currentState.clear();
     }
 
+    let applyStyle = true;
+
     if (apply) {
         const sanitizedStyles = {
             styles: {},
             strokePosition
         };
-
         for (const type in styles) {
             const parsedStyleVal = parseStyle(styles[type], {
                 datum,
@@ -74,18 +75,19 @@ export const applyStylesOnInteraction = (context, elem, interactionType, conf, o
         }
         currentState.set(interactionType, sanitizedStyles);
         applicableStyles = sanitizedStyles.styles;
+    } else if (!currentState.has(interactionType) && !reset) {
+        applyStyle = false;
     } else {
         currentState.delete(interactionType);
         const currentStyle = getPreviousStyle(datum.meta, interactionType);
         applicableStyles = Object.assign({}, originalStyle.styles, currentStyle.styles);
         applicableStrokePos = currentStyle.strokePosition || originalStyle.strokePosition;
-        console.log(applicableStrokePos);
     }
 
     const styleKeys = Object.keys(applicableStyles);
     const [strokeStyles, otherStyles] = partition(styleKeys, v => v in strokeProps);
 
-    context.applyStyles({
+    applyStyle && context.applyStyles({
         strokeStyles,
         otherStyles,
         styleObj: applicableStyles,

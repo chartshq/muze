@@ -221,4 +221,10 @@ export const PointLayerMixin = superclass => class extends superclass {
     getBoundBoxes () {
         return getBoundBoxes(this._points.flat());
     }
+
+    applyElementStyles (elem, styles, styleObj) {
+        styles.forEach((type) => {
+            elem.select('path').style(type, styleObj[type]);
+        });
+    }
 };

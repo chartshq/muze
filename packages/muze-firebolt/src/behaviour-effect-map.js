@@ -63,5 +63,11 @@ export const behaviourEffectMap = {
         options: {
             strategy: 'selectionSummary'
         }
+    }],
+    pseudoSelect: [{
+        name: 'highlighter',
+        options: {
+            strategy: 'pseudoFocus'
+        }
     }]
 };

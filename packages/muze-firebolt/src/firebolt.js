@@ -5,7 +5,8 @@ import {
     isSimpleObject,
     getDataModelFromRange,
     ReservedFields,
-    FieldType
+    FieldType,
+    defaultValue
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -103,6 +104,7 @@ export default class Firebolt {
         this._actionHistory = {};
         this._queuedSideEffects = {};
         this._handlers = {};
+        this._payloadGenerators = {};
 
         this.mapSideEffects(cloneObj(behaviourEffectMap));
         this.registerBehaviouralActions(actions.behavioural);
@@ -570,5 +572,19 @@ export default class Firebolt {
 
     sanitizePayload (payload) {
         return payload;
+    }
+
+    payloadGenerators (...params) {
+        if (params.length) {
+            Object.assign(this._payloadGenerators, params[0]);
+        }
+        return this._payloadGenerators;
+    }
+
+    getPayloadGeneratorFor (action) {
+        const defaultFn = this._payloadGenerators.__default;
+        const fn = this._payloadGenerators[action];
+
+        return defaultValue(fn, defaultFn);
     }
 }

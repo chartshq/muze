@@ -8,12 +8,12 @@ import { generatePayloadFromEvent } from './helpers';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-export const longtouch = firebolt => (targetEl, behaviours) => {
+export const longtouch = firebolt => (targetEl) => {
     let event;
     let touchEnd;
     const dispatchBehaviour = function (args) {
         const payload = generatePayloadFromEvent(args, event, firebolt);
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction('longtouch', payload);
         event.stopPropagation();
     };
 
@@ -26,9 +26,9 @@ export const longtouch = firebolt => (targetEl, behaviours) => {
             if (!touchEnd) {
                 dispatchBehaviour(args);
             } else {
-                behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
+                firebolt.triggerPhysicalAction('longtouch', {
                     criteria: null
-                }));
+                });
             }
         }, 100);
     }).on('touchend', () => {
