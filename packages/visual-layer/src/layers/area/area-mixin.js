@@ -85,13 +85,13 @@ export const AreaLayerMixin = superclass => class extends superclass {
 
             pointArr.forEach((p, i) => {
                 const { y: pointY, y0: pointY0 } = p.update;
-                if ((pointY < y && y < pointY0)) {
+                if (pointY < y && y < pointY0) {
                     index = i;
                     nearestPoint = p;
                 }
             });
 
-            if (index) {
+            if (index || index === 0) {
                 point = {
                     index,
                     data: {
