@@ -104,6 +104,13 @@ export const extractUnitConfig = (config) => {
     return unitConfig;
 };
 
+export const hasOneField = (fields) => {
+    let hasField = false;
+    const keys = Object.keys(fields);
+    hasField = keys.some(d => fields[d].length > 0);
+    return hasField;
+};
+
 /**
  *
  *

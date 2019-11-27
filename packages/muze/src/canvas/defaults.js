@@ -16,7 +16,14 @@ export const SUB_TITLE_CONFIG = {
 };
 
 export const MESSAGE_CONFIG = {
-    className: `${MUZE_PREFIX}-message-container`
+    className: `${MUZE_PREFIX}-message-container`,
+    baseFontLimit: 17,
+    upperFontLimit: 24,
+    baseSizeLimit: 200,
+    upperSizeLimit: 400,
+    fractionFont: 400,
+    fractionImage: 0.8,
+    fractionChild: 0.7
 };
 
 export const CANVAS = 'canvas';

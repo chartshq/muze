@@ -43,7 +43,7 @@ d3.json('/data/cars.json', (data) => {
   		.rows(['Horsepower']) // CountVehicle goes in y axis
       	.columns(['Acceleration']) // Cylinders goes in x-axis
       	.color('Origin') // Colors encoding using the Origin field
-        .data(rootData)
+        .data([])
         .config({
             legend: {
                 color: {

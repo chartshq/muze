@@ -1,7 +1,7 @@
 import { VisualUnit } from '@chartshq/visual-unit';
 import { STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
-import { getBorders } from '../group-helper';
+import { getBorders, hasOneField } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
 import { registerDomainChangeListener, unsubscribeChangeListeners } from './change-listener';
 import ValueMatrix from './value-matrix';
@@ -116,34 +116,36 @@ export const createMatrices = (context) => {
     // Set the row and column axes
     resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
     // Getting the placeholders
-    const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-    context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
-    // Set the selection object
-    context.selection(placeholderInfo.selection);
+    if (hasOneField(resolver.getAllFields())) {
+        const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
+        context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
+        // Set the selection object
+        context.selection(placeholderInfo.selection);
 
-    // Create retinal axes
-    resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
-            encoders);
+        // Create retinal axes
+        resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
+                encoders);
 
-    // Domains are evaluated for each of the axes for commonality
-    resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders);
+        // Domains are evaluated for each of the axes for commonality
+        resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders);
 
-    // Create matrix instances
-    setMatrixInstances(context, placeholderInfo);
+        // Create matrix instances
+        setMatrixInstances(context, placeholderInfo);
 
-    // Prepare corner matrices
-    context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config));
+        // Prepare corner matrices
+        context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config));
 
-    // Set placeholder information
-    context.placeholderInfo(placeholderInfo);
+        // Set placeholder information
+        context.placeholderInfo(placeholderInfo);
 
-    context._composition.axes = resolver.axes();
-    context.metaData({
-        border: getBorders(placeholderInfo, encoders.simpleEncoder)
-    });
+        context._composition.axes = resolver.axes();
+        context.metaData({
+            border: getBorders(placeholderInfo, encoders.simpleEncoder)
+        });
 
-    resolver.encoder().unionUnitDomains(context);
+        resolver.encoder().unionUnitDomains(context);
 
-    registerDomainChangeListener(context);
+        registerDomainChangeListener(context);
+    }
     return context;
 };

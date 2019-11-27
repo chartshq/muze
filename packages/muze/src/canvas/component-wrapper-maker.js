@@ -10,7 +10,7 @@ import {
     RIGHT,
     MESSAGE,
     GRID,
-    NO_DATA_MESSAGE,
+    ERROR_MESSAGE,
     HORIZONTAL_CENTER
 } from '../constants';
 import HeaderComponent from './components/headerComponent';
@@ -131,7 +131,7 @@ const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) 
         const config = {
             ...target,
             dimensions: { height, width },
-            message: NO_DATA_MESSAGE,
+            message: ERROR_MESSAGE,
             classPrefix: MESSAGE_CONFIG,
             position: TOP
         };
