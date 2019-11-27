@@ -83,55 +83,21 @@
     env.canvas()
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Origin'])
-        .rows(['Acceleration'])
-        .color('Origin')
-        // .detail(['Maker'])
-        .mount('#chart')
-        .height(450)
-        .width(600)
-        // .config({
-        //     sort: {
-        //         // Maker : 'asc',
-        //         Origin: 'asc'
-        //     }
-        // })
-        .title('Charts');
-
-    env.canvas()
-        .data(rootData)
-        // .rows(['maxDays'])
         .columns(['Year'])
         .rows(['Acceleration'])
         .color('Origin')
         // .detail(['Maker'])
         .mount('#chart')
-        .height(450)
-        .width(600)
-        // .config({
-        //     sort: {
-        //         // Maker : 'asc',
-        //         Origin: 'asc'
-        //     }
-        // })
-        .title('Charts');
-
-    env.canvas()
-        .data(rootData)
-        // .rows(['maxDays'])
-        .columns(['Year'])
-        .rows(['Acceleration'])
-        .color('Origin')
-        // .detail(['Maker'])
-        .mount('#chart')
-        .height(450)
-        .width(600)
-        // .config({
-        //     sort: {
-        //         // Maker : 'asc',
-        //         Origin: 'asc'
-        //     }
-        // })
+        .height(650)
+        .width(850)
+        .config({
+            sort: {
+                Maker : 'desc',
+            }
+        })
+        .layers([{
+            mark : 'line'
+        }])
         .title('Charts');
     });
 })();
