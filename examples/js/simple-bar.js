@@ -78,9 +78,9 @@
 
     // rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
-    const canvas = env.canvas();
+    // const canvas = env.canvas();
 
-    canvas
+    env.canvas()
         .data(rootData)
         // .rows(['maxDays'])
         .columns(['Origin'])
@@ -88,8 +88,44 @@
         .color('Origin')
         // .detail(['Maker'])
         .mount('#chart')
-        .height(650)
-        .width(850)
+        .height(450)
+        .width(600)
+        // .config({
+        //     sort: {
+        //         // Maker : 'asc',
+        //         Origin: 'asc'
+        //     }
+        // })
+        .title('Charts');
+
+    env.canvas()
+        .data(rootData)
+        // .rows(['maxDays'])
+        .columns(['Year'])
+        .rows(['Acceleration'])
+        .color('Origin')
+        // .detail(['Maker'])
+        .mount('#chart')
+        .height(450)
+        .width(600)
+        // .config({
+        //     sort: {
+        //         // Maker : 'asc',
+        //         Origin: 'asc'
+        //     }
+        // })
+        .title('Charts');
+
+    env.canvas()
+        .data(rootData)
+        // .rows(['maxDays'])
+        .columns(['Year'])
+        .rows(['Acceleration'])
+        .color('Origin')
+        // .detail(['Maker'])
+        .mount('#chart')
+        .height(450)
+        .width(600)
         // .config({
         //     sort: {
         //         // Maker : 'asc',

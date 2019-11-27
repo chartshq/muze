@@ -1,3 +1,4 @@
+import { transformColor } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
@@ -5,28 +6,27 @@ export const defaultConfig = {
     className: '',
     classPrefix: CLASSPREFIX,
     interaction: {
-        highlight: [
-            {
-                type: 'stroke',
-                props: {
-                    value: 'black'
-                }
-            }, {
-                type: 'stroke-width',
-                props: {
-                    value: 1,
-                    position: 'center'
-                }
+        highlight: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '1px'
+            },
+            strokePosition: 'center'
+        },
+        fade: {
+            style: {
+                stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
             }
-        ],
-        fade: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }],
-        focus: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }]
+        },
+        focus: {
+            style: {
+                stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
+            }
+        }
     },
     innerPadding: 0.1,
     transform: {
