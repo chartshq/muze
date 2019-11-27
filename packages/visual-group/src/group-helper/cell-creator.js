@@ -555,7 +555,10 @@ export const computeMatrices = (context, config) => {
     const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
     const facetsAndProjections = resolver.getAllFields();
 
-    if (facetsAndProjections.rowFacets.length > 0 || facetsAndProjections.rowFacets.length > 0) {
+    const { rowFacets, colFacets } = facetsAndProjections;
+    const isFacet = rowFacets.length > 0 || colFacets.length > 0;
+
+    if (isFacet) {
         globalConfig.isFacet = true;
     }
 
@@ -655,7 +658,7 @@ export const computeMatrices = (context, config) => {
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
 
-    if (facetsAndProjections.rowFacets.length > 0 || facetsAndProjections.colFacets.length > 0) {
+    if (isFacet) {
         const arr = sanitiseBorderMatrix({
             leftMatrix: rows[0],
             rightMatrix: rows[1],
