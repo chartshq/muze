@@ -242,6 +242,7 @@ export function renderAxis (axisInstance) {
 
     const selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
     key => key.config().id);
+    selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
 
     let availableSpace;
     let labelProps;
@@ -275,7 +276,6 @@ export function renderAxis (axisInstance) {
         labelProps = axisInstance.axisComponentDimensions().largestTickDimensions;
 
         // Draw axis ticks
-        selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
         setFixedBaseline(axisInstance);
         if (!labels.rotation && labels.smartTicks === false) {
             selectContainer.transition()
