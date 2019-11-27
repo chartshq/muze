@@ -11,7 +11,7 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
         return 'visual-unit';
     }
 
-    apply (selectionSet, payload) {
+    apply (selectionSet) {
         const firebolt = this.firebolt;
         const context = firebolt.context;
         const selectedData = selectionSet.mergedEnter.model.getData().data;

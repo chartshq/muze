@@ -3,8 +3,7 @@ import {
     getSmartComputedStyle,
     selectElement,
     generateGetterSetters,
-    getUniqueId,
-    createSelection
+    getUniqueId
 } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';

@@ -1,7 +1,6 @@
 import SimpleAxis from './simple-axis';
 import { BAND } from '../enums/scale-type';
 import { calculateBandSpace, setOffset, getRotatedSpaces } from './helper';
-import { selectElement } from 'muze-utils';
 
 export default class BandAxis extends SimpleAxis {
     /**
