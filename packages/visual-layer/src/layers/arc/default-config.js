@@ -1,3 +1,4 @@
+import { transformColor } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
@@ -6,18 +7,27 @@ export const defaultConfig = {
     padding: { top: 1, bottom: 1, left: 1, right: 1 },
     className: '',
     interaction: {
-        highlight: [{
-            type: 'fill',
-            intensity: [0, 0, -15, 0]
-        }],
-        fade: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }],
-        focus: [{
-            type: 'fill',
-            intensity: [0, 0, +15, 0]
-        }]
+        highlight: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.1
+                }, data, apply).color
+            }
+        },
+        fade: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
+            }
+        },
+        focus: {
+            style: {
+                fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    a: -0.5
+                }, data, apply).color
+            }
+        }
     },
     height: 100,
     width: 100,

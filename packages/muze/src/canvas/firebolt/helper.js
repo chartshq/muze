@@ -1,4 +1,7 @@
 import { isSimpleObject, ReservedFields, FieldType } from 'muze-utils';
+import { getSideEffects, BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { PSEUDO_SELECT } from '@chartshq/visual-unit/src/enums/behaviours';
+import { COMMON_INTERACTION } from '../../constants';
 
 export const addFacetDataAndMeasureNames = (data, facetData, measureNames) => {
     if (data === null) {
@@ -17,14 +20,20 @@ export const addFacetDataAndMeasureNames = (data, facetData, measureNames) => {
         });
     }
     const criteriaFields = data[0];
-    const fieldsWithFacets = [...facets, ...criteriaFields];
+    const hasMeasureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
+    const fieldsWithFacets = [...facets, ...criteriaFields,
+        ...(hasMeasureNameField ? [] : [ReservedFields.MEASURE_NAMES])];
 
     const dataWithFacets = [
         fieldsWithFacets
     ];
 
     for (let i = 1, len = data.length; i < len; i++) {
-        const row = [...facetVals, ...data[i]];
+        let measureNameArr = [];
+        if (!hasMeasureNameField && measureNames) {
+            measureNameArr = measureNames;
+        }
+        const row = [...facetVals, ...data[i], ...measureNameArr];
         dataWithFacets.push(row);
     }
     return dataWithFacets;
@@ -87,6 +96,85 @@ const isDimension = fields => fields.some(field => field.type() === FieldType.DI
 
 export const isCrosstab = (fields) => {
     const { rowFacets, colFacets, rowProjections, colProjections } = fields;
-    return rowFacets.length || colFacets.length || isDimension(rowProjections.flat()) ||
-        isDimension(colProjections.flat());
+    if (rowFacets.length || colFacets.length) {
+        return true;
+    }
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if ((isDimension(colProj) || isDimension(rowProj)) && (colProj.length > 1 || rowProj.length > 1)) {
+        return true;
+    }
+    return false;
+};
+
+export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
+    const groupFields = firebolt.context.composition().visualGroup.resolver().getAllFields();
+    if (isCrosstab(groupFields)) {
+        const { x, y } = unit.fields();
+        let measureFields;
+
+        if (x[0].type() === FieldType.MEASURE) {
+            measureFields = [`${x[0]}`];
+        } else if (y[0].type() === FieldType.MEASURE) {
+            measureFields = [`${y[0]}`];
+        }
+        payload.selectedMeasures = measureFields;
+    }
+};
+
+export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
+    const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
+    const unitFirebolt = unit.firebolt();
+
+    behaviours.forEach((action) => {
+        const mode = behaviourConfs[action];
+        let targetFirebolt = unitFirebolt;
+        if (mode === COMMON_INTERACTION) {
+            targetFirebolt = firebolt;
+        }
+
+        const actions = targetFirebolt._actions.behavioural;
+        payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
+            unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
+
+        targetFirebolt.dispatchBehaviour(action, payload, {
+            propagate: false,
+            applySideEffect: false
+        });
+
+        const identifiers = actions[action].propagationIdentifiers();
+
+        firebolt.propagate(action, payload, identifiers, {
+            sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
+            sourceUnitId: unit.id(),
+            sourceId: targetFirebolt.id(),
+            propagationDataSource: targetFirebolt.getPropagationSource()
+        });
+    });
+};
+
+export const resetSelectAction = (firebolt, { unit, payload, behaviours }) => {
+    if (behaviours[0] === BEHAVIOURS.BRUSH && payload.dragging && payload.dragDiff < 1) {
+        dispatchBehaviours(firebolt, {
+            behaviours: [BEHAVIOURS.SELECT],
+            payload: {
+                criteria: null
+            },
+            unit
+        });
+    }
+};
+
+export const attachBehaviours = (group) => {
+    const allFields = group.resolver().getAllFields();
+    const valueMatrix = group.matrixInstance().value;
+    const crosstab = isCrosstab(allFields);
+
+    valueMatrix.each((cell) => {
+        const unit = cell.valueOf();
+        const firebolt = unit.firebolt();
+        const behaviours = crosstab ? [PSEUDO_SELECT] : [];
+        firebolt._connectedBehaviours[BEHAVIOURS.SELECT] = behaviours;
+    });
 };

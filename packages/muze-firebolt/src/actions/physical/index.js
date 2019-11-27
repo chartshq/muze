@@ -2,14 +2,14 @@ import drag from './drag';
 import hover from './hover';
 import { longtouch } from './longtouch';
 import { touchdrag } from './touch-drag';
-import * as ACTIONNAMES from '../../enums/actions';
+import * as ACTION_NAMES from '../../enums/actions';
 import click from './click';
 
 export const physicalActions = {
-    [ACTIONNAMES.DRAG]: drag,
-    [ACTIONNAMES.HOVER]: hover,
-    [ACTIONNAMES.CLICK]: click,
-    [ACTIONNAMES.LONGTOUCH]: longtouch,
-    [ACTIONNAMES.TOUCHDRAG]: touchdrag
+    [ACTION_NAMES.DRAG]: drag,
+    [ACTION_NAMES.HOVER]: hover,
+    [ACTION_NAMES.CLICK]: click,
+    [ACTION_NAMES.LONGTOUCH]: longtouch,
+    [ACTION_NAMES.TOUCHDRAG]: touchdrag
 };
 

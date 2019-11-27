@@ -15,7 +15,7 @@ import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
 import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
 import './styles.scss';
-import { getTranslatedPoints, strokeWidthPositionMap, interactionStyleMap } from './bar-helper';
+import { getTranslatedPoints, strokeWidthPositionMap } from './bar-helper';
 
 const { MEASURE } = FieldType;
 
@@ -203,7 +203,7 @@ export const BarLayerMixin = superclass => class extends superclass {
                 identifiers = this.getIdentifiersFromData(values, dataPoint.rowId);
             }
             return {
-                dimensions: [dataPoint.update],
+                dimensions: [dataPoint],
                 id: identifiers,
                 layerId: this.id()
             };
@@ -219,43 +219,71 @@ export const BarLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
-    }
-
-    addOverlayPath (container, refElement, data, style) {
+    addOverlayPath (refElement, data, style, strokePosition, mountPoint) {
         let pathElement;
 
         if (this._overlayPath[data.rowId]) {
             pathElement = this._overlayPath[data.rowId];
         } else {
-            const pathGroup = makeElement(container, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
-            pathElement = makeElement(pathGroup, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            const pathGroup = makeElement(mountPoint, 'g', [1], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement = makeElement(pathGroup, 'path', [data], null, {}, d => `${d.update.x} ${data.rowId}`);
 
             pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
             pathElement.attr('id', data.rowId);
             this._overlayPath[data.rowId] = pathElement;
         }
 
         if (style.type === 'stroke-width') {
             const { L1, L2, L3, M } = strokeWidthPositionMap({
-                width: style.props.value,
-                position: style.props.position
+                width: parseInt(style.value, 10),
+                position: strokePosition
             });
 
-            pathElement.attr('d', d => `M ${d.x + M.x} ${d.y + M.y}
-            L ${d.x + d.width + L1.x} ${d.y + L1.y}
-            L ${d.x + d.width + L2.x} ${d.y + d.height + L2.y}
-            L${d.x + L3.x} ${d.y + d.height + L3.y} Z`);
+            pathElement.attr('d', d => `M ${d.update.x + M.x} ${d.update.y + M.y}
+            L ${d.update.x + d.update.width + L1.x} ${d.update.y + L1.y}
+            L ${d.update.x + d.update.width + L2.x} ${d.update.y + d.update.height + L2.y}
+            L${d.update.x + L3.x} ${d.update.y + d.update.height + L3.y} Z`);
         }
 
-        pathElement.style(style.type, style.props.value);
-        appendElement(container, pathElement.node());
+        let styleVal = style.value;
+        if (typeof styleVal === 'function') {
+            const currentStyle = pathElement.style(style.type);
+            styleVal = styleVal(currentStyle);
+        }
+        pathElement.style(style.type, styleVal);
+        appendElement(mountPoint, pathElement.node());
     }
 
     removeOverlayPath (data, style) {
         const currentPath = this._overlayPath[data.rowId];
-        Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+        if (currentPath) {
+            currentPath.node().removeAttribute('style');
+            Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
+
+            // Apply the path shape get the correct path position
+            currentPath.attr('d', d => `M ${d.update.x} ${d.update.y}
+            L ${d.update.x + d.update.width} ${d.update.y}
+            L ${d.update.x + d.update.width} ${d.update.y + d.update.height}
+            L${d.update.x} ${d.update.y + d.update.height} Z`);
+        }
+    }
+
+    getBoundBoxes () {
+        const points = this._points.flat();
+
+        return points.map((point) => {
+            const { x, y, width, height } = point.update;
+            const data = point.data;
+            return {
+                minX: x,
+                maxX: x + width,
+                minY: y,
+                maxY: y + height,
+                data
+            };
+        });
     }
 };
 

@@ -5,7 +5,8 @@ import {
     isSimpleObject,
     getDataModelFromRange,
     ReservedFields,
-    FieldType
+    FieldType,
+    defaultValue
 } from 'muze-utils';
 import { ALL_ACTIONS } from './enums/actions';
 import SelectionSet from './selection-set';
@@ -18,6 +19,23 @@ import {
     getSideEffects,
     setSideEffectConfig
 } from './helper';
+
+const cloneObj = (behaviourEffectMap) => {
+    const keys = Object.keys(behaviourEffectMap);
+
+    return keys.reduce((acc, key) => {
+        const value = behaviourEffectMap[key];
+        const cloned = value.map((d) => {
+            let clonedVal = d;
+            if (isSimpleObject(d)) {
+                clonedVal = mergeRecursive({}, d);
+            }
+            return clonedVal;
+        });
+        acc[key] = cloned;
+        return acc;
+    }, {});
+};
 
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
@@ -86,8 +104,9 @@ export default class Firebolt {
         this._actionHistory = {};
         this._queuedSideEffects = {};
         this._handlers = {};
+        this._payloadGenerators = {};
 
-        this.mapSideEffects(behaviourEffectMap);
+        this.mapSideEffects(cloneObj(behaviourEffectMap));
         this.registerBehaviouralActions(actions.behavioural);
         this.registerSideEffects(sideEffects);
         this.registerPhysicalBehaviouralMap(actions.physicalBehaviouralMap);
@@ -158,17 +177,20 @@ export default class Firebolt {
         sideEffects.forEach((sideEffect) => {
             const effects = sideEffect.effects;
             const behaviours = sideEffect.behaviours;
-            const combinedSet = this.mergeSelectionSets(behaviours);
+            let combinedSet = this.mergeSelectionSets(behaviours);
             effects.forEach((effect) => {
-                let options;
+                let options = {};
                 let name;
                 if (typeof effect === 'object') {
                     name = effect.name;
-                    options = effect.options;
+                    options = effect.options || {};
                 } else {
                     name = effect;
                 }
-
+                const set = options.set;
+                if (set) {
+                    combinedSet = this.mergeSelectionSets(set);
+                }
                 const sideEffectInstance = sideEffectStore[name];
                 if (sideEffectInstance && sideEffectInstance.isEnabled()) {
                     if (!sideEffectInstance.constructor.mutates() &&
@@ -189,11 +211,9 @@ export default class Firebolt {
     dispatchSideEffect (name, selectionSet, payload, options = {}) {
         const sideEffectStore = this.sideEffects();
         const sideEffect = sideEffectStore[name];
-        let disable = false;
-        if (options.filter && options.filter(sideEffect)) {
-            disable = true;
-        }
-        !disable && sideEffectStore[name].apply(selectionSet, payload, options);
+        const { setTransform } = options;
+        selectionSet = setTransform ? setTransform(selectionSet, payload, this) : selectionSet;
+        sideEffect.apply(selectionSet, payload, options);
     }
 
     registerPropagationBehaviourMap (map) {
@@ -552,5 +572,19 @@ export default class Firebolt {
 
     sanitizePayload (payload) {
         return payload;
+    }
+
+    payloadGenerators (...params) {
+        if (params.length) {
+            Object.assign(this._payloadGenerators, params[0]);
+        }
+        return this._payloadGenerators;
+    }
+
+    getPayloadGeneratorFor (action) {
+        const defaultFn = this._payloadGenerators.__default;
+        const fn = this._payloadGenerators[action];
+
+        return defaultValue(fn, defaultFn);
     }
 }

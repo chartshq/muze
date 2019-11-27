@@ -194,4 +194,7 @@ export default class TimeAxis extends SimpleAxis {
         this.smartTicks(smartTicks);
         return this;
     }
+    _getRawTickValue (data) {
+        return (new Date(data)).getTime();
+    }
 }

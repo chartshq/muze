@@ -78,24 +78,26 @@
 
     // rootData = rootData.project(['Cylinder','Origin','Acceleration','Maker'])
 
-    const canvas = env.canvas();
+    // const canvas = env.canvas();
 
-    canvas
+    env.canvas()
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Origin'])
+        .columns(['Year'])
         .rows(['Acceleration'])
         .color('Origin')
         // .detail(['Maker'])
         .mount('#chart')
         .height(650)
         .width(850)
-        // .config({
-        //     sort: {
-        //         // Maker : 'asc',
-        //         Origin: 'asc'
-        //     }
-        // })
+        .config({
+            sort: {
+                Maker : 'desc',
+            }
+        })
+        .layers([{
+            mark : 'line'
+        }])
         .title('Charts');
     });
 })();

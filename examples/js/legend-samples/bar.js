@@ -1,69 +1,78 @@
-/* eslint-disable*/
-let env = muze();
-const DataModel = muze.DataModel;
-
-d3.json('/data/cars.json', (data) => {
+d3.csv('../data/heatmap.csv', (data) => {
+    // load data and schema from url
+    // Retrieves the DataModel from muze namespace. Muze recognizes DataModel as a first class source of data.
+    const DataModel = window.muze.DataModel;
     const schema = [{
+        name: 'Month',
+        type: 'dimension'
+    }, {
         name: 'Name',
         type: 'dimension'
     }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'Sales',
         type: 'measure'
-    }, {
-        name: 'Displacement',
-        type: 'measure'
-    }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
-        type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
     }];
-    // Create an instance of DataModel using the data and schema.
-    let rootData = new DataModel(data, schema);
-    
-    let canvas1 = env.canvas();
-     // Create a new variable which will keep count of cars per cylinder for a particular origin
-  	const dmWithCount = rootData.calculateVariable(
-        {
-          name: 'CountVehicle',
-          type: 'measure',
-          defAggFn: 'count', // When ever aggregation happens, it counts the number of elements in the bin
-          numberFormat: val => parseInt(val, 10)
-      },
-      ['Name', () => 1]
-  );
-	canvas1
-  		.rows(['CountVehicle']) // CountVehicle goes in y axis
-      	.columns(['Cylinders']) // Cylinders goes in x-axis
-      	.color('Origin') // Colors encoding using the Origin field
-        .data(dmWithCount)
-        .config({
-			legend: {
-				position: 'bottom'
-			}
-		})
-  		.layers([{mark: 'bar',encoding: { y: 'CountVehicle' },transform: { type: 'stack' }}])      	.width(600)
-      	.height(400)
-  		.title('Stacked bar chart', { position: 'top', align: 'right'})
-  		.subtitle('Count of cars per cylinder per origin', { position: 'top', align: 'right'})
-      	.mount('#chart2');
-});
 
+    // Create an instance of DataModel using the data and schema.
+    const rootData = new DataModel(data, schema);
+    // Create a global environment to share common configs across charts
+    const env = window.muze();
+    // Create a canvas from the global environment
+    let canvas = env.canvas();
+
+    canvas = canvas.rows(['Name']).columns(['Month']).layers([{ // For drawing the heatmap background
+        mark: 'bar'
+    }, { // For drawing the text
+        mark: 'text',
+        encoding: {
+            text: {
+                field: 'Sales',
+                formatter: function formatter (value) {
+                    return `${(value / 1000).toFixed(1)}k`;
+                } // Formats the value of text
+            },
+            color: {
+                value: function value () {
+                    return '#fff';
+                }
+            }
+        },
+        interactive: false
+    }]).config({
+        axes: { // With bar encoding, it normally draws a bar chart without padding. Here its forcefully made zero
+            x: {
+                padding: 0
+            },
+            y: {
+                padding: 0
+            }
+        },
+        legend: {
+            position: 'right'
+        },
+        sort: {
+            Month: 'desc'
+        }
+    }).data(rootData).color({ // Color encoding
+        field: 'Sales',
+        step: true,
+        range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
+    }).width(750).height(450)
+    // .title('Heatmap', { position: 'top', align: 'right' })
+    .title('The car acceleration respective to origin').subtitle('Sales per month for each sales person', ).mount('#chart');
+
+    canvas.once('canvas.updated').then(() => {
+        // Disable events from legend
+        const legend = canvas.legend().color;
+        legend.firebolt().dissociateBehaviour('highlight', 'hover');
+        legend.firebolt().dissociateBehaviour('select', 'click');
+    });
+
+    // Disable events from legend
+    // muze.ActionModel.for(canvas).dissociateBehaviour(['select', 'click'], ['brush', 'drag']);
+
+    canvas.once('canvas.animationend').then((client) => {
+        const element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
+});

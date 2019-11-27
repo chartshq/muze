@@ -31,16 +31,30 @@ export const attachDragEvent = (targetEl, action, firebolt, touch) => {
             x: event.x,
             y: event.y
         };
+
         if (touch && Math.abs(startPos.x - endPos.x) <= 5) {
             return;
         }
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
+        const newStartPos = Object.assign({}, startPos);
+        const newEndPos = Object.assign({}, endPos);
+        if (startPos.x > endPos.x) {
+            newStartPos.x = endPos.x;
+            newEndPos.x = startPos.x;
+        }
 
-        const payload = getDragActionConfig(firebolt.context, {
-            startPos,
-            endPos
+        if (startPos.y > endPos.y) {
+            const y = startPos.y;
+            newStartPos.y = endPos.y;
+            newEndPos.y = y;
+        }
+        const payload = getDragActionConfig(firebolt, {
+            startPos: newStartPos,
+            endPos: newEndPos
         });
+        payload.dragging = true;
+        payload.dragDiff = Math.abs(startPos.x - endPos.x) + Math.abs(startPos.y - endPos.y);
         firebolt.triggerPhysicalAction(action, payload);
     }).on('end', () => {
         const event = getEvent();
@@ -55,8 +69,19 @@ export const attachDragEvent = (targetEl, action, firebolt, touch) => {
         }
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
+        if (startPos.x > endPos.x) {
+            const x = startPos.x;
+            startPos.x = endPos.x;
+            endPos.x = x;
+        }
 
-        const payload = getDragActionConfig(firebolt.context, {
+        if (startPos.y > endPos.y) {
+            const y = startPos.y;
+            startPos.y = endPos.y;
+            endPos.y = y;
+        }
+
+        const payload = getDragActionConfig(firebolt, {
             startPos,
             endPos
         });

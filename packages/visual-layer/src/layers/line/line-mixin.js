@@ -17,9 +17,9 @@ import {
     getIndividualClassName,
     getColorMetaInf,
     resolveEncodingValues,
-    sortData
+    sortData,
+    getBoundBoxes
 } from '../../helpers';
-import { interactionStyleMap } from './helper';
 import './styles.scss';
 
 /**
@@ -83,10 +83,6 @@ export const LineLayerMixin = superclass => class extends superclass {
         return true;
     }
 
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
-    }
-
     /**
      * Generates the x and y positions for each point
      * @param {Array} data Data Array
@@ -98,6 +94,7 @@ export const LineLayerMixin = superclass => class extends superclass {
     translatePoints (data) {
         let points = [];
         const axes = this.axes();
+        const encoding = this.config().encoding;
         const xAxis = axes.x;
         const yAxis = axes.y;
         const colorAxis = axes.color;
@@ -122,7 +119,8 @@ export const LineLayerMixin = superclass => class extends superclass {
 
             const style = {
                 stroke: resolvedEncodings.color,
-                'fill-opacity': 0
+                'fill-opacity': encoding.fillOpacity.value,
+                'stroke-width': encoding.strokeWidth.value
             };
 
             const point = {
@@ -134,7 +132,8 @@ export const LineLayerMixin = superclass => class extends superclass {
                 style,
                 rowId: d.rowId,
                 source: d.source,
-                meta: getColorMetaInf(style, colorAxis)
+                data: d.dataObj,
+                meta: getColorMetaInf(style)
             };
             point.className = getIndividualClassName(d, i, data, this);
             this.cachePoint(d[key], point);
@@ -283,5 +282,15 @@ export const LineLayerMixin = superclass => class extends superclass {
             };
         }
         return null;
+    }
+
+    applyStyles ({ strokeStyles, otherStyles, styleObj, elem }) {
+        [...otherStyles, ...strokeStyles].forEach((type) => {
+            elem.style(type, styleObj[type]);
+        });
+    }
+
+    getBoundBoxes () {
+        return getBoundBoxes(this._points.flat());
     }
 };

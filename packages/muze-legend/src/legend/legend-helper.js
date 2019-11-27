@@ -8,7 +8,9 @@ import {
     RIGHT,
     TOP,
     BOTTOM,
-    MAXWIDTH
+    MAXWIDTH,
+    CENTER,
+    HORIZONTAL
 } from '../enums/constants';
 
 /**
@@ -186,6 +188,11 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
  * @param {*} classPrefix
  */
 export const titleCreator = (container, title, measurement, config) => {
+    const { orientation } = config.item.text;
+    let textAlign = LEFT;
+    if (orientation === TOP || orientation === BOTTOM || measurement.alignment === HORIZONTAL) {
+        textAlign = CENTER;
+    }
     const titleWidth = Math.min(measurement.maxWidth, measurement.width);
 
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
@@ -201,6 +208,7 @@ export const titleCreator = (container, title, measurement, config) => {
                     .style('line-height', 1)
                     .style('padding', `${measurement.padding}px`)
                     .text(title.text)
+                    .style('text-align', textAlign)
                     .style('overflow-x', 'scroll')
                     .node();
 };
