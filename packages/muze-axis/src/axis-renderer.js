@@ -226,6 +226,7 @@ export function renderAxis (axisInstance) {
         labels,
         smartAxisName
     } = renderConfig;
+    const mount = axisInstance.mount();
 
     const {
         orientation,
@@ -239,13 +240,14 @@ export function renderAxis (axisInstance) {
         return;
     }
 
+    const selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
+    key => key.config().id);
+
     let availableSpace;
     let labelProps;
-    let selectContainer;
     let tickSize;
     if (axisInstance.domain().length > 0) {
         const labelManager = axisInstance.dependencies().labelManager;
-        const mount = axisInstance.mount();
         const range = axisInstance.range();
         const axis = axisInstance.axis();
         const scale = axisInstance.scale();
@@ -256,9 +258,6 @@ export function renderAxis (axisInstance) {
         } = axisInstance;
 
         tickSize = axisInstance.getTickSize();
-
-        selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
-            key => key.config().id);
 
         // Set style for tick labels
         labelManager.setStyle(tickLabelStyle);
