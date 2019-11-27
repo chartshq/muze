@@ -31,6 +31,7 @@ export const attachDragEvent = (targetEl, action, firebolt, touch) => {
             x: event.x,
             y: event.y
         };
+
         if (touch && Math.abs(startPos.x - endPos.x) <= 5) {
             return;
         }
@@ -53,6 +54,7 @@ export const attachDragEvent = (targetEl, action, firebolt, touch) => {
             endPos: newEndPos
         });
         payload.dragging = true;
+        payload.dragDiff = Math.abs(startPos.x - endPos.x) + Math.abs(startPos.y - endPos.y);
         firebolt.triggerPhysicalAction(action, payload);
     }).on('end', () => {
         const event = getEvent();

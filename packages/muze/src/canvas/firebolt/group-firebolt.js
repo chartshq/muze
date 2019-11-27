@@ -2,8 +2,7 @@ import {
     FieldType,
     mergeRecursive,
     CommonProps,
-    ReservedFields,
-    isSimpleObject
+    ReservedFields
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
 import {
@@ -15,7 +14,14 @@ import {
 import { TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
 import { applyInteractionPolicy } from '../helper';
-import { propagateValues, addFacetDataAndMeasureNames, isCrosstab, addSelectedMeasuresInPayload } from './helper';
+import {
+    propagateValues,
+    isCrosstab,
+    addSelectedMeasuresInPayload,
+    resetSelectAction,
+    dispatchBehaviours,
+    attachBehaviours
+} from './helper';
 import { COMMON_INTERACTION } from '../../constants';
 
 const setSideEffectConfig = (firebolt) => {
@@ -124,6 +130,7 @@ const defaultCrossInteractionPolicy = {
 export default class GroupFireBolt extends Firebolt {
     constructor (...params) {
         super(...params);
+        this.payloadGenerators(payloadGenerator);
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
         this.crossInteractionPolicy(this.constructor.defaultCrossInteractionPolicy());
     }
@@ -170,6 +177,8 @@ export default class GroupFireBolt extends Firebolt {
                     group.getGroupByData().on('propagation', (data, config) => {
                         this.handleDataModelPropagation(data, config);
                     });
+                    // Dispatch pseudo select behaviour for highlighting measures with common dimensions in crosstab
+                    attachBehaviours(group);
                 }
             });
             return this;
@@ -194,9 +203,8 @@ export default class GroupFireBolt extends Firebolt {
         if (mode !== COMMON_INTERACTION) {
             return this;
         }
-        const criteria = config.payload.criteria;
-        const payloadFn = isSimpleObject(criteria) ?
-            payloadGenerator[action] || payloadGenerator.__default : payloadGenerator.__default;
+
+        const payloadFn = this.getPayloadGeneratorFor(action);
         const payload = payloadFn(this, propagationData, config);
 
         const behaviourPolicies = this._behaviourPolicies;
@@ -293,33 +301,10 @@ export default class GroupFireBolt extends Firebolt {
     handlePhysicalAction (event, payload, unit) {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
-        const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
 
-        behaviours.forEach((action) => {
-            const mode = behaviourConfs[action];
-            let targetFirebolt = firebolt;
-            if (mode === COMMON_INTERACTION) {
-                targetFirebolt = this;
-            }
-
-            const actions = targetFirebolt._actions.behavioural;
-            payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
-                unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
-
-            targetFirebolt.dispatchBehaviour(action, payload, {
-                propagate: false,
-                applySideEffect: false
-            });
-
-            const identifiers = actions[action].propagationIdentifiers();
-
-            this.propagate(action, payload, identifiers, {
-                sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
-                sourceUnitId: unit.id(),
-                sourceId: targetFirebolt.id(),
-                propagationDataSource: targetFirebolt.getPropagationSource()
-            });
-        });
+        dispatchBehaviours(this, { behaviours, payload, unit });
+        // Reset select action when dragging is done. Remove this when brush and select will be unioned
+        resetSelectAction(this, { behaviours, payload, unit });
     }
 
     sanitizePayload (payload) {

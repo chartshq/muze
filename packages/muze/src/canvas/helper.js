@@ -100,15 +100,12 @@ const equalityChecker = (props, params) => {
 
 const hasValue = (val) => {
     let hasOneValue = false;
-    for (let i = 0; i < val.length; i++) {
+    for (let i = 0; i < val.length && !hasOneValue; i++) {
         for (let j = 0; j < val[i].length; j++) {
             if (!(val[i][j] instanceof InvalidAwareTypes)) {
                 hasOneValue = true;
                 break;
             }
-        }
-        if (hasOneValue) {
-            break;
         }
     }
     return hasOneValue;

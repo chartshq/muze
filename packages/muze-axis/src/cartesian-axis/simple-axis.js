@@ -489,4 +489,22 @@ export default class SimpleAxis {
             resolveFn();
         };
     }
+
+    _getRawTickValue (data) {
+        return data;
+    }
+
+    getTicksBasedOnData (tickData) {
+        const allTicks = selectElement(this.mount()).selectAll('.tick');
+        let elementToBeModified = null;
+        let elementNotToBeModified = null;
+        if (tickData) {
+            elementToBeModified = allTicks.filter(tickValue => tickData === this._getRawTickValue(tickValue));
+            elementNotToBeModified = allTicks.filter(tickValue => !(tickData === this._getRawTickValue(tickValue)));
+        }
+        return {
+            selectionSet: elementToBeModified,
+            rejectionSet: elementNotToBeModified || allTicks
+        };
+    }
 }

@@ -1,29 +1,15 @@
 import { intersect } from 'muze-utils';
 import * as BEHAVIOURS from './enums/behaviours';
+import * as SIDE_EFFECTS from './enums/side-effects';
 import { unionSets } from './helper';
 
 export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
         options: {
-            strategy: 'focus'
+            strategy: 'fadeOnBrush'
         }
-    }, 'brush-anchors'
-    // {
-    //     name: 'tooltip',
-    //     options: {
-    //         strategy: 'selectionSummary',
-    //         order: 1
-    //     }
-    // }
-    ],
-    // [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
-    //     name: 'tooltip',
-    //     options: {
-    //         strategy: 'selectionSummary',
-    //         order: 1
-    //     }
-    // }],
+    }, 'brush-anchors'],
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
         options: {
@@ -66,6 +52,9 @@ export const behaviourEffectMap = {
                 return null;
             }
         }
+    }, {
+        name: SIDE_EFFECTS.AXIS_LABEL_HIGHLIGHTER,
+        option: {}
     }],
     [BEHAVIOURS.FILTER]: ['filter'],
     [BEHAVIOURS.SELECT]: [{
@@ -77,6 +66,12 @@ export const behaviourEffectMap = {
         name: 'tooltip',
         options: {
             strategy: 'selectionSummary'
+        }
+    }],
+    pseudoSelect: [{
+        name: 'highlighter',
+        options: {
+            strategy: 'pseudoFocus'
         }
     }]
 };

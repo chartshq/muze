@@ -215,24 +215,9 @@ const setAxisNamePos = (textNode, orientation, measures) => {
  * @param {SVGElement} axisInstance.container the container in which to render
  */
 export function renderAxis (axisInstance) {
-    const config = axisInstance.config();
     const renderConfig = axisInstance.renderConfig();
-    const labelManager = axisInstance.dependencies().labelManager;
-    const mount = axisInstance.mount();
-    const range = axisInstance.range();
-    const axis = axisInstance.axis();
-    const scale = axisInstance.scale();
-    const {
-        _tickLabelStyle: tickLabelStyle,
-        _tickFormatter: axisTickFormatter
-    } = axisInstance;
-    const {
-        orientation,
-        axisNamePadding,
-        className,
-        id,
-        classPrefix
-    } = config;
+    const config = axisInstance.config();
+
     const {
         show,
         xOffset,
@@ -242,34 +227,57 @@ export function renderAxis (axisInstance) {
         smartAxisName
     } = renderConfig;
 
+    const {
+        orientation,
+        axisNamePadding,
+        className,
+        id,
+        classPrefix
+    } = config;
+
     if (!show) {
         return;
     }
 
-    const tickSize = axisInstance.getTickSize();
-
-    const selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
-        key => key.config().id);
-
-    // Set style for tick labels
-    labelManager.setStyle(tickLabelStyle);
-
-    const labelFunc = scale.ticks || scale.quantile || scale.domain;
-
-    const ticks = axis.tickValues() || labelFunc();
-
-    axis.tickFormat(axisTickFormatter(ticks));
-
-    // Get range(length of range)
-    const availableSpace = Math.abs(range[0] - range[1]);
-
-    // Get width and height taken by axis labels
-    const labelProps = axisInstance.axisComponentDimensions().largestTickDimensions;
-
-    // Draw axis ticks
-    selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
-    setFixedBaseline(axisInstance);
+    let availableSpace;
+    let labelProps;
+    let selectContainer;
+    let tickSize;
     if (axisInstance.domain().length > 0) {
+        const labelManager = axisInstance.dependencies().labelManager;
+        const mount = axisInstance.mount();
+        const range = axisInstance.range();
+        const axis = axisInstance.axis();
+        const scale = axisInstance.scale();
+
+        const {
+            _tickLabelStyle: tickLabelStyle,
+            _tickFormatter: axisTickFormatter
+        } = axisInstance;
+
+        tickSize = axisInstance.getTickSize();
+
+        selectContainer = makeElement(selectElement(mount), 'g', [axisInstance], `${className}`, {},
+            key => key.config().id);
+
+        // Set style for tick labels
+        labelManager.setStyle(tickLabelStyle);
+
+        const labelFunc = scale.ticks || scale.quantile || scale.domain;
+
+        const ticks = axis.tickValues() || labelFunc();
+
+        axis.tickFormat(axisTickFormatter(ticks));
+
+        // Get range(length of range)
+        availableSpace = Math.abs(range[0] - range[1]);
+
+        // Get width and height taken by axis labels
+        labelProps = axisInstance.axisComponentDimensions().largestTickDimensions;
+
+        // Draw axis ticks
+        selectContainer.attr('transform', `translate(${xOffset},${yOffset})`);
+        setFixedBaseline(axisInstance);
         if (!labels.rotation && labels.smartTicks === false) {
             selectContainer.transition()
                             .duration(1000)
@@ -279,16 +287,15 @@ export function renderAxis (axisInstance) {
             selectContainer.call(axis);
             changeTickOrientation(selectContainer, axisInstance, tickSize);
         }
+
+        selectContainer.selectAll('.tick').classed(`${classPrefix}-ticks`, true);
+        selectContainer.selectAll('.tick line').classed(`${classPrefix}-tick-lines`, true);
+
+        // Set classes for ticks
+        const tickText = selectContainer.selectAll('.tick text');
+        tickText.classed(`${classPrefix}-ticks`, true)
+                        .classed(`${classPrefix}-ticks-${id}`, true);
     }
-
-    selectContainer.selectAll('.tick').classed(`${classPrefix}-ticks`, true);
-    selectContainer.selectAll('.tick line').classed(`${classPrefix}-tick-lines`, true);
-
-    // Set classes for ticks
-    const tickText = selectContainer.selectAll('.tick text');
-    tickText.classed(`${classPrefix}-ticks`, true)
-                    .classed(`${classPrefix}-ticks-${id}`, true);
-
     // Create axis name
     const textNode = makeElement(selectContainer, 'text', [smartAxisName], `${classPrefix}-axis-name`)
                     .attr('text-anchor', 'middle')
