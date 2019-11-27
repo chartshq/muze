@@ -1,7 +1,7 @@
 import { DataModel, mergeRecursive } from 'muze-utils';
 import { sortFacetFields } from './group-utils';
 import { BORDER_WIDTH } from '../enums/defaults';
-import { FACET, DEFAULT } from '../enums/constants';
+import { FACET } from '../enums/constants';
 
 /**
 * Gets name of fields form the variables

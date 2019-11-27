@@ -19,7 +19,6 @@ import * as CONSTANTS from './constants';
 import {
     setSmartText,
     computeTextSpace,
-    isTitleSubtitle,
     setPadding
 } from './text-cell-helper';
 
