@@ -49,6 +49,9 @@ d3.csv('../data/heatmap.csv', (data) => {
         },
         legend: {
             position: 'right'
+        },
+        sort: {
+            Month: 'desc'
         }
     }).data(rootData).color({ // Color encoding
         field: 'Sales',

@@ -83,19 +83,21 @@
     canvas
         .data(rootData)
         // .rows(['maxDays'])
-        .columns(['Origin'])
+        .columns(['Year'])
         .rows(['Acceleration'])
         .color('Origin')
         // .detail(['Maker'])
         .mount('#chart')
         .height(650)
         .width(850)
-        // .config({
-        //     sort: {
-        //         // Maker : 'asc',
-        //         Origin: 'asc'
-        //     }
-        // })
+        .config({
+            sort: {
+                Maker : 'desc',
+            }
+        })
+        .layers([{
+            mark : 'line'
+        }])
         .title('Charts');
     });
 })();

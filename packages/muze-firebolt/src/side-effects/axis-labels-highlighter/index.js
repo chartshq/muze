@@ -14,26 +14,15 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
     apply (selectionSet, payload) {
         const firebolt = this.firebolt;
         const context = firebolt.context;
-        const newstyles = {
-            highlight: {
-
-            },
-            unHighlight: {
-
-            }
-        };
-
-        const selectedData = selectionSet.mergedEnter.model.getData().data[0];
-
+        const selectedData = selectionSet.mergedEnter.model.getData().data;
+        const selectedDataValues = selectedData.length ? selectedData[0] : [];
         const { x, y } = context.axes();
-
         [...x, ...y].forEach((axis) => {
-            if (axis.constructor.type() === 'band') {
-                const { selectionSet: selectedElements,
-                        rejectionSet } = axis.getTicksBasedOnData(selectedData, newstyles);
-                selectedElements.selectAll('text').classed('muze-axis-ticks-highlight', true);
-                rejectionSet.selectAll('text').classed('muze-axis-ticks-highlight', false);
-            }
+            const { index } = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field];
+            const { selectionSet: selectedElements,
+                        rejectionSet } = axis.getTicksBasedOnData(selectedDataValues[index]);
+            selectedElements && selectedElements.selectAll('text').classed('muze-axis-ticks-highlight', true);
+            rejectionSet.selectAll('text').classed('muze-axis-ticks-highlight', false);
         });
     }
 }

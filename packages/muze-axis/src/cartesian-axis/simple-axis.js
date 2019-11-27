@@ -3,7 +3,8 @@ import {
     getSmartComputedStyle,
     selectElement,
     generateGetterSetters,
-    getUniqueId
+    getUniqueId,
+    createSelection
 } from 'muze-utils';
 import { createScale } from '../scale-creator';
 import { axisOrientationMap, BOTTOM, TOP } from '../enums/axis-orientation';
@@ -490,8 +491,22 @@ export default class SimpleAxis {
         };
     }
 
-    getTicksBasedOnData () {
-        throw Error(`Modify not implemented for ${this.constructor.type()}`);
+    _getRawTickValue (data) {
+        return data;
+    }
+
+    getTicksBasedOnData (tickData) {
+        const allTicks = selectElement(this.mount()).selectAll('.tick');
+        let elementToBeModified = null;
+        let elementNotToBeModified = null;
+        if (tickData) {
+            elementToBeModified = allTicks.filter(tickValue => tickData === this._getRawTickValue(tickValue));
+            elementNotToBeModified = allTicks.filter(tickValue => !(tickData === this._getRawTickValue(tickValue)));
+        }
+        return {
+            selectionSet: elementToBeModified,
+            rejectionSet: elementNotToBeModified || allTicks
+        };
     }
 }
 

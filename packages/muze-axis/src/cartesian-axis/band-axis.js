@@ -143,14 +143,4 @@ export default class BandAxis extends SimpleAxis {
         return [p1, p2];
     }
 
-    getTicksBasedOnData (tickData = []) {
-        const mount = this.mount();
-        const allTicks = selectElement(mount).selectAll('.tick');
-        const elementToBeModified = allTicks.filter(tickValue => tickData.includes(tickValue));
-        const elementNotToBeModified = allTicks.filter(tickValue => !tickData.includes(tickValue));
-        return {
-            selectionSet: elementToBeModified,
-            rejectionSet: elementNotToBeModified
-        };
-    }
 }
