@@ -1,5 +1,7 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, InvalidAwareTypes } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType, InvalidAwareTypes } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
+import { BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { payloadGenerator } from '@chartshq/visual-unit';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID, LEGEND }
     from '../constants';
 import { canvasOptions } from './local-options';
@@ -222,10 +224,24 @@ const applyPropagationPolicy = (firebolt, { behaviours, sideEffects }) => {
     }
 };
 
+const isMeasure = fields => fields.every(field => field.type() === FieldType.MEASURE);
+
+const isSplom = (fields) => {
+    const { rowProjections, colProjections } = fields;
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if (isMeasure(colProj) && isMeasure(rowProj)) {
+        return true;
+    }
+    return false;
+};
+
 export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
     if (visualGroup) {
+        const splom = isSplom(visualGroup.resolver().getAllFields());
         const valueMatrix = visualGroup.matrixInstance().value;
         const interactionPolicy = firebolt._interactionPolicy;
         interactionPolicy(valueMatrix, firebolt);
@@ -235,6 +251,15 @@ export const applyInteractionPolicy = (firebolt) => {
         valueMatrix.each((cell) => {
             const unitFireBolt = cell.valueOf().firebolt();
             applyPropagationPolicy(unitFireBolt, { behaviours, sideEffects });
+            if (splom) {
+                unitFireBolt.payloadGenerators({
+                    [BEHAVIOURS.BRUSH]: (inst, dm, propConfig, facetFields) => payloadGenerator.brush(inst, dm,
+                        { ...propConfig, ...{ includeMeasures: false } }, facetFields)
+                });
+                unitFireBolt.sideEffects().selectionBox.config({
+                    persistent: true
+                });
+            }
         });
         applyPropagationPolicy(firebolt, { behaviours, sideEffects });
     }
