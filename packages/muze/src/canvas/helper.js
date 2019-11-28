@@ -1,4 +1,4 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, InvalidAwareTypes } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID, LEGEND }
     from '../constants';
@@ -119,6 +119,19 @@ const equalityChecker = (props, params) => {
     });
 };
 
+const hasValue = (val) => {
+    let hasOneValue = false;
+    for (let i = 0; i < val.length && !hasOneValue; i++) {
+        for (let j = 0; j < val[i].length; j++) {
+            if (!(val[i][j] instanceof InvalidAwareTypes)) {
+                hasOneValue = true;
+                break;
+            }
+        }
+    }
+    return hasOneValue;
+};
+
 const updateChecker = (props, params) => props.every((option, i) => {
     const val = params[i][1];
     switch (option) {
@@ -127,7 +140,7 @@ const updateChecker = (props, params) => props.every((option, i) => {
         return val !== null;
 
     case DATA:
-        return val && !val.isEmpty();
+        return val && !val.isEmpty() && hasValue(val.getData().data);
 
     default:
         return true;
