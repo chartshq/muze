@@ -21,7 +21,6 @@ export const defaultConfig = {
             style: {
                 stroke: 'black',
                 'stroke-width': '1px'
-                // fill: 'blue'
             },
             strokePosition: 'outside'
         },

@@ -31,7 +31,7 @@ export const defaultConfig = {
             }
         }
     },
-    crossline: true,
+    crossline: false,
     transition: {
         effect: 'cubic',
         duration: 1000

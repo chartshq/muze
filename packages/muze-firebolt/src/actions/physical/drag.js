@@ -1,4 +1,5 @@
 import { attachDragEvent } from './helpers/drag-event';
+import * as ACTION_NAMES from '../../enums/actions';
 
 /**
  * Adds dragging action to the target element.
@@ -7,7 +8,7 @@ import { attachDragEvent } from './helpers/drag-event';
  * @param {Array} behaviours Array of behaviours
  */
 /* istanbul ignore next */ const drag = firebolt => (targetEl) => {
-    attachDragEvent(targetEl, 'drag', firebolt);
+    attachDragEvent(targetEl, ACTION_NAMES.DRAG, firebolt);
 };
 
 export default drag;

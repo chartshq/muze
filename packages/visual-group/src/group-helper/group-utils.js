@@ -4,6 +4,7 @@ import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
+import { sanitiseHeaderMatrix } from './cell-border-applier';
 import {
     DIMENSION,
     MEASURE,
@@ -104,6 +105,13 @@ export const extractUnitConfig = (config) => {
     return unitConfig;
 };
 
+export const hasOneField = (fields) => {
+    let hasField = false;
+    const keys = Object.keys(fields);
+    hasField = keys.some(d => fields[d].length > 0);
+    return hasField;
+};
+
 /**
  *
  *
@@ -145,6 +153,7 @@ export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, lab
         labelManager
     }).source(getHeaderText(fieldHeaders, i, fields[0].length))
                     .config({ show: cell.config().show })) : [];
+    sanitiseHeaderMatrix(headers, true);
     return headers;
 };
 

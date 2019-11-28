@@ -141,4 +141,5 @@ export default class BandAxis extends SimpleAxis {
         const p2 = scale(reverse ? extent[0] : extent[extent.length - 1]) + scale.bandwidth();
         return [p1, p2];
     }
+
 }

@@ -1,5 +1,6 @@
 /* global setTimeout */
 import { getEvent } from 'muze-utils';
+import * as ACTION_NAMES from '../../enums/actions';
 import { generatePayloadFromEvent } from './helpers';
 
 /**
@@ -13,7 +14,7 @@ export const longtouch = firebolt => (targetEl) => {
     let touchEnd;
     const dispatchBehaviour = function (args) {
         const payload = generatePayloadFromEvent(args, event, firebolt);
-        firebolt.triggerPhysicalAction('longtouch', payload);
+        firebolt.triggerPhysicalAction(ACTION_NAMES.LONGTOUCH, payload);
         event.stopPropagation();
     };
 
@@ -26,7 +27,7 @@ export const longtouch = firebolt => (targetEl) => {
             if (!touchEnd) {
                 dispatchBehaviour(args);
             } else {
-                firebolt.triggerPhysicalAction('longtouch', {
+                firebolt.triggerPhysicalAction(ACTION_NAMES.LONGTOUCH, {
                     criteria: null
                 });
             }

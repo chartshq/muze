@@ -2,7 +2,7 @@ import { ReservedFields, FieldType, difference, isSimpleObject } from 'muze-util
 
 const getRangeFromData = (instance, selectionDataModel, propConfig) => {
     const dataObj = selectionDataModel.getData();
-    const sourceIdentifiers = propConfig.sourceIdentifiers;
+    const { includeMeasures = true, sourceIdentifiers } = propConfig;
     const schema = dataObj.schema;
     const fieldMap = instance.data().getFieldsConfig();
     const selectionDataFields = selectionDataModel.getFieldspace().fieldsObj();
@@ -21,7 +21,7 @@ const getRangeFromData = (instance, selectionDataModel, propConfig) => {
         }, {});
         const measureNamesIdx = sourceIdentifiers.identifiers[0]
             .findIndex(field => field === ReservedFields.MEASURE_NAMES);
-        if (measureNamesIdx !== undefined) {
+        if (measureNamesIdx !== undefined && includeMeasures) {
             const measureNames = sourceIdentifiers.identifiers.slice(1, sourceIdentifiers.identifiers.length)
                 .map(d => d[measureNamesIdx]);
             criteria[ReservedFields.MEASURE_NAMES] = measureNames.map(d => [d]);

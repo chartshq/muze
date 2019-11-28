@@ -957,18 +957,6 @@ function RGBAToHexA (rgba) {
     if (a.length === 1) { a = `0${a}`; }
 
     return `#${r}${g}${b}${a}`;
-
-    // r = r.toString(16);
-    // g = g.toString(16);
-    // b = b.toString(16);
-    // a = Math.round(a * 255).toString(16);
-
-    // if (r.length === 1) { r = `0${r}`; }
-    // if (g.length === 1) { g = `0${g}`; }
-    // if (b.length === 1) { b = `0${b}`; }
-    // if (a.length === 1) { a = `0${a}`; }
-
-    // return `#${r}${g}${b}${a}`;
 }
 
 const transformToHex = (datumStyle, colorType) => {
@@ -1392,12 +1380,19 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+const sortingOrder = (a, b) => {
+    const sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes)
+    ? a.localeCompare(b)
+    : 1;
+    return sortOrder;
+};
+
 /**
  * Map containing key, value sortingOrder pairs
  */
 const sortOrderMap = {
-    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => firstVal.localeCompare(secondVal),
-    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => secondVal.localeCompare(firstVal)
+    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => sortingOrder(firstVal, secondVal),
+    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => sortingOrder(secondVal, firstVal)
 };
 
 /**
@@ -1456,71 +1451,6 @@ const componentRegistry = (comps) => {
 
     return regObj;
 };
-
-// function hexAToHSL (H) {
-//     // Convert hex to RGB first
-//     let r = 0;
-//     let g = 0;
-//     let b = 0;
-//     let a = 1;
-
-//     if (H.length === 4) {
-//         r = `0x${H[1]}${H[1]}`;
-//         g = `0x${H[2]}${H[2]}`;
-//         b = `0x${H[3]}${H[3]}`;
-//     } else if (H.length === 7) {
-//         r = `0x${H[1]}${H[2]}`;
-//         g = `0x${H[3]}${H[4]}`;
-//         b = `0x${H[5]}${H[6]}`;
-//     } else if (H.length === 5) {
-//         r = `0x${H[1]}${H[1]}`;
-//         g = `0x${H[2]}${H[2]}`;
-//         b = `0x${H[3]}${H[3]}`;
-//         a = `0x${H[4]}${H[4]}`;
-//     } else if (H.length === 9) {
-//         r = `0x${H[1]}${H[2]}`;
-//         g = `0x${H[3]}${H[4]}`;
-//         b = `0x${H[5]}${H[6]}`;
-//         a = `0x${H[7]}${H[8]}`;
-//     }
-
-//     // Then to HSL
-//     r /= 255;
-//     g /= 255;
-//     b /= 255;
-//     const cmin = Math.min(r, g, b);
-//     const cmax = Math.max(r, g, b);
-//     const delta = cmax - cmin;
-
-//     let h = 0;
-//     let s = 0;
-//     let l = 0;
-
-//     if (delta === 0) {
-//         h = 0;
-//     } else if (cmax === r) {
-//         h = ((g - b) / delta) % 6;
-//     } else if (cmax === g) {
-//         h = (b - r) / delta + 2;
-//     } else {
-//         h = (r - g) / delta + 4;
-//     }
-
-//     h = Math.round(h * 60);
-
-//     if (h < 0) { h += 360; }
-
-//     l = (cmax + cmin) / 2;
-//     s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-//     s = +(s * 100).toFixed(1);
-//     l = +(l * 100).toFixed(1);
-//     a = (a / 255).toFixed(3);
-
-//     return {
-//         color: `hsla(${h},${s}%,${l}%,${a})`,
-//         code: [h, s, l, a]
-//     };
-// }
 
 const getReadableTicks = (domain, steps) => {
     // scaling the axis based on steps provided

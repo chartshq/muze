@@ -1,5 +1,7 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType, InvalidAwareTypes } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
+import { BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { payloadGenerator } from '@chartshq/visual-unit';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID, LEGEND }
     from '../constants';
 import { canvasOptions } from './local-options';
@@ -19,6 +21,27 @@ export const initCanvas = (context) => {
     return [new reg.VisualGroup(context._registry, Object.assign({
         throwback: context._throwback
     }, context.dependencies()))];
+};
+
+export const fixFacetConfig = (config) => {
+    let isBorderPresent = false;
+    const isGridLinePresent = {};
+
+    if (config.border && config.border.width) {
+        isBorderPresent = true;
+    }
+    if (config.gridLines) {
+        isGridLinePresent.x = !!config.gridLines.x;
+        isGridLinePresent.y = !!config.gridLines.y;
+    }
+    const facetsUserConfig = {
+        isBorderPresent,
+        isGridLinePresent
+    };
+    return {
+        facetsUserConfig,
+        isFacet: false
+    };
 };
 
 export const fixScrollBarConfig = (config) => {
@@ -98,6 +121,19 @@ const equalityChecker = (props, params) => {
     });
 };
 
+const hasValue = (val) => {
+    let hasOneValue = false;
+    for (let i = 0; i < val.length && !hasOneValue; i++) {
+        for (let j = 0; j < val[i].length; j++) {
+            if (!(val[i][j] instanceof InvalidAwareTypes)) {
+                hasOneValue = true;
+                break;
+            }
+        }
+    }
+    return hasOneValue;
+};
+
 const updateChecker = (props, params) => props.every((option, i) => {
     const val = params[i][1];
     switch (option) {
@@ -106,7 +142,7 @@ const updateChecker = (props, params) => props.every((option, i) => {
         return val !== null;
 
     case DATA:
-        return val && !val.isEmpty();
+        return val && !val.isEmpty() && hasValue(val.getData().data);
 
     default:
         return true;
@@ -188,10 +224,24 @@ const applyPropagationPolicy = (firebolt, { behaviours, sideEffects }) => {
     }
 };
 
+const isMeasure = fields => fields.every(field => field.type() === FieldType.MEASURE);
+
+const isSplom = (fields) => {
+    const { rowProjections, colProjections } = fields;
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if (isMeasure(colProj) && isMeasure(rowProj)) {
+        return true;
+    }
+    return false;
+};
+
 export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
     if (visualGroup) {
+        const splom = isSplom(visualGroup.resolver().getAllFields());
         const valueMatrix = visualGroup.matrixInstance().value;
         const interactionPolicy = firebolt._interactionPolicy;
         interactionPolicy(valueMatrix, firebolt);
@@ -201,6 +251,15 @@ export const applyInteractionPolicy = (firebolt) => {
         valueMatrix.each((cell) => {
             const unitFireBolt = cell.valueOf().firebolt();
             applyPropagationPolicy(unitFireBolt, { behaviours, sideEffects });
+            if (splom) {
+                unitFireBolt.payloadGenerators({
+                    [BEHAVIOURS.BRUSH]: (inst, dm, propConfig, facetFields) => payloadGenerator.brush(inst, dm,
+                        { ...propConfig, ...{ includeMeasures: false } }, facetFields)
+                });
+                unitFireBolt.sideEffects().selectionBox.config({
+                    persistent: true
+                });
+            }
         });
         applyPropagationPolicy(firebolt, { behaviours, sideEffects });
     }
