@@ -384,6 +384,8 @@ export default class CartesianEncoder extends VisualEncoder {
 
     hasMandatoryFields (fields) {
         const { colProjections, rowProjections } = fields;
-        return super.hasMandatoryFields({ colProjections, rowProjections });
+        const colFields = super.hasMandatoryFields({ colProjections });
+        const rowFields = super.hasMandatoryFields({ rowProjections });
+        return colFields && rowFields;
     }
 }

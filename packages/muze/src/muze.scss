@@ -210,6 +210,14 @@
 .#{$messageContainer}-child {
     display: table-cell;
     vertical-align: middle;
+
+    &-img {
+        text-align: center;
+        svg {
+            display: unset;
+            float: unset;
+        }
+    }
 }
 
 .#{$messageContainer}-child-message {
@@ -217,7 +225,6 @@
     color: #4F708C;;
     text-align: center;
     font-weight: 600;
-    margin-top: 20px;
 }
 
 .hidden {

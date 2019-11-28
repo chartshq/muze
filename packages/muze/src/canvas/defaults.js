@@ -17,9 +17,9 @@ export const SUB_TITLE_CONFIG = {
 
 export const MESSAGE_CONFIG = {
     className: `${MUZE_PREFIX}-message-container`,
-    baseFontLimit: 17,
+    baseFontLimit: 16,
     upperFontLimit: 24,
-    baseSizeLimit: 200,
+    baseSizeLimit: 100,
     upperSizeLimit: 300,
     fractionImage: 0.8,
     fractionChild: 0.7

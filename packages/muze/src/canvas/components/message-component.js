@@ -7,8 +7,11 @@ const formatFontSize = (width, height) => {
     const { baseFontLimit, upperFontLimit, baseSizeLimit, upperSizeLimit } = MESSAGE_CONFIG;
     const fractionFont = (upperSizeLimit - baseSizeLimit) / (upperFontLimit - baseFontLimit);
     let fontSize = upperFontLimit;
-    const dim = width < height ? width : height;
-    if (dim <= baseSizeLimit) {
+    const dim = width < height && width !== 0 ? width : height;
+
+    if (dim === 0) {
+        fontSize = 0;
+    } else if (dim <= baseSizeLimit) {
         fontSize = baseFontLimit;
     } else if (dim > baseSizeLimit && dim < upperSizeLimit) {
         fontSize = baseFontLimit + (upperSizeLimit - dim) / fractionFont;
@@ -30,7 +33,7 @@ export default class MessageComponent extends MuzeComponent {
 
         const node = makeElement(parent, 'div', [1], className);
         const { height, width } = config.dimensions;
-        const childHeight = MESSAGE_CONFIG.fractionChild * height;
+        const childHeight = height > MESSAGE_CONFIG.baseSizeLimit ? MESSAGE_CONFIG.fractionChild * height : 0;
         const { message } = config;
 
         applyStyle(node, { width: `${width}px`, height: `${height}px` });
@@ -39,10 +42,9 @@ export default class MessageComponent extends MuzeComponent {
         const imageNode = makeElement(childNode, 'div', [1], `${className}-child-img`);
         const messageNode = makeElement(childNode, 'div', [1], `${className}-child-message`);
 
-        applyStyle(childNode, { width: `${width}px`, height: `${childHeight}px` });
-        applyStyle(imageNode, { width: `${width}px`, height: `${childHeight * MESSAGE_CONFIG.fractionImage}px` });
+        applyStyle(childNode, { width, height: `${childHeight}px` });
+        applyStyle(imageNode, { width, height: `${childHeight * MESSAGE_CONFIG.fractionImage}px` });
 
-        // makeElement(childImage, 'svg', [1]).attr('path', incorrectMessageIcon);
         imageNode.html(incorrectMessageIcon);
 
         const textElement = makeElement(messageNode, 'text', [1]);
