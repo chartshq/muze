@@ -20,7 +20,7 @@ export const MESSAGE_CONFIG = {
     baseFontLimit: 17,
     upperFontLimit: 24,
     baseSizeLimit: 200,
-    upperSizeLimit: 400,
+    upperSizeLimit: 300,
     fractionImage: 0.8,
     fractionChild: 0.7
 };
