@@ -508,4 +508,3 @@ export default class SimpleAxis {
         };
     }
 }
-

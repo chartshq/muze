@@ -1,11 +1,11 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType, InvalidAwareTypes } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
+import { BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { payloadGenerator } from '@chartshq/visual-unit';
 import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID, LEGEND }
     from '../constants';
 import { canvasOptions } from './local-options';
 import { LayoutManager } from '../../../layout/src/tree-layout';
-import { BEHAVIOURS } from '@chartshq/muze-firebolt';
-import { payloadGenerator } from '@chartshq/visual-unit';
 
 /**
  * Instantiate high level components. Canvas knows what all high level component it has.
@@ -21,6 +21,27 @@ export const initCanvas = (context) => {
     return [new reg.VisualGroup(context._registry, Object.assign({
         throwback: context._throwback
     }, context.dependencies()))];
+};
+
+export const fixFacetConfig = (config) => {
+    let isBorderPresent = false;
+    const isGridLinePresent = {};
+
+    if (config.border && config.border.width) {
+        isBorderPresent = true;
+    }
+    if (config.gridLines) {
+        isGridLinePresent.x = !!config.gridLines.x;
+        isGridLinePresent.y = !!config.gridLines.y;
+    }
+    const facetsUserConfig = {
+        isBorderPresent,
+        isGridLinePresent
+    };
+    return {
+        facetsUserConfig,
+        isFacet: false
+    };
 };
 
 export const fixScrollBarConfig = (config) => {
@@ -100,6 +121,19 @@ const equalityChecker = (props, params) => {
     });
 };
 
+const hasValue = (val) => {
+    let hasOneValue = false;
+    for (let i = 0; i < val.length && !hasOneValue; i++) {
+        for (let j = 0; j < val[i].length; j++) {
+            if (!(val[i][j] instanceof InvalidAwareTypes)) {
+                hasOneValue = true;
+                break;
+            }
+        }
+    }
+    return hasOneValue;
+};
+
 const updateChecker = (props, params) => props.every((option, i) => {
     const val = params[i][1];
     switch (option) {
@@ -108,7 +142,7 @@ const updateChecker = (props, params) => props.every((option, i) => {
         return val !== null;
 
     case DATA:
-        return val && !val.isEmpty();
+        return val && !val.isEmpty() && hasValue(val.getData().data);
 
     default:
         return true;

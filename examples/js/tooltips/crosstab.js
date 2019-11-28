@@ -37,25 +37,41 @@ d3.csv('../../data/coffee.csv', (data) => {
     let canvas7 = env7.canvas();
 
     canvas7 = canvas7
-      .rows(['Market', 'Product Type'])
+      .rows([['Market', 'Product Type', 'Product']])
       .columns([['Revenue', 'Expense'], ['Revenue', 'Expense']])
       .data(rootData7)
-      .width(550)
-      .height(300)
+      .width(750)
+      .height(1300)
       .config({
-          showHeaders: true, /* show the headers of fields used in faceting */
-          facetConfig: { rows: { verticalAlign: 'middle' } }, /* dimensional values are placed in middle */
-          axes: {
-              y: { showAxisName: false }, /* dont show axis name as we are showing headers, its redundant information */
-              x: {
-                  tickFormat: (d) => {
-                      if (d < 1000) return d;
-                      if (d > 1000 && d < 1000000) return `${d / 1000}K`
-                      if (d > 1000000) return `${d / 1000}M`
-                      return d
-                  }
-              }
-          }
+        showHeaders: true, /* show the headers of fields used in faceting */
+        axes: {
+            y: { showAxisName: false }, /* dont show axis name as we are showing headers, its redundant information */
+            x: {
+                tickFormat: (d) => {
+                    if (d < 1000) return d;
+                    if (d > 1000 && d < 1000000) return `${d / 1000}K`
+                    if (d > 1000000) return `${d / 1000}M`
+                    return d
+                }
+            }
+        },
+        facetConfig: { rows: { verticalAlign: 'bottom' } }, /* dimensional values are placed in middle */
+        border:{
+            showRowBorders: {
+              top: true,
+              bottom: true,
+            },
+            showColBorders:{
+                left: true,
+                right: true
+            },
+            showValueBorders: {
+                top: true,
+                bottom: true,
+                left: true,
+                right: true
+            }
+        },
       })
       .title('Visual Crosstab')
       .subtitle('Revenue and Expense by Product type and Market')
