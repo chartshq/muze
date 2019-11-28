@@ -17,7 +17,7 @@ export const defaultConfig = {
             className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
-                'stroke-width': '2px'
+                'stroke-width': '1px'
             },
             strokePosition: 'outside'
         },
@@ -30,6 +30,13 @@ export const defaultConfig = {
             strokePosition: 'outside'
         },
         doubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
+            },
+            strokePosition: 'outside'
+        },
+        commonDoubleStroke: {
             style: {
                 stroke: 'black',
                 'stroke-width': '2px'

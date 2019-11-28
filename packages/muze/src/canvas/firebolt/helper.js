@@ -155,7 +155,7 @@ export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
 };
 
 export const resetSelectAction = (firebolt, { unit, payload, behaviours }) => {
-    if (behaviours[0] === BEHAVIOURS.BRUSH && payload.dragging && payload.dragDiff < 1) {
+    if (behaviours[0] === BEHAVIOURS.BRUSH && payload.dragging && payload.dragDiff < 5) {
         dispatchBehaviours(firebolt, {
             behaviours: [BEHAVIOURS.SELECT],
             payload: {

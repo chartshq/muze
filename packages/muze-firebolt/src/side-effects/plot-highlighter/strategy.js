@@ -1,4 +1,6 @@
-import { getFormattedSet, highlightSelectIntersection } from './helper';
+import { intersect, difference } from 'muze-utils';
+import { getFormattedSet } from './helper';
+import { BEHAVIOURS } from '../..';
 
 const fadeFn = (set, context) => {
     const { formattedSet } = set;
@@ -34,7 +36,6 @@ const fadeOnBrushFn = (set, context, payload) => {
     const {
         mergedEnter,
         mergedExit,
-        exitSet,
         completeSet
     } = formattedSet;
 
@@ -60,14 +61,14 @@ const fadeOnBrushFn = (set, context, payload) => {
             // Apply style only on the hovered layer
             if (layerName === 'area') {
                 context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: true }, [layer]);
-                context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+                context.applyInteractionStyle(mergedExit, { interactionType: 'fade', apply: false }, [layer]);
             } else {
-                // Fade the non-brushed points
-                // context.applyInterwactionStyle(exitSet, { interactionType: 'focus', apply: true }, [layer]);
-                // context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false }, [layer]);
-
                 // dragEnd style
-                context.applyInteractionStyle(exitSet, { interactionType, apply: false }, [layer]);
+                context.applyInteractionStyle(mergedExit, { interactionType, apply: false }, [layer]);
+                !payload.dragEnd &&
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: false });
+                interactionType !== 'doubleStroke' &&
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'doubleStroke', apply: false });
                 context.applyInteractionStyle(mergedEnter, { interactionType, apply: true }, [layer]);
             }
         });
@@ -84,20 +85,35 @@ export const strategies = {
             mergedExit,
             completeSet
         } = formattedSet;
+        const { firebolt } = context;
 
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
             context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
-            // Remove all highlight styles
-            context.applyInteractionStyle(completeSet, { interactionType: 'highlight', apply: false });
-            // Remove brushed points when clicked on empty chart area
-            // context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
+            context.applyInteractionStyle(completeSet, { interactionType: 'commonDoubleStroke', apply: false });
         } else {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
 
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
-            context.applyInteractionStyle(formattedSet.entrySet, { interactionType: 'focusStroke', apply: true });
+            context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
+
+            const payload = firebolt.getPayload(BEHAVIOURS.HIGHLIGHT);
+            const entryExitSet = firebolt.getEntryExitSet(BEHAVIOURS.HIGHLIGHT);
+            const layers = firebolt.context.layers();
+
+            if (payload.target && entryExitSet) {
+                layers.forEach((layer) => {
+                    // get uids of only the currently highlighted point
+                    const actualPoint = layer.getUidsFromPayload(entryExitSet.mergedEnter, payload.target);
+
+                    const commonSet = intersect(mergedEnter.uids, actualPoint.uids,
+                        [v => v[0], v => v[0]]);
+                    context.applyInteractionStyle({
+                        uids: commonSet
+                    }, { interactionType: 'commonDoubleStroke', apply: true }, [layer]);
+                });
+            }
         }
     },
     areaFocus: (set, context) => {
@@ -110,7 +126,6 @@ export const strategies = {
         if (!mergedEnter.length && !mergedExit.length) {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
             context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
-            // context.applyInteractionStyle(completeSet, { interactionType: 'doubleStroke', apply: false, reset: true });
         } else {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: false });
             context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: true });
@@ -120,28 +135,25 @@ export const strategies = {
         }
     },
     highlight: (set, context, payload, excludeSetIds) => {
-        const { formattedSet } = set;
+        const { formattedSet, selectionSet } = set;
         const {
             mergedEnter,
-            mergedExit,
-            completeSet
+            mergedExit
         } = formattedSet;
 
         if (!mergedEnter.length && !mergedExit.length) {
             // Remove focusStroke on selected but currently non-highlighted set
-            context.applyInteractionStyle(completeSet, { interactionType: 'highlight', apply: false });
-            const selectEntrySet = context.firebolt.getEntryExitSet('select');
-            if (selectEntrySet) {
-                context.applyInteractionStyle(selectEntrySet.mergedEnter,
-                    { interactionType: 'focusStroke', apply: false });
-            }
+            context.applyInteractionStyle(selectionSet.completeSet, { interactionType: 'highlight', apply: false });
+            context.applyInteractionStyle(selectionSet.completeSet,
+                { interactionType: 'commonDoubleStroke', apply: false }
+            );
         } else {
             const layers = context.firebolt.context.layers();
 
             layers.forEach((layer) => {
                 if (payload.target) {
                     // get uids of only the currently highlighted point
-                    const actualPoint = layer.getUidsFromPayload(mergedEnter, payload.target);
+                    const actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target);
                     // get uids of only the currently highlighted point excluding the excludeSet ids
                     const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
 
@@ -151,17 +163,30 @@ export const strategies = {
                         [layer]
                     );
 
-                    // Get a set of both highlighted and selected points
-                    const commonSelectHighlightSet = highlightSelectIntersection(context.firebolt);
-                    const mergedEnterSet = (commonSelectHighlightSet || {}).mergedEnter;
+                    context.applyInteractionStyle(selectionSet.mergedExit,
+                        { interactionType: 'highlight', apply: false },
+                        [layer]
+                    );
 
-                    // Appy focusStroke on point both hovered and selected
-                    if (mergedEnterSet && mergedEnter.length) {
-                        const pointHoveredAndSelected = layer.getUidsFromPayload(
-                            mergedEnterSet, payload.target
-                        );
-                        context.applyInteractionStyle(pointHoveredAndSelected,
-                            { interactionType: 'focusStroke', apply: true },
+                    const selectEntrySet = context.firebolt.getEntryExitSet('select');
+                    if (selectEntrySet) {
+                        const commonSet = intersect(selectEntrySet.mergedEnter.uids, actualPoint.uids,
+                            [v => v[0], v => v[0]]);
+                        const diffSet = difference(selectEntrySet.mergedEnter.uids, actualPoint.uids,
+                            [v => v[0], v => v[0]]);
+
+                        if (commonSet.length) {
+                            context.applyInteractionStyle({
+                                uids: commonSet
+                            },
+                                    { interactionType: 'commonDoubleStroke', apply: true },
+                                    [layer]
+                                );
+                        }
+                        context.applyInteractionStyle({
+                            uids: diffSet
+                        },
+                            { interactionType: 'commonDoubleStroke', apply: false },
                             [layer]
                         );
                     }

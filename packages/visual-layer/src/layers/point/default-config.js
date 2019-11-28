@@ -20,8 +20,15 @@ export const defaultConfig = {
             className: 'focus-stroke-class',
             style: {
                 stroke: 'black',
-                'stroke-width': '2px'
+                'stroke-width': '1px'
                 // fill: 'blue'
+            },
+            strokePosition: 'outside'
+        },
+        commonDoubleStroke: {
+            style: {
+                stroke: 'black',
+                'stroke-width': '2px'
             },
             strokePosition: 'outside'
         },
