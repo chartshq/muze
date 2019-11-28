@@ -58,10 +58,10 @@ d3.json('../../../data/cars.json', (data) => {
 		.data(dm)
 		.width(850)
 		.height(650)
-		.rows(["Horsepower"])
+		.rows(["Displacement"])
 		.columns(["Year"])
 		.color("Origin")
-		.size('Horsepower')
+		// .size('Horsepower')
 		.layers([{
 			mark: 'bar',
 		}])

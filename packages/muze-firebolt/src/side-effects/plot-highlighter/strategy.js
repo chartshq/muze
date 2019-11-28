@@ -151,14 +151,14 @@ export const strategies = {
                         [layer]
                     );
 
-                    // Get union of highlighted and selected points
-                    const highlightUnionSel = highlightSelectIntersection(context.firebolt, formattedSet);
-                    const selectEntrySet = context.firebolt.getEntryExitSet('select');
+                    // Get a set of both highlighted and selected points
+                    const commonSelectHighlightSet = highlightSelectIntersection(context.firebolt);
+                    const mergedEnterSet = (commonSelectHighlightSet || {}).mergedEnter;
 
                     // Appy focusStroke on point both hovered and selected
-                    if (highlightUnionSel && highlightUnionSel.mergedEnter.length && selectEntrySet) {
+                    if (mergedEnterSet && mergedEnter.length) {
                         const pointHoveredAndSelected = layer.getUidsFromPayload(
-                            selectEntrySet.mergedEnter, payload.target
+                            mergedEnterSet, payload.target
                         );
                         context.applyInteractionStyle(pointHoveredAndSelected,
                             { interactionType: 'focusStroke', apply: true },
