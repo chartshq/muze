@@ -393,4 +393,9 @@ export default class PolarEncoder extends VisualEncoder {
         });
         return layerConfig;
     }
+
+    hasMandatoryFields (fields) {
+        const { optionalProjections, colProjections, rowProjections } = fields;
+        return super.hasMandatoryFields({ optionalProjections, colProjections, rowProjections });
+    }
 }

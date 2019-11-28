@@ -1,7 +1,7 @@
 import { VisualUnit } from '@chartshq/visual-unit';
 import { STATE_NAMESPACES, CommonProps } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
-import { getBorders, hasOneField } from '../group-helper';
+import { getBorders } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
 import { registerDomainChangeListener, unsubscribeChangeListeners } from './change-listener';
 import ValueMatrix from './value-matrix';
@@ -116,8 +116,8 @@ export const createMatrices = (context) => {
     // Set the row and column axes
     resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
     // Getting the placeholders
-    if (hasOneField(resolver.getAllFields())) {
-        const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
+    const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
+    if (Object.keys(placeholderInfo).length > 0) {
         context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
         // Set the selection object
         context.selection(placeholderInfo.selection);

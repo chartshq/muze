@@ -16,7 +16,7 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
         const context = firebolt.context;
         const selectedData = selectionSet.mergedEnter.model.getData().data;
         const selectedDataValues = selectedData.length ? selectedData[0] : [];
-        const { x, y } = context.axes();
+        const { x = [], y = [] } = context.axes();
         [...x, ...y].forEach((axis) => {
             const { index } = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field];
             const { selectionSet: selectedElements,

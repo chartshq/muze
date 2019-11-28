@@ -381,4 +381,9 @@ export default class CartesianEncoder extends VisualEncoder {
         });
         return this.sanitizeLayerConfig(retinalConfig, layerConfig);
     }
+
+    hasMandatoryFields (fields) {
+        const { colProjections, rowProjections } = fields;
+        return super.hasMandatoryFields({ colProjections, rowProjections });
+    }
 }
