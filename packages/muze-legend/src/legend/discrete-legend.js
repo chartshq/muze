@@ -2,7 +2,8 @@ import {
     FieldType,
     DimensionSubtype,
     formatTemporal,
-    getReadableTicks
+    getReadableTicks,
+    InvalidAwareTypes
 } from 'muze-utils';
 import SimpleLegend from './simple-legend';
 import { DISCRETE, LEFT, SIZE } from '../enums/constants';
@@ -87,7 +88,13 @@ export default class DiscreteLegend extends SimpleLegend {
         }).filter(d => d.value !== null);
 
         domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
-            : domainForLegend.sort((a, b) => a.value.localeCompare(b.value));
+            : domainForLegend.sort((a, b) => {
+                const domainValue =
+                                !(a.value instanceof InvalidAwareTypes || a.value instanceof InvalidAwareTypes)
+                                ? a.value.localeCompare(b.value)
+                                : 1;
+                return domainValue;
+            });
         return domainForLegend;
     }
 

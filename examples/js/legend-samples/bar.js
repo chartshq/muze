@@ -1,78 +1,55 @@
-d3.csv('../data/heatmap.csv', (data) => {
-    // load data and schema from url
-    // Retrieves the DataModel from muze namespace. Muze recognizes DataModel as a first class source of data.
-    const DataModel = window.muze.DataModel;
-    const schema = [{
-        name: 'Month',
-        type: 'dimension'
-    }, {
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Sales',
-        type: 'measure'
-    }];
+var env = window.muze();
+var DataModel = window.muze.DataModel;
+var mountPoint = document.getElementById('chart');
 
-    // Create an instance of DataModel using the data and schema.
-    const rootData = new DataModel(data, schema);
-    // Create a global environment to share common configs across charts
-    const env = window.muze();
-    // Create a canvas from the global environment
-    let canvas = env.canvas();
+var schema = [{
+    name: 'Horsepower',
+    type: 'measure'
+}, {
+    name: 'Acceleration',
+    type: 'measure'
+}, {
+    name: 'Origin',
+    type: 'dimension'
+}];
 
-    canvas = canvas.rows(['Name']).columns(['Month']).layers([{ // For drawing the heatmap background
-        mark: 'bar'
-    }, { // For drawing the text
-        mark: 'text',
-        encoding: {
-            text: {
-                field: 'Sales',
-                formatter: function formatter (value) {
-                    return `${(value / 1000).toFixed(1)}k`;
-                } // Formats the value of text
-            },
-            color: {
-                value: function value () {
-                    return '#fff';
-                }
-            }
+var data = [{
+    "Horsepower": 130,
+    "Acceleration": null,
+    "Origin": "USA"
+}, {
+    "Horsepower": 115,
+    "Acceleration": 17.5,
+    "Origin": "Europe"
+}, {
+    "Horsepower": null,
+    "Acceleration": 15,
+    "Origin": "Japan"
+}, {
+    "Horsepower": 120,
+    "Acceleration": 13.9,
+    "Origin": "India"
+}, {
+    "Horsepower": 102,
+    "Acceleration": 15.7,
+    "Origin": null
+}];
+var rootData = new DataModel(data, schema, null, { dataFormat: "FlatJSON" });
+
+var canvas = env.canvas();
+var rows = ["Acceleration"];
+var columns = [];
+canvas.mount(mountPoint).width(600).data(rootData).rows(columns).height(500).columns(rows).layers([{
+    mark: 'arc'
+}]).color({
+    field: 'Origin'
+}).config({
+    axes: {
+        x: {
+            showAxisName: true
         },
-        interactive: false
-    }]).config({
-        axes: { // With bar encoding, it normally draws a bar chart without padding. Here its forcefully made zero
-            x: {
-                padding: 0
-            },
-            y: {
-                padding: 0
-            }
-        },
-        legend: {
-            position: 'right'
-        },
-        sort: {
-            Month: 'desc'
+        y: {
+            showAxisName: true
         }
-    }).data(rootData).color({ // Color encoding
-        field: 'Sales',
-        step: true,
-        range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
-    }).width(750).height(450)
-    // .title('Heatmap', { position: 'top', align: 'right' })
-    .title('The car acceleration respective to origin').subtitle('Sales per month for each sales person', ).mount('#chart');
-
-    canvas.once('canvas.updated').then(() => {
-        // Disable events from legend
-        const legend = canvas.legend().color;
-        legend.firebolt().dissociateBehaviour('highlight', 'hover');
-        legend.firebolt().dissociateBehaviour('select', 'click');
-    });
-
-    // Disable events from legend
-    // muze.ActionModel.for(canvas).dissociateBehaviour(['select', 'click'], ['brush', 'drag']);
-
-    canvas.once('canvas.animationend').then((client) => {
-        const element = document.getElementById('chart');
-        element.classList.add('animateon');
-    });
-});
+    }
+})
