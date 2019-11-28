@@ -19,6 +19,7 @@ import {
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
 import { SimpleVariable } from '../variable';
+import { sanitiseBorderMatrix, sanitiseGeomMatrix } from './cell-border-applier';
 
 /**
  * Updates row and column cells with the geom cell corresponding to the facet keys
@@ -553,6 +554,14 @@ export const computeMatrices = (context, config) => {
     const { fields: normalizedColumns } = resolver.verticalAxis();
     const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
     const facetsAndProjections = resolver.getAllFields();
+
+    const { rowFacets, colFacets } = facetsAndProjections;
+    const isFacet = rowFacets.length > 0 || colFacets.length > 0;
+
+    if (isFacet) {
+        globalConfig.isFacet = true;
+    }
+
     const matrixGnContext = {
         // Configuration to be passed to generate the  different matrices.
         // A common config is used for both value matrices and other matrices
@@ -648,6 +657,16 @@ export const computeMatrices = (context, config) => {
 
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
+
+    if (isFacet) {
+        const arr = sanitiseBorderMatrix({
+            leftMatrix: rows[0],
+            rightMatrix: rows[1],
+            topMatrix: columns[0],
+            bottomMatrix: columns[1]
+        });
+        valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
+    }
 
     return {
         rows: resolver.rowMatrix(),

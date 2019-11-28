@@ -16,96 +16,11 @@ import { DEFAULT_CONFIG } from './enums/defaults';
 import { CLASSPREFIX, TOP, BOTTOM, LEFT, RIGHT, HEADER, WIDTH, TEXT_CELL } from './enums/constants';
 import './text-cell.scss';
 import * as CONSTANTS from './constants';
-
-const setSmartText = (context) => {
-    const source = context.source();
-    const {
-        height: minHeightSpace,
-        width: minWidthSpace
-    } = context.minSpacing();
-    const {
-       margin,
-       rotation
-   } = context.config();
-    const {
-        left,
-        right,
-        top,
-        bottom
-     } = margin;
-    const paddedHeight = top + bottom + minHeightSpace;
-    const paddedWidth = left + right + minWidthSpace;
-    const availHeight = context.availHeight() - paddedHeight;
-    const availWidth = context.availWidth() - paddedWidth;
-    const labelManager = context.dependencies().labelManager;
-
-    labelManager.setStyle(context._computedStyle);
-
-    !rotation && context.smartText(labelManager.getSmartText(source, availWidth, availHeight, false));
-    rotation && context.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
-
-    return context;
-};
-
-/**
-* Computes the Logical Space for the text
-*
-* @param {Object} context Required to get the needed parameters to compute text space
-* @return {Object} Logical space taken up by text
-* @memberof TextCell
-*/
-const computeTextSpace = (context) => {
-    const { labelManager } = context.dependencies();
-    const {
-        height: minHeightSpace,
-        width: minWidthSpace
-    } = context.minSpacing();
-    const {
-       margin,
-       show,
-       maxLines,
-       minCharacters
-   } = context.config();
-    const {
-       left,
-       right,
-       top,
-       bottom
-    } = margin;
-    const paddedHeight = top + bottom + minHeightSpace;
-    const paddedWidth = left + right + minWidthSpace;
-    const availHeight = context.availHeight() - paddedHeight;
-    const availWidth = context.availWidth() - paddedWidth;
-    const source = context.source();
-    const space = context.smartText();
-    const minText = new Array(minCharacters).fill('W').join('');
-    const _minTextSpace = labelManager.getOriSize(minText);
-
-    context.config({ rotation: false });
-    if (space.width > (availWidth || 0) && maxLines) {
-        space.height = space.oriTextHeight * maxLines;
-    }
-    if (availWidth && availWidth < space.width) {
-        space.width = _minTextSpace.width;
-    }
-    if (availWidth && availWidth < Math.min(_minTextSpace.width, space.oriTextWidth)) {
-        const smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
-        space.width = smartSpace.height;
-        space.height = smartSpace.width;
-        context.config({ rotation: true });
-        context.smartText(smartSpace);
-    }
-
-    if (show) {
-        return {
-            width: Math.ceil(space.width) + paddedWidth,
-            height: Math.ceil(space.height) + paddedHeight
-        };
-    } return {
-        width: 0,
-        height: 0
-    };
-};
+import {
+    setSmartText,
+    computeTextSpace,
+    setPadding
+} from './text-cell-helper';
 
 /**
  * Represents a table haeder.
@@ -214,6 +129,8 @@ class TextCell extends SimpleCell {
         if (!this.logicalSpace()) {
             this.logicalSpace(computeTextSpace(this));
         }
+        const space = computeTextSpace(this);
+        this.logicalSpace(space);
         return this.logicalSpace();
     }
 
@@ -249,13 +166,18 @@ class TextCell extends SimpleCell {
             show,
             verticalAlign,
             textAlign,
-            rotation
+            rotation,
+            padding,
+            type,
+            headerPadding,
+            className,
+            titlePadding
         } = this.config();
 
         this.mount(mount);
         if (show) {
             const container = selectElement(mount);
-            const elem = makeElement(container, 'div', [this.id], `${CLASSPREFIX}-${TEXT_CELL}`);
+            let elem = makeElement(container, 'div', [this.id], `${CLASSPREFIX}-${TEXT_CELL}`);
             const vAlign = verticalAlign || rotation ? 'middle' : 'top';
             const {
                 width,
@@ -276,15 +198,19 @@ class TextCell extends SimpleCell {
             elem.classed(this._className, true);
 
             // Apply styles
-            elem.style('text-align', textAlign);
             elem.style('display', 'inline');
             elem.style('transform', rotation ? `translate(${height / 2}px,
                 ${translation[vAlign]}px) rotate(-90deg)` : '');
             elem.style(WIDTH, availWidth ? `${availWidth}px` : '100%');
-            [TOP, BOTTOM, LEFT, RIGHT].forEach((type) => {
-                container.style(`margin-${type}`, `${margin[type]}px`);
+
+            [TOP, BOTTOM, LEFT, RIGHT].forEach((position) => {
+                container.style(`margin-${position}`, `${margin[position]}px`);
             });
-            elem.style('text-align', textAlign);
+
+            elem = setPadding({ elem, className, headerPadding, padding, type, titlePadding });
+            if (this._className === 'muze-grid-headers') {
+                elem.style('text-align', textAlign);
+            }
             elem.style('display', 'inline');
             // set the text as the innerHTML
             this._dependencies.labelManager.setStyle(this._computedStyle);

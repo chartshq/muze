@@ -22,5 +22,23 @@ export const DEFAULT_CONFIG = {
     [CONSTANTS.SHOW]: true,
     [CONSTANTS.MAX_LINES]: 0,
     [CONSTANTS.MIN_CHARS]: 0,
-    [CONSTANTS.ROTATION]: null
+    [CONSTANTS.ROTATION]: null,
+    [CONSTANTS.PADDING]: {
+        [CONSTANTS.LEFT]: 8,
+        [CONSTANTS.RIGHT]: 8,
+        [CONSTANTS.TOP]: 10,
+        [CONSTANTS.BOTTOM]: 0
+    },
+    [CONSTANTS.HEADER_PADDING]: {
+        [CONSTANTS.LEFT]: 8,
+        [CONSTANTS.RIGHT]: 5,
+        [CONSTANTS.TOP]: 2,
+        [CONSTANTS.BOTTOM]: 5
+    },
+    [CONSTANTS.TITLE_PADDING]: {
+        [CONSTANTS.LEFT]: 0,
+        [CONSTANTS.RIGHT]: 0,
+        [CONSTANTS.TOP]: 0,
+        [CONSTANTS.BOTTOM]: 0
+    }
 };

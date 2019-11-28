@@ -13,4 +13,3 @@ export const DEFAULT_PLACEHOLDERS = {
     [CONSTANTS.GEOM_CELL]: GeomCell,
     [CONSTANTS.BLANK_CELL]: BlankCell
 };
-
