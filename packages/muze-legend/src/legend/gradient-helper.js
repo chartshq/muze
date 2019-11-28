@@ -26,10 +26,10 @@ export const getGradientDomain = (data) => {
  * @param {*} domain
  *
  */
-export const makeLinearGradient = (container, data, domain) => {
+export const makeLinearGradient = (container, data, domain, id) => {
     const defs = makeElement(container, 'defs', [1]);
     const linearGradient = makeElement(defs, 'linearGradient', [1])
-                .attr('id', 'linear-gradient')
+                .attr('id', `linear-gradient-${id}`)
                 .attr('x1', '0%')
                 .attr('y2', '0%');
 
@@ -79,12 +79,12 @@ export const createAxis = (context) => {
  *
  * @memberof GradientLegend
  */
-const createLegendSkeleton = (container, classPrefix, data) => {
+const createLegendSkeleton = (container, classPrefix, data, id) => {
     const domain = getGradientDomain(data);
     const legendContainer = makeElement(container, 'div', [1], `${classPrefix}-legend-body`);
     const legendGradSvg = makeElement(legendContainer, 'svg', [1], `${classPrefix}-gradient`);
     const legendGradCont = makeElement(legendGradSvg, 'g', [1], `${classPrefix}-gradient-group`);
-    const linearGradient = makeLinearGradient(legendGradSvg, data, domain);
+    const linearGradient = makeLinearGradient(legendGradSvg, data, domain, id);
     const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-rect`);
 
     return {
@@ -137,7 +137,7 @@ export const renderGradient = (context, container) => {
         legendGradCont,
         linearGradient,
         legendRect
-    } = createLegendSkeleton(container, classPrefix, data);
+    } = createLegendSkeleton(container, classPrefix, data, context._id);
     const labelDim = context.axis().source().getAxisDimensions().tickDimensions;
     const {
         padding,
@@ -192,9 +192,9 @@ export const renderGradient = (context, container) => {
         width: `${gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4}px`
     });
 
-        // Apply styles to the legend rect
+    // Apply styles to the legend rect
     applyStyle(legendRect, {
-        fill: 'url(#linear-gradient)'
+        fill: `url(#linear-gradient-${context._id})`
     });
     legendGradSvg.attr('height', gradientDimensions.height + LEGEND_MARKER_PROPS.size + 4);
     legendGradSvg.attr('width', gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4);

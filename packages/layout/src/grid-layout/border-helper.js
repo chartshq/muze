@@ -3,51 +3,119 @@ import {
     VIEW_INDEX, ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, MIDDLE, NO_BORDERS
 } from '../enums/constants';
 
-const borderMap = {
-    [`${TOP}-${LEFT}`]: NO_BORDERS,
+const borderMap = (isFacet, showHeaders) => ({
+    [`${TOP}-${LEFT}`]: isFacet && showHeaders ? LEFT : NO_BORDERS,
     [`${TOP}-${MIDDLE}`]: COLUMN,
-    [`${TOP}-${RIGHT}`]: NO_BORDERS,
-    [`${CENTER}-${LEFT}`]: ROW,
+    [`${TOP}-${RIGHT}`]: isFacet && showHeaders ? RIGHT : NO_BORDERS,
+    [`${CENTER}-${LEFT}`]: isFacet ? `${CENTER}${LEFT}` : ROW,
     [`${CENTER}-${MIDDLE}`]: CENTER,
-    [`${CENTER}-${RIGHT}`]: ROW,
+    [`${CENTER}-${RIGHT}`]: isFacet ? `${CENTER}${RIGHT}` : ROW,
     [`${BOTTOM}-${LEFT}`]: NO_BORDERS,
     [`${BOTTOM}-${MIDDLE}`]: COLUMN,
     [`${BOTTOM}-${RIGHT}`]: NO_BORDERS
+});
+
+const applySpecificBorder = (params) => {
+    const { type, borderWidth, borderStyle, cells, isFacet, color } = params;
+    if (!isFacet) {
+        cells.style(`border-${type}`, `${borderWidth}px ${borderStyle} ${color}`);
+    } else {
+        cells.style(`border-${type}-width`, `${borderWidth}px`);
+        cells.style(`border-${type}-style`, `${borderStyle}`);
+    }
 };
 
-const applySpecificBorder = (cells, color, type, style) => {
-    cells.style(`border-${type}`, `${style} ${color}`);
-};
-
-const specificBorderApplier = (borderTypes, showBorders, cells, borderInfo) => {
+const specificBorderApplier = (params) => {
+    const { borderTypes, showBorders, cells, borderInfo, name, isFacet } = params;
     const {
         color,
-        width,
-        style
+        style,
+        width
     } = borderInfo;
-    const borderStyle = `${width}px ${style}`;
-
     borderTypes.forEach((borderType) => {
-        applySpecificBorder(cells, showBorders[borderType] ? color : BLANK_BORDERS, borderType, borderStyle);
+        applySpecificBorder({
+            cells,
+            color: showBorders[borderType] ? color : BLANK_BORDERS,
+            type: borderType,
+            borderWidth: width,
+            borderStyle: style,
+            name,
+            isFacet
+        });
     });
 };
 
-const borderApplier = (cells, borderInfo) => {
+const borderApplier = (cells, borderInfo, name, isFacet) => {
     const {
-       showRowBorders,
-      showColBorders,
-      showValueBorders
-  } = borderInfo;
+        showRowBorders,
+        showColBorders,
+        showValueBorders
+    } = borderInfo;
     return {
-        row: () => specificBorderApplier([TOP, BOTTOM], showRowBorders, cells, borderInfo),
-        column: () => specificBorderApplier([LEFT, RIGHT], showColBorders, cells, borderInfo),
-        center: () => specificBorderApplier([LEFT, RIGHT, TOP, BOTTOM], showValueBorders, cells, borderInfo)
+        [ROW]: () => specificBorderApplier({
+            borderTypes: [TOP, BOTTOM],
+            showBorders: showRowBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [COLUMN]: () => specificBorderApplier({
+            borderTypes: [LEFT, RIGHT],
+            showBorders: showColBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [CENTER]: () => specificBorderApplier({
+            borderTypes: [LEFT, RIGHT, TOP, BOTTOM],
+            showBorders: showValueBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [LEFT]: () => specificBorderApplier({
+            borderTypes: [LEFT],
+            showBorders: showValueBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [RIGHT]: () => specificBorderApplier({
+            borderTypes: [RIGHT],
+            showBorders: showValueBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [`${CENTER}${LEFT}`]: () => specificBorderApplier({
+            borderTypes: [LEFT, TOP, BOTTOM],
+            showBorders: showValueBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        }),
+        [`${CENTER}${RIGHT}`]: () => specificBorderApplier({
+            borderTypes: [RIGHT, TOP, BOTTOM],
+            showBorders: showValueBorders,
+            cells,
+            borderInfo,
+            name,
+            isFacet
+        })
     };
 };
 
-export const applyBorders = (cells, border, row, column) => {
-    const borderApplierFn = borderApplier(cells, border);
-    const borderMapVal = borderMap[`${ROW_MATRIX_INDEX[VIEW_INDEX[row]]}-${COLUMN_MATRIX_INDEX[column]}`];
+export const applyBorders = (params) => {
+    const { cells, border, row, column, isFacet, showHeaders } = params;
+    const name = `${ROW_MATRIX_INDEX[VIEW_INDEX[row]]}-${COLUMN_MATRIX_INDEX[column]}`;
+    const borderApplierFn = borderApplier(cells, border, name, isFacet);
+    const borderMapVal = borderMap(isFacet, showHeaders)[name];
     if (borderMapVal) {
         borderApplierFn[borderMapVal]();
     }

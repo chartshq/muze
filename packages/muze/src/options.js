@@ -15,7 +15,7 @@
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
-import { fixScrollBarConfig } from './canvas/helper';
+import { fixScrollBarConfig, fixFacetConfig } from './canvas/helper';
 import { DEFAULT_CONFIG } from './defaults';
 
 export default {
@@ -64,12 +64,17 @@ export default {
                 const { reset = false } = auxConfig;
                 let oldConf = {};
 
+                // handle the default cases for facet, as it is different to other charts
+                const facetDefaultConfig = fixFacetConfig(config);
+                config = mergeRecursive(config, facetDefaultConfig);
+
                 if (!reset) {
                     oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
                 }
 
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);
                 const newConf = mergeRecursive(defConfig, config);
+
                 return fixScrollBarConfig(newConf);
             }
 

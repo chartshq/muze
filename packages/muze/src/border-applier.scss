@@ -1,0 +1,44 @@
+@import "./prefix.scss";
+
+.#{$prefix}grid-normal {
+    border-color: #ebebeb;
+
+    .#{$prefix}axis-name{
+        font-size: 12px;
+        line-height: 15px;
+    }
+}
+
+.#{$prefix}grid-dark {
+    border-color: #cbcbcb;
+
+    .#{$prefix}axis-name{
+        font-size: 12px;
+        line-height: 15px;
+    }
+}
+.#{$prefix}grid-dark-bottom {
+    border-bottom-color:#cbcbcb;
+}
+
+.#{$prefix}grid-darker-top {
+    border-top-color: #979797;
+}
+.#{$prefix}grid-dark-top {
+    border-top-color: #cbcbcb;
+}
+.#{$prefix}grid-dark-right {
+    border-right-color: #cbcbcb;
+}
+
+.#{$prefix}grid-darker-bottom {
+    border-bottom-color: #979797;
+}
+
+.#{$prefix}grid-dark-left {
+    border-left-color: #cbcbcb;
+}
+
+.#{$prefix}grid-none-left {
+    border-left-color:transparent;
+}
