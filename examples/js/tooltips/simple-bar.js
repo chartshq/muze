@@ -1,10 +1,10 @@
 /* eslint-disable */
-const env3 = muze();
-const DataModel3= muze.DataModel;
+const env = muze();
+const DataModel = muze.DataModel;
 
 d3.json('../../data/cars.json', (data) => {
-    let jsonData3 = data;
-    const schema3 = [{
+    let jsonData = data;
+    const schema = [{
         name: 'Name',
         type: 'dimension'
     },
@@ -46,16 +46,20 @@ d3.json('../../data/cars.json', (data) => {
         type: 'dimension'
     }
     ];
-    let rootData3 = new DataModel3(jsonData3, schema3);
-    let canvas3 = env3.canvas();
-		
-    canvas3 = canvas3
-    .rows([['Acceleration'], ['Horsepower']]) // Acceleration goes in Y-Axis
-    .columns(['Year']) // Horsepower goes in Y-Axis
-    .data(rootData3)
-    .width(650)
-    .height(550)
-    .color('Origin')
-    .mount(chart3)
+    var rootData = new DataModel(data, schema, { dataFormat: "FlatJSON" });
+
+    var canvas = env.canvas();
+    var rows = ["Acceleration"];
+    var columns = ["Origin"];
+    canvas
+        .mount('#chart1')
+        .width(600)
+        .data(rootData)
+        .rows(rows)
+        .height(500)
+        .columns(columns)
+        .color({
+            field: 'Maker'
+        })
 });
 

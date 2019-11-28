@@ -1380,12 +1380,19 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+const sortingOrder = (a, b) => {
+    const sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes)
+    ? a.localeCompare(b)
+    : 1;
+    return sortOrder;
+};
+
 /**
  * Map containing key, value sortingOrder pairs
  */
 const sortOrderMap = {
-    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => firstVal.localeCompare(secondVal),
-    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => secondVal.localeCompare(firstVal)
+    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => sortingOrder(firstVal, secondVal),
+    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => sortingOrder(secondVal, firstVal)
 };
 
 /**

@@ -208,11 +208,23 @@
 }
 
 .#{$messageContainer}-child {
-    vertical-align: middle;
-    text-align: center;
-    font-size:  18px;
-    color: rgb(140, 141, 142);
     display: table-cell;
+    vertical-align: middle;
+
+    &-img {
+        text-align: center;
+        svg {
+            display: unset;
+            float: unset;
+        }
+    }
+}
+
+.#{$messageContainer}-child-message {
+    text-align: center;
+    color: #4F708C;;
+    text-align: center;
+    font-weight: 600;
 }
 
 .hidden {
