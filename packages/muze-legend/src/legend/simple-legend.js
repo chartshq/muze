@@ -279,7 +279,11 @@ export default class SimpleLegend {
         } = this.config();
         const {
             border,
-            marginHorizontal
+            marginHorizontal,
+            maxWidth,
+            maxHeight,
+            width,
+            height
         } = this.measurement();
         let {
             margin
@@ -304,7 +308,9 @@ export default class SimpleLegend {
         legendContainer.classed(`${classPrefix}-legend-box-${this._id}`, true);
         legendContainer.style('float', 'left');
         // set height and width
-        legendContainer.style(`${marginPosition}`, `${margin}px`)
+        legendContainer.style('width', `${Math.min(maxWidth, width)}px`)
+                        .style('height', `${Math.min(maxHeight, height)}px`)
+                        .style(`${marginPosition}`, `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 

@@ -190,23 +190,25 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
 export const titleCreator = (container, title, measurement, config) => {
     const { orientation } = config.item.text;
     let textAlign = LEFT;
-    if (orientation === TOP || orientation === BOTTOM || measurement.alignment === HORIZONTAL) {
+    const { alignment, maxWidth, width, height, border, padding } = measurement;
+
+    if (orientation === TOP || orientation === BOTTOM || alignment === HORIZONTAL) {
         textAlign = CENTER;
     }
-    const titleWidth = Math.min(measurement.maxWidth, measurement.width);
+    const titleWidth = Math.min(maxWidth, width);
 
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
             .style(WIDTH, `${titleWidth}px`)
-            .style(HEIGHT, `${measurement.height}px`)
-            .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
+            .style(HEIGHT, `${height}px`)
+            .style('border-bottom', `${border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
             title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
                     .style(WIDTH, `${titleWidth}px`)
-                    .style(MAXWIDTH, `${titleWidth}px`)
+                    .style(MAXWIDTH, `${maxWidth}px`)
                     .style(HEIGHT, '100%')
                     .style('line-height', 1)
-                    .style('padding', `${measurement.padding}px`)
+                    .style('padding', `${padding}px`)
                     .text(title.text)
                     .style('text-align', textAlign)
                     .style('overflow-x', 'scroll')
