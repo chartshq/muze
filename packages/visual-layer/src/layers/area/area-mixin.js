@@ -83,15 +83,17 @@ export const AreaLayerMixin = superclass => class extends superclass {
         if (!point && config.dimValue && this._pointMap) {
             const pointArr = this._pointMap[config.dimValue[1]];
 
-            pointArr.forEach((p, i) => {
-                const { y: pointY, y0: pointY0 } = p.update;
-                if ((pointY < y && y < pointY0)) {
+            for (let i = 0, len = pointArr.length; i < len; i++) {
+                const { y: pointY, y0: pointY0 } = pointArr[i].update;
+                if (pointY < y && y < pointY0) {
                     index = i;
-                    nearestPoint = p;
+                    nearestPoint = pointArr[i];
+                    break;
                 }
-            });
+            }
 
-            if (index) {
+            // Index is a number(0 or more)
+            if (index !== undefined) {
                 point = {
                     index,
                     data: {

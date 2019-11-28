@@ -105,6 +105,7 @@ export default class Firebolt {
         this._queuedSideEffects = {};
         this._handlers = {};
         this._payloadGenerators = {};
+        this._payloads = {};
 
         this.mapSideEffects(cloneObj(behaviourEffectMap));
         this.registerBehaviouralActions(actions.behavioural);
@@ -229,6 +230,7 @@ export default class Firebolt {
         const behaviourEffectMap = this._behaviourEffectMap;
         const sideEffects = getSideEffects(behaviour, behaviourEffectMap);
         this._propagationInf = propagationInfo;
+        this._payloads[behaviour] = payload;
 
         if (action) {
             action.dispatch(payload);
@@ -586,5 +588,9 @@ export default class Firebolt {
         const fn = this._payloadGenerators[action];
 
         return defaultValue(fn, defaultFn);
+    }
+
+    getPayload (action) {
+        return this._payloads[action];
     }
 }

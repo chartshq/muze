@@ -1,4 +1,5 @@
 import { difference, intersect } from 'muze-utils';
+import { intersectSets } from '../../helper';
 
 /**
  * @private
@@ -17,4 +18,16 @@ export const getFormattedSet = (set, selectedPointsId, intersection = false) => 
             length: formattedSet.length
         }
     };
+};
+
+export const highlightSelectIntersection = (firebolt) => {
+    const selectEntrySet = firebolt.getEntryExitSet('select');
+    const highlightEntrySet = firebolt.getEntryExitSet('highlight');
+
+    if (selectEntrySet && highlightEntrySet) {
+        const intersectSet = intersectSets(firebolt, ['select', 'highlight']);
+        return intersectSet;
+    }
+
+    return null;
 };

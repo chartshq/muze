@@ -14,7 +14,8 @@ d3.json('../../../data/cars.json', (data) => {
 		},
 		{
 			name: 'Displacement',
-			type: 'measure'
+			type: 'measure',
+			// defAggFn: 'min'
 		},
 		{
 			name: 'Horsepower',
@@ -57,12 +58,12 @@ d3.json('../../../data/cars.json', (data) => {
 		.data(dm)
 		.width(850)
 		.height(650)
-		.rows(["Horsepower"])
+		.rows(["Displacement"])
 		.columns(["Year"])
 		.color("Origin")
-		.size('Horsepower')
+		// .size('Horsepower')
 		.layers([{
-			mark: 'area',
+			mark: 'bar',
 		}])
 		.mount(document.getElementById('chart'));
 })
