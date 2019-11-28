@@ -9,6 +9,7 @@ import './styles.scss';
 import SpawnableSideEffect from '../spawnable';
 import { selectionBoxDrag } from '../../actions/physical/selection-box-drag';
 import { getBoxDimensionsFromPayload, changeVisibility } from './helper';
+import { BEHAVIOURS } from '../..';
 
 /**
  * This class is used to create a selection box which is used by visual unit for brushing and
@@ -31,7 +32,8 @@ class SelectionBox extends SpawnableSideEffect {
             },
             transition: {
                 duration: 200
-            }
+            },
+            persistent: false
         };
     }
 
@@ -69,7 +71,7 @@ class SelectionBox extends SpawnableSideEffect {
         height = unitHeight;
 
         // Hide selection-box on dragEnd or when criteria is empty
-        if (!payload.criteria || payload.dragEnd) {
+        if (!payload.criteria || (payload.dragEnd && !config.persistent)) {
             this.hide(drawingInf);
             return this;
         }
@@ -103,6 +105,11 @@ class SelectionBox extends SpawnableSideEffect {
         const selection = selectionGroup.selectAll('rect').data(points);
         const selectionBox = selection.enter().append('rect')
                         .each(function () {
+                            firebolt.registerPhysicalBehaviouralMap({
+                                selectiondrag: {
+                                    behaviours: [BEHAVIOURS.BRUSH]
+                                }
+                            });
                             selectionBoxDrag(firebolt)(selectElement(this), ['brush'], sideEffect);
                         })
                         .merge(selection)
