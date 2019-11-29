@@ -47,7 +47,7 @@ export default class GenericSideEffect {
     }
 
     static target () {
-        return 'visual-unit';
+        return 'all';
     }
 
     /**

@@ -135,12 +135,9 @@ const defaultCrossInteractionPolicy = {
     },
     sideEffects: {
         tooltip: (propagationPayload, firebolt) => {
-            const propagationCanvas = propagationPayload.sourceCanvas;
+            const propagationCanvasAlias = propagationPayload.sourceCanvas;
             const canvasAlias = firebolt.sourceCanvas();
-            if (propagationCanvas) {
-                return propagationCanvas === canvasAlias;
-            }
-            return true;
+            return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
         },
         selectionBox: () => false
     }

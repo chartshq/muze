@@ -28610,7 +28610,7 @@ function (_Tooltip) {
           break;
         }
 
-        boxes.push({
+        position && boxes.push({
           x: position.x,
           y: position.y,
           width: tooltipBoundBox.width,
@@ -28631,7 +28631,7 @@ function (_Tooltip) {
         }
       }
 
-      Object(_helper__WEBPACK_IMPORTED_MODULE_1__["spaceOutBoxes"])(boxes, boundBox, showVertically);
+      boxes.length && Object(_helper__WEBPACK_IMPORTED_MODULE_1__["spaceOutBoxes"])(boxes, boundBox, showVertically);
       boxes.forEach(function (box) {
         return box.tooltip.position(box.x, box.y, {
           repositionArrow: true
@@ -28702,6 +28702,8 @@ var GenericSideEffect =
 /*#__PURE__*/
 function () {
   function GenericSideEffect(firebolt) {
+    var _this = this;
+
     _classCallCheck(this, GenericSideEffect);
 
     this.firebolt = firebolt;
@@ -28712,6 +28714,14 @@ function () {
     this._strategies = {};
     Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["generateGetterSetters"])(this, _props__WEBPACK_IMPORTED_MODULE_1__["PROPS"]);
     this.config(this.constructor.defaultConfig());
+    this.sourceInfo(function () {
+      return _this.firebolt.context.getSourceInfo();
+    });
+    this.plotPointsFromIdentifiers(function () {
+      var _this$firebolt$contex;
+
+      return (_this$firebolt$contex = _this.firebolt.context).getPlotPointsFromIdentifiers.apply(_this$firebolt$contex, arguments);
+    });
   }
   /**
    * Returns the default configuration of the side effect.
@@ -28803,6 +28813,26 @@ function () {
       }
 
       return this;
+    }
+  }, {
+    key: "sourceInfo",
+    value: function sourceInfo() {
+      if (arguments.length) {
+        this._sourceInfo = arguments.length <= 0 ? undefined : arguments[0];
+        return this;
+      }
+
+      return this._sourceInfo();
+    }
+  }, {
+    key: "plotPointsFromIdentifiers",
+    value: function plotPointsFromIdentifiers() {
+      if (arguments.length && (arguments.length <= 0 ? undefined : arguments[0]) instanceof Function) {
+        this._plotPointsFromIdentifiers = arguments.length <= 0 ? undefined : arguments[0];
+        return this;
+      }
+
+      return this._plotPointsFromIdentifiers.apply(this, arguments);
     }
   }], [{
     key: "defaultConfig",
@@ -29996,45 +30026,25 @@ function (_GenericSideEffect) {
   _inherits(SpawnableSideEffect, _GenericSideEffect);
 
   function SpawnableSideEffect() {
-    var _getPrototypeOf2;
-
-    var _this;
-
     _classCallCheck(this, SpawnableSideEffect);
 
-    for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-      params[_key] = arguments[_key];
-    }
-
-    _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(SpawnableSideEffect)).call.apply(_getPrototypeOf2, [this].concat(params)));
-
-    _this.sourceInfo(function () {
-      return _this.firebolt.context.getSourceInfo();
-    });
-
-    _this.plotPointsFromIdentifiers(function () {
-      var _this$firebolt$contex;
-
-      return (_this$firebolt$contex = _this.firebolt.context).getPlotPointsFromIdentifiers.apply(_this$firebolt$contex, arguments);
-    });
-
-    return _this;
+    return _possibleConstructorReturn(this, _getPrototypeOf(SpawnableSideEffect).apply(this, arguments));
   }
-  /**
-   * Creates a html or svg element in the container.
-   *
-   * @public
-   * @param {SVGElement|HTMLElement} container Container where the dom element will be rendered.
-   * @param {string} elemType Type of dom element.
-   * @param {Array} data Array of objects with which the dom elements will be binded.
-   * @param {string} className class name of the element.
-   *
-   * @return {Selection} D3 Selection of the element.
-   */
-
 
   _createClass(SpawnableSideEffect, [{
     key: "createElement",
+
+    /**
+     * Creates a html or svg element in the container.
+     *
+     * @public
+     * @param {SVGElement|HTMLElement} container Container where the dom element will be rendered.
+     * @param {string} elemType Type of dom element.
+     * @param {Array} data Array of objects with which the dom elements will be binded.
+     * @param {string} className class name of the element.
+     *
+     * @return {Selection} D3 Selection of the element.
+     */
     value: function createElement(container, elemType, data, className, callbacks) {
       return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, elemType, data, className, callbacks);
     }
@@ -30061,26 +30071,6 @@ function (_GenericSideEffect) {
       }
 
       return this._drawingContext();
-    }
-  }, {
-    key: "sourceInfo",
-    value: function sourceInfo() {
-      if (arguments.length) {
-        this._sourceInfo = arguments.length <= 0 ? undefined : arguments[0];
-        return this;
-      }
-
-      return this._sourceInfo();
-    }
-  }, {
-    key: "plotPointsFromIdentifiers",
-    value: function plotPointsFromIdentifiers() {
-      if (arguments.length && (arguments.length <= 0 ? undefined : arguments[0]) instanceof Function) {
-        this._plotPointsFromIdentifiers = arguments.length <= 0 ? undefined : arguments[0];
-        return this;
-      }
-
-      return this._plotPointsFromIdentifiers.apply(this, arguments);
     }
   }, {
     key: "show",
@@ -30831,6 +30821,11 @@ var buildTooltipData = function buildTooltipData(dataModel) {
       shape = _context$retinalField.shape,
       size = _context$retinalField.size;
   var detailFields = context.detailFields || [];
+
+  var _ref2 = context.config || {},
+      _ref2$showStackSum = _ref2.showStackSum,
+      showStackSum = _ref2$showStackSum === void 0 ? true : _ref2$showStackSum;
+
   var _context$payload$sele = context.payload.selectedMeasures,
       selectedMeasures = _context$payload$sele === void 0 ? [] : _context$payload$sele;
   var dimensions = schema.filter(function (d) {
@@ -30914,7 +30909,7 @@ var buildTooltipData = function buildTooltipData(dataModel) {
         } else {
           var stackedSum = 0;
 
-          if (isStacked) {
+          if (isStacked && showStackSum) {
             stackedSum = getStackedSum(values, fieldsConfig[measures[0].name].index);
             var nf = measures[0].numberFormat;
             content.push(getStackedKeyValue({
@@ -35755,7 +35750,7 @@ function () {
       if (target) {
         var node = this._tooltipContainer.node();
 
-        var tooltipPos = this._position;
+        var tooltipPos = this._orientation;
         var outsidePlot = tooltipPos === _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_LEFT"] || tooltipPos === _constants__WEBPACK_IMPORTED_MODULE_1__["TOOLTIP_RIGHT"] ? y + node.offsetHeight < target.y || y > target.y + target.height : x + node.offsetWidth < target.x || x > target.x + target.width;
 
         if (outsidePlot) {
@@ -35919,7 +35914,7 @@ function () {
       this._tooltipBackground.style('display', 'none'); // }
 
 
-      this._position = obj.position; // this._arrowOrientation = obj.position;
+      this._orientation = obj.position; // this._arrowOrientation = obj.position;
 
       draw && this.position(obj.x, obj.y);
       return this;
@@ -59827,6 +59822,16 @@ var defaultPolicy = function defaultPolicy(registrableComponents) {
         var propagationCanvas = propagationPayload.sourceCanvas;
         return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
       }
+    },
+    sideEffects: {
+      '*': function _(propagationPayload) {
+        var propagationCanvas = propagationPayload.sourceCanvas;
+        return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
+      },
+      tooltip: function tooltip(propagationPayload) {
+        var propagationCanvas = propagationPayload.sourceCanvas;
+        return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
+      }
     }
   };
 };
@@ -63426,14 +63431,9 @@ var _defaultCrossInteractionPolicy = {
   },
   sideEffects: {
     tooltip: function tooltip(propagationPayload, firebolt) {
-      var propagationCanvas = propagationPayload.sourceCanvas;
+      var propagationCanvasAlias = propagationPayload.sourceCanvas;
       var canvasAlias = firebolt.sourceCanvas();
-
-      if (propagationCanvas) {
-        return propagationCanvas === canvasAlias;
-      }
-
-      return true;
+      return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
     },
     selectionBox: function selectionBox() {
       return false;
@@ -63960,13 +63960,15 @@ var addSelectedMeasuresInPayload = function addSelectedMeasuresInPayload(firebol
 
     var measureFields;
 
-    if (x[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
-      measureFields = ["".concat(x[0])];
-    } else if (y[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
-      measureFields = ["".concat(y[0])];
-    }
+    if (x.length && y.length) {
+      if (x[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+        measureFields = ["".concat(x[0])];
+      } else if (y[0].type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
+        measureFields = ["".concat(y[0])];
+      }
 
-    payload.selectedMeasures = measureFields;
+      payload.selectedMeasures = measureFields;
+    }
   }
 };
 var dispatchBehaviours = function dispatchBehaviours(firebolt, _ref) {
@@ -64408,6 +64410,11 @@ var applyInteractionPolicy = function applyInteractionPolicy(firebolt) {
         }));
         unitFireBolt.sideEffects().selectionBox.config({
           persistent: true
+        });
+      } else {
+        unitFireBolt.payloadGenerators(_defineProperty({}, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].BRUSH, _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"].brush));
+        unitFireBolt.sideEffects().selectionBox.config({
+          persistent: false
         });
       }
     });
