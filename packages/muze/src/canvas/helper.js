@@ -44,6 +44,7 @@ export const fixFacetConfig = (config) => {
             isFacet: false
         };
     }
+    return {};
 };
 
 export const fixScrollBarConfig = (config) => {

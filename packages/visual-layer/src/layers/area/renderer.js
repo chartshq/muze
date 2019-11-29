@@ -12,7 +12,6 @@ const area = Symbols.area;
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    debugger;
     const { layer, container, points, style, transition, className, interpolate, connectNullData } = params;
 
     const graphicElems = layer._graphicElems;
