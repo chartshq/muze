@@ -6,18 +6,3 @@ export const getStrokeWidthByPosition = (position, radius) => {
     };
     return strokeWidthWithOffsetMap[position];
 };
-
-export const interactionStyleMap = {
-    // focusStroke: {
-    //     stroke: (...params) => strokeInteractionStyle(...params),
-    //     'stroke-width': (...params) => strokeInteractionStyle(...params)
-    // },
-    highlight: {
-        stroke: () => true,
-        'stroke-width': () => true
-    },
-    focusStroke: {
-        stroke: () => true,
-        'stroke-width': () => true
-    }
-};

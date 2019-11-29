@@ -40,7 +40,6 @@ export const listenerMap = [
         props: [PROPS.LAYERDEFS],
         listener: (context, [, layerDefs]) => {
             const fieldsVal = context.fields();
-            const firebolt = context.firebolt();
 
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
@@ -50,18 +49,6 @@ export const listenerMap = [
                     layerDefArr = [...layerDefArr, ...defFn(layerDefs)];
                 });
                 context.addLayer(layerDefArr);
-
-                // Replace highlight sideffect with areaHighlight
-                layerDefArr.forEach((layer) => {
-                    if (layer.mark === 'area') {
-                        const map = firebolt._behaviourEffectMap;
-                        map.select.forEach((f) => {
-                            if (f.name === 'highlighter') {
-                                f.options.strategy = 'areaFocus';
-                            }
-                        });
-                    }
-                });
 
                 const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {

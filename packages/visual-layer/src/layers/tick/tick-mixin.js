@@ -5,7 +5,6 @@ import drawTicks from './renderer';
 import './styles.scss';
 import { positionPoints, getIndividualClassName,
     getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
-import { interactionStyleMap } from './helper';
 
 const pointTranslators = {
     polar: (data, config = {}, layerInst) => {
@@ -194,10 +193,6 @@ export const TickLayerMixin = superclass => class extends superclass {
 
     elemType () {
         return 'path';
-    }
-
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
     }
 
     /**
