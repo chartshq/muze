@@ -23,6 +23,7 @@ export default class GenericSideEffect {
         generateGetterSetters(this, PROPS);
         this.config(this.constructor.defaultConfig());
         this.sourceInfo(() => this.firebolt.context.getSourceInfo());
+        this.layers(() => this.firebolt.context.layers());
         this.plotPointsFromIdentifiers((...args) => this.firebolt.context.getPlotPointsFromIdentifiers(...args));
     }
 
@@ -139,6 +140,14 @@ export default class GenericSideEffect {
             return this;
         }
         return this._sourceInfo();
+    }
+
+    layers (...layers) {
+        if (layers.length) {
+            this._layers = layers[0];
+            return this;
+        }
+        return this._layers();
     }
 
     plotPointsFromIdentifiers (...params) {

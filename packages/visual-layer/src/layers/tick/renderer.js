@@ -1,4 +1,9 @@
-import { selectElement, Symbols, pathInterpolators } from 'muze-utils';
+import {
+    selectElement,
+    Symbols,
+    pathInterpolators,
+    makeElement
+} from 'muze-utils';
 
 const line = Symbols.line;
 
@@ -8,35 +13,44 @@ const line = Symbols.line;
  * @return {Selection} Ticks Selection
  */
 export default /* istanbul ignore next */ (params) => {
-    const { points, container, keyFn, className, interpolate, layer } = params;
+    const { points, container, keyFn, className, interpolate, layer, transition } = params;
+    const { disabled } = transition;
+
     const mount = selectElement(container);
-    const ticks = mount.selectAll('path').data(points, keyFn);
-    const ticksEnter = ticks.enter().append('path');
     const graphicElems = layer._graphicElems;
-    mount.attr('class', className || '');
-    ticksEnter.each(function (d) {
-        const selection = selectElement(this);
-        const enter = d.enter || {};
-        Object.entries(enter).forEach(attr => (!isNaN(attr[1]) && selection.attr(attr[0], attr[1])));
-    });
+    mount.attr('class', className);
 
-    ticks.exit().remove();
-    return ticks.merge(ticksEnter)
-                    .each(function (d) {
-                        const selection = selectElement(this);
-                        graphicElems[d.rowId] = selection;
-                        const update = d.update;
-                        const updateStyle = d.style || {};
-                        const x0 = update.x0 !== undefined ? update.x0 : update.x;
-                        const y0 = update.y0 !== undefined ? update.y0 : update.y;
-                        const curveInterpolatorFn = pathInterpolators[interpolate];
-                        const linepath = line()
-                            .curve(curveInterpolatorFn)
-                            .x(e => e[0])
-                            .y(e => e[1]);
-                        d.className && selection.classed(d.className, true);
-                        selection.attr('d', linepath([[update.x, update.y], [x0, y0]]));
-                        Object.entries(updateStyle).forEach(styleObj => selection.style(styleObj[0], styleObj[1]));
-                    });
+    return makeElement(mount, 'g', points, null, {
+        enter: (group, d) => {
+            const enter = d.enter || {};
+            Object.entries(enter).forEach(attr => (!isNaN(attr[1]) && group.attr(attr[0], attr[1])));
+        },
+        update: (group, d) => {
+            const pathElem = makeElement(group, 'path', [1]);
+            graphicElems[d.rowId] = group;
+            const { update, style } = d;
+            group.attr('class', className);
+            group.classed(d.className, true);
+
+            const x0 = update.x0 !== undefined ? update.x0 : update.x;
+            const y0 = update.y0 !== undefined ? update.y0 : update.y;
+            const curveInterpolatorFn = pathInterpolators[interpolate];
+            const linepath = line()
+            .curve(curveInterpolatorFn)
+            .x(e => e[0])
+            .y(e => e[1]);
+
+            d.className && group.classed(d.className, true);
+            pathElem.attr('d', linepath([[update.x, update.y], [x0, y0]]));
+            if (!disabled) {
+                group = group.transition()
+                    .duration(transition.duration)
+                    .on('end', layer.registerAnimationDoneHook());
+            }
+            Object.entries(style).forEach(styleObj => group.style(styleObj[0], styleObj[1]));
+        },
+        exit: (exitGroup) => {
+            exitGroup.remove();
+        }
+    }, keyFn);
 };
-
