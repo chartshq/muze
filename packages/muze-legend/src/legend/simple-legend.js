@@ -281,7 +281,8 @@ export default class SimpleLegend {
             marginHorizontal,
             maxHeight,
             height,
-            width
+            width,
+            maxWidth
         } = this.measurement();
         let {
             margin
@@ -312,9 +313,10 @@ export default class SimpleLegend {
             this.config()
         );
 
-        width < widthBox ? selectElement(this.mount()).style('width', `${widthBox}px`) : null;
+        const titleWidth = Math.min(maxWidth, widthBox);
+        width < titleWidth ? selectElement(this.mount()).style('width', `${titleWidth}px`) : null;
         // set height and width
-        legendContainer.style('width', `${widthBox}px`)
+        legendContainer.style('width', `${titleWidth}px`)
                         .style('height', `${Math.min(maxHeight, height)}px`)
                         .style(`${marginPosition}`, `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
