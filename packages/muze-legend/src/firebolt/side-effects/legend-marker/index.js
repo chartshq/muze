@@ -7,6 +7,7 @@ import './styles.scss';
 
 const SYMBOL_PADDING = (Math.sqrt(3) * 3);
 const AXIS_STROKE = 1;
+const MARKER_BUFFER = 10;
 
 const createTextCell = (className, labelManagerRef, cells) => {
     const { TextCell } = cells;
@@ -69,29 +70,33 @@ export default class LegendMarker extends GenericSideEffect {
 
             const legendGradContainer = context.getDrawingContext().svgContainer;
 
+            const isFractional = payload.criteria[1][0] % 1 !== 0;
+
+            const lableConfig = {
+                top: 0,
+                left: 0,
+                labelText: isFractional ? payload.criteria[1][0].toFixed(2) : payload.criteria[1][0]
+            };
+
             const { top, left } = getRelativePosition(context._canvasMount, legendGradContainer.node());
-            const { oriTextHeight, oriTextWidth } = labelManager().getSmartText(payload.criteria[1]);
+            const { oriTextHeight, oriTextWidth } = labelManager().getSmartText(lableConfig.labelText);
             let x;
             let y;
             let rotateAngle;
-            const lableConfig = {
-                top: 0,
-                left: 0
-            };
 
             const { size, shape } = config;
             if (context.config().align === HORIZONTAL) {
                 x = range - (Math.sqrt(size / SYMBOL_PADDING)) + AXIS_STROKE;
                 y = 5;
                 rotateAngle = LEGEND_MARKER_PROPS.ROTATE_HORIZONTAL;
-                lableConfig.top = top + y - 20;
-                lableConfig.left = x + left - (oriTextWidth / 2);
+                lableConfig.top = top + y - 3 * MARKER_BUFFER;
+                lableConfig.left = x + left - (oriTextWidth / 2) - (MARKER_BUFFER / 2);
             } else {
                 y = range + Math.sqrt(size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
                 x = 5;
                 rotateAngle = LEGEND_MARKER_PROPS.ROTATE_VERTICAL;
-                lableConfig.top = top + y - 17 + (oriTextHeight / 2);
-                lableConfig.left = x + left - oriTextWidth - 3;
+                lableConfig.top = top + y - (3 * MARKER_BUFFER - 2) + (oriTextHeight / 2);
+                lableConfig.left = x + left - oriTextWidth - MARKER_BUFFER;
             }
 
             const legendmarkerGroup = makeElement(legendGradContainer,
@@ -123,7 +128,8 @@ export default class LegendMarker extends GenericSideEffect {
                     .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
-            textElement.source(payload.criteria[1]);
+            debugger;
+            textElement.source(lableConfig.labelText);
             textElement.render(this._graphicElements.legendmarkerText.node());
             this._graphicElements.legendmarkerText
                         .attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
