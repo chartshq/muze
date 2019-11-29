@@ -58,7 +58,7 @@ d3.json('../../../data/cars.json', (data) => {
 		.data(dm)
 		.width(850)
 		.height(650)
-		.rows(["Displacement"])
+		.rows(["Acceleration"])
 		.columns(["Year"])
 		.color("Origin")
 		// .size('Horsepower')

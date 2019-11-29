@@ -648,7 +648,7 @@ export default class VisualUnit {
             return pointObj;
         }
 
-        const markInf = this.getMarkInfFromLayers(x, y, config) || { id: null };
+        const markInf = this.getMarkInfFromLayers(x, y, { ...config, dimValue }) || { id: null };
         pointObj = Object.assign({}, markInf);
 
         pointObj.target = markInf.id;

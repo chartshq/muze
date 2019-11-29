@@ -18,7 +18,10 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                     const encoding = {
                         x: getObjProp(depLayerEncoding, 'x', 'field'),
                         y: getObjProp(depLayerEncoding, 'y', 'field'),
-                        color: getObjProp(depLayerEncoding, 'color', 'field'),
+                        color: {
+                            field: getObjProp(depLayerEncoding, 'color', 'field'),
+                            value: getObjProp(depLayerEncoding, 'color', 'value')
+                        },
                         size: {
                             field: getObjProp(depLayerEncoding, 'size', 'field'),
                             value: () => sideEffect.defaultSizeValue()
@@ -144,9 +147,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
         }
 
         [...upperAnchors, ...lowerAnchors].forEach((layer, index) => {
-            const linkedLayer = context.getLayerByName(layer.config().owner);
+            const layerConfig = layer.config();
+            const linkedLayer = context.getLayerByName(layerConfig.owner);
             const linkedLayerName = linkedLayer.constructor.formalName();
-            const groupId = layer.config().groupId;
+            const groupId = layerConfig.groupId;
             const isUpperAnchor = groupId === `${formalName}-upper`;
             let transformedData = [];
             let schema = [];
@@ -177,7 +181,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     }
                 }
             };
-            const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
+            const newConfig = mergeRecursive(layerConfig, anchorSizeConfig);
 
             layer
                 .data(transformedDataModel)
