@@ -135,13 +135,9 @@ export const strategies = {
         }
     },
     highlight: (set, context, payload, excludeSetIds) => {
-        const { formattedSet, selectionSet } = set;
-        const {
-            mergedEnter,
-            mergedExit
-        } = formattedSet;
+        const { selectionSet } = set;
 
-        if (!mergedEnter.length && !mergedExit.length) {
+        if (!selectionSet.mergedEnter.length && !selectionSet.mergedExit.length) {
             // Remove focusStroke on selected but currently non-highlighted set
             context.applyInteractionStyle(selectionSet.completeSet, { interactionType: 'highlight', apply: false });
             context.applyInteractionStyle(selectionSet.completeSet,

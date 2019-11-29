@@ -13062,47 +13062,137 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "applyBorders", function() { return applyBorders; });
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/constants */ "./packages/layout/src/enums/constants.js");
-var _borderMap;
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
-var borderMap = (_borderMap = {}, _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN"]), _defineProperty(_borderMap, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _borderMap);
 
-var applySpecificBorder = function applySpecificBorder(cells, color, type, style) {
-  cells.style("border-".concat(type), "".concat(style, " ").concat(color));
+var borderMap = function borderMap(isFacet, showHeaders) {
+  var _ref;
+
+  return _ref = {}, _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), isFacet && showHeaders ? _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), isFacet && showHeaders ? _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), isFacet ? "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]).concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]) : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), isFacet ? "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]).concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]) : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["MIDDLE"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN"]), _defineProperty(_ref, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), _enums_constants__WEBPACK_IMPORTED_MODULE_0__["NO_BORDERS"]), _ref;
 };
 
-var specificBorderApplier = function specificBorderApplier(borderTypes, showBorders, cells, borderInfo) {
+var applySpecificBorder = function applySpecificBorder(params) {
+  var type = params.type,
+      borderWidth = params.borderWidth,
+      borderStyle = params.borderStyle,
+      cells = params.cells,
+      isFacet = params.isFacet,
+      color = params.color;
+
+  if (!isFacet) {
+    cells.style("border-".concat(type), "".concat(borderWidth, "px ").concat(borderStyle, " ").concat(color));
+  } else {
+    cells.style("border-".concat(type, "-width"), "".concat(borderWidth, "px"));
+    cells.style("border-".concat(type, "-style"), "".concat(borderStyle));
+  }
+};
+
+var specificBorderApplier = function specificBorderApplier(params) {
+  var borderTypes = params.borderTypes,
+      showBorders = params.showBorders,
+      cells = params.cells,
+      borderInfo = params.borderInfo,
+      name = params.name,
+      isFacet = params.isFacet;
   var color = borderInfo.color,
-      width = borderInfo.width,
-      style = borderInfo.style;
-  var borderStyle = "".concat(width, "px ").concat(style);
+      style = borderInfo.style,
+      width = borderInfo.width;
   borderTypes.forEach(function (borderType) {
-    applySpecificBorder(cells, showBorders[borderType] ? color : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BLANK_BORDERS"], borderType, borderStyle);
+    applySpecificBorder({
+      cells: cells,
+      color: showBorders[borderType] ? color : _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BLANK_BORDERS"],
+      type: borderType,
+      borderWidth: width,
+      borderStyle: style,
+      name: name,
+      isFacet: isFacet
+    });
   });
 };
 
-var borderApplier = function borderApplier(cells, borderInfo) {
+var borderApplier = function borderApplier(cells, borderInfo, name, isFacet) {
+  var _ref2;
+
   var showRowBorders = borderInfo.showRowBorders,
       showColBorders = borderInfo.showColBorders,
       showValueBorders = borderInfo.showValueBorders;
-  return {
-    row: function row() {
-      return specificBorderApplier([_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]], showRowBorders, cells, borderInfo);
-    },
-    column: function column() {
-      return specificBorderApplier([_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]], showColBorders, cells, borderInfo);
-    },
-    center: function center() {
-      return specificBorderApplier([_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]], showValueBorders, cells, borderInfo);
-    }
-  };
+  return _ref2 = {}, _defineProperty(_ref2, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW"], function () {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]],
+      showBorders: showRowBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN"], function () {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]],
+      showBorders: showColBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"], function () {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]],
+      showBorders: showValueBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], function () {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]],
+      showBorders: showValueBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], function () {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]],
+      showBorders: showValueBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]).concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), function _() {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]],
+      showBorders: showValueBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _defineProperty(_ref2, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]).concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]), function _() {
+    return specificBorderApplier({
+      borderTypes: [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]],
+      showBorders: showValueBorders,
+      cells: cells,
+      borderInfo: borderInfo,
+      name: name,
+      isFacet: isFacet
+    });
+  }), _ref2;
 };
 
-var applyBorders = function applyBorders(cells, border, row, column) {
-  var borderApplierFn = borderApplier(cells, border);
-  var borderMapVal = borderMap["".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW_MATRIX_INDEX"][_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VIEW_INDEX"][row]], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN_MATRIX_INDEX"][column])];
+var applyBorders = function applyBorders(params) {
+  var cells = params.cells,
+      border = params.border,
+      row = params.row,
+      column = params.column,
+      isFacet = params.isFacet,
+      showHeaders = params.showHeaders;
+  var name = "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["ROW_MATRIX_INDEX"][_enums_constants__WEBPACK_IMPORTED_MODULE_0__["VIEW_INDEX"][row]], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["COLUMN_MATRIX_INDEX"][column]);
+  var borderApplierFn = borderApplier(cells, border, name, isFacet);
+  var borderMapVal = borderMap(isFacet, showHeaders)[name];
 
   if (borderMapVal) {
     borderApplierFn[borderMapVal]();
@@ -18719,60 +18809,67 @@ var setAxisNamePos = function setAxisNamePos(textNode, orientation, measures) {
 
 
 function renderAxis(axisInstance) {
-  var config = axisInstance.config();
   var renderConfig = axisInstance.renderConfig();
-  var labelManager = axisInstance.dependencies().labelManager;
-  var mount = axisInstance.mount();
-  var range = axisInstance.range();
-  var axis = axisInstance.axis();
-  var scale = axisInstance.scale();
-  var tickLabelStyle = axisInstance._tickLabelStyle,
-      axisTickFormatter = axisInstance._tickFormatter;
-  var orientation = config.orientation,
-      axisNamePadding = config.axisNamePadding,
-      className = config.className,
-      id = config.id,
-      classPrefix = config.classPrefix;
+  var config = axisInstance.config();
   var show = renderConfig.show,
       xOffset = renderConfig.xOffset,
       yOffset = renderConfig.yOffset,
       showAxisName = renderConfig.showAxisName,
       labels = renderConfig.labels,
       smartAxisName = renderConfig.smartAxisName;
+  var mount = axisInstance.mount();
+  var orientation = config.orientation,
+      axisNamePadding = config.axisNamePadding,
+      className = config.className,
+      id = config.id,
+      classPrefix = config.classPrefix;
 
   if (!show) {
     return;
   }
 
-  var tickSize = axisInstance.getTickSize();
   var selectContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(mount), 'g', [axisInstance], "".concat(className), {}, function (key) {
     return key.config().id;
-  }); // Set style for tick labels
-
-  labelManager.setStyle(tickLabelStyle);
-  var labelFunc = scale.ticks || scale.quantile || scale.domain;
-  var ticks = axis.tickValues() || labelFunc();
-  axis.tickFormat(axisTickFormatter(ticks)); // Get range(length of range)
-
-  var availableSpace = Math.abs(range[0] - range[1]); // Get width and height taken by axis labels
-
-  var labelProps = axisInstance.axisComponentDimensions().largestTickDimensions; // Draw axis ticks
-
+  });
   selectContainer.attr('transform', "translate(".concat(xOffset, ",").concat(yOffset, ")"));
-  setFixedBaseline(axisInstance);
+  var availableSpace;
+  var labelProps;
+  var tickSize;
 
-  if (!labels.rotation && labels.smartTicks === false) {
-    selectContainer.transition().duration(1000).on('end', axisInstance.registerAnimationDoneHook()).call(axis);
-  } else {
-    selectContainer.call(axis);
-    changeTickOrientation(selectContainer, axisInstance, tickSize);
-  }
+  if (axisInstance.domain().length > 0) {
+    var labelManager = axisInstance.dependencies().labelManager;
+    var range = axisInstance.range();
+    var axis = axisInstance.axis();
+    var scale = axisInstance.scale();
+    var tickLabelStyle = axisInstance._tickLabelStyle,
+        axisTickFormatter = axisInstance._tickFormatter;
+    tickSize = axisInstance.getTickSize(); // Set style for tick labels
 
-  selectContainer.selectAll('.tick').classed("".concat(classPrefix, "-ticks"), true);
-  selectContainer.selectAll('.tick line').classed("".concat(classPrefix, "-tick-lines"), true); // Set classes for ticks
+    labelManager.setStyle(tickLabelStyle);
+    var labelFunc = scale.ticks || scale.quantile || scale.domain;
+    var ticks = axis.tickValues() || labelFunc();
+    axis.tickFormat(axisTickFormatter(ticks)); // Get range(length of range)
 
-  var tickText = selectContainer.selectAll('.tick text');
-  tickText.classed("".concat(classPrefix, "-ticks"), true).classed("".concat(classPrefix, "-ticks-").concat(id), true); // Create axis name
+    availableSpace = Math.abs(range[0] - range[1]); // Get width and height taken by axis labels
+
+    labelProps = axisInstance.axisComponentDimensions().largestTickDimensions; // Draw axis ticks
+
+    setFixedBaseline(axisInstance);
+
+    if (!labels.rotation && labels.smartTicks === false) {
+      selectContainer.transition().duration(1000).on('end', axisInstance.registerAnimationDoneHook()).call(axis);
+    } else {
+      selectContainer.call(axis);
+      changeTickOrientation(selectContainer, axisInstance, tickSize);
+    }
+
+    selectContainer.selectAll('.tick').classed("".concat(classPrefix, "-ticks"), true);
+    selectContainer.selectAll('.tick line').classed("".concat(classPrefix, "-tick-lines"), true); // Set classes for ticks
+
+    var tickText = selectContainer.selectAll('.tick text');
+    tickText.classed("".concat(classPrefix, "-ticks"), true).classed("".concat(classPrefix, "-ticks-").concat(id), true);
+  } // Create axis name
+
 
   var textNode = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(selectContainer, 'text', [smartAxisName], "".concat(classPrefix, "-axis-name")).attr('text-anchor', 'middle').classed("".concat(classPrefix, "-axis-name-").concat(id), true).text(function (d) {
     return d.text;
@@ -19591,7 +19688,17 @@ var computeAxisDimensions = function computeAxisDimensions(context) {
   var domain = context.domain(); // const angle = ((rotation || 0) * Math.PI) / 180;
 
   if (domain.length === 0) {
-    return null;
+    return {
+      allTickDimensions: allTickDimensions,
+      tickSize: 0,
+      tickDimensions: {
+        height: 0,
+        width: 0
+      },
+      axisNameDimensions: axisNameDimensions,
+      largestTickDimensions: largestTickDimensions,
+      axisTicks: axisTicks
+    };
   }
 
   if (smartTicks) {
@@ -19710,7 +19817,7 @@ var getVerticalAxisSpace = function getVerticalAxisSpace(context, axisDimensions
     height = (max - min) / Math.abs(minTickDiff) * tickDimHeight;
   }
 
-  width += (showAxisName ? axisDimHeight : 0) + tickSize + axisNamePadding;
+  width += (showAxisName ? axisDimHeight : 0) + tickSize + (tickValues ? axisNamePadding : 0);
   return {
     height: height,
     width: width
@@ -20813,6 +20920,34 @@ function () {
       };
     }
   }, {
+    key: "_getRawTickValue",
+    value: function _getRawTickValue(data) {
+      return data;
+    }
+  }, {
+    key: "getTicksBasedOnData",
+    value: function getTicksBasedOnData(tickData) {
+      var _this = this;
+
+      var allTicks = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this.mount()).selectAll('.tick');
+      var elementToBeModified = null;
+      var elementNotToBeModified = null;
+
+      if (tickData) {
+        elementToBeModified = allTicks.filter(function (tickValue) {
+          return tickData === _this._getRawTickValue(tickValue);
+        });
+        elementNotToBeModified = allTicks.filter(function (tickValue) {
+          return !(tickData === _this._getRawTickValue(tickValue));
+        });
+      }
+
+      return {
+        selectionSet: elementToBeModified,
+        rejectionSet: elementNotToBeModified || allTicks
+      };
+    }
+  }, {
     key: "id",
     get: function get() {
       return this._id;
@@ -21246,7 +21381,7 @@ var spaceSetter = function spaceSetter(context, spaceConfig) {
     },
     y: function y() {
       labelConfig.smartTicks = false;
-      var tickShifter = tickDimensions.height / 2;
+      var tickShifter = tickDimHeight / 2;
       var baseline = fixedBaseline ? 1 : tickShifter;
       setAxisRange(context, 'x', [availHeight - bottom - baseline, tickShifter + top], isOffset ? availWidth : null); // Remove display of ticks if no space is left
 
@@ -21558,6 +21693,11 @@ function (_SimpleAxis) {
 
       this.smartTicks(smartTicks);
       return this;
+    }
+  }, {
+    key: "_getRawTickValue",
+    value: function _getRawTickValue(data) {
+      return new Date(data).getTime();
     }
   }], [{
     key: "type",
@@ -25191,6 +25331,8 @@ function (_GenericBehaviour) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./packages/muze-firebolt/src/actions/physical/helpers/index.js");
+/* harmony import */ var _enums_actions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../enums/actions */ "./packages/muze-firebolt/src/enums/actions.js");
+
 
 
 /**
@@ -25207,7 +25349,7 @@ var click = function click(firebolt) {
     var dispatchBehaviour = function dispatchBehaviour(args) {
       var event = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getEvent"])();
       var payload = Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["generatePayloadFromEvent"])(args, event, firebolt);
-      firebolt.triggerPhysicalAction('click', payload);
+      firebolt.triggerPhysicalAction(_enums_actions__WEBPACK_IMPORTED_MODULE_2__["CLICK"], payload);
       event.stopPropagation();
     };
 
@@ -25229,6 +25371,8 @@ var click = function click(firebolt) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_drag_event__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/drag-event */ "./packages/muze-firebolt/src/actions/physical/helpers/drag-event.js");
+/* harmony import */ var _enums_actions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/actions */ "./packages/muze-firebolt/src/enums/actions.js");
+
 
 /**
  * Adds dragging action to the target element.
@@ -25241,7 +25385,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var drag = function drag(firebolt) {
   return function (targetEl) {
-    Object(_helpers_drag_event__WEBPACK_IMPORTED_MODULE_0__["attachDragEvent"])(targetEl, 'drag', firebolt);
+    Object(_helpers_drag_event__WEBPACK_IMPORTED_MODULE_0__["attachDragEvent"])(targetEl, _enums_actions__WEBPACK_IMPORTED_MODULE_1__["DRAG"], firebolt);
   };
 };
 
@@ -25456,6 +25600,8 @@ var generatePayloadFromEvent = function generatePayloadFromEvent(args, event, fi
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _enums_actions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/actions */ "./packages/muze-firebolt/src/enums/actions.js");
+
 
 /**
  * Adds mouse interactions to target element.
@@ -25487,12 +25633,12 @@ var hover = function hover(firebolt) {
         position: pos,
         mode: mode
       };
-      firebolt.triggerPhysicalAction('hover', payload);
+      firebolt.triggerPhysicalAction(_enums_actions__WEBPACK_IMPORTED_MODULE_1__["HOVER"], payload);
       event.stopPropagation();
     };
 
     targetEl.on('mouseover', dispatchBehaviour).on('mousemove', dispatchBehaviour).on('mouseout', function () {
-      firebolt.triggerPhysicalAction('hover', {
+      firebolt.triggerPhysicalAction(_enums_actions__WEBPACK_IMPORTED_MODULE_1__["HOVER"], {
         criteria: null
       });
     });
@@ -25544,8 +25690,10 @@ var physicalActions = (_physicalActions = {}, _defineProperty(_physicalActions, 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "longtouch", function() { return longtouch; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers */ "./packages/muze-firebolt/src/actions/physical/helpers/index.js");
+/* harmony import */ var _enums_actions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/actions */ "./packages/muze-firebolt/src/enums/actions.js");
+/* harmony import */ var _helpers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers */ "./packages/muze-firebolt/src/actions/physical/helpers/index.js");
 /* global setTimeout */
+
 
 
 /**
@@ -25561,8 +25709,8 @@ var longtouch = function longtouch(firebolt) {
     var touchEnd;
 
     var dispatchBehaviour = function dispatchBehaviour(args) {
-      var payload = Object(_helpers__WEBPACK_IMPORTED_MODULE_1__["generatePayloadFromEvent"])(args, event, firebolt);
-      firebolt.triggerPhysicalAction('longtouch', payload);
+      var payload = Object(_helpers__WEBPACK_IMPORTED_MODULE_2__["generatePayloadFromEvent"])(args, event, firebolt);
+      firebolt.triggerPhysicalAction(_enums_actions__WEBPACK_IMPORTED_MODULE_1__["LONGTOUCH"], payload);
       event.stopPropagation();
     };
 
@@ -25575,7 +25723,7 @@ var longtouch = function longtouch(firebolt) {
         if (!touchEnd) {
           dispatchBehaviour(args);
         } else {
-          firebolt.triggerPhysicalAction('longtouch', {
+          firebolt.triggerPhysicalAction(_enums_actions__WEBPACK_IMPORTED_MODULE_1__["LONGTOUCH"], {
             criteria: null
           });
         }
@@ -25600,18 +25748,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "selectionBoxDrag", function() { return selectionBoxDrag; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _helpers_drag_action_config__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers/drag-action-config */ "./packages/muze-firebolt/src/actions/physical/helpers/drag-action-config.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../.. */ "./packages/muze-firebolt/src/index.js");
+
 
 
 var selectionBoxDrag = function selectionBoxDrag(firebolt) {
-  return function (targetEl, behaviours) {
+  return function (targetEl) {
     var subject;
     var drawingInf;
     var context = firebolt.context;
 
     var onDrag = function onDrag(payload) {
-      behaviours.forEach(function (action) {
-        return firebolt.dispatchBehaviour(action, payload);
-      });
+      firebolt.triggerPhysicalAction(___WEBPACK_IMPORTED_MODULE_2__["ACTIONS"].SELECTIONDRAG, payload);
     };
 
     var d3Drag = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getD3Drag"])();
@@ -25631,7 +25779,7 @@ var selectionBoxDrag = function selectionBoxDrag(firebolt) {
       var x2 = x + subject.width;
 
       if (x >= 0 && x2 <= width && y >= 0 && y2 <= height) {
-        var payload = Object(_helpers_drag_action_config__WEBPACK_IMPORTED_MODULE_1__["default"])(context, {
+        var payload = Object(_helpers_drag_action_config__WEBPACK_IMPORTED_MODULE_1__["default"])(firebolt, {
           startPos: {
             x: x,
             y: y
@@ -25652,7 +25800,7 @@ var selectionBoxDrag = function selectionBoxDrag(firebolt) {
       var x2 = x + subject.width;
 
       if (x >= 0 && x2 <= width && y >= 0 && y2 <= height) {
-        var payload = Object(_helpers_drag_action_config__WEBPACK_IMPORTED_MODULE_1__["default"])(context, {
+        var payload = Object(_helpers_drag_action_config__WEBPACK_IMPORTED_MODULE_1__["default"])(firebolt, {
           startPos: {
             x: x,
             y: y
@@ -25710,10 +25858,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "behaviourEffectMap", function() { return behaviourEffectMap; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enums/behaviours */ "./packages/muze-firebolt/src/enums/behaviours.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/helper/index.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/helper/index.js");
 var _behaviourEffectMap;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 
@@ -25755,7 +25905,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
       var brushEntrySet = firebolt.getEntryExitSet(_enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"]);
 
       if (selectEntrySet || brushEntrySet) {
-        var unionedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_2__["unionSets"])(firebolt, [_enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["SELECT"], _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"]]);
+        var unionedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["unionSets"])(firebolt, [_enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["SELECT"], _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"]]);
         var uids = unionedSet.mergedEnter.uids;
         var highlightUids = selectionSet.mergedEnter.uids;
 
@@ -25771,6 +25921,9 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
       return null;
     }
   }
+}, {
+  name: _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__["AXIS_LABEL_HIGHLIGHTER"],
+  option: {}
 }]), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["FILTER"], ['filter']), _defineProperty(_behaviourEffectMap, _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["SELECT"], [{
   name: 'highlighter',
   options: {
@@ -25887,7 +26040,7 @@ var SELECTION_OLD_EXIT = -2;
 /*!**********************************************************!*\
   !*** ./packages/muze-firebolt/src/enums/side-effects.js ***!
   \**********************************************************/
-/*! exports provided: ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS, FILTER, HIGHLIGHTER, CROSSLINE, TOOLTIP, FRAGMENTED_TOOLTIP */
+/*! exports provided: ANCHORS, BRUSH_ANCHORS, PERSISTENT_ANCHORS, FILTER, HIGHLIGHTER, CROSSLINE, TOOLTIP, FRAGMENTED_TOOLTIP, AXIS_LABEL_HIGHLIGHTER */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -25900,6 +26053,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CROSSLINE", function() { return CROSSLINE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TOOLTIP", function() { return TOOLTIP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FRAGMENTED_TOOLTIP", function() { return FRAGMENTED_TOOLTIP; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AXIS_LABEL_HIGHLIGHTER", function() { return AXIS_LABEL_HIGHLIGHTER; });
 var ANCHORS = 'anchors';
 var TOOLTIP = 'tooltip';
 var BRUSH_ANCHORS = 'brush-anchors';
@@ -25908,6 +26062,7 @@ var FILTER = 'filter';
 var HIGHLIGHTER = 'highlighter';
 var CROSSLINE = 'crossline';
 var FRAGMENTED_TOOLTIP = 'fragmented-tooltip';
+var AXIS_LABEL_HIGHLIGHTER = 'axis-label-highlighter';
 
 
 /***/ }),
@@ -26064,6 +26219,7 @@ function () {
     this._queuedSideEffects = {};
     this._handlers = {};
     this._payloadGenerators = {};
+    this._payloads = {};
     this.mapSideEffects(cloneObj(behaviourEffectMap));
     this.registerBehaviouralActions(actions.behavioural);
     this.registerSideEffects(sideEffects);
@@ -26215,6 +26371,7 @@ function () {
       var behaviourEffectMap = this._behaviourEffectMap;
       var sideEffects = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getSideEffects"])(behaviour, behaviourEffectMap);
       this._propagationInf = propagationInfo;
+      this._payloads[behaviour] = payload;
 
       if (action) {
         action.dispatch(payload);
@@ -26656,6 +26813,11 @@ function () {
       var fn = this._payloadGenerators[action];
       return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["defaultValue"])(fn, defaultFn);
     }
+  }, {
+    key: "getPayload",
+    value: function getPayload(action) {
+      return this._payloads[action];
+    }
   }]);
 
   return Firebolt;
@@ -26669,7 +26831,7 @@ function () {
 /*!****************************************************!*\
   !*** ./packages/muze-firebolt/src/helper/index.js ***!
   \****************************************************/
-/*! exports provided: initializeSideEffects, setSideEffectConfig, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getSideEffects, unionSets */
+/*! exports provided: initializeSideEffects, setSideEffectConfig, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getSideEffects, unionSets, intersectSets */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -26683,6 +26845,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSourceFields", function() { return getSourceFields; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSideEffects", function() { return getSideEffects; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unionSets", function() { return unionSets; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "intersectSets", function() { return intersectSets; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -26824,6 +26987,51 @@ var unionSets = function unionSets(firebolt, behaviours) {
         } else {
           existingModel = model;
           uidSet[type] = uids;
+        }
+
+        combinedSet[type].uids = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["unique"])(uidSet[type]);
+        combinedSet[type].model = models[type];
+      });
+    }
+  });
+  return combinedSet;
+};
+var intersectSets = function intersectSets(firebolt, behaviours) {
+  var combinedSet = null;
+  var models = {
+    mergedEnter: null,
+    mergedExit: null
+  };
+  var uidSet = {
+    mergedEnter: [],
+    mergedExit: []
+  };
+  behaviours.forEach(function (behaviour) {
+    var entryExitSet = firebolt._entryExitSet[behaviour];
+
+    if (entryExitSet) {
+      combinedSet = Object.assign(combinedSet || {}, Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["clone"])(entryExitSet));
+      ['mergedEnter', 'mergedExit'].forEach(function (type) {
+        var _entryExitSet$type2 = entryExitSet[type],
+            model = _entryExitSet$type2.model,
+            uids = _entryExitSet$type2.uids;
+        var existingModel = models[type];
+
+        if (!existingModel) {
+          existingModel = models[type] = model;
+          uidSet[type] = uids;
+        } else if ("".concat(model.getSchema().map(function (d) {
+          return d.name;
+        }).sort()) === "".concat(existingModel.getSchema().map(function (d) {
+          return d.name;
+        }).sort())) {
+          var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(uidSet[type], uids, [function (id) {
+            return id[0];
+          }, function (id) {
+            return id[0];
+          }]);
+          uidSet[type] = _toConsumableArray(commonSet);
+          models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
         }
 
         combinedSet[type].uids = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["unique"])(uidSet[type]);
@@ -27497,6 +27705,14 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -27520,26 +27736,11 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 var addLayer = function addLayer(layerRegistry, context, sideEffect) {
-  // mark -> area (2 layers)
   context.addLayer(function (layerDefs) {
     var layers = [];
 
-    if (layerDefs[0].mark === 'area') {
-      var lowerAnchorLayr = {
-        mark: 'area',
-        order: 1,
-        def: {
-          mark: 'area',
-          encoding: layerDefs[0].def.encoding,
-          name: 'area-0',
-          order: 1
-        }
-      };
-      layerDefs.push(lowerAnchorLayr);
-    }
-
     if (layerDefs) {
-      layerDefs.forEach(function (layerDef, index) {
+      layerDefs.forEach(function (layerDef) {
         var mark = layerDef.mark;
         var layerCls = layerRegistry[mark];
 
@@ -27557,14 +27758,14 @@ var addLayer = function addLayer(layerRegistry, context, sideEffect) {
             }
           };
           var commonName = sideEffect.constructor.formalName();
-          var name = "".concat(layerDef.def.name, "-").concat(commonName, "-").concat(index);
+          var layerOwner = layerDef.def.name;
+          var name = "".concat(layerOwner, "-").concat(commonName);
           var defaultClassName = "".concat(sideEffect.constructor.defaultConfig().className);
-          var className = "".concat(defaultClassName, "-").concat(index % 2 === 0 ? 'lower' : 'upper');
           layers.push({
-            name: name,
+            name: "".concat(name, "-upper"),
             mark: 'point',
-            groupId: commonName,
-            className: className,
+            groupId: "".concat(commonName, "-upper"),
+            className: "".concat(defaultClassName, "-upper"),
             encoding: encoding,
             transform: {
               type: 'identity'
@@ -27581,6 +27782,30 @@ var addLayer = function addLayer(layerRegistry, context, sideEffect) {
             interactive: false,
             owner: layerDef.def.name
           });
+
+          if (mark === 'area') {
+            layers.push({
+              name: "".concat(name, "-lower"),
+              mark: 'point',
+              groupId: "".concat(commonName, "-lower"),
+              className: "".concat(defaultClassName, "-lower"),
+              encoding: encoding,
+              transform: {
+                type: 'identity'
+              },
+              calculateDomain: false,
+              transition: sideEffect.getTransitionConfig(),
+              source: function source(dm) {
+                return dm.select(function () {
+                  return false;
+                }, {
+                  saveChild: false
+                });
+              },
+              interactive: false,
+              owner: layerDef.def.name
+            });
+          }
         }
       });
     }
@@ -27658,8 +27883,11 @@ function (_SpawnableSideEffect) {
       var dataModel = selectionSet.mergedEnter.model;
       var formalName = this.constructor.formalName();
       var context = this.firebolt.context;
-      var layers = context.layers().filter(function (layer) {
-        return layer.config().groupId === formalName;
+      var upperAnchors = context.layers().filter(function (layer) {
+        return layer.config().groupId === "".concat(formalName, "-upper");
+      });
+      var lowerAnchors = context.layers().filter(function (layer) {
+        return layer.config().groupId === "".concat(formalName, "-lower");
       });
       var target = payload.target;
       var targetObj = null;
@@ -27676,13 +27904,37 @@ function (_SpawnableSideEffect) {
         }, {});
       }
 
-      layers.forEach(function (layer, index) {
-        var linkedLayer = context.getLayerByName(layer.config().owner); // selected data -> stacked data -> new dm
+      [].concat(_toConsumableArray(upperAnchors), _toConsumableArray(lowerAnchors)).forEach(function (layer, index) {
+        var linkedLayer = context.getLayerByName(layer.config().owner);
+        var linkedLayerName = linkedLayer.constructor.formalName();
+        var groupId = layer.config().groupId;
+        var isUpperAnchor = groupId === "".concat(formalName, "-upper");
+        var transformedData = [];
+        var schema = []; // Only render upper layers for all plots
 
-        var _linkedLayer$getTrans = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index),
-            _linkedLayer$getTrans2 = _slicedToArray(_linkedLayer$getTrans, 2),
-            transformedData = _linkedLayer$getTrans2[0],
-            schema = _linkedLayer$getTrans2[1];
+        if (isUpperAnchor) {
+          var _linkedLayer$getTrans = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
+
+          var _linkedLayer$getTrans2 = _slicedToArray(_linkedLayer$getTrans, 2);
+
+          transformedData = _linkedLayer$getTrans2[0];
+          schema = _linkedLayer$getTrans2[1];
+        } // Render both upper and lower anchors for area plot if hovered over an anchor
+
+
+        if (linkedLayerName === 'area' && target) {
+          var filterFn = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["dmMultipleSelection"])(target, dataModel);
+          var dmFromPayload = dataModel.select(filterFn, {});
+
+          if (!isUpperAnchor) {
+            var _linkedLayer$getTrans3 = linkedLayer.getTransformedDataFromIdentifiers(dmFromPayload, index);
+
+            var _linkedLayer$getTrans4 = _slicedToArray(_linkedLayer$getTrans3, 2);
+
+            transformedData = _linkedLayer$getTrans4[0];
+            schema = _linkedLayer$getTrans4[1];
+          }
+        }
 
         var transformedDataModel = new muze_utils__WEBPACK_IMPORTED_MODULE_0__["DataModel"](transformedData, schema);
         var anchorSizeConfig = {
@@ -27744,6 +27996,116 @@ function (_SpawnableSideEffect) {
 /*!*********************************************************************!*\
   !*** ./packages/muze-firebolt/src/side-effects/anchors/styles.scss ***!
   \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+
+/***/ "./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/index.js":
+/*!**********************************************************************************!*\
+  !*** ./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/index.js ***!
+  \**********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return AxisLabelHighLighter; });
+/* harmony import */ var _surrogate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../surrogate */ "./packages/muze-firebolt/src/side-effects/surrogate.js");
+/* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./styles.scss */ "./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/styles.scss");
+/* harmony import */ var _styles_scss__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_styles_scss__WEBPACK_IMPORTED_MODULE_2__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+var AxisLabelHighLighter =
+/*#__PURE__*/
+function (_SurrogateSideEffect) {
+  _inherits(AxisLabelHighLighter, _SurrogateSideEffect);
+
+  function AxisLabelHighLighter() {
+    _classCallCheck(this, AxisLabelHighLighter);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(AxisLabelHighLighter).apply(this, arguments));
+  }
+
+  _createClass(AxisLabelHighLighter, [{
+    key: "apply",
+    value: function apply(selectionSet) {
+      var firebolt = this.firebolt;
+      var context = firebolt.context;
+      var selectedData = selectionSet.mergedEnter.model.getData().data;
+      var selectedDataValues = selectedData.length ? selectedData[0] : [];
+
+      var _context$axes = context.axes(),
+          _context$axes$x = _context$axes.x,
+          x = _context$axes$x === void 0 ? [] : _context$axes$x,
+          _context$axes$y = _context$axes.y,
+          y = _context$axes$y === void 0 ? [] : _context$axes$y;
+
+      [].concat(_toConsumableArray(x), _toConsumableArray(y)).forEach(function (axis) {
+        var index = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field].index;
+
+        var _axis$getTicksBasedOn = axis.getTicksBasedOnData(selectedDataValues[index]),
+            selectedElements = _axis$getTicksBasedOn.selectionSet,
+            rejectionSet = _axis$getTicksBasedOn.rejectionSet;
+
+        selectedElements && selectedElements.selectAll('text').classed('muze-axis-ticks-highlight', true);
+        rejectionSet.selectAll('text').classed('muze-axis-ticks-highlight', false);
+      });
+    }
+  }], [{
+    key: "formalName",
+    value: function formalName() {
+      return _enums_side_effects__WEBPACK_IMPORTED_MODULE_1__["AXIS_LABEL_HIGHLIGHTER"];
+    }
+  }, {
+    key: "target",
+    value: function target() {
+      return 'visual-unit';
+    }
+  }]);
+
+  return AxisLabelHighLighter;
+}(_surrogate__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+
+
+/***/ }),
+
+/***/ "./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/styles.scss":
+/*!*************************************************************************************!*\
+  !*** ./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/styles.scss ***!
+  \*************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -28587,7 +28949,7 @@ var spaceOutBoxes = function spaceOutBoxes(boxes, extent, showVertically) {
 /*!**********************************************************!*\
   !*** ./packages/muze-firebolt/src/side-effects/index.js ***!
   \**********************************************************/
-/*! exports provided: SelectionBox, Tooltip, FragmentedTooltip, Crossline, PlotHighlighter, FilterEffect, PersistentAnchors, BrushAnchors, AnchorEffect */
+/*! exports provided: SelectionBox, Tooltip, FragmentedTooltip, Crossline, PlotHighlighter, FilterEffect, PersistentAnchors, BrushAnchors, AnchorEffect, AxisLabelHighLighter */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28618,6 +28980,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony import */ var _anchors__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./anchors */ "./packages/muze-firebolt/src/side-effects/anchors/index.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AnchorEffect", function() { return _anchors__WEBPACK_IMPORTED_MODULE_8__["default"]; });
+
+/* harmony import */ var _axis_labels_highlighter__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./axis-labels-highlighter */ "./packages/muze-firebolt/src/side-effects/axis-labels-highlighter/index.js");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "AxisLabelHighLighter", function() { return _axis_labels_highlighter__WEBPACK_IMPORTED_MODULE_9__["default"]; });
+
 
 
 
@@ -28741,16 +29107,19 @@ function (_AnchorEffect) {
 /*!****************************************************************************!*\
   !*** ./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js ***!
   \****************************************************************************/
-/*! exports provided: getFormattedSet */
+/*! exports provided: getFormattedSet, highlightSelectIntersection */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getFormattedSet", function() { return getFormattedSet; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "highlightSelectIntersection", function() { return highlightSelectIntersection; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../helper */ "./packages/muze-firebolt/src/helper/index.js");
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 /**
@@ -28772,6 +29141,17 @@ var getFormattedSet = function getFormattedSet(set, selectedPointsId) {
     uids: formattedSet,
     length: formattedSet.length
   });
+};
+var highlightSelectIntersection = function highlightSelectIntersection(firebolt) {
+  var selectEntrySet = firebolt.getEntryExitSet('select');
+  var highlightEntrySet = firebolt.getEntryExitSet('highlight');
+
+  if (selectEntrySet && highlightEntrySet) {
+    var intersectSet = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["intersectSets"])(firebolt, ['select', 'highlight']);
+    return intersectSet;
+  }
+
+  return null;
 };
 
 /***/ }),
@@ -28918,7 +29298,11 @@ function (_SurrogateSideEffect) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategies", function() { return strategies; });
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js");
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../.. */ "./packages/muze-firebolt/src/index.js");
+
+
 
 
 var fadeFn = function fadeFn(set, context) {
@@ -28965,7 +29349,6 @@ var fadeOnBrushFn = function fadeOnBrushFn(set, context, payload) {
   var formattedSet = set.formattedSet;
   var mergedEnter = formattedSet.mergedEnter,
       mergedExit = formattedSet.mergedExit,
-      exitSet = formattedSet.exitSet,
       completeSet = formattedSet.completeSet;
   var dragEnd = payload.dragEnd;
   var interactionType = 'brushStroke';
@@ -28986,6 +29369,11 @@ var fadeOnBrushFn = function fadeOnBrushFn(set, context, payload) {
       context.applyInteractionStyle(completeSet, {
         interactionType: 'brushStroke',
         apply: false
+      }); // Fade out points onDragEnd
+
+      context.applyInteractionStyle(mergedExit, {
+        interactionType: 'focus',
+        apply: true
       });
     }
 
@@ -28998,25 +29386,24 @@ var fadeOnBrushFn = function fadeOnBrushFn(set, context, payload) {
           interactionType: 'fade',
           apply: true
         }, [layer]);
-        context.applyInteractionStyle(exitSet, {
+        context.applyInteractionStyle(mergedExit, {
           interactionType: 'fade',
           apply: false
         }, [layer]);
       } else {
-        // Fade the non-brushed points
-        context.applyInteractionStyle(exitSet, {
-          interactionType: 'focus',
-          apply: true
-        }, [layer]);
-        context.applyInteractionStyle(mergedEnter, {
-          interactionType: 'focus',
-          apply: false
-        }, [layer]); // dragEnd style
-
-        context.applyInteractionStyle(exitSet, {
+        // dragEnd style
+        context.applyInteractionStyle(mergedExit, {
           interactionType: interactionType,
           apply: false
         }, [layer]);
+        !payload.dragEnd && context.applyInteractionStyle(mergedExit, {
+          interactionType: 'focus',
+          apply: false
+        });
+        interactionType !== 'doubleStroke' && context.applyInteractionStyle(mergedExit, {
+          interactionType: 'doubleStroke',
+          apply: false
+        });
         context.applyInteractionStyle(mergedEnter, {
           interactionType: interactionType,
           apply: true
@@ -29034,6 +29421,7 @@ var strategies = {
     var mergedEnter = formattedSet.mergedEnter,
         mergedExit = formattedSet.mergedExit,
         completeSet = formattedSet.completeSet;
+    var firebolt = context.firebolt;
 
     if (!mergedEnter.length && !mergedExit.length) {
       context.applyInteractionStyle(completeSet, {
@@ -29043,12 +29431,10 @@ var strategies = {
       context.applyInteractionStyle(completeSet, {
         interactionType: 'focusStroke',
         apply: false
-      }); // Remove brushed points when clicked on empty chart area
-
+      });
       context.applyInteractionStyle(completeSet, {
-        interactionType: 'doubleStroke',
-        apply: false,
-        reset: true
+        interactionType: 'commonDoubleStroke',
+        apply: false
       });
     } else {
       context.applyInteractionStyle(mergedExit, {
@@ -29067,38 +29453,27 @@ var strategies = {
         interactionType: 'focusStroke',
         apply: true
       });
-    }
-  },
-  highlight: function highlight(set, context, payload, excludeSetIds) {
-    var formattedSet = set.formattedSet,
-        selectionSet = set.selectionSet;
-    var mergedEnter = formattedSet.mergedEnter,
-        mergedExit = formattedSet.mergedExit,
-        completeSet = formattedSet.completeSet;
+      var payload = firebolt.getPayload(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT);
+      var entryExitSet = firebolt.getEntryExitSet(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT);
+      var layers = firebolt.context.layers();
 
-    if (!mergedEnter.length && !mergedExit.length) {
-      context.applyInteractionStyle(completeSet, {
-        interactionType: 'highlight',
-        apply: false
-      });
-    } else {
-      var layers = context.firebolt.context.layers();
-      layers.forEach(function (layer) {
-        if (payload.target) {
+      if (payload.target && entryExitSet) {
+        layers.forEach(function (layer) {
           // get uids of only the currently highlighted point
-          var actualPoint = payload.target ? layer.getUidsFromPayload(mergedEnter, payload.target) : mergedEnter; // get uids of only the currently highlighted point excluding the excludeSet ids
-
-          var currentHighlightedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_0__["getFormattedSet"])(actualPoint, excludeSetIds);
-          context.applyInteractionStyle(currentHighlightedSet, {
-            interactionType: 'highlight',
+          var actualPoint = layer.getUidsFromPayload(entryExitSet.mergedEnter, payload.target);
+          var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(mergedEnter.uids, actualPoint.uids, [function (v) {
+            return v[0];
+          }, function (v) {
+            return v[0];
+          }]);
+          context.applyInteractionStyle({
+            uids: commonSet
+          }, {
+            interactionType: 'commonDoubleStroke',
             apply: true
           }, [layer]);
-          context.applyInteractionStyle(selectionSet.exitSet[1], {
-            interactionType: 'highlight',
-            apply: false
-          }, [layer]);
-        }
-      });
+        });
+      }
     }
   },
   areaFocus: function areaFocus(set, context) {
@@ -29132,6 +29507,70 @@ var strategies = {
       context.applyInteractionStyle(mergedEnter, {
         interactionType: 'focusStroke',
         apply: true
+      });
+    }
+  },
+  highlight: function highlight(set, context, payload, excludeSetIds) {
+    var selectionSet = set.selectionSet;
+
+    if (!selectionSet.mergedEnter.length && !selectionSet.mergedExit.length) {
+      // Remove focusStroke on selected but currently non-highlighted set
+      context.applyInteractionStyle(selectionSet.completeSet, {
+        interactionType: 'highlight',
+        apply: false
+      });
+      context.applyInteractionStyle(selectionSet.completeSet, {
+        interactionType: 'commonDoubleStroke',
+        apply: false
+      });
+    } else {
+      var layers = context.firebolt.context.layers();
+      layers.forEach(function (layer) {
+        if (payload.target) {
+          // get uids of only the currently highlighted point
+          var actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target); // get uids of only the currently highlighted point excluding the excludeSet ids
+
+          var currentHighlightedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getFormattedSet"])(actualPoint, excludeSetIds); // Apply highlight on the currently hovered point
+
+          context.applyInteractionStyle(currentHighlightedSet, {
+            interactionType: 'highlight',
+            apply: true
+          }, [layer]);
+          context.applyInteractionStyle(selectionSet.mergedExit, {
+            interactionType: 'highlight',
+            apply: false
+          }, [layer]);
+          var selectEntrySet = context.firebolt.getEntryExitSet('select');
+
+          if (selectEntrySet) {
+            var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(selectEntrySet.mergedEnter.uids, actualPoint.uids, [function (v) {
+              return v[0];
+            }, function (v) {
+              return v[0];
+            }]);
+            var diffSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"])(selectEntrySet.mergedEnter.uids, actualPoint.uids, [function (v) {
+              return v[0];
+            }, function (v) {
+              return v[0];
+            }]);
+
+            if (commonSet.length) {
+              context.applyInteractionStyle({
+                uids: commonSet
+              }, {
+                interactionType: 'commonDoubleStroke',
+                apply: true
+              }, [layer]);
+            }
+
+            context.applyInteractionStyle({
+              uids: diffSet
+            }, {
+              interactionType: 'commonDoubleStroke',
+              apply: false
+            }, [layer]);
+          }
+        }
       });
     }
   },
@@ -29308,6 +29747,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _spawnable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../spawnable */ "./packages/muze-firebolt/src/side-effects/spawnable.js");
 /* harmony import */ var _actions_physical_selection_box_drag__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../actions/physical/selection-box-drag */ "./packages/muze-firebolt/src/actions/physical/selection-box-drag.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/side-effects/selection-box/helper.js");
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../.. */ "./packages/muze-firebolt/src/index.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -29325,6 +29765,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -29380,7 +29821,7 @@ function (_SpawnableSideEffect) {
       width = unitWidth;
       height = unitHeight; // Hide selection-box on dragEnd or when criteria is empty
 
-      if (!payload.criteria || payload.dragEnd) {
+      if (!payload.criteria || payload.dragEnd && !config.persistent) {
         this.hide(drawingInf);
         return this;
       }
@@ -29413,6 +29854,11 @@ function (_SpawnableSideEffect) {
       var sideEffect = this;
       var selection = selectionGroup.selectAll('rect').data(points);
       var selectionBox = selection.enter().append('rect').each(function () {
+        firebolt.registerPhysicalBehaviouralMap({
+          selectiondrag: {
+            behaviours: [___WEBPACK_IMPORTED_MODULE_6__["BEHAVIOURS"].BRUSH]
+          }
+        });
         Object(_actions_physical_selection_box_drag__WEBPACK_IMPORTED_MODULE_4__["selectionBoxDrag"])(firebolt)(Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this), ['brush'], sideEffect);
       }).merge(selection).each(function (attrs) {
         var element = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(this);
@@ -29458,7 +29904,8 @@ function (_SpawnableSideEffect) {
         },
         transition: {
           duration: 200
-        }
+        },
+        persistent: false
       };
     }
   }, {
@@ -32383,7 +32830,8 @@ function (_SimpleLegend) {
       domainForLegend = scaleType === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["SIZE"] ? domainForLegend.sort(function (a, b) {
         return a[scaleType] - b[scaleType];
       }) : domainForLegend.sort(function (a, b) {
-        return a.value.localeCompare(b.value);
+        var domainValue = !(a.value instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"] || a.value instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"]) ? a.value.localeCompare(b.value) : 1;
+        return domainValue;
       });
       return domainForLegend;
     }
@@ -32508,9 +32956,9 @@ var getGradientDomain = function getGradientDomain(data) {
  *
  */
 
-var makeLinearGradient = function makeLinearGradient(container, data, domain) {
+var makeLinearGradient = function makeLinearGradient(container, data, domain, id) {
   var defs = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'defs', [1]);
-  var linearGradient = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(defs, 'linearGradient', [1]).attr('id', 'linear-gradient').attr('x1', '0%').attr('y2', '0%');
+  var linearGradient = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(defs, 'linearGradient', [1]).attr('id', "linear-gradient-".concat(id)).attr('x1', '0%').attr('y2', '0%');
   Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(linearGradient, 'stop', data, 'stop-gradient').attr('offset', function (d) {
     return "".concat((d.value - domain[0]) * 100 / (domain[1] - domain[0]) || 1, "%");
   }).attr('stop-color', function (d) {
@@ -32570,12 +33018,12 @@ var createAxis = function createAxis(context) {
  * @memberof GradientLegend
  */
 
-var createLegendSkeleton = function createLegendSkeleton(container, classPrefix, data) {
+var createLegendSkeleton = function createLegendSkeleton(container, classPrefix, data, id) {
   var domain = getGradientDomain(data);
   var legendContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], "".concat(classPrefix, "-legend-body"));
   var legendGradSvg = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendContainer, 'svg', [1], "".concat(classPrefix, "-gradient"));
   var legendGradCont = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendGradSvg, 'g', [1], "".concat(classPrefix, "-gradient-group"));
-  var linearGradient = makeLinearGradient(legendGradSvg, data, domain);
+  var linearGradient = makeLinearGradient(legendGradSvg, data, domain, id);
   var legendRect = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(legendGradCont, 'rect', [1], "".concat(classPrefix, "-gradient-rect"));
   return {
     legendContainer: legendContainer,
@@ -32624,7 +33072,7 @@ var renderGradient = function renderGradient(context, container) {
 
   var data = context.data(); // Create the skeleton for the legend
 
-  var _createLegendSkeleton = createLegendSkeleton(container, classPrefix, data),
+  var _createLegendSkeleton = createLegendSkeleton(container, classPrefix, data, context._id),
       legendContainer = _createLegendSkeleton.legendContainer,
       legendGradSvg = _createLegendSkeleton.legendGradSvg,
       legendGradCont = _createLegendSkeleton.legendGradCont,
@@ -32683,7 +33131,7 @@ var renderGradient = function renderGradient(context, container) {
   }); // Apply styles to the legend rect
 
   Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(legendRect, {
-    fill: 'url(#linear-gradient)'
+    fill: "url(#linear-gradient-".concat(context._id, ")")
   });
   legendGradSvg.attr('height', gradientDimensions.height + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4);
   legendGradSvg.attr('width', gradientDimensions.width + _defaults__WEBPACK_IMPORTED_MODULE_3__["LEGEND_MARKER_PROPS"].size + 4);
@@ -54502,7 +54950,7 @@ __webpack_require__.r(__webpack_exports__);
 /*!*************************************************!*\
   !*** ./packages/muze-utils/src/common-utils.js ***!
   \*************************************************/
-/*! exports provided: arraysEqual, componentRegistry, mix, partition, getArrayIndexMap, getValueParser, require, intersect, difference, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColor, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, transformToHex, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, unique, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, getReadableTicks */
+/*! exports provided: arraysEqual, componentRegistry, mix, partition, getArrayIndexMap, getValueParser, require, intersect, difference, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColor, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, transformToHex, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, unique, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, getReadableTicks, dmMultipleSelection */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -54597,6 +55045,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitizeDomainWhenEqual", function() { return sanitizeDomainWhenEqual; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sortCategoricalField", function() { return sortCategoricalField; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getReadableTicks", function() { return getReadableTicks; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dmMultipleSelection", function() { return dmMultipleSelection; });
 /* harmony import */ var datamodel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! datamodel */ "../datamodel/dist/datamodel.js");
 /* harmony import */ var datamodel__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(datamodel__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var d3_axis__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! d3-axis */ "./packages/muze-utils/node_modules/d3-axis/index.js");
@@ -55844,15 +56293,7 @@ function RGBAToHexA(rgba) {
     a = "0".concat(a);
   }
 
-  return "#".concat(r).concat(g).concat(b).concat(a); // r = r.toString(16);
-  // g = g.toString(16);
-  // b = b.toString(16);
-  // a = Math.round(a * 255).toString(16);
-  // if (r.length === 1) { r = `0${r}`; }
-  // if (g.length === 1) { g = `0${g}`; }
-  // if (b.length === 1) { b = `0${b}`; }
-  // if (a.length === 1) { a = `0${a}`; }
-  // return `#${r}${g}${b}${a}`;
+  return "#".concat(r).concat(g).concat(b).concat(a);
 }
 
 var transformToHex = function transformToHex(datumStyle, colorType) {
@@ -56379,15 +56820,20 @@ var nearestSortingDetails = function nearestSortingDetails(dataModel) {
   });
   return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
+
+var sortingOrder = function sortingOrder(a, b) {
+  var sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes) ? a.localeCompare(b) : 1;
+  return sortOrder;
+};
 /**
  * Map containing key, value sortingOrder pairs
  */
 
 
 var sortOrderMap = (_sortOrderMap = {}, _defineProperty(_sortOrderMap, _enums__WEBPACK_IMPORTED_MODULE_11__["SORT_ORDER_ASCENDING"], function (firstVal, secondVal) {
-  return firstVal.localeCompare(secondVal);
+  return sortingOrder(firstVal, secondVal);
 }), _defineProperty(_sortOrderMap, _enums__WEBPACK_IMPORTED_MODULE_11__["SORT_ORDER_DESCENDING"], function (firstVal, secondVal) {
-  return secondVal.localeCompare(firstVal);
+  return sortingOrder(secondVal, firstVal);
 }), _sortOrderMap);
 /**
  * Sort categorical field based on it's sorting order
@@ -56483,63 +56929,7 @@ var componentRegistry = function componentRegistry(comps) {
     }
   };
   return regObj;
-}; // function hexAToHSL (H) {
-//     // Convert hex to RGB first
-//     let r = 0;
-//     let g = 0;
-//     let b = 0;
-//     let a = 1;
-//     if (H.length === 4) {
-//         r = `0x${H[1]}${H[1]}`;
-//         g = `0x${H[2]}${H[2]}`;
-//         b = `0x${H[3]}${H[3]}`;
-//     } else if (H.length === 7) {
-//         r = `0x${H[1]}${H[2]}`;
-//         g = `0x${H[3]}${H[4]}`;
-//         b = `0x${H[5]}${H[6]}`;
-//     } else if (H.length === 5) {
-//         r = `0x${H[1]}${H[1]}`;
-//         g = `0x${H[2]}${H[2]}`;
-//         b = `0x${H[3]}${H[3]}`;
-//         a = `0x${H[4]}${H[4]}`;
-//     } else if (H.length === 9) {
-//         r = `0x${H[1]}${H[2]}`;
-//         g = `0x${H[3]}${H[4]}`;
-//         b = `0x${H[5]}${H[6]}`;
-//         a = `0x${H[7]}${H[8]}`;
-//     }
-//     // Then to HSL
-//     r /= 255;
-//     g /= 255;
-//     b /= 255;
-//     const cmin = Math.min(r, g, b);
-//     const cmax = Math.max(r, g, b);
-//     const delta = cmax - cmin;
-//     let h = 0;
-//     let s = 0;
-//     let l = 0;
-//     if (delta === 0) {
-//         h = 0;
-//     } else if (cmax === r) {
-//         h = ((g - b) / delta) % 6;
-//     } else if (cmax === g) {
-//         h = (b - r) / delta + 2;
-//     } else {
-//         h = (r - g) / delta + 4;
-//     }
-//     h = Math.round(h * 60);
-//     if (h < 0) { h += 360; }
-//     l = (cmax + cmin) / 2;
-//     s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-//     s = +(s * 100).toFixed(1);
-//     l = +(l * 100).toFixed(1);
-//     a = (a / 255).toFixed(3);
-//     return {
-//         color: `hsla(${h},${s}%,${l}%,${a})`,
-//         code: [h, s, l, a]
-//     };
-// }
-
+};
 
 var getReadableTicks = function getReadableTicks(domain, steps) {
   // scaling the axis based on steps provided
@@ -56645,6 +57035,49 @@ var transformColor = function transformColor(rgbaValues, _ref7, datum, apply) {
     hsla: [newH, newS, newL, newA]
   };
   return finalcolor;
+};
+/**
+ * Generates a function which performs an intersection (dataModel select)
+ * operation for multiple fields
+ * @param {Array} targetData - Nested array with field and values in the format:
+ * [
+ *  [field1, field2]
+ *  [val1, val2]
+ * ]
+ * @param {Object} dm - The dataModel instance
+ * @return {Function} filter function
+ */
+
+
+var dmMultipleSelection = function dmMultipleSelection(targetData, dm) {
+  var targetFields = targetData[0];
+  var targetVals = targetData.slice(1, targetData.length);
+  var payloadMap = targetVals.reduce(function (acc, v) {
+    acc[v] = v;
+    return acc;
+  }, {});
+  var measures = Object.keys(dm.getFieldspace().getMeasure());
+
+  var filterFn = function filterFn(fields, i) {
+    var row = "".concat(targetFields.map(function (field) {
+      var val;
+
+      if (field === _enums__WEBPACK_IMPORTED_MODULE_11__["ReservedFields"].MEASURE_NAMES) {
+        val = measures;
+      } else if (field === _enums__WEBPACK_IMPORTED_MODULE_11__["ReservedFields"].ROW_ID) {
+        val = i;
+      } else {
+        var currentField = fields[field];
+        var isFieldInvalid = currentField instanceof InvalidAwareTypes;
+        val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+      }
+
+      return val;
+    }));
+    return row in payloadMap;
+  };
+
+  return filterFn;
 };
 
 
@@ -56802,7 +57235,7 @@ var OFFSET_WIGGLE = 'wiggle';
 /*!******************************************!*\
   !*** ./packages/muze-utils/src/index.js ***!
   \******************************************/
-/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColor, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, difference, getArrayIndexMap, arraysEqual, getReadableTicks, unique, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS, RTree */
+/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColor, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, difference, getArrayIndexMap, arraysEqual, getReadableTicks, unique, dmMultipleSelection, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS, RTree */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -57005,6 +57438,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getReadableTicks", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["getReadableTicks"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "unique", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["unique"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "dmMultipleSelection", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["dmMultipleSelection"]; });
 
 /* harmony import */ var _renderer_utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./renderer-utils */ "./packages/muze-utils/src/renderer-utils.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "selectElement", function() { return _renderer_utils__WEBPACK_IMPORTED_MODULE_7__["selectElement"]; });
@@ -59828,6 +60263,17 @@ var actionModel = function () {
 
 /***/ }),
 
+/***/ "./packages/muze/src/border-applier.scss":
+/*!***********************************************!*\
+  !*** ./packages/muze/src/border-applier.scss ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
+
+/***/ }),
+
 /***/ "./packages/muze/src/canvas/app-state.js":
 /*!***********************************************!*\
   !*** ./packages/muze/src/canvas/app-state.js ***!
@@ -60528,8 +60974,10 @@ var createHeaderWrapper = function createHeaderWrapper(headerType, layoutManager
  */
 
 
-var createMessageWrapper = function createMessageWrapper(layoutManager, canvas, renderDetails, renderGrid) {
-  var headerValues = Object.values(renderDetails.components.headers);
+var createMessageWrapper = function createMessageWrapper(layoutManager, renderDetails, renderGrid) {
+  var components = renderDetails.components,
+      measurement = renderDetails.measurement;
+  var headerValues = Object.values(components.headers);
   var sum = 0;
   var messageWrapper = null;
 
@@ -60540,8 +60988,8 @@ var createMessageWrapper = function createMessageWrapper(layoutManager, canvas, 
 
   if (!renderGrid) {
     var defaultDimensions = {
-      height: canvas.height() - sum,
-      width: canvas.width()
+      height: measurement.canvasHeight - sum,
+      width: measurement.canvasWidth
     };
     var gridComponent = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_0__["GRID"]);
 
@@ -60558,7 +61006,7 @@ var createMessageWrapper = function createMessageWrapper(layoutManager, canvas, 
         height: height,
         width: width
       },
-      message: _constants__WEBPACK_IMPORTED_MODULE_0__["NO_DATA_MESSAGE"],
+      message: _constants__WEBPACK_IMPORTED_MODULE_0__["ERROR_MESSAGE"],
       classPrefix: _defaults__WEBPACK_IMPORTED_MODULE_6__["MESSAGE_CONFIG"],
       position: _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"]
     });
@@ -60803,7 +61251,7 @@ var componentWrapperMaker = function componentWrapperMaker(canvas, grid, renderD
   return {
     title: createHeaderWrapper(_constants__WEBPACK_IMPORTED_MODULE_0__["TITLE"], layoutManager, renderDetails),
     subtitle: createHeaderWrapper(_constants__WEBPACK_IMPORTED_MODULE_0__["SUB_TITLE"], layoutManager, renderDetails),
-    message: createMessageWrapper(layoutManager, canvas, renderDetails, renderGrid),
+    message: createMessageWrapper(layoutManager, renderDetails, renderGrid),
     legend: createLegendWrapper(layoutManager, renderDetails, renderGrid),
     grid: gridLayoutWrapper(layoutManager, renderDetails, grid, renderGrid),
     verticalScrollBar: createScrollBarWrapper(_constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL"], layoutManager, renderDetails, grid, renderGrid),
@@ -60949,6 +61397,12 @@ function (_MuzeComponent) {
               config: matrixConfig
             });
           } else {
+            var _this$params$componen = this.params.component.config(),
+                isFacet = _this$params$componen.isFacet,
+                showHeaders = _this$params$componen.showHeaders;
+
+            matrixConfig.isFacet = isFacet;
+            matrixConfig.showHeaders = showHeaders;
             var matrixWrapper = new _matrix_component__WEBPACK_IMPORTED_MODULE_2__["default"]({
               name: matrixName,
               component: matrix,
@@ -61402,9 +61856,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _layout_src_grid_layout_span_maker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../layout/src/grid-layout/span-maker */ "./packages/layout/src/grid-layout/span-maker.js");
 /* harmony import */ var _layout_src_grid_layout_border_helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../layout/src/grid-layout/border-helper */ "./packages/layout/src/grid-layout/border-helper.js");
-/* harmony import */ var _layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../layout/src/enums/constants */ "./packages/layout/src/enums/constants.js");
-/* harmony import */ var _muze_chart_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./muze-chart-component */ "./packages/muze/src/canvas/components/muze-chart-component.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../constants */ "./packages/muze/src/constants.js");
+/* harmony import */ var _border_applier_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../border-applier.scss */ "./packages/muze/src/border-applier.scss");
+/* harmony import */ var _border_applier_scss__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_border_applier_scss__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../../layout/src/enums/constants */ "./packages/layout/src/enums/constants.js");
+/* harmony import */ var _muze_chart_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./muze-chart-component */ "./packages/muze/src/canvas/components/muze-chart-component.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../constants */ "./packages/muze/src/constants.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -61422,6 +61878,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
 
 
 
@@ -61464,29 +61921,31 @@ function (_MuzeComponent) {
       var _this$params$config$s = this.params.config.scrollInfo,
           horizontal = _this$params$config$s.horizontal,
           vertical = _this$params$config$s.vertical;
-      container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_5__["VISIBLE"]);
-      container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["WIDTH"], _constants__WEBPACK_IMPORTED_MODULE_5__["AUTO"]);
-      container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["HEIGHT"], _constants__WEBPACK_IMPORTED_MODULE_5__["AUTO"]);
+      container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_6__["VISIBLE"]);
+      container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["WIDTH"], _constants__WEBPACK_IMPORTED_MODULE_6__["AUTO"]);
+      container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["HEIGHT"], _constants__WEBPACK_IMPORTED_MODULE_6__["AUTO"]);
 
       if (horizontal && column === 1) {
-        container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_5__["HIDDEN"]);
-        container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["WIDTH"], '100%');
+        container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_6__["HIDDEN"]);
+        container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["WIDTH"], '100%');
       }
 
-      if (vertical && row === _layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_3__["CENTER"]) {
-        container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_5__["HIDDEN"]);
-        container.style(_constants__WEBPACK_IMPORTED_MODULE_5__["HEIGHT"], '100%');
+      if (vertical && row === _layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_4__["CENTER"]) {
+        container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["OVERFLOW"], _constants__WEBPACK_IMPORTED_MODULE_6__["HIDDEN"]);
+        container.style(_constants__WEBPACK_IMPORTED_MODULE_6__["HEIGHT"], '100%');
       }
     }
   }, {
     key: "renderMatrix",
     value: function renderMatrix(mountPoint) {
-      // Creating containers for each matrix individually
-      var classPrefix = this.params.config.classPrefix;
-      var row = this.params.config.row;
-      var column = this.params.config.column;
-      var dimensions = this.params.config.dimensions;
-      var border = this.params.config.border; // Creating containers for each matrix individually
+      var _this$params$config = this.params.config,
+          classPrefix = _this$params$config.classPrefix,
+          row = _this$params$config.row,
+          column = _this$params$config.column,
+          dimensions = _this$params$config.dimensions,
+          border = _this$params$config.border,
+          isFacet = _this$params$config.isFacet,
+          showHeaders = _this$params$config.showHeaders; // Creating containers for each matrix individually
 
       var containerForMatrix = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(mountPoint, 'div', [1], "".concat(classPrefix, "-grid-").concat(row, "-").concat(column + 1)).classed("".concat(classPrefix, "-grid-").concat(row), true).classed("".concat(classPrefix, "-grid"), true);
       this.applyScroll(containerForMatrix);
@@ -61507,7 +61966,14 @@ function (_MuzeComponent) {
       cells.exit().each(function (cell) {
         cell.placeholder.remove();
       });
-      Object(_layout_src_grid_layout_border_helper__WEBPACK_IMPORTED_MODULE_2__["applyBorders"])(cells, border, row, column);
+      Object(_layout_src_grid_layout_border_helper__WEBPACK_IMPORTED_MODULE_2__["applyBorders"])({
+        cells: cells,
+        border: border,
+        row: row,
+        column: column,
+        isFacet: isFacet,
+        showHeaders: showHeaders
+      });
     }
   }, {
     key: "renderTable",
@@ -61524,7 +61990,16 @@ function (_MuzeComponent) {
             rowIndex: i
           };
         });
-      }, "".concat(className, "-td"), {}, function (key) {
+      }, "".concat(className, "-td"), {
+        update: function update(elem, cell) {
+          var _cell$placeholder$con = cell.placeholder.config(),
+              externalClassname = _cell$placeholder$con.externalClassname;
+
+          externalClassname && externalClassname.map(function (d) {
+            return elem.classed("".concat(className, "-").concat(d), true);
+          });
+        }
+      }, function (key) {
         return key.placeholder.id;
       });
       return {
@@ -61553,13 +62028,13 @@ function (_MuzeComponent) {
       this.component = params.component;
       this.params = params;
       this.target(params.config.target);
-      this.position(_layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_3__["TOP"]);
+      this.position(_layout_src_enums_constants__WEBPACK_IMPORTED_MODULE_4__["TOP"]);
       this.className(params.config.className);
     }
   }]);
 
   return MatrixComponent;
-}(_muze_chart_component__WEBPACK_IMPORTED_MODULE_4__["default"]);
+}(_muze_chart_component__WEBPACK_IMPORTED_MODULE_5__["default"]);
 
 
 
@@ -61577,6 +62052,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return MessageComponent; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _muze_chart_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./muze-chart-component */ "./packages/muze/src/canvas/components/muze-chart-component.js");
+/* harmony import */ var _message_icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./message-icon */ "./packages/muze/src/canvas/components/message-icon.js");
+/* harmony import */ var _defaults__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../defaults */ "./packages/muze/src/canvas/defaults.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -61597,6 +62074,28 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 
 
+
+
+
+var formatFontSize = function formatFontSize(width, height) {
+  var baseFontLimit = _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].baseFontLimit,
+      upperFontLimit = _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].upperFontLimit,
+      baseSizeLimit = _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].baseSizeLimit,
+      upperSizeLimit = _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].upperSizeLimit;
+  var fractionFont = (upperSizeLimit - baseSizeLimit) / (upperFontLimit - baseFontLimit);
+  var fontSize = upperFontLimit;
+  var dim = width < height && width !== 0 ? width : height;
+
+  if (dim === 0) {
+    fontSize = 0;
+  } else if (dim <= baseSizeLimit) {
+    fontSize = baseFontLimit;
+  } else if (dim > baseSizeLimit && dim < upperSizeLimit) {
+    fontSize = baseFontLimit + (upperSizeLimit - dim) / fractionFont;
+  }
+
+  return fontSize;
+};
 
 var MessageComponent =
 /*#__PURE__*/
@@ -61625,13 +62124,28 @@ function (_MuzeComponent) {
       var _config$dimensions = config.dimensions,
           height = _config$dimensions.height,
           width = _config$dimensions.width;
+      var childHeight = height > _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].baseSizeLimit ? _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].fractionChild * height : 0;
       var message = config.message;
       Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(node, {
         width: "".concat(width, "px"),
         height: "".concat(height, "px")
       });
-      var child = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(node, 'div', [1], "".concat(className, "-child"));
-      var textElement = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(child, 'text', [1]);
+      var childNode = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(node, 'div', [1], "".concat(className, "-child"));
+      var imageNode = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(childNode, 'div', [1], "".concat(className, "-child-img"));
+      var messageNode = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(childNode, 'div', [1], "".concat(className, "-child-message"));
+      Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(childNode, {
+        width: width,
+        height: "".concat(childHeight, "px")
+      });
+      Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(imageNode, {
+        width: width,
+        height: "".concat(childHeight * _defaults__WEBPACK_IMPORTED_MODULE_3__["MESSAGE_CONFIG"].fractionImage, "px")
+      });
+      imageNode.html(_message_icon__WEBPACK_IMPORTED_MODULE_2__["incorrectMessageIcon"]);
+      var textElement = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(messageNode, 'text', [1]);
+      Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["applyStyle"])(messageNode, {
+        'font-size': "".concat(formatFontSize(width, height), "px")
+      });
       textElement.html(message);
     }
   }, {
@@ -61666,6 +62180,20 @@ function (_MuzeComponent) {
 }(_muze_chart_component__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 
+
+/***/ }),
+
+/***/ "./packages/muze/src/canvas/components/message-icon.js":
+/*!*************************************************************!*\
+  !*** ./packages/muze/src/canvas/components/message-icon.js ***!
+  \*************************************************************/
+/*! exports provided: incorrectMessageIcon */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "incorrectMessageIcon", function() { return incorrectMessageIcon; });
+var incorrectMessageIcon = "<svg width=\"215px\" height=\"199px\" viewBox=\"0 0 215 199\" \nversion=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n<!-- Generator: Sketch 60.1 (88133) - https://sketch.com -->\n\n<title>Group 23</title>\n    <desc>Created with Sketch.</desc>\n    <defs>\n        <polygon id=\"path-1\" points=\"0.149161328 0.420711883 72.119 0.420711883 \n        72.119 71.9995421 0.149161328 71.9995421\"></polygon>\n        <polygon id=\"path-3\" points=\"0 0.08 186.190753 0.08 186.190753 88.592 0 88.592\"></polygon>\n    </defs>\n    <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\">\n        <g id=\"Group-23\" transform=\"translate(0.000000, -1.000000)\">\n            <g id=\"Group-3\" transform=\"translate(142.000000, 127.920000)\">\n                <mask id=\"mask-2\" fill=\"white\">\n                    <use xlink:href=\"#path-1\"></use>\n                </mask>\n                <g id=\"Clip-2\"></g>\n                <path d=\"M0.163,36.1555 C0.163,28.8495 0.126,21.5445 0.173,14.2395 \n                C0.226,6.1165 4.776,0.7895 12.76,0.6405 C28.362,0.3505 43.979,0.3335 \n                59.58,0.6735 C67.574,0.8475 72.079,6.2375 72.096,14.3735 C72.125,28.9835 \n                72.129,43.5935 72.094,58.2045 C72.074,66.4205 67.223,71.7225 58.955,71.8405 \n                C43.682,72.0565 28.4,72.0515 13.128,71.8315 C4.928,71.7135 0.221,66.4315 \n                0.172,58.0705 C0.129,50.7655 0.163,43.4605 0.163,36.1555\" id=\"Fill-1\" \n                fill=\"#8c8d8e\" mask=\"url(#mask-2)\"></path>\n            </g>\n            <g id=\"Group-6\" transform=\"translate(0.000000, 0.920000)\">\n                <mask id=\"mask-4\" fill=\"white\">\n                    <use xlink:href=\"#path-3\"></use>\n                </mask>\n                <g id=\"Clip-5\"></g>\n                <path d=\"M183.4677,4.615 C174.5697,3.72 165.6917,2.607 156.8037,1.597 C152.7477,1.136 \n                147.5417,-0.986 144.9347,0.755 C142.0737,2.664 143.7187,8.515 142.6187,12.488 C141.7057,\n                15.785 143.1607,16.531 146.0297,16.716 C149.3127,16.928 152.5717,17.483 156.6277,17.987 \n                C137.8927,32.589 119.9087,46.473 102.1267,60.61 C99.4257,62.757 98.2077,62.204 96.1947,\n                60.05 C85.5357,48.644 74.6947,37.409 64.0607,25.979 C61.8547,23.608 60.5757,23.002 57.8627,\n                25.586 C51.9777,31.188 45.6137,36.286 39.4547,41.6 C26.7597,52.553 14.0947,63.54 1.3487,\n                74.433 C-0.2963,75.838 -0.4833,76.732 1.0457,78.354 C4.1127,81.609 6.9717,85.061 10.0567,\n                88.592 C26.7507,74.17 43.3037,59.87 59.9757,45.469 C71.5287,57.708 82.9977,69.719 94.2677,\n                81.914 C96.5347,84.368 98.0097,84.604 100.6707,82.492 C116.3907,70.016 132.2397,57.704 \n                148.0587,45.353 C153.9727,40.736 159.9197,36.162 165.9517,31.491 C167.0647,36.458 163.2367,\n                42.055 165.8357,44.513 C168.4597,46.994 174.2387,46.065 178.6037,46.814 C180.5447,47.148 \n                181.1657,46.627 181.4047,44.671 C182.9067,32.336 184.5297,20.016 186.1377,7.696 C186.4127,\n                5.593 185.6327,4.833 183.4677,4.615\" id=\"Fill-4\" fill=\"#8c8d8e\" mask=\"url(#mask-4)\"></path>\n            </g>\n            <path d=\"M68.7436,89.5418 C63.2716,89.6988 57.7836,89.7768 52.3196,89.5178 C49.1866,89.3688 \n            48.3926,90.4028 48.4386,93.4328 C48.6076,104.5468 48.5056,115.6668 48.5056,126.7838 C48.5056,\n            138.0668 48.5916,149.3518 48.4436,160.6328 C48.4076,163.4118 49.1436,164.3578 52.0056,164.2518 \n            C57.8066,164.0398 63.6226,164.0938 69.4276,164.2338 C71.7586,164.2898 72.5516,163.6408 72.5416,\n            161.1938 C72.4536,138.4608 72.4326,115.7288 72.556775,92.9968 C72.5736,89.9318 71.3526,89.4668 \n            68.7436,89.5418\" id=\"Fill-7\" fill=\"#8c8d8e\"></path>\n            <path d=\"M144.3769,91.2962 C138.9019,91.4772 133.4019,91.5912 127.9409,91.2652 C124.4229,91.0562 \n            123.8999,92.4662 123.9449,95.5182 C124.1039,106.3102 124.0069,117.1072 124.0069,127.9012 C124.0079,\n            137.3672 124.0079,146.8332 124.0079,156.3002 C124.0079,164.4422 124.0079,164.3082 132.1549,\n            164.2632 C134.9749,164.2472 135.8559,163.4702 135.7569,160.6292 C135.5449,154.6582 135.6479,\n            148.6742 135.6999,142.6952 C135.7679,135.0662 138.3559,128.6922 145.3599,124.8822 C147.2959,\n            123.8292 147.7519,122.5322 147.7349,120.5452 C147.6649,111.9092 147.6109,103.2722 147.7569,\n            94.6382 C147.8009,92.0132 146.9799,91.2102 144.3769,91.2962\" id=\"Fill-9\" fill=\"#8c8d8e\"></path>\n            <path d=\"M110.3095,117.074 C110.3265,114.616 109.4485,113.950948 107.1345,113.998 C101.3365,\n            114.117 95.5265,114.204 89.7365,113.96 C86.7245,113.833 86.2185,115.041 86.2735,117.672 C86.4225,\n            124.795 86.3255,131.923 86.3245,139.049 C86.3245,146.34 86.4355,153.634 86.2645,160.922 C86.2035,\n            163.546 86.9745,164.336 89.6015,164.249 C95.3955,164.057 101.2015,164.133 107.0005,164.217 C109.1175,\n            164.247 110.3385,163.986 110.3185,161.321 C110.2015,146.573 110.2115,131.823 110.3095,117.074\" \n            id=\"Fill-11\" fill=\"#8c8d8e\"></path>\n            <path d=\"M31.1347,116.1951 C25.3367,116.4001 19.5237,116.3591 13.7217,116.2131 C11.2637,116.1521 \n            10.6717,117.0871 10.6857,119.3921 C10.7747,133.3221 10.7877,147.2541 10.6847,161.1851 C10.6667,163.6601 \n            11.5637,164.2771 13.8597,164.2291 C19.6617,164.1061 25.4757,164.0161 31.2717,164.2601 C34.2827,164.3871 \n            34.7937,163.2071 34.7267,160.5531 C34.5597,153.9241 34.6717,147.2871 34.6717,140.6531 C34.6717,133.6881 \n            34.5377,126.7181 34.7367,119.7581 C34.8177,116.9131 33.9317,116.0961 31.1347,116.1951\" id=\"Fill-13\" \n            fill=\"#8c8d8e\"></path>\n            <path d=\"M182.5937,62.2083 C175.8157,62.4493 169.0307,62.4883 162.2477,62.6073 L162.2467,62.6073 \n            C161.0087,63.1583 161.4327,64.2813 161.4317,65.1903 C161.4087,83.2963 161.4087,101.4033 161.4347,\n            119.5103 C161.4357,120.4033 160.9787,121.5473 162.2837,122.0423 C169.0747,122.1203 175.8697,122.1063 \n            182.6567,122.3223 C185.0277,122.3973 185.2947,121.3543 185.2887,119.3853 C185.2347,101.3103 \n            185.2377,83.2343 185.290773,65.1593 C185.2967,63.1633 184.9367,62.1253 182.5937,62.2083\" \n            id=\"Fill-15\" fill=\"#8c8d8e\"></path>\n            <path d=\"M178.6747,133.095 C186.1527,133.096 193.6297,133.02 201.1057,133.12 C206.6837,133.197 \n            209.9207,136.107 209.9837,141.656 C210.1537,156.606 210.1427,171.56 209.9877,186.51 C209.9317,\n            192.015 206.6527,195.159 201.1977,195.197 C185.9127,195.303 170.6257,195.306 155.3397,195.216 \n            C149.4057,195.182 146.3497,192.185 146.3107,186.367 C146.2127,171.582 146.2197,156.795 146.3047,\n            142.01 C146.3387,136.149 149.3577,133.194 155.2477,133.118 C163.0557,133.019 170.8657,133.094 \n            178.6747,133.095\" id=\"Fill-17\" fill=\"#fbc0af\"></path>\n            <path d=\"M186.1288,150.0833 C184.6798,156.9563 182.9098,165.3223 181.1508,173.6913 C180.7868,\n            175.4293 179.7388,176.1553 177.9798,176.1143 C176.1458,176.0713 175.3328,175.0033 174.9608,\n            173.4093 C173.0558,165.2363 171.0608,157.0593 170.2818,148.6993 C169.8138,143.6663 173.1078,\n            140.3553 177.7748,140.2323 C182.7748,140.1013 186.1058,143.4083 186.1288,150.0833\" \n            id=\"Fill-19\" fill=\"#FDFDFC\"></path>\n            <path d=\"M177.7314,188.0823 C175.7614,187.9153 174.3044,186.6683 174.3184,184.3533 C174.3334,\n            182.0403 175.8334,180.6253 178.1304,180.6793 C180.3624,180.7313 182.0564,182.0443 181.9314,\n            184.4023 C181.8194,186.5383 180.5864,188.1203 177.7314,188.0823\" id=\"Fill-21\" fill=\"#FCF6F3\"></path>\n        </g>\n    </g>\n    </svg>";
 
 /***/ }),
 
@@ -62715,7 +63243,13 @@ var SUB_TITLE_CONFIG = {
   className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_0__["MUZE_PREFIX"], "-subtitle-container")
 };
 var MESSAGE_CONFIG = {
-  className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_0__["MUZE_PREFIX"], "-message-container")
+  className: "".concat(_constants__WEBPACK_IMPORTED_MODULE_0__["MUZE_PREFIX"], "-message-container"),
+  baseFontLimit: 16,
+  upperFontLimit: 24,
+  baseSizeLimit: 100,
+  upperSizeLimit: 300,
+  fractionImage: 0.8,
+  fractionChild: 0.7
 };
 var CANVAS = 'canvas';
 
@@ -62804,32 +63338,67 @@ var setSideEffectConfig = function setSideEffectConfig(firebolt) {
 
 var prepareSelectionSetData = function prepareSelectionSetData(group, dataModel) {
   var valueMatrix = group.matrixInstance().value;
-  var dimensions = Object.values(dataModel.getFieldsConfig()).filter(function (d) {
+  var fieldsConfig = dataModel.getFieldsConfig();
+  var dimensions = Object.values(fieldsConfig).filter(function (d) {
     return d.def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
   });
   var hasMeasures = Object.keys(dataModel.getFieldspace().getMeasure()).length;
   var measureName = hasMeasures ? [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] : [];
-
-  var _dataModel$getData = dataModel.getData(),
-      data = _dataModel$getData.data;
-
-  var groupDataMap = dataModel.getUids().reduce(function (acc, uid, i) {
-    acc[uid] = data[i];
-    return acc;
-  }, {});
   var keys = {};
   var dimensionsMap = {};
+  var unitDimsMap = {};
   valueMatrix.each(function (cell) {
     var unit = cell.source();
     var dm = unit.data();
-    var uids = dm.getUids();
+    var unitDims = dm.getSchema().filter(function (field) {
+      return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+    }).map(function (field) {
+      return field.name;
+    });
+    var facetFields = Object.keys(unit.facetFieldsMap());
+    unitDimsMap[unitDims] = {
+      inst: unit,
+      dims: [].concat(_toConsumableArray(facetFields), _toConsumableArray(unitDims))
+    };
+  });
+  var groupDataMap = {};
+  dataModel.getData().data.forEach(function (row) {
+    for (var key in unitDimsMap) {
+      var dims = unitDimsMap[key].dims;
+      var dimKey = dims.map(function (dim) {
+        return row[fieldsConfig[dim].index];
+      });
+      groupDataMap[dimKey] = row;
+    }
+  });
+  valueMatrix.each(function (cell) {
+    var unit = cell.source();
+    var dm = unit.data();
     var layers = unit.layers();
-    var unitData = uids.map(function (uid) {
-      return groupDataMap[uid];
+    var unitDims = dm.getSchema().filter(function (field) {
+      return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
+    }).map(function (field) {
+      return field.name;
+    });
+    var facetMap = unit.facetFieldsMap();
+    var facetFields = Object.keys(facetMap);
+    var unitFieldsConfig = dm.getFieldsConfig();
+    var linkedRows = [];
+    dm.getData().data.forEach(function (row) {
+      var dimKey = [].concat(_toConsumableArray(facetFields.map(function (field) {
+        return facetMap[field];
+      })), _toConsumableArray(unitDims.map(function (d) {
+        return row[unitFieldsConfig[d].index];
+      })));
+      var linkedRow = groupDataMap[dimKey];
+
+      if (linkedRow) {
+        linkedRows.push(linkedRow);
+      }
     });
     Object(_chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_2__["prepareSelectionSetMap"])({
-      data: unitData,
-      uids: uids,
+      data: linkedRows,
+      uids: dm.getUids(),
       dimensions: dimensions
     }, layers, {
       keys: keys,
@@ -63440,7 +64009,7 @@ var resetSelectAction = function resetSelectAction(firebolt, _ref2) {
       payload = _ref2.payload,
       behaviours = _ref2.behaviours;
 
-  if (behaviours[0] === _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].BRUSH && payload.dragging && payload.dragDiff < 1) {
+  if (behaviours[0] === _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].BRUSH && payload.dragging && payload.dragDiff < 5) {
     dispatchBehaviours(firebolt, {
       behaviours: [_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].SELECT],
       payload: {
@@ -63483,12 +64052,13 @@ __webpack_require__.r(__webpack_exports__);
 /*!********************************************!*\
   !*** ./packages/muze/src/canvas/helper.js ***!
   \********************************************/
-/*! exports provided: initCanvas, fixScrollBarConfig, setLayoutInfForUnits, dispatchProps, notifyAnimationEnd, setupChangeListener, applyInteractionPolicy, setLabelRotationForAxes, createGroupState, removeChild, createLayoutManager */
+/*! exports provided: initCanvas, fixFacetConfig, fixScrollBarConfig, setLayoutInfForUnits, dispatchProps, notifyAnimationEnd, setupChangeListener, applyInteractionPolicy, setLabelRotationForAxes, createGroupState, removeChild, createLayoutManager */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "initCanvas", function() { return initCanvas; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fixFacetConfig", function() { return fixFacetConfig; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fixScrollBarConfig", function() { return fixScrollBarConfig; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setLayoutInfForUnits", function() { return setLayoutInfForUnits; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dispatchProps", function() { return dispatchProps; });
@@ -63501,9 +64071,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createLayoutManager", function() { return createLayoutManager; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_visual_group__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/visual-group */ "./packages/visual-group/src/index.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../constants */ "./packages/muze/src/constants.js");
-/* harmony import */ var _local_options__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./local-options */ "./packages/muze/src/canvas/local-options.js");
-/* harmony import */ var _layout_src_tree_layout__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../layout/src/tree-layout */ "./packages/layout/src/tree-layout/index.js");
+/* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
+/* harmony import */ var _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @chartshq/visual-unit */ "./packages/visual-unit/src/index.js");
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../constants */ "./packages/muze/src/constants.js");
+/* harmony import */ var _local_options__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./local-options */ "./packages/muze/src/canvas/local-options.js");
+/* harmony import */ var _layout_src_tree_layout__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../layout/src/tree-layout */ "./packages/layout/src/tree-layout/index.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -63512,6 +64084,10 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -63519,6 +64095,8 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+
 
 
 
@@ -63540,14 +64118,36 @@ var initCanvas = function initCanvas(context) {
     throwback: context._throwback
   }, context.dependencies()))];
 };
+var fixFacetConfig = function fixFacetConfig(config) {
+  var isBorderPresent = false;
+  var isGridLinePresent = {};
+
+  if (config.border && config.border.width) {
+    isBorderPresent = true;
+  }
+
+  if (config.gridLines) {
+    isGridLinePresent.x = !!config.gridLines.x;
+    isGridLinePresent.y = !!config.gridLines.y;
+  }
+
+  var facetsUserConfig = {
+    isBorderPresent: isBorderPresent,
+    isGridLinePresent: isGridLinePresent
+  };
+  return {
+    facetsUserConfig: facetsUserConfig,
+    isFacet: false
+  };
+};
 var fixScrollBarConfig = function fixScrollBarConfig(config) {
   config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
   return config;
 };
 var setLayoutInfForUnits = function setLayoutInfForUnits(context) {
   var layoutManager = context._layoutManager;
-  var gridLayout = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_2__["GRID"]);
-  var legend = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_2__["LEGEND"]);
+  var gridLayout = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_4__["GRID"]);
+  var legend = layoutManager.getComponent(_constants__WEBPACK_IMPORTED_MODULE_4__["LEGEND"]);
   var boundBox = gridLayout && gridLayout.getBoundBox();
   var valueMatrix = context.composition().visualGroup.matrixInstance().value;
   var parentContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])("#".concat(layoutManager.getRootNodeId())).node();
@@ -63611,17 +64211,17 @@ var equalityChecker = function equalityChecker(props, params) {
 
   return !props.every(function (option, i) {
     switch (option) {
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["ROWS"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["COLUMNS"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["DETAIL"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["ROWS"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["COLUMNS"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["DETAIL"]:
         checker = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isEqual"])('Array');
         break;
 
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["SHAPE"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["SIZE"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["COLOR"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["DATA"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["CONFIG"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["SHAPE"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["SIZE"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["COLOR"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["DATA"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["CONFIG"]:
         checker = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isEqual"])('Object');
         break;
 
@@ -63639,17 +64239,32 @@ var equalityChecker = function equalityChecker(props, params) {
   });
 };
 
+var hasValue = function hasValue(val) {
+  var hasOneValue = false;
+
+  for (var i = 0; i < val.length && !hasOneValue; i++) {
+    for (var j = 0; j < val[i].length; j++) {
+      if (!(val[i][j] instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"])) {
+        hasOneValue = true;
+        break;
+      }
+    }
+  }
+
+  return hasOneValue;
+};
+
 var updateChecker = function updateChecker(props, params) {
   return props.every(function (option, i) {
     var val = params[i][1];
 
     switch (option) {
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["ROWS"]:
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["COLUMNS"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["ROWS"]:
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["COLUMNS"]:
         return val !== null;
 
-      case _constants__WEBPACK_IMPORTED_MODULE_2__["DATA"]:
-        return val && !val.isEmpty();
+      case _constants__WEBPACK_IMPORTED_MODULE_4__["DATA"]:
+        return val && !val.isEmpty() && hasValue(val.getData().data);
 
       default:
         return true;
@@ -63708,8 +64323,8 @@ var notifyAnimationEnd = function notifyAnimationEnd(context) {
 var setupChangeListener = function setupChangeListener(context) {
   var store = context._store;
   var allOptions = Object.keys(context._allOptions);
-  var props = [].concat(_toConsumableArray(allOptions), _toConsumableArray(Object.keys(_local_options__WEBPACK_IMPORTED_MODULE_3__["canvasOptions"])));
-  var nameSpaceProps = [].concat(_toConsumableArray(allOptions), _toConsumableArray(Object.keys(_local_options__WEBPACK_IMPORTED_MODULE_3__["canvasOptions"]))).map(function (prop) {
+  var props = [].concat(_toConsumableArray(allOptions), _toConsumableArray(Object.keys(_local_options__WEBPACK_IMPORTED_MODULE_5__["canvasOptions"])));
+  var nameSpaceProps = [].concat(_toConsumableArray(allOptions), _toConsumableArray(Object.keys(_local_options__WEBPACK_IMPORTED_MODULE_5__["canvasOptions"]))).map(function (prop) {
     return "".concat(muze_utils__WEBPACK_IMPORTED_MODULE_0__["STATE_NAMESPACES"].CANVAS_LOCAL_NAMESPACE, ".").concat(prop);
   });
   store.registerChangeListener(nameSpaceProps, function () {
@@ -63747,11 +64362,31 @@ var applyPropagationPolicy = function applyPropagationPolicy(firebolt, _ref) {
   }
 };
 
+var isMeasure = function isMeasure(fields) {
+  return fields.every(function (field) {
+    return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
+  });
+};
+
+var isSplom = function isSplom(fields) {
+  var rowProjections = fields.rowProjections,
+      colProjections = fields.colProjections;
+  var colProj = colProjections.flat();
+  var rowProj = rowProjections.flat();
+
+  if (isMeasure(colProj) && isMeasure(rowProj)) {
+    return true;
+  }
+
+  return false;
+};
+
 var applyInteractionPolicy = function applyInteractionPolicy(firebolt) {
   var canvas = firebolt.context;
   var visualGroup = canvas.composition().visualGroup;
 
   if (visualGroup) {
+    var splom = isSplom(visualGroup.resolver().getAllFields());
     var valueMatrix = visualGroup.matrixInstance().value;
     var interactionPolicy = firebolt._interactionPolicy;
     interactionPolicy(valueMatrix, firebolt);
@@ -63764,6 +64399,17 @@ var applyInteractionPolicy = function applyInteractionPolicy(firebolt) {
         behaviours: behaviours,
         sideEffects: sideEffects
       });
+
+      if (splom) {
+        unitFireBolt.payloadGenerators(_defineProperty({}, _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].BRUSH, function (inst, dm, propConfig, facetFields) {
+          return _chartshq_visual_unit__WEBPACK_IMPORTED_MODULE_3__["payloadGenerator"].brush(inst, dm, _objectSpread({}, propConfig, {
+            includeMeasures: false
+          }), facetFields);
+        }));
+        unitFireBolt.sideEffects().selectionBox.config({
+          persistent: true
+        });
+      }
     });
     applyPropagationPolicy(firebolt, {
       behaviours: behaviours,
@@ -63824,7 +64470,7 @@ var removeChild = function removeChild(mount) {
   }
 };
 var createLayoutManager = function createLayoutManager() {
-  var layoutManager = new _layout_src_tree_layout__WEBPACK_IMPORTED_MODULE_4__["LayoutManager"]({
+  var layoutManager = new _layout_src_tree_layout__WEBPACK_IMPORTED_MODULE_6__["LayoutManager"]({
     className: 'muze-group-container'
   });
   return layoutManager;
@@ -64630,7 +65276,8 @@ var headerCreator = function headerCreator(config, cellType, labelManager, prevC
       maxLines = config.maxLines;
   var cell = prevCell || new _chartshq_visual_cell__WEBPACK_IMPORTED_MODULE_0__["TextCell"]({
     type: cellType === 'title' ? 'header' : 'text',
-    className: "".concat(classPrefix, "-").concat(cellType, "-cell")
+    className: "".concat(classPrefix, "-").concat(cellType, "-cell"),
+    subType: cellType
   }, {
     labelManager: labelManager
   }).config({
@@ -64728,7 +65375,7 @@ var createHeaders = function createHeaders(context, canvasHeight, canvasWidth) {
 /*!****************************************!*\
   !*** ./packages/muze/src/constants.js ***!
   \****************************************/
-/*! exports provided: ROWS, COLUMNS, DATA, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, MARGIN, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, ORDINAL, MUZE_PREFIX, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, ICON_SHAPES, IS_POINT_MAP, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL, HORIZONTAL_CENTER, VERTICAL_CENTER, HIDDEN, OVERFLOW, OVERFLOW_X, OVERFLOW_Y, AUTO, VISIBLE, VERTICAL_SCROLL_BAR, HORIZONTAL_SCROLL_BAR, GRID, POINT, MESSAGE, NO_DATA_MESSAGE, COMMON_INTERACTION, INDIVIDUAL_INTERACTION */
+/*! exports provided: ROWS, COLUMNS, DATA, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, INITIALIZED, SOURCE, WIDTH, HEIGHT, PADDING, BORDER, MARGIN, CONFIG, MOUNT, CANVAS_UPDATED, CLASSPREFIX, POLICIES, LEGEND, TITLE, SUB_TITLE, RESOLVE, DISCRETE, STEP_COLOR, GRADIENT, LINEAR, ORDINAL, MUZE_PREFIX, TITLE_TEMPLATE_NOT_ALLOWED_TAGS, ICON_SHAPES, IS_POINT_MAP, LEGEND_TYPE_MAP, LEFT, RIGHT, BOTTOM, TOP, GROUP, LAYOUT, RETINAL, DIMENSION, MEASURE, VERTICAL, HORIZONTAL, HORIZONTAL_CENTER, VERTICAL_CENTER, HIDDEN, OVERFLOW, OVERFLOW_X, OVERFLOW_Y, AUTO, VISIBLE, VERTICAL_SCROLL_BAR, HORIZONTAL_SCROLL_BAR, GRID, POINT, MESSAGE, ERROR_MESSAGE, COMMON_INTERACTION, INDIVIDUAL_INTERACTION */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -64792,7 +65439,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GRID", function() { return GRID; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "POINT", function() { return POINT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MESSAGE", function() { return MESSAGE; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NO_DATA_MESSAGE", function() { return NO_DATA_MESSAGE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ERROR_MESSAGE", function() { return ERROR_MESSAGE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "COMMON_INTERACTION", function() { return COMMON_INTERACTION; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "INDIVIDUAL_INTERACTION", function() { return INDIVIDUAL_INTERACTION; });
 /* harmony import */ var _chartshq_muze_legend__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @chartshq/muze-legend */ "./packages/muze-legend/src/index.js");
@@ -64870,7 +65517,7 @@ var HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
 var GRID = 'grid';
 var POINT = 'point';
 var MESSAGE = 'message';
-var NO_DATA_MESSAGE = 'No data to display';
+var ERROR_MESSAGE = 'Insuffient data or incorrect configurations';
 var COMMON_INTERACTION = 'common';
 var INDIVIDUAL_INTERACTION = 'individual';
 
@@ -65558,7 +66205,10 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
         // Stores additional config, if passed
         var _auxConfig$reset = auxConfig.reset,
             reset = _auxConfig$reset === void 0 ? false : _auxConfig$reset;
-        var oldConf = {};
+        var oldConf = {}; // handle the default cases for facet, as it is different to other charts
+
+        var facetDefaultConfig = Object(_canvas_helper__WEBPACK_IMPORTED_MODULE_1__["fixFacetConfig"])(config);
+        config = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(config, facetDefaultConfig);
 
         if (!reset) {
           oldConf = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])({}, config === null ? {} : oldConfig);
@@ -66656,7 +67306,7 @@ var BLANK = 'blank';
 /*!*****************************************************!*\
   !*** ./packages/visual-cell/src/enums/constants.js ***!
   \*****************************************************/
-/*! exports provided: MARGIN, LEFT, RIGHT, BOTTOM, TOP, SPACE_FIXER, CLASSPREFIX, VERTICAL_ALIGN, TEXT_ALIGN, IS_OFFSET, MIDDLE, BASELINE, SHOW, CENTER, TEXT, HEADER, HEIGHT, WIDTH, DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, DETAIL_FIELDS, MAX_LINES, MIN_CHARS, ROTATION, TEXT_CELL, AXIS_CELL, GEOM_CELL, BLANK_CELL */
+/*! exports provided: MARGIN, LEFT, RIGHT, BOTTOM, TOP, SPACE_FIXER, CLASSPREFIX, VERTICAL_ALIGN, TEXT_ALIGN, IS_OFFSET, MIDDLE, BASELINE, SHOW, CENTER, TEXT, HEADER, HEIGHT, WIDTH, DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, DETAIL_FIELDS, MAX_LINES, MIN_CHARS, ROTATION, TEXT_CELL, AXIS_CELL, GEOM_CELL, BLANK_CELL, PADDING, HEADER_PADDING, TITLE_PADDING, TITLE, SUBTITLE */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -66694,6 +67344,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AXIS_CELL", function() { return AXIS_CELL; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GEOM_CELL", function() { return GEOM_CELL; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BLANK_CELL", function() { return BLANK_CELL; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PADDING", function() { return PADDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HEADER_PADDING", function() { return HEADER_PADDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TITLE_PADDING", function() { return TITLE_PADDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TITLE", function() { return TITLE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SUBTITLE", function() { return SUBTITLE; });
 /**
  * Flag to specify whether direction is vertical.
  */
@@ -66730,6 +67385,11 @@ var TEXT_CELL = 'text-cell';
 var AXIS_CELL = 'axis-cell';
 var GEOM_CELL = 'geom-cell';
 var BLANK_CELL = 'blank-cell';
+var PADDING = 'padding';
+var HEADER_PADDING = 'headerPadding';
+var TITLE_PADDING = 'titlePadding';
+var TITLE = 'title';
+var SUBTITLE = 'subtitle';
 
 /***/ }),
 
@@ -66744,7 +67404,7 @@ var BLANK_CELL = 'blank-cell';
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_CONFIG", function() { return DEFAULT_CONFIG; });
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants */ "./packages/visual-cell/src/enums/constants.js");
-var _CONSTANTS$MARGIN, _DEFAULT_CONFIG;
+var _CONSTANTS$MARGIN, _CONSTANTS$PADDING, _CONSTANTS$HEADER_PAD, _CONSTANTS$TITLE_PADD, _DEFAULT_CONFIG;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -66758,7 +67418,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 * @return {Object} Default configuration
 */
 
-var DEFAULT_CONFIG = (_DEFAULT_CONFIG = {}, _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MARGIN"], (_CONSTANTS$MARGIN = {}, _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], 0), _CONSTANTS$MARGIN)), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["SPACE_FIXER"], 2), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["IS_OFFSET"], false), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL_ALIGN"], null), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["TEXT_ALIGN"], _constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["SHOW"], true), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MAX_LINES"], 0), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MIN_CHARS"], 0), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["ROTATION"], null), _DEFAULT_CONFIG);
+var DEFAULT_CONFIG = (_DEFAULT_CONFIG = {}, _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MARGIN"], (_CONSTANTS$MARGIN = {}, _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], 0), _defineProperty(_CONSTANTS$MARGIN, _constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], 0), _CONSTANTS$MARGIN)), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["SPACE_FIXER"], 2), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["IS_OFFSET"], false), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["VERTICAL_ALIGN"], null), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["TEXT_ALIGN"], _constants__WEBPACK_IMPORTED_MODULE_0__["CENTER"]), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["SHOW"], true), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MAX_LINES"], 0), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["MIN_CHARS"], 0), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["ROTATION"], null), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["PADDING"], (_CONSTANTS$PADDING = {}, _defineProperty(_CONSTANTS$PADDING, _constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], 8), _defineProperty(_CONSTANTS$PADDING, _constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], 8), _defineProperty(_CONSTANTS$PADDING, _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], 10), _defineProperty(_CONSTANTS$PADDING, _constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], 0), _CONSTANTS$PADDING)), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["HEADER_PADDING"], (_CONSTANTS$HEADER_PAD = {}, _defineProperty(_CONSTANTS$HEADER_PAD, _constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], 8), _defineProperty(_CONSTANTS$HEADER_PAD, _constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], 5), _defineProperty(_CONSTANTS$HEADER_PAD, _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], 2), _defineProperty(_CONSTANTS$HEADER_PAD, _constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], 5), _CONSTANTS$HEADER_PAD)), _defineProperty(_DEFAULT_CONFIG, _constants__WEBPACK_IMPORTED_MODULE_0__["TITLE_PADDING"], (_CONSTANTS$TITLE_PADD = {}, _defineProperty(_CONSTANTS$TITLE_PADD, _constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], 0), _defineProperty(_CONSTANTS$TITLE_PADD, _constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"], 0), _defineProperty(_CONSTANTS$TITLE_PADD, _constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], 0), _defineProperty(_CONSTANTS$TITLE_PADD, _constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], 0), _CONSTANTS$TITLE_PADD)), _DEFAULT_CONFIG);
 
 /***/ }),
 
@@ -67329,54 +67989,20 @@ function () {
 
 /***/ }),
 
-/***/ "./packages/visual-cell/src/text-cell.js":
-/*!***********************************************!*\
-  !*** ./packages/visual-cell/src/text-cell.js ***!
-  \***********************************************/
-/*! exports provided: default */
+/***/ "./packages/visual-cell/src/text-cell-helper.js":
+/*!******************************************************!*\
+  !*** ./packages/visual-cell/src/text-cell-helper.js ***!
+  \******************************************************/
+/*! exports provided: setSmartText, isTitleSubtitle, computeTextSpace, setPadding */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _simple_cell__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./simple-cell */ "./packages/visual-cell/src/simple-cell.js");
-/* harmony import */ var _enums_cell_type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums/cell-type */ "./packages/visual-cell/src/enums/cell-type.js");
-/* harmony import */ var _props__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./props */ "./packages/visual-cell/src/props.js");
-/* harmony import */ var _enums_defaults__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./enums/defaults */ "./packages/visual-cell/src/enums/defaults.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./enums/constants */ "./packages/visual-cell/src/enums/constants.js");
-/* harmony import */ var _text_cell_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./text-cell.scss */ "./packages/visual-cell/src/text-cell.scss");
-/* harmony import */ var _text_cell_scss__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_text_cell_scss__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./constants */ "./packages/visual-cell/src/constants.js");
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-/**
- * This file declares a class that represents a Text element in a  table.
- * @module VisualCell
- */
-
-
-
-
-
-
-
-
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setSmartText", function() { return setSmartText; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isTitleSubtitle", function() { return isTitleSubtitle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "computeTextSpace", function() { return computeTextSpace; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setPadding", function() { return setPadding; });
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./enums/constants */ "./packages/visual-cell/src/enums/constants.js");
 
 var setSmartText = function setSmartText(context) {
   var source = context.source();
@@ -67403,6 +68029,15 @@ var setSmartText = function setSmartText(context) {
   rotation && context.smartText(labelManager.getSmartText(source, availHeight, availWidth, true));
   return context;
 };
+var isTitleSubtitle = function isTitleSubtitle(subType) {
+  var returnVal = false;
+
+  if (subType === "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TITLE"]) || subType === "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["SUBTITLE"])) {
+    returnVal = true;
+  }
+
+  return returnVal;
+};
 /**
 * Computes the Logical Space for the text
 *
@@ -67410,7 +68045,6 @@ var setSmartText = function setSmartText(context) {
 * @return {Object} Logical space taken up by text
 * @memberof TextCell
 */
-
 
 var computeTextSpace = function computeTextSpace(context) {
   var _context$dependencies = context.dependencies(),
@@ -67454,12 +68088,22 @@ var computeTextSpace = function computeTextSpace(context) {
 
   if (availWidth && availWidth < Math.min(_minTextSpace.width, space.oriTextWidth)) {
     var smartSpace = labelManager.getSmartText(source, availHeight, _minTextSpace.height, true);
-    space.width = smartSpace.height;
-    space.height = smartSpace.width;
+    var smHeight = smartSpace.height,
+        smWidth = smartSpace.width;
+    space.width = smWidth;
+    space.height = smHeight;
     context.config({
       rotation: true
     });
     context.smartText(smartSpace);
+  }
+
+  var _context$config3 = context.config(),
+      subType = _context$config3.subType,
+      headerPadding = _context$config3.headerPadding;
+
+  if (!isTitleSubtitle(subType)) {
+    space.width += headerPadding[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]] + headerPadding[_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]];
   }
 
   if (show) {
@@ -67474,12 +68118,86 @@ var computeTextSpace = function computeTextSpace(context) {
     height: 0
   };
 };
+var setPadding = function setPadding(measures) {
+  var elem = measures.elem,
+      className = measures.className,
+      headerPadding = measures.headerPadding,
+      padding = measures.padding,
+      type = measures.type,
+      titlePadding = measures.titlePadding;
+  var localPadding;
+
+  if (isTitleSubtitle(className)) {
+    localPadding = titlePadding;
+  } else if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_0__["HEADER"]) {
+    localPadding = headerPadding;
+  } else {
+    localPadding = padding;
+  }
+
+  [_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]].forEach(function (position) {
+    elem.style("padding-".concat(position), "".concat(localPadding[position], "px"));
+  });
+  return elem;
+};
+
+/***/ }),
+
+/***/ "./packages/visual-cell/src/text-cell.js":
+/*!***********************************************!*\
+  !*** ./packages/visual-cell/src/text-cell.js ***!
+  \***********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+/* harmony import */ var _simple_cell__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./simple-cell */ "./packages/visual-cell/src/simple-cell.js");
+/* harmony import */ var _enums_cell_type__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums/cell-type */ "./packages/visual-cell/src/enums/cell-type.js");
+/* harmony import */ var _props__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./props */ "./packages/visual-cell/src/props.js");
+/* harmony import */ var _enums_defaults__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./enums/defaults */ "./packages/visual-cell/src/enums/defaults.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./enums/constants */ "./packages/visual-cell/src/enums/constants.js");
+/* harmony import */ var _text_cell_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./text-cell.scss */ "./packages/visual-cell/src/text-cell.scss");
+/* harmony import */ var _text_cell_scss__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_text_cell_scss__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./constants */ "./packages/visual-cell/src/constants.js");
+/* harmony import */ var _text_cell_helper__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./text-cell-helper */ "./packages/visual-cell/src/text-cell-helper.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+/**
+ * This file declares a class that represents a Text element in a  table.
+ * @module VisualCell
+ */
+
+
+
+
+
+
+
+
+
 /**
  * Represents a table haeder.
  *
  * @class Text
  */
-
 
 var TextCell =
 /*#__PURE__*/
@@ -67513,7 +68231,7 @@ function (_SimpleCell) {
       height: Math.floor(space.height / 2)
     });
 
-    setSmartText(_assertThisInitialized(_this));
+    Object(_text_cell_helper__WEBPACK_IMPORTED_MODULE_8__["setSmartText"])(_assertThisInitialized(_this));
     return _this;
   }
   /**
@@ -67591,9 +68309,11 @@ function (_SimpleCell) {
      */
     value: function getLogicalSpace() {
       if (!this.logicalSpace()) {
-        this.logicalSpace(computeTextSpace(this));
+        this.logicalSpace(Object(_text_cell_helper__WEBPACK_IMPORTED_MODULE_8__["computeTextSpace"])(this));
       }
 
+      var space = Object(_text_cell_helper__WEBPACK_IMPORTED_MODULE_8__["computeTextSpace"])(this);
+      this.logicalSpace(space);
       return this.logicalSpace();
     }
     /**
@@ -67610,7 +68330,7 @@ function (_SimpleCell) {
     value: function setAvailableSpace(width, height) {
       this.availWidth(width);
       this.availHeight(height);
-      setSmartText(this);
+      Object(_text_cell_helper__WEBPACK_IMPORTED_MODULE_8__["setSmartText"])(this);
       this.logicalSpace(null);
       return this;
     }
@@ -67634,7 +68354,12 @@ function (_SimpleCell) {
           show = _this$config.show,
           verticalAlign = _this$config.verticalAlign,
           textAlign = _this$config.textAlign,
-          rotation = _this$config.rotation;
+          rotation = _this$config.rotation,
+          padding = _this$config.padding,
+          type = _this$config.type,
+          headerPadding = _this$config.headerPadding,
+          className = _this$config.className,
+          titlePadding = _this$config.titlePadding;
 
       this.mount(mount);
 
@@ -67659,14 +68384,25 @@ function (_SimpleCell) {
 
         elem.classed(this._className, true); // Apply styles
 
-        elem.style('text-align', textAlign);
         elem.style('display', 'inline');
         elem.style('transform', rotation ? "translate(".concat(height / 2, "px,\n                ").concat(translation[vAlign], "px) rotate(-90deg)") : '');
         elem.style(_enums_constants__WEBPACK_IMPORTED_MODULE_5__["WIDTH"], availWidth ? "".concat(availWidth, "px") : '100%');
-        [_enums_constants__WEBPACK_IMPORTED_MODULE_5__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["RIGHT"]].forEach(function (type) {
-          container.style("margin-".concat(type), "".concat(margin[type], "px"));
+        [_enums_constants__WEBPACK_IMPORTED_MODULE_5__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_5__["RIGHT"]].forEach(function (position) {
+          container.style("margin-".concat(position), "".concat(margin[position], "px"));
         });
-        elem.style('text-align', textAlign);
+        elem = Object(_text_cell_helper__WEBPACK_IMPORTED_MODULE_8__["setPadding"])({
+          elem: elem,
+          className: className,
+          headerPadding: headerPadding,
+          padding: padding,
+          type: type,
+          titlePadding: titlePadding
+        });
+
+        if (this._className === 'muze-grid-headers') {
+          elem.style('text-align', textAlign);
+        }
+
         elem.style('display', 'inline'); // set the text as the innerHTML
 
         this._dependencies.labelManager.setStyle(this._computedStyle);
@@ -68202,6 +68938,22 @@ function (_VisualEncoder) {
         });
       });
       return this.sanitizeLayerConfig(retinalConfig, layerConfig);
+    }
+  }, {
+    key: "hasMandatoryFields",
+    value: function hasMandatoryFields(fields) {
+      var colProjections = fields.colProjections,
+          rowProjections = fields.rowProjections;
+
+      var colFields = _get(_getPrototypeOf(CartesianEncoder.prototype), "hasMandatoryFields", this).call(this, {
+        colProjections: colProjections
+      });
+
+      var rowFields = _get(_getPrototypeOf(CartesianEncoder.prototype), "hasMandatoryFields", this).call(this, {
+        rowProjections: rowProjections
+      });
+
+      return colFields && rowFields;
     }
   }], [{
     key: "type",
@@ -69323,6 +70075,14 @@ function (_VisualEncoder) {
       });
       return layerConfig;
     }
+  }, {
+    key: "hasMandatoryFields",
+    value: function hasMandatoryFields(fields) {
+      var optionalProjections = fields.optionalProjections;
+      return _get(_getPrototypeOf(PolarEncoder.prototype), "hasMandatoryFields", this).call(this, {
+        optionalProjections: optionalProjections
+      });
+    }
   }], [{
     key: "type",
     value: function type() {
@@ -69664,6 +70424,11 @@ function () {
     value: function getProjectionFields(layers) {
       return Object(_group_helper_group_utils__WEBPACK_IMPORTED_MODULE_2__["getFieldsFromSuppliedLayers"])(layers);
     }
+  }, {
+    key: "hasMandatoryFields",
+    value: function hasMandatoryFields(fields) {
+      return Object(_group_helper_group_utils__WEBPACK_IMPORTED_MODULE_2__["hasOneField"])(fields);
+    }
   }]);
 
   return VisualEncoder;
@@ -69677,7 +70442,7 @@ function () {
 /*!******************************************************!*\
   !*** ./packages/visual-group/src/enums/constants.js ***!
   \******************************************************/
-/*! exports provided: X, Y, WIDTH, HEIGHT, MEASUREMENT, CONFIG, MIN_UNIT_WIDTH, MIN_UNIT_HEIGHT, DIMENSIONS, MEASURES, DIMENSION, MEASURE, PIVOT, FORMAT, MOUNT, HAS_DATA_UPDATED, ROWS, COLUMNS, COL, ROW, COLUMN, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, ORDINAL, LINEAR, LEFT, RIGHT, TOP, BOTTOM, RETINAL, CELL, X_AXES, Y_AXES, ENTRY_CELLS, INITIALIZED, EXIT_CELLS, AXIS, UNIT, UPDATED, BEFORE_UPDATE, VALUE_MATRIX, FACET_HEADERS, RADIUS, ANGLE, ANGLE0, ARC, CATEGORICAL, TEMPORAL, BAR, LINE, POINT, PRIMARY, SECONDARY, BOTH, INTERACTION, GRID_LINES, GRID_BANDS, HEADER, FACET, ASCENDING, DESCENDING */
+/*! exports provided: X, Y, WIDTH, HEIGHT, MEASUREMENT, CONFIG, MIN_UNIT_WIDTH, MIN_UNIT_HEIGHT, DIMENSIONS, MEASURES, DIMENSION, MEASURE, PIVOT, FORMAT, MOUNT, HAS_DATA_UPDATED, ROWS, COLUMNS, COL, ROW, COLUMN, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, ORDINAL, LINEAR, LEFT, RIGHT, TOP, BOTTOM, RETINAL, CELL, X_AXES, Y_AXES, ENTRY_CELLS, INITIALIZED, EXIT_CELLS, AXIS, UNIT, UPDATED, BEFORE_UPDATE, VALUE_MATRIX, FACET_HEADERS, RADIUS, ANGLE, ANGLE0, ARC, CATEGORICAL, TEMPORAL, BAR, LINE, POINT, PRIMARY, SECONDARY, BOTH, INTERACTION, GRID_LINES, GRID_BANDS, HEADER, FACET, DEFAULT, ASCENDING, DESCENDING, DARK, NONE, NORMAL, DARKER */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -69745,8 +70510,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GRID_BANDS", function() { return GRID_BANDS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HEADER", function() { return HEADER; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FACET", function() { return FACET; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT", function() { return DEFAULT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ASCENDING", function() { return ASCENDING; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DESCENDING", function() { return DESCENDING; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DARK", function() { return DARK; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NONE", function() { return NONE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "NORMAL", function() { return NORMAL; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DARKER", function() { return DARKER; });
 /**
  * This file exports constants that are used as enums in the
  *  crosstab group implementation.
@@ -70062,6 +70832,7 @@ var HEADER = 'header';
  */
 
 var FACET = 'facet';
+var DEFAULT = 'default';
 /**
  * Ordering type
  */
@@ -70072,6 +70843,10 @@ var ASCENDING = 'asc';
  */
 
 var DESCENDING = 'desc';
+var DARK = 'dark';
+var NONE = 'none';
+var NORMAL = 'normal';
+var DARKER = 'darker';
 
 /***/ }),
 
@@ -70079,18 +70854,23 @@ var DESCENDING = 'desc';
 /*!*****************************************************!*\
   !*** ./packages/visual-group/src/enums/defaults.js ***!
   \*****************************************************/
-/*! exports provided: DATA_UPDATE_COUNTER, DEFAULT_LAYER_TYPE */
+/*! exports provided: DATA_UPDATE_COUNTER, DEFAULT_LAYER_TYPE, BORDER_WIDTH */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DATA_UPDATE_COUNTER", function() { return DATA_UPDATE_COUNTER; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_LAYER_TYPE", function() { return DEFAULT_LAYER_TYPE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BORDER_WIDTH", function() { return BORDER_WIDTH; });
 /**
  * This file exports variables that are used as defaults for the crosstab group.
  */
 var DATA_UPDATE_COUNTER = 0;
 var DEFAULT_LAYER_TYPE = 'cartesian';
+var BORDER_WIDTH = {
+  "default": 2,
+  facet: 1
+};
 
 /***/ }),
 
@@ -70117,6 +70897,139 @@ var scaleMaps = {
 
 /***/ }),
 
+/***/ "./packages/visual-group/src/group-helper/cell-border-applier.js":
+/*!***********************************************************************!*\
+  !*** ./packages/visual-group/src/group-helper/cell-border-applier.js ***!
+  \***********************************************************************/
+/*! exports provided: sanitiseHeaderMatrix, sanitiseGeomMatrix, sanitiseFacetValues, sanitiseBorderMatrix */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitiseHeaderMatrix", function() { return sanitiseHeaderMatrix; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitiseGeomMatrix", function() { return sanitiseGeomMatrix; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitiseFacetValues", function() { return sanitiseFacetValues; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitiseBorderMatrix", function() { return sanitiseBorderMatrix; });
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../enums/constants */ "./packages/visual-group/src/enums/constants.js");
+
+var sanitiseHeaderMatrix = function sanitiseHeaderMatrix(matrices, header) {
+  if (header) {
+    for (var i = 0; i < matrices.length; i++) {
+      if (i !== 0) {
+        matrices[i].config({
+          externalClassname: ["".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"])]
+        });
+      } else {
+        matrices[i].config({
+          externalClassname: ["".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["NONE"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]), "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"])]
+        });
+      }
+    }
+  } else {
+    for (var _i = 0; _i < matrices.length; _i++) {
+      for (var j = 0; j < matrices[0].length; j++) {
+        matrices[_i][j].config({
+          externalClassname: ["".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"])]
+        });
+      }
+    }
+  }
+};
+var sanitiseGeomMatrix = function sanitiseGeomMatrix(matrices) {
+  var arr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  for (var i = 0; i < matrices.length; i++) {
+    for (var j = 0; j < matrices[0].length; j++) {
+      matrices[i][j].config({
+        externalClassname: ["".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["NORMAL"])]
+      });
+
+      if (i === 0) {
+        matrices[i][j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARKER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"]));
+      } else if (i === matrices.length - 1) {
+        matrices[i][j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARKER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+      }
+
+      if (j === matrices[i].length - 1) {
+        matrices[i][j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]));
+      }
+
+      if (arr[i]) {
+        matrices[i - 1][j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+      }
+    }
+  }
+};
+var sanitiseFacetValues = function sanitiseFacetValues(matrices, type) {
+  var normal = type === "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]) ? "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"]) : "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["NORMAL"]);
+  var length = matrices.length;
+  var latestSource = matrices[0][0].source();
+  var lastSource = matrices[matrices.length - 1][0].source();
+  var arr = {}; // initialise the classname
+
+  for (var i = 0; i < matrices.length; i++) {
+    for (var j = 0; j < matrices[0].length; j++) {
+      matrices[i][j].config({
+        externalClassname: [normal]
+      });
+    } // seperate wrt the corner most facet
+
+
+    if (matrices[i][0].source() !== latestSource) {
+      arr[i] = i;
+      latestSource = matrices[i][0].source();
+    }
+  } // add custom classname
+
+
+  for (var _i2 = 0; _i2 < matrices.length; _i2++) {
+    for (var _j = 0; _j < matrices[0].length; _j++) {
+      if (_j === 0) {
+        matrices[_i2][0].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["NONE"], "-").concat(type));
+
+        if (matrices[_i2][_j].source() === lastSource) {
+          matrices[_i2][_j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARKER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+        } else {
+          matrices[_i2][0].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+        }
+      } else if (_j !== matrices[_i2].length - 1) {
+        matrices[_i2][_j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"], "-").concat(type));
+      }
+
+      if (_i2 === 0) {
+        matrices[0][_j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARKER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["TOP"]));
+      } else if (_i2 === length - 1) {
+        matrices[_i2][_j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARKER"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+      }
+
+      if (arr[_i2]) {
+        matrices[_i2 - 1][_j].config().externalClassname.push("".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["DARK"], "-").concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["BOTTOM"]));
+      }
+    }
+  }
+
+  return arr;
+};
+var sanitiseBorderMatrix = function sanitiseBorderMatrix(matrices) {
+  var leftMatrix = matrices.leftMatrix,
+      rightMatrix = matrices.rightMatrix,
+      topMatrix = matrices.topMatrix,
+      bottomMatrix = matrices.bottomMatrix;
+  var bottomBorderObj = {};
+
+  if (rightMatrix.length) {
+    bottomBorderObj = sanitiseFacetValues(rightMatrix, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["RIGHT"]));
+  } else if (leftMatrix.length) {
+    bottomBorderObj = sanitiseFacetValues(leftMatrix, "".concat(_enums_constants__WEBPACK_IMPORTED_MODULE_0__["LEFT"]));
+  }
+
+  topMatrix.length && sanitiseHeaderMatrix(topMatrix);
+  bottomMatrix.length && sanitiseHeaderMatrix(bottomMatrix);
+  return bottomBorderObj;
+};
+
+/***/ }),
+
 /***/ "./packages/visual-group/src/group-helper/cell-creator.js":
 /*!****************************************************************!*\
   !*** ./packages/visual-group/src/group-helper/cell-creator.js ***!
@@ -70135,6 +71048,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _group_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./group-utils */ "./packages/visual-group/src/group-helper/group-utils.js");
 /* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../enums/constants */ "./packages/visual-group/src/enums/constants.js");
 /* harmony import */ var _variable__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../variable */ "./packages/visual-group/src/variable/index.js");
+/* harmony import */ var _cell_border_applier__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cell-border-applier */ "./packages/visual-group/src/group-helper/cell-border-applier.js");
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -70150,6 +71064,7 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 
 
 
@@ -70735,6 +71650,7 @@ var transformDataModel = function transformDataModel(dataModel, config, resolver
 
 
 var computeMatrices = function computeMatrices(context, config) {
+  var placeholderInfo = {};
   var resolver = context.resolver,
       datamodel = context.datamodel,
       componentRegistry = context.componentRegistry,
@@ -70759,111 +71675,135 @@ var computeMatrices = function computeMatrices(context, config) {
 
   var otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
   var facetsAndProjections = resolver.getAllFields();
-  var matrixGnContext = {
-    // Configuration to be passed to generate the  different matrices.
-    // A common config is used for both value matrices and other matrices
-    normalizedColumns: normalizedColumns,
-    normalizedRows: normalizedRows,
-    facetsAndProjections: facetsAndProjections,
-    layers: layerConfig,
-    fieldMap: fieldMap,
-    otherEncodings: otherEncodings,
-    encoders: encoders,
-    facet: globalConfig.facet || {},
-    axisFrom: globalConfig.axisFrom || {},
-    selection: selection,
-    resolver: resolver
-  };
-  var cells = {
-    GeomCell: resolver.getCellDef(registry.cells.GeomCell),
-    AxisCell: resolver.getCellDef(registry.cells.AxisCell),
-    BlankCell: resolver.getCellDef(registry.cells.BlankCell),
-    TextCell: resolver.getCellDef(registry.cells.TextCell)
-  };
-  var isRowSizeEqual = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["isDistributionEqual"])(normalizedRows);
-  var isColumnSizeEqual = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["isDistributionEqual"])(normalizedColumns);
-  resolver.colCells({});
-  resolver.rowCells({});
-  resolver.datamodelTransform(transform || {}); // Cell creation begins here
-
-  resolver.resetSimpleAxes();
-
-  var _resolver$cacheMaps = resolver.cacheMaps(),
-      entryCellMap = _resolver$cacheMaps.entryCellMap;
-
-  var newCacheMap = {
-    exitCellMap: entryCellMap,
-    entryCellMap: new Map()
-  };
-  resolver.cacheMaps(newCacheMap);
   var simpleEncoder = encoders.simpleEncoder;
-  var valueCellContext = {
-    config: globalConfig,
-    suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
-    resolver: resolver,
-    cell: cells.GeomCell,
-    encoder: simpleEncoder,
-    newCacheMap: newCacheMap,
-    detailFields: config.detail,
-    retinalConfig: {
-      color: config.color,
-      size: config.size,
-      shape: config.shape
+
+  if (simpleEncoder.hasMandatoryFields(facetsAndProjections)) {
+    var rowFacets = facetsAndProjections.rowFacets,
+        colFacets = facetsAndProjections.colFacets;
+    var isFacet = rowFacets.length > 0 || colFacets.length > 0;
+
+    if (isFacet) {
+      globalConfig.isFacet = true;
     }
-  };
-  var groupedModel = transformDataModel(datamodel, {
-    facetsAndProjections: facetsAndProjections,
-    suppliedLayers: valueCellContext.suppliedLayers,
-    groupBy: groupBy
-  }, resolver);
-  simpleEncoder.data(groupedModel); // return a callback function to create the cells from the matrix
 
-  var cellCreator = resolver.valueCellsCreator(valueCellContext); // Creates value matrices from the datamodel and configs
+    var matrixGnContext = {
+      // Configuration to be passed to generate the  different matrices.
+      // A common config is used for both value matrices and other matrices
+      normalizedColumns: normalizedColumns,
+      normalizedRows: normalizedRows,
+      facetsAndProjections: facetsAndProjections,
+      layers: layerConfig,
+      fieldMap: fieldMap,
+      otherEncodings: otherEncodings,
+      encoders: encoders,
+      facet: globalConfig.facet || {},
+      axisFrom: globalConfig.axisFrom || {},
+      selection: selection,
+      resolver: resolver
+    };
+    var cells = {
+      GeomCell: resolver.getCellDef(registry.cells.GeomCell),
+      AxisCell: resolver.getCellDef(registry.cells.AxisCell),
+      BlankCell: resolver.getCellDef(registry.cells.BlankCell),
+      TextCell: resolver.getCellDef(registry.cells.TextCell)
+    };
+    var isRowSizeEqual = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["isDistributionEqual"])(normalizedRows);
+    var isColumnSizeEqual = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["isDistributionEqual"])(normalizedColumns);
+    resolver.colCells({});
+    resolver.rowCells({});
+    resolver.datamodelTransform(transform || {}); // Cell creation begins here
 
-  var valueMatrixInfo = Object(_matrix_model__WEBPACK_IMPORTED_MODULE_2__["getMatrixModel"])(groupedModel, facetsAndProjections, cellCreator, globalConfig);
-  Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["removeExitCells"])(resolver);
-  resolver.cacheMaps().exitCellMap.clear();
-  resolver.valueMatrix(valueMatrixInfo.matrix);
+    resolver.resetSimpleAxes();
 
-  var _mutateAxesFromMap = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["mutateAxesFromMap"])(resolver.cacheMaps(), resolver.axes()),
-      xAxes = _mutateAxesFromMap.xAxes,
-      yAxes = _mutateAxesFromMap.yAxes;
+    var _resolver$cacheMaps = resolver.cacheMaps(),
+        entryCellMap = _resolver$cacheMaps.entryCellMap;
 
-  resolver.axes({
-    x: xAxes,
-    y: yAxes
-  });
-  resolver.createUnits(componentRegistry, config);
-  var matrices = {
-    valuesMatrix: valueMatrixInfo,
-    axesMatrix: resolver.axes()
-  }; // Create all matrices
+    var newCacheMap = {
+      exitCellMap: entryCellMap,
+      entryCellMap: new Map()
+    };
+    resolver.cacheMaps(newCacheMap);
+    var valueCellContext = {
+      config: globalConfig,
+      suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+      resolver: resolver,
+      cell: cells.GeomCell,
+      encoder: simpleEncoder,
+      newCacheMap: newCacheMap,
+      detailFields: config.detail,
+      retinalConfig: {
+        color: config.color,
+        size: config.size,
+        shape: config.shape
+      }
+    };
+    var groupedModel = transformDataModel(datamodel, {
+      facetsAndProjections: facetsAndProjections,
+      suppliedLayers: valueCellContext.suppliedLayers,
+      groupBy: groupBy
+    }, resolver);
+    simpleEncoder.data(groupedModel); // return a callback function to create the cells from the matrix
 
-  var _generateMatrices = generateMatrices(matrixGnContext, matrices, cells, labelManager),
-      rows = _generateMatrices.rows,
-      columns = _generateMatrices.columns,
-      selectionObj = _generateMatrices.selectionObj,
-      rowPriority = _generateMatrices.rowPriority,
-      colPriority = _generateMatrices.colPriority;
+    var cellCreator = resolver.valueCellsCreator(valueCellContext); // Creates value matrices from the datamodel and configs
 
-  resolver.rowMatrix(rows);
-  resolver.columnMatrix(columns);
-  return {
-    rows: resolver.rowMatrix(),
-    columns: resolver.columnMatrix(),
-    values: resolver.valueMatrix(),
-    isColumnSizeEqual: isColumnSizeEqual,
-    isRowSizeEqual: isRowSizeEqual,
-    priority: {
-      row: rowPriority,
-      col: colPriority
-    },
-    selection: selectionObj,
-    dataModels: {
-      groupedModel: groupedModel,
-      parentModel: datamodel
+    var valueMatrixInfo = Object(_matrix_model__WEBPACK_IMPORTED_MODULE_2__["getMatrixModel"])(groupedModel, facetsAndProjections, cellCreator, globalConfig);
+    Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["removeExitCells"])(resolver);
+    resolver.cacheMaps().exitCellMap.clear();
+    resolver.valueMatrix(valueMatrixInfo.matrix);
+
+    var _mutateAxesFromMap = Object(_group_utils__WEBPACK_IMPORTED_MODULE_3__["mutateAxesFromMap"])(resolver.cacheMaps(), resolver.axes()),
+        xAxes = _mutateAxesFromMap.xAxes,
+        yAxes = _mutateAxesFromMap.yAxes;
+
+    resolver.axes({
+      x: xAxes,
+      y: yAxes
+    });
+    resolver.createUnits(componentRegistry, config);
+    var matrices = {
+      valuesMatrix: valueMatrixInfo,
+      axesMatrix: resolver.axes()
+    }; // Create all matrices
+
+    var _generateMatrices = generateMatrices(matrixGnContext, matrices, cells, labelManager),
+        rows = _generateMatrices.rows,
+        columns = _generateMatrices.columns,
+        selectionObj = _generateMatrices.selectionObj,
+        rowPriority = _generateMatrices.rowPriority,
+        colPriority = _generateMatrices.colPriority;
+
+    resolver.rowMatrix(rows);
+    resolver.columnMatrix(columns);
+
+    if (isFacet) {
+      var arr = Object(_cell_border_applier__WEBPACK_IMPORTED_MODULE_6__["sanitiseBorderMatrix"])({
+        leftMatrix: rows[0],
+        rightMatrix: rows[1],
+        topMatrix: columns[0],
+        bottomMatrix: columns[1]
+      });
+      valueMatrixInfo.matrix = Object(_cell_border_applier__WEBPACK_IMPORTED_MODULE_6__["sanitiseGeomMatrix"])(valueMatrixInfo.matrix, arr);
     }
-  };
+
+    placeholderInfo = {
+      rows: resolver.rowMatrix(),
+      columns: resolver.columnMatrix(),
+      values: resolver.valueMatrix(),
+      isColumnSizeEqual: isColumnSizeEqual,
+      isRowSizeEqual: isRowSizeEqual,
+      priority: {
+        row: rowPriority,
+        col: colPriority
+      },
+      selection: selectionObj,
+      dataModels: {
+        groupedModel: groupedModel,
+        parentModel: datamodel
+      }
+    };
+  }
+
+  return placeholderInfo;
 };
 
 /***/ }),
@@ -70872,7 +71812,7 @@ var computeMatrices = function computeMatrices(context, config) {
 /*!***************************************************************!*\
   !*** ./packages/visual-group/src/group-helper/group-utils.js ***!
   \***************************************************************/
-/*! exports provided: initStore, isDistributionEqual, initializeCacheMaps, getAxisKey, getCellKey, extractUnitConfig, getHeaderText, headerCreator, findInGroup, getAxisType, retriveDomainFromData, mutateAxesFromMap, getEncoder, getHeaderAxisFrom, setFacetsAndProjections, getBorders, getFieldsFromSuppliedLayers, extractFields, sortFacetFields, removeExitCells */
+/*! exports provided: initStore, isDistributionEqual, initializeCacheMaps, getAxisKey, getCellKey, extractUnitConfig, hasOneField, getHeaderText, headerCreator, findInGroup, getAxisType, retriveDomainFromData, mutateAxesFromMap, getEncoder, getHeaderAxisFrom, setFacetsAndProjections, getBorders, getFieldsFromSuppliedLayers, extractFields, sortFacetFields, removeExitCells */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -70883,6 +71823,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAxisKey", function() { return getAxisKey; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCellKey", function() { return getCellKey; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "extractUnitConfig", function() { return extractUnitConfig; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hasOneField", function() { return hasOneField; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getHeaderText", function() { return getHeaderText; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "headerCreator", function() { return headerCreator; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "findInGroup", function() { return findInGroup; });
@@ -70903,7 +71844,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _enums_defaults__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/defaults */ "./packages/visual-group/src/enums/defaults.js");
 /* harmony import */ var _variable__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../variable */ "./packages/visual-group/src/variable/index.js");
 /* harmony import */ var _encoder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../encoder */ "./packages/visual-group/src/encoder/index.js");
-/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../enums/constants */ "./packages/visual-group/src/enums/constants.js");
+/* harmony import */ var _cell_border_applier__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cell-border-applier */ "./packages/visual-group/src/group-helper/cell-border-applier.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../enums/constants */ "./packages/visual-group/src/enums/constants.js");
 var _this = undefined;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -70933,6 +71875,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 var POLAR = muze_utils__WEBPACK_IMPORTED_MODULE_0__["COORD_TYPES"].POLAR;
 /**
  * Creates an instance of a store which contains the arguments to make the class reactive
@@ -70954,7 +71897,7 @@ var isDistributionEqual = function isDistributionEqual(arr) {
   return [].concat(_toConsumableArray(arr[0]), _toConsumableArray(arr[1])).reduce(function (isEqual, row) {
     var rowType = row.type();
 
-    if (rowType === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["MEASURE"] || rowType === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TEMPORAL"]) {
+    if (rowType === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["MEASURE"] || rowType === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TEMPORAL"]) {
       isEqual = true;
     }
 
@@ -71008,13 +71951,21 @@ var getCellKey = function getCellKey(rowId, columnId) {
 
 var extractUnitConfig = function extractUnitConfig(config) {
   var unitConfig = {};
-  var attrNames = [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["INTERACTION"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["GRID_LINES"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["GRID_BANDS"]];
+  var attrNames = [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["INTERACTION"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["GRID_LINES"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["GRID_BANDS"]];
   attrNames.forEach(function (attr) {
     if (config[attr] !== undefined) {
       unitConfig[attr] = config[attr];
     }
   });
   return unitConfig;
+};
+var hasOneField = function hasOneField(fields) {
+  var hasField = false;
+  var keys = Object.keys(fields);
+  hasField = keys.some(function (d) {
+    return fields[d].length > 0;
+  });
+  return hasField;
 };
 /**
  *
@@ -71057,7 +72008,7 @@ var headerCreator = function headerCreator(fields, fieldHeaders, TextCell, _ref2
       labelManager = _ref2.labelManager;
   var headers = fields.length > 0 ? fields[0].map(function (cell, i) {
     return new TextCell({
-      type: _enums_constants__WEBPACK_IMPORTED_MODULE_6__["HEADER"],
+      type: _enums_constants__WEBPACK_IMPORTED_MODULE_7__["HEADER"],
       className: "".concat(classPrefix, "-grid-headers")
     }, {
       labelManager: labelManager
@@ -71065,6 +72016,7 @@ var headerCreator = function headerCreator(fields, fieldHeaders, TextCell, _ref2
       show: cell.config().show
     });
   }) : [];
+  Object(_cell_border_applier__WEBPACK_IMPORTED_MODULE_6__["sanitiseHeaderMatrix"])(headers, true);
   return headers;
 };
 /**
@@ -71077,7 +72029,7 @@ var headerCreator = function headerCreator(fields, fieldHeaders, TextCell, _ref2
 
 var findInGroup = function findInGroup(variable, allFields) {
   var channel = null;
-  [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["COLOR"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["SIZE"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["SHAPE"]].forEach(function (e) {
+  [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["COLOR"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["SIZE"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["SHAPE"]].forEach(function (e) {
     if (_this.store.get(e) && variable === _this.store.get(e)[0]) {
       channel = e;
     }
@@ -71089,12 +72041,12 @@ var findInGroup = function findInGroup(variable, allFields) {
     };
   }
 
-  [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COL"]].forEach(function (facetType) {
+  [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COL"]].forEach(function (facetType) {
     allFields["".concat(facetType, "Facets")].forEach(function (e) {
       if (e.toString() === variable) {
         channel = {
-          channel: _enums_constants__WEBPACK_IMPORTED_MODULE_6__["FACET"],
-          type: facetType === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COL"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COLUMN"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"]
+          channel: _enums_constants__WEBPACK_IMPORTED_MODULE_7__["FACET"],
+          type: facetType === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COL"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COLUMN"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"]
         };
       }
     });
@@ -71104,11 +72056,11 @@ var findInGroup = function findInGroup(variable, allFields) {
     return channel;
   }
 
-  [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COL"]].forEach(function (projType) {
+  [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COL"]].forEach(function (projType) {
     allFields["".concat(projType, "Projections")].forEach(function (e) {
       e.forEach(function (m) {
         if (m.toString() === variable) {
-          channel = projType === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COL"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["X"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["Y"];
+          channel = projType === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COL"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["X"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["Y"];
         }
       });
     });
@@ -71130,10 +72082,10 @@ var findInGroup = function findInGroup(variable, allFields) {
  */
 
 var getAxisType = function getAxisType(fieldsConfig, field) {
-  var fieldType = _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ORDINAL"];
+  var fieldType = _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ORDINAL"];
 
-  if (field && fieldsConfig[field].def.type !== _enums_constants__WEBPACK_IMPORTED_MODULE_6__["DIMENSION"]) {
-    fieldType = _enums_constants__WEBPACK_IMPORTED_MODULE_6__["LINEAR"];
+  if (field && fieldsConfig[field].def.type !== _enums_constants__WEBPACK_IMPORTED_MODULE_7__["DIMENSION"]) {
+    fieldType = _enums_constants__WEBPACK_IMPORTED_MODULE_7__["LINEAR"];
   }
 
   return fieldType;
@@ -71182,7 +72134,7 @@ var mutateAxesFromMap = function mutateAxesFromMap(cacheMaps, axes) {
 };
 
 var hasPolarEncodings = function hasPolarEncodings(layerConf) {
-  return layerConf.mark === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ARC"] || [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["RADIUS"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ANGLE"]].some(function (field) {
+  return layerConf.mark === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ARC"] || [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["RADIUS"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ANGLE"]].some(function (field) {
     return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getObjProp"])(layerConf.encoding, field);
   });
 };
@@ -71218,7 +72170,7 @@ var getEncoder = function getEncoder(layers) {
 var getHeaderAxisFrom = function getHeaderAxisFrom(type, fields, userAxisFromConfig) {
   var axisFrom = userAxisFromConfig[type];
   var headerFrom = '';
-  var options = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["RIGHT"]] : [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"]];
+  var options = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["RIGHT"]] : [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["BOTTOM"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"]];
 
   var _fields = _slicedToArray(fields, 2),
       firstField = _fields[0],
@@ -71232,28 +72184,28 @@ var getHeaderAxisFrom = function getHeaderAxisFrom(type, fields, userAxisFromCon
     return secondField.length ? secondField[i].type() : null;
   };
 
-  if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["DIMENSION"] && secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["DIMENSION"]) {
+  if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["DIMENSION"] && secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["DIMENSION"]) {
     headerFrom = axisFrom ? options[1 - options.indexOf(axisFrom)] : options[1];
 
-    if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["COLUMN"] && firstField[firstField.length - 1].toString() === secondField[0].toString()) {
-      axisFrom = _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"];
+    if (type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["COLUMN"] && firstField[firstField.length - 1].toString() === secondField[0].toString()) {
+      axisFrom = _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"];
     } else {
       axisFrom = axisFrom || options[0];
     }
-  } else if (secondFieldType(secondField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["DIMENSION"]) {
-    headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["BOTTOM"];
-    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["BOTTOM"];
+  } else if (secondFieldType(secondField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["DIMENSION"]) {
+    headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["BOTTOM"];
+    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["BOTTOM"];
   } else {
-    headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"];
-    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"];
+    headerFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"];
+    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"];
   }
 
-  if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["MEASURE"] && secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["MEASURE"]) {
-    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"];
-  } else if (secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["MEASURE"]) {
-    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["BOTTOM"];
-  } else if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["MEASURE"]) {
-    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_6__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"];
+  if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["MEASURE"] && secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["MEASURE"]) {
+    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"];
+  } else if (secondFieldType(0) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["MEASURE"]) {
+    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["RIGHT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["BOTTOM"];
+  } else if (firstFieldType(firstField.length - 1) === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["MEASURE"]) {
+    axisFrom = type === _enums_constants__WEBPACK_IMPORTED_MODULE_7__["ROW"] ? _enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"] : _enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"];
   }
 
   return [headerFrom, axisFrom];
@@ -71320,8 +72272,8 @@ var getValueBorders = function getValueBorders(rows, columns) {
     bottom: true,
     right: true
   };
-  var borderTypeRow = [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["RIGHT"]];
-  var borderTypeCol = [_enums_constants__WEBPACK_IMPORTED_MODULE_6__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_6__["BOTTOM"]];
+  var borderTypeRow = [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["LEFT"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["RIGHT"]];
+  var borderTypeCol = [_enums_constants__WEBPACK_IMPORTED_MODULE_7__["TOP"], _enums_constants__WEBPACK_IMPORTED_MODULE_7__["BOTTOM"]];
   rows.forEach(function (e, i) {
     if (e[0] && e[0].length) {
       borders[borderTypeRow[i]] = true;
@@ -71504,7 +72456,7 @@ var removeExitCells = function removeExitCells(resolver) {
 /*!*********************************************************!*\
   !*** ./packages/visual-group/src/group-helper/index.js ***!
   \*********************************************************/
-/*! exports provided: initStore, findInGroup, getEncoder, getAxisType, getAxisKey, retriveDomainFromData, getBorders, MatrixResolver */
+/*! exports provided: initStore, findInGroup, getEncoder, getAxisType, getAxisKey, retriveDomainFromData, getBorders, hasOneField, MatrixResolver */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -71523,6 +72475,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "retriveDomainFromData", function() { return _group_utils__WEBPACK_IMPORTED_MODULE_0__["retriveDomainFromData"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getBorders", function() { return _group_utils__WEBPACK_IMPORTED_MODULE_0__["getBorders"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "hasOneField", function() { return _group_utils__WEBPACK_IMPORTED_MODULE_0__["hasOneField"]; });
 
 /* harmony import */ var _matrix_resolver__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./matrix-resolver */ "./packages/visual-group/src/group-helper/matrix-resolver.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "MatrixResolver", function() { return _matrix_resolver__WEBPACK_IMPORTED_MODULE_1__["default"]; });
@@ -71544,6 +72498,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMatrixModel", function() { return getMatrixModel; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _group_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./group-utils */ "./packages/visual-group/src/group-helper/group-utils.js");
+/* harmony import */ var _enums_defaults__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../enums/defaults */ "./packages/visual-group/src/enums/defaults.js");
+/* harmony import */ var _enums_constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../enums/constants */ "./packages/visual-group/src/enums/constants.js");
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -71555,6 +72511,8 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+
 
 
 
@@ -71674,6 +72632,41 @@ var createJoinedKeys = function createJoinedKeys(keys) {
       joinedKey: e.join(',')
     };
   });
+};
+
+var setDefaultConfigForFacet = function setDefaultConfigForFacet(facetInfo, projectionInfo, config) {
+  var conf = {};
+
+  if (facetInfo.allFacets.length || projectionInfo.indices.length > 1) {
+    var facetsUserConfig = config.facetsUserConfig,
+        border = config.border;
+    var isBorderPresent = facetsUserConfig.isBorderPresent,
+        isGridLinePresent = facetsUserConfig.isGridLinePresent;
+    var gridLinesShowLength = Object.keys(isGridLinePresent).length;
+    var borderWidth = border.width;
+    var gridLines = {};
+
+    if (!isBorderPresent) {
+      borderWidth = _enums_defaults__WEBPACK_IMPORTED_MODULE_2__["BORDER_WIDTH"][_enums_constants__WEBPACK_IMPORTED_MODULE_3__["FACET"]];
+    }
+
+    if (gridLinesShowLength <= 0) {
+      gridLines = {
+        x: {
+          show: false
+        }
+      };
+    }
+
+    conf = {
+      border: {
+        width: borderWidth
+      },
+      gridLines: gridLines
+    };
+  }
+
+  return conf;
 };
 /**
 *
@@ -71881,6 +72874,8 @@ var getMatrixModel = function getMatrixModel(dataModel, fieldInfo, geomCellCreat
       rowKeys = _getSplitModelHashMap.rowKeys,
       colKeys = _getSplitModelHashMap.colKeys;
 
+  var defaultConfig = setDefaultConfigForFacet(facetInfo, projectionInfo, globalConfig);
+  globalConfig = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["mergeRecursive"])(globalConfig, defaultConfig);
   var generalContext = {
     matrix: matrix,
     geomCellCreator: geomCellCreator,
@@ -73540,25 +74535,29 @@ var createMatrices = function createMatrices(context) {
   resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders); // Getting the placeholders
 
   var placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-  context._groupedDataModel = placeholderInfo.dataModels.groupedModel; // Set the selection object
 
-  context.selection(placeholderInfo.selection); // Create retinal axes
+  if (Object.keys(placeholderInfo).length > 0) {
+    context._groupedDataModel = placeholderInfo.dataModels.groupedModel; // Set the selection object
 
-  resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig, encoders); // Domains are evaluated for each of the axes for commonality
+    context.selection(placeholderInfo.selection); // Create retinal axes
 
-  resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders); // Create matrix instances
+    resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig, encoders); // Domains are evaluated for each of the axes for commonality
 
-  setMatrixInstances(context, placeholderInfo); // Prepare corner matrices
+    resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders); // Create matrix instances
 
-  context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config)); // Set placeholder information
+    setMatrixInstances(context, placeholderInfo); // Prepare corner matrices
 
-  context.placeholderInfo(placeholderInfo);
-  context._composition.axes = resolver.axes();
-  context.metaData({
-    border: Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["getBorders"])(placeholderInfo, encoders.simpleEncoder)
-  });
-  resolver.encoder().unionUnitDomains(context);
-  Object(_change_listener__WEBPACK_IMPORTED_MODULE_5__["registerDomainChangeListener"])(context);
+    context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config)); // Set placeholder information
+
+    context.placeholderInfo(placeholderInfo);
+    context._composition.axes = resolver.axes();
+    context.metaData({
+      border: Object(_group_helper__WEBPACK_IMPORTED_MODULE_3__["getBorders"])(placeholderInfo, encoders.simpleEncoder)
+    });
+    resolver.encoder().unionUnitDomains(context);
+    Object(_change_listener__WEBPACK_IMPORTED_MODULE_5__["registerDomainChangeListener"])(context);
+  }
+
   return context;
 };
 
@@ -73850,6 +74849,9 @@ function () {
       });
       this.matrix([]);
     }
+  }, {
+    key: "data",
+    value: function data() {}
   }]);
 
   return ValueMatrix;
@@ -74987,7 +75989,7 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
               });
 
               if (exist) {
-                var transformedVal = dataObj[enc];
+                var transformedVal = dataObj[enc] || 0;
                 var row = dataObj.source;
                 var tuple = {};
 
@@ -77415,18 +78417,21 @@ var AreaLayerMixin = function AreaLayerMixin(superclass) {
 
           if (!point && config.dimValue && this._pointMap) {
             var pointArr = this._pointMap[config.dimValue[1]];
-            pointArr.forEach(function (p, i) {
-              var _p$update = p.update,
-                  pointY = _p$update.y,
-                  pointY0 = _p$update.y0;
+
+            for (var i = 0, len = pointArr.length; i < len; i++) {
+              var _pointArr$i$update = pointArr[i].update,
+                  pointY = _pointArr$i$update.y,
+                  pointY0 = _pointArr$i$update.y0;
 
               if (pointY < y && y < pointY0) {
                 index = i;
-                nearestPoint = p;
+                nearestPoint = pointArr[i];
+                break;
               }
-            });
+            } // Index is a number(0 or more)
 
-            if (index) {
+
+            if (index !== undefined) {
               point = {
                 index: index,
                 data: {
@@ -78730,7 +79735,7 @@ var defaultConfig = {
       className: 'focus-stroke-class',
       style: {
         stroke: 'black',
-        'stroke-width': '2px'
+        'stroke-width': '1px'
       },
       strokePosition: 'outside'
     },
@@ -78743,6 +79748,13 @@ var defaultConfig = {
       strokePosition: 'outside'
     },
     doubleStroke: {
+      style: {
+        stroke: 'black',
+        'stroke-width': '2px'
+      },
+      strokePosition: 'outside'
+    },
+    commonDoubleStroke: {
       style: {
         stroke: 'black',
         'stroke-width': '2px'
@@ -79697,8 +80709,14 @@ var defaultConfig = {
       className: 'focus-stroke-class',
       style: {
         stroke: 'black',
-        'stroke-width': '2px' // fill: 'blue'
-
+        'stroke-width': '1px'
+      },
+      strokePosition: 'outside'
+    },
+    commonDoubleStroke: {
+      style: {
+        stroke: 'black',
+        'stroke-width': '2px'
       },
       strokePosition: 'outside'
     },
@@ -79865,7 +80883,7 @@ var prepareDrawingInf = function prepareDrawingInf(_ref) {
     source: source,
     rowId: rowId,
     style: style,
-    data: datum,
+    data: datum.dataObj,
     meta: Object(_helpers__WEBPACK_IMPORTED_MODULE_2__["getColorMetaInf"])(style, {
       strokePosition: layerEncoding.strokePosition.value
     }),
@@ -80582,7 +81600,7 @@ var defaultConfig = {
       }
     }
   },
-  crossline: true,
+  crossline: false,
   transition: {
     effect: 'cubic',
     duration: 1000
@@ -82892,7 +83910,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var getRangeFromData = function getRangeFromData(instance, selectionDataModel, propConfig) {
   var dataObj = selectionDataModel.getData();
-  var sourceIdentifiers = propConfig.sourceIdentifiers;
+  var _propConfig$includeMe = propConfig.includeMeasures,
+      includeMeasures = _propConfig$includeMe === void 0 ? true : _propConfig$includeMe,
+      sourceIdentifiers = propConfig.sourceIdentifiers;
   var schema = dataObj.schema;
   var fieldMap = instance.data().getFieldsConfig();
   var selectionDataFields = selectionDataModel.getFieldspace().fieldsObj();
@@ -82914,7 +83934,7 @@ var getRangeFromData = function getRangeFromData(instance, selectionDataModel, p
       return field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES;
     });
 
-    if (measureNamesIdx !== undefined) {
+    if (measureNamesIdx !== undefined && includeMeasures) {
       var measureNames = sourceIdentifiers.identifiers.slice(1, sourceIdentifiers.identifiers.length).map(function (d) {
         return d[measureNamesIdx];
       });

@@ -136,6 +136,10 @@ class ValueMatrix {
         this.each(cell => cell.remove());
         this.matrix([]);
     }
+
+    data () {
+
+    }
 }
 
 export default ValueMatrix;

@@ -54,26 +54,59 @@ const setSideEffectConfig = (firebolt) => {
 
 const prepareSelectionSetData = (group, dataModel) => {
     const valueMatrix = group.matrixInstance().value;
-    const dimensions = Object.values(dataModel.getFieldsConfig()).filter(d => d.def.type === FieldType.DIMENSION);
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const dimensions = Object.values(fieldsConfig).filter(d => d.def.type === FieldType.DIMENSION);
     const hasMeasures = Object.keys(dataModel.getFieldspace().getMeasure()).length;
     const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
-    const { data } = dataModel.getData();
-    const groupDataMap = dataModel.getUids().reduce((acc, uid, i) => {
-        acc[uid] = data[i];
-        return acc;
-    }, {});
     const keys = {};
     const dimensionsMap = {};
+    const unitDimsMap = {};
 
     valueMatrix.each((cell) => {
         const unit = cell.source();
         const dm = unit.data();
-        const uids = dm.getUids();
+        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
+        const facetFields = Object.keys(unit.facetFieldsMap());
+
+        unitDimsMap[unitDims] = {
+            inst: unit,
+            dims: [...facetFields, ...unitDims]
+        };
+    });
+
+    const groupDataMap = {};
+
+    dataModel.getData().data.forEach((row) => {
+        for (const key in unitDimsMap) {
+            const { dims } = unitDimsMap[key];
+            const dimKey = dims.map(dim => row[fieldsConfig[dim].index]);
+            groupDataMap[dimKey] = row;
+        }
+    });
+
+    valueMatrix.each((cell) => {
+        const unit = cell.source();
+        const dm = unit.data();
         const layers = unit.layers();
-        const unitData = uids.map(uid => groupDataMap[uid]);
+        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
+        const facetMap = unit.facetFieldsMap();
+        const facetFields = Object.keys(facetMap);
+        const unitFieldsConfig = dm.getFieldsConfig();
+        const linkedRows = [];
+
+        dm.getData().data.forEach((row) => {
+            const dimKey = [...facetFields.map(field => facetMap[field]), ...unitDims.map(d =>
+                row[unitFieldsConfig[d].index])];
+            const linkedRow = groupDataMap[dimKey];
+
+            if (linkedRow) {
+                linkedRows.push(linkedRow);
+            }
+        });
+
         prepareSelectionSetMap({
-            data: unitData,
-            uids,
+            data: linkedRows,
+            uids: dm.getUids(),
             dimensions
         }, layers, {
             keys,

@@ -240,6 +240,14 @@
 .muze-brush-anchors-upper .muze-layer-point {
   fill-opacity: 1; }
 
+.muze-axis-ticks-highlight {
+  font-weight: bold;
+  fill: #595959; }
+
+.muze-axis-ticks-unhighlight {
+  font-weight: 400;
+  fill: #858585; }
+
 .muze-visual-unit {
   background: transparent; }
 
@@ -365,12 +373,12 @@
   text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
 
 .muze-text-cell {
-  font-size: 14px;
-  text-align: center;
+  font-size: 12px;
+  line-height: 15px;
   color: #5f5f5f;
   font-weight: 400;
   font-family: 'Source Sans Pro',"Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 1;
+  line-height: 15px;
   white-space: nowrap;
   -webkit-transform-origin: 0 0;
           transform-origin: 0 0; }
@@ -547,6 +555,39 @@
   height: 50%;
   -webkit-transform: skew(-35deg, 0deg);
           transform: skew(-35deg, 0deg); }
+
+.muze-grid-normal {
+  border-color: #ebebeb; }
+  .muze-grid-normal .muze-axis-name {
+    font-size: 12px;
+    line-height: 15px; }
+
+.muze-grid-dark {
+  border-color: #cbcbcb; }
+  .muze-grid-dark .muze-axis-name {
+    font-size: 12px;
+    line-height: 15px; }
+
+.muze-grid-dark-bottom {
+  border-bottom-color: #cbcbcb; }
+
+.muze-grid-darker-top {
+  border-top-color: #979797; }
+
+.muze-grid-dark-top {
+  border-top-color: #cbcbcb; }
+
+.muze-grid-dark-right {
+  border-right-color: #cbcbcb; }
+
+.muze-grid-darker-bottom {
+  border-bottom-color: #979797; }
+
+.muze-grid-dark-left {
+  border-left-color: #cbcbcb; }
+
+.muze-grid-none-left {
+  border-left-color: transparent; }
 
 /* cyrillic-ext */
 @font-face {
@@ -1224,7 +1265,8 @@
   font-family: 'Source Sans Pro',"Helvetica Neue",Helvetica,Arial,sans-serif; }
 
 .muze-group-container {
-  font-size: 14px;
+  font-size: 12px;
+  line-height: 15px;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   line-height: 1.42857143;
   color: #5F5F5F;
@@ -1353,6 +1395,12 @@
   position: relative;
   float: left; }
 
+.muze-grid-top {
+  position: relative;
+  top: 100%;
+  -webkit-transform: translateY(-100%);
+          transform: translateY(-100%); }
+
 .muze-grid div {
   float: left;
   border-collapse: collapse; }
@@ -1366,8 +1414,7 @@
   color: #5f5f5f; }
 
 .muze-grid-headers {
-  font-size: 14px;
-  font-weight: bold; }
+  font-size: 12px; }
 
 .muze-subtitle-cell {
   font-size: 16px;
@@ -1386,11 +1433,19 @@
   border: 1px solid #c3c9d0; }
 
 .muze-message-container-child {
-  vertical-align: middle;
+  display: table-cell;
+  vertical-align: middle; }
+  .muze-message-container-child-img {
+    text-align: center; }
+    .muze-message-container-child-img svg {
+      display: unset;
+      float: unset; }
+
+.muze-message-container-child-message {
   text-align: center;
-  font-size: 18px;
-  color: #8c8d8e;
-  display: table-cell; }
+  color: #4F708C;
+  text-align: center;
+  font-weight: 600; }
 
 .hidden {
   display: none; }

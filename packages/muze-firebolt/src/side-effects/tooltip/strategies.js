@@ -224,6 +224,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
     const fieldsConfig = dataModel.getFieldsConfig();
     const { color, shape, size } = context.retinalFields;
     const detailFields = context.detailFields || [];
+    const { showStackSum = true } = context.config || {};
     const { selectedMeasures = [] } = context.payload;
     const dimensions = schema.filter(d => d.type === FieldType.DIMENSION);
     const measures = schema.filter(d => d.type === FieldType.MEASURE);
@@ -290,7 +291,7 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
                     generateTooltipContent(values, index + 1, content);
                 } else {
                     let stackedSum = 0;
-                    if (isStacked) {
+                    if (isStacked && showStackSum) {
                         stackedSum = getStackedSum(
                             values,
                             fieldsConfig[measures[0].name].index
