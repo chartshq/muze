@@ -12,7 +12,8 @@ const area = Symbols.area;
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    const { layer, container, points, style, transition, className, interpolate } = params;
+    debugger;
+    const { layer, container, points, style, transition, className, interpolate, connectNullData } = params;
 
     const graphicElems = layer._graphicElems;
     const { effect: easeEffect, duration } = transition;
@@ -27,10 +28,14 @@ const /* istanbul ignore next */ drawArea = (params) => {
 
     mount.attr('class', className);
 
+    let filteredPoints = points;
+    if (connectNullData) {
+        filteredPoints = filteredPoints.filter(d => d.update.y !== undefined);
+    }
     const selectionEnter = selection
         .enter()
         .append('path')
-        .attr('d', enterAreaPath(points))
+        .attr('d', enterAreaPath(filteredPoints))
         .each((d) => {
             d.forEach((dd) => {
                 if (dd.rowId) {
@@ -42,7 +47,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
                     .on('end', layer.registerAnimationDoneHook())
-                    .attr('d', updateAreaPath(points))
+                    .attr('d', updateAreaPath(filteredPoints))
                     .each(function () {
                         const element = selectElement(this);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
