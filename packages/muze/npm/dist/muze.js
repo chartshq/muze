@@ -28073,9 +28073,9 @@ function (_SurrogateSideEffect) {
           y = _context$axes$y === void 0 ? [] : _context$axes$y;
 
       [].concat(_toConsumableArray(x), _toConsumableArray(y)).forEach(function (axis) {
-        var index = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field].index;
+        var fieldMeta = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field];
 
-        var _axis$getTicksBasedOn = axis.getTicksBasedOnData(selectedDataValues[index]),
+        var _axis$getTicksBasedOn = axis.getTicksBasedOnData(selectedDataValues[fieldMeta && fieldMeta.index ? fieldMeta.index : undefined]),
             selectedElements = _axis$getTicksBasedOn.selectionSet,
             rejectionSet = _axis$getTicksBasedOn.rejectionSet;
 
@@ -32206,6 +32206,7 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var SYMBOL_PADDING = Math.sqrt(3) * 3;
 var AXIS_STROKE = 1;
+var MARKER_BUFFER = 10;
 
 var createTextCell = function createTextCell(className, labelManagerRef, cells) {
   var TextCell = cells.TextCell;
@@ -32272,22 +32273,24 @@ function (_GenericSideEffect) {
         var axis = context.axis().source();
         var range = payload.criteria[0] ? axis.getScaleValue(payload.criteria[1]) : 0;
         var legendGradContainer = context.getDrawingContext().svgContainer;
+        var isFractional = payload.criteria[1][0] % 1 !== 0;
+        var lableConfig = {
+          top: 0,
+          left: 0,
+          labelText: isFractional ? payload.criteria[1][0].toFixed(2) : payload.criteria[1][0]
+        };
 
         var _getRelativePosition = getRelativePosition(context._canvasMount, legendGradContainer.node()),
             top = _getRelativePosition.top,
             left = _getRelativePosition.left;
 
-        var _labelManager$getSmar = labelManager().getSmartText(payload.criteria[1]),
+        var _labelManager$getSmar = labelManager().getSmartText(lableConfig.labelText),
             oriTextHeight = _labelManager$getSmar.oriTextHeight,
             oriTextWidth = _labelManager$getSmar.oriTextWidth;
 
         var x;
         var y;
         var rotateAngle;
-        var lableConfig = {
-          top: 0,
-          left: 0
-        };
         var size = config.size,
             shape = config.shape;
 
@@ -32295,14 +32298,14 @@ function (_GenericSideEffect) {
           x = range - Math.sqrt(size / SYMBOL_PADDING) + AXIS_STROKE;
           y = 5;
           rotateAngle = _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].ROTATE_HORIZONTAL;
-          lableConfig.top = top + y - 20;
-          lableConfig.left = x + left - oriTextWidth / 2;
+          lableConfig.top = top + y - 3 * MARKER_BUFFER;
+          lableConfig.left = x + left - oriTextWidth / 2 - MARKER_BUFFER / 2;
         } else {
           y = range + Math.sqrt(size / (2 * SYMBOL_PADDING)) - AXIS_STROKE;
           x = 5;
           rotateAngle = _legend_defaults__WEBPACK_IMPORTED_MODULE_4__["LEGEND_MARKER_PROPS"].ROTATE_VERTICAL;
-          lableConfig.top = top + y - 17 + oriTextHeight / 2;
-          lableConfig.left = x + left - oriTextWidth - 3;
+          lableConfig.top = top + y - (3 * MARKER_BUFFER - 2) + oriTextHeight / 2;
+          lableConfig.left = x + left - oriTextWidth - MARKER_BUFFER;
         }
 
         var legendmarkerGroup = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["makeElement"])(legendGradContainer, 'g', [1], "".concat(config.classPrefix, "-").concat(config.className, "-group"));
@@ -32326,7 +32329,8 @@ function (_GenericSideEffect) {
           value: payload.criteria
         }]).attr('transform', "translate(".concat(x, ",").concat(y, ") rotate(").concat(rotateAngle, ")")).attr('d', Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["getSymbol"])(shape).size(size * size)()).classed("".concat(className, "-show"), true).classed("".concat(className, "-hide"), false);
 
-        textElement.source(payload.criteria[1]);
+        debugger;
+        textElement.source(lableConfig.labelText);
         textElement.render(this._graphicElements.legendmarkerText.node());
 
         this._graphicElements.legendmarkerText.attr('style', "top: ".concat(lableConfig.top, "px; left:").concat(lableConfig.left, "px")).classed("".concat(className, "-show"), true).classed("".concat(className, "-hide"), false);
@@ -32779,7 +32783,8 @@ function (_SimpleLegend) {
       var _getScaleInfo = Object(_legend_helper__WEBPACK_IMPORTED_MODULE_3__["getScaleInfo"])(scale),
           scaleType = _getScaleInfo.scaleType,
           domain = _getScaleInfo.domain,
-          scaleFn = _getScaleInfo.scaleFn;
+          scaleFn = _getScaleInfo.scaleFn,
+          steps = _getScaleInfo.steps;
 
       var field = this.metaData().getFieldspace().fields[0];
 
@@ -32790,7 +32795,9 @@ function (_SimpleLegend) {
       var domainForLegend = [];
 
       if (scaleType === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["SIZE"] && type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE) {
-        domainForLegend = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getReadableTicks"])(domain, domain.length);
+        domainForLegend = steps instanceof Array ? steps : Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getReadableTicks"])(domain, domain.length);
+      } else if (subtype === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].TEMPORAL) {
+        domainForLegend = _toConsumableArray(new Set(field.data()));
       } else {
         domainForLegend = _toConsumableArray(new Set(domain));
       }
@@ -33641,14 +33648,20 @@ var getInterpolatedData = function getInterpolatedData(domain, steps, scaleParam
 var titleCreator = function titleCreator(container, title, measurement, config) {
   var orientation = config.item.text.orientation;
   var textAlign = _enums_constants__WEBPACK_IMPORTED_MODULE_1__["LEFT"];
+  var alignment = measurement.alignment,
+      maxWidth = measurement.maxWidth,
+      width = measurement.width,
+      height = measurement.height,
+      border = measurement.border,
+      padding = measurement.padding;
 
-  if (orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["TOP"] || orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"] || measurement.alignment === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["HORIZONTAL"]) {
+  if (orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["TOP"] || orientation === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["BOTTOM"] || alignment === _enums_constants__WEBPACK_IMPORTED_MODULE_1__["HORIZONTAL"]) {
     textAlign = _enums_constants__WEBPACK_IMPORTED_MODULE_1__["CENTER"];
   }
 
-  var titleWidth = Math.min(measurement.maxWidth, measurement.width);
-  var titleContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'table', [1], "".concat(config.classPrefix, "-legend-title")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], "".concat(titleWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], "".concat(measurement.height, "px")).style('border-bottom', "".concat(measurement.border, "px ").concat(config.borderStyle, " ").concat(config.borderColor)).style('text-align', title.orientation instanceof Function ? title.orientation(config.position) : title.orientation);
-  return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(titleContainer, 'td', [1], "".concat(config.classPrefix, "-legend-title-text")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], "".concat(titleWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["MAXWIDTH"], "".concat(titleWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], '100%').style('line-height', 1).style('padding', "".concat(measurement.padding, "px")).text(title.text).style('text-align', textAlign).style('overflow-x', 'scroll').node();
+  var titleWidth = Math.min(maxWidth, width);
+  var titleContainer = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'table', [1], "".concat(config.classPrefix, "-legend-title")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], "".concat(titleWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], "".concat(height, "px")).style('border-bottom', "".concat(border, "px ").concat(config.borderStyle, " ").concat(config.borderColor)).style('text-align', title.orientation instanceof Function ? title.orientation(config.position) : title.orientation);
+  return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(titleContainer, 'td', [1], "".concat(config.classPrefix, "-legend-title-text")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["WIDTH"], "".concat(titleWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["MAXWIDTH"], "".concat(maxWidth, "px")).style(_enums_constants__WEBPACK_IMPORTED_MODULE_1__["HEIGHT"], '100%').style('line-height', 1).style('padding', "".concat(padding, "px")).text(title.text).style('text-align', textAlign).style('overflow-x', 'scroll').node();
 };
 /**
  *
@@ -34126,6 +34139,8 @@ var createLegendSkeleton = function createLegendSkeleton(context, container, cla
   maxGradHeight = maxHeight - (titleSpaces.height + margin * 2 + border * 2);
   maxGradWidth = maxWidth - (margin * 2 + border * 2);
   var legendBody = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(container, 'div', [1], "".concat(classPrefix, "-legend-body"));
+  legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["WIDTH"], "".concat(gradWidth, "px"));
+  legendBody.style(_enums_constants__WEBPACK_IMPORTED_MODULE_3__["HEIGHT"], "".concat(gradHeight, "px"));
   legendBody.select(".".concat(classPrefix, "-legend-overflow")).remove(); // Create a div with scroll when overflow
 
   if (maxGradWidth && maxGradWidth < gradWidth) {
@@ -34770,7 +34785,11 @@ function () {
 
       var _this$measurement3 = this.measurement(),
           border = _this$measurement3.border,
-          marginHorizontal = _this$measurement3.marginHorizontal;
+          marginHorizontal = _this$measurement3.marginHorizontal,
+          maxWidth = _this$measurement3.maxWidth,
+          maxHeight = _this$measurement3.maxHeight,
+          width = _this$measurement3.width,
+          height = _this$measurement3.height;
 
       var _this$measurement4 = this.measurement(),
           margin = _this$measurement4.margin;
@@ -34800,7 +34819,7 @@ function () {
       legendContainer.classed("".concat(classPrefix, "-legend-box-").concat(this._id), true);
       legendContainer.style('float', 'left'); // set height and width
 
-      legendContainer.style("".concat(marginPosition), "".concat(margin, "px")).style('border', "".concat(border, "px ").concat(borderStyle, " ").concat(borderColor));
+      legendContainer.style('width', "".concat(Math.min(maxWidth, width), "px")).style('height', "".concat(Math.min(maxHeight, height), "px")).style("".concat(marginPosition), "".concat(margin, "px")).style('border', "".concat(border, "px ").concat(borderStyle, " ").concat(borderColor));
       this.legendContainer(legendContainer.node()); // create title
 
       this.renderTitle(legendContainer);
@@ -59822,16 +59841,6 @@ var defaultPolicy = function defaultPolicy(registrableComponents) {
         var propagationCanvas = propagationPayload.sourceCanvas;
         return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
       }
-    },
-    sideEffects: {
-      '*': function _(propagationPayload) {
-        var propagationCanvas = propagationPayload.sourceCanvas;
-        return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
-      },
-      tooltip: function tooltip(propagationPayload) {
-        var propagationCanvas = propagationPayload.sourceCanvas;
-        return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
-      }
     }
   };
 };
@@ -61794,6 +61803,8 @@ function (_MuzeComponent) {
 
         Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["makeElement"])(_mount, 'div', this.components, "".concat(classPrefix, "-legend-components"), {}, function (d) {
           return d.legend.id();
+        }).style('width', function (d) {
+          return "".concat(d.legend.measurement().width, "px");
         }).each(function (d) {
           d.legend.mount(this);
         });
@@ -68699,7 +68710,7 @@ function (_VisualEncoder) {
             var currentFieldName = fieldsObj[axisType][key].oneVar();
             var sortingOrder = Object(_encoder_helper__WEBPACK_IMPORTED_MODULE_3__["getSortingConfig"])(context, currentFieldName, axes[0].config);
 
-            if (sortingOrder) {
+            if (sortingOrder && domains[axisType][key] instanceof Array) {
               domains[axisType][key].sort(function (a, b) {
                 return Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["sortCategoricalField"])(sortingOrder, a, b);
               });

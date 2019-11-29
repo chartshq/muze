@@ -36,6 +36,7 @@ export default class Tooltip extends SpawnableSideEffect {
                 x: 0,
                 y: 0
             },
+            orientation: 'horizontal',
             highlightSummary: {
                 order: 1,
                 dataTransform: (dm, fields) => (fields ? dm.project(fields, { saveChild: false }) : dm)
@@ -184,6 +185,8 @@ export default class Tooltip extends SpawnableSideEffect {
                 y: plotDim.y,
                 width: plotDim.width || 0,
                 height: plotDim.height || 0
+            }, {
+                orientation: config.orientation
             }
             );
         } else {
