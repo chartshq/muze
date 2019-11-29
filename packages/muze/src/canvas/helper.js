@@ -1,4 +1,4 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType, InvalidAwareTypes } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
 import { BEHAVIOURS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from '@chartshq/visual-unit';
@@ -87,7 +87,13 @@ export const dispatchProps = (context) => {
     const { invalidValues } = context.config();
 
     visualGroup.valueParser(getValueParser(invalidValues));
-    visualGroup.createMatrices();
+
+    const sanitizedData = visualGroup.getMandatoryFields();
+    if (sanitizedData.shouldRender) {
+        visualGroup.createMatrices(sanitizedData);
+    } else {
+        visualGroup.remove();
+    }
     context._cachedProps = {};
     lifeCycleManager.notify({ client: context, action: 'initialized' });
     lifeCycleManager.notify({ client: context, action: 'updated' });
@@ -120,35 +126,6 @@ const equalityChecker = (props, params) => {
         return checker(oldVal, newVal);
     });
 };
-
-const hasValue = (val) => {
-    let hasOneValue = false;
-    for (let i = 0; i < val.length && !hasOneValue; i++) {
-        for (let j = 0; j < val[i].length; j++) {
-            if (!(val[i][j] instanceof InvalidAwareTypes)) {
-                hasOneValue = true;
-                break;
-            }
-        }
-    }
-    return hasOneValue;
-};
-
-const updateChecker = (props, params) => props.every((option, i) => {
-    const val = params[i][1];
-    switch (option) {
-    case ROWS:
-    case COLUMNS:
-        return val !== null;
-
-    case DATA:
-        return val && !val.isEmpty() && hasValue(val.getData().data);
-
-    default:
-        return true;
-
-    }
-});
 
 export const notifyAnimationEnd = (context) => {
     const viewInfo = context.layout().viewInfo();
@@ -201,14 +178,9 @@ export const setupChangeListener = (context) => {
         `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
     store.registerChangeListener(nameSpaceProps, (...params) => {
         const equalityProps = equalityChecker(props, params);
-        const updateProps = updateChecker(props, params);
         // inform attached board to rerender
         if (equalityProps && context.mount()) {
-            if (updateProps) {
-                dispatchProps(context);
-            } else {
-                context.composition().visualGroup.remove();
-            }
+            dispatchProps(context);
             context.render();
         }
         notifyAnimationEnd(context);
