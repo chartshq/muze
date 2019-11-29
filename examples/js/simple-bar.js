@@ -1,72 +1,74 @@
-d3.csv('../data/heatmap.csv', (data) => {
+d3.json('../data/cars.json', (data) => {
     // load data and schema from url
-    // Retrieves the DataModel from muze namespace. Muze recognizes DataModel as a first class source of data.
-    const DataModel = window.muze.DataModel;
     const schema = [{
-        name: 'Month',
-        type: 'dimension'
-    }, {
         name: 'Name',
         type: 'dimension'
     }, {
-        name: 'Sales',
-        type: 'measure'
+        name: 'Maker',
+        type: 'dimension'
+    }, {
+        name: 'Miles_per_Gallon',
+        type: 'measure',
+        defAggFn: 'avg'
+    }, {
+        name: 'Displacement',
+        type: 'measure',
+        defAggFn: 'max'
+    }, {
+        name: 'Horsepower',
+        type: 'measure',
+        defAggFn: 'avg'
+    }, {
+        name: 'Weight_in_lbs',
+        type: 'measure',
+        defAggFn: 'min'
+    }, {
+        name: 'Acceleration',
+        type: 'measure',
+        defAggFn: 'avg'
+    }, {
+        name: 'Origin',
+        type: 'dimension'
+    }, {
+        name: 'Cylinders',
+        type: 'dimension'
+    }, {
+        name: 'Year',
+        type: 'dimension',
+        subtype: 'temporal',
+        format: '%Y-%m-%d'
     }];
 
     // Create an instance of DataModel using the data and schema.
-    const rootData = new DataModel(data, schema);
-    // Create a global environment to share common configs across charts
+    let dm = new muze.DataModel(data, schema);
+    // Sort the data. Before sorting groupBy needs to be performed. As grouping after sorting changes the order.
+    // When sorting is applied, internal grouping of data inside muze has to be turned off.
+    const filterMaker = ['bmw', 'honda', 'ford', 'volvo', 'volkswagen', 'audi', 'renault', 'toyota', 'dodge', 'chevrolet', 'plymouth'];
+    dm = dm.groupBy(['Maker']).sort([['Acceleration', 'ASC']]);
+    dm = dm.select(fields => filterMaker.indexOf(fields.Maker.value) > -1);
+    // Create an environment for future rendering
     const env = window.muze();
-    // Create a canvas from the global environment
-    let canvas = env.canvas();
+    // Create an instance of canvas which houses the visualization
+    const canvas = env.canvas();
 
-    canvas = canvas.rows(['Name']).columns(['Month']).layers([{ // For drawing the heatmap background
-        mark: 'bar'
-    }, { // For drawing the text
-        mark: 'text',
-        encoding: {
-            text: {
-                field: 'Sales',
-                formatter: function formatter (value) {
-                    return `${(value / 1000).toFixed(1) }k`;
-                } // Formats the value of text
-            },
-            color: {
-                value: function value () {
-                    return '#fff';
-                }
-            }
-        },
-        interactive: false
-    }]).config({
-        axes: { // With bar encoding, it normally draws a bar chart without padding. Here its forcefully made zero
-            x: {
-                padding: 0
-            },
-            y: {
-                padding: 0
-            }
+    canvas.rows(['Maker']) // Year goes in X axis
+    .columns(['Acceleration']) // Acceleration goes in Y axis
+    .data(dm).color({
+        field: 'Acceleration', // A measure in color encoding channel creates gradient legend
+        stops: 10, // 3 stops with interpolated value
+        range: ['#eaeaea', '#258e47'] // range could be either set of color or predefined palletes
+    }).config({
+        autoGroupBy: { // Turn off internal grouping of data because data has order wich needs to be maintained
+            disabled: true
         },
         legend: {
-            position: 'right'
+            position: 'bottom'
         }
-    }).data(rootData).color({ // Color encoding
-        field: 'Sales',
-        step: true,
-        range: ['#BBF6F0', '#85ECE1', '#50C0B5', '#12877B', '#005F56']
-    }).width(750).height(450)
-    // .title('Heatmap', { position: 'top', align: 'right' })
-    .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' }).subtitle('Sales per month for each sales person', { position: 'top', align: 'right' }).mount('#chart');
-
-    canvas.once('canvas.updated').then(() => {
-        // Disable events from legend
-        const legend = canvas.legend().color;
-        // legend.firebolt().dissociateBehaviour('highlight', 'hover');
-        // legend.firebolt().dissociateBehaviour('select', 'click');
-    });
-
-    // Disable events from legend
-    // muze.ActionModel.for(canvas).dissociateBehaviour(['select', 'click'], ['brush', 'drag']);
+    }).width(600) // Set the chart width
+    .height(400) // Set the chart height
+    .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
+    // .title('Bar chart with gradient legend', { position: 'bottom', align: 'right', })
+    .subtitle('Change of acceleration over the years colored with Horsepower', { position: 'bottom', align: 'right' }).mount('#chart'); // Render on a dom element
 
     canvas.once('canvas.animationend').then((client) => {
         const element = document.getElementById('chart');

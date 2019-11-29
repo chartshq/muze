@@ -259,6 +259,13 @@ export const applyInteractionPolicy = (firebolt) => {
                 unitFireBolt.sideEffects().selectionBox.config({
                     persistent: true
                 });
+            } else {
+                unitFireBolt.payloadGenerators({
+                    [BEHAVIOURS.BRUSH]: payloadGenerator.brush
+                });
+                unitFireBolt.sideEffects().selectionBox.config({
+                    persistent: false
+                });
             }
         });
         applyPropagationPolicy(firebolt, { behaviours, sideEffects });

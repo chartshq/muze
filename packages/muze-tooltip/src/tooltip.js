@@ -148,7 +148,7 @@ export default class Tooltip {
 
         if (target) {
             const node = this._tooltipContainer.node();
-            const tooltipPos = this._position;
+            const tooltipPos = this._orientation;
             const outsidePlot = tooltipPos === TOOLTIP_LEFT || tooltipPos === TOOLTIP_RIGHT ?
                 (y + node.offsetHeight) < target.y || y > (target.y + target.height) :
                 (x + node.offsetWidth) < target.x || x > (target.x + target.width);
@@ -304,7 +304,7 @@ export default class Tooltip {
             // this._tooltipArrow.style('display', 'none');
         this._tooltipBackground.style('display', 'none');
         // }
-        this._position = obj.position;
+        this._orientation = obj.position;
         // this._arrowOrientation = obj.position;
         draw && this.position(obj.x, obj.y);
         return this;
