@@ -57,6 +57,8 @@ export default class DiscreteLegend extends SimpleLegend {
         let domainForLegend = [];
         if (scaleType === SIZE && type === FieldType.MEASURE) {
             domainForLegend = getReadableTicks(domain, domain.length);
+        } else if (subtype === DimensionSubtype.TEMPORAL) {
+            domainForLegend = [...new Set(field.data())];
         } else {
             domainForLegend = [...new Set(domain)];
         }
