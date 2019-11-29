@@ -51,12 +51,12 @@ export default class DiscreteLegend extends SimpleLegend {
      */
     dataFromScale () {
         const scale = this.scale();
-        const { scaleType, domain, scaleFn } = getScaleInfo(scale);
+        const { scaleType, domain, scaleFn, steps } = getScaleInfo(scale);
         const field = this.metaData().getFieldspace().fields[0];
         const { type, subtype } = field.schema();
         let domainForLegend = [];
         if (scaleType === SIZE && type === FieldType.MEASURE) {
-            domainForLegend = getReadableTicks(domain, domain.length);
+            domainForLegend = steps instanceof Array ? steps : getReadableTicks(domain, domain.length);
         } else if (subtype === DimensionSubtype.TEMPORAL) {
             domainForLegend = [...new Set(field.data())];
         } else {
