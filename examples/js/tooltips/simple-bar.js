@@ -62,4 +62,3 @@ d3.json('../../data/cars.json', (data) => {
             field: 'Maker'
         })
 });
-
