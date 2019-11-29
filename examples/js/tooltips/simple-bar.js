@@ -1,65 +1,54 @@
-/* eslint-disable */
-const env = muze();
-const DataModel = muze.DataModel;
+var env = window.muze();
+var DataModel = window.muze.DataModel;
 
-d3.json('../../data/cars.json', (data) => {
-    let jsonData = data;
-    const schema = [{
+d3.json('/data/cars-with-null.json', function (data) {
+    var schema = [{
         name: 'Name',
         type: 'dimension'
-    },
-    {
+    }, {
         name: 'Maker',
         type: 'dimension'
-    },
-    {
+    }, {
         name: 'Miles_per_Gallon',
         type: 'measure'
-    },
-
-    {
+    }, {
         name: 'Displacement',
         type: 'measure'
-    },
-    {
+    }, {
         name: 'Horsepower',
         type: 'measure'
-    },
-    {
+    }, {
         name: 'Weight_in_lbs',
         type: 'measure'
-    },
-    {
+    }, {
         name: 'Acceleration',
         type: 'measure'
-    },
-    {
+    }, {
         name: 'Origin',
         type: 'dimension'
-    },
-    {
+    }, {
         name: 'Cylinders',
         type: 'dimension'
-    },
-    {
+    }, {
         name: 'Year',
         type: 'dimension'
-    }
-    ];
-    var rootData = new DataModel(data, schema, { dataFormat: "FlatJSON" });
+    }];
+    // Create an instance of DataModel using the data and schema.
+    var rootData = new DataModel(data, schema);
 
-    var canvas = env.canvas();
-    var rows = ["Acceleration"];
-    var columns = ["Origin"];
-    canvas
-        .mount('#chart1')
-        .width(600)
-        .data(rootData)
-        .rows(rows)
-        .height(500)
-        .columns(columns)
-        .color({
-            field: 'Maker'
-        })
+    // Get a canvas instance from Muze where the chart will be rendered.
+    var rows = [['Acceleration']],
+        columns = [['Year']];
+
+    env.canvas().rows(rows).columns(columns).data(rootData).layers([{
+        mark: 'bar'
+    }]).width(800).config({
+        legend: {
+            position: 'bottom'
+        } }).height(600).columns(['Acceleration']).rows(['Year']).layers([{
+        mark: 'point'
+    }]).shape('Cylinders').mount('#chart').once('canvas.animationend').then(function (client) {
+        var element = document.getElementById('chart');
+        element.classList.add('animateon');
+    });
 });
-
