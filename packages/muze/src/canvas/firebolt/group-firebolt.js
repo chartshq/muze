@@ -271,6 +271,7 @@ export default class GroupFireBolt extends Firebolt {
 
                     if (inst) {
                         inst.sourceInfo(() => unit.getSourceInfo());
+                        inst.layers(() => unit.layers());
                         inst.plotPointsFromIdentifiers((...params) =>
                             unit.getPlotPointsFromIdentifiers(...params));
                         inst.drawingContext(() => unit.getDrawingContext());

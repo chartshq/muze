@@ -213,7 +213,7 @@ export default class Firebolt {
         const sideEffectStore = this.sideEffects();
         const sideEffect = sideEffectStore[name];
         const { setTransform } = options;
-        selectionSet = setTransform ? setTransform(selectionSet, payload, this) : selectionSet;
+        selectionSet = setTransform ? setTransform(selectionSet, payload, sideEffect) : selectionSet;
         sideEffect.apply(selectionSet, payload, options);
     }
 
