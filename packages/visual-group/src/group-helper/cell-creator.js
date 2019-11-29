@@ -665,7 +665,7 @@ export const computeMatrices = (context, config) => {
                 rightMatrix: rows[1],
                 topMatrix: columns[0],
                 bottomMatrix: columns[1]
-            });
+            }, registry.cells.BlankCell);
             valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
         }
 
