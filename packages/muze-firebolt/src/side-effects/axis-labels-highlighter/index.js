@@ -18,9 +18,10 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
         const selectedDataValues = selectedData.length ? selectedData[0] : [];
         const { x = [], y = [] } = context.axes();
         [...x, ...y].forEach((axis) => {
-            const { index } = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field];
+            const fieldMeta = selectionSet.mergedEnter.model.getFieldsConfig()[axis.config().field];
             const { selectionSet: selectedElements,
-                        rejectionSet } = axis.getTicksBasedOnData(selectedDataValues[index]);
+                        rejectionSet } = axis.getTicksBasedOnData(
+                            selectedDataValues[fieldMeta && fieldMeta.index !== undefined ? fieldMeta.index : undefined]);
             selectedElements && selectedElements.selectAll('text').classed('muze-axis-ticks-highlight', true);
             rejectionSet.selectAll('text').classed('muze-axis-ticks-highlight', false);
         });
