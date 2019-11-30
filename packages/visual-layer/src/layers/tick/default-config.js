@@ -6,13 +6,6 @@ export const defaultConfig = {
     className: '',
     classPrefix: CLASSPREFIX,
     interaction: {
-        highlight: {
-            style: {
-                stroke: 'black',
-                'stroke-width': '1px'
-            },
-            strokePosition: 'center'
-        },
         fade: {
             style: {
                 stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {

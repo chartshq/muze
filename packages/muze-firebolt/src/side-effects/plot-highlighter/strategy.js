@@ -51,10 +51,6 @@ const fadeOnBrushFn = (set, context, payload) => {
             interactionType = 'doubleStroke';
             // onDrag style
             context.applyInteractionStyle(completeSet, { interactionType: 'brushStroke', apply: false });
-            // Fade out points onDragEnd only if any point is brushed
-            if (mergedEnter.length) {
-                context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true });
-            }
         }
         const layers = context.firebolt.context.layers();
 
@@ -66,6 +62,8 @@ const fadeOnBrushFn = (set, context, payload) => {
                 if (dragEnd) {
                     context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: true }, [layer]);
                     context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+                    mergedEnter.length &&
+                        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: true }, [layer]);
                 }
             } else {
                 // dragEnd style
@@ -75,6 +73,8 @@ const fadeOnBrushFn = (set, context, payload) => {
                 interactionType !== 'doubleStroke' &&
                     context.applyInteractionStyle(mergedExit, { interactionType: 'doubleStroke', apply: false });
                 context.applyInteractionStyle(mergedEnter, { interactionType, apply: true }, [layer]);
+                mergedExit.length &&
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true }, [layer]);
             }
         });
     }
@@ -97,6 +97,7 @@ export const strategies = {
             context.applyInteractionStyle(completeSet, { interactionType: 'focus', apply: false });
             context.applyInteractionStyle(completeSet, { interactionType: 'focusStroke', apply: false });
             context.applyInteractionStyle(completeSet, { interactionType: 'commonDoubleStroke', apply: false });
+            context.applyInteractionStyle(completeSet, { interactionType: 'fade', apply: false });
         } else {
             // context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true });
             // context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });

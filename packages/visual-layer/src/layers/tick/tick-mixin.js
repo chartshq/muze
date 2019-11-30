@@ -1,10 +1,11 @@
-import { FieldType } from 'muze-utils';
+import { FieldType, makeElement, appendElement, selectElement } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
 import { positionPoints, getIndividualClassName,
     getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
+import { strokeWidthPositionMap } from './helper';
 
 const pointTranslators = {
     polar: (data, config = {}, layerInst) => {
@@ -217,5 +218,57 @@ export const TickLayerMixin = superclass => class extends superclass {
                 y: heightSpan
             }
         };
+    }
+
+    addOverlayPath (refElement, data, style, strokePosition) {
+        let pathElement;
+
+        if (this._overlayPath[data.rowId]) {
+            pathElement = this._overlayPath[data.rowId];
+        } else {
+            pathElement = makeElement(refElement, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
+            pathElement.attr('id', data.rowId);
+            this._overlayPath[data.rowId] = pathElement;
+        }
+
+        let offsetM = { x: 0, y: 0 };
+        let offsetL = { x: 0, y: 0 };
+
+        if (style.type === 'stroke-width') {
+            const { L, M } = strokeWidthPositionMap({
+                width: parseInt(style.value, 10),
+                position: strokePosition
+            });
+            offsetM = M;
+            offsetL = L;
+        }
+
+        pathElement.attr('d', (d) => {
+            if (d.update) {
+                return `M ${d.update.x + offsetM.x} ${d.update.y + offsetM.y}
+                    L ${d.update.x0 + offsetL.x} ${d.update.y0 + offsetL.y}`;
+            }
+            return `M ${d.x + offsetM.x} ${d.y + offsetM.y}
+                L ${d.x0 + offsetL.x} ${d.y0 + offsetL.y}`;
+        });
+
+        let styleVal = style.value;
+        if (typeof styleVal === 'function') {
+            const currentStyle = pathElement.style(style.type);
+            styleVal = styleVal(currentStyle);
+        }
+        pathElement.style(style.type, styleVal);
+        appendElement(refElement, pathElement.node());
+    }
+
+    removeOverlayPath (data, style) {
+        const currentPath = this._overlayPath[data.rowId];
+        if (currentPath) {
+            currentPath.node().removeAttribute('style');
+            Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
+        }
     }
 };
