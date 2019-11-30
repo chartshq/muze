@@ -6,14 +6,26 @@ import {
     findInGroup,
     getEncoder
 } from '../group-helper';
-import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices, createLayerState } from './helper';
+import {
+    createUnitState,
+    initializeGlobalState,
+    setMatrixInstances,
+    createMatrices,
+    createLayerState,
+    initializeResolverFields,
+    initializeFields,
+    updateChecker
+} from './helper';
 import { setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
     CONFIG,
     MOUNT,
     RETINAL,
-    Y
+    Y,
+    ROWS,
+    COLUMNS,
+    DATA
 } from '../enums/constants';
 
 /**
@@ -263,8 +275,39 @@ class VisualGroup extends SimpleGroup {
         return this._groupedDataModel;
     }
 
-    createMatrices () {
-        createMatrices(this);
+    createMatrices (sanitizedConfig) {
+        createMatrices(this, sanitizedConfig);
+    }
+
+    getMandatoryFields () {
+        const updateProps = updateChecker(this, [ROWS, COLUMNS, DATA]);
+        let sanitizedValue = {
+            groupConfig: {},
+            resolverConfig: {},
+            shouldRender: false
+        };
+        if (updateProps) {
+            const localFields = initializeFields(this);
+            const {
+                datamodel,
+                encoders,
+                resolver,
+                matrixConfig
+            } = localFields;
+            const context = {
+                datamodel,
+                componentRegistry: this.registry(),
+                encoders,
+                resolver
+            };
+            const resolverFields = initializeResolverFields(context, matrixConfig);
+            sanitizedValue = {
+                groupConfig: localFields,
+                resolverConfig: resolverFields,
+                shouldRender: resolverFields.shouldRender
+            };
+        }
+        return sanitizedValue;
     }
 
     remove () {

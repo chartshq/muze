@@ -1,10 +1,11 @@
 import { VisualUnit } from '@chartshq/visual-unit';
-import { STATE_NAMESPACES, CommonProps } from 'muze-utils';
+import { STATE_NAMESPACES, CommonProps, InvalidAwareTypes } from 'muze-utils';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { getBorders } from '../group-helper';
 import { RetinalEncoder } from '../encoder';
 import { registerDomainChangeListener, unsubscribeChangeListeners } from './change-listener';
 import ValueMatrix from './value-matrix';
+import { ROWS, COLUMNS, DATA } from '../enums/constants';
 
 export const createUnitState = (context) => {
     const [globalState, localState] = VisualUnit.getState();
@@ -61,7 +62,34 @@ export const setMatrixInstances = (context, placeholder) => {
     return context;
 };
 
-export const createMatrices = (context) => {
+const hasValue = (val) => {
+    let hasOneValue = false;
+    for (let i = 0; i < val.length && !hasOneValue; i++) {
+        for (let j = 0; j < val[i].length; j++) {
+            if (!(val[i][j] instanceof InvalidAwareTypes)) {
+                hasOneValue = true;
+                break;
+            }
+        }
+    }
+    return hasOneValue;
+};
+
+export const updateChecker = (context, props) => props.every((option) => {
+    const val = context[option]();
+    switch (option) {
+    case ROWS:
+    case COLUMNS:
+        return val !== null;
+    case DATA:
+        return val && !val.isEmpty() && hasValue(val.getData().data);
+
+    default:
+        return true;
+    }
+});
+
+export const initializeFields = (context) => {
     const rows = context.rows();
     const columns = context.columns();
     const color = context.color();
@@ -72,11 +100,12 @@ export const createMatrices = (context) => {
     const transform = context.transform();
     const config = context.config();
     const shape = context.shape();
-
     // Get the resolver for the matrices
     const resolver = context.resolver();
+
     resolver.store(context.store());
     resolver.valueParser(context.valueParser());
+
     // Prepare configuration for matrix preparation
     let matrixConfig = {
         selection: context.selection(),
@@ -115,37 +144,112 @@ export const createMatrices = (context) => {
     layers && resolver.layerConfig(layers);
     // Set the row and column axes
     resolver.horizontalAxis(fields.rows, encoders).verticalAxis(fields.columns, encoders);
-    // Getting the placeholders
-    const placeholderInfo = resolver.getMatrices(datamodel, matrixConfig, context.registry(), encoders);
-    if (Object.keys(placeholderInfo).length > 0) {
-        context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
+
+    return {
+        rows,
+        columns,
+        color,
+        datamodel,
+        size,
+        detail,
+        layers,
+        transform,
+        config,
+        shape,
+        resolver,
+        matrixConfig,
+        retinalConfig,
+        encoders,
+        fields
+    };
+};
+
+export const createMatrices = (context, sanitizedConfig) => {
+    const { groupConfig, resolverConfig } = sanitizedConfig;
+    const {
+        config,
+        resolver,
+        matrixConfig,
+        encoders,
+        retinalConfig,
+        fields
+    } = groupConfig;
+
+    const placeholderInfo = resolver.getMatrices(resolverConfig);
+
+    context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
         // Set the selection object
-        context.selection(placeholderInfo.selection);
+    context.selection(placeholderInfo.selection);
 
         // Create retinal axes
-        resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
+    resolver.createRetinalAxes(placeholderInfo.dataModels.parentModel.getFieldsConfig(), retinalConfig,
                 encoders);
 
         // Domains are evaluated for each of the axes for commonality
-        resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders);
+    resolver.setRetinalAxisDomain(matrixConfig, placeholderInfo.dataModels, encoders);
 
         // Create matrix instances
-        setMatrixInstances(context, placeholderInfo);
+    setMatrixInstances(context, placeholderInfo);
 
         // Prepare corner matrices
-        context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config));
+    context.cornerMatrices(resolver.createHeaders(placeholderInfo, fields, config));
 
         // Set placeholder information
-        context.placeholderInfo(placeholderInfo);
+    context.placeholderInfo(placeholderInfo);
 
-        context._composition.axes = resolver.axes();
-        context.metaData({
-            border: getBorders(placeholderInfo, encoders.simpleEncoder)
-        });
+    context._composition.axes = resolver.axes();
+    context.metaData({
+        border: getBorders(placeholderInfo, encoders.simpleEncoder)
+    });
 
-        resolver.encoder().unionUnitDomains(context);
+    resolver.encoder().unionUnitDomains(context);
 
-        registerDomainChangeListener(context);
-    }
+    registerDomainChangeListener(context);
     return context;
+};
+
+export const initializeResolverFields = (context, config) => {
+    const {
+        datamodel,
+        encoders,
+        resolver,
+        componentRegistry
+    } = context;
+    const {
+            globalConfig,
+            selection,
+            transform
+        } = config;
+    const groupBy = globalConfig.autoGroupBy;
+    const { smartlabel: labelManager } = resolver.dependencies();
+    const fieldMap = datamodel.getFieldsConfig();
+    const layerConfig = resolver.layerConfig();
+    const registry = resolver.registry();
+    const { fields: normalizedRows } = resolver.horizontalAxis();
+    const { fields: normalizedColumns } = resolver.verticalAxis();
+    const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
+    const facetsAndProjections = resolver.getAllFields();
+    const { simpleEncoder } = encoders;
+    const shouldRender = simpleEncoder.hasMandatoryFields(facetsAndProjections);
+    return {
+        datamodel,
+        encoders,
+        resolver,
+        globalConfig,
+        selection,
+        transform,
+        componentRegistry,
+        groupBy,
+        labelManager,
+        fieldMap,
+        layerConfig,
+        registry,
+        normalizedRows,
+        normalizedColumns,
+        otherEncodings,
+        facetsAndProjections,
+        simpleEncoder,
+        shouldRender,
+        config
+    };
 };

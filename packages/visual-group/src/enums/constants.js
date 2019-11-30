@@ -91,6 +91,11 @@ export const ROWS = 'rows';
 export const COLUMNS = 'columns';
 
 /**
+ * Field referring to object storing data
+ */
+export const DATA = 'data';
+
+/**
  * Field referring to object storing set of columns
  */
 export const COL = 'col';
