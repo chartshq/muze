@@ -24,24 +24,27 @@ export const initCanvas = (context) => {
 };
 
 export const fixFacetConfig = (config) => {
-    let isBorderPresent = false;
-    const isGridLinePresent = {};
+    if (config) {
+        let isBorderPresent = false;
+        const isGridLinePresent = {};
 
-    if (config.border && config.border.width) {
-        isBorderPresent = true;
+        if (config.border && config.border.width) {
+            isBorderPresent = true;
+        }
+        if (config.gridLines) {
+            isGridLinePresent.x = !!config.gridLines.x;
+            isGridLinePresent.y = !!config.gridLines.y;
+        }
+        const facetsUserConfig = {
+            isBorderPresent,
+            isGridLinePresent
+        };
+        return {
+            facetsUserConfig,
+            isFacet: false
+        };
     }
-    if (config.gridLines) {
-        isGridLinePresent.x = !!config.gridLines.x;
-        isGridLinePresent.y = !!config.gridLines.y;
-    }
-    const facetsUserConfig = {
-        isBorderPresent,
-        isGridLinePresent
-    };
-    return {
-        facetsUserConfig,
-        isFacet: false
-    };
+    return {};
 };
 
 export const fixScrollBarConfig = (config) => {
