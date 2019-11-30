@@ -38,38 +38,29 @@ d3.json('../data/cars.json', (data) => {
         subtype: 'temporal',
         format: '%Y-%m-%d'
     }];
+    // Get reference of dom element on which the chart will be rendered
+    const mountPoint = document.getElementById('chart');
 
-    // Create an instance of DataModel using the data and schema.
-    let dm = new muze.DataModel(data, schema);
-    // Sort the data. Before sorting groupBy needs to be performed. As grouping after sorting changes the order.
-    // When sorting is applied, internal grouping of data inside muze has to be turned off.
-    const filterMaker = ['bmw', 'honda', 'ford', 'volvo', 'volkswagen', 'audi', 'renault', 'toyota', 'dodge', 'chevrolet', 'plymouth'];
-    dm = dm.groupBy(['Maker']).sort([['Acceleration', 'ASC']]);
-    dm = dm.select(fields => filterMaker.indexOf(fields.Maker.value) > -1);
+    // Retrieves the DataModel from muze namespace. Muze recognizes DataModel as a first class source of data.
+    const DataModel = window.muze.DataModel;
     // Create an environment for future rendering
     const env = window.muze();
+
+    // Create an instance of DataModel using the data and schema.
+    const rootData = new DataModel(data, schema);
+
     // Create an instance of canvas which houses the visualization
-    const canvas = env.canvas();
+    let canvas = env.canvas();
 
-    canvas.rows(['Maker']) // Year goes in X axis
-    .columns(['Acceleration']) // Acceleration goes in Y axis
-    .data(dm).color({
-        field: 'Acceleration', // A measure in color encoding channel creates gradient legend
-        stops: 10, // 3 stops with interpolated value
-        range: ['#eaeaea', '#258e47'] // range could be either set of color or predefined palletes
-    }).config({
-        autoGroupBy: { // Turn off internal grouping of data because data has order wich needs to be maintained
-            disabled: true
-        },
-        legend: {
-            position: 'bottom'
-        }
-    }).width(600) // Set the chart width
-    .height(400) // Set the chart height
-    .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
-    // .title('Bar chart with gradient legend', { position: 'bottom', align: 'right', })
-    .subtitle('Change of acceleration over the years colored with Horsepower', { position: 'bottom', align: 'right' }).mount('#chart'); // Render on a dom element
-
+    canvas = canvas.rows(['Acceleration']) // Acceleration goes in Y-Axis
+    .columns(['Year']) // Year goes in X-Axis
+    .color('Origin') // Create multiseries by applying Origin in color encoding channel
+    .config({
+        interaction: {
+            tooltip: {
+                mode: 'fragmented' // fragmented tooltip view
+            } } }).data(rootData) //  Feed data
+    .width(800).height(500).title('The car acceleration respective to origin', { position: 'bottom', align: 'left' }).subtitle('Change of Acceleration of cars from 1970 - 1982', { position: 'top', align: 'left' }).mount(mountPoint); // Render on the DOM el
     canvas.once('canvas.animationend').then((client) => {
         const element = document.getElementById('chart');
         element.classList.add('animateon');
