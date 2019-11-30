@@ -73,7 +73,8 @@ const fadeOnBrushFn = (set, context, payload) => {
                 interactionType !== 'doubleStroke' &&
                     context.applyInteractionStyle(mergedExit, { interactionType: 'doubleStroke', apply: false });
                 context.applyInteractionStyle(mergedEnter, { interactionType, apply: true }, [layer]);
-                mergedExit.length &&
+                // fade out unselected points only if any selection is done
+                mergedEnter.length && payload.dragEnd &&
                     context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true }, [layer]);
             }
         });
