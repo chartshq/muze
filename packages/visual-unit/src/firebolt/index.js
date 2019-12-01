@@ -84,20 +84,6 @@ export default class UnitFireBolt extends Firebolt {
     sanitizePayload (payload) {
         const { criteria } = payload;
         const { allFields: fields, dimensionsMap } = this._metaData;
-        ((dm) => {
-            dm._fn = (propDims, fieldsConfig) => {
-                const cacheMap = dm._cacheMap || (dm._cacheMap = {});
-                if (!cacheMap[propDims]) {
-                    cacheMap[propDims] = dm.getData({ withUid: true }).data.reduce((acc, row) => {
-                        const key = propDims.map(d => row[fieldsConfig[d].index]);
-                        acc[key] || (acc[key] = []);
-                        acc[key].push(row);
-                        return acc;
-                    }, {});
-                }
-                return cacheMap[propDims];
-            };
-        })(this.data());
 
         return Object.assign({}, payload,
             {
