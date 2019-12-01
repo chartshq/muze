@@ -114,13 +114,13 @@ export const unionSets = (firebolt, behaviours) => {
                     uidSet[type] = uids;
                 } else if (`${model.getSchema().map(d => d.name).sort()}` ===
                     `${existingModel.getSchema().map(d => d.name).sort()}`) {
-                    uidSet[type] = [...uidSet[type], ...uids];
+                    uidSet[type] = unique([...uidSet[type], ...uids]);
                     models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
                 } else {
                     existingModel = model;
                     uidSet[type] = uids;
                 }
-                combinedSet[type].uids = unique(uidSet[type]);
+                combinedSet[type].uids = uidSet[type];
                 combinedSet[type].model = models[type];
             });
         }

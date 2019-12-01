@@ -1,7 +1,12 @@
 import { FieldType, intersect } from 'muze-utils';
 import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
-import { isSideEffectEnabled, sanitizePayloadCriteria, dispatchSecondaryActions } from './helper';
+import {
+    isSideEffectEnabled,
+    sanitizePayloadCriteria,
+    dispatchSecondaryActions,
+    createMapByDimensions
+} from './helper';
 
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
@@ -79,11 +84,27 @@ export default class UnitFireBolt extends Firebolt {
     sanitizePayload (payload) {
         const { criteria } = payload;
         const { allFields: fields, dimensionsMap } = this._metaData;
+        ((dm) => {
+            dm._fn = (propDims, fieldsConfig) => {
+                const cacheMap = dm._cacheMap || (dm._cacheMap = {});
+                if (!cacheMap[propDims]) {
+                    cacheMap[propDims] = dm.getData({ withUid: true }).data.reduce((acc, row) => {
+                        const key = propDims.map(d => row[fieldsConfig[d].index]);
+                        acc[key] || (acc[key] = []);
+                        acc[key].push(row);
+                        return acc;
+                    }, {});
+                }
+                return cacheMap[propDims];
+            };
+        })(this.data());
+
         return Object.assign({}, payload,
             {
                 criteria: sanitizePayloadCriteria(criteria, fields, {
                     dm: this.data(),
-                    dimensionsMap
+                    dimensionsMap,
+                    dimsMapGetter: this._dimsMapGetter
                 })
             });
     }
@@ -150,16 +171,16 @@ export default class UnitFireBolt extends Firebolt {
         };
     }
 
-    prepareSelectionSets (behaviours) {
-        const data = this.context.data();
-        if (data) {
-            this.createSelectionSet(data.getData().uids, behaviours);
-        }
-        return this;
-    }
-
     target () {
         return 'visual-unit';
+    }
+
+    createSelectionSet (...params) {
+        super.createSelectionSet(...params);
+
+        this._dimsMapGetter = createMapByDimensions(this, this.data());
+
+        return this;
     }
 
     remove () {
