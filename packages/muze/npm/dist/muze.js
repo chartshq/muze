@@ -2487,7 +2487,9 @@ return /******/ (function(modules) { // webpackBootstrap
               var sortedDm = new this.constructor(dataInCSVArr, rawData.schema, {
                 dataFormat: 'DSVArr'
               });
-              Object(_helper__WEBPACK_IMPORTED_MODULE_1__["persistDerivations"])(this, sortedDm, _constants__WEBPACK_IMPORTED_MODULE_2__["DM_DERIVATIVES"].SORT, config, sortingDetails);
+              Object(_helper__WEBPACK_IMPORTED_MODULE_1__["persistDerivations"])(this, sortedDm, _constants__WEBPACK_IMPORTED_MODULE_2__["DM_DERIVATIVES"].SORT, Object.assign({}, {
+                uidMap: rawData.uids
+              }, config), sortingDetails);
 
               if (config.saveChild) {
                 sortedDm.setParent(this);
@@ -84150,28 +84152,6 @@ function (_Firebolt) {
       var _this$_metaData = this._metaData,
           fields = _this$_metaData.allFields,
           dimensionsMap = _this$_metaData.dimensionsMap;
-
-      (function (dm) {
-        dm._fn = function (propDims, fieldsConfig) {
-          var cacheMap = dm._cacheMap || (dm._cacheMap = {});
-
-          if (!cacheMap[propDims]) {
-            cacheMap[propDims] = dm.getData({
-              withUid: true
-            }).data.reduce(function (acc, row) {
-              var key = propDims.map(function (d) {
-                return row[fieldsConfig[d].index];
-              });
-              acc[key] || (acc[key] = []);
-              acc[key].push(row);
-              return acc;
-            }, {});
-          }
-
-          return cacheMap[propDims];
-        };
-      })(this.data());
-
       return Object.assign({}, payload, {
         criteria: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["sanitizePayloadCriteria"])(criteria, fields, {
           dm: this.data(),
