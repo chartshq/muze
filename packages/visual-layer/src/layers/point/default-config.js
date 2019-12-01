@@ -63,7 +63,7 @@ export const defaultConfig = {
         }
     },
     innerPadding: 0.1,
-    nearestPointThreshold: 10,
+    nearestPointThreshold: 5,
     transform: {
         type: 'identity'
     },

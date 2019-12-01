@@ -5,6 +5,7 @@ export const defaultConfig = {
     defClassName: 'layer-tick',
     className: '',
     classPrefix: CLASSPREFIX,
+    nearestPointThreshold: 10,
     interaction: {
         fade: {
             style: {

@@ -6,14 +6,13 @@ import {
     FieldType,
     Scales,
     getObjProp,
-    isSimpleObject,
     makeElement,
     appendElement
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
 import { defaultConfig } from './default-config';
-import { getPlotMeasurement, getValidTransformForAggFn } from '../../helpers';
+import { getPlotMeasurement, getValidTransformForAggFn, getDataFromEvent } from '../../helpers';
 import './styles.scss';
 import { getTranslatedPoints, strokeWidthPositionMap } from './bar-helper';
 
@@ -195,20 +194,7 @@ export const BarLayerMixin = superclass => class extends superclass {
     }
 
     getDataFromEvent (event) {
-        const dataPoint = selectElement(event.target).data()[0];
-        if (isSimpleObject(dataPoint)) {
-            const values = dataPoint && dataPoint.source;
-            let identifiers = null;
-            if (values) {
-                identifiers = this.getIdentifiersFromData(values, dataPoint.rowId);
-            }
-            return {
-                dimensions: [dataPoint],
-                id: identifiers,
-                layerId: this.id()
-            };
-        }
-        return null;
+        return getDataFromEvent(this, event);
     }
 
     getPlotSpan () {
