@@ -6,8 +6,14 @@ import {
 } from 'muze-utils';
 import drawText from './renderer';
 import { defaultConfig } from './default-config';
-import { positionPoints, getIndividualClassName, resolveEncodingValues, getColorMetaInf, toCartesianCoordinates }
-    from '../../helpers';
+import {
+    positionPoints,
+    getIndividualClassName,
+    resolveEncodingValues,
+    getColorMetaInf,
+    toCartesianCoordinates,
+    getDataFromEvent
+} from '../../helpers';
 import { TEXT_ANCHOR_MIDDLE, ENCODING } from '../../enums/constants';
 
 import './styles.scss';
@@ -67,9 +73,10 @@ const pointTranslators = {
                     padding: backgroundPadding
                 },
                 'alignment-baseline': resolvedVal['alignment-baseline'],
-                meta: getColorMetaInf({
-                    fill: resolvedVal.color
-                }, colorAxis),
+                meta: { ...{ layerId: layerInst.id() },
+                    ...getColorMetaInf({
+                        fill: resolvedVal.color
+                    }) },
                 style: {},
                 source,
                 rowId: d.rowId
@@ -136,9 +143,10 @@ const pointTranslators = {
                 },
                 'alignment-baseline': resolvedEncodings['alignment-baseline'],
                 rotation: resolvedEncodings.rotation,
-                meta: getColorMetaInf({
-                    fill: resolvedEncodings.color
-                }, colorAxis),
+                meta: { ...{ layerId: layerInst.id() },
+                    ...getColorMetaInf({
+                        fill: resolvedEncodings.color
+                    }) },
                 style: {},
                 source: d.source,
                 rowId: d.rowId
@@ -232,6 +240,17 @@ export const TextLayerMixin = superclass => class extends superclass {
             }
         });
         return this;
+    }
+
+    getNearestPoint (x, y, { event }) {
+        if (!this.data()) {
+            return null;
+        }
+        return this.getDataFromEvent(event);
+    }
+
+    getDataFromEvent (event) {
+        return getDataFromEvent(this, event);
     }
 };
 

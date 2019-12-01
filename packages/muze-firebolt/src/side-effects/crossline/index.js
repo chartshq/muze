@@ -30,7 +30,9 @@ export default class Crossline extends SpawnableSideEffect {
         } = this.config();
         const dataModel = selectionSet.mergedEnter.model;
         const drawingInf = this.drawingContext();
-        if (payload.criteria && dataModel && dataModel.isEmpty()) {
+        const isEmptyDataModel = dataModel && dataModel.isEmpty();
+        if (payload.criteria && isEmptyDataModel) {
+            this.hide();
             return this;
         }
         if (payload.criteria === null || !dataModel) {

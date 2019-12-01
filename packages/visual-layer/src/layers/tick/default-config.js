@@ -5,14 +5,8 @@ export const defaultConfig = {
     defClassName: 'layer-tick',
     className: '',
     classPrefix: CLASSPREFIX,
+    nearestPointThreshold: 10,
     interaction: {
-        highlight: {
-            style: {
-                stroke: 'black',
-                'stroke-width': '1px'
-            },
-            strokePosition: 'center'
-        },
         fade: {
             style: {
                 stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {

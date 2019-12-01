@@ -21,6 +21,11 @@
     overflow: auto;
 }
 
+.#{$prefix}tooltip-parent-container {
+    pointer-events: none;
+    z-index: 9999999999;
+}
+
 .#{$prefix}tooltip-stacked-row{
     color:#828282;
     margin-left: 10px;

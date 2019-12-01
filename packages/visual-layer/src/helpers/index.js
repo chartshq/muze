@@ -10,7 +10,8 @@ import {
     COORD_TYPES,
     CommonProps,
     defaultValue,
-    InvalidAwareTypes
+    InvalidAwareTypes,
+    isSimpleObject
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -301,12 +302,20 @@ export const domainCalculator = {
     }
 };
 
-export const attachDataToVoronoi = (voronoi, points) => {
+const defFn = (d) => {
+    const { x, y } = d.update;
+    return {
+        x,
+        y
+    };
+};
+
+export const attachDataToVoronoi = (voronoi, points, accessor = defFn) => {
     voronoi.data([].concat(...points).filter(d => d.rowId !== undefined).map((d) => {
-        const point = d.update;
+        const { x, y } = accessor(d);
         return {
-            x: point.x,
-            y: point.y,
+            x,
+            y,
             data: d
         };
     }));
@@ -588,3 +597,20 @@ export const getBoundBoxes = points => points.map((point) => {
         data
     };
 });
+
+export const getDataFromEvent = (context, event) => {
+    const dataPoint = selectElement(event.target).data()[0];
+    if (isSimpleObject(dataPoint) && getObjProp(dataPoint, 'meta', 'layerId') === context.id()) {
+        const values = dataPoint && dataPoint.source;
+        let identifiers = null;
+        if (values) {
+            identifiers = context.getIdentifiersFromData(values, dataPoint.rowId);
+        }
+        return {
+            dimensions: [dataPoint],
+            id: identifiers,
+            layerId: context.id()
+        };
+    }
+    return null;
+};

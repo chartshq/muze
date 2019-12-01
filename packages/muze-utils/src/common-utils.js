@@ -1543,6 +1543,14 @@ const transformColor = (rgbaValues, { h = 0, s = 0, l = 0, a }, datum, apply) =>
     return finalcolor;
 };
 
+const pointWithinCircle = (c, point) => {
+    const { x: cx, y: cy, r } = c;
+    const { x, y } = point;
+
+    const dist = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2);
+    return dist <= r;
+};
+
 /**
  * Generates a function which performs an intersection (dataModel select)
  * operation for multiple fields
@@ -1674,5 +1682,6 @@ export {
     sanitizeDomainWhenEqual,
     sortCategoricalField,
     getReadableTicks,
-    dmMultipleSelection
+    dmMultipleSelection,
+    pointWithinCircle
 };

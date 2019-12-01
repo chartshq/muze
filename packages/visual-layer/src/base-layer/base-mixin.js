@@ -26,7 +26,7 @@ import {
 } from '../helpers';
 import { localOptions } from './local-options';
 import { listenerMap } from './listener-map';
-import { BASE_LAYER } from '../enums/constants';
+import { BASE_LAYER, AREA_LAYER } from '../enums/constants';
 import { applyStylesOnInteraction } from './helper';
 
 const layerNs = [STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE, STATE_NAMESPACES.LAYER_LOCAL_NAMESPACE];
@@ -595,8 +595,12 @@ export const BaseLayerMixin = superclass => class extends superclass {
             measureIndex = fieldsConfig[xField].index;
             enc = 'x';
         } else if (yFieldType === FieldType.MEASURE) {
+            const layerName = this.constructor.formalName();
             measureIndex = fieldsConfig[yField].index;
-            enc = (idx % 2 === 0) ? 'y' : 'y0';
+            enc = 'y';
+            if (layerName === AREA_LAYER) {
+                enc = (idx % 2 === 0) ? 'y' : 'y0';
+            }
         }
 
         const transformedData = [];

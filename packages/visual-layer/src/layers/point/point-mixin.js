@@ -5,7 +5,8 @@ import {
     getQualifiedClassName,
     selectElement,
     appendElement,
-    getSymbol
+    getSymbol,
+    pointWithinCircle
 } from 'muze-utils';
 import drawSymbols from './renderer';
 import { defaultConfig } from './default-config';
@@ -97,7 +98,7 @@ export const PointLayerMixin = superclass => class extends superclass {
         const schema = this.data().getSchema();
         makeElement(container, 'g', this._points, null, {
             update: (group, points) => {
-                maxSize = Math.max(maxSize, ...points.map(d => d.size));
+                maxSize = Math.max(maxSize, ...points.map(d => d.size || 0));
                 seriesClassName = `${qualifiedClassName[0]}`;
                 this.constructor.drawFn()({
                     layer: this,
@@ -111,8 +112,12 @@ export const PointLayerMixin = superclass => class extends superclass {
             }
         }, data => data[0].rowId);
         this._maxSize = Math.sqrt(maxSize / Math.PI) * 2;
-        attachDataToVoronoi(this._voronoi, this._points);
+        this.attachDataToVoronoi(this._points);
         return this;
+    }
+
+    attachDataToVoronoi (points) {
+        attachDataToVoronoi(this._voronoi, points);
     }
 
     generateDataPoints (normalizedData, keys) {
@@ -146,7 +151,8 @@ export const PointLayerMixin = superclass => class extends superclass {
      * @return {Object} Point details
      */
     getNearestPoint (x, y) {
-        const distanceLimit = Math.max(this._maxSize, this.config().nearestPointThreshold);
+        const nearestPointThreshold = this.config().nearestPointThreshold;
+        const distanceLimit = Math.max(this._maxSize, nearestPointThreshold);
 
         if (!this.data()) {
             return null;
@@ -157,18 +163,25 @@ export const PointLayerMixin = superclass => class extends superclass {
         const radius = point ? Math.sqrt(point.data.data.size / Math.PI) : 0;
 
         if (point) {
-            const { source, rowId } = point.data.data;
-            const identifiers = this.getIdentifiersFromData(source, rowId);
-            return {
-                id: identifiers,
-                dimensions: [{
-                    x: dimensions.x,
-                    y: dimensions.y,
-                    width: radius,
-                    height: radius
-                }],
-                layerId: this.id()
-            };
+            const insideShape = pointWithinCircle({
+                x: dimensions.x,
+                y: dimensions.y,
+                r: radius + nearestPointThreshold
+            }, { x, y });
+            if (insideShape) {
+                const { source, rowId } = point.data.data;
+                const identifiers = this.getIdentifiersFromData(source, rowId);
+                return {
+                    id: identifiers,
+                    dimensions: [{
+                        x: dimensions.x,
+                        y: dimensions.y,
+                        width: radius,
+                        height: radius
+                    }],
+                    layerId: this.id()
+                };
+            }
         }
         return null;
     }

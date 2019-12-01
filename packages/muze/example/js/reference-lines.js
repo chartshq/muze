@@ -28,7 +28,8 @@
                     value: 'line'
                 },
                 y: 'compositeBar.encoding.y'
-            }
+			},
+			interactive: false,
         },
         {
             name: 'averageText',
@@ -45,7 +46,8 @@
                 background: {
                     enabled: true
                 }
-            },
+			},
+			interactive: false,
             positioner: (points, store, layerInst) => {
                 let width = store.visualunit.width();
                 let smartLabel = layerInst.dependencies().smartLabel;
