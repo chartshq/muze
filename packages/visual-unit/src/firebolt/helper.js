@@ -97,7 +97,7 @@ export const prepareSelectionSetData = (dataModel, unit) => {
     };
 };
 
-export const sanitizePayloadCriteria = (data, propFields, { dm, dimensionsMap }) => {
+export const sanitizePayloadCriteria = (data, propFields, { dm, dimensionsMap, dimsMapGetter }) => {
     const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
         [ReservedFields.ROW_ID]: {
             index: Object.keys(dm.getFieldsConfig()).length,
@@ -139,12 +139,7 @@ export const sanitizePayloadCriteria = (data, propFields, { dm, dimensionsMap })
     const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
     const propDims = fields.filter(d => d.name in fieldsConfig).map(d => d.name);
 
-    const dimsMap = dm.getData({ withUid: true }).data.reduce((acc, row) => {
-        const key = propDims.map(d => row[fieldsConfig[d].index]);
-        acc[key] || (acc[key] = []);
-        acc[key].push(row);
-        return acc;
-    }, {});
+    const dimsMap = dimsMapGetter(propDims, fieldsConfig);
 
     for (let i = 1, len = data.length; i < len; i++) {
         const row = data[i];
@@ -187,4 +182,17 @@ export const dispatchSecondaryActions = (firebolt, { action, propagationData, co
                         context.facetByFields());
         firebolt.dispatchBehaviour(secAction, generatedPayload, propagationInf);
     });
+};
+
+export const createMapByDimensions = (context, dm) => (propDims, fieldsConfig) => {
+    const cacheMap = context._cacheMap || (context._cacheMap = {});
+    if (!cacheMap[propDims]) {
+        cacheMap[propDims] = dm.getData({ withUid: true }).data.reduce((acc, row) => {
+            const key = propDims.map(d => row[fieldsConfig[d].index]);
+            acc[key] || (acc[key] = []);
+            acc[key].push(row);
+            return acc;
+        }, {});
+    }
+    return cacheMap[propDims];
 };

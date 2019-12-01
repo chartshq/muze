@@ -5,6 +5,7 @@ import {
     ReservedFields
 } from 'muze-utils';
 import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
+import { createMapByDimensions } from '@chartshq/visual-unit/src/firebolt/helper';
 import {
     payloadGenerator,
     isSideEffectEnabled,
@@ -43,9 +44,12 @@ const setSideEffectConfig = (firebolt) => {
     } else {
         tooltipSideEffect.config({
             selectionSummary: {
-                className: 'tooltip-content-container-selectionSummary-default'
+                order: 0,
+                className: 'tooltip-content-container-selectionSummary-default',
+                showMultipleMeasures: false
             },
             highlightSummary: {
+                order: 1,
                 className: 'tooltip-content-container-highlightSummary-default'
             }
         });
@@ -332,7 +336,6 @@ export default class GroupFireBolt extends Firebolt {
     handlePhysicalAction (event, payload, unit) {
         const firebolt = unit.firebolt();
         const { behaviours } = firebolt._actionBehaviourMap[event];
-
         dispatchBehaviours(this, { behaviours, payload, unit });
         // Reset select action when dragging is done. Remove this when brush and select will be unioned
         resetSelectAction(this, { behaviours, payload, unit });
@@ -341,13 +344,23 @@ export default class GroupFireBolt extends Firebolt {
     sanitizePayload (payload) {
         const { criteria } = payload;
         const { allFields: fields, dimensionsMap } = this._metaData;
+
         return Object.assign({}, payload,
             {
                 criteria: sanitizePayloadCriteria(criteria, fields, {
                     dm: this.data(),
-                    dimensionsMap
+                    dimensionsMap,
+                    dimsMapGetter: this._dimsMapGetter
                 })
             });
+    }
+
+    createSelectionSet (...params) {
+        super.createSelectionSet(...params);
+
+        this._dimsMapGetter = createMapByDimensions(this, this.data());
+
+        return this;
     }
 
     id () {

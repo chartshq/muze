@@ -3,6 +3,7 @@ import { CLASSPREFIX } from './constants';
 export const defaultConfig = {
     classPrefix: CLASSPREFIX,
     defClassName: 'tooltip-box',
+    parentClassName: 'tooltip-parent-container',
     connectorClassName: 'tooltip-connectors',
     className: '',
     row: {
