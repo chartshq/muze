@@ -398,14 +398,14 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
     };
 };
 
-export const createRTree = (context, rtree) => {
+export const createRTree = (context) => {
     const elements = [].concat(...context.layers().filter(layer => layer.config().interactive !== false)
         .map((layer) => {
             const points = layer.getBoundBoxes();
             return points;
         })).flat().filter(d => d !== null);
 
-    rtree = rtree || new RTree();
+    const rtree = new RTree();
     rtree.load(elements);
     return rtree;
 };

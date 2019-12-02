@@ -141,6 +141,7 @@ export default class GenericBehaviour {
             const [selectionSet, payload] = params;
             const fieldsConfig = this.firebolt.data().getFieldsConfig();
             const { criteria } = payload;
+            const propagationFields = this._propagationFields;
 
             if (selectionSet.resetted() || criteria === null) {
                 propData = null;
@@ -166,14 +167,16 @@ export default class GenericBehaviour {
                     identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]
                 };
             } else {
-                const data = criteria;
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true,
+                    dimensions: propagationFields });
+                const fields = propagationFields ? [...propagationFields, ReservedFields.MEASURE_NAMES] :
+                    criteria[0];
 
-                const { mergedEnter } = selectionSet.getSets({ keepDims: true });
                 propData = {
-                    fields: data[0].map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
+                    fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d
                     })),
-                    identifiers: [criteria[0], ...mergedEnter]
+                    identifiers: [fields, ...mergedEnter]
                 };
             }
             this._propagationIdentifiers = propData;
@@ -196,6 +199,12 @@ export default class GenericBehaviour {
 
     isEnabled () {
         return this._enabled;
+    }
+
+    propagateWith (...params) {
+        this._propagationFields = params[0];
+
+        return this;
     }
 }
 

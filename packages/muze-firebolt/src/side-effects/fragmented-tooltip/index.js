@@ -12,7 +12,7 @@ export default class FragmentedTooltip extends Tooltip {
         let totalHeight = 0;
         let totalWidth = 0;
         const config = this.config();
-        const { payload } = props;
+        const { strategy } = props;
         const context = this.firebolt.context;
         const drawingInf = this.drawingContext();
 
@@ -54,7 +54,7 @@ export default class FragmentedTooltip extends Tooltip {
                 break;
             }
 
-            boxes.push({
+            position && boxes.push({
                 x: position.x,
                 y: position.y,
                 width: tooltipBoundBox.width,
@@ -66,7 +66,7 @@ export default class FragmentedTooltip extends Tooltip {
         for (const key in tooltips) {
             if (!enter[key]) {
                 const tooltip = tooltips[key];
-                tooltip.content(payload.action, null);
+                tooltip.content(strategy, null);
                 if (!tooltip.getContents().length) {
                     tooltip.remove();
                     delete tooltips[key];
@@ -74,7 +74,7 @@ export default class FragmentedTooltip extends Tooltip {
             }
         }
 
-        spaceOutBoxes(boxes, boundBox, showVertically);
+        boxes.length && spaceOutBoxes(boxes, boundBox, showVertically);
         boxes.forEach(box => box.tooltip.position(box.x, box.y, {
             repositionArrow: true
         }));

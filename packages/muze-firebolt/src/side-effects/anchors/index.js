@@ -18,7 +18,10 @@ const addLayer = (layerRegistry, context, sideEffect) => {
                     const encoding = {
                         x: getObjProp(depLayerEncoding, 'x', 'field'),
                         y: getObjProp(depLayerEncoding, 'y', 'field'),
-                        color: getObjProp(depLayerEncoding, 'color', 'field'),
+                        color: {
+                            field: getObjProp(depLayerEncoding, 'color', 'field'),
+                            value: getObjProp(depLayerEncoding, 'color', 'value')
+                        },
                         size: {
                             field: getObjProp(depLayerEncoding, 'size', 'field'),
                             value: () => sideEffect.defaultSizeValue()
@@ -131,7 +134,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const upperAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-upper`);
         const lowerAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-lower`);
 
-        const target = payload.target;
+        const { target, action } = payload;
         let targetObj = null;
         if (target) {
             targetObj = target[1].reduce((acc, v, i) => {
@@ -144,20 +147,18 @@ export default class AnchorEffect extends SpawnableSideEffect {
         }
 
         [...upperAnchors, ...lowerAnchors].forEach((layer, index) => {
-            const linkedLayer = context.getLayerByName(layer.config().owner);
+            const layerConfig = layer.config();
+            const linkedLayer = context.getLayerByName(layerConfig.owner);
             const linkedLayerName = linkedLayer.constructor.formalName();
-            const groupId = layer.config().groupId;
+            const groupId = layerConfig.groupId;
             const isUpperAnchor = groupId === `${formalName}-upper`;
             let transformedData = [];
             let schema = [];
 
-            // Only render upper layers for all plots
-            if (isUpperAnchor) {
-                [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
-            }
+            [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
 
             // Render both upper and lower anchors for area plot if hovered over an anchor
-            if (linkedLayerName === 'area' && target) {
+            if (linkedLayerName === 'area' && target && action === 'highlight') {
                 const filterFn = dmMultipleSelection(target, dataModel);
                 const dmFromPayload = dataModel.select(filterFn, {});
 
@@ -177,7 +178,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
                     }
                 }
             };
-            const newConfig = mergeRecursive(layer.config(), anchorSizeConfig);
+            const newConfig = mergeRecursive(layerConfig, anchorSizeConfig);
 
             layer
                 .data(transformedDataModel)

@@ -10,7 +10,8 @@ import {
     BOTTOM,
     MAXWIDTH,
     CENTER,
-    HORIZONTAL
+    HORIZONTAL,
+    POSITION_ALIGNMENT_MAP
 } from '../enums/constants';
 
 /**
@@ -429,4 +430,21 @@ export const prepareSelectionSetData = (data, fieldName, dm) => {
         }, {}),
         fields: [fieldName]
     };
+};
+
+export const calculateTitleWidth = (measures, titleWidth, config) => {
+    const { maxItemSpaces, margin, itemSpaces } = measures;
+    const { position, buffer } = config;
+    const alignment = POSITION_ALIGNMENT_MAP[position];
+    let width = 0;
+
+    if (alignment === HORIZONTAL) {
+        const localBuffer = buffer[alignment];
+        width = itemSpaces.reduce((acc, cur) => acc + cur.width + localBuffer, 0);
+    } else if (maxItemSpaces.width < titleWidth) {
+        width = titleWidth + 2 * margin;
+    } else {
+        width = maxItemSpaces.width;
+    }
+    return width;
 };

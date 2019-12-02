@@ -9,7 +9,9 @@ import {
     getObjProp,
     COORD_TYPES,
     CommonProps,
-    defaultValue
+    defaultValue,
+    InvalidAwareTypes,
+    isSimpleObject
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -84,6 +86,12 @@ export const setNullsInStack = (transformedData, schema, value, setNulls) => {
     });
     return transformedData;
 };
+export const setNulls = (transformedData, val) => transformedData.map((seriesData) => {
+    if (val && (seriesData[val.index] instanceof InvalidAwareTypes)) {
+        seriesData[val.index] = null;
+    }
+    return seriesData;
+});
 
 /**
  *
@@ -96,7 +104,7 @@ export const setNullsInStack = (transformedData, schema, value, setNulls) => {
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
     const schema = data.schema;
-    const { transform, connectNullData: setNulls } = config;
+    const { transform, connectNullData: setNullData } = config;
     const {
         xField,
         yField,
@@ -115,7 +123,9 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
     }, data.uids);
 
     if (transformType === STACK) {
-        transformedData = setNullsInStack(transformedData, schema, value, setNulls);
+        transformedData = setNullsInStack(transformedData, schema, value, setNullData);
+    } else {
+        transformedData = setNulls(transformedData, dataModel.getFieldsConfig()[value]);
     }
     return transformedData;
 };
@@ -292,12 +302,20 @@ export const domainCalculator = {
     }
 };
 
-export const attachDataToVoronoi = (voronoi, points) => {
+const defFn = (d) => {
+    const { x, y } = d.update;
+    return {
+        x,
+        y
+    };
+};
+
+export const attachDataToVoronoi = (voronoi, points, accessor = defFn) => {
     voronoi.data([].concat(...points).filter(d => d.rowId !== undefined).map((d) => {
-        const point = d.update;
+        const { x, y } = accessor(d);
         return {
-            x: point.x,
-            y: point.y,
+            x,
+            y,
             data: d
         };
     }));
@@ -579,3 +597,20 @@ export const getBoundBoxes = points => points.map((point) => {
         data
     };
 });
+
+export const getDataFromEvent = (context, event) => {
+    const dataPoint = selectElement(event.target).data()[0];
+    if (isSimpleObject(dataPoint) && getObjProp(dataPoint, 'meta', 'layerId') === context.id()) {
+        const values = dataPoint && dataPoint.source;
+        let identifiers = null;
+        if (values) {
+            identifiers = context.getIdentifiersFromData(values, dataPoint.rowId);
+        }
+        return {
+            dimensions: [dataPoint],
+            id: identifiers,
+            layerId: context.id()
+        };
+    }
+    return null;
+};

@@ -114,12 +114,14 @@ export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
         const { x, y } = unit.fields();
         let measureFields;
 
-        if (x[0].type() === FieldType.MEASURE) {
-            measureFields = [`${x[0]}`];
-        } else if (y[0].type() === FieldType.MEASURE) {
-            measureFields = [`${y[0]}`];
+        if (x.length && y.length) {
+            if (x[0].type() === FieldType.MEASURE) {
+                measureFields = [`${x[0]}`];
+            } else if (y[0].type() === FieldType.MEASURE) {
+                measureFields = [`${y[0]}`];
+            }
+            payload.selectedMeasures = measureFields;
         }
-        payload.selectedMeasures = measureFields;
     }
 };
 

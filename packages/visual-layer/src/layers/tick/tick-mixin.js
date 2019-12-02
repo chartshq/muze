@@ -1,11 +1,11 @@
-import { FieldType } from 'muze-utils';
+import { FieldType, makeElement, appendElement } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
 import { positionPoints, getIndividualClassName,
-    getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
-import { interactionStyleMap } from './helper';
+    getColorMetaInf, resolveEncodingValues, toCartesianCoordinates, attachDataToVoronoi } from '../../helpers';
+import { strokeWidthPositionMap } from './helper';
 
 const pointTranslators = {
     polar: (data, config = {}, layerInst) => {
@@ -59,7 +59,7 @@ const pointTranslators = {
                 source: d.source,
                 rowId: d.rowId,
                 data: d,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: { ...{ layerId: layerInst.id() }, ...getColorMetaInf(style) }
             };
             point.className = getIndividualClassName(d, i, data, layerInst);
             points.push(point);
@@ -157,7 +157,7 @@ const pointTranslators = {
                     source: row,
                     rowId: d.rowId,
                     data: d.dataObj,
-                    meta: getColorMetaInf(style, colorAxis)
+                    meta: { ...{ layerId: layerInst.id() }, ...getColorMetaInf(style) }
                 };
                 point.className = getIndividualClassName(d, i, data, layerInst);
                 points.push(point);
@@ -196,10 +196,6 @@ export const TickLayerMixin = superclass => class extends superclass {
         return 'path';
     }
 
-    getInteractionStyles (interactionType, styleType) {
-        return (interactionStyleMap[interactionType] || {})[styleType];
-    }
-
     /**
     * Generates an array of objects containing x, y, width and height of the points from the data
     * @param  {Array.<Array>} data Data Array
@@ -209,6 +205,17 @@ export const TickLayerMixin = superclass => class extends superclass {
     */
     translatePoints (data, config) {
         return pointTranslators[this.coord()](data, config, this);
+    }
+
+    attachDataToVoronoi (points) {
+        attachDataToVoronoi(this._voronoi, points, (d) => {
+            const { x, x0, y, y0 } = d.update;
+
+            return {
+                x: x + (x0 - x) / 2,
+                y: y + (y0 - y) / 2
+            };
+        });
     }
 
     getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {
@@ -222,5 +229,57 @@ export const TickLayerMixin = superclass => class extends superclass {
                 y: heightSpan
             }
         };
+    }
+
+    addOverlayPath (refElement, data, style, strokePosition) {
+        let pathElement;
+
+        if (this._overlayPath[data.rowId]) {
+            pathElement = this._overlayPath[data.rowId];
+        } else {
+            pathElement = makeElement(refElement, 'path', [data.update], null, {}, d => `${d.x} ${data.rowId}`);
+            pathElement.style('fill', 'none');
+            pathElement.style('fill-opacity', 0);
+            pathElement.attr('id', data.rowId);
+            this._overlayPath[data.rowId] = pathElement;
+        }
+
+        let offsetM = { x: 0, y: 0 };
+        let offsetL = { x: 0, y: 0 };
+
+        if (style.type === 'stroke-width') {
+            const { L, M } = strokeWidthPositionMap({
+                width: parseInt(style.value, 10),
+                position: strokePosition
+            });
+            offsetM = M;
+            offsetL = L;
+        }
+
+        pathElement.attr('d', (d) => {
+            if (d.update) {
+                return `M ${d.update.x + offsetM.x} ${d.update.y + offsetM.y}
+                    L ${d.update.x0 + offsetL.x} ${d.update.y0 + offsetL.y}`;
+            }
+            return `M ${d.x + offsetM.x} ${d.y + offsetM.y}
+                L ${d.x0 + offsetL.x} ${d.y0 + offsetL.y}`;
+        });
+
+        let styleVal = style.value;
+        if (typeof styleVal === 'function') {
+            const currentStyle = pathElement.style(style.type);
+            styleVal = styleVal(currentStyle);
+        }
+        pathElement.style(style.type, styleVal);
+        appendElement(refElement, pathElement.node());
+    }
+
+    removeOverlayPath (data, style) {
+        const currentPath = this._overlayPath[data.rowId];
+        if (currentPath) {
+            currentPath.node().removeAttribute('style');
+            Object.keys(style).forEach(s => currentPath.style(s, style[s]));
+            currentPath.style('fill-opacity', 0);
+        }
     }
 };

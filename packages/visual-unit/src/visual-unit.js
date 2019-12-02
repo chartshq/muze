@@ -159,7 +159,7 @@ export default class VisualUnit {
                     props: [CommonProps.ON_LAYER_DRAW],
                     listener: (context, [, drawn]) => {
                         if (drawn) {
-                            context._rtree = createRTree(context, context._rtree);
+                            context._rtree = createRTree(context);
 
                             const firebolt = context.firebolt();
                             dispatchQueuedSideEffects(firebolt);
@@ -648,7 +648,7 @@ export default class VisualUnit {
             return pointObj;
         }
 
-        const markInf = this.getMarkInfFromLayers(x, y, config) || { id: null };
+        const markInf = this.getMarkInfFromLayers(x, y, { ...config, dimValue }) || { id: null };
         pointObj = Object.assign({}, markInf);
 
         pointObj.target = markInf.id;

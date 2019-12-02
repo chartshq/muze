@@ -488,15 +488,8 @@ export default class MatrixResolver {
         return this;
     }
 
-    getMatrices (datamodel, config, componentRegistry, encoders) {
-        const context = {
-            datamodel,
-            componentRegistry,
-            encoders,
-            resolver: this
-        };
-
-        this._placeholderInfo = computeMatrices(context, config);
+    getMatrices (resolverConfig) {
+        this._placeholderInfo = computeMatrices(resolverConfig);
 
         return this._placeholderInfo;
     }

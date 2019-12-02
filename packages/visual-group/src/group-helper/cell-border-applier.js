@@ -9,6 +9,11 @@ import {
     BOTTOM
 } from '../enums/constants';
 
+const handleBlankCell = (data) => {
+    data.config().externalClassname.push(`${NONE}-${LEFT}`);
+    data.config().externalClassname.push(`${NONE}-${RIGHT}`);
+};
+
 export const sanitiseHeaderMatrix = (matrices, header) => {
     if (header) {
         for (let i = 0; i < matrices.length; i++) {
@@ -57,7 +62,7 @@ export const sanitiseGeomMatrix = (matrices, arr = {}) => {
     }
 };
 
-export const sanitiseFacetValues = (matrices, type) => {
+export const sanitiseFacetValues = (matrices, type, blankCell) => {
     const normal = type === `${RIGHT}` ? `${DARK}` : `${NORMAL}`;
     const length = matrices.length;
     let latestSource = matrices[0][0].source();
@@ -89,6 +94,10 @@ export const sanitiseFacetValues = (matrices, type) => {
                 } else {
                     matrices[i][0].config().externalClassname.push(`${DARK}-${BOTTOM}`);
                 }
+                if (matrices[i][j] instanceof blankCell) {
+                    matrices[i][j].config().externalClassname.push(`${NONE}-${TOP}`);
+                    matrices[i][j].config().externalClassname.push(`${NONE}-${BOTTOM}`);
+                }
             } else if (j !== matrices[i].length - 1) {
                 matrices[i][j].config().externalClassname.push(`${DARK}-${type}`);
             }
@@ -102,18 +111,23 @@ export const sanitiseFacetValues = (matrices, type) => {
             if (arr[i]) {
                 matrices[i - 1][j].config().externalClassname.push(`${DARK}-${BOTTOM}`);
             }
+
+            if (matrices[i][j] instanceof blankCell) {
+                handleBlankCell(matrices[i][j], blankCell);
+            }
         }
     }
     return arr;
 };
 
-export const sanitiseBorderMatrix = (matrices) => {
+export const sanitiseBorderMatrix = (matrices, blankCell) => {
     const { leftMatrix, rightMatrix, topMatrix, bottomMatrix } = matrices;
     let bottomBorderObj = {};
     if (rightMatrix.length) {
-        bottomBorderObj = sanitiseFacetValues(rightMatrix, `${RIGHT}`);
-    } else if (leftMatrix.length) {
-        bottomBorderObj = sanitiseFacetValues(leftMatrix, `${LEFT}`);
+        bottomBorderObj = sanitiseFacetValues(rightMatrix, `${RIGHT}`, blankCell);
+    }
+    if (leftMatrix.length) {
+        bottomBorderObj = sanitiseFacetValues(leftMatrix, `${LEFT}`, blankCell);
     }
     topMatrix.length && sanitiseHeaderMatrix(topMatrix);
     bottomMatrix.length && sanitiseHeaderMatrix(bottomMatrix);

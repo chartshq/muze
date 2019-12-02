@@ -68,8 +68,6 @@
 		env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
 		let mountPoint = document.getElementById('chart');
 		window.canvas = env.canvas();
-		let canvas2 = env.canvas();
-		let canvas3 = env.canvas();
 		let rows = [[ 'Acceleration']],
 			columns = [['Horsepower']];
 		canvas = canvas

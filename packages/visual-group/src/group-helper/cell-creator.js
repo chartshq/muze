@@ -533,158 +533,155 @@ const transformDataModel = (dataModel, config, resolver) => {
  * @return {Object} conputed matrices
  * @memberof MatrixResolver
  */
-export const computeMatrices = (context, config) => {
+export const computeMatrices = (resolverConfig) => {
     let placeholderInfo = {};
     const {
-        resolver,
         datamodel,
+        encoders,
+        resolver,
+        globalConfig,
+        selection,
+        transform,
         componentRegistry,
-        encoders
-    } = context;
-    const {
-            globalConfig,
-            selection,
-            transform
-        } = config;
-    const groupBy = globalConfig.autoGroupBy;
-    const { smartlabel: labelManager } = resolver.dependencies();
-    const fieldMap = datamodel.getFieldsConfig();
-    const layerConfig = resolver.layerConfig();
-    const registry = resolver.registry();
-    const { fields: normalizedRows } = resolver.horizontalAxis();
-    const { fields: normalizedColumns } = resolver.verticalAxis();
-    const otherEncodings = resolver.optionalProjections(config, layerConfig, datamodel.getSchema());
-    const facetsAndProjections = resolver.getAllFields();
-    const { simpleEncoder } = encoders;
+        groupBy,
+        labelManager,
+        fieldMap,
+        layerConfig,
+        registry,
+        normalizedRows,
+        normalizedColumns,
+        otherEncodings,
+        facetsAndProjections,
+        simpleEncoder,
+        config
+    } = resolverConfig;
 
-    if (simpleEncoder.hasMandatoryFields(facetsAndProjections)) {
-        const { rowFacets, colFacets } = facetsAndProjections;
-        const isFacet = rowFacets.length > 0 || colFacets.length > 0;
+    const { rowFacets, colFacets, colProjections, rowProjections } = facetsAndProjections;
+    const isProjection = rowProjections.length > 0 || colProjections.length > 0;
+    const isFacet = rowFacets.length > 0 || colFacets.length > 0;
 
-        if (isFacet) {
-            globalConfig.isFacet = true;
-        }
-        const matrixGnContext = {
-            // Configuration to be passed to generate the  different matrices.
-            // A common config is used for both value matrices and other matrices
-            normalizedColumns,
-            normalizedRows,
-            facetsAndProjections,
-            layers: layerConfig,
-            fieldMap,
-            otherEncodings,
-            encoders,
-            facet: globalConfig.facet || {},
-            axisFrom: globalConfig.axisFrom || {},
-            selection,
-            resolver
-        };
-        const cells = {
-            GeomCell: resolver.getCellDef(registry.cells.GeomCell),
-            AxisCell: resolver.getCellDef(registry.cells.AxisCell),
-            BlankCell: resolver.getCellDef(registry.cells.BlankCell),
-            TextCell: resolver.getCellDef(registry.cells.TextCell)
-        };
-        const isRowSizeEqual = isDistributionEqual(normalizedRows);
-        const isColumnSizeEqual = isDistributionEqual(normalizedColumns);
-
-        resolver.colCells({});
-        resolver.rowCells({});
-        resolver.datamodelTransform(transform || {});
-
-        // Cell creation begins here
-        resolver.resetSimpleAxes();
-
-        const {
-            entryCellMap
-        } = resolver.cacheMaps();
-        const newCacheMap = {
-            exitCellMap: entryCellMap,
-            entryCellMap: new Map()
-        };
-
-        resolver.cacheMaps(newCacheMap);
-        const valueCellContext = {
-            config: globalConfig,
-            suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
-            resolver,
-            cell: cells.GeomCell,
-            encoder: simpleEncoder,
-            newCacheMap,
-            detailFields: config.detail,
-            retinalConfig: {
-                color: config.color,
-                size: config.size,
-                shape: config.shape
-            }
-        };
-
-        const groupedModel = transformDataModel(datamodel, {
-            facetsAndProjections,
-            suppliedLayers: valueCellContext.suppliedLayers,
-            groupBy
-        }, resolver);
-        simpleEncoder.data(groupedModel);
-        // return a callback function to create the cells from the matrix
-        const cellCreator = resolver.valueCellsCreator(valueCellContext);
-        // Creates value matrices from the datamodel and configs
-        const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator, globalConfig);
-
-        removeExitCells(resolver);
-        resolver.cacheMaps().exitCellMap.clear();
-        resolver.valueMatrix(valueMatrixInfo.matrix);
-
-        const { xAxes, yAxes } = mutateAxesFromMap(resolver.cacheMaps(), resolver.axes());
-
-        resolver.axes({
-            x: xAxes,
-            y: yAxes
-        });
-
-        resolver.createUnits(componentRegistry, config);
-
-        const matrices = {
-            valuesMatrix: valueMatrixInfo,
-            axesMatrix: resolver.axes()
-        };
-        // Create all matrices
-        const {
-            rows,
-            columns,
-            selectionObj,
-            rowPriority,
-            colPriority
-        } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
-
-        resolver.rowMatrix(rows);
-        resolver.columnMatrix(columns);
-
-        if (isFacet) {
-            const arr = sanitiseBorderMatrix({
-                leftMatrix: rows[0],
-                rightMatrix: rows[1],
-                topMatrix: columns[0],
-                bottomMatrix: columns[1]
-            });
-            valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
-        }
-
-        placeholderInfo = {
-            rows: resolver.rowMatrix(),
-            columns: resolver.columnMatrix(),
-            values: resolver.valueMatrix(),
-            isColumnSizeEqual,
-            isRowSizeEqual,
-            priority: {
-                row: rowPriority,
-                col: colPriority
-            },
-            selection: selectionObj,
-            dataModels: {
-                groupedModel,
-                parentModel: datamodel
-            }
-        };
+    if (isFacet) {
+        globalConfig.isFacet = true;
     }
+    const matrixGnContext = {
+        // Configuration to be passed to generate the  different matrices.
+        // A common config is used for both value matrices and other matrices
+        normalizedColumns,
+        normalizedRows,
+        facetsAndProjections,
+        layers: layerConfig,
+        fieldMap,
+        otherEncodings,
+        encoders,
+        facet: globalConfig.facet || {},
+        axisFrom: globalConfig.axisFrom || {},
+        selection,
+        resolver
+    };
+    const cells = {
+        GeomCell: resolver.getCellDef(registry.cells.GeomCell),
+        AxisCell: resolver.getCellDef(registry.cells.AxisCell),
+        BlankCell: resolver.getCellDef(registry.cells.BlankCell),
+        TextCell: resolver.getCellDef(registry.cells.TextCell)
+    };
+    const isRowSizeEqual = isDistributionEqual(normalizedRows);
+    const isColumnSizeEqual = isDistributionEqual(normalizedColumns);
+
+    resolver.colCells({});
+    resolver.rowCells({});
+    resolver.datamodelTransform(transform || {});
+
+    // Cell creation begins here
+    resolver.resetSimpleAxes();
+
+    const {
+        entryCellMap
+    } = resolver.cacheMaps();
+    const newCacheMap = {
+        exitCellMap: entryCellMap,
+        entryCellMap: new Map()
+    };
+
+    resolver.cacheMaps(newCacheMap);
+    const valueCellContext = {
+        config: globalConfig,
+        suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+        resolver,
+        cell: cells.GeomCell,
+        encoder: simpleEncoder,
+        newCacheMap,
+        detailFields: config.detail,
+        retinalConfig: {
+            color: config.color,
+            size: config.size,
+            shape: config.shape
+        }
+    };
+
+    const groupedModel = transformDataModel(datamodel, {
+        facetsAndProjections,
+        suppliedLayers: valueCellContext.suppliedLayers,
+        groupBy
+    }, resolver);
+    simpleEncoder.data(groupedModel);
+    // return a callback function to create the cells from the matrix
+    const cellCreator = resolver.valueCellsCreator(valueCellContext);
+    // Creates value matrices from the datamodel and configs
+    const valueMatrixInfo = getMatrixModel(groupedModel, facetsAndProjections, cellCreator, globalConfig);
+
+    removeExitCells(resolver);
+    resolver.cacheMaps().exitCellMap.clear();
+    resolver.valueMatrix(valueMatrixInfo.matrix);
+
+    const { xAxes, yAxes } = mutateAxesFromMap(resolver.cacheMaps(), resolver.axes());
+
+    resolver.axes({
+        x: xAxes,
+        y: yAxes
+    });
+
+    resolver.createUnits(componentRegistry, config);
+
+    const matrices = {
+        valuesMatrix: valueMatrixInfo,
+        axesMatrix: resolver.axes()
+    };
+    // Create all matrices
+    const {
+        rows,
+        columns,
+        selectionObj,
+        rowPriority,
+        colPriority
+    } = generateMatrices(matrixGnContext, matrices, cells, labelManager);
+
+    resolver.rowMatrix(rows);
+    resolver.columnMatrix(columns);
+    if (isFacet || isProjection) {
+        const arr = sanitiseBorderMatrix({
+            leftMatrix: rows[0],
+            rightMatrix: rows[1],
+            topMatrix: columns[0],
+            bottomMatrix: columns[1]
+        }, registry.cells.BlankCell);
+        valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
+    }
+
+    placeholderInfo = {
+        rows: resolver.rowMatrix(),
+        columns: resolver.columnMatrix(),
+        values: resolver.valueMatrix(),
+        isColumnSizeEqual,
+        isRowSizeEqual,
+        priority: {
+            row: rowPriority,
+            col: colPriority
+        },
+        selection: selectionObj,
+        dataModels: {
+            groupedModel,
+            parentModel: datamodel
+        }
+    };
     return placeholderInfo;
 };
