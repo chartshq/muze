@@ -184,15 +184,18 @@ export const dispatchSecondaryActions = (firebolt, { action, propagationData, co
     });
 };
 
-export const createMapByDimensions = (context, dm) => (propDims, fieldsConfig) => {
-    const cacheMap = context._cacheMap || (context._cacheMap = {});
-    if (!cacheMap[propDims]) {
-        cacheMap[propDims] = dm.getData({ withUid: true }).data.reduce((acc, row) => {
-            const key = propDims.map(d => row[fieldsConfig[d].index]);
-            acc[key] || (acc[key] = []);
-            acc[key].push(row);
-            return acc;
-        }, {});
-    }
-    return cacheMap[propDims];
+export const createMapByDimensions = (context, dm) => {
+    let cacheMap = context._cacheMap = {};
+    return (propDims, fieldsConfig) => {
+        cacheMap = context._cacheMap;
+        if (!cacheMap[propDims]) {
+            cacheMap[propDims] = dm.getData({ withUid: true }).data.reduce((acc, row) => {
+                const key = propDims.map(d => row[fieldsConfig[d].index]);
+                acc[key] || (acc[key] = []);
+                acc[key].push(row);
+                return acc;
+            }, {});
+        }
+        return cacheMap[propDims];
+    };
 };
