@@ -1,5 +1,6 @@
 /* global window, requestAnimationFrame, cancelAnimationFrame */
 import { FieldType, DimensionSubtype, DateTimeFormatter, DM_DERIVATIVES, default as DataModel } from 'datamodel';
+
 import {
     axisLeft,
     axisRight,
@@ -52,13 +53,14 @@ import {
     easeElastic
 } from 'd3-ease';
 import {
-   color,
-   rgb,
-   hsl
+    color,
+    rgb,
+    hsl
 } from 'd3-color';
 import { voronoi } from 'd3-voronoi';
 import { dataSelect } from './DataSystem';
-import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING } from './enums';
+import * as scales from './scales';
+import { DATA_TYPE, SORT_ORDER_ASCENDING, SORT_ORDER_DESCENDING, ReservedFields } from './enums';
 import * as STACK_CONFIG from './enums/stack-config';
 
 const { CATEGORICAL, TEMPORAL } = DimensionSubtype;
@@ -168,6 +170,7 @@ const getDomainFromData = (data, fields, fieldType) => {
     let domain;
     const domArr = [];
     data = data[0] instanceof Array ? data : [data];
+
     switch (fieldType) {
     case CATEGORICAL:
         domain = [].concat(...data.map(arr => arr.map(d => d[fields[0]]).filter(d => d !== undefined)));
@@ -360,7 +363,13 @@ const capitalizeFirst = (text) => {
  *
  * @param {*} arr
  */
-const unique = arr => ([...new Set(arr)]);
+const unique = (arr, fn = d => d) => {
+    const vals = arr.reduce((acc, v) => {
+        acc[fn(v)] = v;
+        return acc;
+    }, {});
+    return Object.values(vals);
+};
 
 /**
  * Gets the minimum difference between two consecutive numbers  in an array.
@@ -776,17 +785,17 @@ function hue2rgb (p, q, t) {
     return p;
 }
 
-  /**
-   * Converts an HSL color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
-   * Assumes h, s, and l are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  l       The lightness
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  l       The lightness
+ * @return  Array           The RGB representation
+ */
 const hslToRgb = (h, s, l, a = 1) => {
     let r;
     let g;
@@ -806,17 +815,17 @@ const hslToRgb = (h, s, l, a = 1) => {
     return [r * 255, g * 255, b * 255, a];
 };
 
-  /**
-   * Converts an RGB color value to HSV. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes r, g, and b are contained in the set [0, 255] and
-   * returns h, s, and v in the set [0, 1].
-   *
-   * @param   Number  r       The red color value
-   * @param   Number  g       The green color value
-   * @param   Number  b       The blue color value
-   * @return  Array           The HSV representation
-   */
+/**
+ * Converts an RGB color value to HSV. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes r, g, and b are contained in the set [0, 255] and
+ * returns h, s, and v in the set [0, 1].
+ *
+ * @param   Number  r       The red color value
+ * @param   Number  g       The green color value
+ * @param   Number  b       The blue color value
+ * @return  Array           The HSV representation
+ */
 const rgbToHsv = (r, g, b, a = 1) => {
     r = +r; g = +g; b = +b; a = +a;
     r /= 255; g /= 255; b /= 255;
@@ -842,17 +851,17 @@ const rgbToHsv = (r, g, b, a = 1) => {
     return [h, s, l, a];
 };
 
-  /**
-   * Converts an HSV color value to RGB. Conversion formula
-   * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
-   * Assumes h, s, and v are contained in the set [0, 1] and
-   * returns r, g, and b in the set [0, 255].
-   *
-   * @param   Number  h       The hue
-   * @param   Number  s       The saturation
-   * @param   Number  v       The value
-   * @return  Array           The RGB representation
-   */
+/**
+ * Converts an HSV color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+ * Assumes h, s, and v are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  v       The value
+ * @return  Array           The RGB representation
+ */
 const hsvToRgb = (h, s, v, a = 1) => {
     let r;
     let g;
@@ -885,14 +894,26 @@ const hexToHsv = (hex) => {
     return result ? rgbToHsv(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)) : '';
 };
 
+const RGBAtoRGB = (r, g, b, a, r2 = 255, g2 = 255, b2 = 255) => {
+    const r3 = Math.round(((1 - a) * r2) + (a * r));
+    const g3 = Math.round(((1 - a) * g2) + (a * g));
+    const b3 = Math.round(((1 - a) * b2) + (a * b));
+    return `rgb(${r3},${g3},${b3})`;
+};
+
+const hslaToRgb = (h, s, l, a) => {
+    const [r, g, b, a1] = hslToRgb(h, s, l, a);
+    return RGBAtoRGB(r, g, b, a1);
+};
+
 const detectColor = (col) => {
     const matchRgb = /rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/;
     const matchHsl = /hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g;
 
     // Source :  https://gist.github.com/sethlopezme/d072b945969a3cc2cc11
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchRgba = /rgba?\(((25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,\s*?){2}(25[0-5]|2[0-4]\d|1\d{1,2}|\d\d?)\s*,?\s*([01]\.?\d*?)?\)/;
-     // eslint-disable-next-line
+    // eslint-disable-next-line
     const matchHsla = /^hsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*(\d*(?:\.\d+)?)\)$/;
     const matchHex = /^#([0-9a-f]{3}){1,2}$/i;
 
@@ -903,6 +924,51 @@ const detectColor = (col) => {
     } else if (matchHex.test(col)) {
         return 'hex';
     } return col;
+};
+
+function RGBAToHexA (rgba) {
+    const sep = rgba.indexOf(',') > -1 ? ',' : ' ';
+    rgba = rgba.substr(5).split(')')[0].split(sep);
+
+  // Strip the slash if using space-separated syntax
+    if (rgba.indexOf('/') > -1) { rgba.splice(3, 1); }
+
+    for (const R in rgba) {
+        const r = rgba[R];
+        if (r.indexOf('%') > -1) {
+            const p = r.substr(0, r.length - 1) / 100;
+
+            if (R < 3) {
+                rgba[R] = Math.round(p * 255);
+            } else {
+                rgba[R] = p;
+            }
+        }
+    }
+
+    let r = (+rgba[0]).toString(16);
+    let g = (+rgba[1]).toString(16);
+    let b = (+rgba[2]).toString(16);
+    let a = Math.round(+rgba[3] * 255).toString(16);
+
+    if (r.length === 1) { r = `0${r}`; }
+    if (g.length === 1) { g = `0${g}`; }
+    if (b.length === 1) { b = `0${b}`; }
+    if (a.length === 1) { a = `0${a}`; }
+
+    return `#${r}${g}${b}${a}`;
+}
+
+const transformToHex = (datumStyle, colorType) => {
+    if (colorType === 'rgb') {
+        const [r, g, b, a] = datumStyle.replace(/[^\d,]/g, '').split(',');
+        const aa = a || 1;
+
+        const rgbaString = `rgba(${r}, ${g}, ${b}, ${aa})`;
+        return RGBAToHexA(rgbaString);
+    }
+    // Add methods to handle hsl and hex conversion
+    return null;
 };
 
 const assembleModelFromIdentifiers = (model, identifiers) => {
@@ -945,18 +1011,24 @@ const assembleModelFromIdentifiers = (model, identifiers) => {
  * @param {*} criteria
  *
  */
-const getDataModelFromRange = (dataModel, criteria, mode) => {
-    if (criteria === null) {
-        return null;
-    }
-    const selFields = Object.keys(criteria);
+const getDataModelFromRange = (dataModel, criteria, mode, criteriaFields) => {
+    if (criteria === null) return null;
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const selFields = criteriaFields || Object.keys(criteria).filter(d => d in fieldsConfig);
     const selFn = fields => selFields.every((field) => {
-        const val = fields[field].internalValue;
+        const fieldValue = fields[field].internalValue;
         const range = criteria[field][0] instanceof Array ? criteria[field][0] : criteria[field];
+
         if (typeof range[0] === STRING) {
-            return range.find(d => d === val) !== undefined;
+            return range.find(d => d === fieldValue) !== undefined;
         }
-        return range ? val >= range[0] && val <= range[1] : true;
+
+        if (range) {
+            // Check if the selected bar value lies insid e the selection box
+            return fieldValue >= range[0] && fieldValue <= range[1];
+        }
+
+        return false;
     });
 
     return dataModel.select(selFn, {
@@ -965,6 +1037,10 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
     });
 };
 
+const getArrayIndexMap = arr => arr.reduce((acc, value, i) => {
+    acc[value] = i;
+    return acc;
+}, {});
 /**
  *
  *
@@ -972,7 +1048,7 @@ const getDataModelFromRange = (dataModel, criteria, mode) => {
  * @param {*} identifiers
  *
  */
-const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
+const getDataModelFromIdentifiers = (dataModel, identifiers, mode, hasBarLayer) => {
     let filteredDataModel;
     if (identifiers instanceof Array) {
         const fieldsConfig = dataModel.getFieldsConfig();
@@ -981,11 +1057,11 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
         if (identifiers instanceof Function) {
             filteredDataModel = identifiers(dataModel, {}, false);
         } else if (identifiers instanceof Array && identifiers[0].length) {
-            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig);
-            filteredDataModel = dataModel.select((fields) => {
+            const filteredSchema = identifiers[0].filter(d => d in fieldsConfig || d === ReservedFields.ROW_ID);
+            filteredDataModel = dataModel.select((fields, rowId) => {
                 let include = true;
                 filteredSchema.forEach((propField, idx) => {
-                    const value = fields[propField].internalValue;
+                    const value = propField === ReservedFields.ROW_ID ? rowId : fields[propField].internalValue;
                     const index = dataArr.findIndex(d => d[idx] === value);
                     include = include && index !== -1;
                 });
@@ -1001,7 +1077,7 @@ const getDataModelFromIdentifiers = (dataModel, identifiers, mode) => {
             });
         }
     } else {
-        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode);
+        filteredDataModel = getDataModelFromRange(dataModel, identifiers, mode, hasBarLayer);
     }
     return filteredDataModel;
 };
@@ -1106,14 +1182,16 @@ const concatModels = (dm1, dm2) => {
             } else {
                 const dm1Key = dim1Values.join();
                 const dm2Key = dim2Values.join();
-                if (!commonTuples[dm1Key] && !commonTuples[dm2Key]) {
-                    !tuples1[dm1Key] && (tuples1[dm1Key] = {});
-                    !tuples2[dm2Key] && (tuples2[dm2Key] = {});
+                if (!commonTuples[dm1Key]) {
+                    !commonTuples[dm1Key] && (commonTuples[dm1Key] = {});
                     row1.forEach((value, idx) => {
-                        tuples1[dm1Key][schema1[idx].name] = value;
+                        commonTuples[dm1Key][schema1[idx].name] = value;
                     });
+                }
+                if (!commonTuples[dm2Key]) {
+                    !commonTuples[dm2Key] && (commonTuples[dm2Key] = {});
                     row2.forEach((value, idx) => {
-                        tuples2[dm2Key][schema2[idx].name] = value;
+                        commonTuples[dm2Key][schema2[idx].name] = value;
                     });
                 }
             }
@@ -1141,7 +1219,7 @@ const stackOffsets = {
 
 // eslint-disable-next-line require-jsdoc
 const stack = params => d3Stack().keys(params.keys).offset(stackOffsets[params.offset])
-                .order(stackOrders[params.order])(params.data);
+    .order(stackOrders[params.order])(params.data);
 
 /**
  * Groups the data into a hierarchical tree structure based on one or more fields.
@@ -1155,6 +1233,14 @@ const nestCollection = (params) => {
     params.keys.forEach(key => nestFn.key(d => d[key]));
     return nestFn.entries(params.data);
 };
+
+/**
+ * Returns array difference, elements in array A, not in Array B
+ * @param { Array.<number> } arr Data which needs to be grouped
+ * @param { Array.<number> } arr1 Field indices by which the data will be grouped
+ * @return { Array.<number> } Returns the array difference (A - B)
+ */
+const getArrayDiff = (arr, arr1) => arr.filter(el => arr1.indexOf(el) < 0);
 
 const pathInterpolators = {
     curveLinear,
@@ -1294,12 +1380,19 @@ const nearestSortingDetails = (dataModel) => {
     return nearestSortDerivation ? nearestSortDerivation.criteria : null;
 };
 
+const sortingOrder = (a, b) => {
+    const sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes)
+    ? a.localeCompare(b)
+    : 1;
+    return sortOrder;
+};
+
 /**
  * Map containing key, value sortingOrder pairs
  */
 const sortOrderMap = {
-    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => firstVal.localeCompare(secondVal),
-    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => secondVal.localeCompare(firstVal)
+    [SORT_ORDER_ASCENDING]: (firstVal, secondVal) => sortingOrder(firstVal, secondVal),
+    [SORT_ORDER_DESCENDING]: (firstVal, secondVal) => sortingOrder(secondVal, firstVal)
 };
 
 /**
@@ -1327,22 +1420,203 @@ const intersect = (arr1, arr2, accessors = [v => v, v => v]) => {
     return arr1.filter(value => set.has(fn1(value)));
 };
 
+const difference = (arr1, arr2, accessors = [v => v, v => v]) => {
+    const [fn1, fn2] = accessors;
+    const set = new Set(arr2.map(v => fn2(v)));
+    return arr1.filter(value => !set.has(fn1(value)));
+};
+
+const partition = (array, filterFn) => array.reduce((acc, v, i) => {
+    const pass = filterFn(v, i, array);
+
+    pass ? acc[0].push(v) : acc[1].push(v);
+    return acc;
+}, [[], []]);
+
+const mix = superclass => ({
+    with: (...mixins) => mixins.reduce((cls, mixin) => mixin(cls), superclass)
+});
+
+const componentRegistry = (comps) => {
+    const reg = Object.assign({}, comps);
+    const regObj = {
+        register: (def, customKey) => {
+            const key = customKey || def.formalName();
+
+            reg[key] = def;
+            return regObj;
+        },
+        get: () => reg
+    };
+
+    return regObj;
+};
+
+const getReadableTicks = (domain, steps) => {
+    // scaling the axis based on steps provided
+    const orderedDomain = [Math.min(...domain), Math.max(...domain)];
+    if (steps < 3) {
+        return orderedDomain;
+    }
+
+    const tempScale = scales.scaleQuantize().domain(orderedDomain).nice();
+    let tempAxis = null;
+    let legendTicks = null;
+
+    tempAxis = Symbols.axisBottom().scale(tempScale);
+
+    legendTicks = tempAxis.scale().ticks(steps);
+
+    if (Math.max(...legendTicks) < orderedDomain[1]) {
+        // legendTicks.pop();
+        legendTicks.push(orderedDomain[1]);
+    }
+    if (Math.min(...legendTicks) > orderedDomain[0]) {
+        // legendTicks.shift();
+        legendTicks.unshift(orderedDomain[0]);
+    }
+    return legendTicks;
+};
+
+const RGBAToHSLA = (r, g, b, a = 1) => {
+    // Make r, g, and b fractions of 1
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    // Find greatest and smallest channel values
+    const cmin = Math.min(r, g, b);
+    const cmax = Math.max(r, g, b);
+    const delta = cmax - cmin;
+    let h = 0;
+    let s = 0;
+    let l = 0;
+
+    // Calculate hue
+    // No difference
+    if (delta === 0) {
+        h = 0;
+    } else if (cmax === r) {
+        // Red is max
+        h = ((g - b) / delta) % 6;
+    } else if (cmax === g) {
+        // Green is max
+        h = (b - r) / delta + 2;
+    } else {
+        // Blue is max
+        h = (r - g) / delta + 4;
+    }
+    h = Math.round(h * 60);
+
+    // Make negative hues positive behind 360°
+    if (h < 0) { h += 360; }
+    // Calculate lightness
+    l = (cmax + cmin) / 2;
+    // Calculate saturation
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    // Multiply l and s by 100
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return {
+        color: `hsla(${h},${s}%,${l}%,${a})`,
+        code: [h, s, l, a]
+    };
+};
+
+const transformColor = (rgbaValues, { h = 0, s = 0, l = 0, a }, datum, apply) => {
+    const [origH, origS, origL, origA] = RGBAToHSLA(...rgbaValues).code;
+    const sanitizedA = parseFloat(a || origA, 10);
+    const newH = origH + h;
+    const newS = origS + s;
+    const newL = origL + l;
+    let newA = sanitizedA + 1;
+
+    if (!apply) {
+        newA = sanitizedA - 1;
+    }
+
+    const finalcolor = {
+        color: `hsla(${newH},${newS}%,${newL}%,${newA})`,
+        hsla: [newH, newS, newL, newA]
+    };
+    return finalcolor;
+};
+
+const pointWithinCircle = (c, point) => {
+    const { x: cx, y: cy, r } = c;
+    const { x, y } = point;
+
+    const dist = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2);
+    return dist <= r;
+};
+
+/**
+ * Generates a function which performs an intersection (dataModel select)
+ * operation for multiple fields
+ * @param {Array} targetData - Nested array with field and values in the format:
+ * [
+ *  [field1, field2]
+ *  [val1, val2]
+ * ]
+ * @param {Object} dm - The dataModel instance
+ * @return {Function} filter function
+ */
+const dmMultipleSelection = (targetData, dm) => {
+    const targetFields = targetData[0];
+    const targetVals = targetData.slice(1, targetData.length);
+    const payloadMap = targetVals.reduce((acc, v) => {
+        acc[v] = v;
+        return acc;
+    }, {});
+    const measures = Object.keys(dm.getFieldspace().getMeasure());
+
+    const filterFn = (fields, i) => {
+        const row = `${targetFields.map((field) => {
+            let val;
+            if (field === ReservedFields.MEASURE_NAMES) {
+                val = measures;
+            } else if (field === ReservedFields.ROW_ID) {
+                val = i;
+            } else {
+                const currentField = fields[field];
+                const isFieldInvalid = currentField instanceof InvalidAwareTypes;
+
+                val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+            }
+            return val;
+        })}`;
+        return row in payloadMap;
+    };
+    return filterFn;
+};
+
 export {
+    arraysEqual,
+    componentRegistry,
+    mix,
+    partition,
+    getArrayIndexMap,
     getValueParser,
     require,
     intersect,
+    difference,
     Scales,
     Symbols,
     pathInterpolators,
     stack,
     nestCollection,
+    getArrayDiff,
     getSymbol,
+    transformColor,
     transformColors,
     detectColor,
     hexToHsv,
     hslToRgb,
     rgbToHsv,
+    transformToHex,
     hsvToRgb,
+    hslaToRgb,
     concatModels,
     toArray,
     angleToRadian,
@@ -1368,6 +1642,7 @@ export {
     unionDomain,
     symbolFns,
     easeFns,
+    unique,
     clone,
     isEqual,
     interpolateArray,
@@ -1405,5 +1680,8 @@ export {
     temporalFields,
     retrieveFieldDisplayName,
     sanitizeDomainWhenEqual,
-    sortCategoricalField
+    sortCategoricalField,
+    getReadableTicks,
+    dmMultipleSelection,
+    pointWithinCircle
 };

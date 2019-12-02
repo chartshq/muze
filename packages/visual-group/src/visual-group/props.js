@@ -28,7 +28,10 @@ export const PROPS = {
     registry: {
         sanitization: (context, value) => {
             if (context.resolver) {
-                context.resolver().registry(value.cellRegistry);
+                context.resolver().registry({
+                    cells: value.cellRegistry,
+                    VisualUnit: value.VisualUnit
+                });
             }
             return value;
         }

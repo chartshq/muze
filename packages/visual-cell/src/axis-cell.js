@@ -9,6 +9,7 @@ import SimpleCell from './simple-cell';
 import { DEFAULT_CONFIG } from './enums/defaults';
 import { AXIS } from './enums/cell-type';
 import { PROPS } from './props';
+import * as CONSTANTS from './constants';
 
 /**
  * Computes the logical space of the an axis instance within an axis cell
@@ -95,6 +96,10 @@ class AxisCell extends SimpleCell {
      */
     get id () {
         return this._id;
+    }
+
+    static formalName () {
+        return CONSTANTS.AXIS_CELL;
     }
 
     /**

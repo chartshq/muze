@@ -1,12 +1,12 @@
 /* eslint-disable */
 
 (function () {
-	let env = muze.Muze();
-	let DataTable = muze.DataTable,
-		share = muze.operators.share,
-		html = muze.operators.html,
-		Board = muze.Board;
-		window.board = new Board();
+	let env = window.muze();
+	let DataModel = muze.DataModel;
+		// share = muze.operators.share,
+		// html = muze.operators.html,
+		// Board = muze.Board;
+		// window.board = new Board();
 
 
 	d3.json('../../../data/cars.json', (data) => {
@@ -56,7 +56,7 @@
 				},
 
 			];
-		let rootData = new DataTable(jsonData, schema);
+		let rootData = new DataModel(jsonData, schema);
 
 		rootData = rootData.groupBy(['Year'], {
 			Horsepower: 'mean',

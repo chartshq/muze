@@ -1,4 +1,3 @@
-import { VisualUnit } from '@chartshq/visual-unit';
 import { generateGetterSetters, STATE_NAMESPACES, getUniqueId } from 'muze-utils';
 import {
      initializeCacheMaps,
@@ -50,10 +49,15 @@ export default class MatrixResolver {
             angle: [],
             angle0: []
         };
-        generateGetterSetters(this, RESOLVER_PROPS);
+        this._placeholderInfo = {};
+        generateGetterSetters(this, this.constructor.getterSetters());
+
         this.cacheMaps(initializeCacheMaps());
     }
 
+    static getterSetters () {
+        return RESOLVER_PROPS;
+    }
     /**
      * Set:  Registers placeholders, Get: return {Object} those placeholders
      *
@@ -103,13 +107,6 @@ export default class MatrixResolver {
         return this._axes;
     }
 
-    /**
-     *
-     *
-     * @param {*} facets
-     *
-     * @memberof MatrixResolver
-     */
     facets (...facets) {
         if (facets.length) {
             Object.entries(facets[0]).forEach((e) => {
@@ -120,13 +117,6 @@ export default class MatrixResolver {
         return this._facets;
     }
 
-    /**
-     *
-     *
-     * @param {*} projections
-     *
-     * @memberof MatrixResolver
-     */
     projections (...projections) {
         if (projections.length) {
             Object.entries(projections[0]).forEach((e) => {
@@ -137,15 +127,7 @@ export default class MatrixResolver {
         return this._projections;
     }
 
-    /**
-     *
-     *
-     * @param {*} config
-     * @param {*} layerConfig
-     *
-     * @memberof MatrixResolver
-     */
-    optionalProjections (config, layerConfig) {
+    optionalProjections (config, layerConfig, schema) {
         const otherEncodings = {};
         const optionalProjections = [];
         const otherEncodingTypes = [SIZE, COLOR, SHAPE];
@@ -162,17 +144,8 @@ export default class MatrixResolver {
             optionalProjections.push(...config.detail);
         }
 
-        if (layerConfig.length) {
-            layerConfig.forEach((layer) => {
-                if (layer.encoding) {
-                    Object.values(layer.encoding).forEach((enc) => {
-                        if (enc && optionalProjections.indexOf(enc.field) === -1) {
-                            optionalProjections.push(enc.field ? enc.field : enc);
-                        }
-                    });
-                }
-            });
-        }
+        const encoder = this.encoder();
+        optionalProjections.push(...encoder.getProjectionFields(layerConfig, schema));
         this.projections({ optionalProjections });
         return otherEncodings;
     }
@@ -216,7 +189,7 @@ export default class MatrixResolver {
      * @memberof MatrixResolver
      */
     getCellDef (cell) {
-        const registry = this.registry();
+        const registry = this.registry().cells;
 
         Object.values(registry).forEach((e) => {
             if (e.prototype instanceof cell) {
@@ -256,12 +229,6 @@ export default class MatrixResolver {
         });
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof MatrixResolver
-     */
     getAllFields () {
         const retObj = this.projections();
 
@@ -271,11 +238,6 @@ export default class MatrixResolver {
         return retObj;
     }
 
-    /**
-     *
-     *
-     * @memberof MatrixResolver
-     */
     resetSimpleAxes () {
         return this.axes({
             x: new Set(),
@@ -309,7 +271,7 @@ export default class MatrixResolver {
         } = config;
         const {
             layerRegistry,
-            sideEffectRegistry
+            interactions
         } = componentRegistry;
         const {
             smartlabel: smartLabel,
@@ -324,6 +286,7 @@ export default class MatrixResolver {
         const unitConfig = extractUnitConfig(globalConfig || {});
         const store = this.store();
         store.lockModel();
+        const { VisualUnit } = this.registry();
 
         this.forEach(VALUE_MATRIX, (i, j, el) => {
             let unit = el.source();
@@ -332,7 +295,7 @@ export default class MatrixResolver {
 
                 unit = VisualUnit.create({
                     layerRegistry,
-                    sideEffectRegistry
+                    interactions
                 }, {
                     smartLabel,
                     lifeCycleManager,
@@ -366,7 +329,7 @@ export default class MatrixResolver {
      * @param {*} config
      * @memberof MatrixResolver
      */
-    setDomains (config, datamodel, encoders) {
+    setRetinalAxisDomain (config, datamodel, encoders) {
         const {
             color,
             shape,
@@ -386,7 +349,7 @@ export default class MatrixResolver {
         const facetFields = [...rowFacets.map(e => e.toString()), ...colFacets.map(e => e.toString())];
         const retContext = {
             domains: encoders.simpleEncoder.getRetinalFieldsDomain(datamodel, encoding, facetFields, groupBy),
-            axes: this.axes(),
+            axes: this.getRetinalAxes(),
             encoding
         };
         encoders.retinalEncoder.setCommonDomain(retContext);
@@ -399,12 +362,6 @@ export default class MatrixResolver {
         return this;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof MatrixResolver
-     */
     getRetinalAxes () {
         const {
             color,
@@ -419,73 +376,24 @@ export default class MatrixResolver {
         };
     }
 
-    /**
-     *
-     *
-     * @param {*} type
-     *
-     * @memberof MatrixResolver
-     */
     getSimpleAxes (type) {
         return this.axes()[`${type}`];
     }
 
-    /**
-     *
-     *
-     * @param {*} datamodel
-     * @param {*} config
-     * @memberof MatrixResolver
-     */
     createRetinalAxes (fieldsConfig, config, encoders) {
-        const layerConfig = this.layerConfig();
-        this.optionalProjections(config, layerConfig);
         const retinalAxes = encoders.retinalEncoder.createAxis({
             fieldsConfig,
             config,
             axes: this.axes()
         });
-        const {
-            lifeCycleManager
-        } = this.dependencies();
 
-        [COLOR, SHAPE, SIZE].forEach((e) => {
-            this.axes()[e] = retinalAxes[e];
-        });
+        this.axes(retinalAxes);
 
-        lifeCycleManager.notify({ client: this.axes(), action: INITIALIZED, formalName: AXIS });
-        lifeCycleManager.notify({ client: this.units(), action: BEFORE_UPDATE, formalName: UNIT });
+        this.updateVisualUnit(config);
 
-        const units = [];
-        const matrixLayers = this.matrixLayers();
-        const props = [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`,
-            `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
-        const store = this.store();
-        store.lockCommits(props);
-        store.lockModel();
-        this.forEach(VALUE_MATRIX, (i, j, el) => {
-            el.axes(Object.assign(el.axes(), retinalAxes));
-            el.source() && el.source().retinalFields(config);
-            el.layerDef(matrixLayers[i][j]);
-            el.updateModel();
-
-            units.push(el.source());
-        });
-        store.unlockModel()
-            .unlockCommits([props[0]])
-            .unlockCommits([props[1]]);
-        lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
         return this;
     }
 
-    /**
-     *
-     *
-     * @param {*} placeholders
-     * @param {*} fieldNames
-     *
-     * @memberof MatrixResolver
-     */
     createHeaders (placeholders, fieldNames, config) {
         let bottomLeft = [];
         let bottomRight = [];
@@ -501,8 +409,7 @@ export default class MatrixResolver {
             showHeaders,
             classPrefix
         } = config;
-        const TextCell = this.getCellDef(this.registry().TextCell);
-        const BlankCell = this.getCellDef(this.registry().BlankCell);
+        const { TextCell, BlankCell } = this.registry().cells;
         const [leftRows, rightRows] = rows;
         const [topCols, bottomCols] = columns;
         const rowHeaders = fieldNames.rows;
@@ -549,37 +456,47 @@ export default class MatrixResolver {
         return { topLeft, topRight, bottomLeft, bottomRight };
     }
 
-    /**
-     *
-     *
-     * @param {*} datamodel
-     * @param {*} config
-     * @param {*} componentRegistry
-     * @param {*} encoders
-     *
-     * @memberof MatrixResolver
-     */
-    getMatrices (datamodel, config, componentRegistry, encoders) {
-        const context = {
-            datamodel,
-            componentRegistry,
-            encoders,
-            resolver: this
-        };
+    updateVisualUnit (retinalConfig) {
+        const retinalAxes = this.getRetinalAxes();
 
-        return computeMatrices(context, config);
+        const { lifeCycleManager } = this.dependencies();
+        lifeCycleManager.notify({ client: this.axes(), action: INITIALIZED, formalName: AXIS });
+        lifeCycleManager.notify({ client: this.units(), action: BEFORE_UPDATE, formalName: UNIT });
+
+        const units = [];
+        const matrixLayers = this.matrixLayers();
+
+        const props = [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`,
+            `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`];
+        const store = this.store();
+        store.lockCommits(props);
+        store.lockModel();
+
+        this.forEach(VALUE_MATRIX, (i, j, el) => {
+            el.axes(Object.assign(el.axes(), retinalAxes));
+            el.source() && el.source().retinalFields(retinalConfig);
+            el.layerDef(matrixLayers[i][j]);
+            el.updateModel();
+
+            units.push(el.source());
+        });
+
+        store.unlockModel()
+            .unlockCommits([props[0]])
+            .unlockCommits([props[1]]);
+        lifeCycleManager.notify({ client: units, action: UPDATED, formalName: UNIT });
+        return this;
     }
 
-    store (...params) {
-        if (params.length) {
-            this._store = params[0];
-            return this;
-        }
-        return this._store;
+    getMatrices (resolverConfig) {
+        this._placeholderInfo = computeMatrices(resolverConfig);
+
+        return this._placeholderInfo;
     }
 
     clear () {
         const cacheMaps = this._cacheMaps;
+
         for (const key in cacheMaps) {
             cacheMaps[key].clear();
         }

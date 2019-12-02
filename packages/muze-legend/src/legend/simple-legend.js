@@ -6,7 +6,6 @@ import {
     generateGetterSetters,
     mergeRecursive
 } from 'muze-utils';
-import { behaviouralActions } from '@chartshq/muze-firebolt';
 import * as legendBehaviours from '../firebolt/behavioural';
 
 import { LegendFireBolt } from '../firebolt/legend-firebolt';
@@ -14,10 +13,16 @@ import { actionBehaviourMap } from '../firebolt/action-behaviour-map';
 import { physicalActions } from '../firebolt/physical';
 import * as sideEffects from '../firebolt/side-effects';
 import { behaviourEffectMap } from '../firebolt/behaviour-effect-map';
-import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM } from '../enums/constants';
+import { VALUE, PATH, RIGHT, LEFT, TOP, BOTTOM, POSITION_ALIGNMENT_MAP } from '../enums/constants';
 import { PROPS } from './props';
 import { DEFAULT_MEASUREMENT, DEFAULT_CONFIG, LEGEND_TITLE } from './defaults';
-import { getItemMeasures, titleCreator, computeItemSpaces } from './legend-helper';
+import {
+    getItemMeasures,
+    titleCreator,
+    computeItemSpaces,
+    prepareSelectionSetData,
+    calculateTitleWidth
+} from './legend-helper';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -33,6 +38,7 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     constructor (dependencies) {
+        const { interactions } = dependencies.registry;
         this._data = [];
         this._metaData = [];
         this._mount = null;
@@ -53,7 +59,7 @@ export default class SimpleLegend {
             `${this.config().classPrefix}-legend-item-info`);
 
         this._firebolt = new LegendFireBolt(this, {
-            behavioural: Object.assign({}, behaviouralActions, legendBehaviours),
+            behavioural: Object.assign({}, interactions.behaviours.get(), legendBehaviours),
             physical: physicalActions,
             physicalBehaviouralMap: actionBehaviourMap
         }, sideEffects, behaviourEffectMap);
@@ -235,7 +241,13 @@ export default class SimpleLegend {
      * @memberof Legend
      */
     renderTitle (container) {
-        const { titleSpaces, border, padding, width, maxWidth } = this.measurement();
+        const { titleSpaces, border, padding, maxWidth } = this.measurement();
+
+        const width = calculateTitleWidth(
+            this.measurement(),
+            this._labelManager.getOriSize(this._title.text).width,
+            this.config()
+        );
         const { borderStyle, borderColor } = this.config();
         return titleCreator(container, this.title(), {
             height: titleSpaces.height,
@@ -244,7 +256,8 @@ export default class SimpleLegend {
             border,
             padding,
             borderStyle,
-            borderColor
+            borderColor,
+            alignment: POSITION_ALIGNMENT_MAP[this.config().position]
         }, this.config());
     }
 
@@ -264,48 +277,63 @@ export default class SimpleLegend {
             position
         } = this.config();
         const {
-            maxWidth,
+            border,
+            marginHorizontal,
             maxHeight,
-            width,
             height,
-            margin,
-            border
+            width,
+            maxWidth
+        } = this.measurement();
+        let {
+            margin
         } = this.measurement();
         const legendContainer = makeElement(selectElement(this.mount()), 'div', [1], `${classPrefix}-legend-box`);
         let marginPosition;
         switch (position) {
         case TOP:
             marginPosition = `margin-${BOTTOM}`;
+            margin = marginHorizontal;
             break;
         case LEFT:
             marginPosition = `margin-${RIGHT}`;
             break;
         case BOTTOM:
             marginPosition = `margin-${TOP}`;
+            margin = marginHorizontal;
             break;
         default:
             marginPosition = `margin-${LEFT}`;
         }
         legendContainer.classed(`${classPrefix}-legend-box-${this._id}`, true);
         legendContainer.style('float', 'left');
+
+        const widthBox = calculateTitleWidth(
+            this.measurement(),
+            this._labelManager.getOriSize(this._title.text).width,
+            this.config()
+        );
+
+        const titleWidth = Math.min(maxWidth, widthBox);
+        width < titleWidth ? selectElement(this.mount()).style('width', `${titleWidth}px`) : null;
         // set height and width
-        legendContainer.style('width', `${Math.min(maxWidth, width) - margin * 2}px`)
-                        .style('height', `${Math.min(maxHeight, height) - margin * 2}px`)
+        legendContainer.style('width', `${titleWidth}px`)
+                        .style('height', `${Math.min(maxHeight, height)}px`)
                         .style(`${marginPosition}`, `${margin}px`)
                         .style('border', `${border}px ${borderStyle} ${borderColor}`);
         this.legendContainer(legendContainer.node());
 
         // create title
         this.renderTitle(legendContainer);
-        firebolt.createSelectionSet(this.data().map(d => d.id));
+        firebolt.createSelectionSet(prepareSelectionSetData(this.data(), this.fieldName(), this.metaData()));
         return legendContainer;
     }
-  /**
+
+    /**
      *
      *
      * @param {*} data
      *
-     * @memberof StepLegend
+     * @memberof SimpleLegend
      */
     getCriteriaFromData (data) {
         const fieldName = this.fieldName();
@@ -316,5 +344,37 @@ export default class SimpleLegend {
             };
         }
         return [[fieldName], [data.rawVal]];
+    }
+
+    getValueFromId (id, fields = []) {
+        const data = this.data();
+        if (fields.length) {
+            id = Number(id);
+            return [data.find(d => id === d.id).rawVal];
+        }
+
+        return [];
+    }
+
+    getRangeFromIdentifiers ({ fields, entrySet }) {
+        const data = this.data();
+        const idRangeMap = data.reduce((acc, v) => {
+            acc[v.id] = v;
+            return acc;
+        }, {});
+
+        return fields.reduce((acc, v) => {
+            acc[v] = entrySet.reduce((ranges, id) => {
+                if (id in idRangeMap) {
+                    ranges.push(idRangeMap[id].range);
+                }
+                return ranges;
+            }, []);
+            return acc;
+        }, {});
+    }
+
+    setParentInfo (info) {
+        this._canvasMount = info.canvasRoot;
     }
 }

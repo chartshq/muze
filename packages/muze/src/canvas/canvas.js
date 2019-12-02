@@ -1,5 +1,6 @@
 import { GridLayout } from '@chartshq/layout';
 import { transactor, Store, getUniqueId, selectElement, STATE_NAMESPACES, CommonProps } from 'muze-utils';
+import UnitBrushBehaviour from '@chartshq/visual-unit/src/firebolt/behaviours/brush';
 import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { RETINAL } from '../constants';
 import TransactionSupport from '../transaction-support';
@@ -58,7 +59,8 @@ export default class Canvas extends TransactionSupport {
 
         this._throwback = new Store({
             [CommonProps.MATRIX_CREATED]: false,
-            [CommonProps.ON_LAYER_DRAW]: null
+            [CommonProps.ON_LAYER_DRAW]: null,
+            propagationInfo: null
         });
 
         // Setters and getters will be mounted on this. The object will be mutated.
@@ -71,7 +73,9 @@ export default class Canvas extends TransactionSupport {
 
         this.dependencies(Object.assign({}, globalDependencies, this._dependencies));
         this.firebolt(new GroupFireBolt(this, {
-            behavioural: behaviouralActions,
+            behavioural: Object.assign({}, behaviouralActions, {
+                brush: UnitBrushBehaviour
+            }),
             physical: physicalActions,
             physicalBehaviouralMap: {}
         }, sideEffects, behaviourEffectMap));
@@ -209,10 +213,12 @@ export default class Canvas extends TransactionSupport {
      */
     registry (...params) {
         if (params.length) {
-            const components = Object.assign({}, params[0].components);
-            const componentSubRegistry = Object.assign({}, params[0].componentSubRegistry);
+            const param = params[0];
+            const components = Object.assign({}, param.components);
+            const componentSubRegistry = Object.assign({}, param.componentSubRegistry);
+            const interactionRegistry = Object.assign({}, param.interactions);
 
-            this._registry = { components, componentSubRegistry };
+            this._registry = { components, componentSubRegistry, interactions: interactionRegistry };
             const initedComponents = initCanvas(this);
             // @todo is it okay to continue this tight behaviour? If not use a resolver to resolve diff component type.
             this._composition.visualGroup = initedComponents[0];
@@ -314,6 +320,8 @@ export default class Canvas extends TransactionSupport {
 
         // setLabelRotation
         setLabelRotationForAxes(this);
+
+        this.firebolt().mapActionsAndBehaviour();
     }
 
     /**

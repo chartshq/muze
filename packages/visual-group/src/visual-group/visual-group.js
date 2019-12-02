@@ -3,16 +3,29 @@ import localOptions from './local-options';
 import { SimpleGroup } from '../simple-group';
 import {
     MatrixResolver,
-    findInGroup
+    findInGroup,
+    getEncoder
 } from '../group-helper';
-import { createUnitState, initializeGlobalState, setMatrixInstances, createMatrices, createLayerState } from './helper';
+import {
+    createUnitState,
+    initializeGlobalState,
+    setMatrixInstances,
+    createMatrices,
+    createLayerState,
+    initializeResolverFields,
+    initializeFields,
+    updateChecker
+} from './helper';
 import { setupChangeListeners } from './change-listener';
 import { PROPS } from './props';
 import {
     CONFIG,
     MOUNT,
     RETINAL,
-    Y
+    Y,
+    ROWS,
+    COLUMNS,
+    DATA
 } from '../enums/constants';
 
 /**
@@ -42,7 +55,9 @@ class VisualGroup extends SimpleGroup {
         super();
 
         const {
-            componentSubRegistry
+            components,
+            componentSubRegistry,
+            interactions
         } = registry;
 
         this._dependencies = dependencies;
@@ -50,8 +65,8 @@ class VisualGroup extends SimpleGroup {
         // One can get each property by calling the method and can set it
         // by passing paramaters for the same. Thus, one can chain setter
         // getter methods.
-        generateGetterSetters(this, PROPS);
-        generateGetterSetters(this, localOptions);
+        generateGetterSetters(this, this.constructor.getterSetters());
+        generateGetterSetters(this, this.constructor.localOptions());
         // Populate the store with default values
         // initialize group compositions
         this._composition = {};
@@ -62,13 +77,15 @@ class VisualGroup extends SimpleGroup {
         // selection object that takes care of updating of components
         this._selection = {};
         // Create instance of matrix resolver
-        this.resolver(new MatrixResolver(this._dependencies));
+        this.createMatrixResolver();
         // matrix instance store each of the matrices
         setMatrixInstances(this, {});
          // Getting indiviual registered items
         this.registry({
-            layerRegistry: componentSubRegistry.layerRegistry.get(),
-            cellRegistry: componentSubRegistry.cellRegistry.get()
+            layerRegistry: componentSubRegistry.layers.get(),
+            cellRegistry: componentSubRegistry.cells.get(),
+            VisualUnit: components.VisualUnit,
+            interactions
         });
     }
 
@@ -95,6 +112,17 @@ class VisualGroup extends SimpleGroup {
             return this;
         }
         return this._store;
+    }
+
+    static formalName () {
+        return 'VisualGroup';
+    }
+
+    static localOptions () {
+        return localOptions;
+    }
+    static getterSetters () {
+        return PROPS;
     }
 
     /**
@@ -247,8 +275,39 @@ class VisualGroup extends SimpleGroup {
         return this._groupedDataModel;
     }
 
-    createMatrices () {
-        createMatrices(this);
+    createMatrices (sanitizedConfig) {
+        createMatrices(this, sanitizedConfig);
+    }
+
+    getMandatoryFields () {
+        const updateProps = updateChecker(this, [ROWS, COLUMNS, DATA]);
+        let sanitizedValue = {
+            groupConfig: {},
+            resolverConfig: {},
+            shouldRender: false
+        };
+        if (updateProps) {
+            const localFields = initializeFields(this);
+            const {
+                datamodel,
+                encoders,
+                resolver,
+                matrixConfig
+            } = localFields;
+            const context = {
+                datamodel,
+                componentRegistry: this.registry(),
+                encoders,
+                resolver
+            };
+            const resolverFields = initializeResolverFields(context, matrixConfig);
+            sanitizedValue = {
+                groupConfig: localFields,
+                resolverConfig: resolverFields,
+                shouldRender: resolverFields.shouldRender
+            };
+        }
+        return sanitizedValue;
     }
 
     remove () {
@@ -258,6 +317,18 @@ class VisualGroup extends SimpleGroup {
         info.rows = null;
         info.columns = null;
         info.values = null;
+    }
+
+    createEncoderInstance () {
+        const layers = this.layers();
+
+        return getEncoder(layers);
+    }
+
+    createMatrixResolver () {
+        this.resolver(new MatrixResolver(this._dependencies));
+
+        return this;
     }
 }
 

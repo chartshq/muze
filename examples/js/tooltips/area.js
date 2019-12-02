@@ -1,35 +1,9 @@
 /* eslint-disable */
-const env = muze();
-const DataModel = muze.DataModel;
 
-d3.json('../../data/cars.json', (data) => {
+
+d3.json('../../data/cars-with-null.json', (data) => {
     let jsonData = data;
     const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    },
-    {
-        name: 'Maker',
-        type: 'dimension'
-    },
-    {
-        name: 'Miles_per_Gallon',
-        type: 'measure'
-    },
-
-    {
-        name: 'Displacement',
-        type: 'measure'
-    },
-    {
-        name: 'Horsepower',
-        type: 'measure'
-    },
-    {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    },
-    {
         name: 'Acceleration',
         type: 'measure'
     },
@@ -38,30 +12,66 @@ d3.json('../../data/cars.json', (data) => {
         type: 'dimension'
     },
     {
-        name: 'Cylinders',
-        type: 'dimension'
-    },
-    {
         name: 'Year',
         type: 'dimension'
     }
     ];
+    const env = muze();
+    const DataModel = muze.DataModel;
     let rootData = new DataModel(jsonData, schema);
-    let canvas = env.canvas();
+    // const filtered = rootData.select((tuples) => {
+    //     return tuples.Origin.value === 'Holland';
+    // });
 
-    canvas = canvas
-      .rows(['Acceleration']) // Acceleration goes in Y-Axis
-      .columns(['Year']) // Horsepower goes in Y-Axis
-      .data(rootData)
-      .layers([{
-        mark : 'area',
-        interpolate: 'catmullRom' /* spline */
-      }])
-      .width(450)
-      .height(250)
-      .rows(['Weight_in_lbs'])
-      .columns(['Year'])
-      .title('Area')
-      .mount("#chart1");
+    env.canvas()      
+        .rows(['Acceleration']) // Acceleration goes in Y-Axis
+        .columns(['Year']) // Horsepower goes in Y-Axis
+        .data(rootData)
+        .color('Origin')
+        .width(550)
+        .height(650)
+        .title('Area')
+        .mount("#chart1");
+        
+    // env.canvas()      
+    //     .rows(['Acceleration']) // Acceleration goes in Y-Axis
+    //     .columns(['Year']) // Horsepower goes in Y-Axis
+    //     .data(rootData)
+    //     .layers([{
+    //     mark : 'area',
+    //     connectNullData: true
+    //     }])
+    //     .color('Origin')
+    //     .width(850)
+    //     .height(650)
+    //     .title('Area')
+    //     .mount("#chart1");
+    
+    // env.canvas()      
+    //     .rows(['Acceleration']) // Acceleration goes in Y-Axis
+    //     .columns(['Year']) // Horsepower goes in Y-Axis
+    //     .data(filtered)
+    //     .layers([{
+    //         mark : 'area',
+    //         connectNullData: false
+    //     }])
+    //     .color('Origin')
+    //     .width(850)
+    //     .height(650)
+    //     .title('Area')
+    //     .mount("#chart1");
+    // env.canvas()      
+    //     .rows(['Acceleration']) // Acceleration goes in Y-Axis
+    //     .columns(['Year']) // Horsepower goes in Y-Axis
+    //     .data(filtered)
+    //     .layers([{
+    //         mark : 'area',
+    //         connectNullData: true
+    //     }])
+    //     .color('Origin')
+    //     .width(850)
+    //     .height(650)
+    //     .title('Area')
+    //     .mount("#chart1");
 });
 

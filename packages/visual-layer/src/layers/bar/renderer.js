@@ -43,14 +43,23 @@ const barEnterFn = (elem, d) => {
  * @return {Selection} Bar Selection
  */
 /* istanbul ignore next */ export const drawRects = (params) => {
-    const { layer, points, container, keyFn } = params;
+    const { layer, points, container, keyFn, className } = params;
     const graphicElems = layer._graphicElems;
     const updateFns = {
-        enter (elem, d) { barEnterFn(elem, d); },
+        enter (elem, d) {
+            barEnterFn(elem, d);
+        },
         update (elem, d, i) {
             graphicElems[d.rowId] = elem;
             transitionBars(layer, elem, d, i, params);
         }
     };
-    return makeElement(container, 'rect', points, null, updateFns, keyFn);
+
+    return makeElement(container, 'g', points, null, {
+        update: (group, d) => {
+            makeElement(group.node(), 'rect', data => [data], null, updateFns, keyFn);
+            group.attr('class', `${className}-${d.rowId}`);
+            group.classed(d.className, true);
+        }
+    }, keyFn);
 };

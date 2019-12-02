@@ -1,5 +1,5 @@
 /* eslint-disable */
-const env = muze();
+// const env = muze();
 const DataModel = muze.DataModel;
 
 function shuffleArray(array) {
@@ -56,31 +56,34 @@ d3.json('../../data/cars.json', (data) => {
     {
         name: 'Year',
         type: 'dimension',
-        subtype: 'temporal',
-        format: '%Y-%m-%d'
+        // subtype: 'temporal',
+        // format: '%Y-%m-%d'
     }];
 
-    window.rootData = new DataModel(jsonData, schema)
+    var rootData = new DataModel(jsonData, schema);
+    rootData = rootData.calculateVariable({
+        name: "date",
+        type: "dimension",
+        subtype: "temporal",
+        format: "%Y-%m-%d"
+    }, ["Year", function (d) {
+        return d;
+    }]);
 
-    const rows = ['Origin'];
-    const columns = rows.reverse();
+    env = muze().data(rootData).minUnitHeight(40).minUnitWidth(40);
+    var mountPoint = document.getElementById('chart');
+    window.canvas = env.canvas();
+    var rows = ['Cylinders', 'Horsepower'],
+        columns = ['Origin', 'Year'];
+    canvas = canvas.rows(rows).columns(columns).height(800).color('Origin')
+    //{initProps}
+    .mount(mountPoint);
 
-    const canvas = env
-        .canvas()
-        .columns(['Maker', 'Cylinders', 'Acceleration'])
-        .rows(columns)
-        .data(rootData)
-        .height(800)
-        .width(1500)
-        .detail(['Maker', 'Cylinders'])
-        .title('The car acceleration respective to origin', { position: 'bottom', align: 'center' })
-        .color({ field: 'Origin' })
-        .mount('#chart')
-        .config({
-            sort:{
-                Maker: 'asc',
-                Cylinders: (a, b) => a - b,
-                Origin: (a, b) => b.localeCompare(a),
-            }
-        })
+    // setTimeout(() => {
+    //     canvas.rows(['Horsepower', 'Acceleration']).columns(['Acceleration', 'Horsepower']).color('Horsepower').size('Cylinders').detail(['Maker']).width(600).height(600);
+    // //     canvas.once('canvas.animationend').then(function (client) {
+    // //         var element = document.getElementById('chart');
+    // //         element.classList.add('animateon');
+    // //     });
+    // }, 2000);
 });

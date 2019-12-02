@@ -52,15 +52,16 @@ d3.json('../../data/cars.json', (data) => {
 		rootData2 = rootData2.select(fields => makers.indexOf(fields.Maker.value) > -1);
 		
     canvas2 = canvas2
-      .rows(['Acceleration']) // Acceleration goes in Y-Axis
-      .columns(['Horsepower']) // Horsepower goes in Y-Axis
-      .color('Origin') // Color the points from using Origin
-      .shape('Maker') // Use maker for shape encoding
-      .detail(['Name']) // Use Name to add granurality of the points
-      .data(rootData2)
-      .width(450)
-      .height(350)
-      .title('Scatter with shape and color legend')
-      .mount("#chart3");
+        .rows(['Horsepower']) // Acceleration goes in Y-Axis
+        .columns(['Year']) // Horsepower goes in Y-Axis
+        .size('Acceleration') // Use maker for shape encoding
+        .data(rootData2)
+        .width(450)
+        .height(350)
+        .layers([{
+            mark: 'point'
+        }])
+        .title('Scatter with shape and color legend')
+        .mount("#chart3");
 });
 

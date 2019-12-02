@@ -3,6 +3,7 @@ import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { CLASSPREFIX, HEIGHT, WIDTH, HORIZONTAL, RECT } from '../../../enums/constants';
 import { SELECTIONBOX } from '../../../enums/side-effects';
 import { selectionBoxDrag } from '../../physical/selection-box-drag';
+import { LEGEND_MARKER_PROPS } from '../../../legend/defaults';
 import './styles.scss';
 
 /**
@@ -11,6 +12,13 @@ import './styles.scss';
  * @class SelectionBox
  */
 /* istanbul ignore next */ class SelectionBox extends SpawnableSideEffect {
+    constructor (...params) {
+        super(...params);
+        this._graphicElems = {
+            rect: null
+        };
+    }
+
     static formalName () {
         return SELECTIONBOX;
     }
@@ -39,8 +47,15 @@ import './styles.scss';
         const config = this.config();
         const axis = context.axis().source();
         const className = `${config.classPrefix}-${config.className}`;
+        const { criteria } = payload;
+        const { rect } = this._graphicElems;
 
-        const domain = payload.criteria[firebolt.context.fieldName()];
+        if (criteria === null) {
+            rect && rect.remove();
+            return this;
+        }
+
+        const domain = criteria[firebolt.context.fieldName()];
         const axisScale = axis.scale();
         const range = domain ? [axis.getScaleValue(domain[0]), axis.getScaleValue(domain[1])] : [];
 
@@ -51,15 +66,16 @@ import './styles.scss';
 
         const rangeShifter = axisScale.range()[axisType === 'x' ? 0 : 1];
         const legendGradContainer = context.getDrawingContext().svgContainer;
-        const legendSelGroup = makeElement(legendGradContainer, 'g', [1], `${config.classPrefix}-selection-box-group`);
+        const legendSelGroup = makeElement(legendGradContainer, 'g', [1],
+            `${config.classPrefix}-selection-box-group`);
 
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
-            y = 0;
+            y = LEGEND_MARKER_PROPS.size + 4;
             width = range[1] - range[0] || 0;
             height = gradientDimension;
         } else {
-            x = 0;
+            x = LEGEND_MARKER_PROPS.size + 4;
             y = range[1] - rangeShifter || 0;
             height = range[0] - range[1] || 0;
             width = gradientDimension;
@@ -67,12 +83,15 @@ import './styles.scss';
         const enterFn = function (el) {
             selectionBoxDrag(firebolt)(el, ['brush']);
         };
+
         const selBox = makeElement(legendSelGroup, RECT, [{ domain, x, y, width, height }], className,
             { enter: enterFn });
         selBox.attr('y', y)
                         .attr('x', x)
                         .attr(WIDTH, width)
                         .attr(HEIGHT, height);
+        this._graphicElems.rect = selBox;
+        return this;
     }
 }
 

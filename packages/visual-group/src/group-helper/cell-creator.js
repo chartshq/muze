@@ -19,6 +19,7 @@ import {
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
 import { SimpleVariable } from '../variable';
+import { sanitiseBorderMatrix, sanitiseGeomMatrix } from './cell-border-applier';
 
 /**
  * Updates row and column cells with the geom cell corresponding to the facet keys
@@ -499,23 +500,27 @@ const transformDataModel = (dataModel, config, resolver) => {
     if (resolvedData instanceof DataModel) {
         resolvedData.dispose();
     }
-    groupedModel = dataModel.project(dataModel.getSchema().map(d => d.name));
+
+    const fields = getFieldsFromSuppliedLayers(suppliedLayers).filter(field =>
+        getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+    const allFields = extractFields(facetsAndProjections, fields);
+
+    groupedModel = dataModel.project(allFields);
     resolver.data(groupedModel);
     if (!groupBy.disabled) {
-        const fields = getFieldsFromSuppliedLayers(suppliedLayers, groupedModel.getFieldsConfig());
-        const allFields = extractFields(facetsAndProjections, fields);
+        const newFieldsConfig = groupedModel.getFieldsConfig();
         const dimensions = allFields.filter(field =>
-            getObjProp(fieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
+            getObjProp(newFieldsConfig, field, 'def', 'type') === FieldType.DIMENSION);
         const aggregationFns = groupBy.measures;
         const measureNames = Object.keys(groupedModel.getFieldspace().getMeasure());
         const nearestAggFns = retrieveNearestGroupByReducers(groupedModel, ...measureNames);
         const resolvedAggFns = mergeRecursive(nearestAggFns, aggregationFns);
 
-        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns)
-                                            .project(allFields);
+        groupedModel = groupedModel.groupBy(dimensions.length ? dimensions : [''], resolvedAggFns);
     }
     // sort temporal fields if any in the given rows and columns
     groupedModel = sortDmTemporalFields(resolver, groupedModel);
+    resolver.transformedData(groupedModel);
     return groupedModel;
 };
 
@@ -528,27 +533,36 @@ const transformDataModel = (dataModel, config, resolver) => {
  * @return {Object} conputed matrices
  * @memberof MatrixResolver
  */
-export const computeMatrices = (context, config) => {
+export const computeMatrices = (resolverConfig) => {
+    let placeholderInfo = {};
     const {
-        resolver,
         datamodel,
+        encoders,
+        resolver,
+        globalConfig,
+        selection,
+        transform,
         componentRegistry,
-        encoders
-    } = context;
-    const {
-            globalConfig,
-            selection,
-            transform
-        } = config;
-    const groupBy = globalConfig.autoGroupBy;
-    const { smartlabel: labelManager } = resolver.dependencies();
-    const fieldMap = datamodel.getFieldsConfig();
-    const layerConfig = resolver.layerConfig();
-    const registry = resolver.registry();
-    const { fields: normalizedRows } = resolver.horizontalAxis();
-    const { fields: normalizedColumns } = resolver.verticalAxis();
-    const otherEncodings = resolver.optionalProjections(config, layerConfig);
-    const facetsAndProjections = resolver.getAllFields();
+        groupBy,
+        labelManager,
+        fieldMap,
+        layerConfig,
+        registry,
+        normalizedRows,
+        normalizedColumns,
+        otherEncodings,
+        facetsAndProjections,
+        simpleEncoder,
+        config
+    } = resolverConfig;
+
+    const { rowFacets, colFacets, colProjections, rowProjections } = facetsAndProjections;
+    const isProjection = rowProjections.length > 0 || colProjections.length > 0;
+    const isFacet = rowFacets.length > 0 || colFacets.length > 0;
+
+    if (isFacet) {
+        globalConfig.isFacet = true;
+    }
     const matrixGnContext = {
         // Configuration to be passed to generate the  different matrices.
         // A common config is used for both value matrices and other matrices
@@ -565,10 +579,10 @@ export const computeMatrices = (context, config) => {
         resolver
     };
     const cells = {
-        GeomCell: resolver.getCellDef(registry.GeomCell),
-        AxisCell: resolver.getCellDef(registry.AxisCell),
-        BlankCell: resolver.getCellDef(registry.BlankCell),
-        TextCell: resolver.getCellDef(registry.TextCell)
+        GeomCell: resolver.getCellDef(registry.cells.GeomCell),
+        AxisCell: resolver.getCellDef(registry.cells.AxisCell),
+        BlankCell: resolver.getCellDef(registry.cells.BlankCell),
+        TextCell: resolver.getCellDef(registry.cells.TextCell)
     };
     const isRowSizeEqual = isDistributionEqual(normalizedRows);
     const isColumnSizeEqual = isDistributionEqual(normalizedColumns);
@@ -589,13 +603,12 @@ export const computeMatrices = (context, config) => {
     };
 
     resolver.cacheMaps(newCacheMap);
-
     const valueCellContext = {
         config: globalConfig,
-        suppliedLayers: encoders.simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
+        suppliedLayers: simpleEncoder.serializeLayerConfig(resolver.layerConfig()),
         resolver,
         cell: cells.GeomCell,
-        encoder: encoders.simpleEncoder,
+        encoder: simpleEncoder,
         newCacheMap,
         detailFields: config.detail,
         retinalConfig: {
@@ -610,7 +623,7 @@ export const computeMatrices = (context, config) => {
         suppliedLayers: valueCellContext.suppliedLayers,
         groupBy
     }, resolver);
-
+    simpleEncoder.data(groupedModel);
     // return a callback function to create the cells from the matrix
     const cellCreator = resolver.valueCellsCreator(valueCellContext);
     // Creates value matrices from the datamodel and configs
@@ -644,8 +657,17 @@ export const computeMatrices = (context, config) => {
 
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
+    if (isFacet || isProjection) {
+        const arr = sanitiseBorderMatrix({
+            leftMatrix: rows[0],
+            rightMatrix: rows[1],
+            topMatrix: columns[0],
+            bottomMatrix: columns[1]
+        }, registry.cells.BlankCell);
+        valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
+    }
 
-    return {
+    placeholderInfo = {
         rows: resolver.rowMatrix(),
         columns: resolver.columnMatrix(),
         values: resolver.valueMatrix(),
@@ -661,4 +683,5 @@ export const computeMatrices = (context, config) => {
             parentModel: datamodel
         }
     };
+    return placeholderInfo;
 };

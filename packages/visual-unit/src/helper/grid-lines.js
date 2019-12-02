@@ -95,6 +95,7 @@ const dimensionSubTypes = Object.values(DimensionSubtype).reduce((acc, v) => {
     acc[v] = 1;
     return acc;
 }, {});
+
 const getValidSubtype = subtype => (!dimensionSubTypes[subtype] ? DimensionSubtype.CATEGORICAL : subtype);
 
 export const getGridLayerData = (axes, fields, fieldsConfig) => {
@@ -174,6 +175,7 @@ export const createGridLineLayer = (context) => {
                 .store(store);
             return inst;
         }, definitions, atomicDef => atomicDef.definition.name);
+
         context[sel].each((layer, atomicDef) => {
             const definition = atomicDef.definition;
             const sConf = layerFactory.getSerializedConf(mark, definition);

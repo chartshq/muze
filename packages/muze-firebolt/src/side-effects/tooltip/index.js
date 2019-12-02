@@ -1,8 +1,6 @@
 import { Tooltip as TooltipRenderer } from '@chartshq/muze-tooltip';
-import { FieldType, mergeRecursive, defaultValue } from 'muze-utils';
-import { spaceOutBoxes } from '../helper';
+import { mergeRecursive, defaultValue } from 'muze-utils';
 import { strategies } from './strategies';
-import { FRAGMENTED } from '../../enums/constants';
 import { TOOLTIP } from '../../enums/side-effects';
 import SpawnableSideEffect from '../spawnable';
 
@@ -39,19 +37,12 @@ export default class Tooltip extends SpawnableSideEffect {
                 y: 0
             },
             highlightSummary: {
-                dataTransform: (dt, fields) => (fields ? dt.project(fields, { saveChild: false }) : dt
-                )
+                order: 1,
+                dataTransform: (dm, fields) => (fields ? dm.project(fields, { saveChild: false }) : dm)
             },
             selectionSummary: {
-                dataTransform: (dt, fields) => {
-                    const fieldspace = dt.getFieldspace();
-                    const dimensions = Object.keys(fieldspace.getDimension());
-                    const measures = Object.keys(fieldspace.getMeasure());
-                    const projectedFields = defaultValue(fields, measures.length ? [measures[0]] : []);
-                    return dt.project([...dimensions, ...projectedFields], {
-                        saveChild: false
-                    });
-                }
+                order: 0,
+                dataTransform: dm => dm
             }
         };
     }
@@ -74,44 +65,53 @@ export default class Tooltip extends SpawnableSideEffect {
     }
 
     apply (selectionSet, payload, options = {}) {
-        let totalHeight = 0;
-        let totalWidth = 0;
-        const dataModel = selectionSet.mergedEnter.model;
-        const context = this.firebolt.context;
-        const drawingInf = this.drawingContext();
-        if ((dataModel.isEmpty() || payload.criteria === null)) {
+        const dataModel = selectionSet && selectionSet.mergedEnter.model;
+
+        if ((payload.criteria === null || (dataModel && dataModel.isEmpty())) || selectionSet === null) {
             this.hide(options, null);
             return this;
         }
 
-        const tooltips = this._tooltips;
-        const config = this.config();
-        const boundBox = {
-            width: drawingInf.width,
-            height: drawingInf.height
-        };
-        const showInPosition = payload.showInPosition;
-        const pad = config.padding;
-        const dataModels = [];
-        const fragmented = config.mode === FRAGMENTED;
-        const sourceInf = context.getSourceInfo();
-        const fields = sourceInf.fields;
-        const xFieldDim = fields.x[0] ? fields.x[0].type() === FieldType.DIMENSION : false;
-        const showVertically = !!xFieldDim;
-        const tooltipPos = payload.position;
-        const boxes = [];
-        const enter = {};
-        const uids = dataModel.getData().uids;
-        if (fragmented) {
-            dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
-                saveChild: false
-            })));
-        } else {
-            dataModels.push(dataModel);
-        }
+        const strategy = defaultValue(options.strategy, this._strategy);
 
+        this.createTooltip(dataModel, Object.assign({}, {
+            payload,
+            selectionSet,
+            strategy,
+            options
+        }), null, 0);
+
+        return this;
+    }
+
+    static target () {
+        return 'all';
+    }
+
+    hide (options) {
+        const tooltips = this._tooltips;
+        const { orientation } = this.config();
+
+        for (const key in tooltips) {
+            if ({}.hasOwnProperty.call(tooltips, key)) {
+                const tooltip = tooltips[key];
+                const strategy = options.strategy || this._strategy;
+                tooltip.content(strategy, null);
+                if (!Object.keys(tooltip._contents).length) {
+                    tooltip.hide();
+                } else {
+                    tooltip.positionRelativeTo(tooltip._target, {
+                        orientation
+                    });
+                }
+            }
+        }
+    }
+
+    getPlotPointsFromIdentifiers (payload) {
         let target = payload.target;
         let targetFields = [];
+
         if (target) {
             targetFields = target[0] || [];
             const sourceFields = payload.sourceFields;
@@ -124,123 +124,79 @@ export default class Tooltip extends SpawnableSideEffect {
             target = target.map(d => d.filter((v, i) => indices.indexOf(i) !== -1));
         }
 
-        const plotDimensions = context.getPlotPointsFromIdentifiers(target || payload.criteria, {
+        return super.plotPointsFromIdentifiers(target || payload.criteria, {
             getBBox: true
         });
-
-        const strategy = defaultValue(options.strategy, this._strategy);
-        const strategyConf = config[strategy];
-        const { dataTransform, fields: projectFields } = strategyConf;
-        const strategyObj = this._strategies;
-        // Show tooltip for each datamodel
-        for (let i = 0; i < dataModels.length; i++) {
-            let plotDim = plotDimensions[i];
-            if (fragmented) {
-                const dimensions = dataModels[i].getData().schema.filter(d => d.type === FieldType.DIMENSION)
-                    .map(d => d.name);
-                plotDim = context.getPlotPointsFromIdentifiers(dataModels[i].project(dimensions), { getBBox: true });
-                plotDim = plotDim && plotDim[0];
-            }
-
-            const dt = dataTransform(dataModels[i], projectFields, this);
-
-            enter[i] = true;
-            const { parentContainer: layoutContainer, parentContainerDimensions } = drawingInf;
-            const layoutBoundBox = layoutContainer.getBoundingClientRect();
-            const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
-
-            const offsetLeft = unitBoundBox.left - layoutBoundBox.left;
-            const offsetTop = unitBoundBox.top - layoutBoundBox.top;
-            const tooltipInst = tooltips[i] = tooltips[i] || new TooltipRenderer(layoutContainer,
-                    drawingInf.svgContainer);
-
-            sourceInf.payload = payload;
-            sourceInf.firebolt = this.firebolt;
-            sourceInf.detailFields = context.detailFields();
-            sourceInf.timeDiffs = context.timeDiffsByField();
-            sourceInf.valueParser = context.valueParser();
-            sourceInf.selectionSet = selectionSet;
-            tooltipInst.context(sourceInf);
-            const strategyFn = strategyObj[strategy];
-            tooltipInst.content(strategy, dt, {
-                formatter: strategyFn,
-                order: options.order
-            })
-                            .config(this.config())
-                            .extent({
-                                x: 0,
-                                y: 0,
-                                width: parentContainerDimensions.width,
-                                height: parentContainerDimensions.height
-                            })
-                            .offset({
-                                x: offsetLeft + (config.offset.x || 0),
-                                y: offsetTop + (config.offset.y || 0)
-                            });
-
-            if (showInPosition) {
-                tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
-            } else if (plotDim) {
-                tooltipInst.positionRelativeTo({
-                    x: plotDim.x,
-                    y: plotDim.y,
-                    width: plotDim.width || 0,
-                    height: plotDim.height || 0
-                }, {
-                    orientation: fragmented ?
-                        (showVertically ? 'horizontal' : 'vertical') : undefined
-                });
-            } else {
-                tooltipInst.hide();
-                break;
-            }
-
-            if (fragmented) {
-                const position = tooltipInst._position;
-                const tooltipBoundBox = tooltipInst._tooltipContainer.node().getBoundingClientRect();
-
-                totalHeight += tooltipBoundBox.height + pad;
-                totalWidth += tooltipBoundBox.width + pad;
-                if (showVertically ? totalHeight > drawingInf.height : totalWidth > drawingInf.width) {
-                    break;
-                }
-                boxes.push({
-                    x: position.x,
-                    y: position.y,
-                    width: tooltipBoundBox.width,
-                    height: tooltipBoundBox.height,
-                    tooltip: tooltipInst
-                });
-            }
-        }
-
-        for (const key in tooltips) {
-            if (!enter[key]) {
-                const tooltip = tooltips[key];
-                tooltip.content(payload.action, null);
-                if (!tooltip.getContents().length) {
-                    tooltip.remove();
-                    delete tooltips[key];
-                }
-            }
-        }
-        if (fragmented) {
-            spaceOutBoxes(boxes, boundBox, showVertically);
-            boxes.forEach(box => box.tooltip.position(box.x, box.y, {
-                repositionArrow: true
-            }));
-        }
-        return this;
     }
 
-    hide (options) {
-        const tooltips = this._tooltips;
-        for (const key in tooltips) {
-            if ({}.hasOwnProperty.call(tooltips, key)) {
-                const strategy = options.strategy || this._strategy;
-                tooltips[key].content(strategy, null);
-                tooltips[key].hide();
+    createTooltip (dataModel, props = {}, plotDim, key) {
+        const drawingInf = this.drawingContext();
+        const sourceInf = this.sourceInfo();
+        const config = this.config();
+        const {
+            strategy,
+            payload,
+            selectionSet
+        } = props;
+        plotDim = defaultValue(plotDim, this.getPlotPointsFromIdentifiers(payload));
+        plotDim = plotDim && plotDim[0];
+        const pad = config.padding;
+        const { showInPosition, position: tooltipPos } = payload;
+        const { fields: projectFields, dataTransform } = config[strategy];
+
+        const strategyFn = this._strategies[strategy];
+        const dt = dataTransform(dataModel, projectFields, this);
+        const { parentContainer: layoutContainer, parentContainerDimensions } = drawingInf;
+        const layoutBoundBox = layoutContainer.getBoundingClientRect();
+        const unitBoundBox = drawingInf.htmlContainer.getBoundingClientRect();
+
+        const offsetLeft = unitBoundBox.left - layoutBoundBox.left;
+        const offsetTop = unitBoundBox.top - layoutBoundBox.top;
+        const tooltipInst = this._tooltips[key] = this._tooltips[key] || new TooltipRenderer(layoutContainer,
+            drawingInf.svgContainer);
+
+        Object.assign(sourceInf, {
+            payload,
+            firebolt: this.firebolt,
+            detailFields: [],
+            timeDiffs: sourceInf.timeDiffs,
+            valueParser: this.valueParser(),
+            selectionSet,
+            config: config[strategy]
+        });
+
+        tooltipInst.context(sourceInf);
+        tooltipInst.content(strategy, dt, {
+            formatter: strategyFn,
+            order: config[strategy].order,
+            className: config[strategy].className
+        })
+                        .config(this.config())
+                        .extent({
+                            x: 0,
+                            y: 0,
+                            width: parentContainerDimensions.width,
+                            height: parentContainerDimensions.height
+                        })
+                        .offset({
+                            x: offsetLeft + (config.offset.x || 0),
+                            y: offsetTop + (config.offset.y || 0)
+                        });
+
+        if (showInPosition) {
+            tooltipInst.position(tooltipPos.x + pad, tooltipPos.y + pad);
+        } else if (plotDim) {
+            tooltipInst.positionRelativeTo({
+                x: plotDim.x,
+                y: plotDim.y,
+                width: plotDim.width || 0,
+                height: plotDim.height || 0
+            }, {
+                orientation: config.orientation
             }
+            );
+        } else {
+            tooltipInst.hide();
         }
     }
 }

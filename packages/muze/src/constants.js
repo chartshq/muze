@@ -40,6 +40,16 @@ export const TITLE_TEMPLATE_NOT_ALLOWED_TAGS = [
     'style'
 ];
 
+export const ICON_SHAPES = {
+    SQUARE: 'square',
+    CIRCLE: 'circle'
+};
+
+export const IS_POINT_MAP = {
+    true: ICON_SHAPES.CIRCLE,
+    false: ICON_SHAPES.SQUARE
+};
+
 export const LEGEND_TYPE_MAP = {
     [`${ORDINAL}-${true}-${COLOR}`]: DiscreteLegend,
     [`${ORDINAL}-${true}-${SIZE}`]: DiscreteLegend,
@@ -76,6 +86,8 @@ export const VISIBLE = 'visible';
 export const VERTICAL_SCROLL_BAR = 'verticalScrollBar';
 export const HORIZONTAL_SCROLL_BAR = 'horizontalScrollBar';
 export const GRID = 'grid';
+export const POINT = 'point';
 export const MESSAGE = 'message';
-export const NO_DATA_MESSAGE = 'No data to display';
-
+export const ERROR_MESSAGE = 'Insufficient data or incorrect configurations';
+export const COMMON_INTERACTION = 'common';
+export const INDIVIDUAL_INTERACTION = 'individual';

@@ -114,6 +114,7 @@ export default class ColorAxis {
     getColor (domainVal) {
         return this.getHslString(this.getRawColor(domainVal));
     }
+
     /**
      *
      *

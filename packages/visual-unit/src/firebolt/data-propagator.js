@@ -1,122 +1,139 @@
-import { isSimpleObject, FieldType, DataModel } from 'muze-utils';
+// import { isSimpleObject, FieldType } from 'muze-utils';
 
-const getModelWithFacetData = (dm, data) => {
-    const dataObj = dm.getData();
-    const schema1 = dataObj.schema;
-    const data1 = dataObj.data;
-    const jsonData = [];
-    const derivedSchema = data[0].map(d => ({
-        name: `${d}`,
-        type: FieldType.DIMENSION,
-        subtype: d.subtype()
-    }));
-    const dataAtFirstPos = data[1];
+// export const addFacetData = ({ identifiers: data }, facetData, propFields, dm) => {
+//     const facets = Object.keys(facetData);
+//     const facetVals = Object.values(facetData);
+//     const facetLen = facets.length;
+//     if (isSimpleObject(data)) {
+//         return Object.assign({}, Object.keys(facetData).reduce((acc, v) => {
+//             acc[v] = [facetData[v]];
+//             return acc;
+//         }, {}), data);
+//     }
+//     const fieldsWithFacets = data[0].length ? [...facets.map(d => ({ name: d, type: FieldType.DIMENSION })),
+//         ...data[0].map((d, i) => ({
+//             name: d,
+//             index: i + facetLen
+//         }))] : [];
 
-    data1.forEach((d) => {
-        const tuple = {};
-        schema1.forEach((obj, i) => {
-            tuple[obj.name] = d[i];
-        });
-        derivedSchema.forEach((obj, i) => {
-            tuple[obj.name] = dataAtFirstPos[i];
-        });
-        jsonData.push(tuple);
-    });
+//     const fieldIndexMap = fieldsWithFacets.reduce((acc, v, i) => {
+//         acc[v.name] = i;
+//         return acc;
+//     }, {});
+//     propFields = propFields || fieldsWithFacets.map(d => d.name);
+//     const dataWithFacets = [
+//         propFields
+//     ];
+//     const fieldsConfig = dm.getFieldsConfig();
+//     const propDims = fieldsWithFacets.filter(d => d.name in fieldsConfig).map(d => d.name);
 
-    return new DataModel(jsonData, [...schema1, ...derivedSchema]);
-};
+//     const dimsMap = dm.getData().data.reduce((acc, row) => {
+//         const key = propDims.map(d => row[fieldsConfig[d].index]);
+//         acc[key] || (acc[key] = []);
+//         acc[key].push(row);
+//         return acc;
+//     }, {});
 
-export const propagateValues = (instance, action, config = {}) => {
-    let propagationData;
-    const payload = config.payload;
-    const selectionSet = config.selectionSet;
-    const propagationFieldInf = config.propagationFields[action] || {};
-    const propagationFields = propagationFieldInf.fields || [];
-    const append = propagationFieldInf.append;
-    const criteria = payload.criteria;
-    const context = instance.context;
-    const dataModel = context.cachedData()[0];
-    const sourceId = context.id();
-    const sideEfffects = instance.sideEffects();
-    const behaviourEffectMap = instance._behaviourEffectMap;
-    const mergedModel = selectionSet.mergedEnter.model;
-    const fieldsConfig = dataModel.getFieldsConfig();
-    payload.sourceUnit = sourceId;
-    payload.action = action;
-    payload.sourceCanvas = context.parentAlias();
-    const propagationBehaviourMap = instance._propagationBehaviourMap;
-    const propagationBehaviour = propagationBehaviourMap[action] || action;
+//     for (let i = 1, len = data.length; i < len; i++) {
+//         const row = [...facetVals, ...data[i]];
+//         const newRow = [];
+//         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
+//         const origRow = dimsMap[dimKey];
+//         if (origRow) {
+//             origRow.forEach((rowVal) => {
+//                 const newRowVal = [];
+//                 propFields.forEach((field) => {
+//                     if (field in fieldIndexMap) {
+//                         const idx = fieldIndexMap[field];
+//                         newRowVal.push(row[idx]);
+//                     } else {
+//                         const idx = fieldsConfig[field].index;
+//                         newRowVal.push(rowVal[idx]);
+//                     }
+//                 });
 
-    let propFields = [];
-    if (criteria === null) {
-        propagationData = null;
-    } else if (isSimpleObject(criteria)) {
-        propFields = Object.keys(criteria || {});
-        propagationData = mergedModel ? mergedModel.project(propFields) : null;
-    } else {
-        propFields = criteria[0];
-        propagationData = mergedModel ? mergedModel.project(propFields) : null;
-    }
+//                 dataWithFacets.push(newRowVal);
+//             });
+//         } else {
+//             propFields.forEach((field) => {
+//                 if (field in fieldIndexMap) {
+//                     const idx = fieldIndexMap[field];
+//                     newRow.push(row[idx]);
+//                 }
+//             });
+//             dataWithFacets.push(newRow);
+//         }
+//     }
+//     return dataWithFacets;
+// };
 
-    const facetByFields = context.facetByFields();
-    if (propagationData !== null && propagationFields.length) {
-        const fields = propagationData.getData().schema.map(d => d.name);
-        propagationData = getModelWithFacetData(propagationData, facetByFields);
-        propFields = append ? [...fields, ...propagationFields] : propagationFields;
-        propagationData = propagationData.project(propFields);
-    }
+// export const propagateValues = (instance, action, config = {}) => {
+//     let propFields = [];
+//     const { payload, identifiers, propagationFields } = config;
+//     const { fields: propagationFieldNames = [], append } = propagationFields[action] || {};
+//     const context = instance.context;
+//     const dataModel = context.cachedData()[0];
+//     const sourceId = context.id();
+//     const sideEfffects = instance.sideEffects();
+//     const behaviourEffectMap = instance._behaviourEffectMap;
+//     const propagationBehaviourMap = instance._propagationBehaviourMap;
+//     const propagationBehaviour = propagationBehaviourMap[action] || action;
+//     const facetByFields = context.facetByFields();
 
-    let propagateInterpolatedValues = false;
-    if (propFields.length && propFields.every(field => fieldsConfig[field] &&
-        fieldsConfig[field].def.type === FieldType.MEASURE)) {
-        propagateInterpolatedValues = true;
-    }
+//     payload.sourceUnit = sourceId;
+//     payload.action = action;
+//     payload.sourceCanvas = context.parentAlias();
 
-    const groupId = context.parentAlias();
-    payload.action = action;
-    const behaviourInstance = instance._actions.behavioural[propagationBehaviour];
-    const isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
+//     if (identifiers !== null) {
+//         propFields = identifiers.fields;
 
-    const filterFn = (entry, propagationConf) => {
-        const effects = behaviourEffectMap[entry.config.action];
-        const mutates = entry.config.groupId ?
-            effects.some(d => sideEfffects[d.name || d].constructor.mutates()) : true;
-        return entry.config.groupId !== propagationConf.groupId && mutates;
-    };
+//         if (propagationFieldNames.length) {
+//             const fields = identifiers.fields;
+//             propFields = append ? [...fields.map(d => d.name), ...propagationFieldNames] : propagationFieldNames;
+//             Object.assign(identifiers, {
+//                 identifiers: addFacetData(identifiers, facetByFields, propFields)
+//             });
+//         }
+//     }
 
-    const sourceBehaviour = instance._actions.behavioural[action];
-    const mutates = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
-    let propConfig = {
-        payload,
-        action,
-        criteria: propagationData,
-        isMutableAction: mutates,
-        propagateInterpolatedValues,
-        groupId,
-        sourceId: mutates ? groupId : sourceId,
-        filterFn,
-        enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
-            propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)
-    };
+//     const groupId = context.parentAlias();
 
-    dataModel.propagate(propagationData, propConfig, true);
+//     const filterFn = (entry, propagationConf) => {
+//         const effects = behaviourEffectMap[entry.config.action];
+//         const mutates = entry.config.groupId ?
+//             (effects ? effects.some(d => sideEfffects[d.name || d].constructor.mutates()) : false) : true;
+//         return entry.config.groupId !== propagationConf.groupId && mutates;
+//     };
 
-    if (action !== propagationBehaviour) {
-        propConfig = {
-            payload,
-            sourceId: isMutableAction ? groupId : sourceId,
-            criteria: propagationData,
-            isMutableAction,
-            propagateInterpolatedValues,
-            action: propagationBehaviour,
-            groupId,
-            applyOnSource: action === propagationBehaviour,
-            enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.parentAlias(),
-            filterFn
-        };
+//     const sourceBehaviour = instance._actions.behavioural[action];
+//     let isMutableAction = sourceBehaviour ? sourceBehaviour.constructor.mutates() : false;
+//     const propConfig = {
+//         payload,
+//         action,
+//         criteria: identifiers,
+//         isMutableAction,
+//         groupId,
+//         sourceId: config.sourceId,
+//         filterFn,
+//         enabled: (propConf, firebolt) => (action !== propagationBehaviour ?
+//             propConf.payload.sourceCanvas === firebolt.context.parentAlias() : true)
+//     };
 
-        dataModel.propagate(propagationData, propConfig, true, {
-            filterImmutableAction: (actionInf, propInf) => actionInf.groupId !== propInf.groupId
-        });
-    }
-};
+//     dataModel.propagate(identifiers, propConfig, true);
+
+//     if (action !== propagationBehaviour) {
+//         const behaviourInstance = instance._actions.behavioural[propagationBehaviour];
+//         isMutableAction = behaviourInstance ? behaviourInstance.constructor.mutates() : false;
+
+//         dataModel.propagate(identifiers, Object.assign({}, propConfig, {
+//             isMutableAction,
+//             applyOnSource: false,
+//             action: propagationBehaviour,
+//             sourceId: isMutableAction ? groupId : sourceId,
+//             enabled: (propConf, firebolt) => propConf.payload.sourceCanvas !== firebolt.context.parentAlias()
+//         }), true, {
+//             filterImmutableAction: (actionInf, propInf) => actionInf.groupId !== propInf.groupId
+//         });
+//     }
+// };
+

@@ -1,6 +1,8 @@
 import SimpleLegend from './simple-legend';
 import { getScaleInfo, getInterpolatedData, getInterpolatedArrayData } from './legend-helper';
 import { GRADIENT, LEFT, SIZE } from '../enums/constants';
+import { HIGHLIGHT } from '../enums/behaviours';
+import { Marker } from '../enums/side-effects';
 import { renderGradient, createAxis } from './gradient-helper';
 import '../styles.scss';
 
@@ -91,8 +93,8 @@ export default class GradientLegend extends SimpleLegend {
             const value = domainForLegend[i];
             return {
                 [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor()
-                    : scale[scaleFn](Math.floor(ele)),
-                value: +value.toFixed(2),
+                    : scale[scaleFn](ele),
+                value: +value.toFixed(1),
                 id: i
             };
         }).filter(d => d.value !== null);
@@ -150,10 +152,13 @@ export default class GradientLegend extends SimpleLegend {
         renderGradient(this, legendContainer);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
-        firebolt.createSelectionSet(this.data().map(d => d.id));
+        firebolt.mapSideEffects({
+            [HIGHLIGHT]: [Marker]
+        });
         return legendContainer;
     }
- /**
+
+    /**
      *
      *
      * @param {*} data
@@ -162,5 +167,12 @@ export default class GradientLegend extends SimpleLegend {
      */
     getCriteriaFromData (data) {
         return [[this.fieldName()], [data.value]];
+    }
+
+    getRangeFromIdentifiers ({ fields, criteria }) {
+        return fields.reduce((range, v) => {
+            range[v] = criteria[v];
+            return range;
+        }, {});
     }
 }

@@ -1,4 +1,4 @@
-import { getSymbol } from 'muze-utils';
+import { getSymbol, mergeRecursive } from 'muze-utils';
 import {
     CENTER,
     LEFT,
@@ -17,6 +17,8 @@ export const DEFAULT_MEASUREMENT = {
     maxHeight: Infinity,
     padding: 2,
     margin: 2,
+    marginHorizontal: 3,
+    paddingRight: 4,
     border: 1
 };
 
@@ -30,6 +32,10 @@ export const LEGEND_TITLE = {
 };
 
 export const DEFAULT_CONFIG = {
+    buffer: {
+        [ALIGN.HORIZONTAL]: 10,
+        [ALIGN.VERTICAL]: 10
+    },
     classPrefix: 'muze',
     borderStyle: 'solid',
     borderColor: 'rgba(0,0,0,0)',
@@ -49,11 +55,24 @@ export const DEFAULT_CONFIG = {
             className: 'legend-icon',
             height: 20,
             width: 20,
-            color: 'rgba(0,0,0,.5)',
+            color: 'rgba(192,192,192,0.6)',
             type: 'square'
         }
     }
+    // stops: 5
 };
+
+const tempConfig = mergeRecursive({}, DEFAULT_CONFIG);
+
+const ITEM_FORMATTER = {
+    item: {
+        text: {
+            formatter: val => `${val[0]} - ${val[1]}`
+        }
+    }
+};
+
+export const STEP_DEFAULT_CONFIG = mergeRecursive(tempConfig, ITEM_FORMATTER);
 
 /**
  * Creates a map of pre defined icons
@@ -65,4 +84,11 @@ export const ICON_MAP = (icon) => {
     if (icon && typeof (icon) === 'string') {
         return getSymbol(icon);
     } return icon;
+};
+
+export const LEGEND_MARKER_PROPS = {
+    size: 8,
+    ROTATE_HORIZONTAL: 180,
+    ROTATE_VERTICAL: 90,
+    shape: 'triangle'
 };

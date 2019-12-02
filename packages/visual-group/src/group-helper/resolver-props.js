@@ -11,5 +11,7 @@ export const RESOLVER_PROPS = {
     valueMatrix: {},
     encoder: {},
     valueParser: {},
-    data: {}
+    data: {},
+    transformedData: {},
+    store: {}
 };

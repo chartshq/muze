@@ -1,8 +1,7 @@
 import {
     getEvent,
     getD3Drag
- } from 'muze-utils';
-
+} from 'muze-utils';
 import getDragActionConfig from './drag-action-config';
 
 /**
@@ -11,7 +10,7 @@ import getDragActionConfig from './drag-action-config';
  * @param {SVGElement} targetEl Element on which brushing action is needed.
  * @param {Array} behaviours Array of behaviours
  */
-export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
+export const attachDragEvent = (targetEl, action, firebolt, touch) => {
     let startPos = {};
     let endPos = {};
     let drawingInf;
@@ -32,17 +31,31 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
             x: event.x,
             y: event.y
         };
+
         if (touch && Math.abs(startPos.x - endPos.x) <= 5) {
             return;
         }
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
+        const newStartPos = Object.assign({}, startPos);
+        const newEndPos = Object.assign({}, endPos);
+        if (startPos.x > endPos.x) {
+            newStartPos.x = endPos.x;
+            newEndPos.x = startPos.x;
+        }
 
-        const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
-            startPos,
-            endPos
-        }, firebolt.context.data().getFieldsConfig());
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        if (startPos.y > endPos.y) {
+            const y = startPos.y;
+            newStartPos.y = endPos.y;
+            newEndPos.y = y;
+        }
+        const payload = getDragActionConfig(firebolt, {
+            startPos: newStartPos,
+            endPos: newEndPos
+        });
+        payload.dragging = true;
+        payload.dragDiff = Math.abs(startPos.x - endPos.x) + Math.abs(startPos.y - endPos.y);
+        firebolt.triggerPhysicalAction(action, payload);
     }).on('end', () => {
         const event = getEvent();
         endPos = {
@@ -56,14 +69,24 @@ export const attachDragEvent = (targetEl, behaviours, firebolt, touch) => {
         }
         endPos.x = Math.max(0, Math.min(endPos.x, drawingInf.width));
         endPos.y = Math.max(0, Math.min(endPos.y, drawingInf.height));
+        if (startPos.x > endPos.x) {
+            const x = startPos.x;
+            startPos.x = endPos.x;
+            endPos.x = x;
+        }
 
-        const payload = getDragActionConfig(firebolt.context.getSourceInfo(), {
+        if (startPos.y > endPos.y) {
+            const y = startPos.y;
+            startPos.y = endPos.y;
+            endPos.y = y;
+        }
+
+        const payload = getDragActionConfig(firebolt, {
             startPos,
-            endPos,
-            snap: true
-        }, firebolt.context.data().getFieldsConfig());
+            endPos
+        });
         payload.dragEnd = true;
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction(action, payload);
     }));
 };
 

@@ -8,6 +8,12 @@ const defaultPolicy = (registrableComponents) => {
                 const propagationCanvas = propagationPayload.sourceCanvas;
                 return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
             }
+        },
+        sideEffects: {
+            '*': (propagationPayload) => {
+                const propagationCanvas = propagationPayload.sourceCanvas;
+                return propagationCanvas ? aliases.indexOf(propagationCanvas) !== -1 : true;
+            }
         }
     };
 };
@@ -108,6 +114,7 @@ class ActionModel {
      */
     registerPhysicalActions (action) {
         registerActions(this, 'physicalActions', 'registerPhysicalActions', action);
+
         return this;
     }
 

@@ -1,7 +1,7 @@
 import { makeElement, applyStyle } from 'muze-utils';
 import { ContinousAxis } from '@chartshq/muze-axis';
 import { BOTTOM, RIGHT } from '../enums/constants';
-import { ALIGN } from './defaults';
+import { ALIGN, LEGEND_MARKER_PROPS } from './defaults';
 import '../styles.scss';
 
 /**
@@ -18,7 +18,6 @@ export const getGradientDomain = (data) => {
     }
     return data.map(e => e.value);
 };
-
 /**
  *
  *
@@ -27,10 +26,10 @@ export const getGradientDomain = (data) => {
  * @param {*} domain
  *
  */
-export const makeLinearGradient = (container, data, domain) => {
+export const makeLinearGradient = (container, data, domain, id) => {
     const defs = makeElement(container, 'defs', [1]);
     const linearGradient = makeElement(defs, 'linearGradient', [1])
-                .attr('id', 'linear-gradient')
+                .attr('id', `linear-gradient-${id}`)
                 .attr('x1', '0%')
                 .attr('y2', '0%');
 
@@ -80,12 +79,12 @@ export const createAxis = (context) => {
  *
  * @memberof GradientLegend
  */
-const createLegendSkeleton = (container, classPrefix, data) => {
+const createLegendSkeleton = (container, classPrefix, data, id) => {
     const domain = getGradientDomain(data);
     const legendContainer = makeElement(container, 'div', [1], `${classPrefix}-legend-body`);
     const legendGradSvg = makeElement(legendContainer, 'svg', [1], `${classPrefix}-gradient`);
     const legendGradCont = makeElement(legendGradSvg, 'g', [1], `${classPrefix}-gradient-group`);
-    const linearGradient = makeLinearGradient(legendGradSvg, data, domain);
+    const linearGradient = makeLinearGradient(legendGradSvg, data, domain, id);
     const legendRect = makeElement(legendGradCont, 'rect', [1], `${classPrefix}-gradient-rect`);
 
     return {
@@ -108,6 +107,9 @@ const createLegendSkeleton = (container, classPrefix, data) => {
 export const renderAxis = (context, container, height, width) => {
     const axis = context.axis();
 
+    axis.source().config({
+        tickFormat: (val, i) => context.config().item.text.formatter(val, i, context.metaData(), context)
+    });
     axis.setAvailableSpace(width, height);
     axis.render(container.node());
     axis.source().render();
@@ -135,7 +137,7 @@ export const renderGradient = (context, container) => {
         legendGradCont,
         linearGradient,
         legendRect
-    } = createLegendSkeleton(container, classPrefix, data);
+    } = createLegendSkeleton(container, classPrefix, data, context._id);
     const labelDim = context.axis().source().getAxisDimensions().tickDimensions;
     const {
         padding,
@@ -157,7 +159,7 @@ export const renderGradient = (context, container) => {
         gradientDimensions.height = item.icon.height;
         gradientDimensions.width = gradWidth - 2 * padding - labelDim.width / 2;
         linearGradient.attr('x2', '100%').attr('y1', '0%');
-        legendGradCont.attr('transform', `translate( ${labelDim.width / 2} 0)`);
+        legendGradCont.attr('transform', `translate( ${labelDim.width / 2} ${LEGEND_MARKER_PROPS.size + 4})`);
         renderAxis(context, legendContainer, gradHeight - item.icon.height - padding, gradWidth - 2 * padding - 1);
 
         applyStyle(legendContainer, {
@@ -172,7 +174,7 @@ export const renderGradient = (context, container) => {
         gradientDimensions.height = gradHeight - 2 * padding - labelDim.height / 2;
         gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
-        legendGradCont.attr('transform', `translate(0 ${labelDim.height / 2})`);
+        legendGradCont.attr('transform', `translate(${LEGEND_MARKER_PROPS.size + 4} ${labelDim.height / 2})`);
         renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
 
         applyStyle(legendContainer, {
@@ -186,16 +188,16 @@ export const renderGradient = (context, container) => {
 
     // Apply Styles to the legend plot area
     applyStyle(legendGradSvg, {
-        height: `${gradientDimensions.height}px`,
-        width: `${gradientDimensions.width}px`
+        height: `${gradientDimensions.height + LEGEND_MARKER_PROPS.size + 4}px`,
+        width: `${gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4}px`
     });
 
-        // Apply styles to the legend rect
+    // Apply styles to the legend rect
     applyStyle(legendRect, {
-        fill: 'url(#linear-gradient)'
+        fill: `url(#linear-gradient-${context._id})`
     });
-    legendGradSvg.attr('height', gradientDimensions.height);
-    legendGradSvg.attr('width', gradientDimensions.width);
+    legendGradSvg.attr('height', gradientDimensions.height + LEGEND_MARKER_PROPS.size + 4);
+    legendGradSvg.attr('width', gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4);
 
     context.measurement({
         gradientDimensions

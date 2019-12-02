@@ -2,16 +2,17 @@ import SimpleLegend from './simple-legend';
 import {
     getScaleInfo,
     getInterpolatedData,
-    getDomainBounds
+    getItemMeasures
 } from './legend-helper';
 import {
     createLegendSkeleton,
     createItemSkeleton,
     renderStepItem
 } from './renderer';
-import { STEP, RECT, LEFT, SIZE, UPPER, LOWER } from '../enums/constants';
+import { STEP, RECT, LEFT, SIZE, HORIZONTAL } from '../enums/constants';
 import { stepData } from './position-config';
 import '../styles.scss';
+import { STEP_DEFAULT_CONFIG, DEFAULT_MEASUREMENT } from './defaults';
 
 /**
  * Creates a Legend from the axes of a canvas
@@ -47,6 +48,18 @@ export default class StepLegend extends SimpleLegend {
     /**
      *
      *
+     * @static
+     *
+     * @memberof StepLegend
+     */
+    static defaultConfig () {
+        STEP_DEFAULT_CONFIG.buffer[HORIZONTAL] = 0;
+        return STEP_DEFAULT_CONFIG;
+    }
+
+    /**
+     *
+     *
      * @param {*} scale
      *
      * @memberof StepLegend
@@ -55,11 +68,7 @@ export default class StepLegend extends SimpleLegend {
         let domainLeg = [];
         const scale = this.scale();
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
-
-        const { formatter } = this.config();
-        const domainBounds = {
-            lower: null, upper: null
-        };
+        const isFraction = ele => ele % 1 !== 0;
 
         // defining scaleParams
         const scaleParams = {
@@ -71,12 +80,13 @@ export default class StepLegend extends SimpleLegend {
 
         if (steps instanceof Array) {
             if (domain[0] < steps[0]) {
-                domainBounds.lower = [`${formatter.bounds.lower} ${steps[0]}`];
+                domainLeg[0] = domain[0];
             }
             domainLeg = [...domainLeg, ...steps];
             if (domain[domain.length - 1] > steps[steps.length - 1]) {
-                domainBounds.upper = [`${formatter.bounds.upper} ${steps[steps.length - 1]}`];
+                domainLeg.push(domain[1]);
             }
+            domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
         } else {
             domainLeg = getInterpolatedData(domain, steps, scaleParams);
         }
@@ -84,29 +94,32 @@ export default class StepLegend extends SimpleLegend {
         domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
         domainLeg = domainLeg.map((ele, i) => {
             let value = null;
+            let range;
             if (i < domainLeg.length - 1) {
-                value = `${(ele.toFixed(1))} - ${(+domainLeg[i + 1].toFixed(1))}`;
+                const left = isFraction(ele) ? ele.toFixed(1) : ele;
+
+                const numRight = +domainLeg[i + 1];
+                const right = isFraction(numRight) ? numRight.toFixed(1) : numRight;
+
+                value = `${left} - ${right}`;
+                range = [left, right];
             } else if (domainLeg.length === 1) {
-                value = ele.toFixed(1);
+                value = isFraction(ele) ? ele.toFixed(1) : ele;
+
+                const numRight = +domainLeg[i + 1];
+                const right = isFraction(numRight) ? numRight.toFixed(1) : numRight;
+                range = [value, right];
             }
+
             return {
-                [scaleType]: scaleType === SIZE ? scale[scaleFn](ele) * scale.getScaleFactor() : scale[scaleFn](ele),
+                [scaleType]: scaleType === SIZE
+                ? scale[scaleFn](ele) * scale.getScaleFactor()
+                : scale[scaleFn](ele),
                 value,
                 id: i + 1,
-                range: [ele, domainLeg[i + 1]]
+                range
             };
         }).filter(d => d.value !== null);
-
-        if (domainBounds.lower) {
-            const lowerBounds = getDomainBounds(LOWER, { scale, scaleFn, scaleType },
-                { domain, steps, domainBounds });
-            domainLeg = [lowerBounds, ...domainLeg];
-        }
-        if (domainBounds.upper) {
-            const upperBounds = getDomainBounds(UPPER, { scale, scaleFn, scaleType },
-            { domain, steps, domainBounds, domainLeg });
-            domainLeg = [...domainLeg, upperBounds];
-        }
 
         return domainLeg;
     }
@@ -119,7 +132,7 @@ export default class StepLegend extends SimpleLegend {
      *
      * @memberof Legend
      */
-    getLabelSpaces (effPadding, align) {
+    getLabelSpaces () {
         this.config({
             item: {
                 text: {
@@ -127,7 +140,11 @@ export default class StepLegend extends SimpleLegend {
                 }
             }
         });
-        return super.getLabelSpaces(effPadding, align);
+        const {
+            item
+        } = this.config();
+        const stepItemBuffer = DEFAULT_MEASUREMENT.padding * 2;
+        return getItemMeasures(this, 'range', item.text.formatter, stepItemBuffer);
     }
 
     /**
@@ -161,17 +178,9 @@ export default class StepLegend extends SimpleLegend {
         renderStepItem(this, itemSkeleton);
         legendContainer.selectAll('div').style('float', LEFT);
         firebolt.mapActionsAndBehaviour();
-        firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
 
-    /**
-     *
-     *
-     * @param {*} data
-     *
-     * @memberof StepLegend
-     */
     getCriteriaFromData (data) {
         const fieldName = this.fieldName();
         return {

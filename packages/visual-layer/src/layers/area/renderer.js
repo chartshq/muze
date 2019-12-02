@@ -12,33 +12,43 @@ const area = Symbols.area;
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    let filteredPoints;
-    const { layer, container, points, style, transition, className, connectNullData, interpolate } = params;
+    const { layer, container, points, style, transition, className, interpolate, connectNullData } = params;
 
+    const graphicElems = layer._graphicElems;
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
     const curveInterpolatorFn = pathInterpolators[interpolate];
-    const selection = mount.selectAll('path').data(points.length ? [points[0].className] : []);
+    const selection = mount.selectAll('path').data(points.length ? [points] : []);
     const [enterAreaPath, updateAreaPath] = ['enter', 'update'].map(e => area().curve(curveInterpolatorFn)
                     .x(d => d[e].x)
                     .y1(d => d[e].y)
                     .y0(d => d[e].y0)
-                    .defined(d => d[e].y !== null
-            ));
+                    .defined(d => d[e].y !== undefined));
 
-    filteredPoints = points;
     mount.attr('class', className);
+
+    let filteredPoints = points;
     if (connectNullData) {
-        filteredPoints = points.filter(d => d.update.y !== null);
+        filteredPoints = filteredPoints.filter(d => d.update.y !== undefined);
     }
-    const selectionEnter = selection.enter().append('path').attr('d', enterAreaPath(filteredPoints));
+    const selectionEnter = selection
+        .enter()
+        .append('path')
+        .attr('d', enterAreaPath(filteredPoints))
+        .each((d) => {
+            d.forEach((dd) => {
+                if (dd.rowId) {
+                    graphicElems[dd.rowId] = mount.select('path');
+                }
+            });
+        });
+
     selection.merge(selectionEnter).transition().ease(easeFns[easeEffect])
                     .duration(duration)
                     .on('end', layer.registerAnimationDoneHook())
                     .attr('d', updateAreaPath(filteredPoints))
-                    .each(function (d) {
+                    .each(function () {
                         const element = selectElement(this);
-                        element.attr('class', d);
                         Object.keys(style).forEach(key => element.style(key, style[key]));
                     });
 };

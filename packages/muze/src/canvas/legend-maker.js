@@ -1,7 +1,8 @@
 import { TextCell, AxisCell } from '@chartshq/visual-cell';
 import { getValueParser, retrieveFieldDisplayName, DataModel, getObjProp } from 'muze-utils';
 import {
-    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING, BORDER, MARGIN
+    VERTICAL, HORIZONTAL, LEFT, RIGHT, LEGEND_TYPE_MAP, PADDING,
+    BORDER, MARGIN, SIZE, COLOR, IS_POINT_MAP, POINT
 } from '../constants';
 
 /**
@@ -44,6 +45,18 @@ export const legendCreator = (canvas) => {
 };
 
 /**
+ * @param {*} mark mark of the layers in the canvas
+ * @param {*} scaleType type of the scale to draw the legend ie shape, size or color
+ *
+ */
+export const legendIconShapeMapper = (layers, scaleType) => {
+    const layerMarks = layers.map(el => el.mark);
+    const shape = IS_POINT_MAP[(scaleType === COLOR || scaleType === SIZE)
+    && layerMarks.includes(POINT)];
+    return shape;
+};
+
+/**
  *
  *
  * @param {*} legendConfig
@@ -66,8 +79,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
 
     const legendInfo = legendCreator(canvas);
     const { invalidValues } = canvas.config();
-
+    const interactionRegistry = canvas.registry().interactions;
     const parser = getValueParser(invalidValues);
+
     legendInfo.forEach((dataInfo, index) => {
         const legendMeasures = {};
         const {
@@ -89,6 +103,9 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
                     labelManager: canvas._dependencies.smartlabel,
                     cells: {
                         AxisCell, TextCell
+                    },
+                    registry: {
+                        interactions: interactionRegistry
                     }
                 });
             }
@@ -104,6 +121,10 @@ export const legendInitializer = (legendConfig, canvas, measurement, prevLegends
             if (metaData instanceof DataModel) {
                 metaData.dispose();
             }
+
+            const mark = canvas.composition().visualGroup.resolver().matrixLayers()[0][0];
+            config.shape = legendIconShapeMapper(mark, scaleType);
+
             legend.scale(scale)
                             .valueParser(parser)
                             .title(title)

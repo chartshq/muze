@@ -173,7 +173,7 @@ export default class PolarEncoder extends VisualEncoder {
         const axes = context.resolver().axes();
         context.matrixInstance().value.each((cell, rIdx, cIdx) => {
             const unit = cell.valueOf();
-            const unitDomains = unit.getDataDomain();
+            const unitDomains = unit.dataDomain();
             const fields = unit.fields();
             setRadiusFactor(unit);
             [RADIUS, ANGLE, ANGLE0].forEach((encType) => {
@@ -375,6 +375,7 @@ export default class PolarEncoder extends VisualEncoder {
                 !encoding.angle && (encoding.angle = {});
                 const angleField = getObjProp(encoding.angle, 'field');
                 const angle0Field = getObjProp(encoding.angle0, 'field');
+
                 if (!angleField) {
                     Object.assign(encoding.angle, {
                         field: encodingConfigs.color && encodingConfigs.color.field
@@ -391,5 +392,10 @@ export default class PolarEncoder extends VisualEncoder {
             layerConfig.push(config);
         });
         return layerConfig;
+    }
+
+    hasMandatoryFields (fields) {
+        const { optionalProjections } = fields;
+        return super.hasMandatoryFields({ optionalProjections });
     }
 }

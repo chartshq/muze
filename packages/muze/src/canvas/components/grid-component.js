@@ -79,12 +79,18 @@ export default class GridComponent extends MuzeComponent {
                     column: j
                 };
                 if (this.gridComponents[i][j] instanceof MuzeComponent) {
+                    const { isFacet, showHeaders } = this.params.component.config();
+                    matrixConfig.isFacet = isFacet;
+                    matrixConfig.showHeaders = showHeaders;
                     this.gridComponents[i][j].updateWrapper({
                         name: matrixName,
                         component: matrix,
                         config: matrixConfig
                     });
                 } else {
+                    const { isFacet, showHeaders } = this.params.component.config();
+                    matrixConfig.isFacet = isFacet;
+                    matrixConfig.showHeaders = showHeaders;
                     const matrixWrapper = new MatrixComponent({
                         name: matrixName,
                         component: matrix,

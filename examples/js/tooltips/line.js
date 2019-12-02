@@ -46,7 +46,18 @@ d3.json('../../data/cars.json', (data) => {
     }
     ];
     let rootData1 = new DataModel1(jsonData1, schema1);
-    let canvas1 = env1.canvas();
 
-    canvas1 = canvas1.data(rootData1).width(600).height(400).columns(['Cylinders']).size('Weight_in_lbs').color('Weight_in_lbs').rows(['Horsepower']).detail(['Maker']).layers([{ mark: 'point' }]).title('The car acceleration respective to origin', { position: 'bottom', align: 'left' }).mount("#chart2");
+    env1.canvas().data(rootData1).width(600).height(400).rows(['Horsepower']).columns(['Origin'])
+    .layer([{
+        mark: 'point'
+    }])
+    .config({
+        legend: {
+            color: {
+                item: {
+                    text: { orientation: 'bottom' }
+                }
+            }
+        }
+    }).color('Origin').mount('#chart2').title('The car acceleration respective to origin', { position: 'bottom', align: 'left' });
 });

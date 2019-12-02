@@ -22,6 +22,9 @@ export default class GenericSideEffect {
         this._strategies = {};
         generateGetterSetters(this, PROPS);
         this.config(this.constructor.defaultConfig());
+        this.sourceInfo(() => this.firebolt.context.getSourceInfo());
+        this.layers(() => this.firebolt.context.layers());
+        this.plotPointsFromIdentifiers((...args) => this.firebolt.context.getPlotPointsFromIdentifiers(...args));
     }
 
     /**
@@ -129,5 +132,29 @@ export default class GenericSideEffect {
             this._strategies[name] = fn;
         }
         return this;
+    }
+
+    sourceInfo (...sourceInfo) {
+        if (sourceInfo.length) {
+            this._sourceInfo = sourceInfo[0];
+            return this;
+        }
+        return this._sourceInfo();
+    }
+
+    layers (...layers) {
+        if (layers.length) {
+            this._layers = layers[0];
+            return this;
+        }
+        return this._layers();
+    }
+
+    plotPointsFromIdentifiers (...params) {
+        if (params.length && params[0] instanceof Function) {
+            this._plotPointsFromIdentifiers = params[0];
+            return this;
+        }
+        return this._plotPointsFromIdentifiers(...params);
     }
 }

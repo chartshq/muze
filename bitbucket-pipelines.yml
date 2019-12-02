@@ -1,0 +1,12 @@
+image: node:10.16.3
+
+pipelines:
+   pull-requests:
+      '**':
+        - step:
+            script:
+                - apt-get update
+                - apt-get install zip
+                - npm install --unsafe-perm
+                - npm run test
+                - npm run autotest:prod

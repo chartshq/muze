@@ -1,13 +1,15 @@
-import { clone, retrieveNearestGroupByReducers } from 'muze-utils';
-import * as SELECTION from '../enums/selection';
+import { clone, unique, intersect } from 'muze-utils';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
     sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
     sideEffects.forEach((SideEffect) => {
         const formalName = SideEffect.formalName();
-        const sideEffectInstance = sideEffectsMap[formalName];
-        sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+        const target = SideEffect.target();
+        if (target === context.target() || target === 'all') {
+            const sideEffectInstance = sideEffectsMap[formalName];
+            sideEffectsMap[formalName] = sideEffectInstance || new SideEffect(context);
+        }
     });
     return sideEffectsMap;
 };
@@ -64,50 +66,13 @@ export const getSourceFields = (propagationInf, criteria = {}) => {
     const sourceIdentifiers = propagationInf.sourceIdentifiers;
     let sourceFields;
     if (sourceIdentifiers) {
-        sourceFields = sourceIdentifiers.getSchema().map(d => d.name);
+        sourceFields = sourceIdentifiers.fields.map(d => d.name);
     } else if (criteria instanceof Array) {
         sourceFields = criteria[0];
     } else {
         sourceFields = Object.keys(criteria || {});
     }
     return sourceFields;
-};
-
-const conditionsMap = {
-    mergedEnter: [SELECTION.SELECTION_NEW_ENTRY, SELECTION.SELECTION_OLD_ENTRY],
-    mergedExit: [SELECTION.SELECTION_NEW_EXIT, SELECTION.SELECTION_OLD_EXIT],
-    complete: []
-};
-
-export const getModelFromSet = (type, model, set) => {
-    const conditions = conditionsMap[type];
-    if (model && conditions) {
-        return model.select((fields, i) =>
-           (conditions.some(condition => set[i] === condition)), {
-               saveChild: false
-           });
-    }
-    return null;
-};
-
-export const getSetInfo = (type, set, config) => {
-    let model = null;
-    const filteredDataModel = config.filteredDataModel;
-    const selectionSet = config.selectionSet;
-    if (!config.propagationData) {
-        if (selectionSet.resetted()) {
-            model = null;
-        } else if (type === 'mergedEnter') {
-            model = getModelFromSet(type, config.dataModel, config.selectionSet._set);
-        }
-    } else if (filteredDataModel) {
-        model = type === 'mergedEnter' ? filteredDataModel[0] : filteredDataModel[1];
-    }
-    return {
-        uids: set,
-        length: set.length,
-        model
-    };
 };
 
 export const getSideEffects = (behaviour, behaviourEffectMap) => {
@@ -125,33 +90,78 @@ export const getSideEffects = (behaviour, behaviourEffectMap) => {
     return sideEffects;
 };
 
-export const unionSets = (context, behaviours) => {
-    let combinedSet = {};
+export const unionSets = (firebolt, behaviours) => {
+    let combinedSet = null;
     const models = {
         mergedEnter: null,
         mergedExit: null
     };
+    const uidSet = {
+        mergedEnter: [],
+        mergedExit: []
+    };
+
     behaviours.forEach((behaviour) => {
-        const entryExitSet = context._entryExitSet[behaviour];
+        const entryExitSet = firebolt._entryExitSet[behaviour];
         if (entryExitSet) {
-            combinedSet = Object.assign(combinedSet, clone(entryExitSet));
+            combinedSet = Object.assign(combinedSet || {}, clone(entryExitSet));
             ['mergedEnter', 'mergedExit'].forEach((type) => {
-                const model = entryExitSet[type].model;
+                const { model, uids } = entryExitSet[type];
                 let existingModel = models[type];
-                let aggFns = retrieveNearestGroupByReducers(model);
+
                 if (!existingModel) {
                     existingModel = models[type] = model;
+                    uidSet[type] = uids;
                 } else if (`${model.getSchema().map(d => d.name).sort()}` ===
                     `${existingModel.getSchema().map(d => d.name).sort()}`) {
-                    aggFns = Object.assign({}, retrieveNearestGroupByReducers(existingModel));
-                    existingModel = models[type] = model.union(existingModel);
+                    uidSet[type] = unique([...uidSet[type], ...uids]);
+                    models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
                 } else {
                     existingModel = model;
+                    uidSet[type] = uids;
                 }
-                combinedSet[type].model = existingModel;
-                combinedSet[type].aggFns = aggFns;
+                combinedSet[type].uids = uidSet[type];
+                combinedSet[type].model = models[type];
             });
         }
     });
+
+    return combinedSet;
+};
+
+export const intersectSets = (firebolt, behaviours) => {
+    let combinedSet = null;
+    const models = {
+        mergedEnter: null,
+        mergedExit: null
+    };
+    const uidSet = {
+        mergedEnter: [],
+        mergedExit: []
+    };
+
+    behaviours.forEach((behaviour) => {
+        const entryExitSet = firebolt._entryExitSet[behaviour];
+        if (entryExitSet) {
+            combinedSet = Object.assign(combinedSet || {}, clone(entryExitSet));
+            ['mergedEnter', 'mergedExit'].forEach((type) => {
+                const { model, uids } = entryExitSet[type];
+                let existingModel = models[type];
+
+                if (!existingModel) {
+                    existingModel = models[type] = model;
+                    uidSet[type] = uids;
+                } else if (`${model.getSchema().map(d => d.name).sort()}` ===
+                    `${existingModel.getSchema().map(d => d.name).sort()}`) {
+                    const commonSet = intersect(uidSet[type], uids, [id => id[0], id => id[0]]);
+                    uidSet[type] = [...commonSet];
+                    models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
+                }
+                combinedSet[type].uids = unique(uidSet[type]);
+                combinedSet[type].model = models[type];
+            });
+        }
+    });
+
     return combinedSet;
 };

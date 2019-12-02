@@ -5,6 +5,8 @@ const PERSISTENT_ANCHORS = 'persistent-anchors';
 const FILTER = 'filter';
 const HIGHLIGHTER = 'highlighter';
 const CROSSLINE = 'crossline';
+const FRAGMENTED_TOOLTIP = 'fragmented-tooltip';
+const AXIS_LABEL_HIGHLIGHTER = 'axis-label-highlighter';
 
 export {
     ANCHORS,
@@ -13,5 +15,7 @@ export {
     FILTER,
     HIGHLIGHTER,
     CROSSLINE,
-    TOOLTIP
+    TOOLTIP,
+    FRAGMENTED_TOOLTIP,
+    AXIS_LABEL_HIGHLIGHTER
 };

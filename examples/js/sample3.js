@@ -1,5 +1,5 @@
 /* eslint-disable */
-const env = muze();
+let env = muze();
 const DataModel = muze.DataModel;
 
 function shuffleArray(array) {
@@ -61,74 +61,87 @@ d3.json('../../data/cars.json', (data) => {
         // format: '%Y-%m-%d'
     }
     ];
-    jsonData = [
-        {
-            Origin: 'USA',
-            Cylinders: 5,
-            Name: 'x',
-            Horsepower: 12
-        },
+    // jsonData = [
+    //     {
+    //         Origin: 'USA',
+    //         Cylinders: 5,
+    //         Name: 'x',
+    //         Horsepower: 12
+    //     },
 
 
-        {
-            Origin: 'Japan',
-            Cylinders: 3,
-            Name: 'z',
-            Horsepower: 12
-        },
-        {
-            Origin: 'Japan',
-            Cylinders: 3,
-            Name: 'k',
-            Horsepower: 12
-        },
-        {
-            Origin: 'Japan',
-            Cylinders: 5,
-            Name: 'x',
-            Horsepower: 12
-        },
-        {
-            Origin: 'Europe',
-            Cylinders: 3,
-            Name: 'x',
-            Horsepower: 12
-        },
-        {
-            Origin: 'Europe',
-            Cylinders: 3,
-            Name: 'r',
-            Horsepower: 12
-        },
-        {
-            Origin: 'Europe',
-            Cylinders: 5,
-            Name: 'x',
-            Horsepower: 12
-        },
-    ]
+    //     {
+    //         Origin: 'Japan',
+    //         Cylinders: 3,
+    //         Name: 'z',
+    //         Horsepower: 12
+    //     },
+    //     {
+    //         Origin: 'Japan',
+    //         Cylinders: 3,
+    //         Name: 'k',
+    //         Horsepower: 12
+    //     },
+    //     {
+    //         Origin: 'Japan',
+    //         Cylinders: 5,
+    //         Name: 'x',
+    //         Horsepower: 12
+    //     },
+    //     {
+    //         Origin: 'Europe',
+    //         Cylinders: 3,
+    //         Name: 'x',
+    //         Horsepower: 12
+    //     },
+    //     {
+    //         Origin: 'Europe',
+    //         Cylinders: 3,
+    //         Name: 'r',
+    //         Horsepower: 12
+    //     },
+    //     {
+    //         Origin: 'Europe',
+    //         Cylinders: 5,
+    //         Name: 'x',
+    //         Horsepower: 12
+    //     },
+    // ]
 
-    let rootData = new DataModel(jsonData, schema)
-    console.log(rootData.sort([
-        ['Cylinders', null],
-        ['Origin', 'desc'],
-        ['Name', 'asc']
-    ]).getData().data);
+    var rootData = new DataModel(jsonData, schema);
+    rootData = rootData.calculateVariable({
+        name: "date",
+        type: "dimension",
+        subtype: "temporal",
+        format: "%Y-%m-%d"
+    }, ["Year", function (d) {
+        return d;
+    }]);
 
+    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+    var mountPoint = document.getElementById('chart');
+    window.canvas = env.canvas();
+    var rows = ['Cylinders', 'Horsepower', 'Acceleration'],
+        columns = ['Origin', 'Year'];
+    canvas = canvas.rows(rows).columns(columns).height(800).color('Origin').width(500)
+    //{initProps}
+    .mount('#chart');
 
-        const canvas = env.canvas();
-        canvas
-        .data(rootData)
-        .width(850)
-        .height(550)
-        .rows(["Cylinders", "Origin", "Name"])
-        .columns(["Horsepower"])
-        .mount("#chart")
-        .config({
-            showHeaders: true,
-            sort: {
-                Origin: "asc",
-                Name: "asc"
-            }
-        })
+    var rows = ['Horsepower', 'Acceleration'],
+        columns = ['Cylinders'];
+    window.canvas2 = env.canvas().rows(rows).columns(columns).height(800).width(500)
+    //{initProps}
+    .mount('#chart2');
+
+    // muze.ActionModel.for(canvas, canvas2).enableCrossInteractivity()
+    //     .registerPropagationBehaviourMap({
+    //         select: 'filter'
+    //     })
+    // canvas.once('canvas.animationend').then(function (client) {
+    //     canvas.rows(['Horsepower', 'Acceleration']).columns(['Acceleration', 'Horsepower']).color('Horsepower').size('Cylinders').detail(['Maker']).width(300).height(300);
+    //     canvas.once('canvas.animationend').then(function (client) {
+    //         var element = document.getElementById('chart');
+    //         element.classList.add('animateon');
+    //     });
+    // });
 });

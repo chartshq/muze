@@ -34,7 +34,8 @@ const headerCreator = (config, cellType, labelManager, prevCell) => {
     const cell = prevCell || new TextCell(
         {
             type: cellType === 'title' ? 'header' : 'text',
-            className: `${classPrefix}-${cellType}-cell`
+            className: `${classPrefix}-${cellType}-cell`,
+            subType: cellType
         }, {
             labelManager
         })

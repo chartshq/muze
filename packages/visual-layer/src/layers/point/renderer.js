@@ -4,7 +4,8 @@ import {
     selectElement,
     easeFns,
     objectIterator,
-    getSymbol
+    getSymbol,
+    setStyles
 } from 'muze-utils';
 
 /**
@@ -27,7 +28,7 @@ const checkPath = (str) => {
  * @param {*} elem
  */
 const createShape = function (d, groupElement) {
-    const { shape, size, update } = d;
+    const { shape, size, update, style } = d;
 
     if (shape instanceof Promise) {
         shape.then((res) => {
@@ -59,7 +60,8 @@ const createShape = function (d, groupElement) {
         } else {
             pathStr = getSymbol(shape).size(size)(update);
         }
-        makeElement(groupElement, 'path', data => [data]).attr('d', pathStr);
+        const pathEl = makeElement(groupElement, 'path', data => [data]).attr('d', pathStr);
+        setStyles(pathEl, style);
     } else {
         d.shape = 'circle';
         createShape(d, groupElement);

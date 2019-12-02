@@ -10,7 +10,7 @@ import {
     RIGHT,
     MESSAGE,
     GRID,
-    NO_DATA_MESSAGE,
+    ERROR_MESSAGE,
     HORIZONTAL_CENTER
 } from '../constants';
 import HeaderComponent from './components/headerComponent';
@@ -114,8 +114,9 @@ const createHeaderWrapper = (headerType, layoutManager, renderDetails) => {
  * @param {GridLayout} canvas canvas instance
  * @return {Instance} Returns the respective wrappers
  */
-const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) => {
-    const headerValues = Object.values(renderDetails.components.headers);
+const createMessageWrapper = (layoutManager, renderDetails, renderGrid) => {
+    const { components, measurement } = renderDetails;
+    const headerValues = Object.values(components.headers);
     let sum = 0;
     let messageWrapper = null;
 
@@ -124,14 +125,14 @@ const createMessageWrapper = (layoutManager, canvas, renderDetails, renderGrid) 
     }
 
     if (!renderGrid) {
-        const defaultDimensions = { height: canvas.height() - sum, width: canvas.width() };
+        const defaultDimensions = { height: measurement.canvasHeight - sum, width: measurement.canvasWidth };
         const gridComponent = layoutManager.getComponent(GRID);
         const { height, width } = (gridComponent && gridComponent.getBoundBox()) || defaultDimensions;
         const target = { target: CANVAS };
         const config = {
             ...target,
             dimensions: { height, width },
-            message: NO_DATA_MESSAGE,
+            message: ERROR_MESSAGE,
             classPrefix: MESSAGE_CONFIG,
             position: TOP
         };
@@ -348,7 +349,7 @@ export const componentWrapperMaker = (canvas, grid, renderDetails) => {
     return {
         title: createHeaderWrapper(TITLE, layoutManager, renderDetails),
         subtitle: createHeaderWrapper(SUB_TITLE, layoutManager, renderDetails),
-        message: createMessageWrapper(layoutManager, canvas, renderDetails, renderGrid),
+        message: createMessageWrapper(layoutManager, renderDetails, renderGrid),
         legend: createLegendWrapper(layoutManager, renderDetails, renderGrid),
         grid: gridLayoutWrapper(layoutManager, renderDetails, grid, renderGrid),
         verticalScrollBar: createScrollBarWrapper(VERTICAL, layoutManager, renderDetails, grid, renderGrid),

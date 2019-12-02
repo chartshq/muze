@@ -1,20 +1,34 @@
+import { intersect } from 'muze-utils';
 import * as BEHAVIOURS from './enums/behaviours';
+import * as SIDE_EFFECTS from './enums/side-effects';
+import { unionSets } from './helper';
+
+const nullDataTooltipMap = {
+    area: true,
+    arc: false,
+    line: true,
+    text: false,
+    point: false,
+    bar: false,
+    tick: false
+};
+
+const applySideEffectOnEmptyTarget = (sideEffect, { target }) => {
+    const layers = sideEffect.layers();
+    const showTooltipOnEmptyTarget = layers.some((l) => {
+        const layerName = l.constructor.formalName();
+        return nullDataTooltipMap[layerName];
+    });
+    return showTooltipOnEmptyTarget || target;
+};
 
 export const behaviourEffectMap = {
     [BEHAVIOURS.BRUSH]: ['selectionBox', {
         name: 'highlighter',
         options: {
-            strategy: 'fade'
+            strategy: 'fadeOnBrush'
         }
     }, 'brush-anchors'],
-    [`${BEHAVIOURS.BRUSH},${BEHAVIOURS.SELECT}`]: [{
-        name: 'tooltip',
-        options: {
-            strategy: 'selectionSummary',
-            order: 0,
-            filter: context => context.config().mode === 'fragmented'
-        }
-    }],
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
         options: {
@@ -23,14 +37,70 @@ export const behaviourEffectMap = {
     }, 'crossline', {
         name: 'tooltip',
         options: {
-            order: 9999
+            setTransform: (selectionSet, payload, sideEffect) => {
+                if (sideEffect.firebolt._actions.behavioural.brush.active) {
+                    return null;
+                }
+                if (applySideEffectOnEmptyTarget(sideEffect, payload)) {
+                    return selectionSet;
+                }
+                return null;
+            }
         }
-    }, 'anchors'],
+    }, 'anchors', {
+        name: 'tooltip',
+        options: {
+            strategy: 'selectionSummary',
+            setTransform: (selectionSet, payload, sideEffect) => {
+                if (sideEffect.firebolt._actions.behavioural.brush.active === true ||
+                        !applySideEffectOnEmptyTarget(sideEffect, payload)) {
+                    return null;
+                }
+                const selectEntrySet = sideEffect.firebolt.getEntryExitSet(BEHAVIOURS.SELECT);
+                const brushEntrySet = sideEffect.firebolt.getEntryExitSet(BEHAVIOURS.BRUSH);
+                if (selectEntrySet || brushEntrySet) {
+                    const unionedSet = unionSets(sideEffect.firebolt, [BEHAVIOURS.SELECT, BEHAVIOURS.BRUSH]);
+                    const { uids } = unionedSet.mergedEnter;
+                    const { uids: highlightUids } = selectionSet.mergedEnter;
+
+                    if (intersect(uids, highlightUids, [id => id[0], id => id[0]]).length) {
+                        return unionedSet;
+                    }
+                }
+
+                return null;
+            }
+        }
+    }, {
+        name: SIDE_EFFECTS.AXIS_LABEL_HIGHLIGHTER,
+        options: {
+            setTransform: (selectionSet, payload, sideEffect) => {
+                if (sideEffect.firebolt._actions.behavioural.brush.active) {
+                    return null;
+                }
+                if (applySideEffectOnEmptyTarget(sideEffect, payload)) {
+                    return selectionSet;
+                }
+                return null;
+            }
+        }
+    }],
     [BEHAVIOURS.FILTER]: ['filter'],
     [BEHAVIOURS.SELECT]: [{
         name: 'highlighter',
         options: {
             strategy: 'focus'
         }
-    }, 'persistent-anchors']
+    }, 'persistent-anchors', {
+        name: 'tooltip',
+        options: {
+            strategy: 'selectionSummary'
+        }
+    }],
+    pseudoSelect: [{
+        name: 'highlighter',
+        options: {
+            strategy: 'pseudoFocus'
+        }
+    }]
 };

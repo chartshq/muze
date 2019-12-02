@@ -4,61 +4,62 @@
     let env = window.muze();
     const DataModel = window.muze.DataModel;
 
-    d3.json('/data/cars.json', (data) => {
+    d3.csv('/data/weather.csv', (data) => {
+        const share = muze.Operators.share;
         const schema = [{
-        name: 'Name',
-        type: 'dimension'
-    }, {
-        name: 'Maker',
-        type: 'dimension'
-    }, {
-        name: 'Miles_per_Gallon',
+        name: 'maxDays',
         type: 'measure'
     }, {
-        name: 'Displacement',
+        name: 'minDays',
         type: 'measure'
     }, {
-        name: 'Horsepower',
-        type: 'measure'
-    }, {
-        name: 'Weight_in_lbs',
-        type: 'measure'
-    }, {
-        name: 'Acceleration',
-        type: 'measure'
-    }, {
-        name: 'Origin',
-        type: 'dimension'
-    }, {
-        name: 'Cylinders',
-        type: 'dimension'
-    }, {
-        name: 'Year',
+        name: 'time',
         type: 'dimension',
-        // subtype: 'temporal',
-        // format: '%Y-%m-%d'
     }];
 
     let rootData = new DataModel(data, schema)
 
-    rootData.sort([
-        ['Cylinders', 'asc'],
-        ['Maker', 'desc'],
-    ])
+    rootData = rootData.calculateVariable({
+        name: "date",
+        type: "dimension",
+        subtype: "temporal",
+        format: "%Y-%m-%d"
+    }, ["Year", function (d) {
+        return d;
+    }]);
 
-    const canvas = env.canvas();
-    
-    canvas
-        .data(rootData)
-        .columns(['Cylinders', 'Horsepower'])
-        .rows(['Acceleration'])
-        .color('Maker')
-        .mount('#chart')
-        .height(500)
-        .title('Charts');
-     
+    env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
+    var mountPoint = document.getElementById('chart');
+    window.canvas = env.canvas();
+    var rows = ['Cylinders', 'Horsepower'],
+        columns = ['Origin', 'Year'];
+    canvas = canvas.rows(rows).columns(columns).height(800).color('Origin')
+    //{initProps}
+    .mount(mountPoint);
+
     setTimeout(() => {
-        canvas.data(canvas.data().select(() => false))
-    }, 1000);
+        canvas.rows(['Horsepower', 'Acceleration']).columns(['Acceleration', 'Horsepower']).color('Horsepower').size('Cylinders').detail(['Maker']).width(300).height(300);
+        canvas.once('canvas.animationend').then(function (client) {
+            var element = document.getElementById('chart');
+            element.classList.add('animateon');
+        });
+    }, 3000);
+
+    // const canvas = env.canvas();
+    
+    // canvas
+    //     .data(rootData)
+    //     // .rows(['maxDays'])
+    //     .rows([share('maxDays', 'minDays')])
+    //     .columns(['time'])
+    //     .layers([{ mark: 'tick', encoding: { y: 'maxDays', y0: 'minDays' } } ])
+    //     // .layers([{
+    //     //     mark: 'area'
+    //     // }])
+    //     // .detail(['Name'])
+    //     .mount('#chart')
+    //     .height(500)
+    //     .width(900)
+    //     .title('Charts');
     })
 })();
