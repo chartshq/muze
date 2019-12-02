@@ -134,7 +134,7 @@ export default class AnchorEffect extends SpawnableSideEffect {
         const upperAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-upper`);
         const lowerAnchors = context.layers().filter(layer => layer.config().groupId === `${formalName}-lower`);
 
-        const target = payload.target;
+        const { target, action } = payload;
         let targetObj = null;
         if (target) {
             targetObj = target[1].reduce((acc, v, i) => {
@@ -155,13 +155,10 @@ export default class AnchorEffect extends SpawnableSideEffect {
             let transformedData = [];
             let schema = [];
 
-            // Only render upper layers for all plots
-            if (isUpperAnchor) {
-                [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
-            }
+            [transformedData, schema] = linkedLayer.getTransformedDataFromIdentifiers(dataModel, index);
 
             // Render both upper and lower anchors for area plot if hovered over an anchor
-            if (linkedLayerName === 'area' && target) {
+            if (linkedLayerName === 'area' && target && action === 'highlight') {
                 const filterFn = dmMultipleSelection(target, dataModel);
                 const dmFromPayload = dataModel.select(filterFn, {});
 
