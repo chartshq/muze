@@ -86,7 +86,7 @@
     "transform-runtime": "0.0.0",
     "uglifyjs-webpack-plugin": "^1.2.7",
     "uuid": "^3.3.2",
-    "webpack-bundle-analyzer": "^2.13.1",
+    "webpack-bundle-analyzer": "^3.6.0",
     "webpack-dev-server": "^3.1.14",
     "yamljs": "^0.3.0",
     "webpack": "^4.20.2",
