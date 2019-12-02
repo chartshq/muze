@@ -290,21 +290,23 @@ export default class Tooltip {
 
         this._target = dim;
 
+        const hMax = getMaxPoint(spaces.filter(d => d.position === 'left' || d.position === 'right'),
+            'value');
+        const vMax = getMaxPoint(spaces.filter(d => d.position === 'top' || d.position === 'bottom'),
+                'value');
         if (!orientation) {
-            const position = getMaxPoint(spaces, 'value').position;
-
-            if (position === 'left' || position === 'right') {
+            if (hMax.value > 0) {
+                const position = hMax.position;
                 obj = positionHorizontal(position);
             } else {
+                const position = vMax.position;
                 obj = positionVertical(position);
             }
         } else if (orientation === 'horizontal') {
-            const position = getMaxPoint(spaces.filter(d => d.position === 'left' || d.position === 'right'),
-                'value').position;
+            const position = hMax.position;
             obj = positionHorizontal(position);
         } else {
-            const position = getMaxPoint(spaces.filter(d => d.position === 'top' || d.position === 'bottom'),
-                'value').position;
+            const position = vMax.position;
             obj = positionVertical(position);
         }
 

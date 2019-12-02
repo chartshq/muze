@@ -593,4 +593,8 @@ export default class Firebolt {
     getPayload (action) {
         return this._payloads[action];
     }
+
+    actions () {
+        return this._actions;
+    }
 }
