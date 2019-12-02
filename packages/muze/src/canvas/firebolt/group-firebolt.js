@@ -138,7 +138,7 @@ const defaultCrossInteractionPolicy = {
         }
     },
     sideEffects: {
-        tooltip: (propagationPayload, firebolt) => {
+        '*': (propagationPayload, firebolt) => {
             const propagationCanvasAlias = propagationPayload.sourceCanvas;
             const canvasAlias = firebolt.sourceCanvas();
             return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
