@@ -223,11 +223,8 @@ class SelectionSet {
                 i in set && (set[i] = SELECTION_NULL);
             });
         } else {
-            const lockedSel = this._lockedSelection;
             for (const key in set) {
-                if (!(key in lockedSel)) {
-                    set[key] = SELECTION_NULL;
-                }
+                set[key] = SELECTION_NULL;
             }
         }
         this._resetted = true;

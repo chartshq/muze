@@ -50,7 +50,7 @@ export const defaultConfig = {
         fade: {
             style: {
                 fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
-                    l: +20
+                    a: -0.5
                 }, data, apply).color
             }
         },
@@ -63,7 +63,7 @@ export const defaultConfig = {
         }
     },
     innerPadding: 0.1,
-    nearestPointThreshold: 10,
+    nearestPointThreshold: 5,
     transform: {
         type: 'identity'
     },

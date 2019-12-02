@@ -86,6 +86,11 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     maxGradWidth = maxWidth - (margin * 2 + border * 2);
 
     let legendBody = makeElement(container, 'div', [1], `${classPrefix}-legend-body`);
+
+    legendBody.style(WIDTH, `${gradWidth}px`);
+
+    legendBody.style(HEIGHT, `${gradHeight}px`);
+
     legendBody.select(`.${classPrefix}-legend-overflow`).remove();
         // Create a div with scroll when overflow
     if (maxGradWidth && maxGradWidth < gradWidth) {

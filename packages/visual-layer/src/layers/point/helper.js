@@ -47,9 +47,11 @@ export const prepareDrawingInf = ({ data, datum, i, layerInst, xPx, yPx }) => {
         rowId,
         style,
         data: datum.dataObj,
-        meta: getColorMetaInf(style, {
+        meta: Object.assign({
+            layerId: layerInst.id()
+        }, getColorMetaInf(style, {
             strokePosition: layerEncoding.strokePosition.value
-        }),
+        })),
         size
     };
 };

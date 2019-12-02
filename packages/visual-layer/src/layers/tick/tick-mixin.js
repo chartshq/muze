@@ -1,10 +1,10 @@
-import { FieldType, makeElement, appendElement, selectElement } from 'muze-utils';
+import { FieldType, makeElement, appendElement } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { ENCODING } from '../../enums/constants';
 import drawTicks from './renderer';
 import './styles.scss';
 import { positionPoints, getIndividualClassName,
-    getColorMetaInf, resolveEncodingValues, toCartesianCoordinates } from '../../helpers';
+    getColorMetaInf, resolveEncodingValues, toCartesianCoordinates, attachDataToVoronoi } from '../../helpers';
 import { strokeWidthPositionMap } from './helper';
 
 const pointTranslators = {
@@ -59,7 +59,7 @@ const pointTranslators = {
                 source: d.source,
                 rowId: d.rowId,
                 data: d,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: { ...{ layerId: layerInst.id() }, ...getColorMetaInf(style) }
             };
             point.className = getIndividualClassName(d, i, data, layerInst);
             points.push(point);
@@ -157,7 +157,7 @@ const pointTranslators = {
                     source: row,
                     rowId: d.rowId,
                     data: d.dataObj,
-                    meta: getColorMetaInf(style, colorAxis)
+                    meta: { ...{ layerId: layerInst.id() }, ...getColorMetaInf(style) }
                 };
                 point.className = getIndividualClassName(d, i, data, layerInst);
                 points.push(point);
@@ -205,6 +205,17 @@ export const TickLayerMixin = superclass => class extends superclass {
     */
     translatePoints (data, config) {
         return pointTranslators[this.coord()](data, config, this);
+    }
+
+    attachDataToVoronoi (points) {
+        attachDataToVoronoi(this._voronoi, points, (d) => {
+            const { x, x0, y, y0 } = d.update;
+
+            return {
+                x: x + (x0 - x) / 2,
+                y: y + (y0 - y) / 2
+            };
+        });
     }
 
     getMeasurementConfig (offsetX, offsetY, widthSpan, heightSpan) {

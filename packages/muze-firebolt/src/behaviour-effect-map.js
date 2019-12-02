@@ -32,10 +32,7 @@ export const behaviourEffectMap = {
     [BEHAVIOURS.HIGHLIGHT]: [{
         name: 'highlighter',
         options: {
-            strategy: 'highlight',
-            // behaviours for which the current strategy won't apply
-            // accepts an array or fn
-            excludeSet: [BEHAVIOURS.SELECT, BEHAVIOURS.BRUSH]
+            strategy: 'highlight'
         }
     }, 'crossline', {
         name: 'tooltip',
@@ -55,7 +52,8 @@ export const behaviourEffectMap = {
         options: {
             strategy: 'selectionSummary',
             setTransform: (selectionSet, payload, sideEffect) => {
-                if (sideEffect.firebolt._actions.behavioural.brush.active === true) {
+                if (sideEffect.firebolt._actions.behavioural.brush.active === true ||
+                        !applySideEffectOnEmptyTarget(sideEffect, payload)) {
                     return null;
                 }
                 const selectEntrySet = sideEffect.firebolt.getEntryExitSet(BEHAVIOURS.SELECT);

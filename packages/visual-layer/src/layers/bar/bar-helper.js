@@ -247,7 +247,9 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 rowId: d.rowId,
                 data: d.dataObj,
                 style,
-                meta: getColorMetaInf(style, conf)
+                meta: Object.assign({
+                    layerId: context.id()
+                }, getColorMetaInf(style, conf))
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);

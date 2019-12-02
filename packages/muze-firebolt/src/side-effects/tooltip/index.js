@@ -90,12 +90,19 @@ export default class Tooltip extends SpawnableSideEffect {
 
     hide (options) {
         const tooltips = this._tooltips;
+        const { orientation } = this.config();
+
         for (const key in tooltips) {
             if ({}.hasOwnProperty.call(tooltips, key)) {
+                const tooltip = tooltips[key];
                 const strategy = options.strategy || this._strategy;
-                tooltips[key].content(strategy, null);
-                if (!Object.keys(tooltips[key]._contents).length) {
-                    tooltips[key].hide();
+                tooltip.content(strategy, null);
+                if (!Object.keys(tooltip._contents).length) {
+                    tooltip.hide();
+                } else {
+                    tooltip.positionRelativeTo(tooltip._target, {
+                        orientation
+                    });
                 }
             }
         }
@@ -184,6 +191,8 @@ export default class Tooltip extends SpawnableSideEffect {
                 y: plotDim.y,
                 width: plotDim.width || 0,
                 height: plotDim.height || 0
+            }, {
+                orientation: config.orientation
             }
             );
         } else {

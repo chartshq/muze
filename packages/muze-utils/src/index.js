@@ -114,7 +114,8 @@ export {
     arraysEqual,
     getReadableTicks,
     unique,
-    dmMultipleSelection
+    dmMultipleSelection,
+    pointWithinCircle
 } from './common-utils';
 
 export {

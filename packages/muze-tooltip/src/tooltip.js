@@ -3,11 +3,11 @@ import {
     getQualifiedClassName,
     getUniqueId,
     selectElement,
-    setStyles,
-    makeElement
+    makeElement,
+    getMaxPoint
 } from 'muze-utils';
-import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM, TOOLTIP_TOP,
-    INITIAL_STYLE } from './constants';
+import { ARROW_BOTTOM, ARROW_LEFT, ARROW_RIGHT, TOOLTIP_LEFT, TOOLTIP_RIGHT, TOOLTIP_BOTTOM,
+    TOOLTIP_TOP } from './constants';
 import { defaultConfig } from './default-config';
 import { reorderContainers } from './helper';
 import './styles.scss';
@@ -35,23 +35,23 @@ export default class Tooltip {
         const container = makeElement(htmlContainer, 'div', [1], `${classPrefix}-tooltip-container`);
         this._container = container;
         this._tooltipContainer = container.append('div').style('position', 'absolute');
-        this._contentContainer = this._tooltipContainer.append('div').attr('class', `${classPrefix}-${contentClass}`);
-        this._tooltipBackground = this._tooltipContainer.append('div').style('position', 'relative');
+        this._contentContainer = this._tooltipContainer.append('div').attr('class',
+            `${classPrefix}-${tooltipConf.defClassName} ${classPrefix}-${contentClass}
+            ${tooltipConf.className}`);
 
         if (!svgContainer) {
             connectorContainer = htmlContainer.append('svg').style('pointer-events', 'none');
         }
+
         this._contents = {};
         this._tooltipConnectorContainer = selectElement(connectorContainer)
             .append('g')
             .attr('class', `${tooltipConf.classPrefix}-${tooltipConf.connectorClassName}`);
         const id = this._id;
-        const defClassName = tooltipConf.defClassName;
+        const defClassName = tooltipConf.parentClassName;
         const qualifiedClassName = getQualifiedClassName(defClassName, id, tooltipConf.classPrefix);
 
-        setStyles(this._tooltipBackground, INITIAL_STYLE);
         this.addClass(qualifiedClassName.join(' '));
-        this.addClass(tooltipConf.className);
         this.hide();
     }
 
@@ -155,7 +155,6 @@ export default class Tooltip {
 
             if (outsidePlot) {
                 let path;
-                this._tooltipBackground.style('display', 'none');
                 this._tooltipConnectorContainer.style('display', 'block');
                 const connector = this._tooltipConnectorContainer.selectAll('path').data([1]);
                 const enter = connector.enter().append('path');
@@ -192,7 +191,7 @@ export default class Tooltip {
      */
     positionRelativeTo (dim, tooltipConf = {}) {
         let obj;
-        let orientation = tooltipConf.orientation;
+        const orientation = tooltipConf.orientation;
         this.show();
         if (!dim) {
             this.hide();
@@ -200,12 +199,14 @@ export default class Tooltip {
         }
 
         const extent = this._extent;
-        const node = this._tooltipContainer.node();
-
+        const contentContainer = this._contentContainer.node();
         this._tooltipContainer.style('top', '0px')
-                        .style('left', '0px');
-        const offsetWidth = node.offsetWidth + 2;
-        const offsetHeight = node.offsetHeight + 2;
+                        .style('left', '0px')
+                        .style('width', '2000px')
+                        .style('height', '2000px');
+
+        const offsetWidth = contentContainer.offsetWidth + 4;
+        const offsetHeight = contentContainer.offsetHeight + 4;
         const config = this._config;
         const offset = this._offset;
         const spacing = config.spacing;
@@ -215,27 +216,39 @@ export default class Tooltip {
         const dimX = dim.x + dim.width + offset.x;
         const rightSpace = extent.width - dimX;
         const leftSpace = dim.x + offset.x - extent.x;
+        const bottomSpace = extent.height - (dim.y + dim.height + offset.y);
         const arrowSize = spacing;
-        const positionTop = topSpace > (offsetHeight + arrowSize);
-        const positionRight = rightSpace >= offsetWidth + arrowSize;
-        const positionLeft = leftSpace >= offsetWidth + arrowSize;
+        const tooltipHeight = offsetHeight + arrowSize;
+        const tooltipWidth = offsetWidth + arrowSize;
 
-        const positionHorizontal = () => {
+        const spaces = [{
+            position: 'top',
+            value: topSpace - tooltipHeight
+        }, {
+            position: 'right',
+            value: rightSpace - tooltipWidth
+        }, {
+            position: 'left',
+            value: leftSpace - tooltipWidth
+        }, {
+            position: 'bottom',
+            value: bottomSpace - tooltipHeight
+        }];
+
+        const positionHorizontal = (positionVal) => {
             let position;
             let x = dim.x + dim.width;
             let y = dim.y;
 
-            if (positionRight) {
+            if (positionVal === 'right') {
                 position = TOOLTIP_LEFT;
                 x += arrowSize;
-            } else if (positionLeft) {
+            } else if (positionVal === 'left') {
                 x = dim.x - offsetWidth;
                 position = TOOLTIP_RIGHT;
                 x -= arrowSize;
-            } else {
-                position = 'left';
-                x += arrowSize;
             }
+
             if (dim.height < offsetHeight) {
                 y = Math.max(0, dim.y + dim.height / 2 - offsetHeight / 2);
             }
@@ -247,7 +260,7 @@ export default class Tooltip {
             };
         };
 
-        const positionVertical = () => {
+        const positionVertical = (positionVal) => {
             let position;
             let y;
             // Position tooltip at the center of plot
@@ -260,7 +273,7 @@ export default class Tooltip {
                 x = extent.x;
             }
 
-            if (positionTop) {
+            if (positionVal === 'top') {
                 y = dim.y - offsetHeight - arrowSize;
                 position = TOOLTIP_BOTTOM;
             } else {
@@ -276,20 +289,25 @@ export default class Tooltip {
         };
 
         this._target = dim;
-        if (!orientation) {
-            if (positionTop) {
-                orientation = 'vertical';
-            } else if (positionRight || positionLeft) {
-                orientation = 'horizontal';
-            } else {
-                orientation = 'vertical';
-            }
-        }
 
-        if (orientation === 'horizontal') {
-            obj = positionHorizontal();
-        } else if (orientation === 'vertical') {
-            obj = positionVertical();
+        const hMax = getMaxPoint(spaces.filter(d => d.position === 'left' || d.position === 'right'),
+            'value');
+        const vMax = getMaxPoint(spaces.filter(d => d.position === 'top' || d.position === 'bottom'),
+                'value');
+        if (!orientation) {
+            if (hMax.value > 0) {
+                const position = hMax.position;
+                obj = positionHorizontal(position);
+            } else {
+                const position = vMax.position;
+                obj = positionVertical(position);
+            }
+        } else if (orientation === 'horizontal') {
+            const position = hMax.position;
+            obj = positionHorizontal(position);
+        } else {
+            const position = vMax.position;
+            obj = positionVertical(position);
         }
 
         this._position = {
@@ -297,15 +315,9 @@ export default class Tooltip {
             y: obj.y
         };
 
-        // this._arrowPos = obj.arrowPos;
-        // if (!arrowDisabled) {
-        //     // placeArrow(this, obj.position, obj.arrowPos);
-        // } else {
-            // this._tooltipArrow.style('display', 'none');
-        this._tooltipBackground.style('display', 'none');
-        // }
+        this._tooltipContainer.style('height', `${offsetHeight}px`)
+            .style('width', `${offsetWidth}px`);
         this._orientation = obj.position;
-        // this._arrowOrientation = obj.position;
         draw && this.position(obj.x, obj.y);
         return this;
     }
@@ -341,7 +353,6 @@ export default class Tooltip {
 
     remove () {
         this._tooltipContainer.remove();
-        this._tooltipBackground.remove();
         this._tooltipConnectorContainer.remove();
         return this;
     }
