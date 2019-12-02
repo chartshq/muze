@@ -159,7 +159,7 @@ export default class VisualUnit {
                     props: [CommonProps.ON_LAYER_DRAW],
                     listener: (context, [, drawn]) => {
                         if (drawn) {
-                            context._rtree = createRTree(context, context._rtree);
+                            context._rtree = createRTree(context);
 
                             const firebolt = context.firebolt();
                             dispatchQueuedSideEffects(firebolt);
