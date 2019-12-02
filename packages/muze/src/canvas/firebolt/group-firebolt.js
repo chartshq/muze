@@ -1,60 +1,147 @@
 import {
-    getDataModelFromIdentifiers,
     FieldType,
     mergeRecursive,
-    isSimpleObject,
-    CommonProps
+    CommonProps,
+    ReservedFields
 } from 'muze-utils';
-import { Firebolt } from '@chartshq/muze-firebolt';
-
+import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
+import { createMapByDimensions } from '@chartshq/visual-unit/src/firebolt/helper';
+import {
+    payloadGenerator,
+    isSideEffectEnabled,
+    sanitizePayloadCriteria,
+    prepareSelectionSetMap
+} from '@chartshq/visual-unit';
+import { TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
 import { applyInteractionPolicy } from '../helper';
+import {
+    propagateValues,
+    isCrosstab,
+    addSelectedMeasuresInPayload,
+    resetSelectAction,
+    dispatchBehaviours,
+    attachBehaviours
+} from './helper';
+import { COMMON_INTERACTION } from '../../constants';
 
-const defaultInteractionPolicy = (valueMatrix, firebolt) => {
-    const isMeasure = field => field.type() === FieldType.MEASURE;
-    const canvas = firebolt.context;
-    const visualGroup = canvas.composition().visualGroup;
-    const xFields = [].concat(...visualGroup.getFieldsFromChannel('x'));
-    const yFields = [].concat(...visualGroup.getFieldsFromChannel('y'));
-    const colDim = xFields.every(field => field.type() === FieldType.DIMENSION);
-    const fieldInf = visualGroup.resolver().getAllFields();
-    const rowFacets = fieldInf.rowFacets;
-    const colFacets = fieldInf.colFacets;
-    valueMatrix.each((cell) => {
-        const unitFireBolt = cell.valueOf().firebolt();
-        if (!(xFields.every(isMeasure) && yFields.every(isMeasure))) {
-            const facetFields = cell.valueOf().facetByFields()[0];
-            const unitColFacets = facetFields.filter(d => colFacets.findIndex(v => v.equals(d)) !== -1);
-            const unitRowFacets = facetFields.filter(d => rowFacets.findIndex(v => v.equals(d)) !== -1);
-            let propFields;
-            if (colDim) {
-                propFields = unitColFacets.map(d => `${d}`);
-            } else {
-                propFields = unitRowFacets.map(d => `${d}`);
+const setSideEffectConfig = (firebolt) => {
+    const tooltipSideEffect = firebolt.sideEffects().tooltip;
+    const allFields = firebolt.context.composition().visualGroup.resolver().getAllFields();
+
+    if (isCrosstab(allFields)) {
+        tooltipSideEffect.config({
+            selectionSummary: {
+                order: 1,
+                className: 'tooltip-content-container-selectionSummary-crosstab',
+                showMultipleMeasures: true
+            },
+            highlightSummary: {
+                order: 0,
+                className: 'tooltip-content-container-highlightSummary-crosstab'
             }
+        });
+    } else {
+        tooltipSideEffect.config({
+            selectionSummary: {
+                order: 0,
+                className: 'tooltip-content-container-selectionSummary-default',
+                showMultipleMeasures: false
+            },
+            highlightSummary: {
+                order: 1,
+                className: 'tooltip-content-container-highlightSummary-default'
+            }
+        });
+    }
+};
 
-            unitFireBolt.propagateWith('*', propFields, true);
+const prepareSelectionSetData = (group, dataModel) => {
+    const valueMatrix = group.matrixInstance().value;
+    const fieldsConfig = dataModel.getFieldsConfig();
+    const dimensions = Object.values(fieldsConfig).filter(d => d.def.type === FieldType.DIMENSION);
+    const hasMeasures = Object.keys(dataModel.getFieldspace().getMeasure()).length;
+    const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
+    const keys = {};
+    const dimensionsMap = {};
+    const unitDimsMap = {};
+
+    valueMatrix.each((cell) => {
+        const unit = cell.source();
+        const dm = unit.data();
+        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
+        const facetFields = Object.keys(unit.facetFieldsMap());
+
+        unitDimsMap[unitDims] = {
+            inst: unit,
+            dims: [...facetFields, ...unitDims]
+        };
+    });
+
+    const groupDataMap = {};
+
+    dataModel.getData().data.forEach((row) => {
+        for (const key in unitDimsMap) {
+            const { dims } = unitDimsMap[key];
+            const dimKey = dims.map(dim => row[fieldsConfig[dim].index]);
+            groupDataMap[dimKey] = row;
         }
     });
+
+    valueMatrix.each((cell) => {
+        const unit = cell.source();
+        const dm = unit.data();
+        const layers = unit.layers();
+        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
+        const facetMap = unit.facetFieldsMap();
+        const facetFields = Object.keys(facetMap);
+        const unitFieldsConfig = dm.getFieldsConfig();
+        const linkedRows = [];
+
+        dm.getData().data.forEach((row) => {
+            const dimKey = [...facetFields.map(field => facetMap[field]), ...unitDims.map(d =>
+                row[unitFieldsConfig[d].index])];
+            const linkedRow = groupDataMap[dimKey];
+
+            if (linkedRow) {
+                linkedRows.push(linkedRow);
+            }
+        });
+
+        prepareSelectionSetMap({
+            data: linkedRows,
+            uids: dm.getUids(),
+            dimensions
+        }, layers, {
+            keys,
+            dimensionsMap
+        });
+    });
+
+    const dimensionFields = dimensions.length ? [...dimensions.map(d => d.def.name)] :
+        [ReservedFields.ROW_ID];
+
+    return {
+        keys,
+        dimensionsMap,
+        dimensions: dimensionFields,
+        allFields: [...dimensionFields, ...measureName]
+    };
 };
 
 const defaultCrossInteractionPolicy = {
     behaviours: {
-        '*': (propagationPayload, context) => {
+        '*': (propagationPayload, firebolt) => {
             const propagationCanvasAlias = propagationPayload.sourceCanvas;
-            const canvasAlias = context.parentAlias();
+            const canvasAlias = firebolt.sourceCanvas();
             return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
         }
     },
     sideEffects: {
-        tooltip: (propagationPayload, context) => {
-            const propagationUnit = propagationPayload.sourceUnit;
-            const propagationCanvas = propagationPayload.sourceCanvas;
-            const unitId = context.id();
-            const canvasAlias = context.parentAlias();
-            if (propagationCanvas) {
-                return propagationCanvas !== canvasAlias ? true : unitId === propagationUnit;
-            }
-            return true;
+        '*': (propagationPayload, firebolt) => {
+            const propagationCanvasAlias = propagationPayload.sourceCanvas;
+            const canvasAlias = firebolt.sourceCanvas();
+            return propagationCanvasAlias ? canvasAlias === propagationCanvasAlias : true;
         },
         selectionBox: () => false
     }
@@ -77,12 +164,13 @@ const defaultCrossInteractionPolicy = {
 export default class GroupFireBolt extends Firebolt {
     constructor (...params) {
         super(...params);
+        this.payloadGenerators(payloadGenerator);
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
         this.crossInteractionPolicy(this.constructor.defaultCrossInteractionPolicy());
     }
 
     static defaultInteractionPolicy () {
-        return defaultInteractionPolicy;
+        return () => {};
     }
 
     static defaultCrossInteractionPolicy () {
@@ -99,84 +187,110 @@ export default class GroupFireBolt extends Firebolt {
 
     crossInteractionPolicy (...policy) {
         if (policy.length) {
+            const context = this.context;
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
-            const context = this.context;
+
             applyInteractionPolicy(this);
-            context._throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
+            const throwback = context._throwback;
+            throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
+                this.config(this.context.config().interaction);
                 applyInteractionPolicy(this);
+                const group = this.context.composition().visualGroup;
+                if (group) {
+                    setSideEffectConfig(this);
+
+                    const { keys, dimensions, dimensionsMap, allFields } = prepareSelectionSetData(group,
+                        group.getGroupByData());
+                    this._metaData = {
+                        dimensionsMap,
+                        dimensions,
+                        allFields
+                    };
+                    this.createSelectionSet({ keys, fields: dimensions });
+                    group.getGroupByData().on('propagation', (data, config) => {
+                        this.handleDataModelPropagation(data, config);
+                    });
+                    // Dispatch pseudo select behaviour for highlighting measures with common dimensions in crosstab
+                    attachBehaviours(group);
+                }
             });
             return this;
         }
         return this._crossInteractionPolicy;
     }
 
-    /**
-     * Dispatches a behavioural action with a payload. It takes the name of the behavioural action and a payload
-     * object which contains the criteria aend an array of side effects which determines what side effects are
-     * going to be shown in each visual unit of the canvas. It prepares the datamodel from the given criteria
-     * and initiates a propagation from the datamodel of canvas. Then all the visual units of canvas which listens
-     * to the propagation gets informed on which rows got selected and dispatches the behavioural action sent during
-     * propagation.
-     *
-     * To dispatch a behavioural action on the canvas
-     * ```
-     *  // Get the firebolt instance of the canvas
-     *  const firebolt = canvas.firebolt();
-     *  // Dispatch a brush behaviour
-     *  firebolt.dispatchBehaviour('brush', {
-     *      // Selects all the rows with Horsepower having range between 100 and 200.
-     *      criteria: {
-     *          Horsepower: [100, 200]
-     *      }
-     *  });
-     * // On dispatch of this behavioural action, a selection box gets created and plots gets faded out which are the
-     * // default side effects mapped to this behavioural action.
-     * ```
-     *
-     * ```
-     * Additionally, it can also be passed an array of side effects in the payload.
-     *  // Dispatch a select behaviour with only crossline as side effect.
-     *  firebolt.dispatchBehaviour('select', {
-     *      criteria: {
-     *          Cylinders: ['8']
-     *      },
-     *      sideEffects: ['crossline']
-     *  });
-     * ```
-     *
-     * @public
-     *
-     * @param {string} behaviour Name of the behavioural action
-     * @param {Object} payload Object which contains the interaction information.
-     * @param {Object | Array.<Array>} payload.criteria Identifiers by which the selection happens.
-     * @param {Array.<string|Object>} payload.sideEffects Side effects which needs to be shown.
-     *
-     * @return {GroupFireBolt} Instance of firebolt.
-     */
-    dispatchBehaviour (behaviour, payload) {
-        const propPayload = Object.assign(payload);
-        const criteria = propPayload.criteria;
-        const data = this.context.composition().visualGroup.getGroupByData();
-        const fieldsConfig = data.getFieldsConfig();
-        const model = getDataModelFromIdentifiers(data, criteria);
-        const behaviouralAction = this._actions.behavioural[behaviour];
-
-        if (behaviouralAction) {
-            const fields = isSimpleObject(criteria) ? Object.keys(criteria) : (criteria ? criteria[0] : []);
-            const validFields = fields.filter(field => field in fieldsConfig);
-            const mutates = behaviouralAction.constructor.mutates();
-            const propConfig = {
-                payload: propPayload,
-                action: behaviour,
-                criteria: model,
-                sourceId: this.context.alias(),
-                isMutableAction: mutates,
-                propagateInterpolatedValues: validFields.every(field => fieldsConfig[field].def.type ===
-                    FieldType.MEASURE)
-            };
-            data.propagate(model, propConfig, true);
+    handleDataModelPropagation (data, config) {
+        const group = this.context.composition().visualGroup;
+        const valueMatrix = group.matrixInstance().value;
+        const units = group.resolver().units();
+        const propagationData = data;
+        // @todo refactor this code
+        const {
+            enabled: enabledFn,
+            sourceIdentifiers,
+            action,
+            payload: propPayload
+        } = config;
+        const { interaction: { behaviours: behaviourConfs = {} } } = this.context.config();
+        const mode = behaviourConfs[action];
+        if (mode !== COMMON_INTERACTION) {
+            return this;
         }
+
+        const payloadFn = this.getPayloadGeneratorFor(action);
+        const payload = payloadFn(this, propagationData, config);
+
+        const behaviourPolicies = this._behaviourPolicies;
+        const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
+        let enabled = filterFns.every(fn => fn(propPayload || {}, this, {
+            sourceIdentifiers,
+            propagationData
+        }));
+
+        if (enabledFn) {
+            enabled = enabledFn(config, this) && enabled;
+        }
+
+        if (enabled) {
+            const propagationInf = {
+                propagate: false,
+                data: propagationData,
+                propPayload,
+                sourceIdentifiers,
+                sourceId: config.propagationSourceId,
+                isMutableAction: config.isMutableAction
+            };
+
+            const behaviourEffectMap = this._behaviourEffectMap;
+            const sideEffects = getSideEffects(action, behaviourEffectMap);
+            const sideEffectInstances = this.sideEffects();
+            const { instance: unit = units[0][0] } =
+                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
+
+            sideEffects.forEach(({ effects }) => {
+                effects.forEach((effect) => {
+                    const name = effect.name;
+                    const inst = sideEffectInstances[name];
+
+                    if (inst) {
+                        inst.sourceInfo(() => unit.getSourceInfo());
+                        inst.layers(() => unit.layers());
+                        inst.plotPointsFromIdentifiers((...params) =>
+                            unit.getPlotPointsFromIdentifiers(...params));
+                        inst.drawingContext(() => unit.getDrawingContext());
+                        inst.valueParser(unit.valueParser());
+                    }
+                });
+            });
+
+            if (propPayload.sourceUnit) {
+                addSelectedMeasuresInPayload(this, unit, payload);
+            }
+
+            this.dispatchBehaviour(action, payload, propagationInf);
+        }
+
         return this;
     }
 
@@ -184,6 +298,128 @@ export default class GroupFireBolt extends Firebolt {
         for (const key in sideEffects) {
             this._sideEffectDefinitions[sideEffects[key].formalName()] = sideEffects[key];
         }
+        this.initializeSideEffects();
+
         return this;
+    }
+
+    target () {
+        return 'visual-group';
+    }
+
+    mapActionsAndBehaviour () {
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+
+        unitMatrix.each((unit) => {
+            const firebolt = unit.source().firebolt();
+            firebolt.mapActionsAndBehaviour();
+        });
+
+        this.registerPhysicalActionHandlers();
+    }
+
+    registerPhysicalActionHandlers () {
+        const unitMatrix = this.context.composition().visualGroup.matrixInstance().value;
+
+        unitMatrix.each((cell) => {
+            const unit = cell.source();
+            const firebolt = unit.firebolt();
+
+            firebolt.onPhysicalAction('*', (event, payload) => {
+                this.handlePhysicalAction(event, payload, unit);
+            }, this.context.constructor.formalName());
+        });
+
+        return this;
+    }
+
+    handlePhysicalAction (event, payload, unit) {
+        const firebolt = unit.firebolt();
+        const { behaviours } = firebolt._actionBehaviourMap[event];
+        dispatchBehaviours(this, { behaviours, payload, unit });
+        // Reset select action when dragging is done. Remove this when brush and select will be unioned
+        resetSelectAction(this, { behaviours, payload, unit });
+    }
+
+    sanitizePayload (payload) {
+        const { criteria } = payload;
+        const { allFields: fields, dimensionsMap } = this._metaData;
+
+        return Object.assign({}, payload,
+            {
+                criteria: sanitizePayloadCriteria(criteria, fields, {
+                    dm: this.data(),
+                    dimensionsMap,
+                    dimsMapGetter: this._dimsMapGetter
+                })
+            });
+    }
+
+    createSelectionSet (...params) {
+        super.createSelectionSet(...params);
+
+        this._dimsMapGetter = createMapByDimensions(this, this.data());
+
+        return this;
+    }
+
+    id () {
+        return this.context.alias();
+    }
+
+    shouldApplySideEffects (propInf) {
+        return propInf.applySideEffect !== false;
+    }
+
+    data () {
+        return this.context.composition().visualGroup.getGroupByData();
+    }
+
+    getRangeFromIdentifiers ({ criteria, fields }) {
+        return fields.reduce((acc, v) => {
+            acc[v] = criteria[v];
+            return acc;
+        }, {});
+    }
+
+    propagate (behaviour, payload, identifiers, auxConfig = {}) {
+        propagateValues(this, behaviour, Object.assign({
+            payload,
+            identifiers,
+            propagationFields: this._propagationFields,
+            sourceId: this.id(),
+            sourceCanvasId: this.id(),
+            propagationDataSource: this.data()
+        }, auxConfig));
+    }
+
+    getPropagationSource () {
+        return this.data();
+    }
+
+    sourceCanvas () {
+        return this.context.alias();
+    }
+
+    getApplicableSideEffects (sideEffects, payload, propagationInf) {
+        if (payload.sideEffects) {
+            return [{
+                effects: payload.sideEffects,
+                behaviours: [payload.action]
+            }];
+        }
+        const { mode } = this.context.config().interaction.tooltip;
+        propagationInf.propPayload = propagationInf.propPayload || payload;
+        sideEffects.forEach((d) => {
+            let mappedEffects = d.effects;
+            mappedEffects = mappedEffects.filter((se) => {
+                if (se.name === TOOLTIP && mode === FRAGMENTED) {
+                    return false;
+                }
+                return isSideEffectEnabled(this, { se, propagationInf });
+            });
+            d.effects = mappedEffects;
+        });
+        return sideEffects;
     }
 }

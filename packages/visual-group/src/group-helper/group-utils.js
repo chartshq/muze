@@ -1,9 +1,10 @@
-import { Store, FieldType, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
+import { Store, COORD_TYPES, getObjProp, DataModel } from 'muze-utils';
 import { VisualUnit } from '@chartshq/visual-unit';
 import { BaseLayer } from '@chartshq/visual-layer';
 import { DATA_UPDATE_COUNTER } from '../enums/defaults';
 import { Variable } from '../variable';
 import { PolarEncoder, CartesianEncoder } from '../encoder';
+import { sanitiseHeaderMatrix } from './cell-border-applier';
 import {
     DIMENSION,
     MEASURE,
@@ -104,6 +105,13 @@ export const extractUnitConfig = (config) => {
     return unitConfig;
 };
 
+export const hasOneField = (fields) => {
+    let hasField = false;
+    const keys = Object.keys(fields);
+    hasField = keys.some(d => fields[d].length > 0);
+    return hasField;
+};
+
 /**
  *
  *
@@ -145,6 +153,7 @@ export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, lab
         labelManager
     }).source(getHeaderText(fieldHeaders, i, fields[0].length))
                     .config({ show: cell.config().show })) : [];
+    sanitiseHeaderMatrix(headers, true);
     return headers;
 };
 
@@ -430,12 +439,11 @@ export const getBorders = (matrices, encoder) => {
     return { showRowBorders, showColBorders, showValueBorders };
 };
 
-export const getFieldsFromSuppliedLayers = (suppliedLayerConfig, fieldsConfig) => {
-    let fields = [];
+export const getFieldsFromSuppliedLayers = (suppliedLayerConfig) => {
     const encodingArr = suppliedLayerConfig.map(conf => (conf.encoding || {}));
-    fields = [...fields, [].concat(...encodingArr.map(enc => Object.values(enc).map(d => d.field)))];
-    fields = fields.filter(field => fieldsConfig[field] && fieldsConfig[field].def.type === FieldType.DIMENSION);
-    return fields;
+    const fields = [].concat(...encodingArr.map(enc => Object.values(enc).map(d => (typeof d === 'object' ?
+        d.field : d))));
+    return [...new Set(fields.filter(d => d))];
 };
 
 export const extractFields = (facetsAndProjections, layerFields) => {

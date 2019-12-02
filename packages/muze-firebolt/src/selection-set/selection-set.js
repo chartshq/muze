@@ -18,15 +18,28 @@ class SelectionSet {
      *
      * @param {Array.<string>} completeSet Set of unique ids.
      */
-    constructor (completeSet, _volatile) {
-        this.completeSet = completeSet;
-        this._set = completeSet.reduce((obj, key) => {
-            obj[key] = SELECTION_NULL;
-            return obj;
-        }, {});
+    constructor ({ keys, fields }, _volatile) {
+        this.completeSet = keys;
+        this._set = {};
+        this._uidMap = {};
+        this._measureNames = {};
+        this._dimVals = {};
+
+        for (const key in keys) {
+            this._set[key] = SELECTION_NULL;
+            this._uidMap[key] = keys[key].uid;
+            this._measureNames[key] = keys[key].measureNames;
+            this._dimVals[key] = keys[key].dims;
+        }
+
         this._volatile = _volatile;
-        this._completeSetCount = completeSet.length;
+        this._completeSetCount = Object.keys(keys).length;
         this._lockedSelection = {};
+        this._fieldIndices = fields.reduce((acc, v, i) => {
+            acc[v] = i;
+            return acc;
+        }, {});
+        this._fields = fields;
         this._resetted = true;
     }
 
@@ -44,7 +57,9 @@ class SelectionSet {
         const set = this._set;
         // from exitset to entryset
         ids.forEach((i) => {
-            set[i] = SELECTION_NEW_ENTRY;
+            if (i in set) {
+                set[i] = SELECTION_NEW_ENTRY;
+            }
         });
 
         for (const key in set) {
@@ -66,7 +81,9 @@ class SelectionSet {
         const set = this._set;
         // from exitset to entryset
         ids.forEach((i) => {
-            set[i] = SELECTION_OLD_ENTRY;
+            if (i in set) {
+                set[i] = SELECTION_OLD_ENTRY;
+            }
         });
 
         return this;
@@ -121,7 +138,7 @@ class SelectionSet {
 
         const set = this._set;
         ids.forEach((i) => {
-            set[i] = SELECTION_NEW_EXIT;
+            i in set && (set[i] = SELECTION_NEW_EXIT);
         });
 
         for (const key in set) {
@@ -133,29 +150,58 @@ class SelectionSet {
         return this;
     }
 
-    getSets () {
+    getSets (config = {}) {
         const set = this._set;
+        const uidMap = this._uidMap;
         const retObj = {
             entrySet: [[], []],
             exitSet: [[], []],
+            mergedEnter: [],
+            mergedExit: [],
             completeSet: []
         };
+        const measureNames = this._measureNames;
+        const dimVals = this._dimVals;
+        const { keepDims = false, dimensions = this._fields } = config;
+        const fieldIndices = this._fieldIndices;
 
         for (const key in set) {
-            if (set[key] > 0) {
-                set[key] === SELECTION_OLD_ENTRY && retObj.entrySet[0].push(key);
-                set[key] === SELECTION_NEW_ENTRY && retObj.entrySet[1].push(key);
-            } else if (set[key] < 0) {
-                set[key] === SELECTION_OLD_EXIT && retObj.exitSet[0].push(key);
-                set[key] === SELECTION_NEW_EXIT && retObj.exitSet[1].push(key);
-            }
-            retObj.completeSet.push(key);
-        }
+            let val;
+            const measureNamesArr = measureNames[key] || [];
+            let dims = dimVals[key];
 
-        ['entrySet', 'exitSet'].forEach((type) => {
-            retObj[type] = retObj[type].map(e => e.map(Number));
-        });
-        retObj.completeSet = retObj.completeSet.map(Number);
+            if (keepDims) {
+                if (measureNamesArr.length) {
+                    dims = dimensions.map(d => dims[fieldIndices[d]]);
+                    val = dims.length ? [...dims, `${measureNamesArr}`] : [uidMap[key], `${measureNamesArr}`];
+                } else {
+                    val = dims.length ? [...dims] : [uidMap[key]];
+                }
+            } else {
+                val = measureNamesArr.length ? [uidMap[key], measureNames[key], dims] : [uidMap[key]];
+            }
+
+            if (set[key] > 0) {
+                [SELECTION_OLD_ENTRY, SELECTION_NEW_ENTRY].forEach((v, i) => {
+                    if (set[key] === v) {
+                        retObj.entrySet[i].push(val);
+                    }
+                });
+                if (set[key] === SELECTION_OLD_ENTRY || set[key] === SELECTION_NEW_ENTRY) {
+                    retObj.mergedEnter.push(val);
+                }
+            } else if (set[key] < 0) {
+                [SELECTION_OLD_EXIT, SELECTION_NEW_EXIT].forEach((v, i) => {
+                    if (set[key] === v) {
+                        retObj.exitSet[i].push(val);
+                    }
+                });
+                if (set[key] === SELECTION_OLD_EXIT || set[key] === SELECTION_NEW_EXIT) {
+                    retObj.mergedExit.push(val);
+                }
+            }
+            retObj.completeSet.push(val);
+        }
 
         return retObj;
     }
@@ -174,14 +220,11 @@ class SelectionSet {
         const set = this._set;
         if (ids) {
             ids.forEach((i) => {
-                set[i] = SELECTION_NULL;
+                i in set && (set[i] = SELECTION_NULL);
             });
         } else {
-            const lockedSel = this._lockedSelection;
             for (const key in set) {
-                if (!(key in lockedSel)) {
-                    set[key] = SELECTION_NULL;
-                }
+                set[key] = SELECTION_NULL;
             }
         }
         this._resetted = true;
@@ -322,6 +365,40 @@ class SelectionSet {
         }
 
         return this;
+    }
+
+    getMergedEntrySet (raw) {
+        const set = this._set;
+        const mergedEnter = [];
+        const uidMap = this._uidMap;
+        const measureNames = this._measureNames;
+        const dimVals = this._dimVals;
+
+        for (const key in set) {
+            const val = raw ? [...dimVals[key], `${measureNames[key]}`] :
+                [uidMap[key], measureNames[key]];
+            if (set[key] === SELECTION_NEW_ENTRY || set[key] === SELECTION_OLD_ENTRY) {
+                mergedEnter.push(val);
+            }
+        }
+        return mergedEnter;
+    }
+
+    getMergedExitSet (raw) {
+        const set = this._set;
+        const mergedExit = [];
+        const uidMap = this._uidMap;
+        const measureNames = this._measureNames;
+        const dimVals = this._dimVals;
+
+        for (const key in set) {
+            const val = raw ? [...dimVals[key], `${measureNames[key]}`] :
+                [uidMap[key], measureNames[key]];
+            if (set[key] === SELECTION_NEW_EXIT || set[key] === SELECTION_OLD_EXIT) {
+                mergedExit.push(val);
+            }
+        }
+        return mergedExit;
     }
 }
 

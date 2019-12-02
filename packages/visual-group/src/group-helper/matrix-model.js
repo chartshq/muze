@@ -1,5 +1,7 @@
-import { DataModel } from 'muze-utils';
+import { DataModel, mergeRecursive } from 'muze-utils';
 import { sortFacetFields } from './group-utils';
+import { BORDER_WIDTH } from '../enums/defaults';
+import { FACET } from '../enums/constants';
 
 /**
 * Gets name of fields form the variables
@@ -95,6 +97,36 @@ const createJoinedKeys = keys => keys.map(e => ({
     keyArr: e,
     joinedKey: e.join(',')
 }));
+
+const setDefaultConfigForFacet = (facetInfo, projectionInfo, config) => {
+    let conf = {};
+
+    if (facetInfo.allFacets.length || projectionInfo.indices.length > 1) {
+        const { facetsUserConfig, border } = config;
+        const { isBorderPresent, isGridLinePresent } = facetsUserConfig;
+        const gridLinesShowLength = Object.keys(isGridLinePresent).length;
+        let borderWidth = border.width;
+        let gridLines = {};
+
+        if (!isBorderPresent) {
+            borderWidth = BORDER_WIDTH[FACET];
+        }
+        if (gridLinesShowLength <= 0) {
+            gridLines = {
+                x: {
+                    show: false
+                }
+            };
+        }
+        conf = {
+            border: {
+                width: borderWidth
+            },
+            gridLines
+        };
+    }
+    return conf;
+};
 
 /**
 *
@@ -309,6 +341,9 @@ export const getMatrixModel = (dataModel, fieldInfo, geomCellCreator, globalConf
         rowKeys,
         colKeys
     } = getSplitModelHashMap(allSplitModels, facetInfo, globalConfig);
+
+    const defaultConfig = setDefaultConfigForFacet(facetInfo, projectionInfo, globalConfig);
+    globalConfig = mergeRecursive(globalConfig, defaultConfig);
 
     const generalContext = {
         matrix,

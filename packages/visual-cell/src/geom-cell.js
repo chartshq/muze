@@ -12,6 +12,7 @@ import {
     CLASSPREFIX, HEIGHT, WIDTH, DATA, AXES, FACET_BY_FIELDS, FIELDS, TRANSFORM, LAYER_DEF, CONFIG, GEOM_CELL,
     DETAIL_FIELDS
 } from './enums/constants';
+import * as CONSTANTS from './constants';
 import { DEFAULT_CONFIG } from './enums/defaults';
 
 /**
@@ -86,6 +87,10 @@ class GeomCell extends SimpleCell {
      */
     get id () {
         return this.source().id();
+    }
+
+    static formalName () {
+        return CONSTANTS.GEOM_CELL;
     }
 
     /**

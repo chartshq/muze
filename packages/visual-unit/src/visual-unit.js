@@ -12,10 +12,13 @@ import {
     transposeArray,
     CommonProps,
     toArray,
-    STATE_NAMESPACES
+    STATE_NAMESPACES,
+    FieldType,
+    ReservedFields
 } from 'muze-utils';
-import { physicalActions, sideEffects, behaviouralActions, behaviourEffectMap } from '@chartshq/muze-firebolt';
+import { behaviourEffectMap } from '@chartshq/muze-firebolt';
 import { actionBehaviourMap } from './firebolt/action-behaviour-map';
+import UnitBrushBehaviour from './firebolt/behaviours/brush';
 import {
     renderLayers,
     getNearestDimensionalValue,
@@ -27,18 +30,23 @@ import {
     createSideEffectGroup,
     resolveEncodingTransform,
     createRenderPromise,
-    setAxisRange
+    setAxisRange,
+    unionDomainFromLayers,
+    createRTree
 } from './helper';
 import { renderGridLineLayers, attachDataToGridLineLayers } from './helper/grid-lines';
-import { calculateDomainListener, listenerMap } from './listener-map';
+import { listenerMap } from './listener-map';
 import { PROPS } from './props';
 import UnitFireBolt from './firebolt';
 import { initSideEffects, dispatchQueuedSideEffects, clearActionHistory } from './firebolt/helper';
 import './styles.scss';
 import localOptions from './local-options';
 import { WIDTH, HEIGHT } from './enums/reactive-props';
+import { REACTIVE_PROPS } from './enums';
+import { PSEUDO_SELECT } from './enums/behaviours';
+import PseudoSelectBehaviour from './firebolt/behaviours/pseudo-select';
 
-const FORMAL_NAME = 'unit';
+const FORMAL_NAME = 'VisualUnit';
 const unitNs = [STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE, STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE];
 const groupNs = STATE_NAMESPACES.GROUP_GLOBAL_NAMESPACE;
 
@@ -77,7 +85,7 @@ export default class VisualUnit {
         this._layerAxisIndex = {};
         this._queuedLayerDefs = [];
         layerFactory.setLayerRegistry(registry.layerRegistry);
-        generateGetterSetters(this, PROPS);
+        generateGetterSetters(this, this.constructor.getterSetters());
         this.registry(registry);
         this.cachedData([]);
     }
@@ -91,11 +99,19 @@ export default class VisualUnit {
             {
                 domain: null
             },
-            Object.keys((localOptions)).reduce((acc, v) => {
+            Object.keys((this.localOptions())).reduce((acc, v) => {
                 acc[v] = localOptions[v].value;
                 return acc;
             }, {})
         ];
+    }
+
+    static getterSetters () {
+        return PROPS;
+    }
+
+    static localOptions () {
+        return localOptions;
     }
 
     static getQualifiedStateProps () {
@@ -113,7 +129,10 @@ export default class VisualUnit {
             }), {
                 type: 'registerImmediateListener',
                 props: [`${STATE_NAMESPACES.LAYER_GLOBAL_NAMESPACE}.domain`],
-                listener: calculateDomainListener
+                listener: (context) => {
+                    const domain = context.calculateDomainFromData();
+                    context.dataDomain(domain);
+                }
             }, {
                 type: 'registerImmediateListener',
                 props: [`${unitNs[1]}.${WIDTH}`,
@@ -140,6 +159,8 @@ export default class VisualUnit {
                     props: [CommonProps.ON_LAYER_DRAW],
                     listener: (context, [, drawn]) => {
                         if (drawn) {
+                            context._rtree = createRTree(context);
+
                             const firebolt = context.firebolt();
                             dispatchQueuedSideEffects(firebolt);
                             clearActionHistory(firebolt);
@@ -159,24 +180,49 @@ export default class VisualUnit {
     store (...params) {
         if (params.length) {
             const store = this._store = params[0];
-            const { throwback, fireboltDeps } = this._dependencies;
+            const { throwback } = this._dependencies;
             const { namespace } = this.metaInf();
 
             store.addSubNamespace(namespace, FORMAL_NAME, this);
             throwback.addSubNamespace(namespace, FORMAL_NAME, this);
-            transactor(this, localOptions, store, {
+            transactor(this, this.constructor.localOptions(), store, {
                 subNamespace: namespace,
                 namespace: `${STATE_NAMESPACES.UNIT_LOCAL_NAMESPACE}`
             });
+            this.createFireboltInstance();
 
-            this.firebolt(new UnitFireBolt(this, {
-                physical: Object.assign({}, physicalActions, fireboltDeps.physicalActions),
-                behavioural: Object.assign({}, behaviouralActions, fireboltDeps.behaviouralActions),
-                physicalBehaviouralMap: actionBehaviourMap
-            }, Object.assign({}, sideEffects, fireboltDeps.sideEffects), behaviourEffectMap));
             return this;
         }
         return this._store;
+    }
+
+    createFireboltInstance () {
+        const { interactions } = this.registry();
+        const { fireboltDeps } = this._dependencies;
+        const Cls = this.getFireboltCls();
+
+        this.firebolt(new Cls(this, {
+            physical: Object.assign({}, interactions.physicalActions.get(), fireboltDeps.physicalActions),
+            behavioural: Object.assign({}, interactions.behaviours.get(), {
+                [UnitBrushBehaviour.formalName()]: UnitBrushBehaviour,
+                [PSEUDO_SELECT]: PseudoSelectBehaviour
+            }, fireboltDeps.behaviouralActions),
+            physicalBehaviouralMap: this.getActionBehaviourMap()
+        }, Object.assign({}, interactions.sideEffects.get(), fireboltDeps.sideEffects), this.getBehaviourEffectMap()));
+
+        return this;
+    }
+
+    getFireboltCls () {
+        return UnitFireBolt;
+    }
+
+    getBehaviourEffectMap () {
+        return behaviourEffectMap;
+    }
+
+    getActionBehaviourMap () {
+        return actionBehaviourMap;
     }
 
     /**
@@ -241,32 +287,48 @@ export default class VisualUnit {
      * @return {VisualUnit} Instance of visual unit.
      */
     render (container) {
+        this.createRootContainers(container);
+
+        setAxisRange(this);
+        this.renderLayers();
+        const node = this._rootSvg.node();
+        const { sideEffectClassName, classPrefix } = this.config();
+        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
+        const firebolt = this.firebolt();
+        initSideEffects(firebolt.sideEffects(), firebolt);
+        return this;
+    }
+
+    createRootContainers (container) {
         const config = this.config();
-        const { className, defClassName, sideEffectClassName, classPrefix } = config;
+        const { className, defClassName } = config;
         const qualifiedClassName = getQualifiedClassName(defClassName, this.id(), config.classPrefix);
         const width = this.width();
         const height = this.height();
         const containerSelection = selectElement(container).style('position', 'relative');
-
         this._rootSvg = makeElement(containerSelection, 'svg', [null], className)
                         .style('width', `${width}px`).style('height', `${height}px`);
 
         const node = this._rootSvg.node();
+
         setAttrs(node, {
             width,
             height,
             class: qualifiedClassName.join(' ')
         });
+        return this;
+    }
 
-        setAxisRange(this);
+    renderLayers () {
+        const width = this.width();
+        const height = this.height();
+        const node = this._rootSvg.node();
+
         renderGridLineLayers(this, node);
         renderLayers(this, node, this.layers(), {
             width,
             height
         });
-        this._sideEffectGroup = createSideEffectGroup(node, `${classPrefix}-${sideEffectClassName}`);
-        const firebolt = this.firebolt();
-        initSideEffects(firebolt.sideEffects(), firebolt);
         return this;
     }
 
@@ -355,7 +417,6 @@ export default class VisualUnit {
         if (mount.length) {
             this._mount = mount[0];
             this.render(mount[0]);
-            this.firebolt().mapActionsAndBehaviour();
             return this;
         }
         return this._mount;
@@ -439,12 +500,6 @@ export default class VisualUnit {
         return layers;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     remove () {
         const formalName = this.constructor.formalName();
         const { lifeCycleManager, throwback } = this._dependencies;
@@ -470,12 +525,10 @@ export default class VisualUnit {
      *
      * @memberof VisualUnit
      */
-    getDataModelFromIdentifiers (identifiers, mode, parentModel) {
-        if (identifiers === null) {
-            return null;
-        }
+    getDataModelFromIdentifiers (identifiers, mode, parentModel, hasBarLayer) {
+        if (!identifiers) return null;
         const dataModel = parentModel || this.data();
-        return getDataModelFromIdentifiers(dataModel, identifiers, mode);
+        return getDataModelFromIdentifiers(dataModel, identifiers, mode, hasBarLayer);
     }
 
     /**
@@ -490,31 +543,29 @@ export default class VisualUnit {
         return this;
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     getSourceInfo () {
         return {
             dimensionMeasureMap: this._dimensionMeasureMap,
             fields: this.fields(),
             data: this.data(),
-            axes: this.axes()
+            axes: this.axes(),
+            retinalFields: this.retinalFields(),
+            layers: this.layers(),
+            timeDiffs: this.timeDiffsByField()
         };
     }
 
-    getDataDomain () {
-        return this.store().get(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.domain`, this.metaInf().namespace);
+    dataDomain (...params) {
+        const { namespace } = this.metaInf();
+        const store = this.store();
+        const prop = `${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${REACTIVE_PROPS.DOMAIN}`;
+        if (params.length) {
+            const domain = params[0];
+            store.commit(prop, domain, namespace);
+        }
+        return store.get(prop, namespace);
     }
 
-    /**
-     *
-     *
-     *
-     * @memberof VisualUnit
-     */
     getDefaultTargetContainer () {
         const { classPrefix, defClassName } = this.config();
         return [`.${classPrefix}-${defClassName}`];
@@ -582,13 +633,22 @@ export default class VisualUnit {
         });
 
         if (dimValue !== null && config.getAllPoints) {
+            dimValue[0].push(ReservedFields.MEASURE_NAMES);
             pointObj.id = dimValue;
-            const pointInf = this.getMarkInfFromLayers(x, y, config);
-            pointObj.target = pointInf && pointInf.id ? pointInf.id : pointObj.id;
+            const layers = this.layers();
+            const pointInf = this.getMarkInfFromLayers(x, y, { ...config, dimValue });
+            layers.forEach((layer) => {
+                const measures = layer.data().getSchema()
+                    .filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+                for (let i = 1, len = dimValue.length; i < len; i++) {
+                    dimValue[i].push(measures.join());
+                }
+            });
+            pointObj.target = pointInf && pointInf.id ? pointInf.id : null;
             return pointObj;
         }
 
-        const markInf = this.getMarkInfFromLayers(x, y, config) || { id: null };
+        const markInf = this.getMarkInfFromLayers(x, y, { ...config, dimValue }) || { id: null };
         pointObj = Object.assign({}, markInf);
 
         pointObj.target = markInf.id;
@@ -710,5 +770,82 @@ export default class VisualUnit {
     removeLayersByType (type) {
         removeLayersBy('type', type);
         return this;
+    }
+
+    calculateDomainFromData () {
+        const domain = unionDomainFromLayers(this.layers(), this.fields(), this._layerAxisIndex,
+            this.data().getFieldsConfig());
+        return domain;
+    }
+
+    getValueFromId (id, fields, fieldsConfig) {
+        const { idValuesMap } = this._cachedValuesMap();
+        const row = idValuesMap[id];
+        const filteredRow = fields.map(d => (d === ReservedFields.ROW_ID ? id : row[fieldsConfig[d].index]));
+
+        return filteredRow;
+    }
+
+    getRangeFromIdentifiers ({ criteria, fields }) {
+        return fields.reduce((acc, v) => {
+            acc[v] = criteria[v];
+            return acc;
+        }, {});
+    }
+
+    getRangeFromPositions ({ startPos, endPos }) {
+        const { x, y } = this.fields();
+        const axes = this.axes();
+        const xField = x[0];
+        const yField = y[0];
+        const xFieldType = x[0].type();
+        const yFieldType = y[0].type();
+        const dimensions = Object.keys(this.data().getFieldspace().getDimension());
+
+        if (xFieldType === FieldType.MEASURE && yFieldType === FieldType.MEASURE) {
+            const dom = {
+                x: axes.x[0].invertExtent(startPos.x, endPos.x).sort((a, b) => a - b),
+                y: axes.y[0].invertExtent(startPos.y, endPos.y).sort((a, b) => a - b)
+            };
+            const range = {};
+            if (`${xField}` === `${yField}`) {
+                const xdom = dom.x;
+                const ydom = dom.y;
+                const min = xdom[0] > ydom[0] ? ydom : xdom;
+                const max = min === ydom ? xdom : ydom;
+                if (min[1] < max[0]) {
+                    range[xField] = [];
+                } else {
+                    range[xField] = [max[0], min[1] < max[1] ? min[1] : max[1]];
+                }
+            } else {
+                range[xField] = dom.x;
+                range[yField] = dom.y;
+            }
+            return range;
+        } else if (xFieldType === FieldType.DIMENSION || yFieldType === FieldType.DIMENSION) {
+            const points = this._rtree.search({
+                minX: startPos.x,
+                minY: startPos.y,
+                maxX: endPos.x,
+                maxY: endPos.y
+            });
+
+            const criteria = [[]];
+            dimensions.forEach((field) => {
+                criteria[0].push(`${field}`);
+            });
+
+            points.forEach((point) => {
+                const data = point.data;
+                const vals = [];
+                dimensions.forEach((field) => {
+                    vals.push(data[field]);
+                });
+                criteria.push(vals);
+            });
+            return criteria;
+        }
+        return null;
     }
 }

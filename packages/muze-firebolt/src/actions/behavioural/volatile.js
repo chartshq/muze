@@ -11,7 +11,7 @@ export default class VolatileBehaviour extends GenericBehaviour {
             const existingAddSet = addSet.filter(d => selectionSet._set[d] === SELECTION.SELECTION_NEW_ENTRY
                     || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
             selectionSet.updateExit();
-            const { entrySet } = selectionSet.getSets();
+            const { entrySet } = selectionSet.getSets({ keepDims: true });
             selectionSet.reset(getMergedSet(entrySet));
             selectionSet.add(addSet);
             selectionSet.update(existingAddSet);

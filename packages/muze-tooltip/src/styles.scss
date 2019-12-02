@@ -1,7 +1,7 @@
 @import './prefix.scss';
 
 .#{$prefix}tooltip-box {
-    opacity: 0.9;
+    opacity: 1;
     border: 1px solid rgba(151,151,151,.19);
     background: #fbfbfb;
     box-shadow: 2px 2px 3px 0px rgba(211,211,211,.5);
@@ -20,17 +20,50 @@
     padding-top: 2px;
     overflow: auto;
 }
+
+.#{$prefix}tooltip-parent-container {
+    pointer-events: none;
+    z-index: 9999999999;
+}
+
+.#{$prefix}tooltip-stacked-row{
+    color:#828282;
+    margin-left: 10px;
+    font-size: 12px ;
+    font-weight: 600;
+    line-height: '15px'
+}
+
+.#{$prefix}tooltip-stacked-row-key{
+    margin-left: 10px;
+}
+
+.#{$prefix}tooltip-stacked-row-value{
+    margin-left: 2px;
+}
+
+.#{$prefix}tooltip-stacked-percentage{
+    font-size: 10px;
+    color:#828282;
+    margin-left: -20px;
+    margin-right: 20px;
+    float: right;
+    line-height: 17px;
+}
 .#{$prefix}tooltip-selected-row{
     background-color:#ebebeb
 }
+
 .#{$prefix}tooltip-row:last-child{
     padding-bottom: 4px;
 }
+
 .#{$prefix}tooltip-value{
     color:#5F5F5F;
     float: right;
     margin-left: 10px;
 }
+
 .#{$prefix}tooltip-connectors path {
     stroke-width: 2px;
     stroke: #c7c7be;
@@ -38,66 +71,6 @@
     stroke-linecap: round;
 }
 
-.#{$prefix}tooltip-arrow-bottom {
-    border-top: 10px solid #fbfbfb;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    right: 0;
-};
-.#{$prefix}tooltip-arrow-right {
-    border-left: 10px solid #fbfbfb;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    // left: 0;
-    right: -10px;
-};
-.#{$prefix}tooltip-arrow-left {
-    border-right: 10px solid #fbfbfb;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    right: 0;
-    left: -10px;
-};
-.#{$prefix}tooltip-arrow-top {
-    border-bottom: 10px solid #fbfbfb;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    right: 0;
-};
-
-
-.#{$prefix}tooltip-background-arrow-top {
-    border-bottom: 12px solid rgba(151,151,151,.19);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    top: 0%;
-    right: 0;
-};
-.#{$prefix}tooltip-background-arrow-bottom {
-    border-top: 12px solid rgba(151,151,151,.19);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    top: 102%;
-    right: 0;
-};
-.#{$prefix}tooltip-background-arrow-right {
-    border-left: 12px solid rgba(151,151,151,.19);
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    // left: 0;
-    right: -12px;
-};
-.#{$prefix}tooltip-background-arrow-left {
-    border-right: 12px solid rgba(151,151,151,.19);
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    right: 0;
-    left: -12px;
-};
-
-.#{$prefix}tooltip-content-container {
-    float: none !important;
-}
 .#{$prefix}tooltip-html-container {
     margin-left: 10px;
     margin-right: 10px;
@@ -107,13 +80,6 @@
     svg {
         margin-left: 10px;
         margin-right: 5px;
-    }
-}
-
-.#{$prefix}tooltip-content-container-selectionSummary{
-    .#{$prefix}tooltip-content {
-        margin-left: 3px;
-        margin-right: 3px;
     }
 }
 

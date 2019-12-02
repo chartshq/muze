@@ -120,7 +120,7 @@ d3.json('../data/cars.json', (data) => {
                         simpleTick, simplePoint
                     ]);
 
-    const rows = [['Horsepower'], ['Acceleration']];
+    const rows = [['Horsepower']];
     env.canvas()
                     .data(rootData)
                     .width(600)
@@ -149,18 +149,13 @@ d3.json('../data/cars.json', (data) => {
                     //         }
                     //     }
                     // })
-                    .rows(rows)
+                    .rows(['Horsepower'])
                     .columns(['Year'])
                     .color('Origin')
                     .layers([{
-                        mark: 'bar',
+                        mark: 'tick',
                         encoding: {
                             y: 'Horsepower'
-                        }
-                    }, {
-                        mark: 'compositePoint',
-                        encoding: {
-                            y: 'Acceleration'
                         }
                     }])
                     // .detail(['Maker'])

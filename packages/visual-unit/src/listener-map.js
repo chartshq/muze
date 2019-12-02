@@ -1,14 +1,22 @@
-import { STATE_NAMESPACES, temporalFields, getObjProp, defaultValue } from 'muze-utils';
+import {
+    STATE_NAMESPACES,
+    temporalFields,
+    getObjProp,
+    defaultValue,
+    isSimpleObject
+} from 'muze-utils';
+import { FRAGMENTED } from '@chartshq/muze-firebolt/src/enums/constants';
+import { TOOLTIP, FRAGMENTED_TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
 import * as PROPS from './enums/reactive-props';
 import {
     transformDataModels,
     getDimensionMeasureMap,
     attachDataToLayers,
-    attachAxisToLayers,
-    unionDomainFromLayers
+    attachAxisToLayers
 } from './helper';
 
 import { createGridLineLayer } from './helper/grid-lines';
+import { prepareSelectionSetData } from './firebolt/helper';
 
 const removeExitLayers = (layerDefs, context) => {
     const layersMap = context._layersMap;
@@ -26,19 +34,13 @@ const removeExitLayers = (layerDefs, context) => {
     }
 };
 
-export const calculateDomainListener = (context) => {
-    const { namespace } = context.metaInf();
-    const domain = unionDomainFromLayers(context.layers(), context.fields(), context._layerAxisIndex,
-        context.data().getFieldsConfig());
-    context.store().commit(`${STATE_NAMESPACES.UNIT_GLOBAL_NAMESPACE}.${PROPS.DOMAIN}`, domain, namespace);
-};
-
 export const listenerMap = [
     {
         type: 'registerImmediateListener',
         props: [PROPS.LAYERDEFS],
         listener: (context, [, layerDefs]) => {
             const fieldsVal = context.fields();
+
             if (layerDefs && fieldsVal) {
                 removeExitLayers(layerDefs, context);
                 const queuedLayerDefs = context._queuedLayerDefs;
@@ -47,6 +49,7 @@ export const listenerMap = [
                     layerDefArr = [...layerDefArr, ...defFn(layerDefs)];
                 });
                 context.addLayer(layerDefArr);
+
                 const adjustRange = context.layers().some(inst => inst.hasPlotSpan());
                 ['x', 'y'].forEach((type) => {
                     const axisArr = defaultValue(getObjProp(context.axes(), type), []);
@@ -91,7 +94,13 @@ export const listenerMap = [
                 context._timeDiffs = timeDiffs;
                 const firebolt = context.firebolt();
                 const originalData = context.cachedData()[0];
-                firebolt.createSelectionSet(context.data().getUids());
+                const { keys, dimensionsMap, dimensions, allFields } = prepareSelectionSetData(context.data(), context);
+                firebolt._metaData = {
+                    dimensionsMap,
+                    dimensions,
+                    allFields
+                };
+                firebolt.createSelectionSet({ keys, fields: dimensions });
                 firebolt.attachPropagationListener(originalData);
             }
         }
@@ -101,7 +110,27 @@ export const listenerMap = [
         props: [PROPS.CONFIG],
         listener: (context, [, config]) => {
             if (config) {
-                context.firebolt().config(config.interaction);
+                const firebolt = context.firebolt();
+                const { interaction } = config;
+                firebolt.config(interaction);
+                const { mode } = interaction.tooltip;
+                if (mode === FRAGMENTED) {
+                    const map = firebolt._behaviourEffectMap;
+                    for (const key in map) {
+                        const sideEffects = map[key];
+
+                        map[key] = sideEffects.map((val) => {
+                            let name = val;
+                            if (isSimpleObject(val)) {
+                                name = val.name;
+                            }
+                            if (name === TOOLTIP) {
+                                return FRAGMENTED_TOOLTIP;
+                            }
+                            return val;
+                        });
+                    }
+                }
                 createGridLineLayer(context);
             }
         }

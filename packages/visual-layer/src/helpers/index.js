@@ -9,7 +9,9 @@ import {
     getObjProp,
     COORD_TYPES,
     CommonProps,
-    defaultValue
+    defaultValue,
+    InvalidAwareTypes,
+    isSimpleObject
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -18,110 +20,78 @@ import { IDENTITY, STACK, GROUP, COLOR, SHAPE, SIZE, ENCODING, AGG_FN_SUM, ASCEN
 const BAND = ScaleType.BAND;
 const { POLAR, CARTESIAN } = COORD_TYPES;
 
-const transformColor = (colorAxis, datum, styleType, intensity) => {
+export const transformColor = (colorAxis, datum, styleType, intensity, interactionType) => {
     const meta = datum.meta;
-    const stateColor = defaultValue(meta.stateColor[styleType], meta.originalColor[styleType]);
+    const stateColor = defaultValue(meta.currentState[interactionType][styleType], meta.originalState[styleType]);
     const colorInfo = colorAxis.transformColor(stateColor, intensity);
 
-    meta.stateColor[styleType] = colorInfo.hsla;
+    // meta.stateColor[styleType] = colorInfo.hsla;
+    meta.currentState[interactionType][styleType] = colorInfo.hsla;
     return colorInfo;
 };
 
 export const applyInteractionStyle = (context, selectionSet, interactionStyles, config) => {
     const elements = context.getPlotElementsFromSet(selectionSet);
-    const axes = context.axes();
-    const colorAxis = axes.color;
-    const apply = config.apply;
-    const interactionType = config.interactionType;
-    interactionStyles.forEach((style) => {
-        const styleType = style.type;
-        elements.forEach((elem) => {
-            elem.style(styleType, ((d) => {
-                const { colorTransform, stateColor, originalColor } = d.meta;
-                colorTransform[interactionType] = colorTransform[interactionType] || {};
-                if (apply && !colorTransform[interactionType][styleType]) {
-                    // fade selections
-                    colorTransform[interactionType][styleType] = style.intensity;
-                    const color = transformColor(colorAxis, d, styleType, style.intensity).color;
-                    return color;
-                }
-                if (!apply && colorTransform[interactionType][styleType]) {
-                     // unfade selections
-                    colorTransform[interactionType][styleType] = null;
-                    return transformColor(colorAxis, d, styleType, style.intensity.map(e => -e)).color;
-                }
-                const [h, s, l, a] = stateColor[styleType] ? stateColor[styleType] : originalColor[styleType];
-                return `hsla(${h * 360},${s * 100}%,${l * 100}%, ${a})`;
-            }));
-        });
+    const { apply, interactionType, reset } = config;
+    const mountPoint = selectElement(context.mount()).select('.muze-overlay-paths').node();
+
+    elements.forEach((elem) => {
+        const options = { mountPoint, apply, reset };
+        context.applyLayerStyle(elem, interactionType, interactionStyles, options);
+
+        // const interactionStylesEntries = Object.entries(interactionStyles.style);
+
+        // for (const [type, value] of interactionStylesEntries) {
+        //     const style = { type, value };
+        //     const options = { mountPoint, apply, reset };
+        //     context.applyLayerStyle(elem, interactionType, style, options);
+        // }
     });
 };
 
-/**
- *
- *
- * @param {*} selectionSet
- * @param {*} className
- * @param {*} hasFaded
- */
-export const fadeUnfadeSelection = (context, selectionSet, hasFaded, interaction) => {
-    const interactionConfig = { interaction, apply: hasFaded };
-    applyInteractionStyle(context, selectionSet, 'fade', interactionConfig);
-};
+export const retrieveEncodingInf = (encoding, fieldsConfig, encodingNames) => {
+    const encodingInf = {};
 
-/**
- *
- *
- * @param {*} selectionSet
- * @param {*} className
- * @param {*} hasFaded
- */
-export const focusUnfocusSelection = (context, selectionSet, isFocussed, interaction) => {
-    const interactionConfig = { interaction, apply: isFocussed };
-    applyInteractionStyle(context, selectionSet, 'focus', interactionConfig);
-};
-
-/**
- *
- *
- * @param {*} axes
- *
- */
-export const getAxesScales = (axes) => {
-    const [xAxis, yAxis] = [ENCODING.X, ENCODING.Y].map(e => axes[e]);
-    const [xScale, yScale] = [xAxis, yAxis].map(e => e && e.scale());
-    return {
-        xAxis,
-        yAxis,
-        xScale,
-        yScale
-    };
-};
-
-export const encodingFieldInfRetriever = {
-    [POLAR]: (encoding, fieldsConfig) => {
-        const encodingInf = {};
-        [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE, TEXT]
-            .forEach((e) => {
-                const field = getObjProp(encoding, e, 'field');
-                encodingInf[`${e}Field`] = field;
-                encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
-            });
-        return encodingInf;
-    },
-    [CARTESIAN]: (encoding, fieldsConfig) => {
-        const encodingInf = {};
-        [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE, TEXT].forEach((e) => {
+    encodingNames
+        .forEach((e) => {
             const field = getObjProp(encoding, e, 'field');
             encodingInf[`${e}Field`] = field;
             encodingInf[`${e}FieldIndex`] = getObjProp(fieldsConfig, field, 'index');
             encodingInf[`${e}FieldType`] = getObjProp(fieldsConfig, field, 'def', 'type');
             encodingInf[`${e}FieldSubType`] = getObjProp(fieldsConfig, field, 'def', 'subtype');
         });
+    return encodingInf;
+};
 
-        return encodingInf;
+export const encodingFieldInfRetriever = {
+    [POLAR]: (encoding, fieldsConfig) => {
+        const fields = [ENCODING.RADIUS, ENCODING.RADIUS0, ENCODING.ANGLE, ENCODING.ANGLE0, COLOR, SHAPE, SIZE, TEXT];
+        return retrieveEncodingInf(encoding, fieldsConfig, fields);
+    },
+    [CARTESIAN]: (encoding, fieldsConfig) => {
+        const fields = [ENCODING.X, ENCODING.Y, ENCODING.X0, ENCODING.Y0, COLOR, SHAPE, SIZE, TEXT];
+        return retrieveEncodingInf(encoding, fieldsConfig, fields);
     }
 };
+
+export const setNullsInStack = (transformedData, schema, value, setNulls) => {
+    const uniqueFieldIndex = schema.findIndex(d => d.name === value);
+    transformedData.forEach((seriesData) => {
+        seriesData.forEach((dataObj) => {
+            if (dataObj.data[uniqueFieldIndex] === null && !setNulls) {
+                dataObj[0] = null;
+                dataObj[1] = null;
+            }
+        });
+    });
+    return transformedData;
+};
+export const setNulls = (transformedData, val) => transformedData.map((seriesData) => {
+    if (val && (seriesData[val.index] instanceof InvalidAwareTypes)) {
+        seriesData[val.index] = null;
+    }
+    return seriesData;
+});
 
 /**
  *
@@ -134,7 +104,7 @@ export const encodingFieldInfRetriever = {
 export const transformData = (dataModel, config, transformType, encodingFieldInf) => {
     const data = dataModel.getData({ withUid: true });
     const schema = data.schema;
-    const transform = config.transform;
+    const { transform, connectNullData: setNullData } = config;
     const {
         xField,
         yField,
@@ -142,15 +112,22 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
         yFieldType
     } = encodingFieldInf;
     const uniqueField = xFieldType === FieldType.MEASURE ? yField : xField;
-
-    return transformFactory(transformType)(schema, data.data, {
+    const value = yFieldType === FieldType.MEASURE ? yField : xField;
+    let transformedData = transformFactory(transformType)(schema, data.data, {
         groupBy: transform.groupBy,
         uniqueField,
         sort: transform.sort || 'none',
         offset: transform.offset,
         orderBy: transform.orderBy,
-        value: yFieldType === FieldType.MEASURE ? yField : xField
+        value
     }, data.uids);
+
+    if (transformType === STACK) {
+        transformedData = setNullsInStack(transformedData, schema, value, setNullData);
+    } else {
+        transformedData = setNulls(transformedData, dataModel.getFieldsConfig()[value]);
+    }
+    return transformedData;
 };
 
 export const getIndividualClassName = (d, i, data, context) => {
@@ -162,7 +139,7 @@ export const getIndividualClassName = (d, i, data, context) => {
     return classNameStr;
 };
 
-const dataNormalizers = {
+export const dataNormalizers = {
     [POLAR]: (transformedData, encodingFieldInf, fieldsConfig) => {
         const {
             radiusFieldIndex,
@@ -199,7 +176,9 @@ const dataNormalizers = {
             x0FieldIndex,
             y0FieldIndex
         } = encodingFieldInf;
-        const fieldsLen = Object.keys(fieldsConfig).length;
+        const fieldsArr = Object.keys(fieldsConfig);
+        const fieldsLen = fieldsArr.length;
+
         /**
          * Returns normalized data from transformed data. It recursively traverses through
          * the transformed data if there it is nested.
@@ -252,6 +231,11 @@ const dataNormalizers = {
                         pointObj[enc] = d[encodingFieldInf[`${enc}FieldIndex`]];
                     });
                 }
+                const source = pointObj.source;
+                pointObj.dataObj = fieldsArr.reduce((acc, name) => {
+                    acc[name] = source[fieldsConfig[name].index];
+                    return acc;
+                }, {});
                 return pointObj;
             });
         }).filter(d => d.length);
@@ -318,12 +302,20 @@ export const domainCalculator = {
     }
 };
 
-export const attachDataToVoronoi = (voronoi, points) => {
+const defFn = (d) => {
+    const { x, y } = d.update;
+    return {
+        x,
+        y
+    };
+};
+
+export const attachDataToVoronoi = (voronoi, points, accessor = defFn) => {
     voronoi.data([].concat(...points).filter(d => d.rowId !== undefined).map((d) => {
-        const point = d.update;
+        const { x, y } = accessor(d);
         return {
-            x: point.x,
-            y: point.y,
+            x,
+            y,
             data: d
         };
     }));
@@ -544,15 +536,11 @@ export const resolveEncodingValues = (data, i, dataArr, layerInst) => {
     return transformedValues;
 };
 
-export const getColorMetaInf = (colorInf, colorAxis) => ({
-    originalColor: Object.keys(colorInf).reduce((acc, key) => {
-        if (colorInf[key]) {
-            acc[key] = colorAxis.getHslArray(colorInf[key]);
-        }
-        return acc;
-    }, {}),
-    stateColor: {},
-    colorTransform: {}
+export const getColorMetaInf = (initialStyle, conf = {}) => ({
+    originalStyle: Object.assign({}, {
+        styles: initialStyle
+    }, conf),
+    currentState: new Map()
 });
 
 const getCoordValue = (radius, trig, angle, offset) => radius * Math[trig](angle) + offset;
@@ -596,4 +584,33 @@ export const sortData = (data, axes) => {
         }
     }
     return data;
+};
+
+export const getBoundBoxes = points => points.map((point) => {
+    const { x, y } = point.update;
+    const data = point.data;
+    return {
+        minX: x,
+        maxX: x,
+        minY: y,
+        maxY: y,
+        data
+    };
+});
+
+export const getDataFromEvent = (context, event) => {
+    const dataPoint = selectElement(event.target).data()[0];
+    if (isSimpleObject(dataPoint) && getObjProp(dataPoint, 'meta', 'layerId') === context.id()) {
+        const values = dataPoint && dataPoint.source;
+        let identifiers = null;
+        if (values) {
+            identifiers = context.getIdentifiersFromData(values, dataPoint.rowId);
+        }
+        return {
+            dimensions: [dataPoint],
+            id: identifiers,
+            layerId: context.id()
+        };
+    }
+    return null;
 };

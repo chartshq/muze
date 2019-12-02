@@ -1,6 +1,8 @@
-import { isEqual, STATE_NAMESPACES, selectElement, getValueParser } from 'muze-utils';
+import { isEqual, STATE_NAMESPACES, selectElement, getValueParser, FieldType } from 'muze-utils';
 import { VisualGroup } from '@chartshq/visual-group';
-import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID }
+import { BEHAVIOURS } from '@chartshq/muze-firebolt';
+import { payloadGenerator } from '@chartshq/visual-unit';
+import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, DATA, CONFIG, GRID, LEGEND }
     from '../constants';
 import { canvasOptions } from './local-options';
 import { LayoutManager } from '../../../layout/src/tree-layout';
@@ -21,6 +23,30 @@ export const initCanvas = (context) => {
     }, context.dependencies()))];
 };
 
+export const fixFacetConfig = (config) => {
+    if (config) {
+        let isBorderPresent = false;
+        const isGridLinePresent = {};
+
+        if (config.border && config.border.width) {
+            isBorderPresent = true;
+        }
+        if (config.gridLines) {
+            isGridLinePresent.x = !!config.gridLines.x;
+            isGridLinePresent.y = !!config.gridLines.y;
+        }
+        const facetsUserConfig = {
+            isBorderPresent,
+            isGridLinePresent
+        };
+        return {
+            facetsUserConfig,
+            isFacet: false
+        };
+    }
+    return {};
+};
+
 export const fixScrollBarConfig = (config) => {
     config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
     return config;
@@ -29,9 +55,13 @@ export const fixScrollBarConfig = (config) => {
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
     const gridLayout = layoutManager.getComponent(GRID);
+    const legend = layoutManager.getComponent(LEGEND);
     const boundBox = gridLayout && gridLayout.getBoundBox();
     const valueMatrix = context.composition().visualGroup.matrixInstance().value;
     const parentContainer = selectElement(`#${layoutManager.getRootNodeId()}`).node();
+    if (legend) {
+        legend.setComponentInfo({ rootNode: parentContainer });
+    }
     valueMatrix.each((cell) => {
         cell.valueOf().parentContainerInf({
             el: parentContainer,
@@ -60,7 +90,13 @@ export const dispatchProps = (context) => {
     const { invalidValues } = context.config();
 
     visualGroup.valueParser(getValueParser(invalidValues));
-    visualGroup.createMatrices();
+
+    const sanitizedData = visualGroup.getMandatoryFields();
+    if (sanitizedData.shouldRender) {
+        visualGroup.createMatrices(sanitizedData);
+    } else {
+        visualGroup.remove();
+    }
     context._cachedProps = {};
     lifeCycleManager.notify({ client: context, action: 'initialized' });
     lifeCycleManager.notify({ client: context, action: 'updated' });
@@ -93,22 +129,6 @@ const equalityChecker = (props, params) => {
         return checker(oldVal, newVal);
     });
 };
-
-const updateChecker = (props, params) => props.every((option, i) => {
-    const val = params[i][1];
-    switch (option) {
-    case ROWS:
-    case COLUMNS:
-        return val !== null;
-
-    case DATA:
-        return val && !val.isEmpty();
-
-    default:
-        return true;
-
-    }
-});
 
 export const notifyAnimationEnd = (context) => {
     const viewInfo = context.layout().viewInfo();
@@ -161,24 +181,42 @@ export const setupChangeListener = (context) => {
         `${STATE_NAMESPACES.CANVAS_LOCAL_NAMESPACE}.${prop}`);
     store.registerChangeListener(nameSpaceProps, (...params) => {
         const equalityProps = equalityChecker(props, params);
-        const updateProps = updateChecker(props, params);
         // inform attached board to rerender
         if (equalityProps && context.mount()) {
-            if (updateProps) {
-                dispatchProps(context);
-            } else {
-                context.composition().visualGroup.remove();
-            }
+            dispatchProps(context);
             context.render();
         }
         notifyAnimationEnd(context);
     }, true);
 };
 
+const applyPropagationPolicy = (firebolt, { behaviours, sideEffects }) => {
+    for (const key in behaviours) {
+        firebolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
+    }
+    for (const key in sideEffects) {
+        firebolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+    }
+};
+
+const isMeasure = fields => fields.every(field => field.type() === FieldType.MEASURE);
+
+const isSplom = (fields) => {
+    const { rowProjections, colProjections } = fields;
+    const colProj = colProjections.flat();
+    const rowProj = rowProjections.flat();
+
+    if (isMeasure(colProj) && isMeasure(rowProj)) {
+        return true;
+    }
+    return false;
+};
+
 export const applyInteractionPolicy = (firebolt) => {
     const canvas = firebolt.context;
     const visualGroup = canvas.composition().visualGroup;
     if (visualGroup) {
+        const splom = isSplom(visualGroup.resolver().getAllFields());
         const valueMatrix = visualGroup.matrixInstance().value;
         const interactionPolicy = firebolt._interactionPolicy;
         interactionPolicy(valueMatrix, firebolt);
@@ -187,13 +225,25 @@ export const applyInteractionPolicy = (firebolt) => {
         const sideEffects = crossInteractionPolicy.sideEffects;
         valueMatrix.each((cell) => {
             const unitFireBolt = cell.valueOf().firebolt();
-            for (const key in behaviours) {
-                unitFireBolt.changeBehaviourStateOnPropagation(key, behaviours[key]);
-            }
-            for (const key in sideEffects) {
-                unitFireBolt.changeSideEffectStateOnPropagation(key, sideEffects[key]);
+            applyPropagationPolicy(unitFireBolt, { behaviours, sideEffects });
+            if (splom) {
+                unitFireBolt.payloadGenerators({
+                    [BEHAVIOURS.BRUSH]: (inst, dm, propConfig, facetFields) => payloadGenerator.brush(inst, dm,
+                        { ...propConfig, ...{ includeMeasures: false } }, facetFields)
+                });
+                unitFireBolt.sideEffects().selectionBox.config({
+                    persistent: true
+                });
+            } else {
+                unitFireBolt.payloadGenerators({
+                    [BEHAVIOURS.BRUSH]: payloadGenerator.brush
+                });
+                unitFireBolt.sideEffects().selectionBox.config({
+                    persistent: false
+                });
             }
         });
+        applyPropagationPolicy(firebolt, { behaviours, sideEffects });
     }
 };
 

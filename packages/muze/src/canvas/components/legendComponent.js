@@ -85,8 +85,8 @@ export default class LegendComponent extends MuzeComponent {
                             .style('width', `${legWidth}px`);
 
             makeElement(mount, 'div', this.components, `${classPrefix}-legend-components`, {}, d => d.legend.id())
-                            .each(function (d) { d.legend.mount(this); })
-                            .style('width', d => `${d.legend.measurement().width}px`);
+                            .style('width', d => `${d.legend.measurement().width}px`)
+                            .each(function (d) { d.legend.mount(this); });
         }
     }
 
@@ -110,6 +110,14 @@ export default class LegendComponent extends MuzeComponent {
         this.className(params.config.className);
         this.alignWith(params.config.alignWith || alignWith);
         this.alignment(params.config.alignment || alignment);
+    }
+
+    setComponentInfo (params) {
+        const { rootNode } = params;
+        this.components.forEach((legendInfo) => {
+            const leg = legendInfo.legend;
+            leg.setParentInfo({ canvasRoot: rootNode });
+        });
     }
 
 }

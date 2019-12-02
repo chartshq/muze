@@ -30,7 +30,9 @@ export default class Crossline extends SpawnableSideEffect {
         } = this.config();
         const dataModel = selectionSet.mergedEnter.model;
         const drawingInf = this.drawingContext();
-        if (payload.criteria && dataModel && dataModel.isEmpty()) {
+        const isEmptyDataModel = dataModel && dataModel.isEmpty();
+        if (payload.criteria && isEmptyDataModel) {
+            this.hide();
             return this;
         }
         if (payload.criteria === null || !dataModel) {
@@ -62,21 +64,26 @@ export default class Crossline extends SpawnableSideEffect {
                 const value = dataArr[0];
                 bandWidth = axis.getUnitWidth() || 0;
                 px = axis.getScaleValue(value) + bandWidth / 2 + drawingInf.xOffset;
-                const layers = this.firebolt.context.layers();
-                const plotWidth = Math.max(...layers.map(layer => layer.getPlotSpan()[type]));
-                const pad = Math.max(...layers.map(layer => layer.getPlotPadding()[type]));
-                height = drawingInf.height;
-                width = drawingInf.width;
-                const startPx = px - plotWidth / 2 - pad / 2;
-                const endPx = px + plotWidth / 2 + pad / 2;
-                const dataPoint = {};
-                if (type === 'y') {
-                    dataPoint.d = `M 0 ${startPx} L 0 ${endPx} L ${width} ${endPx} L ${width} ${startPx} Z`;
-                } else {
-                    dataPoint.d = `M ${startPx} 0 L ${endPx} 0 L ${endPx} ${height} L ${startPx} ${height} Z`;
+
+                let layers = this.firebolt.context.layers();
+                layers = layers.filter(layer => !!layer.config().crossline);
+
+                if (layers.length) {
+                    const plotWidth = Math.max(...layers.map(layer => layer.getPlotSpan()[type]));
+                    const pad = Math.max(...layers.map(layer => layer.getPlotPadding()[type]));
+                    height = drawingInf.height;
+                    width = drawingInf.width;
+                    const startPx = px - plotWidth / 2 - pad / 2;
+                    const endPx = px + plotWidth / 2 + pad / 2;
+                    const dataPoint = {};
+                    if (type === 'y') {
+                        dataPoint.d = `M 0 ${startPx} L 0 ${endPx} L ${width} ${endPx} L ${width} ${startPx} Z`;
+                    } else {
+                        dataPoint.d = `M ${startPx} 0 L ${endPx} 0 L ${endPx} ${height} L ${startPx} ${height} Z`;
+                    }
+                    dataPoint.className = plotWidth ? bandClass : lineClass;
+                    !isNaN(px) && elemData.push(dataPoint);
                 }
-                dataPoint.className = plotWidth ? bandClass : lineClass;
-                !isNaN(px) && elemData.push(dataPoint);
             }
         });
         if (elemData.length) {
@@ -92,5 +99,9 @@ export default class Crossline extends SpawnableSideEffect {
         const className = this.config().className;
         const drawingInf = this.drawingContext();
         selectElement(drawingInf.sideEffectGroup).selectAll(`.${className}`).remove();
+    }
+
+    static target () {
+        return 'visual-unit';
     }
 }

@@ -44,5 +44,4 @@ export const spaceOutBoxes = (boxes, extent, showVertically) => {
         }
     }
     return boxes;
-}
-;
+};

@@ -9,7 +9,8 @@ import {
     DimensionSubtype,
     toArray,
     MeasureSubtype,
-    getNearestValue
+    getNearestValue,
+    RTree
 } from 'muze-utils';
 import { layerFactory, ENCODING } from '@chartshq/visual-layer';
 
@@ -222,7 +223,7 @@ export const renderLayers = (context, container, layers, measurement) => {
     context._lifeCycleManager.notify({ client: layers, action: 'beforedraw', formalName: 'layer' });
     const config = context.config();
     const classPrefix = config.classPrefix;
-    const orderedLayers = context.layers().sort((a, b) => a.config().order - b.config().order);
+    const orderedLayers = layers.sort((a, b) => a.config().order - b.config().order);
     const layerParentGroup = makeElement(container, 'g', [1], `${classPrefix}-layer-group`);
     const layerDepOrder = getDependencyOrder(context._layerDepOrder);
     const groups = {};
@@ -235,7 +236,7 @@ export const renderLayers = (context, container, layers, measurement) => {
         }
     });
 
-    const layerSeq = layerDepOrder.map(name => groups[name]);
+    const layerSeq = layerDepOrder.map(name => groups[name]).filter(d => d !== undefined);
     layerSeq.forEach((o) => {
         const layer = o.layer;
         const group = o.group;
@@ -342,16 +343,18 @@ const getKey = (arr, row) => {
 };
 
 export const getValuesMap = (model, context) => {
-    const valuesMap = {};
+    const idValuesMap = {};
+    const valuesIdMap = {};
     const { data: dataArr, schema, uids } = model.getData();
     const fieldsConfig = model.getFieldsConfig();
     const fieldIndices = isXandYMeasures(context) ? schema.map((d, i) => i) :
                             Object.keys(model.getFieldspace().getDimension()).map(d => fieldsConfig[d].index);
     dataArr.forEach((row, i) => {
         const key = getKey(fieldIndices, row);
-        valuesMap[key] = uids[i];
+        valuesIdMap[key] = uids[i];
+        idValuesMap[uids[i]] = row;
     });
-    return valuesMap;
+    return { valuesIdMap, idValuesMap, fieldsConfig };
 };
 
 export const getSelectionRejectionModel = (model, propModel, measures, propValuesMap) => {
@@ -362,13 +365,15 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
 
     if (schema.length) {
         const fieldMap = model.getFieldsConfig();
+        const { valuesIdMap } = propValuesMap;
+
         const rowIdsObj = {};
         const filteredSchema = measures ? schema.map((d, idx) => idx) :
             Object.keys(model.getFieldspace().getDimension()).map(d => fieldMap[d].index);
         data.forEach((row) => {
             const key = getKey(filteredSchema, row);
-            const id = propValuesMap[key];
-            if (key in propValuesMap) {
+            const id = valuesIdMap[key];
+            if (key in valuesIdMap) {
                 entryRowIds.push(id);
                 rowIdsObj[id] = 1;
             }
@@ -393,3 +398,14 @@ export const getSelectionRejectionModel = (model, propModel, measures, propValue
     };
 };
 
+export const createRTree = (context) => {
+    const elements = [].concat(...context.layers().filter(layer => layer.config().interactive !== false)
+        .map((layer) => {
+            const points = layer.getBoundBoxes();
+            return points;
+        })).flat().filter(d => d !== null);
+
+    const rtree = new RTree();
+    rtree.load(elements);
+    return rtree;
+};

@@ -1,4 +1,21 @@
-import { getSetInfo, getMergedSet, getSourceFields } from '../../helper';
+import {
+    isSimpleObject,
+    DimensionSubtype,
+    partition,
+    ReservedFields,
+    retrieveNearestGroupByReducers
+} from 'muze-utils';
+import { getMergedSet, getSourceFields } from '../../helper';
+
+export const getIdentifiersFromSet = (set, context, { fields }) => {
+    const data = [[]];
+
+    if (fields.length) {
+        data[0] = fields;
+        set.forEach(id => data.push(id));
+    }
+    return data;
+};
 
 /**
  * This is the base class has all the common functionalities needed for all behavioural actions. Any other behavioural
@@ -31,13 +48,22 @@ export default class GenericBehaviour {
         const {
             model: filteredDataModel,
             uids
-        } = this.firebolt.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
-        const entryExitSets = selectionSets.map((selectionSet) => {
-            this.setSelectionSet(uids, selectionSet);
-            return this.getEntryExitSet(selectionSet, filteredDataModel, payload);
-        });
+        } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
+        this._payload = payload;
 
-        return entryExitSets;
+        selectionSets.forEach((selectionSet) => {
+            this.setSelectionSet(uids, selectionSet, {
+                filteredDataModel,
+                payload
+            });
+
+            selectionSet._volatile && this.propagationIdentifiers(selectionSet, payload);
+            this.entryExitSet(selectionSet, filteredDataModel, payload);
+        });
+    }
+
+    getAddSetFromCriteria (...params) {
+        return this.firebolt.getAddSetFromCriteria(...params);
     }
 
     /**
@@ -54,32 +80,109 @@ export default class GenericBehaviour {
         return this;
     }
 
-    getEntryExitSet (selectionSet, filteredDataModel, payload) {
-        const {
-            entrySet,
-            exitSet,
-            completeSet
-        } = selectionSet.getSets();
-        const propagationInf = this.firebolt.getPropagationInf();
-        const dataModel = this.firebolt.getFullData();
-        const setConfig = {
-            dataModel,
-            filteredDataModel,
-            propagationData: propagationInf.data,
-            selectionSet
-        };
+    entryExitSet (...params) {
+        if (params.length) {
+            const [selectionSet, filteredDataModel, payload] = params;
+            const {
+                entrySet,
+                exitSet,
+                completeSet
+            } = selectionSet.getSets();
+            const propagationInf = this.firebolt.getPropagationInf();
+
+            this._entryExitSet = {
+                entrySet: [this.getSetInfo('oldEntry', entrySet[0], filteredDataModel),
+                    this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
+                exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel),
+                    this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
+                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel,
+                    selectionSet._fields),
+                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel,
+                    selectionSet._fields),
+                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel, selectionSet._fields),
+                fields: getSourceFields(propagationInf, payload.criteria)
+            };
+
+            return this;
+        }
+        return this._entryExitSet;
+    }
+
+    getSetInfo (type, set, filteredDataModel, setFields) {
+        let model = null;
+        const data = this.firebolt.data();
+
+        if (type === 'mergedEnter') {
+            model = filteredDataModel || null;
+        } else if (type === 'mergedExit') {
+            if (filteredDataModel) {
+                const setKeys = new Set(set.map(d => d[0]));
+                model = data.select((fields, i) => setKeys.has(setFields.map(field =>
+                        (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
+                            saveChild: false
+                        });
+            }
+            model = filteredDataModel || null;
+        }
+        const aggFns = retrieveNearestGroupByReducers(model);
 
         return {
-            entrySet: [getSetInfo('oldEntry', entrySet[0], setConfig),
-                getSetInfo('newEntry', entrySet[1], setConfig)],
-            exitSet: [getSetInfo('oldEntry', exitSet[0], setConfig),
-                getSetInfo('newExit', exitSet[1], setConfig)],
-            mergedEnter: getSetInfo('mergedEnter', getMergedSet(entrySet), setConfig),
-            mergedExit: getSetInfo('mergedExit', getMergedSet(exitSet), setConfig),
-            completeSet: getSetInfo('complete', completeSet, setConfig),
-            fields: getSourceFields(propagationInf, payload.criteria),
-            sourceSelectionSet: selectionSet._volatile === true
+            uids: set,
+            length: set.length,
+            model,
+            fields: setFields,
+            aggFns
         };
+    }
+
+    propagationIdentifiers (...params) {
+        if (params.length) {
+            let propData = null;
+            const [selectionSet, payload] = params;
+            const fieldsConfig = this.firebolt.data().getFieldsConfig();
+            const { criteria } = payload;
+            const propagationFields = this._propagationFields;
+
+            if (selectionSet.resetted() || criteria === null) {
+                propData = null;
+            } else if (isSimpleObject(criteria)) {
+                const fields = Object.keys(criteria);
+                const [, otherFields] =
+                    partition(fields, (d => (fieldsConfig[d] ? fieldsConfig[d].def.subtype ===
+                        DimensionSubtype.CATEGORICAL : d === ReservedFields.MEASURE_NAMES)));
+                const allFields = selectionSet._fields.filter(d => d === ReservedFields.ROW_ID ||
+                    fieldsConfig[d].def.subtype ===
+                    DimensionSubtype.CATEGORICAL
+                );
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true, dimensions: allFields });
+                propData = {
+                    fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
+                        name: d
+                    })),
+                    range: this.firebolt.getRangeFromIdentifiers({
+                        criteria,
+                        entrySet: mergedEnter,
+                        fields: otherFields
+                    }),
+                    identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]
+                };
+            } else {
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true,
+                    dimensions: propagationFields });
+                const fields = propagationFields ? [...propagationFields, ReservedFields.MEASURE_NAMES] :
+                    criteria[0];
+
+                propData = {
+                    fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
+                        name: d
+                    })),
+                    identifiers: [fields, ...mergedEnter]
+                };
+            }
+            this._propagationIdentifiers = propData;
+            return this;
+        }
+        return this._propagationIdentifiers;
     }
 
     static mutates () {
@@ -96,6 +199,12 @@ export default class GenericBehaviour {
 
     isEnabled () {
         return this._enabled;
+    }
+
+    propagateWith (...params) {
+        this._propagationFields = params[0];
+
+        return this;
     }
 }
 

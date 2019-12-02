@@ -1,5 +1,6 @@
 /* global setTimeout */
 import { getEvent } from 'muze-utils';
+import * as ACTION_NAMES from '../../enums/actions';
 import { generatePayloadFromEvent } from './helpers';
 
 /**
@@ -8,12 +9,12 @@ import { generatePayloadFromEvent } from './helpers';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-export const longtouch = firebolt => (targetEl, behaviours) => {
+export const longtouch = firebolt => (targetEl) => {
     let event;
     let touchEnd;
     const dispatchBehaviour = function (args) {
         const payload = generatePayloadFromEvent(args, event, firebolt);
-        behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, payload));
+        firebolt.triggerPhysicalAction(ACTION_NAMES.LONGTOUCH, payload);
         event.stopPropagation();
     };
 
@@ -26,9 +27,9 @@ export const longtouch = firebolt => (targetEl, behaviours) => {
             if (!touchEnd) {
                 dispatchBehaviour(args);
             } else {
-                behaviours.forEach(beh => firebolt.dispatchBehaviour(beh, {
+                firebolt.triggerPhysicalAction(ACTION_NAMES.LONGTOUCH, {
                     criteria: null
-                }));
+                });
             }
         }, 100);
     }).on('touchend', () => {

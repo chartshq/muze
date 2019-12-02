@@ -1,0 +1,22 @@
+Checklist to release a new version to NPM:
+  * Make sure DataModel has been released first
+  * Clone Muze repository from Github if needed
+  * Checkout develop branch and make sure develop branch is up-to-date with remote
+  * If git flow is not initialized yet, Run: git flow init
+  * Create a new release branch, Run: git flow release start <new_version_with_v_character>
+  * Delete all existing npm dependencies, Run: rm -rf node_modules package-lock.json packages/*/node_modules packages/*/package-lock.json
+  * Make sure DataModel's latest version is configured in packages/muze-utils/package.json
+  * Install dependencies again, Run: npm install
+  * Update LICENSE file if needed
+  * Update README.md file if needed
+  * Create a release-ready build, Run: node scripts/make-release-build.js
+  * Now release files would be created in release folder and ready to release
+  * Test the release/dist/* files if needed
+  * Now commit all the changes including release folder (so that other person can release from different system) with this message: "Make a build and bump version"
+  * Then finish the release, Run: git flow release finish [-s] <new_version_with_v_character> and enter release notes
+  * Push all changes and tags to remote, Run: git push origin master && git push origin develop && git push origin --tags
+  * Edit the title of the released tag in Github
+  * When everything is fine, it's ready to release
+  * Checkout master branch
+  * Change current directory, Run: cd release
+  * Now if everything is fine, release it to npm, Run: npm publish

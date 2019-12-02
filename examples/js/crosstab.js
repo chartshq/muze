@@ -25,8 +25,8 @@ d3.csv('/data/coffee.csv', function (data) {
     var env = window.muze();
     var DataModel = window.muze.DataModel;
     var rootData = new DataModel(data, schema);
-    // console.log('-----------------> 1 ', rootData.getData());
-     /* data and schema is global */
+
+    /* data and schema is global */
     var canvas = env.canvas();
     canvas.rows(['Market', 'Product Type']).columns([['Revenue', 'Expense'], ['Revenue', 'Expense']]).data(rootData).width(650).height(800).config({
       showHeaders: true, /* show the headers of fields used in faceting */

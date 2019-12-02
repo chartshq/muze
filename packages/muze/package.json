@@ -1,7 +1,7 @@
 {
   "name": "muze",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.3.0",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://muzejs.org",
   "author": "Muzejs.org (https://muzejs.org/)",

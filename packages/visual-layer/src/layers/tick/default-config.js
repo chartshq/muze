@@ -1,22 +1,26 @@
+import { transformColor } from 'muze-utils';
 import { CLASSPREFIX } from '../../enums/constants';
 
 export const defaultConfig = {
     defClassName: 'layer-tick',
     className: '',
     classPrefix: CLASSPREFIX,
+    nearestPointThreshold: 10,
     interaction: {
-        highlight: [{
-            type: 'stroke',
-            intensity: [0, 0, -15, 0]
-        }],
-        fade: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }],
-        focus: [{
-            type: 'stroke',
-            intensity: [0, 0, 15, 0]
-        }]
+        fade: {
+            style: {
+                stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
+            }
+        },
+        focus: {
+            style: {
+                stroke: (rgbaValues, data, apply) => transformColor(rgbaValues, {
+                    l: +15
+                }, data, apply).color
+            }
+        }
     },
     innerPadding: 0.1,
     transform: {

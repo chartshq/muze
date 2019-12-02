@@ -1,7 +1,9 @@
 import {
     FieldType,
     DimensionSubtype,
-    formatTemporal
+    formatTemporal,
+    getReadableTicks,
+    InvalidAwareTypes
 } from 'muze-utils';
 import SimpleLegend from './simple-legend';
 import { DISCRETE, LEFT, SIZE } from '../enums/constants';
@@ -49,11 +51,19 @@ export default class DiscreteLegend extends SimpleLegend {
      */
     dataFromScale () {
         const scale = this.scale();
-        const { scaleType, domain, scaleFn } = getScaleInfo(scale);
-        let domainForLegend = [...new Set(domain)];
+        const { scaleType, domain, scaleFn, steps } = getScaleInfo(scale);
         const field = this.metaData().getFieldspace().fields[0];
         const { type, subtype } = field.schema();
+        let domainForLegend = [];
+        if (scaleType === SIZE && type === FieldType.MEASURE) {
+            domainForLegend = steps instanceof Array ? steps : getReadableTicks(domain, domain.length);
+        } else if (subtype === DimensionSubtype.TEMPORAL) {
+            domainForLegend = [...new Set(field.data())];
+        } else {
+            domainForLegend = [...new Set(domain)];
+        }
 
+        const len = domainForLegend.length;
         domainForLegend = domainForLegend.map((ele, i) => {
             let value = 0;
             let range = 0;
@@ -61,7 +71,7 @@ export default class DiscreteLegend extends SimpleLegend {
             if (type === FieldType.MEASURE) {
                 value = (+domainForLegend[i]).toFixed(0);
                 const nextVal = domainForLegend[i + 1] ? +domainForLegend[i + 1] : +value;
-                range = [value, nextVal.toFixed(0)];
+                range = [value, i === len - 1 ? nextVal.toFixed(0) : nextVal.toFixed(0) - 1];
             } else {
                 let domainVal = rawVal;
                 if (subtype === DimensionSubtype.TEMPORAL) {
@@ -80,7 +90,13 @@ export default class DiscreteLegend extends SimpleLegend {
         }).filter(d => d.value !== null);
 
         domainForLegend = scaleType === SIZE ? domainForLegend.sort((a, b) => a[scaleType] - b[scaleType])
-            : domainForLegend;
+            : domainForLegend.sort((a, b) => {
+                const domainValue =
+                                !(a.value instanceof InvalidAwareTypes || a.value instanceof InvalidAwareTypes)
+                                ? a.value.localeCompare(b.value)
+                                : 1;
+                return domainValue;
+            });
         return domainForLegend;
     }
 
@@ -94,15 +110,19 @@ export default class DiscreteLegend extends SimpleLegend {
     render () {
         const firebolt = this.firebolt();
         const data = this.data();
+
         const { classPrefix } = this.config();
         const legendContainer = super.render(this.mount());
         // create Legend
         const { legendItem } = createLegendSkeleton(this, legendContainer, classPrefix, data);
         const { itemSkeleton } = createItemSkeleton(this, legendItem);
         renderDiscreteItem(this, itemSkeleton);
-        legendContainer.selectAll('div').style('float', LEFT);
+
+        legendContainer.selectAll('div')
+        .filter((datum, i, allSelections) => !allSelections[i].classList.contains(`${classPrefix}-legend-body`))
+        .style('float', LEFT);
+
         firebolt.mapActionsAndBehaviour();
-        firebolt.createSelectionSet(this.data().map(d => d.id));
         return legendContainer;
     }
 }

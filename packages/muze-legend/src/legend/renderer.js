@@ -8,7 +8,15 @@ import {
     VALUE,
     RECT,
     LEFT,
-    RIGHT
+    DEFAULTICONSIZE,
+    VERTICAL_BUFFER,
+    HORIZONTAL_BUFFER,
+    HORIZONTAL,
+    VERTICAL,
+    DEFAULT,
+    TOP,
+    BOTTOM,
+    OPPOSITE_POSITION
 } from '../enums/constants';
 
 /**
@@ -78,6 +86,11 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     maxGradWidth = maxWidth - (margin * 2 + border * 2);
 
     let legendBody = makeElement(container, 'div', [1], `${classPrefix}-legend-body`);
+
+    legendBody.style(WIDTH, `${gradWidth}px`);
+
+    legendBody.style(HEIGHT, `${gradHeight}px`);
+
     legendBody.select(`.${classPrefix}-legend-overflow`).remove();
         // Create a div with scroll when overflow
     if (maxGradWidth && maxGradWidth < gradWidth) {
@@ -89,9 +102,6 @@ export const createLegendSkeleton = (context, container, classPrefix, data) => {
     }
 
     legendBody = makeElement(legendBody, 'div', [1], `${classPrefix}-legend-overflow`);
-
-    legendBody.style(WIDTH, `${gradWidth}px`);
-    legendBody.style(HEIGHT, `${gradHeight}px`);
 
     const legendItem = getItemContainers(legendBody, data, context);
     return { legendItem };
@@ -110,7 +120,6 @@ export const createItemSkeleton = (context, container) => {
         item
     } = context.config();
     const textOrientation = item.text.orientation;
-
     const stack = itemStack[textOrientation];
     const itemSkeleton = makeElement(container, 'div', (d, i) => stack.map(e => [e, d[e], d.color, d.size,
         d.value, context.fieldName(), i]), `${classPrefix}-legend-item-info`);
@@ -134,12 +143,21 @@ export const applyItemStyle = (item, measureType, stepColorCheck, context) => {
         iconSpaces,
         maxIconWidth
     } = context.measurement();
+
+    const { align } = context.config().align;
+
     const diff = stepColorCheck ? -padding * 2 : 0;
 
     if (item[0] === VALUE) {
         return `${labelSpaces[item[6]][measureType]}px`;
     }
-    return `${measureType === 'width' && !stepColorCheck ? maxIconWidth : iconSpaces[item[6]][measureType] - diff}px`;
+
+    if (measureType === 'width' && !stepColorCheck && align === VERTICAL) {
+        return `${maxIconWidth}px`;
+    } else if (align === HORIZONTAL) {
+        return `${maxIconWidth}px`;
+    }
+    return `${iconSpaces[item[6]][measureType] - diff}px`;
 };
 
 /**
@@ -161,11 +179,12 @@ const checkPath = (str) => {
  * @param {*} d
  * @param {*} elem
  */
-const createShape = function (d, elem, defaultIcon, width, height) {
+const createShape = function (d, elem, defaultIcon) {
     const groupElement = elem;
     // const { shape, size, update } = d;
-    const size = d[3] || Math.min(width, height) * Math.PI;
     const shape = d[1] || defaultIcon;
+    const defaultIconSize = DEFAULTICONSIZE[shape] || DEFAULTICONSIZE[DEFAULT];
+    const size = d[3] || defaultIconSize * Math.PI;
 
     if (shape instanceof Promise) {
         shape.then((res) => {
@@ -222,22 +241,31 @@ export const renderIcon = (icon, container, datum, context) => {
     const {
         classPrefix,
         iconHeight,
-        iconWidth,
-        maxIconWidth,
         padding,
-        color
+        color,
+        iconWidth,
+        align
     } = context;
+
+    let { maxIconWidth } = context;
+
+    if (align === HORIZONTAL) {
+        maxIconWidth = iconWidth + 2 * padding;
+    }
     const svg = makeElement(container, 'svg', f => [f], `${classPrefix}-legend-icon-svg`)
     .attr(WIDTH, maxIconWidth)
     .attr(HEIGHT, iconHeight)
-    .style(WIDTH, `${maxIconWidth}px`)
+    .style(WIDTH, `${Math.ceil(maxIconWidth)}px`)
     .style(HEIGHT, `${iconHeight}px`);
+
+    const transalate = maxIconWidth / 2 - padding;
 
     if (icon !== RECT) {
         const group = makeElement(svg, 'g', [datum[1]], `${classPrefix}-legend-icon`);
-        createShape(datum, group, datum[3] ? 'circle' : 'square', iconWidth, iconHeight)
-                        .attr('transform', `translate(${maxIconWidth / 2 - padding} ${iconHeight / 2})`)
-                        .attr('fill', datum[2] || color);
+        createShape(datum, group, icon)
+                        .attr('transform', `translate(${transalate} ${iconHeight / 2})`)
+                        .attr('fill', datum[2] || color)
+                        .attr('stroke', datum[2] || color);
     } else {
         makeElement(svg, RECT, [datum[1]], `${classPrefix}-legend-icon`)
                         .attr('x', 0)
@@ -258,7 +286,9 @@ export const renderDiscreteItem = (context, container) => {
     const labelManager = context._labelManager;
     const {
            item,
-           classPrefix
+           classPrefix,
+           shape,
+           align
     } = context.config();
     const {
         maxIconWidth,
@@ -270,7 +300,6 @@ export const renderDiscreteItem = (context, container) => {
             color,
             className
         } = item.icon;
-
     const textOrientation = item.text.orientation;
     const formatter = item.text.formatter;
 
@@ -282,24 +311,30 @@ export const renderDiscreteItem = (context, container) => {
         padding: `${padding}px`
     });
 
+    const marginHorizontalBuffer = HORIZONTAL_BUFFER;
+    const marginVerticalBuffer = textOrientation === TOP || textOrientation === BOTTOM ? 0 : VERTICAL_BUFFER;
+
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
+    const position = OPPOSITE_POSITION[textOrientation] || LEFT;
     container.each(function (d, i) {
         if (d[0] === VALUE) {
             selectElement(this).text(formatter(d[1], i, dataArr, context))
-                            .style(`padding-${textOrientation === RIGHT ? LEFT : RIGHT}`, '0px');
+            .style(`padding-${position}`, '0px')
+            .style(`margin-${position}`, `${align === HORIZONTAL ? marginHorizontalBuffer : marginVerticalBuffer}px`);
         } else {
             // const icon = getLegendIcon(d, iconWidth, iconHeight, type);
             selectElement(this).classed(`${classPrefix}-${className}`, true);
             selectElement(this).classed(`${classPrefix}-${className}-${i}`, true);
-            renderIcon('circle', selectElement(this), d, {
+            renderIcon(shape, selectElement(this), d, {
                 classPrefix,
-                iconWidth,
-                // iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
+                // iconWidth,
+                iconWidth: 2 * Math.sqrt(d[3] / Math.PI) || iconWidth,
                 iconHeight,
                 maxIconWidth,
                 padding,
-                color
+                color,
+                align
             });
         }
     });
@@ -345,10 +380,12 @@ export const renderStepItem = (context, container) => {
     });
 
     labelManager.setStyle(context._computedStyle);
-    const dataArr = container.data();
+    const dataArr = context.metaData();
+    const data = context.data();
     container.each(function (d, i) {
         if (d[0] === VALUE) {
-            selectElement(this).text(formatter(d[1], i, dataArr, context));
+            const formattedData = formatter([data[d[6]].range[0], data[d[6]].range[1]], i, dataArr, context);
+            selectElement(this).text(formattedData);
         } else {
             renderIcon(RECT, selectElement(this), d, {
                 classPrefix,

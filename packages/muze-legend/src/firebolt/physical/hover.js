@@ -6,13 +6,13 @@ import { getEvent } from 'muze-utils';
  * @param {SVGElement} targetEl Element on which the event listeners will be attached.
  * @param {Array} behaviours Array of behaviours
  */
-/* istanbul ignore next */ const hover = firebolt => (targetEl, behaviours) => {
+/* istanbul ignore next */ const hover = firebolt => (targetEl) => {
     const dispatchBehaviour = function (args) {
         const event = getEvent();
         const payload = {
             criteria: firebolt.context.getCriteriaFromData(args)
         };
-        behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, payload));
+        firebolt.triggerPhysicalAction('hover', payload);
         event.stopPropagation();
     };
 
@@ -20,9 +20,9 @@ import { getEvent } from 'muze-utils';
                     .on('mousemove', dispatchBehaviour)
                     .on('mouseout', () => {
                         const event = getEvent();
-                        behaviours.forEach(behaviour => firebolt.dispatchBehaviour(behaviour, {
+                        firebolt.triggerPhysicalAction('hover', {
                             criteria: null
-                        }));
+                        });
                         event.stopPropagation();
                     });
 };

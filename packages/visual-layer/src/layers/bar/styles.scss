@@ -2,11 +2,12 @@
 
 .#{$prefix}layer-bar {
     fill-opacity: 1;
+    stroke: none;
+    stroke-width: 0;
 }
 
 .#{$prefix}layer-bar-highlight {
     fill-opacity: 1;
-
 }
 
 .#{$prefix}layer-bar-fadeout {

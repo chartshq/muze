@@ -9,6 +9,7 @@ import './styles.scss';
 import SpawnableSideEffect from '../spawnable';
 import { selectionBoxDrag } from '../../actions/physical/selection-box-drag';
 import { getBoxDimensionsFromPayload, changeVisibility } from './helper';
+import { BEHAVIOURS } from '../..';
 
 /**
  * This class is used to create a selection box which is used by visual unit for brushing and
@@ -31,7 +32,8 @@ class SelectionBox extends SpawnableSideEffect {
             },
             transition: {
                 duration: 200
-            }
+            },
+            persistent: false
         };
     }
 
@@ -51,8 +53,8 @@ class SelectionBox extends SpawnableSideEffect {
      * @param {number} unitHeight Height of the visual unit.
      */
     apply (selectionSet, payload) {
-        let x;
-        let y;
+        let x = 0;
+        let y = 0;
         let width;
         let height;
         const config = this._config;
@@ -65,30 +67,27 @@ class SelectionBox extends SpawnableSideEffect {
         const classPrefix = config.classPrefix;
         const selectionGroupClassName = config.defClassName;
 
-        if (payload.criteria === null) {
+        width = unitWidth;
+        height = unitHeight;
+
+        // Hide selection-box on dragEnd or when criteria is empty
+        if (!payload.criteria || (payload.dragEnd && !config.persistent)) {
             this.hide(drawingInf);
             return this;
         }
 
-        const sourceInf = firebolt.context.getSourceInfo();
-        const { dimension, direction } = getBoxDimensionsFromPayload(payload, sourceInf.axes,
-            sourceInf.fields);
+        const sourceInf = this.sourceInfo();
+        const { dimension, direction } =
+            getBoxDimensionsFromPayload(payload, sourceInf.axes, sourceInf.fields);
         const transition = payload.dragEnd && config.transition;
 
-        if (direction === 'both' || direction === 'vertical') {
+        if (direction === 'both') {
             x = Math.min(dimension.x1, dimension.x2);
-            width = Math.abs(dimension.x2 - dimension.x1);
-        } else {
-            x = 0;
-            width = unitWidth;
-        }
-        if (direction === 'both' || direction === 'horizontal') {
             y = Math.min(dimension.y1, dimension.y2);
+            width = Math.abs(dimension.x2 - dimension.x1);
             height = Math.abs(dimension.y2 - dimension.y1);
-        } else {
-            height = unitHeight;
-            y = 0;
         }
+
         this.show(drawingInf);
         // Create the data array for drawing the rectangle
         const points = [
@@ -106,6 +105,11 @@ class SelectionBox extends SpawnableSideEffect {
         const selection = selectionGroup.selectAll('rect').data(points);
         const selectionBox = selection.enter().append('rect')
                         .each(function () {
+                            firebolt.registerPhysicalBehaviouralMap({
+                                selectiondrag: {
+                                    behaviours: [BEHAVIOURS.BRUSH]
+                                }
+                            });
                             selectionBoxDrag(firebolt)(selectElement(this), ['brush'], sideEffect);
                         })
                         .merge(selection)
@@ -136,4 +140,3 @@ class SelectionBox extends SpawnableSideEffect {
 }
 
 export default SelectionBox;
-

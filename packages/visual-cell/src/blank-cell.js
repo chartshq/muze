@@ -13,6 +13,7 @@ import { CLASSPREFIX, BLANK_CELL } from './enums/constants';
 import { BLANK } from './enums/cell-type';
 import { DEFAULT_CONFIG } from './enums/defaults';
 import { PROPS } from './props';
+import * as CONSTANTS from './constants';
 
 /**
  * Represents a table haeder.
@@ -72,6 +73,10 @@ class BlankCell extends SimpleCell {
      */
     get id () {
         return this._id;
+    }
+
+    static formalName () {
+        return CONSTANTS.BLANK_CELL;
     }
 
     /**

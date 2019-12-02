@@ -1,4 +1,4 @@
-import { stack } from 'muze-utils';
+import { stack, InvalidAwareTypes } from 'muze-utils';
 
 import group from '../group-transform';
 /*
@@ -26,6 +26,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
     const valueFieldIndex = schema.findIndex(d => d.name === valueField);
     const seriesKeyIndex = schema.findIndex(d => d.name === groupBy);
     const seriesKeys = data.map(d => d[seriesKeyIndex]).filter((item, pos, arr) => arr.indexOf(item) === pos).sort();
+
     const fieldNames = schema.reduce((acc, obj, i) => {
         acc[i] = obj.name;
         return acc;
@@ -35,6 +36,9 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
         const rowObj = arr.values.reduce((acc, row) => {
             acc = row.reduce((obj, value, i) => {
                 if (i === seriesKeyIndex) {
+                    if (row[valueFieldIndex] instanceof InvalidAwareTypes) {
+                        row[valueFieldIndex] = null;
+                    }
                     obj[value] = row[valueFieldIndex];
                     tuples[value] = row;
                 } else if (i !== valueFieldIndex) {
@@ -63,6 +67,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
         keys: seriesKeys
     };
 };
+
 /**
  * Generate a stacked representation of data
  * @param {Array} schema schema Array
@@ -71,9 +76,7 @@ const normalizeData = (data, schema, valueField, uniqueField, groupBy) => {
  * @return {Array} stacked data
  */
 export default (schema, data, config) => {
-    const uniqueField = config.uniqueField;
-    const valueField = config.value;
-    const groupBy = config.groupBy;
+    const { uniqueField, value: valueField, groupBy } = config;
     const sort = config.sort || 'descending';
     const normalizedData = normalizeData(data, schema, valueField, uniqueField, groupBy);
     const keys = normalizedData.keys;
@@ -81,6 +84,7 @@ export default (schema, data, config) => {
     const orderBy = config.orderBy;
     const orderIndex = schema.findIndex(d => d.name === orderBy);
     const groupByIndex = schema.findIndex(d => d.name === groupBy);
+
     if (orderIndex !== -1) {
         keys.forEach((key) => {
             const name = data.find(d => d[groupByIndex] === key);
@@ -95,11 +99,13 @@ export default (schema, data, config) => {
         order: sort,
         data: normalizedData.data
     });
+
     stackData.forEach((seriesData) => {
         seriesData.forEach((dataObj) => {
             dataObj.data = dataObj.data._tuple[seriesData.key];
         });
     });
+
     return stackData;
 };
 

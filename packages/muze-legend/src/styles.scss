@@ -48,7 +48,11 @@ $prefix: muze-;
 
 .#{$prefix}legend-fadeout {
     fill-opacity: 0.3;
-    opacity: 0.3;
+
+    path {
+        stroke-width: 1px;
+        fill-opacity:0; 
+    }
 }
 
 .#{$prefix}legend-brighten {

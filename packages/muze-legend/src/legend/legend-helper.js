@@ -1,4 +1,4 @@
-import { makeElement, numberInterpolator } from 'muze-utils';
+import { makeElement, FieldType, getReadableTicks } from 'muze-utils';
 
 import {
     SCALE_FUNCTIONS,
@@ -8,7 +8,10 @@ import {
     RIGHT,
     TOP,
     BOTTOM,
-    MAXWIDTH
+    MAXWIDTH,
+    CENTER,
+    HORIZONTAL,
+    POSITION_ALIGNMENT_MAP
 } from '../enums/constants';
 
 /**
@@ -159,9 +162,6 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     const getTickMeasure = scaleParams.smartLabel;
     const { maxWidth, maxHeight } = scaleParams.measures;
     const { alignment } = scaleParams;
-    const domainForLegend = [];
-    const interpolatedFn = numberInterpolator()(domain[0], domain[1]);
-
     // getting tick measure(i.e height and width)
     const tickValue = getTickMeasure.getOriSize(domain[1].toFixed(2));
 
@@ -177,11 +177,7 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
     }
     steps = Math.min(steps, recomputeSteps);
 
-    // scaling the axis based on steps provided
-    for (let i = 0; i <= steps; i++) {
-        domainForLegend[i] = interpolatedFn(i / steps);
-    }
-    return domainForLegend;
+    return getReadableTicks(domain, steps);
 };
 
 /**
@@ -193,21 +189,29 @@ export const getInterpolatedData = (domain, steps, scaleParams) => {
  * @param {*} classPrefix
  */
 export const titleCreator = (container, title, measurement, config) => {
-    const titleWidth = Math.min(measurement.maxWidth, measurement.width);
+    const { orientation } = config.item.text;
+    let textAlign = LEFT;
+    const { alignment, maxWidth, width, height, border, padding } = measurement;
+
+    if (orientation === TOP || orientation === BOTTOM || alignment === HORIZONTAL) {
+        textAlign = CENTER;
+    }
+    const titleWidth = Math.min(maxWidth, width);
 
     const titleContainer = makeElement(container, 'table', [1], `${config.classPrefix}-legend-title`)
             .style(WIDTH, `${titleWidth}px`)
-            .style(HEIGHT, `${measurement.height}px`)
-            .style('border-bottom', `${measurement.border}px ${config.borderStyle} ${config.borderColor}`)
+            .style(HEIGHT, `${height}px`)
+            .style('border-bottom', `${border}px ${config.borderStyle} ${config.borderColor}`)
             .style('text-align', title.orientation instanceof Function ?
             title.orientation(config.position) : title.orientation);
     return makeElement(titleContainer, 'td', [1], `${config.classPrefix}-legend-title-text`)
                     .style(WIDTH, `${titleWidth}px`)
-                    .style(MAXWIDTH, `${titleWidth}px`)
+                    .style(MAXWIDTH, `${maxWidth}px`)
                     .style(HEIGHT, '100%')
                     .style('line-height', 1)
-                    .style('padding', `${measurement.padding}px`)
+                    .style('padding', `${padding}px`)
                     .text(title.text)
+                    .style('text-align', textAlign)
                     .style('overflow-x', 'scroll')
                     .node();
 };
@@ -249,8 +253,9 @@ export const getItemMeasures = (context, prop, formatter) => {
 
     data.forEach((item, index) => {
         const value = prop ? item[prop] : item;
-        const { height, width } = labelManager.getOriSize(formatter(value, index, data, context));
-        space[index] = { height: height + 1, width: width + 1 };
+        const formattedData = formatter(value, index, context.metaData(), context);
+        const { height, width } = labelManager.getOriSize(formattedData);
+        space[index] = { height, width };
     });
     return space;
 };
@@ -332,20 +337,21 @@ export const computeItemSpaces = (config, measures, data) => {
         itemSpaces.push(itemSpace);
         iconSpaces.push(iconSpace);
     });
+
     itemSpaces.forEach((itemSpace, i) => {
         if (align === 'horizontal') {
             itemSpace.height = totalHeight;
-            iconSpaces[i].width = maxIconWidth;
+            // iconSpaces[i].width = maxIconWidth;
             if (textOrientation === LEFT || textOrientation === RIGHT) {
                 labelSpaces[i].height = totalHeight;
                 iconSpaces[i].height = totalHeight;
-                itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
+                itemSpaces[i].width = labelSpaces[i].width + iconSpaces[i].width + 2 * effPadding;
             } else {
-                labelSpaces[i].width = maxIconWidth;
-                itemSpaces[i].width = maxIconWidth;
-                labelSpaces[i].width = maxIconWidth;
+                labelSpaces[i].width = iconSpaces[i].width;
+                itemSpaces[i].width = iconSpaces[i].width;
+                labelSpaces[i].width = iconSpaces[i].width;
             }
-            totalWidth = Math.max(totalWidth + itemSpaces[i].width);
+            totalWidth += itemSpaces[i].width;
         } else {
             itemSpace.width = Math.max(totalWidth, maxWidth);
             if (textOrientation === TOP || textOrientation === BOTTOM) {
@@ -356,7 +362,7 @@ export const computeItemSpaces = (config, measures, data) => {
                 const labelWidth = labelSpaces[i].width;
                 const newLabelWidth = (maxItemSpaces.width - maxIconWidth);
                 iconSpaces[i].width = maxIconWidth;
-                itemSpaces[i].width = labelSpaces[i].width + maxIconWidth;
+                itemSpaces[i].width = labelWidth + maxIconWidth;
                 labelSpaces[i].width = Math.max(labelWidth, newLabelWidth);
                 totalWidth = Math.max(totalWidth, itemSpace.width);
             }
@@ -397,4 +403,48 @@ export const getDomainBounds = (type, scaleInfo, domainInfo) => {
         id: type === 'lower' ? 0 : domainLeg.length + 2,
         range: [ele, step]
     };
+};
+
+export const prepareSelectionSetData = (data, fieldName, dm) => {
+    const fieldType = dm.getFieldsConfig()[fieldName].def.type;
+    if (fieldType === FieldType.DIMENSION) {
+        return {
+            keys: data.reduce((acc, d) => {
+                acc[d.rawVal] = {
+                    uid: d.id,
+                    dims: [d.rawVal]
+
+                };
+                return acc;
+            }, {}),
+            fields: [fieldName]
+        };
+    }
+    return {
+        keys: data.reduce((acc, d) => {
+            acc[d.id] = {
+                uid: d.id,
+                dims: [d.id]
+            };
+            return acc;
+        }, {}),
+        fields: [fieldName]
+    };
+};
+
+export const calculateTitleWidth = (measures, titleWidth, config) => {
+    const { maxItemSpaces, margin, itemSpaces } = measures;
+    const { position, buffer } = config;
+    const alignment = POSITION_ALIGNMENT_MAP[position];
+    let width = 0;
+
+    if (alignment === HORIZONTAL) {
+        const localBuffer = buffer[alignment];
+        width = itemSpaces.reduce((acc, cur) => acc + cur.width + localBuffer, 0);
+    } else if (maxItemSpaces.width < titleWidth) {
+        width = titleWidth + 2 * margin;
+    } else {
+        width = maxItemSpaces.width;
+    }
+    return width;
 };

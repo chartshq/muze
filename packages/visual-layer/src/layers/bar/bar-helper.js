@@ -1,6 +1,11 @@
 import { MeasureSubtype, DimensionSubtype } from 'muze-utils';
 import { STACK } from '../../enums/constants';
-import { positionPoints, getIndividualClassName, getColorMetaInf, resolveEncodingValues } from '../../helpers';
+import {
+    positionPoints,
+    getIndividualClassName,
+    getColorMetaInf,
+    resolveEncodingValues
+} from '../../helpers';
 
 const positionRetriever = {
     x: (xPx, isNegativeVal, barBasePos) => (isNegativeVal ? [xPx, barBasePos] : [barBasePos, xPx]),
@@ -138,6 +143,31 @@ const resolveDimensions = (data, config, axes) => {
     };
 };
 
+export const strokeWidthPositionMap = ({ width, position }) => {
+    const offset = width / 2;
+    const strokeWidthWithOffsetMap = {
+        center: {
+            M: { x: 0, y: 0 },
+            L1: { x: 0, y: 0 },
+            L2: { x: 0, y: 0 },
+            L3: { x: 0, y: 0 }
+        },
+        inside: {
+            M: { x: +offset, y: +offset },
+            L1: { x: -offset, y: +offset },
+            L2: { x: -offset, y: -offset },
+            L3: { x: +offset, y: -offset }
+        },
+        outside: {
+            M: { x: -offset, y: -offset },
+            L1: { x: +offset, y: -offset },
+            L2: { x: +offset, y: +offset },
+            L3: { x: -offset, y: +offset }
+        }
+    };
+    return strokeWidthWithOffsetMap[position];
+};
+
 /**
  * Generates an array of objects containing x, y, width and height of the bars from the data
  * @param  {Array.<Array>} data Data Array
@@ -190,10 +220,17 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
             },
             data: d
         }, i, data, context);
+        // const layerEncoding = layerInst.config().encoding;
+
         color = resolvedEncodings.color;
         const { x, y, width, height } = resolvedEncodings;
         const style = {
-            fill: color
+            fill: color,
+            stroke: encoding.stroke.value,
+            'stroke-width': encoding.strokeWidth.value
+        };
+        const conf = {
+            strokePosition: encoding.strokePosition.value
         };
 
         if (!isNaN(x) && !isNaN(y) && d.rowId !== undefined) {
@@ -208,8 +245,11 @@ export const getTranslatedPoints = (context, data, sizeConfig) => {
                 },
                 source: d.source,
                 rowId: d.rowId,
+                data: d.dataObj,
                 style,
-                meta: getColorMetaInf(style, colorAxis)
+                meta: Object.assign({
+                    layerId: context.id()
+                }, getColorMetaInf(style, conf))
             };
             point.className = getIndividualClassName(d, i, data, context);
             points.push(point);

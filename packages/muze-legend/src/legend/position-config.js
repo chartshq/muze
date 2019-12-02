@@ -18,18 +18,21 @@ const legendOrientation = {
             row: [1],
             column: data
         }),
-        itemContainerMeasures: (measurement) => {
+        itemContainerMeasures: (measurement, config) => {
             const {
                 itemSpaces,
                 width
             } = measurement;
+            const {
+                buffer
+            } = config;
             return {
                 row: {
-                    width: `${width}px`,
+                    width: `${width + itemSpaces.length * buffer[HORIZONTAL] || 1}px`,
                     padding: `${0}px`
                 },
                 column: {
-                    width: (d, i) => `${itemSpaces[i].width}px`,
+                    width: (d, i) => `${itemSpaces[i].width + buffer[HORIZONTAL]}px`,
                     padding: `${0}px`
                 }
             };

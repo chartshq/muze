@@ -4,13 +4,14 @@ import {
  } from 'muze-utils';
 
 import getDragActionConfig from './helpers/drag-action-config';
+import { ACTIONS } from '../..';
 
-export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
+export const selectionBoxDrag = firebolt => (targetEl) => {
     let subject;
     let drawingInf;
     const context = firebolt.context;
     const onDrag = (payload) => {
-        behaviours.forEach(action => firebolt.dispatchBehaviour(action, payload));
+        firebolt.triggerPhysicalAction(ACTIONS.SELECTIONDRAG, payload);
     };
     const d3Drag = getD3Drag();
 
@@ -30,7 +31,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         const x2 = x + subject.width;
 
         if (x >= 0 && x2 <= width && y >= 0 && y2 <= height) {
-            const payload = getDragActionConfig(context.getSourceInfo(), {
+            const payload = getDragActionConfig(firebolt, {
                 startPos: {
                     x,
                     y
@@ -39,7 +40,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
                     x: x2,
                     y: y2
                 }
-            }, context.data().getFieldsConfig());
+            });
             onDrag(payload);
         }
     }).on('end', () => {
@@ -51,7 +52,7 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
         const x2 = x + subject.width;
 
         if (x >= 0 && x2 <= width && y >= 0 && y2 <= height) {
-            const payload = getDragActionConfig(context.getSourceInfo(), {
+            const payload = getDragActionConfig(firebolt, {
                 startPos: {
                     x,
                     y
@@ -59,9 +60,8 @@ export const selectionBoxDrag = firebolt => (targetEl, behaviours) => {
                 endPos: {
                     x: x2,
                     y: y2
-                },
-                snap: true
-            }, context.data().getFieldsConfig());
+                }
+            });
             payload.dragEnd = true;
             onDrag(payload);
         }

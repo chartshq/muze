@@ -49,6 +49,9 @@ layerFactory.composeLayers('boxMark', [
         encoding: {
             x0: 'boxMark.encoding.meanValue',
             x: 'boxMark.encoding.quarter',
+            color: {
+                value: () => 'rgba(30,119,180,0.75)'
+            }
         },
         transform: {
             type: 'identity'
@@ -64,6 +67,9 @@ layerFactory.composeLayers('boxMark', [
         encoding: {
             x: 'boxMark.encoding.thirdQuarter',
             x0: 'boxMark.encoding.meanValue',
+            color: {
+                value: () => 'rgba(30,119,180,0.35)'
+            }
         },
         transform: {
             type: 'identity'
@@ -152,6 +158,6 @@ d3.json('../data/iris.cleared.json', (data) => {
         type: 'identity'
     },
 }])
-.color('organ')
+// .color('organ')
         .mount(document.getElementsByClassName('chart')[0]);
 });
