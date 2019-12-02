@@ -2,7 +2,6 @@ import SimpleLegend from './simple-legend';
 import {
     getScaleInfo,
     getInterpolatedData,
-    getDomainBounds,
     getItemMeasures
 } from './legend-helper';
 import {
@@ -10,7 +9,7 @@ import {
     createItemSkeleton,
     renderStepItem
 } from './renderer';
-import { STEP, RECT, LEFT, SIZE, UPPER, LOWER, HORIZONTAL } from '../enums/constants';
+import { STEP, RECT, LEFT, SIZE, HORIZONTAL } from '../enums/constants';
 import { stepData } from './position-config';
 import '../styles.scss';
 import { STEP_DEFAULT_CONFIG, DEFAULT_MEASUREMENT } from './defaults';
@@ -69,12 +68,6 @@ export default class StepLegend extends SimpleLegend {
         let domainLeg = [];
         const scale = this.scale();
         const { scaleType, domain, steps, scaleFn } = getScaleInfo(scale);
-
-        const { formatter } = this.config();
-        const domainBounds = {
-            lower: null, upper: null
-        };
-
         const isFraction = ele => ele % 1 !== 0;
 
         // defining scaleParams
@@ -87,12 +80,13 @@ export default class StepLegend extends SimpleLegend {
 
         if (steps instanceof Array) {
             if (domain[0] < steps[0]) {
-                domainBounds.lower = [`${formatter.bounds.lower} ${steps[0]}`];
+                domainLeg[0] = domain[0];
             }
             domainLeg = [...domainLeg, ...steps];
             if (domain[domain.length - 1] > steps[steps.length - 1]) {
-                domainBounds.upper = [`${formatter.bounds.upper} ${steps[steps.length - 1]}`];
+                domainLeg.push(domain[1]);
             }
+            domainLeg = [...new Set(domainLeg)].sort((a, b) => a - b);
         } else {
             domainLeg = getInterpolatedData(domain, steps, scaleParams);
         }
@@ -126,16 +120,6 @@ export default class StepLegend extends SimpleLegend {
                 range
             };
         }).filter(d => d.value !== null);
-        if (domainBounds.lower) {
-            const lowerBounds = getDomainBounds(LOWER, { scale, scaleFn, scaleType },
-                { domain, steps, domainBounds });
-            domainLeg = [lowerBounds, ...domainLeg];
-        }
-        if (domainBounds.upper) {
-            const upperBounds = getDomainBounds(UPPER, { scale, scaleFn, scaleType },
-            { domain, steps, domainBounds, domainLeg });
-            domainLeg = [...domainLeg, upperBounds];
-        }
 
         return domainLeg;
     }
