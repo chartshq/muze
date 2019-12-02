@@ -12,8 +12,8 @@ Checklist to release a new version to NPM:
   * Create a release-ready build, Run: node scripts/make-release-build.js
   * Now release files would be created in release folder and ready to release
   * Test the release/dist/* files if needed
-  * Now commit all the changes with this message: "Make a build and bump version"
-  * Then finish the release, Run: git flow finish release [-s] <new_version_with_v_character> and enter release notes
+  * Now commit all the changes including release folder (so that other person can release from different system) with this message: "Make a build and bump version"
+  * Then finish the release, Run: git flow release finish [-s] <new_version_with_v_character> and enter release notes
   * Push all changes and tags to remote, Run: git push origin master && git push origin develop && git push origin --tags
   * Edit the title of the released tag in Github
   * When everything is fine, it's ready to release
