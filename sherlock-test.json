@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames":["legend"] ,
+		"groupNames":["color"] ,
 		"subGroups":["bar"]
 	}
 }
