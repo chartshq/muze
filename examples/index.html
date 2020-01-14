@@ -9,26 +9,39 @@
     <!-- <link rel="stylesheet" href="./muze.css" /> -->
     <script src="/muze.js"></script>
     <style>
-        body,
-        html {
-            font-family: 'Source Sans Pro', "Helvetica Neue", Helvetica, Arial, sans-serif;
-        }
-
-        #chart-container {
+        #chart {
+            width: 800px;
+            height: 550px;
             overflow-y: auto !important;
             text-align: center;
             padding: 0px 10px 10px 10px;
             height: auto;
-            min-height: 350px;
         }
 
-        .averageLine path {
-            stroke-width: 2px;
+        body,
+        html {
+            font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
-        #chart{
-            /* position: absolute;
-            left:50px;
-            top:50px; */
+
+        .muze-grid-center-2 td {
+            background: #f2f2f2;
+        }
+
+        .muze-grid .muze-text-cell {
+            font-size: 12px !important;
+        }
+
+        .muze-ticks {
+            font-size: 1px !important;
+        }
+
+        .muze-layer-text text {
+            alignment-baseline: central;
+            text-align: center;
+        }
+
+        .muze-layer-point {
+            fill-opacity: 1 !important;
         }
     </style>
 </head>
@@ -46,21 +59,10 @@
         <div id="chart6"></div>
         <div id="chart7"></div>
         <div id="chart8"></div>
-</div>
-<!-- <script src="./js/simple-bar.js"></script> -->
-<script src="./samples/design-samples/scatter-shape.js"></script>
-
-<!-- <script src="./js/tooltips/area.js"></script> -->
-<!-- <script src="./js/simple-bar.js"></script> -->
-<!-- <script src="./samples/design-samples/scatter-shape.js"></script> -->
-<!-- <script src="./js/aaa1.js"></script> -->
-<!-- <script src="./js/aaa3.js"></script> -->
-<!-- <script src="./js/aaa2.js"></script> -->
-<!-- <script src="./js/composite-layers.js"></script> -->
-<!-- <script src="./js/composition-of-layer.js"></script> -->
-<!-- <script src="./js/reference-lines.js"></script> -->
-<!-- <script src="./js/dual-line-point.js"></script> -->
-<!-- <script src="./js/no-data.js"></script> -->
-<!-- <script src="./js/concurrent-tooltip.js"></script> -->
+    </div>
+    <script src="./js/crosstab/election.js"></script>
+    <script src="./js/crosstab/border.js"></script>
+    <script src="./js/tooltips/crosstab.js"></script>
 </body>
+
 </html>

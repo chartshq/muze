@@ -105,11 +105,19 @@ const setDefaultConfigForFacet = (facetInfo, projectionInfo, config) => {
         const { facetsUserConfig, border } = config;
         const { isBorderPresent, isGridLinePresent } = facetsUserConfig;
         const gridLinesShowLength = Object.keys(isGridLinePresent).length;
-        let borderWidth = border.width;
+        const { width: borderWidth, color: borderColor, style: borderStyle } = border;
         let gridLines = {};
+        let borderConf = {};
 
-        if (!isBorderPresent) {
-            borderWidth = BORDER_WIDTH[FACET];
+        if (Object.keys(isBorderPresent).length === 0) {
+            borderConf = {
+                width: BORDER_WIDTH[FACET]
+            };
+        } else {
+            Object.assign(borderConf,
+                borderWidth ? { width: borderWidth } : null,
+                borderColor ? { color: borderColor } : null,
+                borderStyle ? { style: borderStyle } : null);
         }
         if (gridLinesShowLength <= 0) {
             gridLines = {
@@ -119,9 +127,7 @@ const setDefaultConfigForFacet = (facetInfo, projectionInfo, config) => {
             };
         }
         conf = {
-            border: {
-                width: borderWidth
-            },
+            border: borderConf,
             gridLines
         };
     }

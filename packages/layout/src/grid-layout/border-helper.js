@@ -22,6 +22,7 @@ const applySpecificBorder = (params) => {
     } else {
         cells.style(`border-${type}-width`, `${borderWidth}px`);
         cells.style(`border-${type}-style`, `${borderStyle}`);
+        cells.style('border-color', `${color}`);
     }
 };
 

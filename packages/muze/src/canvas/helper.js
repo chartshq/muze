@@ -25,15 +25,20 @@ export const initCanvas = (context) => {
 
 export const fixFacetConfig = (config) => {
     if (config) {
-        let isBorderPresent = false;
+        const isBorderPresent = {};
         const isGridLinePresent = {};
+        const { border, gridLines } = config;
 
-        if (config.border && config.border.width) {
-            isBorderPresent = true;
+        if (border) {
+            const { width, color, style } = border;
+            Object.assign(isBorderPresent,
+                width ? { width } : null,
+                color ? { color } : null,
+                style ? { style } : null);
         }
-        if (config.gridLines) {
-            isGridLinePresent.x = !!config.gridLines.x;
-            isGridLinePresent.y = !!config.gridLines.y;
+        if (gridLines) {
+            isGridLinePresent.x = !!gridLines.x;
+            isGridLinePresent.y = !!gridLines.y;
         }
         const facetsUserConfig = {
             isBorderPresent,

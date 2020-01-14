@@ -657,14 +657,18 @@ export const computeMatrices = (resolverConfig) => {
 
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
+
+    const colorCheck = globalConfig.facetsUserConfig.isBorderPresent
+    && !globalConfig.facetsUserConfig.isBorderPresent.color;
+
     if (isFacet || isProjection) {
-        const arr = sanitiseBorderMatrix({
+        const arr = colorCheck && sanitiseBorderMatrix({
             leftMatrix: rows[0],
             rightMatrix: rows[1],
             topMatrix: columns[0],
             bottomMatrix: columns[1]
         }, registry.cells.BlankCell);
-        valueMatrixInfo.matrix = sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
+        valueMatrixInfo.matrix = colorCheck && sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
     }
 
     placeholderInfo = {
