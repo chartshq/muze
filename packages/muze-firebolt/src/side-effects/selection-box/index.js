@@ -4,6 +4,7 @@ import {
     makeElement,
     isValidValue
 } from 'muze-utils';
+import { SELECTIONDRAG } from '../../enums/actions';
 import { CLASSPREFIX } from '../../enums/constants';
 import './styles.scss';
 import SpawnableSideEffect from '../spawnable';
@@ -107,14 +108,14 @@ class SelectionBox extends SpawnableSideEffect {
                         .each(function () {
                             // Add selectiondrag entry in firebolt._actionBehaviourMap
                             firebolt.registerPhysicalBehaviouralMap({
-                                selectiondrag: {
+                                [SELECTIONDRAG]: {
                                     target: [selectElement(this)],
                                     behaviours: [BEHAVIOURS.BRUSH]
                                 }
                             });
                             // Add selectiondrag entry in firebolt._actions.physical
                             firebolt.registerPhysicalActions({
-                                selectiondrag: selectionBoxDrag
+                                [SELECTIONDRAG]: selectionBoxDrag
                             });
                             selectionBoxDrag(firebolt)(selectElement(this), ['brush'], sideEffect);
                         })
