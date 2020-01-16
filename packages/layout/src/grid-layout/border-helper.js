@@ -20,9 +20,9 @@ const applySpecificBorder = (params) => {
     if (!isFacet) {
         cells.style(`border-${type}`, `${borderWidth}px ${borderStyle} ${color}`);
     } else {
+        cells.style('border-color', `${color}`);
         cells.style(`border-${type}-width`, `${borderWidth}px`);
         cells.style(`border-${type}-style`, `${borderStyle}`);
-        cells.style('border-color', `${color}`);
     }
 };
 

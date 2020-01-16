@@ -58,18 +58,12 @@ d3.csv('../../data/coffee.csv', (data) => {
         facetConfig: { rows: { verticalAlign: 'bottom' } }, /* dimensional values are placed in middle */
         border:{
             showRowBorders: {
-              top: true,
-              bottom: true,
+              top: false,
+              bottom: false,
             },
             showColBorders:{
-                left: true,
-                right: true
-            },
-            showValueBorders: {
-                top: true,
-                bottom: true,
-                left: true,
-                right: true
+                left: false,
+                right: false
             }
         },
       })

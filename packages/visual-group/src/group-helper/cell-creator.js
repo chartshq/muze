@@ -14,7 +14,8 @@ import {
     mutateAxesFromMap,
     getFieldsFromSuppliedLayers,
     extractFields,
-    removeExitCells
+    removeExitCells,
+    sanitizeCheck
 } from './group-utils';
 import { ROW, ROWS, COLUMNS, COL, LEFT, RIGHT, TOP,
     BOTTOM, PRIMARY, SECONDARY, X, Y, TEMPORAL } from '../enums/constants';
@@ -658,17 +659,15 @@ export const computeMatrices = (resolverConfig) => {
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
 
-    const colorCheck = globalConfig.facetsUserConfig.isBorderPresent
-    && !globalConfig.facetsUserConfig.isBorderPresent.color;
-
     if (isFacet || isProjection) {
-        const arr = colorCheck && sanitiseBorderMatrix({
+        const sanitizeCheckBorder = sanitizeCheck(globalConfig.facetsUserConfig);
+        const arr = sanitizeCheckBorder && sanitiseBorderMatrix({
             leftMatrix: rows[0],
             rightMatrix: rows[1],
             topMatrix: columns[0],
             bottomMatrix: columns[1]
         }, registry.cells.BlankCell);
-        valueMatrixInfo.matrix = colorCheck && sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
+        valueMatrixInfo.matrix = sanitizeCheckBorder && sanitiseGeomMatrix(valueMatrixInfo.matrix, arr);
     }
 
     placeholderInfo = {

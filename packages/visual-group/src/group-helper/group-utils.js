@@ -145,7 +145,7 @@ export const getHeaderText = (headers, index, rowLength) => {
  * @param {*} labelManager
  *
  */
-export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, labelManager }) => {
+export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, labelManager, sanitizeCheck }) => {
     const headers = fields.length > 0 ? fields[0].map((cell, i) => new TextCell({
         type: HEADER,
         className: `${classPrefix}-grid-headers`
@@ -153,8 +153,18 @@ export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, lab
         labelManager
     }).source(getHeaderText(fieldHeaders, i, fields[0].length))
                     .config({ show: cell.config().show })) : [];
-    sanitiseHeaderMatrix(headers, true);
+    sanitizeCheck && sanitiseHeaderMatrix(headers, true);
     return headers;
+};
+
+/**
+ * @param {*} facetConfig
+ *
+ */
+export const sanitizeCheck = (facetConfig) => {
+    const { isBorderPresent } = facetConfig;
+    const updateBorderMap = ['color', 'showRowBorders', 'showColBorders', 'showValueBorders'];
+    return (!isBorderPresent || updateBorderMap.every(d => !isBorderPresent[d]));
 };
 
 /**
