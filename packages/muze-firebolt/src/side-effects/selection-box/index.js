@@ -105,10 +105,16 @@ class SelectionBox extends SpawnableSideEffect {
         const selection = selectionGroup.selectAll('rect').data(points);
         const selectionBox = selection.enter().append('rect')
                         .each(function () {
+                            // Add selectiondrag entry in firebolt._actionBehaviourMap
                             firebolt.registerPhysicalBehaviouralMap({
                                 selectiondrag: {
+                                    target: [selectElement(this)],
                                     behaviours: [BEHAVIOURS.BRUSH]
                                 }
+                            });
+                            // Add selectiondrag entry in firebolt._actions.physical
+                            firebolt.registerPhysicalActions({
+                                selectiondrag: selectionBoxDrag
                             });
                             selectionBoxDrag(firebolt)(selectElement(this), ['brush'], sideEffect);
                         })
