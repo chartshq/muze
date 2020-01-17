@@ -86,6 +86,7 @@ export const attachDragEvent = (targetEl, action, firebolt, touch) => {
             endPos
         });
         payload.dragEnd = true;
+        payload.hideSelBox = true;
         firebolt.triggerPhysicalAction(action, payload);
     }));
 };

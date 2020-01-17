@@ -72,7 +72,7 @@ class SelectionBox extends SpawnableSideEffect {
         height = unitHeight;
 
         // Hide selection-box on dragEnd or when criteria is empty
-        if (!payload.criteria || (payload.dragEnd && !config.persistent)) {
+        if (!payload.criteria || (payload.hideSelBox && !config.persistent)) {
             this.hide(drawingInf);
             return this;
         }
@@ -112,10 +112,6 @@ class SelectionBox extends SpawnableSideEffect {
                                     target: [selectElement(this)],
                                     behaviours: [BEHAVIOURS.BRUSH]
                                 }
-                            });
-                            // Add selectiondrag entry in firebolt._actions.physical
-                            firebolt.registerPhysicalActions({
-                                [SELECTIONDRAG]: selectionBoxDrag
                             });
                             selectionBoxDrag(firebolt)(selectElement(this), ['brush'], sideEffect);
                         })
