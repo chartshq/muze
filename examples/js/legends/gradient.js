@@ -10,71 +10,71 @@ d3.json('../data/cars.json', function (data) {
 
         schema = [{
 
-        name: 'Name',
+            name: 'Name',
 
-        type: 'dimension'
+            type: 'dimension'
 
-    }, {
+        }, {
 
-        name: 'Maker',
+            name: 'Maker',
 
-        type: 'dimension'
+            type: 'dimension'
 
-    }, {
+        }, {
 
-        name: 'Miles_per_Gallon',
+            name: 'Miles_per_Gallon',
 
-        type: 'measure'
+            type: 'measure'
 
-    }, {
+        }, {
 
-        name: 'Displacement',
+            name: 'Displacement',
 
-        type: 'measure'
+            type: 'measure'
 
-    }, {
+        }, {
 
-        name: 'Horsepower',
+            name: 'Horsepower',
 
-        type: 'measure'
+            type: 'measure'
 
-    }, {
+        }, {
 
-        name: 'Weight_in_lbs',
+            name: 'Weight_in_lbs',
 
-        type: 'measure'
+            type: 'measure'
 
-    }, {
+        }, {
 
-        name: 'Acceleration',
+            name: 'Acceleration',
 
-        type: 'measure'
+            type: 'measure'
 
-    }, {
+        }, {
 
-        name: 'Origin',
+            name: 'Origin',
 
-        type: 'dimension'
+            type: 'dimension'
 
-    }, {
+        }, {
 
-        name: 'Cylinders',
+            name: 'Cylinders',
 
-        type: 'dimension'
+            type: 'dimension'
 
-    }, {
+        }, {
 
-        name: 'Year',
+            name: 'Year',
 
-        type: 'dimension',
+            type: 'dimension',
 
-        //{subtype}
+            //{subtype}
 
-        // subtype: 'temporal',
+            // subtype: 'temporal',
 
-        // format: '%Y-%m-%d'
+            // format: '%Y-%m-%d'
 
-    }];
+        }];
 
     var rootData = new DataModel(jsonData, schema);
 
@@ -93,25 +93,18 @@ d3.json('../data/cars.json', function (data) {
         })
         .config({
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                color: {
+                    marker: {
+                        text: {
+                            formatter: (a, b, c) => {
+                                return `${a} m/s2`;
+                            }
+                        }
+                    },
+
+                }
             }
         })
-        .mount('#chart1')
-
-    env.canvas()
-        .rows(["Maker"])
-        .height(400)
-        .columns(['Acceleration'])
-        .data(rootData)
-        .color({
-            field: 'Acceleration',
-            stops: 3
-        })
-        .config({
-            legend: {
-                position: 'left'
-            }
-        })
-        .mount('#chart2')
-
+        .mount('#chart1');
 });

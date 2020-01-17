@@ -63,8 +63,13 @@ export default class LegendMarker extends GenericSideEffect {
             const firebolt = this.firebolt;
             const labelManager = firebolt.context.labelManager;
             const context = firebolt.context;
+            const legendConfig = firebolt.context.config();
+            const legendScale = firebolt.context.scale();
+            const { formatter: pointerTextFormatter } = legendConfig.marker.text;
             const config = this.config();
             const axis = context.axis().source();
+            const dm = context.metaData();
+            const domain = legendScale.domain();
 
             const range = payload.criteria[0] ? axis.getScaleValue(payload.criteria[1]) : 0;
 
@@ -128,7 +133,10 @@ export default class LegendMarker extends GenericSideEffect {
                     .attr('d', getSymbol(shape).size(size * size)())
                     .classed(`${className}-show`, true)
                     .classed(`${className}-hide`, false);
-            textElement.source(lableConfig.labelText);
+
+            // pointer label formatter
+            textElement.source(pointerTextFormatter(lableConfig.labelText, dm, domain));
+
             textElement.render(this._graphicElements.legendmarkerText.node());
             this._graphicElements.legendmarkerText
                         .attr('style', `top: ${lableConfig.top}px; left:${lableConfig.left}px`)
