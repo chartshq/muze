@@ -135,7 +135,7 @@ export default class LegendMarker extends GenericSideEffect {
                     .classed(`${className}-hide`, false);
 
             // pointer label formatter
-            textElement.source(pointerTextFormatter(lableConfig.labelText, dm, domain));
+            textElement.source(pointerTextFormatter(lableConfig.labelText, domain, dm));
 
             textElement.render(this._graphicElements.legendmarkerText.node());
             this._graphicElements.legendmarkerText
