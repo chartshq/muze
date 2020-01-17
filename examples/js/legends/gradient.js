@@ -97,8 +97,8 @@ d3.json('../data/cars.json', function (data) {
                 color: {
                     marker: {
                         text: {
-                            formatter: (a, b, c) => {
-                                return `${a} m/s2`;
+                            formatter: (data, domain, dm) => {
+                                return `${data} m/s2`;
                             }
                         }
                     },
