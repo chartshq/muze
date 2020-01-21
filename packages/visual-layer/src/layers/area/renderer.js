@@ -37,7 +37,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
         .attr('d', enterAreaPath(filteredPoints))
         .each((d) => {
             d.forEach((dd) => {
-                if (dd.rowId) {
+                if (dd.rowId !== undefined) {
                     graphicElems[dd.rowId] = mount.select('path');
                 }
             });
