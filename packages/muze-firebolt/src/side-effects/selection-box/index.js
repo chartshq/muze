@@ -4,6 +4,7 @@ import {
     makeElement,
     isValidValue
 } from 'muze-utils';
+import { SELECTIONDRAG } from '../../enums/actions';
 import { CLASSPREFIX } from '../../enums/constants';
 import './styles.scss';
 import SpawnableSideEffect from '../spawnable';
@@ -71,7 +72,7 @@ class SelectionBox extends SpawnableSideEffect {
         height = unitHeight;
 
         // Hide selection-box on dragEnd or when criteria is empty
-        if (!payload.criteria || (payload.dragEnd && !config.persistent)) {
+        if (!payload.criteria || (payload.hideSelBox && !config.persistent)) {
             this.hide(drawingInf);
             return this;
         }
@@ -105,8 +106,10 @@ class SelectionBox extends SpawnableSideEffect {
         const selection = selectionGroup.selectAll('rect').data(points);
         const selectionBox = selection.enter().append('rect')
                         .each(function () {
+                            // Add selectiondrag entry in firebolt._actionBehaviourMap
                             firebolt.registerPhysicalBehaviouralMap({
-                                selectiondrag: {
+                                [SELECTIONDRAG]: {
+                                    target: [selectElement(this)],
                                     behaviours: [BEHAVIOURS.BRUSH]
                                 }
                             });
