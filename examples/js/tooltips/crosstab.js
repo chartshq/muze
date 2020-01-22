@@ -57,14 +57,25 @@ d3.csv('../../data/coffee.csv', (data) => {
         },
         facetConfig: { rows: { verticalAlign: 'bottom' } }, /* dimensional values are placed in middle */
         border:{
+          color:'blue',
             showRowBorders: {
+              top: true,
+              bottom: true,
+              left: true,
+              right: true
+            },
+            showValueBorders:{
               top: false,
-              bottom: false,
+              bottom: true,
+              left: true,
+              right: true
             },
             showColBorders:{
-                left: false,
-                right: false
-            }
+              top: true,
+              bottom: true,
+              left: true,
+              right: true
+            },
         },
       })
       .title('Visual Crosstab')

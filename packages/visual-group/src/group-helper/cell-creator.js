@@ -557,8 +557,7 @@ export const computeMatrices = (resolverConfig) => {
         config
     } = resolverConfig;
 
-    const { rowFacets, colFacets, colProjections, rowProjections } = facetsAndProjections;
-    const isProjection = rowProjections.length > 0 || colProjections.length > 0;
+    const { rowFacets, colFacets } = facetsAndProjections;
     const isFacet = rowFacets.length > 0 || colFacets.length > 0;
 
     if (isFacet) {
@@ -659,7 +658,7 @@ export const computeMatrices = (resolverConfig) => {
     resolver.rowMatrix(rows);
     resolver.columnMatrix(columns);
 
-    if (isFacet || isProjection) {
+    if (isFacet) {
         const sanitizeCheckBorder = sanitizeCheck(globalConfig.facetsUserConfig);
         const arr = sanitizeCheckBorder && sanitiseBorderMatrix({
             leftMatrix: rows[0],

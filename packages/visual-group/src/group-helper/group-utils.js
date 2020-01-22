@@ -358,22 +358,32 @@ export const setFacetsAndProjections = (context, fieldInfo, encoder) => {
 };
 
 const getRowBorders = (left, right) => {
-    const borders = {};
-    borders.top = false;
-    borders.bottom = false;
+    const borders = {
+        top: false,
+        bottom: false,
+        left: false,
+        right: false
+    };
     if (left.length > 1 || right.length > 1) {
         borders.top = true;
         borders.bottom = true;
+        borders.left = true;
+        borders.right = true;
     }
     return borders;
 };
 
 const getColumnsBorders = (top, bottom) => {
-    const borders = {};
-    borders.left = false;
-    borders.right = false;
+    const borders = {
+        top: false,
+        bottom: false,
+        left: false,
+        right: false
+    };
     if (top.length || bottom.length) {
         if ((top[0] && top[0].length > 1) || (bottom[0] && bottom[0].length > 1)) {
+            borders.top = true;
+            borders.bottom = true;
             borders.left = true;
             borders.right = true;
         }
@@ -404,8 +414,8 @@ const getValueBorders = (rows, columns) => {
 };
 
 export const getBorders = (matrices, encoder) => {
-    let showRowBorders = { top: false, bottom: false };
-    let showColBorders = { left: false, right: false };
+    let showRowBorders = { top: false, bottom: false, left: false, right: false };
+    let showColBorders = { top: false, bottom: false, left: false, right: false };
     let showValueBorders = { top: false, bottom: false, left: false, right: false };
     const {
         rows,

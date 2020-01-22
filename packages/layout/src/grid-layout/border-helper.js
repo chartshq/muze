@@ -1,5 +1,5 @@
 import {
-    TOP, BOTTOM, LEFT, RIGHT, CENTER, BLANK_BORDERS, COLUMN, ROW,
+    TOP, BOTTOM, LEFT, RIGHT, CENTER, COLUMN, ROW,
     VIEW_INDEX, ROW_MATRIX_INDEX, COLUMN_MATRIX_INDEX, MIDDLE, NO_BORDERS
 } from '../enums/constants';
 
@@ -16,14 +16,8 @@ const borderMap = (isFacet, showHeaders) => ({
 });
 
 const applySpecificBorder = (params) => {
-    const { type, borderWidth, borderStyle, cells, isFacet, color } = params;
-    if (!isFacet) {
-        cells.style(`border-${type}`, `${borderWidth}px ${borderStyle} ${color}`);
-    } else {
-        cells.style('border-color', `${color}`);
-        cells.style(`border-${type}-width`, `${borderWidth}px`);
-        cells.style(`border-${type}-style`, `${borderStyle}`);
-    }
+    const { type, borderWidth, borderStyle, cells, color } = params;
+    cells.style(`border-${type}`, `${borderWidth}px ${borderStyle} ${color}`);
 };
 
 const specificBorderApplier = (params) => {
@@ -33,10 +27,11 @@ const specificBorderApplier = (params) => {
         style,
         width
     } = borderInfo;
+
     borderTypes.forEach((borderType) => {
         applySpecificBorder({
             cells,
-            color: showBorders[borderType] ? color : BLANK_BORDERS,
+            color: showBorders[borderType] ? color : 'transparent',
             type: borderType,
             borderWidth: width,
             borderStyle: style,
@@ -79,7 +74,7 @@ const borderApplier = (cells, borderInfo, name, isFacet) => {
         }),
         [LEFT]: () => specificBorderApplier({
             borderTypes: [LEFT],
-            showBorders: showValueBorders,
+            showBorders: showRowBorders,
             cells,
             borderInfo,
             name,
@@ -87,7 +82,7 @@ const borderApplier = (cells, borderInfo, name, isFacet) => {
         }),
         [RIGHT]: () => specificBorderApplier({
             borderTypes: [RIGHT],
-            showBorders: showValueBorders,
+            showBorders: showRowBorders,
             cells,
             borderInfo,
             name,
@@ -95,7 +90,7 @@ const borderApplier = (cells, borderInfo, name, isFacet) => {
         }),
         [`${CENTER}${LEFT}`]: () => specificBorderApplier({
             borderTypes: [LEFT, TOP, BOTTOM],
-            showBorders: showValueBorders,
+            showBorders: showRowBorders,
             cells,
             borderInfo,
             name,
@@ -103,7 +98,7 @@ const borderApplier = (cells, borderInfo, name, isFacet) => {
         }),
         [`${CENTER}${RIGHT}`]: () => specificBorderApplier({
             borderTypes: [RIGHT, TOP, BOTTOM],
-            showBorders: showValueBorders,
+            showBorders: showRowBorders,
             cells,
             borderInfo,
             name,
