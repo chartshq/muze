@@ -1,1 +1,6 @@
-{}
+{
+    "groups": {
+		"groupNames":["data"] ,
+		"subGroups":["arc"]
+	}
+}

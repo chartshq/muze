@@ -17,7 +17,7 @@ export const defaultConfig = {
         fade: {
             style: {
                 fill: (rgbaValues, data, apply) => transformColor(rgbaValues, {
-                    l: +15
+                    a: -0.3
                 }, data, apply).color
             }
         },
