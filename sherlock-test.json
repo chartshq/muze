@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames":["legend"] ,
-		"subGroups":["bar"]
+		"groupNames":["canvas"] ,
+		"subGroups":["border-facet"]
 	}
 }

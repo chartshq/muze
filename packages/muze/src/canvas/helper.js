@@ -25,18 +25,14 @@ export const initCanvas = (context) => {
 
 export const fixFacetConfig = (config) => {
     if (config) {
-        let isBorderPresent = false;
         const isGridLinePresent = {};
-
-        if (config.border && config.border.width) {
-            isBorderPresent = true;
-        }
-        if (config.gridLines) {
-            isGridLinePresent.x = !!config.gridLines.x;
-            isGridLinePresent.y = !!config.gridLines.y;
+        const { border, gridLines } = config;
+        if (gridLines) {
+            isGridLinePresent.x = !!gridLines.x;
+            isGridLinePresent.y = !!gridLines.y;
         }
         const facetsUserConfig = {
-            isBorderPresent,
+            isBorderPresent: border || {},
             isGridLinePresent
         };
         return {
