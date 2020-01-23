@@ -45,6 +45,11 @@ export const DEFAULT_CONFIG = {
             upper: 'more than'
         }
     },
+    marker: {
+        text: {
+            formatter: data => data
+        }
+    },
     item: {
         text: {
             orientation: 'right',
