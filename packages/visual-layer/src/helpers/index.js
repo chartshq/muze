@@ -10,7 +10,8 @@ import {
     COORD_TYPES,
     CommonProps,
     defaultValue,
-    isSimpleObject
+    isSimpleObject,
+    InvalidAwareTypes
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -78,8 +79,8 @@ export const setNullsInStack = (transformedData, schema, value, setNulls) => {
     transformedData.forEach((seriesData) => {
         seriesData.forEach((dataObj) => {
             if (dataObj.data[uniqueFieldIndex] === null && !setNulls) {
-                dataObj[0] = null;
-                dataObj[1] = null;
+                dataObj[0] = new InvalidAwareTypes();
+                dataObj[1] = new InvalidAwareTypes();
             }
         });
     });
