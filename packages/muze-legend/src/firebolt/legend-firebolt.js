@@ -1,7 +1,7 @@
 import { Firebolt } from '@chartshq/muze-firebolt';
 import { propagate, payloadGenerator } from './helper';
 import { STEP, GRADIENT } from '../enums/constants';
-import { HIGHLIGHT } from '../enums/behaviours';
+import { HIGHLIGHT, SELECT } from '../enums/behaviours';
 /**
  * This class manages the interactions of legend.
  * @export
@@ -91,6 +91,29 @@ export class LegendFireBolt extends Firebolt {
     }
 
     shouldApplySideEffects () {
+        return true;
+    }
+
+    /**
+     * Finds out if a deselected legend item is hovered
+     * @param {string} behaviour type of interaction
+     * @return {bool} true if highlight should work on the legend item, false otherwise
+     */
+    shouldApplyHighlightEffect (behaviour) {
+        if (this.getEntryExitSet(HIGHLIGHT) && this.getEntryExitSet(SELECT)) {
+            const currentHighlightedSet = this.getEntryExitSet(HIGHLIGHT).mergedEnter.uids;
+            const deselectedLegendItemsSet = this.getEntryExitSet(SELECT).mergedExit.uids;
+
+            // Find out if the currently highlighted item is also the deselected item
+            if (behaviour === HIGHLIGHT) {
+                const disabledLegendItems = [].concat(...currentHighlightedSet).filter(
+                    id => [].concat(...deselectedLegendItemsSet).includes(id)
+                );
+                if (disabledLegendItems.length) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 }
