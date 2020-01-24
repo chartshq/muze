@@ -6,14 +6,32 @@ import {
 } from 'muze-utils';
 
 const area = Symbols.area;
+
+const sanitizeAreaData = (connectNullData, points) => {
+    const sanitizedPoints = points;
+    sanitizedPoints.map((point) => {
+        if (point.update.y === null) {
+            if (connectNullData) {
+                point.update.y = point.update.y0;
+                point.update.y0 = point.update.y0;
+            } else {
+                point.update.y = undefined;
+                point.update.y0 = undefined;
+            }
+        }
+        return point;
+    });
+    return sanitizedPoints;
+};
 /**
  * Draws a line from the points
  * Generates a svg path string
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    const { layer, container, points, style, transition, className, interpolate, connectNullData } = params;
-
+    const { layer, container, style, transition, className, interpolate, connectNullData } = params;
+    let { points } = params;
+    points = sanitizeAreaData(connectNullData, points);
     const graphicElems = layer._graphicElems;
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
