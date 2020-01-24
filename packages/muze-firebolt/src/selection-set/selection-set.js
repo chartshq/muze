@@ -1,6 +1,7 @@
 import {
     SELECTION_NEW_ENTRY, SELECTION_NEW_EXIT, SELECTION_NULL, SELECTION_OLD_ENTRY, SELECTION_OLD_EXIT
 } from '../enums/selection';
+import { ReservedFields } from 'muze-utils';
 /* eslint-disable guard-for-in */
 
 /**
@@ -31,15 +32,13 @@ class SelectionSet {
             this._measureNames[key] = keys[key].measureNames;
             this._dimVals[key] = keys[key].dims;
         }
-
-        this._volatile = _volatile;
-        this._completeSetCount = Object.keys(keys).length;
-        this._lockedSelection = {};
+        this._fields = fields;
         this._fieldIndices = fields.reduce((acc, v, i) => {
             acc[v] = i;
             return acc;
         }, {});
-        this._fields = fields;
+        this._volatile = _volatile;
+        this._completeSetCount = Object.keys(keys).length;
         this._resetted = true;
     }
 
@@ -160,25 +159,24 @@ class SelectionSet {
             mergedExit: [],
             completeSet: []
         };
-        const measureNames = this._measureNames;
         const dimVals = this._dimVals;
-        const { keepDims = false, dimensions = this._fields } = config;
-        const fieldIndices = this._fieldIndices;
+        const { keepDims, fields = [] } = config;
+        const measureNames = this._measureNames;
 
         for (const key in set) {
-            let val;
             const measureNamesArr = measureNames[key] || [];
-            let dims = dimVals[key];
-
+            let val;
             if (keepDims) {
-                if (measureNamesArr.length) {
-                    dims = dimensions.map(d => dims[fieldIndices[d]]);
-                    val = dims.length ? [...dims, `${measureNamesArr}`] : [uidMap[key], `${measureNamesArr}`];
-                } else {
-                    val = dims.length ? [...dims] : [uidMap[key]];
-                }
+                val = fields.map((field) => {
+                    if (field === ReservedFields.MEASURE_NAMES) {
+                        return measureNamesArr;
+                    } else if (field === ReservedFields.ROW_ID) {
+                        return uidMap[key];
+                    }
+                    return dimVals[key][this._fieldIndices[field]];
+                });
             } else {
-                val = measureNamesArr.length ? [uidMap[key], measureNames[key], dims] : [uidMap[key]];
+                val = measureNamesArr.length ? [uidMap[key], measureNamesArr] : [uidMap[key]];
             }
 
             if (set[key] > 0) {
@@ -276,35 +274,6 @@ class SelectionSet {
     }
 
     /**
-     * Gets the set of ids which are added in the selection set.
-     * @return {Array.<string>} Array of unique ids
-     */
-    getOldEntry () {
-        const set = this._set;
-        const updateSet = [];
-
-        for (const key in set) {
-            set[key] === SELECTION_OLD_ENTRY && updateSet.push(key);
-        }
-        return updateSet;
-    }
-
-    /**
-     * Gets the set of ids which are added in the selection set.
-     * @return {Array.<string>} Array of unique ids
-     */
-    getOldExit () {
-        const set = this._set;
-        const updateSet = [];
-
-        for (const key in set) {
-            set[key] === SELECTION_OLD_EXIT && updateSet.push(key);
-        }
-
-        return updateSet;
-    }
-
-    /**
      * Gets the array of ids which are in the exit set.
      *
      * @public
@@ -343,62 +312,6 @@ class SelectionSet {
 
     resetted () {
         return this._resetted;
-    }
-
-    /**
-     * Swaps the add set and remove set in the selection set.
-     * @return {SelectionSet} Instance of selection set.
-     */
-    toggle () {
-        const set = this._set;
-
-        for (const key in set) {
-            if (set[key] === SELECTION_NEW_ENTRY) {
-                set[key] = SELECTION_NEW_EXIT;
-            } else if (set[key] === SELECTION_NEW_EXIT) {
-                set[key] = SELECTION_NEW_ENTRY;
-            } else if (set[key] === SELECTION_OLD_ENTRY) {
-                set[key] = SELECTION_OLD_EXIT;
-            } else {
-                set[key] = SELECTION_OLD_ENTRY;
-            }
-        }
-
-        return this;
-    }
-
-    getMergedEntrySet (raw) {
-        const set = this._set;
-        const mergedEnter = [];
-        const uidMap = this._uidMap;
-        const measureNames = this._measureNames;
-        const dimVals = this._dimVals;
-
-        for (const key in set) {
-            const val = raw ? [...dimVals[key], `${measureNames[key]}`] :
-                [uidMap[key], measureNames[key]];
-            if (set[key] === SELECTION_NEW_ENTRY || set[key] === SELECTION_OLD_ENTRY) {
-                mergedEnter.push(val);
-            }
-        }
-        return mergedEnter;
-    }
-
-    getMergedExitSet (raw) {
-        const set = this._set;
-        const mergedExit = [];
-        const uidMap = this._uidMap;
-        const measureNames = this._measureNames;
-        const dimVals = this._dimVals;
-
-        for (const key in set) {
-            const val = raw ? [...dimVals[key], `${measureNames[key]}`] :
-                [uidMap[key], measureNames[key]];
-            if (set[key] === SELECTION_NEW_EXIT || set[key] === SELECTION_OLD_EXIT) {
-                mergedExit.push(val);
-            }
-        }
-        return mergedExit;
     }
 }
 

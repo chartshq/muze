@@ -109,20 +109,18 @@ export default class Tooltip extends SpawnableSideEffect {
     }
 
     getPlotPointsFromIdentifiers (payload) {
-        let target = payload.target;
-        let targetFields = [];
-
-        if (target) {
-            targetFields = target[0] || [];
-            const sourceFields = payload.sourceFields;
-            const indices = [];
-            for (let i = 0, len = targetFields.length; i < len; i++) {
-                if (sourceFields.indexOf(targetFields[i]) !== -1) {
-                    indices.push(i);
-                }
-            }
-            target = target.map(d => d.filter((v, i) => indices.indexOf(i) !== -1));
-        }
+        const target = payload.target;
+        // if (target) {
+        //     targetFields = target[0] || [];
+        //     const sourceFields = payload.sourceFields;
+        //     const indices = [];
+        //     for (let i = 0, len = targetFields.length; i < len; i++) {
+        //         if (sourceFields.indexOf(targetFields[i]) !== -1) {
+        //             indices.push(i);
+        //         }
+        //     }
+        //     target = target.map(d => d.filter((v, i) => indices.indexOf(i) !== -1));
+        // }
 
         return super.plotPointsFromIdentifiers(target || payload.criteria, {
             getBBox: true

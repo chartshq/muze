@@ -58,8 +58,8 @@ export const payloadGenerator = {
                 }
             }
         });
-        const selectionSet = instance._selectionSet[propConfig.action];
-        const selectionSetFields = selectionSet._fields;
+        const selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
+
         if (sourceIdentifiers) {
             const [facetFields = [], facetValues = []] = facetByFields;
             const facetIndices = facetFields.reduce((acc, v, i) => {
@@ -94,7 +94,7 @@ export const payloadGenerator = {
                         dims.push(row[idx]);
                     }
                 });
-
+                const uid = row[row.length - 1];
                 const vals = `${sourceIdentifierFields.map((d) => {
                     if (d.name in fieldsConfig) {
                         return row[fieldsConfig[d.name].index];
@@ -106,7 +106,7 @@ export const payloadGenerator = {
 
                 if (vals in identifierMap) {
                     const measures = identifierMap[vals];
-                    const allMeasures = instance._metaData.dimensionsMap[dims];
+                    const allMeasures = instance._metaData.dimensionsMap[uid];
 
                     if (excludeSelectedMeasures) {
                         const fn = v => `${v}`;
@@ -120,7 +120,7 @@ export const payloadGenerator = {
                         });
                     }
                 } else {
-                    let measures = instance._metaData.dimensionsMap[dims];
+                    let measures = instance._metaData.dimensionsMap[uid];
                     measures = measures && measures.length ? measures : [[]];
                     measures.forEach((measureArr) => {
                         dataArr.push([...dims, measureArr]);
@@ -136,10 +136,10 @@ export const payloadGenerator = {
         payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(d => d.name) : [];
         return payload;
     },
-    pseudoSelect: (instance, selectionDataModel, propConfig, facetByFields = []) =>
+    pseudoSelect: (instance, selectionDataModel, propConfig) =>
         payloadGenerator.__default(instance, selectionDataModel, Object.assign({}, {
             excludeSelectedMeasures: true
-        }, propConfig), facetByFields)
+        }, propConfig))
 };
 
 export const getPayloadGenerator = (action, criteria) => {

@@ -97,8 +97,9 @@ const prepareSelectionSetData = (group, dataModel) => {
         const facetFields = Object.keys(facetMap);
         const unitFieldsConfig = dm.getFieldsConfig();
         const linkedRows = [];
+        const { data, uids } = dm.getData();
 
-        dm.getData().data.forEach((row) => {
+        data.forEach((row) => {
             const dimKey = [...facetFields.map(field => facetMap[field]), ...unitDims.map(d =>
                 row[unitFieldsConfig[d].index])];
             const linkedRow = groupDataMap[dimKey];
@@ -110,7 +111,7 @@ const prepareSelectionSetData = (group, dataModel) => {
 
         prepareSelectionSetMap({
             data: linkedRows,
-            uids: dm.getUids(),
+            uids,
             dimensions
         }, layers, {
             keys,
@@ -118,14 +119,11 @@ const prepareSelectionSetData = (group, dataModel) => {
         });
     });
 
-    const dimensionFields = dimensions.length ? [...dimensions.map(d => d.def.name)] :
-        [ReservedFields.ROW_ID];
-
     return {
         keys,
         dimensionsMap,
-        dimensions: dimensionFields,
-        allFields: [...dimensionFields, ...measureName]
+        dimensions,
+        allFields: [...dimensions, ...measureName]
     };
 };
 
@@ -207,7 +205,7 @@ export default class GroupFireBolt extends Firebolt {
                         dimensions,
                         allFields
                     };
-                    this.createSelectionSet({ keys, fields: dimensions });
+                    this.createSelectionSet({ keys, fields: dimensions.map(d => d.def.name) });
                     group.getGroupByData().on('propagation', (data, config) => {
                         this.handleDataModelPropagation(data, config);
                     });
@@ -343,11 +341,11 @@ export default class GroupFireBolt extends Firebolt {
 
     sanitizePayload (payload) {
         const { criteria } = payload;
-        const { allFields: fields, dimensionsMap } = this._metaData;
+        const { dimensionsMap } = this._metaData;
 
         return Object.assign({}, payload,
             {
-                criteria: sanitizePayloadCriteria(criteria, fields, {
+                criteria: sanitizePayloadCriteria(criteria, {
                     dm: this.data(),
                     dimensionsMap,
                     dimsMapGetter: this._dimsMapGetter

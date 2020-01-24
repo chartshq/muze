@@ -95,11 +95,9 @@ export default class GenericBehaviour {
                     this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
                 exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel),
                     this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
-                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel,
-                    selectionSet._fields),
-                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel,
-                    selectionSet._fields),
-                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel, selectionSet._fields),
+                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel),
+                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel),
+                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel),
                 fields: getSourceFields(propagationInf, payload.criteria)
             };
 
@@ -110,19 +108,12 @@ export default class GenericBehaviour {
 
     getSetInfo (type, set, filteredDataModel, setFields) {
         let model = null;
-        const data = this.firebolt.data();
+        // const data = this.firebolt.data();
 
         if (type === 'mergedEnter') {
             model = filteredDataModel || null;
         } else if (type === 'mergedExit') {
-            if (filteredDataModel) {
-                const setKeys = new Set(set.map(d => d[0]));
-                model = data.select((fields, i) => setKeys.has(setFields.map(field =>
-                        (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
-                            saveChild: false
-                        });
-            }
-            model = filteredDataModel || null;
+            model = null;
         }
         const aggFns = retrieveNearestGroupByReducers(model);
 
@@ -150,11 +141,9 @@ export default class GenericBehaviour {
                 const [, otherFields] =
                     partition(fields, (d => (fieldsConfig[d] ? fieldsConfig[d].def.subtype ===
                         DimensionSubtype.CATEGORICAL : d === ReservedFields.MEASURE_NAMES)));
-                const allFields = selectionSet._fields.filter(d => d === ReservedFields.ROW_ID ||
-                    fieldsConfig[d].def.subtype ===
-                    DimensionSubtype.CATEGORICAL
-                );
-                const { mergedEnter } = selectionSet.getSets({ keepDims: true, dimensions: allFields });
+                const allFields = fields.filter(d => d === ReservedFields.ROW_ID ||
+                    fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL);
+                const { mergedEnter } = selectionSet.getSets();
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d
@@ -167,10 +156,9 @@ export default class GenericBehaviour {
                     identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]
                 };
             } else {
-                const { mergedEnter } = selectionSet.getSets({ keepDims: true,
-                    dimensions: propagationFields });
                 const fields = propagationFields ? [...propagationFields, ReservedFields.MEASURE_NAMES] :
                     criteria[0];
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true, fields });
 
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {

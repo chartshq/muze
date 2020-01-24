@@ -1,7 +1,7 @@
 import * as helpers from './helper';
 import * as enums from './enums';
 import UnitFireBolt from './firebolt';
-import { isSideEffectEnabled, prepareSelectionSetMap, sanitizePayloadCriteria } from './firebolt/helper';
+import { isSideEffectEnabled, prepareSelectionSetMap } from './firebolt/helper';
 import { payloadGenerator } from './firebolt/payload-generator';
 
 export { default as VisualUnit } from './visual-unit';
@@ -11,6 +11,6 @@ export {
     UnitFireBolt,
     isSideEffectEnabled,
     payloadGenerator,
-    prepareSelectionSetMap,
-    sanitizePayloadCriteria
+    prepareSelectionSetMap
+    // sanitizePayloadCriteria
 };

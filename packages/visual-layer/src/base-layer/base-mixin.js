@@ -291,48 +291,20 @@ export const BaseLayerMixin = superclass => class extends superclass {
     }
 
     getUidsFromPayload ({ model, uids }, targetData) {
-        const targetFields = targetData[0];
+        // const targetFields = targetData[0];
         const targetVals = targetData.slice(1, targetData.length);
-        const payloadMap = targetVals.reduce((acc, v) => {
-            acc[v] = v;
-            return acc;
-        }, {});
-        const measures = Object.keys(this.data().getFieldspace().getMeasure());
 
-        const filterFn = (fields, i) => {
-            const row = `${targetFields.map((field) => {
-                let val;
-                if (field === ReservedFields.MEASURE_NAMES) {
-                    val = measures;
-                } else if (field === ReservedFields.ROW_ID) {
-                    val = i;
-                } else {
-                    const currentField = fields[field];
-                    const isFieldInvalid = currentField instanceof InvalidAwareTypes;
-
-                    val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
-                }
-                return val;
-            })}`;
-            return row in payloadMap;
-        };
-
-        const dm = model.select(filterFn, {});
-
-        // Need to find a better way to do this instead of iterating the full data
-        const currentSetIds = this.data().select(filterFn, {
+        const dm = model.select((fields) => {
+            return  `${fields.__id__}` === `${targetVals[0][0]}`;
+        }, {
             saveChild: false
-        }).getUids();
-
-        const uidMap = currentSetIds.reduce((acc, v) => {
-            acc[v] = true;
-            return acc;
-        }, {});
+        });
+        const uidArr = dm.getData().uids;
 
         return {
             model: dm,
-            uids: uids.filter(d => uidMap[d[0]]),
-            length: currentSetIds.length
+            uids: uids.filter(d => uidArr.find(id => `${id}` === `${d[0]}`)),
+            length: uidArr.length
         };
     }
 
@@ -457,30 +429,28 @@ export const BaseLayerMixin = superclass => class extends superclass {
 
     getIdentifiersFromData (data, rowId) {
         const schema = this.data().getSchema();
-        const fieldsConfig = this.data().getFieldsConfig();
+        // const fieldsConfig = this.data().getFieldsConfig();
         const identifiers = [[], []];
 
-        const allMeasures = schema.every(field => field.type === FieldType.MEASURE);
-        schema.forEach((d, i) => {
-            const name = d.name;
-            const { type } = fieldsConfig[name].def;
-            if (type === FieldType.DIMENSION) {
-                identifiers[0].push(name);
-                identifiers[1].push(data[i]);
-            }
-        });
+        // const allMeasures = schema.every(field => field.type === FieldType.MEASURE);
+        // schema.forEach((d, i) => {
+        //     const name = d.name;
+        //     const { type } = fieldsConfig[name].def;
+        //     if (type === FieldType.DIMENSION) {
+        //         identifiers[0].push(name);
+        //         identifiers[1].push(data[i]);
+        //     }
+        // });
 
         const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
+        // if (allMeasures) {
+        identifiers[0].push(...[ReservedFields.ROW_ID]);
+        identifiers[1].push(...[rowId]);
+        // }
         if (measures.length) {
             identifiers[0].push(ReservedFields.MEASURE_NAMES);
             identifiers[1].push(measures.join());
         }
-
-        if (allMeasures) {
-            identifiers[0].push(...[ReservedFields.ROW_ID]);
-            identifiers[1].push(...[rowId]);
-        }
-
         return identifiers;
     }
 
