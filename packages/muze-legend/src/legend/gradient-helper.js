@@ -175,7 +175,12 @@ export const renderGradient = (context, container) => {
         gradientDimensions.width = item.icon.width;
         linearGradient.attr('x2', '0%').attr('y1', '100%');
         legendGradCont.attr('transform', `translate(${LEGEND_MARKER_PROPS.size + 4} ${labelDim.height / 2})`);
-        renderAxis(context, legendContainer, gradHeight - 2 * padding - 1, gradWidth - item.icon.width - padding * 2);
+        renderAxis(
+            context,
+            legendContainer,
+            gradHeight - 2 * padding - 1,
+            gradWidth - (gradientDimensions.width + LEGEND_MARKER_PROPS.size + 4) - padding * 2
+        );
 
         applyStyle(legendContainer, {
             height: `${Math.min(height, maxHeight)}px`,
