@@ -3,7 +3,7 @@
  * This file declares a class that is used to render an axis to add  meaning to
  * plots.
  */
-import { getUniqueId, generateGetterSetters, rgbToHsv, defaultValue } from 'muze-utils';
+import { getUniqueId, generateGetterSetters, rgbToHsv, defaultValue, colorInterpolator } from 'muze-utils';
 import { createScale, getScheme, getSchemeType } from '../scale-creator';
 import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
 import { strategyGetter } from './color-strategy';
@@ -123,17 +123,28 @@ export default class ColorAxis {
      * @memberof ColorAxis
      */
     getRawColor (domainVal) {
+        const domain = this.domain();
+
         if (this.domain() && domainVal !== undefined) {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
-            const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
-            if (color) {
-                if (typeof color === 'string') {
-                    const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
-                    return rgbToHsv(...col);
-                }
-                return [...color];
+            let color;
+
+            if (domain.length > range.length) {
+                console.log(range);
+                debugger;
+                // color = colorInterpolator()(this.getColor(range[10], this.getColor(range[1])))(0.5);
+                // color = colorInterpolator()(range[10], range[1])(0.5);
+                color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
+            } else {
+                color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
             }
+
+            if (color && typeof color === 'string') {
+                const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
+                return rgbToHsv(...col);
+            }
+            return [...color];
         }
         return [...this.config().value];
     }

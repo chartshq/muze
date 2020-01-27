@@ -39,6 +39,7 @@ import { nest } from 'd3-collection';
 import {
     interpolate,
     interpolateRgb,
+    interpolateHsl,
     piecewise,
     interpolateNumber,
     interpolateHslLong
@@ -757,6 +758,8 @@ const numberInterpolator = () => interpolateNumber;
  *
  */
 const colorInterpolator = () => interpolateRgb;
+
+const hslColorInterpolator = () => interpolateHsl;
 
 /**
  * Gets the hsl interpolator from d3 color
@@ -1628,6 +1631,7 @@ export {
     getDataModelFromIdentifiers,
     getDataModelFromRange,
     colorInterpolator,
+    hslColorInterpolator,
     numberInterpolator,
     ERROR_MSG,
     reqAnimFrame,
