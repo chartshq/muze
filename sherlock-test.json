@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames":["color"] ,
-		"subGroups":["bar"]
+		"groupNames":["layout"] ,
+		"subGroups":["chart-size-gradient-legend"]
 	}
 }

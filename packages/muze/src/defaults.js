@@ -79,3 +79,5 @@ export const DEFAULT_CONFIG = {
     invalidValues: {},
     sort: {}
 };
+
+export const EXCLUDE_CONFIG_KEYS = ['sort'];
