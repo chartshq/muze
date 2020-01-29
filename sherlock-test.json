@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames":["canvas"] ,
-		"subGroups":["sort-config"]
+		"groupNames":["layout"] ,
+		"subGroups":["chart-size-gradient-legend"]
 	}
 }

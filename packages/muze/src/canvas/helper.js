@@ -51,7 +51,7 @@ export const fixScrollBarConfig = (config) => {
 export const excludeKeys = (config, keys) => {
     const emptyValueKeyObject = {};
     keys.forEach((key) => {
-        if (Object.keys(config[key]).length) {
+        if (config[key] && Object.keys(config[key]).length) {
             emptyValueKeyObject[key] = {};
         }
     });
