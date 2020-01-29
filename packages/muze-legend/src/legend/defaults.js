@@ -93,6 +93,7 @@ export const ICON_MAP = (icon) => {
 
 export const LEGEND_MARKER_PROPS = {
     size: 8,
+    BUFFER: 4,
     ROTATE_HORIZONTAL: 180,
     ROTATE_VERTICAL: 90,
     shape: 'triangle'

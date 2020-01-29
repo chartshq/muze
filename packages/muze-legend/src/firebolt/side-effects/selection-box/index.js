@@ -69,13 +69,14 @@ import './styles.scss';
         const legendSelGroup = makeElement(legendGradContainer, 'g', [1],
             `${config.classPrefix}-selection-box-group`);
 
+        const { size, BUFFER } = LEGEND_MARKER_PROPS;
         if (firebolt.context.config().align === HORIZONTAL) {
             x = range[0] - rangeShifter || 0;
-            y = LEGEND_MARKER_PROPS.size + 4;
+            y = size + BUFFER;
             width = range[1] - range[0] || 0;
             height = gradientDimension;
         } else {
-            x = LEGEND_MARKER_PROPS.size + 4;
+            x = size + BUFFER;
             y = range[1] - rangeShifter || 0;
             height = range[0] - range[1] || 0;
             width = gradientDimension;
