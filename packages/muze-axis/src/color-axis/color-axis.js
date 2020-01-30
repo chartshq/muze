@@ -139,6 +139,27 @@ export default class ColorAxis {
         return [...this.config().value];
     }
 
+    setRangeWithInterpolatedColors (scaleType, scaleInfo) {
+        const { domain: originalDomain, range: originalRange } = scaleInfo;
+        const originalDomainLen = originalDomain.length;
+        const originalRangeLen = originalRange.length;
+
+        if (scaleType === ORDINAL && originalDomainLen > originalRangeLen) {
+            const newRange = [];
+            const newDomain = originalDomain.map((d, i) => i / originalDomainLen);
+
+            this._linearScale = scaleMap.linear()
+                .range(this._config.range)
+                .domain(newDomain);
+
+            for (let i = 0, len = originalDomainLen; i < len; i++) {
+                const rangeVal = (1 / len) * i;
+                newRange.push([...this._linearScale(rangeVal)]);
+            }
+            this.scale().range(newRange);
+        }
+    }
+
     /**
      *
      *
@@ -153,26 +174,14 @@ export default class ColorAxis {
             const domainRangeFn = this._colorStrategy.domainRange();
             const scaleType = this._colorStrategy.scale;
             const scaleInfo = domainRangeFn(domain, this.config().stops, range);
-            const { domain: originalDomain, range: originalRange } = scaleInfo;
 
-            this.domain(originalDomain);
-            originalRange && this.scale().range(originalRange);
+            this.domain(scaleInfo.domain);
+            scaleInfo.range && this.scale().range(scaleInfo.range);
             this.uniqueValues(scaleInfo.uniqueVals);
             this.scale().domain(scaleInfo.scaleDomain || this.domain());
 
             // Interpolate colors using linear scale if domain exceeds range
-            if (scaleType === ORDINAL && originalDomain.length > originalRange.length) {
-                const newRange = [];
-                this._linearScale = scaleMap.linear()
-                .range(this._config.range)
-                .domain([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]);
-
-                for (let i = 0, len = originalDomain.length; i < len; i++) {
-                    const rangeVal = 1 / len * (i);
-                    newRange.push([...this._linearScale(rangeVal)]);
-                }
-                this.scale().range(newRange);
-            }
+            this.setRangeWithInterpolatedColors(scaleType, scaleInfo);
         }
         return this;
     }
