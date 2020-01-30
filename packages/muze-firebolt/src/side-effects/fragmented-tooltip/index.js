@@ -30,7 +30,7 @@ export default class FragmentedTooltip extends Tooltip {
         const boxes = [];
         const uids = dataModel.getUids();
 
-        dataModels.push(...uids.map(uid => dataModel.select((fieldsArr) =>
+        dataModels.push(...uids.map(uid => dataModel.select(fieldsArr =>
             fieldsArr[ReservedFields.ROW_ID].value === uid, {
                 saveChild: false
             })));
