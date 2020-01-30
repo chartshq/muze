@@ -271,6 +271,10 @@ export default class Firebolt {
         return this;
     }
 
+    shouldApplyHighlightEffect () {
+        return true;
+    }
+
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
         // payload = this.sanitizePayload(payload);
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
@@ -285,17 +289,19 @@ export default class Firebolt {
             action.dispatch(payload);
             this._entryExitSet[behaviour] = action.entryExitSet();
             const shouldApplySideEffects = this.shouldApplySideEffects(propagationInfo);
+            const shouldApplyHighlightEffect = this.shouldApplyHighlightEffect(behaviour);
 
-            if (propagate) {
-                this.propagate(behaviour, payload, action.propagationIdentifiers(), { sideEffects });
-            }
+            if (shouldApplyHighlightEffect) {
+                if (propagate) {
+                    this.propagate(behaviour, payload, action.propagationIdentifiers(), { sideEffects });
+                }
 
-            if (shouldApplySideEffects) {
-                const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
-                this.applySideEffects(applicableSideEffects, this.getEntryExitSet(behaviour), payload);
+                if (shouldApplySideEffects) {
+                    const applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+                    this.applySideEffects(applicableSideEffects, this.getEntryExitSet(behaviour), payload);
+                }
             }
         }
-
         return this;
     }
 
