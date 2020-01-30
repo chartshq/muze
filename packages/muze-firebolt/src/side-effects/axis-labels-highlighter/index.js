@@ -1,6 +1,7 @@
 import SurrogateSideEffect from '../surrogate';
 import { AXIS_LABEL_HIGHLIGHTER } from '../../enums/side-effects';
 import './styles.scss';
+import { shouldApplySideEffect } from '../helper';
 
 export default class AxisLabelHighLighter extends SurrogateSideEffect {
     static formalName () {
@@ -14,6 +15,9 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
     apply (selectionSet) {
         const context = this.firebolt.context;
         const dataModel = selectionSet && selectionSet.mergedEnter.model;
+        if (!shouldApplySideEffect(dataModel, this)) {
+            return this;
+        }
         const selectedData = dataModel && dataModel.getData().data;
         const selectedDataValues = selectedData && selectedData.length ? selectedData[0] : [];
         const { x = [], y = [] } = context.axes();
@@ -25,5 +29,7 @@ export default class AxisLabelHighLighter extends SurrogateSideEffect {
             selectedElements && selectedElements.selectAll('text').classed('muze-axis-ticks-highlight', true);
             rejectionSet.selectAll('text').classed('muze-axis-ticks-highlight', false);
         });
+
+        return this;
     }
 }

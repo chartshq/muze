@@ -5,17 +5,7 @@ import {
     ReservedFields,
     retrieveNearestGroupByReducers
 } from 'muze-utils';
-import { getMergedSet, getSourceFields } from '../../helper';
-
-export const getIdentifiersFromSet = (set, context, { fields }) => {
-    const data = [[]];
-
-    if (fields.length) {
-        data[0] = fields;
-        set.forEach(id => data.push(id));
-    }
-    return data;
-};
+import { getSourceFields } from '../../helper';
 
 /**
  * This is the base class has all the common functionalities needed for all behavioural actions. Any other behavioural
@@ -45,6 +35,7 @@ export default class GenericBehaviour {
         const firebolt = this.firebolt;
         const formalName = this.constructor.formalName();
         const selectionSets = firebolt.getSelectionSets(formalName);
+        const propInf = this.firebolt.getPropagationInf();
         const {
             model: filteredDataModel,
             uids
@@ -56,8 +47,9 @@ export default class GenericBehaviour {
                 filteredDataModel,
                 payload
             });
-
-            selectionSet._volatile && this.propagationIdentifiers(selectionSet, payload);
+            if (!propInf.sourceId) {
+                this.propagationIdentifiers(selectionSet, payload);
+            }
             this.entryExitSet(selectionSet, filteredDataModel, payload);
         });
     }
@@ -86,6 +78,8 @@ export default class GenericBehaviour {
             const {
                 entrySet,
                 exitSet,
+                mergedEnter,
+                mergedExit,
                 completeSet
             } = selectionSet.getSets();
             const propagationInf = this.firebolt.getPropagationInf();
@@ -95,11 +89,9 @@ export default class GenericBehaviour {
                     this.getSetInfo('newEntry', entrySet[1], filteredDataModel)],
                 exitSet: [this.getSetInfo('oldEntry', exitSet[0], filteredDataModel),
                     this.getSetInfo('newExit', exitSet[1], filteredDataModel)],
-                mergedEnter: this.getSetInfo('mergedEnter', getMergedSet(entrySet), filteredDataModel,
-                    selectionSet._fields),
-                mergedExit: this.getSetInfo('mergedExit', getMergedSet(exitSet), filteredDataModel,
-                    selectionSet._fields),
-                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel, selectionSet._fields),
+                mergedEnter: this.getSetInfo('mergedEnter', mergedEnter, filteredDataModel),
+                mergedExit: this.getSetInfo('mergedExit', mergedExit, filteredDataModel),
+                completeSet: this.getSetInfo('complete', completeSet, filteredDataModel),
                 fields: getSourceFields(propagationInf, payload.criteria)
             };
 
@@ -108,21 +100,25 @@ export default class GenericBehaviour {
         return this._entryExitSet;
     }
 
-    getSetInfo (type, set, filteredDataModel, setFields) {
-        let model = null;
+    getSetInfo (type, set, filteredDataModel) {
+        const { sourceId } = this.firebolt.getPropagationInf();
         const data = this.firebolt.data();
+        let model = null;
 
         if (type === 'mergedEnter') {
-            model = filteredDataModel || null;
-        } else if (type === 'mergedExit') {
-            if (filteredDataModel) {
-                const setKeys = new Set(set.map(d => d[0]));
-                model = data.select((fields, i) => setKeys.has(setFields.map(field =>
-                        (field === ReservedFields.ROW_ID ? i : fields[field].value))), {
-                            saveChild: false
-                        });
+            if (sourceId) {
+                model = filteredDataModel || null;
+            } else {
+                const uidMap = set.reduce((acc, v) => {
+                    acc[v[0]] = 1;
+                    return acc;
+                }, {});
+                model = data.select(fields => fields[ReservedFields.ROW_ID] in uidMap, {
+                    saveChild: false
+                });
             }
-            model = filteredDataModel || null;
+        } else if (type === 'mergedExit') {
+            model = null;
         }
         const aggFns = retrieveNearestGroupByReducers(model);
 
@@ -130,7 +126,6 @@ export default class GenericBehaviour {
             uids: set,
             length: set.length,
             model,
-            fields: setFields,
             aggFns
         };
     }
@@ -150,11 +145,9 @@ export default class GenericBehaviour {
                 const [, otherFields] =
                     partition(fields, (d => (fieldsConfig[d] ? fieldsConfig[d].def.subtype ===
                         DimensionSubtype.CATEGORICAL : d === ReservedFields.MEASURE_NAMES)));
-                const allFields = selectionSet._fields.filter(d => d === ReservedFields.ROW_ID ||
-                    fieldsConfig[d].def.subtype ===
-                    DimensionSubtype.CATEGORICAL
-                );
-                const { mergedEnter } = selectionSet.getSets({ keepDims: true, dimensions: allFields });
+                const allFields = fields.filter(d => d === ReservedFields.ROW_ID ||
+                    fieldsConfig[d] && fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL);
+                const { mergedEnter } = selectionSet.getSets();
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d
@@ -167,10 +160,9 @@ export default class GenericBehaviour {
                     identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]
                 };
             } else {
-                const { mergedEnter } = selectionSet.getSets({ keepDims: true,
-                    dimensions: propagationFields });
                 const fields = propagationFields ? [...propagationFields, ReservedFields.MEASURE_NAMES] :
                     criteria[0];
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true, fields });
 
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {

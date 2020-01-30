@@ -20,6 +20,59 @@ import {
     setSideEffectConfig
 } from './helper';
 
+export const sanitizePayloadCriteria = (data, { dm, dimensionsMap, dimsMapGetter, addMeasures = true }) => {
+    const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
+        [ReservedFields.ROW_ID]: {
+            index: Object.keys(dm.getFieldsConfig()).length,
+            def: {
+                name: ReservedFields.ROW_ID,
+                type: FieldType.DIMENSION
+            }
+        }
+    });
+
+    if (data === null) {
+        return null;
+    }
+
+    const criteriaFields = data[0];
+    const fields = criteriaFields.length ? criteriaFields.map((d, i) => ({
+        name: d,
+        index: i
+    })) : [];
+
+    const fieldIndexMap = fields.reduce((acc, v, i) => {
+        acc[v.name] = i;
+        return acc;
+    }, {});
+
+    const uids = [];
+    const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
+    const propDims = fields.filter(d => d.name in fieldsConfig).map(d => d.name);
+
+    const dimsMap = dimsMapGetter(propDims, fieldsConfig);
+    for (let i = 1, len = data.length; i < len; i++) {
+        const row = data[i];
+        const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
+        const origRow = dimsMap[dimKey];
+        if (origRow) {
+            origRow.forEach((rowVal) => {
+                const rowId = rowVal[rowVal.length - 1];
+                if (!measureNameField) {
+                    const measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
+                    measuresArr.forEach((measures) => {
+                        uids.push([...rowId, ...(addMeasures ? measures : [])]);
+                    });
+                } else {
+                    uids.push([rowId, row[fieldIndexMap[measureNameField]]]);
+                }
+            });
+        }
+    }
+
+    return uids;
+};
+
 const cloneObj = (behaviourEffectMap) => {
     const keys = Object.keys(behaviourEffectMap);
 
@@ -40,29 +93,25 @@ const cloneObj = (behaviourEffectMap) => {
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
         const data = firebolt.data();
-        const { dimensionsMap, dimensions: dimArr } = firebolt._metaData;
+        const { dimensionsMap } = firebolt._metaData;
 
         let values = [];
         if (isSimpleObject(criteria)) {
             const dm = getDataModelFromRange(data, criteria);
-            const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
-                [ReservedFields.ROW_ID]: {
-                    index: Object.keys(dm.getFieldsConfig()).length,
-                    def: {
-                        name: ReservedFields.ROW_ID,
-                        type: FieldType.DIMENSION
-                    }
-                }
-            });
             dm.getData({ withUid: true }).data.forEach((row) => {
-                const dimKey = `${dimArr.map(d => row[fieldsConfig[d].index])}`;
-                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[dimKey] || [[]];
+                const id = row[row.length - 1];
+                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [[]];
                 measures.forEach((measureArr) => {
-                    values.push(`${[dimKey, ...measureArr]}`);
+                    values.push(`${[id, ...measureArr]}`);
                 });
             });
         } else {
-            values = criteria.slice(1, criteria.length).map(d => `${d}`);
+            const dimsMapGetter = firebolt._dimsMapGetter;
+            values = sanitizePayloadCriteria(criteria, {
+                dm: firebolt.data(),
+                dimensionsMap,
+                dimsMapGetter
+            });
         }
         return values;
     }
@@ -223,7 +272,7 @@ export default class Firebolt {
     }
 
     dispatchBehaviour (behaviour, payload, propagationInfo = {}) {
-        payload = this.sanitizePayload(payload);
+        // payload = this.sanitizePayload(payload);
         const propagate = propagationInfo.propagate !== undefined ? propagationInfo.propagate : true;
         const behaviouralActions = this._actions.behavioural;
         const action = behaviouralActions[behaviour];
@@ -495,18 +544,7 @@ export default class Firebolt {
     }
 
     getSelectionSets (action) {
-        const sourceId = this.id();
-        const propagationInf = this._propagationInf || {};
-        const propagationSource = propagationInf.sourceId;
-        let applicableSelectionSets = [];
-        if (propagationSource !== sourceId) {
-            applicableSelectionSets = [this._volatileSelectionSet[action]];
-        }
-
-        if (propagationSource) {
-            applicableSelectionSets.push(this.selectionSet()[action]);
-        }
-        return applicableSelectionSets;
+        return [this.selectionSet()[action]];
     }
 
     getFullData () {
@@ -536,6 +574,10 @@ export default class Firebolt {
 
     data () {
         return this.context.data();
+    }
+
+    currentData () {
+        return this.data();
     }
 
     triggerPhysicalAction (event, payload) {

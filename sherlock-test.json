@@ -1,6 +1,11 @@
 {
     "groups": {
+<<<<<<< HEAD
+		"groupNames":["data"] ,
+		"subGroups":["bar"]
+=======
 		"groupNames":["legend"] ,
 		"subGroups":["crosstab-bar"]
+>>>>>>> d2efd157c96305d49d886c3309d82610450e451d
 	}
 }

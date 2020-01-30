@@ -94,13 +94,13 @@ export const listenerMap = [
                 context._timeDiffs = timeDiffs;
                 const firebolt = context.firebolt();
                 const originalData = context.cachedData()[0];
-                const { keys, dimensionsMap, dimensions, allFields } = prepareSelectionSetData(context.data(), context);
+                const { keys, dimensionsMap, dimensions } = prepareSelectionSetData(context.data(), context);
                 firebolt._metaData = {
                     dimensionsMap,
-                    dimensions,
-                    allFields
+                    dimensions
+
                 };
-                firebolt.createSelectionSet({ keys, fields: dimensions });
+                firebolt.createSelectionSet({ keys, fields: dimensions.map(d => d.def.name) });
                 firebolt.attachPropagationListener(originalData);
             }
         }

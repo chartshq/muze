@@ -27,7 +27,7 @@ import * as ACTION_NAMES from '../../enums/actions';
             position: pos,
             mode
         };
-
+        // console.log('payload', payload.criteria);
         firebolt.triggerPhysicalAction(ACTION_NAMES.HOVER, payload);
         event.stopPropagation();
     };
