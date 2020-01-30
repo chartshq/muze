@@ -62,45 +62,23 @@ const prepareSelectionSetData = (group, dataModel) => {
     const measureName = hasMeasures ? [ReservedFields.MEASURE_NAMES] : [];
     const keys = {};
     const dimensionsMap = {};
-    const unitDimsMap = {};
-
-    valueMatrix.each((cell) => {
-        const unit = cell.source();
-        const dm = unit.data();
-        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
-        const facetFields = Object.keys(unit.facetFieldsMap());
-
-        unitDimsMap[unitDims] = {
-            inst: unit,
-            dims: [...facetFields, ...unitDims]
-        };
-    });
-
     const groupDataMap = {};
 
     dataModel.getData({ withUid: true }).data.forEach((row) => {
-        for (const key in unitDimsMap) {
-            const { dims } = unitDimsMap[key];
-            const dimKey = dims.map(dim => row[fieldsConfig[dim].index]);
-            groupDataMap[dimKey] = row;
-        }
+        const dimKey = row[row.length - 1];
+        groupDataMap[dimKey] = row;
     });
 
     valueMatrix.each((cell) => {
         const unit = cell.source();
         const dm = unit.cachedData()[0];
         const layers = unit.layers();
-        const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
-        const facetMap = unit.facetFieldsMap();
-        const facetFields = Object.keys(facetMap);
-        const unitFieldsConfig = dm.getFieldsConfig();
         const linkedRows = [];
-        const { data } = dm.getData();
+        const { uids: uidsArr } = dm.getData();
         const uids = [];
-        data.forEach((row) => {
-            const dimKey = [...facetFields.map(field => facetMap[field]), ...unitDims.map(d =>
-                row[unitFieldsConfig[d].index])];
-            const linkedRow = groupDataMap[dimKey];
+
+        uidsArr.forEach((id) => {
+            const linkedRow = groupDataMap[id];
 
             if (linkedRow) {
                 linkedRows.push(linkedRow);

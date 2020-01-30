@@ -46,6 +46,7 @@ export const payloadGenerator = {
     },
 
     __default: (instance, selectionDataModel, propConfig, facetByFields = []) => {
+        let selectionSetFields = [];
         const { payload: propPayload, sourceIdentifiers, excludeSelectedMeasures } = propConfig;
         const dataObj = selectionDataModel.getData({ withUid: true });
         const payload = Object.assign({}, propPayload);
@@ -58,7 +59,8 @@ export const payloadGenerator = {
                 }
             }
         });
-        const selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
+        selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
+        !selectionSetFields.length && (selectionSetFields = [ReservedFields.ROW_ID]);
 
         if (sourceIdentifiers) {
             const [facetFields = [], facetValues = []] = facetByFields;
