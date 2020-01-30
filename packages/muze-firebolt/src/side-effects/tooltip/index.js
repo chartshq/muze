@@ -6,6 +6,7 @@ import SpawnableSideEffect from '../spawnable';
 
 import './styles.scss';
 import { HIGHLIGHT_SUMMARY } from '../../enums/tooltip-strategies';
+import { shouldApplySideEffect } from '../helper';
 
 const configResolvers = {
     [HIGHLIGHT_SUMMARY]: (specificConf, config) => defaultValue(specificConf, config),
@@ -66,7 +67,9 @@ export default class Tooltip extends SpawnableSideEffect {
 
     apply (selectionSet, payload, options = {}) {
         const dataModel = selectionSet && selectionSet.mergedEnter.model;
-
+        if (!shouldApplySideEffect(dataModel, this)) {
+            return this;
+        }
         if ((payload.criteria === null || (dataModel && dataModel.isEmpty())) || selectionSet === null) {
             this.hide(options, null);
             return this;

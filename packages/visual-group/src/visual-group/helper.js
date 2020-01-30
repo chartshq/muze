@@ -177,7 +177,7 @@ export const createMatrices = (context, sanitizedConfig) => {
 
     const placeholderInfo = resolver.getMatrices(resolverConfig);
 
-    context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
+    context._originalGroupedData = context._groupedDataModel = placeholderInfo.dataModels.groupedModel;
         // Set the selection object
     context.selection(placeholderInfo.selection);
 

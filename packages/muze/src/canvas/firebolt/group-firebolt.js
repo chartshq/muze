@@ -4,12 +4,11 @@ import {
     CommonProps,
     ReservedFields
 } from 'muze-utils';
-import { Firebolt, getSideEffects } from '@chartshq/muze-firebolt';
+import { Firebolt, getSideEffects, SpawnableSideEffect } from '@chartshq/muze-firebolt';
 import { createMapByDimensions } from '@chartshq/visual-unit/src/firebolt/helper';
 import {
     payloadGenerator,
     isSideEffectEnabled,
-    sanitizePayloadCriteria,
     prepareSelectionSetMap
 } from '@chartshq/visual-unit';
 import { TOOLTIP } from '@chartshq/muze-firebolt/src/enums/side-effects';
@@ -18,7 +17,6 @@ import { applyInteractionPolicy } from '../helper';
 import {
     propagateValues,
     isCrosstab,
-    addSelectedMeasuresInPayload,
     resetSelectAction,
     dispatchBehaviours,
     attachBehaviours
@@ -80,7 +78,7 @@ const prepareSelectionSetData = (group, dataModel) => {
 
     const groupDataMap = {};
 
-    dataModel.getData().data.forEach((row) => {
+    dataModel.getData({ withUid: true }).data.forEach((row) => {
         for (const key in unitDimsMap) {
             const { dims } = unitDimsMap[key];
             const dimKey = dims.map(dim => row[fieldsConfig[dim].index]);
@@ -90,15 +88,15 @@ const prepareSelectionSetData = (group, dataModel) => {
 
     valueMatrix.each((cell) => {
         const unit = cell.source();
-        const dm = unit.data();
+        const dm = unit.cachedData()[0];
         const layers = unit.layers();
         const unitDims = dm.getSchema().filter(field => field.type === FieldType.DIMENSION).map(field => field.name);
         const facetMap = unit.facetFieldsMap();
         const facetFields = Object.keys(facetMap);
         const unitFieldsConfig = dm.getFieldsConfig();
         const linkedRows = [];
-        const { data, uids } = dm.getData();
-
+        const { data } = dm.getData();
+        const uids = [];
         data.forEach((row) => {
             const dimKey = [...facetFields.map(field => facetMap[field]), ...unitDims.map(d =>
                 row[unitFieldsConfig[d].index])];
@@ -106,6 +104,7 @@ const prepareSelectionSetData = (group, dataModel) => {
 
             if (linkedRow) {
                 linkedRows.push(linkedRow);
+                uids.push(linkedRow[linkedRow.length - 1]);
             }
         });
 
@@ -165,6 +164,21 @@ export default class GroupFireBolt extends Firebolt {
         this.payloadGenerators(payloadGenerator);
         this._interactionPolicy = this.constructor.defaultInteractionPolicy();
         this.crossInteractionPolicy(this.constructor.defaultCrossInteractionPolicy());
+        const throwback = this.context._throwback;
+        throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
+            this.config(this.context.config().interaction);
+            applyInteractionPolicy(this);
+            const group = this.context.composition().visualGroup;
+            if (group) {
+                setSideEffectConfig(this);
+                this.createSelectionSet(group.groupedData());
+                group.getGroupByData().on('propagation', (data, config) => {
+                    this.handleDataModelPropagation(data, config);
+                });
+                // Dispatch pseudo select behaviour for highlighting measures with common dimensions in crosstab
+                attachBehaviours(group);
+            }
+        });
     }
 
     static defaultInteractionPolicy () {
@@ -185,34 +199,10 @@ export default class GroupFireBolt extends Firebolt {
 
     crossInteractionPolicy (...policy) {
         if (policy.length) {
-            const context = this.context;
             this._crossInteractionPolicy = mergeRecursive(mergeRecursive({},
                 this.constructor.defaultCrossInteractionPolicy()), policy[0] || {});
 
             applyInteractionPolicy(this);
-            const throwback = context._throwback;
-            throwback.registerImmediateListener([CommonProps.MATRIX_CREATED], () => {
-                this.config(this.context.config().interaction);
-                applyInteractionPolicy(this);
-                const group = this.context.composition().visualGroup;
-                if (group) {
-                    setSideEffectConfig(this);
-
-                    const { keys, dimensions, dimensionsMap, allFields } = prepareSelectionSetData(group,
-                        group.getGroupByData());
-                    this._metaData = {
-                        dimensionsMap,
-                        dimensions,
-                        allFields
-                    };
-                    this.createSelectionSet({ keys, fields: dimensions.map(d => d.def.name) });
-                    group.getGroupByData().on('propagation', (data, config) => {
-                        this.handleDataModelPropagation(data, config);
-                    });
-                    // Dispatch pseudo select behaviour for highlighting measures with common dimensions in crosstab
-                    attachBehaviours(group);
-                }
-            });
             return this;
         }
         return this._crossInteractionPolicy;
@@ -223,6 +213,9 @@ export default class GroupFireBolt extends Firebolt {
         const valueMatrix = group.matrixInstance().value;
         const units = group.resolver().units();
         const propagationData = data;
+        if (config.propagationSourceId === this.id()) {
+            return this;
+        }
         // @todo refactor this code
         const {
             enabled: enabledFn,
@@ -276,15 +269,11 @@ export default class GroupFireBolt extends Firebolt {
                         inst.layers(() => unit.layers());
                         inst.plotPointsFromIdentifiers((...params) =>
                             unit.getPlotPointsFromIdentifiers(...params));
-                        inst.drawingContext(() => unit.getDrawingContext());
+                        inst instanceof SpawnableSideEffect && inst.drawingContext(() => unit.getDrawingContext());
                         inst.valueParser(unit.valueParser());
                     }
                 });
             });
-
-            if (propPayload.sourceUnit) {
-                addSelectedMeasuresInPayload(this, unit, payload);
-            }
 
             this.dispatchBehaviour(action, payload, propagationInf);
         }
@@ -339,22 +328,15 @@ export default class GroupFireBolt extends Firebolt {
         resetSelectAction(this, { behaviours, payload, unit });
     }
 
-    sanitizePayload (payload) {
-        const { criteria } = payload;
-        const { dimensionsMap } = this._metaData;
-
-        return Object.assign({}, payload,
-            {
-                criteria: sanitizePayloadCriteria(criteria, {
-                    dm: this.data(),
-                    dimensionsMap,
-                    dimsMapGetter: this._dimsMapGetter
-                })
-            });
-    }
-
-    createSelectionSet (...params) {
-        super.createSelectionSet(...params);
+    createSelectionSet (data) {
+        const group = this.context.composition().visualGroup;
+        const { keys, dimensions, dimensionsMap, allFields } = prepareSelectionSetData(group, data);
+        this._metaData = {
+            dimensionsMap,
+            dimensions,
+            allFields
+        };
+        super.createSelectionSet({ keys, fields: dimensions.map(d => d.def.name) });
 
         this._dimsMapGetter = createMapByDimensions(this, this.data());
 
@@ -369,8 +351,24 @@ export default class GroupFireBolt extends Firebolt {
         return propInf.applySideEffect !== false;
     }
 
-    data () {
-        return this.context.composition().visualGroup.getGroupByData();
+    data (...params) {
+        const group = this.context.composition().visualGroup;
+
+        if (params.length) {
+            const model = params[0];
+            group.groupedData(model);
+            this.createSelectionSet(group.groupedData());
+            return this;
+        }
+
+        return group.getGroupByData();
+    }
+
+    resetData () {
+        const group = this.context.composition().visualGroup;
+        group.resetData();
+        this.createSelectionSet(group.groupedData());
+        return this;
     }
 
     getRangeFromIdentifiers ({ criteria, fields }) {
@@ -392,7 +390,9 @@ export default class GroupFireBolt extends Firebolt {
     }
 
     getPropagationSource () {
-        return this.data();
+        const group = this.context.composition().visualGroup;
+
+        return group._originalGroupedData;
     }
 
     sourceCanvas () {

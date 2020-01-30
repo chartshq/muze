@@ -140,9 +140,28 @@ export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
         payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
             unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
 
+        const behaviourEffectMap = firebolt._behaviourEffectMap;
+        const sideEffects = getSideEffects(action, behaviourEffectMap);
+        const sideEffectInstances = firebolt.sideEffects();
+
+        sideEffects.forEach(({ effects }) => {
+            effects.forEach((effect) => {
+                const name = effect.name;
+                const inst = sideEffectInstances[name];
+
+                if (inst) {
+                    inst.sourceInfo(() => unit.getSourceInfo());
+                    inst.layers(() => unit.layers());
+                    inst.plotPointsFromIdentifiers((...params) =>
+                        unit.getPlotPointsFromIdentifiers(...params));
+                    inst.drawingContext(() => unit.getDrawingContext());
+                    inst.valueParser(unit.valueParser());
+                }
+            });
+        });
+        addSelectedMeasuresInPayload(firebolt, unit, payload);
         targetFirebolt.dispatchBehaviour(action, payload, {
-            propagate: false,
-            applySideEffect: false
+            propagate: false
         });
 
         const identifiers = actions[action].propagationIdentifiers();

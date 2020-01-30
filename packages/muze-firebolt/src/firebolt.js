@@ -93,25 +93,16 @@ const cloneObj = (behaviourEffectMap) => {
 const getKeysFromCriteria = (criteria, firebolt) => {
     if (criteria) {
         const data = firebolt.data();
-        const { dimensionsMap, dimensions: dimArr } = firebolt._metaData;
+        const { dimensionsMap } = firebolt._metaData;
 
         let values = [];
         if (isSimpleObject(criteria)) {
             const dm = getDataModelFromRange(data, criteria);
-            const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
-                [ReservedFields.ROW_ID]: {
-                    index: Object.keys(dm.getFieldsConfig()).length,
-                    def: {
-                        name: ReservedFields.ROW_ID,
-                        type: FieldType.DIMENSION
-                    }
-                }
-            });
             dm.getData({ withUid: true }).data.forEach((row) => {
-                const dimKey = `${dimArr.map(d => row[fieldsConfig[d].index])}`;
-                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[dimKey] || [[]];
+                const id = row[row.length - 1];
+                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [[]];
                 measures.forEach((measureArr) => {
-                    values.push(`${[dimKey, ...measureArr]}`);
+                    values.push(`${[id, ...measureArr]}`);
                 });
             });
         } else {
@@ -553,18 +544,7 @@ export default class Firebolt {
     }
 
     getSelectionSets (action) {
-        const sourceId = this.id();
-        const propagationInf = this._propagationInf || {};
-        const propagationSource = propagationInf.sourceId;
-        let applicableSelectionSets = [];
-        if (propagationSource !== sourceId) {
-            applicableSelectionSets = [this._volatileSelectionSet[action]];
-        }
-
-        if (propagationSource) {
-            applicableSelectionSets.push(this.selectionSet()[action]);
-        }
-        return applicableSelectionSets;
+        return [this.selectionSet()[action]];
     }
 
     getFullData () {
@@ -594,6 +574,10 @@ export default class Firebolt {
 
     data () {
         return this.context.data();
+    }
+
+    currentData () {
+        return this.data();
     }
 
     triggerPhysicalAction (event, payload) {

@@ -1,4 +1,4 @@
-import { clone, unique, intersect } from 'muze-utils';
+import { clone, unique } from 'muze-utils';
 
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
@@ -115,49 +115,18 @@ export const unionSets = (firebolt, behaviours) => {
                 } else if (`${model.getSchema().map(d => d.name).sort()}` ===
                     `${existingModel.getSchema().map(d => d.name).sort()}`) {
                     uidSet[type] = unique([...uidSet[type], ...uids]);
-                    models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
+                    if (!existingModel.isEmpty() && !model.isEmpty()) {
+                        models[type] = existingModel.union(model);
+                    } else if (existingModel.isEmpty()) {
+                        models[type] = model;
+                    } else {
+                        models[type] = existingModel;
+                    }
                 } else {
                     existingModel = model;
                     uidSet[type] = uids;
                 }
                 combinedSet[type].uids = uidSet[type];
-                combinedSet[type].model = models[type];
-            });
-        }
-    });
-
-    return combinedSet;
-};
-
-export const intersectSets = (firebolt, behaviours) => {
-    let combinedSet = null;
-    const models = {
-        mergedEnter: null,
-        mergedExit: null
-    };
-    const uidSet = {
-        mergedEnter: [],
-        mergedExit: []
-    };
-
-    behaviours.forEach((behaviour) => {
-        const entryExitSet = firebolt._entryExitSet[behaviour];
-        if (entryExitSet) {
-            combinedSet = Object.assign(combinedSet || {}, clone(entryExitSet));
-            ['mergedEnter', 'mergedExit'].forEach((type) => {
-                const { model, uids } = entryExitSet[type];
-                let existingModel = models[type];
-
-                if (!existingModel) {
-                    existingModel = models[type] = model;
-                    uidSet[type] = uids;
-                } else if (`${model.getSchema().map(d => d.name).sort()}` ===
-                    `${existingModel.getSchema().map(d => d.name).sort()}`) {
-                    const commonSet = intersect(uidSet[type], uids, [id => id[0], id => id[0]]);
-                    uidSet[type] = [...commonSet];
-                    models[type] = model.isEmpty() ? existingModel : existingModel.union(model);
-                }
-                combinedSet[type].uids = unique(uidSet[type]);
                 combinedSet[type].model = models[type];
             });
         }

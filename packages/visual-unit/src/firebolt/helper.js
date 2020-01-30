@@ -1,5 +1,5 @@
 import { SpawnableSideEffect } from '@chartshq/muze-firebolt';
-import { FieldType, ReservedFields, defaultValue, isSimpleObject, getObjProp } from 'muze-utils';
+import { FieldType, defaultValue } from 'muze-utils';
 
 export const initSideEffects = (sideEffects, firebolt) => {
     for (const key in sideEffects) {

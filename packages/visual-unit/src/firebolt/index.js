@@ -80,6 +80,20 @@ export default class UnitFireBolt extends Firebolt {
         return propInf.propagate === false && propInf.applySideEffect !== false;
     }
 
+    data (...params) {
+        if (params.length) {
+            const model = params[0];
+            this.context.enableCaching().data(model);
+            return this;
+        }
+        return this.context.data();
+    }
+
+    resetData () {
+        this.context.clearCaching().resetData();
+        return this;
+    }
+
     onDataModelPropagation () {
         return (data, config) => {
             let isMutableAction = false;

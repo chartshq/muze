@@ -31,7 +31,7 @@ export default class SelectBehaviour extends PersistentBehaviour {
                     selectionSet.updateEntry();
                     selectionSet.add(addSet);
                 }
-                const { exitSet } = selectionSet.getSets();
+                const { exitSet } = selectionSet.getSets({ keys: true });
                 const mergedExitSet = getMergedSet(exitSet);
                 const completeSetCount = selectionSet.getCompleteSet().length;
                 if (mergedExitSet.length === completeSetCount) {

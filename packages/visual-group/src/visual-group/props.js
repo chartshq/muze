@@ -2,7 +2,11 @@ import { ROWS, COLUMNS, COLOR, SHAPE, SIZE, DETAIL, LAYERS, TRANSFORM, CONFIG } 
 
 export const PROPS = {
     alias: {},
-    data: {},
+    data: {
+        preset: (context) => {
+            context._prevData = null;
+        }
+    },
     cornerMatrices: {
         defaultValue: {
             topLeft: [],

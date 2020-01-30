@@ -1,7 +1,7 @@
+import { ReservedFields } from 'muze-utils';
 import {
     SELECTION_NEW_ENTRY, SELECTION_NEW_EXIT, SELECTION_NULL, SELECTION_OLD_ENTRY, SELECTION_OLD_EXIT
 } from '../enums/selection';
-import { ReservedFields } from 'muze-utils';
 /* eslint-disable guard-for-in */
 
 /**
@@ -160,7 +160,7 @@ class SelectionSet {
             completeSet: []
         };
         const dimVals = this._dimVals;
-        const { keepDims, fields = [] } = config;
+        const { keepDims, fields = [], keys = false } = config;
         const measureNames = this._measureNames;
 
         for (const key in set) {
@@ -175,6 +175,8 @@ class SelectionSet {
                     }
                     return dimVals[key][this._fieldIndices[field]];
                 });
+            } else if (keys) {
+                val = key;
             } else {
                 val = measureNamesArr.length ? [uidMap[key], measureNamesArr] : [uidMap[key]];
             }
