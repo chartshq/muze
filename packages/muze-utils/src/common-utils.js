@@ -39,7 +39,6 @@ import { nest } from 'd3-collection';
 import {
     interpolate,
     interpolateRgb,
-    interpolateHsl,
     piecewise,
     interpolateNumber,
     interpolateHslLong
