@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames":["legend"] ,
-		"subGroups":["crosstab-bar"]
+		"groupNames": ["update"],
+		"subGroups": ["legend"]
 	}
 }

@@ -100,9 +100,12 @@ export class LegendFireBolt extends Firebolt {
      * @return {bool} true if highlight should work on the legend item, false otherwise
      */
     shouldApplyHighlightEffect (behaviour) {
-        if (this.getEntryExitSet(HIGHLIGHT) && this.getEntryExitSet(SELECT)) {
-            const currentHighlightedSet = this.getEntryExitSet(HIGHLIGHT).mergedEnter.uids;
-            const deselectedLegendItemsSet = this.getEntryExitSet(SELECT).mergedExit.uids;
+        const highlightedSet = this.getEntryExitSet(HIGHLIGHT);
+        const selectionSet = this.getEntryExitSet(SELECT);
+
+        if (highlightedSet && selectionSet) {
+            const currentHighlightedSet = highlightedSet.mergedEnter.uids;
+            const deselectedLegendItemsSet = selectionSet.mergedExit.uids;
 
             // Find out if the currently highlighted item is also the deselected item
             if (behaviour === HIGHLIGHT) {
