@@ -126,17 +126,9 @@ export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
 };
 
 export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
-    const { interaction: { behaviours: behaviourConfs = {} } } = firebolt.context.config();
-    const unitFirebolt = unit.firebolt();
-
     behaviours.forEach((action) => {
-        const mode = behaviourConfs[action];
-        let targetFirebolt = unitFirebolt;
-        if (mode === COMMON_INTERACTION) {
-            targetFirebolt = firebolt;
-        }
 
-        const actions = targetFirebolt._actions.behavioural;
+        const actions = firebolt._actions.behavioural;
         payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
             unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));
 
@@ -160,17 +152,18 @@ export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
             });
         });
         addSelectedMeasuresInPayload(firebolt, unit, payload);
-        targetFirebolt.dispatchBehaviour(action, payload, {
+        payload.sourceCanvas = firebolt.sourceCanvas();
+        firebolt.dispatchBehaviour(action, payload, {
             propagate: false
         });
 
         const identifiers = actions[action].propagationIdentifiers();
 
         firebolt.propagate(action, payload, identifiers, {
-            sideEffects: getSideEffects(action, targetFirebolt._behaviourEffectMap),
+            sideEffects: getSideEffects(action, firebolt._behaviourEffectMap),
             sourceUnitId: unit.id(),
-            sourceId: targetFirebolt.id(),
-            propagationDataSource: targetFirebolt.getPropagationSource()
+            sourceId: firebolt.id(),
+            propagationDataSource: firebolt.getPropagationSource()
         });
     });
 };
