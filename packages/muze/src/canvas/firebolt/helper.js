@@ -1,7 +1,6 @@
 import { isSimpleObject, ReservedFields, FieldType } from 'muze-utils';
 import { getSideEffects, BEHAVIOURS } from '@chartshq/muze-firebolt';
 import { PSEUDO_SELECT } from '@chartshq/visual-unit/src/enums/behaviours';
-import { COMMON_INTERACTION } from '../../constants';
 
 export const addFacetDataAndMeasureNames = (data, facetData, measureNames) => {
     if (data === null) {
@@ -127,7 +126,6 @@ export const addSelectedMeasuresInPayload = (firebolt, unit, payload) => {
 
 export const dispatchBehaviours = (firebolt, { payload, unit, behaviours }) => {
     behaviours.forEach((action) => {
-
         const actions = firebolt._actions.behavioural;
         payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(),
             unit.layers().map(layer => Object.keys(layer.data().getFieldspace().getMeasure())));

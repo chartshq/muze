@@ -13384,6 +13384,29 @@ function () {
 
       return _toConsumableArray(this.config().value);
     }
+  }, {
+    key: "setRangeWithInterpolatedColors",
+    value: function setRangeWithInterpolatedColors(scaleType, scaleInfo) {
+      var originalDomain = scaleInfo.domain,
+          originalRange = scaleInfo.range;
+      var originalDomainLen = originalDomain.length;
+      var originalRangeLen = originalRange.length;
+
+      if (scaleType === _enums_constants__WEBPACK_IMPORTED_MODULE_2__["ORDINAL"] && originalDomainLen > originalRangeLen) {
+        var newRange = [];
+        var newDomain = originalDomain.map(function (d, i) {
+          return i / originalDomainLen;
+        });
+        this._linearScale = _scale_creator__WEBPACK_IMPORTED_MODULE_1__["scaleMap"].linear().range(this._config.range).domain(newDomain);
+
+        for (var i = 0, len = originalDomainLen; i < len; i++) {
+          var rangeVal = 1 / len * i;
+          newRange.push(_toConsumableArray(this._linearScale(rangeVal)));
+        }
+
+        this.scale().range(newRange);
+      }
+    }
     /**
      *
      *
@@ -13403,11 +13426,14 @@ function () {
 
         var domainRangeFn = this._colorStrategy.domainRange();
 
+        var scaleType = this._colorStrategy.scale;
         var scaleInfo = domainRangeFn(domain, this.config().stops, range);
         this.domain(scaleInfo.domain);
         scaleInfo.range && this.scale().range(scaleInfo.range);
         this.uniqueValues(scaleInfo.uniqueVals);
-        this.scale().domain(scaleInfo.scaleDomain || this.domain());
+        this.scale().domain(scaleInfo.scaleDomain || this.domain()); // Interpolate colors using linear scale if domain exceeds range
+
+        this.setRangeWithInterpolatedColors(scaleType, scaleInfo);
       }
 
       return this;
@@ -54880,58 +54906,25 @@ var prepareSelectionSetData = function prepareSelectionSetData(group, dataModel)
   var measureName = hasMeasures ? [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] : [];
   var keys = {};
   var dimensionsMap = {};
-  var unitDimsMap = {};
-  valueMatrix.each(function (cell) {
-    var unit = cell.source();
-    var dm = unit.data();
-    var unitDims = dm.getSchema().filter(function (field) {
-      return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
-    }).map(function (field) {
-      return field.name;
-    });
-    var facetFields = Object.keys(unit.facetFieldsMap());
-    unitDimsMap[unitDims] = {
-      inst: unit,
-      dims: [].concat(_toConsumableArray(facetFields), _toConsumableArray(unitDims))
-    };
-  });
   var groupDataMap = {};
   dataModel.getData({
     withUid: true
   }).data.forEach(function (row) {
-    for (var key in unitDimsMap) {
-      var dims = unitDimsMap[key].dims;
-      var dimKey = dims.map(function (dim) {
-        return row[fieldsConfig[dim].index];
-      });
-      groupDataMap[dimKey] = row;
-    }
+    var dimKey = row[row.length - 1];
+    groupDataMap[dimKey] = row;
   });
   valueMatrix.each(function (cell) {
     var unit = cell.source();
     var dm = unit.cachedData()[0];
     var layers = unit.layers();
-    var unitDims = dm.getSchema().filter(function (field) {
-      return field.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION;
-    }).map(function (field) {
-      return field.name;
-    });
-    var facetMap = unit.facetFieldsMap();
-    var facetFields = Object.keys(facetMap);
-    var unitFieldsConfig = dm.getFieldsConfig();
     var linkedRows = [];
 
     var _dm$getData = dm.getData(),
-        data = _dm$getData.data;
+        uidsArr = _dm$getData.uids;
 
     var uids = [];
-    data.forEach(function (row) {
-      var dimKey = [].concat(_toConsumableArray(facetFields.map(function (field) {
-        return facetMap[field];
-      })), _toConsumableArray(unitDims.map(function (d) {
-        return row[unitFieldsConfig[d].index];
-      })));
-      var linkedRow = groupDataMap[dimKey];
+    uidsArr.forEach(function (id) {
+      var linkedRow = groupDataMap[id];
 
       if (linkedRow) {
         linkedRows.push(linkedRow);
@@ -55525,21 +55518,8 @@ var dispatchBehaviours = function dispatchBehaviours(firebolt, _ref) {
   var payload = _ref.payload,
       unit = _ref.unit,
       behaviours = _ref.behaviours;
-
-  var _firebolt$context$con = firebolt.context.config(),
-      _firebolt$context$con2 = _firebolt$context$con.interaction.behaviours,
-      behaviourConfs = _firebolt$context$con2 === void 0 ? {} : _firebolt$context$con2;
-
-  var unitFirebolt = unit.firebolt();
   behaviours.forEach(function (action) {
-    var mode = behaviourConfs[action];
-    var targetFirebolt = unitFirebolt;
-
-    if (mode === _constants__WEBPACK_IMPORTED_MODULE_3__["COMMON_INTERACTION"]) {
-      targetFirebolt = firebolt;
-    }
-
-    var actions = targetFirebolt._actions.behavioural;
+    var actions = firebolt._actions.behavioural;
     payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(), unit.layers().map(function (layer) {
       return Object.keys(layer.data().getFieldspace().getMeasure());
     }));
@@ -55570,15 +55550,16 @@ var dispatchBehaviours = function dispatchBehaviours(firebolt, _ref) {
       });
     });
     addSelectedMeasuresInPayload(firebolt, unit, payload);
-    targetFirebolt.dispatchBehaviour(action, payload, {
+    payload.sourceCanvas = firebolt.sourceCanvas();
+    firebolt.dispatchBehaviour(action, payload, {
       propagate: false
     });
     var identifiers = actions[action].propagationIdentifiers();
     firebolt.propagate(action, payload, identifiers, {
-      sideEffects: Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, targetFirebolt._behaviourEffectMap),
+      sideEffects: Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, firebolt._behaviourEffectMap),
       sourceUnitId: unit.id(),
-      sourceId: targetFirebolt.id(),
-      propagationDataSource: targetFirebolt.getPropagationSource()
+      sourceId: firebolt.id(),
+      propagationDataSource: firebolt.getPropagationSource()
     });
   });
 };
@@ -60408,6 +60389,13 @@ function (_VisualEncoder) {
 
           if (!encodingObj.domain && field) {
             var domain = Object(_group_helper__WEBPACK_IMPORTED_MODULE_4__["retriveDomainFromData"])(groupedModel, field);
+            var fieldInstance = groupedModel.getFieldspace().fieldsObj()[field];
+            var isTemporalField = fieldInstance.schema().subtype === _enums_constants__WEBPACK_IMPORTED_MODULE_5__["TEMPORAL"];
+
+            if (isTemporalField) {
+              domain = fieldInstance.data();
+            }
+
             domains[field] = domain;
           }
         }
@@ -75868,6 +75856,7 @@ var payloadGenerator = {
   },
   __default: function __default(instance, selectionDataModel, propConfig) {
     var facetByFields = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+    var selectionSetFields = [];
     var propPayload = propConfig.payload,
         sourceIdentifiers = propConfig.sourceIdentifiers,
         excludeSelectedMeasures = propConfig.excludeSelectedMeasures;
@@ -75882,7 +75871,8 @@ var payloadGenerator = {
         type: muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION
       }
     }));
-    var selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
+    selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
+    !selectionSetFields.length && (selectionSetFields = [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID]);
 
     if (sourceIdentifiers) {
       (function () {
