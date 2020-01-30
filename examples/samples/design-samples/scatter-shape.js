@@ -40,12 +40,15 @@ d3.json('../../../data/cars.json', (data) => {
 		{
 			name: 'Year',
 			type: 'dimension',
-			subtype: 'temporal',
-			format: '%Y-%m-%d'
+			// subtype: 'temporal',
+			// format: '%Y-%m-%d'
 		},
 	];
 	let DataModel = muze.DataModel;
 	let dm = new DataModel(data, schema);
+	// const someMakers = ['amc', 'audi', 'bmw', 'buick', 'cadillac', 'capri', 'chevy', 'datsun', 'hi', 'nissan', 'renault', 'ford'];
+	// const someMakers = ['amc', 'audi', 'bmw', 'buick', 'cadillac', 'capri', 'chevy', 'datsun', 'hi'];
+	// dm = dm.select(d => someMakers.includes(d.Maker.internalValue));
 	// dm = dm.select(d => d.Year.internalValue === -19800000 || d.Year.internalValue === 31516200000);
 	// dm = dm.select(d => d.Origin.value !== 'European Union');
     // const makers = ['bmw', 'ford', 'toyota', 'amc'];

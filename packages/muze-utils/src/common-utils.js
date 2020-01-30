@@ -759,8 +759,6 @@ const numberInterpolator = () => interpolateNumber;
  */
 const colorInterpolator = () => interpolateRgb;
 
-const hslColorInterpolator = () => interpolateHsl;
-
 /**
  * Gets the hsl interpolator from d3 color
  *
@@ -1631,7 +1629,6 @@ export {
     getDataModelFromIdentifiers,
     getDataModelFromRange,
     colorInterpolator,
-    hslColorInterpolator,
     numberInterpolator,
     ERROR_MSG,
     reqAnimFrame,

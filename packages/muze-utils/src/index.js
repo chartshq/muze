@@ -42,7 +42,6 @@ export {
     ERROR_MSG,
     interpolator,
     colorInterpolator,
-    hslColorInterpolator,
     numberInterpolator,
     piecewiseInterpolator,
     reqAnimFrame,
