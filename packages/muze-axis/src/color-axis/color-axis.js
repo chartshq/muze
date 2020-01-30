@@ -5,7 +5,7 @@
  */
 import { getUniqueId, generateGetterSetters, rgbToHsv, defaultValue } from 'muze-utils';
 import { createScale, getScheme, getSchemeType, scaleMap } from '../scale-creator';
-import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
+import { CONTINOUS, DISCRETE, ORDINAL, COLOR } from '../enums/constants';
 import { strategyGetter } from './color-strategy';
 import { DEFAULT_CONFIG } from './defaults';
 import { PROPS, getHslString, getActualHslColor } from './props';
@@ -128,11 +128,13 @@ export default class ColorAxis {
             const range = scale.range ? scale.range() : null;
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
 
-            if (color && typeof color === 'string') {
-                const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
-                return rgbToHsv(...col);
+            if (color) {
+                if (typeof color === 'string') {
+                    const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
+                    return rgbToHsv(...col);
+                }
+                return [...color];
             }
-            return [...color];
         }
         return [...this.config().value];
     }
@@ -149,6 +151,7 @@ export default class ColorAxis {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const domainRangeFn = this._colorStrategy.domainRange();
+            const scaleType = this._colorStrategy.scale;
             const scaleInfo = domainRangeFn(domain, this.config().stops, range);
             const { domain: originalDomain, range: originalRange } = scaleInfo;
 
@@ -158,7 +161,7 @@ export default class ColorAxis {
             this.scale().domain(scaleInfo.scaleDomain || this.domain());
 
             // Interpolate colors using linear scale if domain exceeds range
-            if (originalDomain.length > originalRange.length) {
+            if (scaleType === ORDINAL && originalDomain.length > originalRange.length) {
                 const newRange = [];
                 this._linearScale = scaleMap.linear()
                 .range(this._config.range)
