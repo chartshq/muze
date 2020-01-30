@@ -9,7 +9,8 @@ export const DEFAULT_CONFIG = {
         behaviours: {
             highlight: COMMON_INTERACTION,
             select: COMMON_INTERACTION,
-            brush: COMMON_INTERACTION
+            brush: COMMON_INTERACTION,
+            filter: COMMON_INTERACTION
         },
         tooltip: {
 

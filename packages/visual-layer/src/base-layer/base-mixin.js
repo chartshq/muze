@@ -299,13 +299,13 @@ export const BaseLayerMixin = superclass => class extends superclass {
         }, {});
         const measures = Object.keys(this.data().getFieldspace().getMeasure());
 
-        const filterFn = (fields, i) => {
+        const dm = model.select((fields) => {
             const row = `${targetFields.map((field) => {
                 let val;
                 if (field === ReservedFields.MEASURE_NAMES) {
                     val = measures;
                 } else if (field === ReservedFields.ROW_ID) {
-                    val = i;
+                    val = fields[ReservedFields.ROW_ID];
                 } else {
                     const currentField = fields[field];
                     const isFieldInvalid = currentField instanceof InvalidAwareTypes;
@@ -315,24 +315,16 @@ export const BaseLayerMixin = superclass => class extends superclass {
                 return val;
             })}`;
             return row in payloadMap;
-        };
-
-        const dm = model.select(filterFn, {});
-
-        // Need to find a better way to do this instead of iterating the full data
-        const currentSetIds = this.data().select(filterFn, {
+        }, {
             saveChild: false
-        }).getUids();
+        });
 
-        const uidMap = currentSetIds.reduce((acc, v) => {
-            acc[v] = true;
-            return acc;
-        }, {});
+        const uidArr = dm.getUids();
 
         return {
             model: dm,
-            uids: uids.filter(d => uidMap[d[0]]),
-            length: currentSetIds.length
+            uids: uids.filter(d => uidArr.find(id => `${id}` === `${d[0]}`)),
+            length: uidArr.length
         };
     }
 
@@ -471,16 +463,14 @@ export const BaseLayerMixin = superclass => class extends superclass {
         });
 
         const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
-        if (measures.length) {
-            identifiers[0].push(ReservedFields.MEASURE_NAMES);
-            identifiers[1].push(measures.join());
-        }
-
         if (allMeasures) {
             identifiers[0].push(...[ReservedFields.ROW_ID]);
             identifiers[1].push(...[rowId]);
         }
-
+        if (measures.length) {
+            identifiers[0].push(ReservedFields.MEASURE_NAMES);
+            identifiers[1].push(measures.join());
+        }
         return identifiers;
     }
 

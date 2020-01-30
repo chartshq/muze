@@ -1,3 +1,5 @@
+import { intersect } from 'muze-utils';
+
 export const spaceOutBoxes = (boxes, extent, showVertically) => {
     let y;
     let height;
@@ -44,4 +46,15 @@ export const spaceOutBoxes = (boxes, extent, showVertically) => {
         }
     }
     return boxes;
+};
+
+export const shouldApplySideEffect = (dm, sideEffect) => {
+    const propagationInf = sideEffect.firebolt.getPropagationInf();
+    if (propagationInf.sourceIdentifiers && dm) {
+        const { fields } = propagationInf.sourceIdentifiers;
+        const sourceDims = fields.filter(field => field.type === 'dimension').map(d => d.name);
+        const dims = Object.keys(dm.getFieldspace().getDimension());
+        return intersect(sourceDims, dims).length;
+    }
+    return true;
 };

@@ -3,7 +3,6 @@ import { Firebolt, SIDE_EFFECTS } from '@chartshq/muze-firebolt';
 import { payloadGenerator } from './payload-generator';
 import {
     isSideEffectEnabled,
-    sanitizePayloadCriteria,
     dispatchSecondaryActions,
     createMapByDimensions
 } from './helper';
@@ -81,18 +80,18 @@ export default class UnitFireBolt extends Firebolt {
         return propInf.propagate === false && propInf.applySideEffect !== false;
     }
 
-    sanitizePayload (payload) {
-        const { criteria } = payload;
-        const { allFields: fields, dimensionsMap } = this._metaData;
+    data (...params) {
+        if (params.length) {
+            const model = params[0];
+            this.context.enableCaching().data(model);
+            return this;
+        }
+        return this.context.data();
+    }
 
-        return Object.assign({}, payload,
-            {
-                criteria: sanitizePayloadCriteria(criteria, fields, {
-                    dm: this.data(),
-                    dimensionsMap,
-                    dimsMapGetter: this._dimsMapGetter
-                })
-            });
+    resetData () {
+        this.context.clearCaching().resetData();
+        return this;
     }
 
     onDataModelPropagation () {
