@@ -48,6 +48,16 @@ export const fixScrollBarConfig = (config) => {
     return config;
 };
 
+export const excludeKeys = (config, keys) => {
+    const emptyValueKeyObject = {};
+    keys.forEach((key) => {
+        if (config[key] && Object.keys(config[key]).length) {
+            emptyValueKeyObject[key] = {};
+        }
+    });
+    return emptyValueKeyObject;
+};
+
 export const setLayoutInfForUnits = (context) => {
     const layoutManager = context._layoutManager;
     const gridLayout = layoutManager.getComponent(GRID);

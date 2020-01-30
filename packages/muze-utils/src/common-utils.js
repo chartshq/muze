@@ -1381,7 +1381,7 @@ const nearestSortingDetails = (dataModel) => {
 };
 
 const sortingOrder = (a, b) => {
-    const sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes)
+    const sortOrder = !(a instanceof InvalidAwareTypes || b instanceof InvalidAwareTypes)
     ? a.localeCompare(b)
     : 1;
     return sortOrder;
