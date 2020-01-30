@@ -51,10 +51,7 @@
         let rootData = new DataModel(data, schema);
 
         env = env.data(rootData).minUnitHeight(40).minUnitWidth(40);
-        let mountPoint = document.getElementById('chart')
         window.canvas = env.canvas();
-        let rows = ['Horsepower'];
-        let columns = ['Year'];
         
         canvas
         .data(rootData)

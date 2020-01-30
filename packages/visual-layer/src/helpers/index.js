@@ -10,8 +10,8 @@ import {
     COORD_TYPES,
     CommonProps,
     defaultValue,
-    InvalidAwareTypes,
-    isSimpleObject
+    isSimpleObject,
+    InvalidAwareTypes
 } from 'muze-utils';
 import { ScaleType } from '@chartshq/muze-axis';
 import { transformFactory } from '@chartshq/transform';
@@ -79,19 +79,13 @@ export const setNullsInStack = (transformedData, schema, value, setNulls) => {
     transformedData.forEach((seriesData) => {
         seriesData.forEach((dataObj) => {
             if (dataObj.data[uniqueFieldIndex] === null && !setNulls) {
-                dataObj[0] = null;
-                dataObj[1] = null;
+                dataObj[0] = new InvalidAwareTypes();
+                dataObj[1] = new InvalidAwareTypes();
             }
         });
     });
     return transformedData;
 };
-export const setNulls = (transformedData, val) => transformedData.map((seriesData) => {
-    if (val && (seriesData[val.index] instanceof InvalidAwareTypes)) {
-        seriesData[val.index] = null;
-    }
-    return seriesData;
-});
 
 /**
  *
@@ -124,8 +118,6 @@ export const transformData = (dataModel, config, transformType, encodingFieldInf
 
     if (transformType === STACK) {
         transformedData = setNullsInStack(transformedData, schema, value, setNullData);
-    } else {
-        transformedData = setNulls(transformedData, dataModel.getFieldsConfig()[value]);
     }
     return transformedData;
 };

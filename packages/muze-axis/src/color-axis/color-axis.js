@@ -4,8 +4,8 @@
  * plots.
  */
 import { getUniqueId, generateGetterSetters, rgbToHsv, defaultValue } from 'muze-utils';
-import { createScale, getScheme, getSchemeType } from '../scale-creator';
-import { CONTINOUS, DISCRETE, COLOR } from '../enums/constants';
+import { createScale, getScheme, getSchemeType, scaleMap } from '../scale-creator';
+import { CONTINOUS, DISCRETE, ORDINAL, COLOR } from '../enums/constants';
 import { strategyGetter } from './color-strategy';
 import { DEFAULT_CONFIG } from './defaults';
 import { PROPS, getHslString, getActualHslColor } from './props';
@@ -127,6 +127,7 @@ export default class ColorAxis {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const color = this._colorStrategy.value(range)(domainVal, scale, this.domain(), this.uniqueValues());
+
             if (color) {
                 if (typeof color === 'string') {
                     const col = color.substring(color.indexOf('(') + 1, color.lastIndexOf(')')).split(/,\s*/);
@@ -136,6 +137,27 @@ export default class ColorAxis {
             }
         }
         return [...this.config().value];
+    }
+
+    setRangeWithInterpolatedColors (scaleType, scaleInfo) {
+        const { domain: originalDomain, range: originalRange } = scaleInfo;
+        const originalDomainLen = originalDomain.length;
+        const originalRangeLen = originalRange.length;
+
+        if (scaleType === ORDINAL && originalDomainLen > originalRangeLen) {
+            const newRange = [];
+            const newDomain = originalDomain.map((d, i) => i / originalDomainLen);
+
+            this._linearScale = scaleMap.linear()
+                .range(this._config.range)
+                .domain(newDomain);
+
+            for (let i = 0, len = originalDomainLen; i < len; i++) {
+                const rangeVal = (1 / len) * i;
+                newRange.push([...this._linearScale(rangeVal)]);
+            }
+            this.scale().range(newRange);
+        }
     }
 
     /**
@@ -150,12 +172,16 @@ export default class ColorAxis {
             const scale = this.scale();
             const range = scale.range ? scale.range() : null;
             const domainRangeFn = this._colorStrategy.domainRange();
+            const scaleType = this._colorStrategy.scale;
             const scaleInfo = domainRangeFn(domain, this.config().stops, range);
 
             this.domain(scaleInfo.domain);
             scaleInfo.range && this.scale().range(scaleInfo.range);
             this.uniqueValues(scaleInfo.uniqueVals);
             this.scale().domain(scaleInfo.scaleDomain || this.domain());
+
+            // Interpolate colors using linear scale if domain exceeds range
+            this.setRangeWithInterpolatedColors(scaleType, scaleInfo);
         }
         return this;
     }
