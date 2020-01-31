@@ -101,9 +101,9 @@ const createJoinedKeys = keys => keys.map(e => ({
 const setDefaultConfigForFacet = (facetInfo, projectionInfo, config) => {
     let conf = {};
 
-    if (facetInfo.allFacets.length || projectionInfo.indices.length > 1) {
-        const { facetsUserConfig, border } = config;
-        const { isBorderPresent, isGridLinePresent } = facetsUserConfig;
+    if (config && (facetInfo.allFacets.length || projectionInfo.indices.length > 1)) {
+        const { facetsUserConfig = {}, border } = config;
+        const { isBorderPresent = {}, isGridLinePresent = {} } = facetsUserConfig;
         const gridLinesShowLength = Object.keys(isGridLinePresent).length;
         const {
             width: borderWidth,

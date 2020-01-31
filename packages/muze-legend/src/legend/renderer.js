@@ -292,7 +292,9 @@ export const renderDiscreteItem = (context, container) => {
     } = context.config();
     const {
         maxIconWidth,
-        padding
+        padding,
+        margin,
+        border
     } = context.measurement();
     const {
             width: iconWidth,
@@ -300,6 +302,7 @@ export const renderDiscreteItem = (context, container) => {
             color,
             className
         } = item.icon;
+
     const textOrientation = item.text.orientation;
     const formatter = item.text.formatter;
 
@@ -312,7 +315,11 @@ export const renderDiscreteItem = (context, container) => {
     });
 
     const marginHorizontalBuffer = HORIZONTAL_BUFFER;
-    const marginVerticalBuffer = textOrientation === TOP || textOrientation === BOTTOM ? 0 : VERTICAL_BUFFER;
+
+    const bufferCondition = textOrientation === TOP || textOrientation === BOTTOM
+    || !padding || !margin || !border;
+
+    const marginVerticalBuffer = bufferCondition ? 0 : VERTICAL_BUFFER;
 
     labelManager.setStyle(context._computedStyle);
     const dataArr = context.metaData();
