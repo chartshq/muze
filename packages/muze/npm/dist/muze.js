@@ -16199,6 +16199,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return GenericBehaviour; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../helper */ "./packages/muze-firebolt/src/helper/index.js");
+/* harmony import */ var _entry_exit_set__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../entry-exit-set */ "./packages/muze-firebolt/src/entry-exit-set.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -16220,6 +16221,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 
 
 
@@ -16255,12 +16257,10 @@ function () {
   _createClass(GenericBehaviour, [{
     key: "dispatch",
     value: function dispatch(payload) {
-      var _this = this;
-
       var criteria = payload.criteria;
       var firebolt = this.firebolt;
       var formalName = this.constructor.formalName();
-      var selectionSets = firebolt.getSelectionSets(formalName);
+      var selectionSet = firebolt.getSelectionSet(formalName);
       var propInf = this.firebolt.getPropagationInf();
 
       var _this$getAddSetFromCr = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf()),
@@ -16268,18 +16268,16 @@ function () {
           uids = _this$getAddSetFromCr.uids;
 
       this._payload = payload;
-      selectionSets.forEach(function (selectionSet) {
-        _this.setSelectionSet(uids, selectionSet, {
-          filteredDataModel: filteredDataModel,
-          payload: payload
-        });
-
-        if (!propInf.sourceId) {
-          _this.propagationIdentifiers(selectionSet, payload);
-        }
-
-        _this.entryExitSet(selectionSet, filteredDataModel, payload);
+      this.setSelectionSet(uids, selectionSet, {
+        filteredDataModel: filteredDataModel,
+        payload: payload
       });
+
+      if (!propInf.sourceId) {
+        this.propagationIdentifiers(selectionSet, payload);
+      }
+
+      this.entryExitSet(selectionSet, filteredDataModel, payload);
     }
   }, {
     key: "getAddSetFromCriteria",
@@ -16344,33 +16342,31 @@ function () {
           sourceId = _this$firebolt$getPro.sourceId;
 
       var data = this.firebolt.data();
-      var model = null;
-
-      if (type === 'mergedEnter') {
-        if (sourceId) {
-          model = filteredDataModel || null;
-        } else {
-          var uidMap = set.reduce(function (acc, v) {
-            acc[v[0]] = 1;
-            return acc;
-          }, {});
-          model = data.select(function (fields) {
-            return fields[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID] in uidMap;
-          }, {
-            saveChild: false
-          });
-        }
-      } else if (type === 'mergedExit') {
-        model = null;
-      }
-
-      var aggFns = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["retrieveNearestGroupByReducers"])(model);
-      return {
+      return new _entry_exit_set__WEBPACK_IMPORTED_MODULE_2__["EntryExitSet"]({
         uids: set,
-        length: set.length,
-        model: model,
-        aggFns: aggFns
-      };
+        filteredModel: function filteredModel(fullData) {
+          var model = null;
+
+          if (type === 'complete') {
+            return fullData;
+          } else if (type === 'mergedEnter' && sourceId) {
+            model = filteredDataModel;
+          } else {
+            var uidMap = set.reduce(function (acc, v) {
+              acc[v[0]] = 1;
+              return acc;
+            }, {});
+            model = fullData.select(function (fields) {
+              return fields[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID] in uidMap;
+            }, {
+              saveChild: false
+            });
+          }
+
+          return model;
+        },
+        data: data
+      });
     }
   }, {
     key: "propagationIdentifiers",
@@ -16402,7 +16398,10 @@ function () {
             return d === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID || fieldsConfig[d] && fieldsConfig[d].def.subtype === muze_utils__WEBPACK_IMPORTED_MODULE_0__["DimensionSubtype"].CATEGORICAL;
           });
 
-          var _selectionSet$getSets2 = selectionSet.getSets(),
+          var _selectionSet$getSets2 = selectionSet.getSets({
+            keepDims: true,
+            fields: allFields
+          }),
               mergedEnter = _selectionSet$getSets2.mergedEnter;
 
           propData = {
@@ -16413,7 +16412,7 @@ function () {
             }),
             range: this.firebolt.getRangeFromIdentifiers({
               criteria: criteria,
-              entrySet: mergedEnter,
+              entrySet: selectionSet.getSets().mergedEnter,
               fields: otherFields
             }),
             identifiers: [[].concat(_toConsumableArray(allFields), [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES])].concat(_toConsumableArray(mergedEnter))
@@ -17383,11 +17382,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enums/behaviours */ "./packages/muze-firebolt/src/enums/behaviours.js");
 /* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/helper/index.js");
 var _behaviourEffectMap;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 
 
 
@@ -17450,8 +17447,17 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
       var brushEntrySet = sideEffect.firebolt.getEntryExitSet(_enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"]);
 
       if (selectEntrySet || brushEntrySet) {
-        var unionedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["unionSets"])(sideEffect.firebolt, [_enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["SELECT"], _enums_behaviours__WEBPACK_IMPORTED_MODULE_1__["BRUSH"]]);
-        var uids = unionedSet.mergedEnter.uids;
+        var uids = [];
+        var returnEntrySet = null;
+
+        if (selectEntrySet.mergedEnter.uids.length) {
+          uids = selectEntrySet.mergedEnter.uids;
+          returnEntrySet = selectEntrySet;
+        } else if (brushEntrySet.mergedEnter.uids.length) {
+          uids = brushEntrySet.mergedEnter.uids;
+          returnEntrySet = brushEntrySet;
+        }
+
         var highlightUids = selectionSet.mergedEnter.uids;
 
         if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(uids, highlightUids, [function (id) {
@@ -17459,7 +17465,7 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
         }, function (id) {
           return id[0];
         }]).length) {
-          return unionedSet;
+          return returnEntrySet;
         }
       }
 
@@ -17497,6 +17503,71 @@ var behaviourEffectMap = (_behaviourEffectMap = {}, _defineProperty(_behaviourEf
     strategy: 'pseudoFocus'
   }
 }]), _behaviourEffectMap);
+
+/***/ }),
+
+/***/ "./packages/muze-firebolt/src/entry-exit-set.js":
+/*!******************************************************!*\
+  !*** ./packages/muze-firebolt/src/entry-exit-set.js ***!
+  \******************************************************/
+/*! exports provided: EntryExitSet */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EntryExitSet", function() { return EntryExitSet; });
+/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+var EntryExitSet =
+/*#__PURE__*/
+function () {
+  function EntryExitSet(_ref) {
+    var uids = _ref.uids,
+        data = _ref.data,
+        filteredModel = _ref.filteredModel;
+
+    _classCallCheck(this, EntryExitSet);
+
+    this._uids = uids;
+    this._data = data;
+    this._filteredModel = filteredModel;
+    this._model = null;
+  }
+
+  _createClass(EntryExitSet, [{
+    key: "uids",
+    get: function get() {
+      return this._uids;
+    }
+  }, {
+    key: "model",
+    get: function get() {
+      if (!this._model) {
+        this._model = this._filteredModel(this._data);
+      }
+
+      return this._model;
+    }
+  }, {
+    key: "length",
+    get: function get() {
+      return this._uids.length;
+    }
+  }, {
+    key: "aggFns",
+    get: function get() {
+      return Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["retrieveNearestGroupByReducers"])(this._model);
+    }
+  }]);
+
+  return EntryExitSet;
+}();
 
 /***/ }),
 
@@ -17644,12 +17715,12 @@ var HIGHLIGHT_SUMMARY = 'highlightSummary';
 /*!************************************************!*\
   !*** ./packages/muze-firebolt/src/firebolt.js ***!
   \************************************************/
-/*! exports provided: sanitizePayloadCriteria, default */
+/*! exports provided: getUidsFromCriteria, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "sanitizePayloadCriteria", function() { return sanitizePayloadCriteria; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getUidsFromCriteria", function() { return getUidsFromCriteria; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Firebolt; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _enums_actions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./enums/actions */ "./packages/muze-firebolt/src/enums/actions.js");
@@ -17677,7 +17748,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-var sanitizePayloadCriteria = function sanitizePayloadCriteria(data, _ref) {
+var getUidsFromCriteria = function getUidsFromCriteria(data, _ref) {
   var dm = _ref.dm,
       dimensionsMap = _ref.dimensionsMap,
       dimsMapGetter = _ref.dimsMapGetter,
@@ -17734,7 +17805,14 @@ var sanitizePayloadCriteria = function sanitizePayloadCriteria(data, _ref) {
             uids.push([].concat(_toConsumableArray(rowId), _toConsumableArray(addMeasures ? measures : [])));
           });
         } else {
-          uids.push([rowId, row[fieldIndexMap[measureNameField]]]);
+          var _measuresArr = row[fieldIndexMap[measureNameField]];
+
+          if (!_measuresArr.length) {
+            _measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [];
+          }
+
+          var uidArr = _measuresArr.length ? [rowId, _measuresArr] : [rowId];
+          uids.push(uidArr);
         }
       });
     }
@@ -17784,7 +17862,7 @@ var getKeysFromCriteria = function getKeysFromCriteria(criteria, firebolt) {
       });
     } else {
       var dimsMapGetter = firebolt._dimsMapGetter;
-      values = sanitizePayloadCriteria(criteria, {
+      values = getUidsFromCriteria(criteria, {
         dm: firebolt.data(),
         dimensionsMap: dimensionsMap,
         dimsMapGetter: dimsMapGetter
@@ -17925,9 +18003,6 @@ function () {
       sideEffects.forEach(function (sideEffect) {
         var effects = sideEffect.effects;
         var behaviours = sideEffect.behaviours;
-
-        var combinedSet = _this.mergeSelectionSets(behaviours);
-
         effects.forEach(function (effect) {
           var options = {};
           var name;
@@ -17939,12 +18014,6 @@ function () {
             name = effect;
           }
 
-          var set = options.set;
-
-          if (set) {
-            combinedSet = _this.mergeSelectionSets(set);
-          }
-
           var sideEffectInstance = sideEffectStore[name];
 
           if (sideEffectInstance && sideEffectInstance.isEnabled()) {
@@ -17953,10 +18022,10 @@ function () {
             })) {
               queuedSideEffects["".concat(name, "-").concat(behaviours.join())] = {
                 name: name,
-                params: [combinedSet, payload, options]
+                params: [selectionSet, payload, options]
               };
             } else {
-              _this.dispatchSideEffect(name, combinedSet, payload, options);
+              _this.dispatchSideEffect(name, selectionSet, payload, options);
             }
           }
         });
@@ -18317,9 +18386,9 @@ function () {
       };
     }
   }, {
-    key: "getSelectionSets",
-    value: function getSelectionSets(action) {
-      return [this.selectionSet()[action]];
+    key: "getSelectionSet",
+    value: function getSelectionSet(action) {
+      return this.selectionSet()[action];
     }
   }, {
     key: "getFullData",
@@ -18345,11 +18414,6 @@ function () {
     key: "getEntryExitSet",
     value: function getEntryExitSet(behaviour) {
       return this._entryExitSet[behaviour];
-    }
-  }, {
-    key: "mergeSelectionSets",
-    value: function mergeSelectionSets(behaviours) {
-      return Object(_helper__WEBPACK_IMPORTED_MODULE_3__["unionSets"])(this, behaviours);
     }
   }, {
     key: "data",
@@ -18447,7 +18511,7 @@ function () {
 /*!****************************************************!*\
   !*** ./packages/muze-firebolt/src/helper/index.js ***!
   \****************************************************/
-/*! exports provided: initializeSideEffects, setSideEffectConfig, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getSideEffects, unionSets */
+/*! exports provided: initializeSideEffects, setSideEffectConfig, initializeBehaviouralActions, initializePhysicalActions, changeSideEffectAvailability, getMergedSet, getSourceFields, getSideEffects */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -18460,7 +18524,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMergedSet", function() { return getMergedSet; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSourceFields", function() { return getSourceFields; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSideEffects", function() { return getSideEffects; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unionSets", function() { return unionSets; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -18567,56 +18630,6 @@ var getSideEffects = function getSideEffects(behaviour, behaviourEffectMap) {
   }
 
   return sideEffects;
-};
-var unionSets = function unionSets(firebolt, behaviours) {
-  var combinedSet = null;
-  var models = {
-    mergedEnter: null,
-    mergedExit: null
-  };
-  var uidSet = {
-    mergedEnter: [],
-    mergedExit: []
-  };
-  behaviours.forEach(function (behaviour) {
-    var entryExitSet = firebolt._entryExitSet[behaviour];
-
-    if (entryExitSet) {
-      combinedSet = Object.assign(combinedSet || {}, Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["clone"])(entryExitSet));
-      ['mergedEnter', 'mergedExit'].forEach(function (type) {
-        var _entryExitSet$type = entryExitSet[type],
-            model = _entryExitSet$type.model,
-            uids = _entryExitSet$type.uids;
-        var existingModel = models[type];
-
-        if (!existingModel) {
-          existingModel = models[type] = model;
-          uidSet[type] = uids;
-        } else if ("".concat(model.getSchema().map(function (d) {
-          return d.name;
-        }).sort()) === "".concat(existingModel.getSchema().map(function (d) {
-          return d.name;
-        }).sort())) {
-          uidSet[type] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["unique"])([].concat(_toConsumableArray(uidSet[type]), _toConsumableArray(uids)));
-
-          if (!existingModel.isEmpty() && !model.isEmpty()) {
-            models[type] = existingModel.union(model);
-          } else if (existingModel.isEmpty()) {
-            models[type] = model;
-          } else {
-            models[type] = existingModel;
-          }
-        } else {
-          existingModel = model;
-          uidSet[type] = uids;
-        }
-
-        combinedSet[type].uids = uidSet[type];
-        combinedSet[type].model = models[type];
-      });
-    }
-  });
-  return combinedSet;
 };
 
 /***/ }),
@@ -20989,35 +21002,34 @@ var strategies = {
         interactionType: 'focusStroke',
         apply: true
       });
-      var payload = firebolt.getPayload(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT);
+      var payload = firebolt.getPayload(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT) || {};
       var entryExitSet = firebolt.getEntryExitSet(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT);
       var layers = firebolt.context.layers();
+      layers.forEach(function (layer) {
+        var layerName = layer.constructor.formalName();
 
-      if (payload.target && entryExitSet) {
-        layers.forEach(function (layer) {
-          var layerName = layer.constructor.formalName();
+        if (layerName === 'area') {
+          context.applyInteractionStyle(mergedExit, {
+            interactionType: 'focus',
+            apply: false
+          }, [layer]);
+          context.applyInteractionStyle(mergedEnter, {
+            interactionType: 'focus',
+            apply: true
+          }, [layer]);
+        } else {
+          context.applyInteractionStyle(mergedExit, {
+            interactionType: 'focus',
+            apply: true
+          }, [layer]);
+          context.applyInteractionStyle(mergedEnter, {
+            interactionType: 'focus',
+            apply: false
+          }, [layer]);
+        }
 
-          if (layerName === 'area') {
-            context.applyInteractionStyle(mergedExit, {
-              interactionType: 'focus',
-              apply: false
-            }, [layer]);
-            context.applyInteractionStyle(mergedEnter, {
-              interactionType: 'focus',
-              apply: true
-            }, [layer]);
-          } else {
-            context.applyInteractionStyle(mergedExit, {
-              interactionType: 'focus',
-              apply: true
-            }, [layer]);
-            context.applyInteractionStyle(mergedEnter, {
-              interactionType: 'focus',
-              apply: false
-            }, [layer]);
-          } // get uids of only the currently highlighted point
-
-
+        if (payload.target !== null && entryExitSet) {
+          // get uids of only the currently highlighted point
           var actualPoint = layer.getUidsFromPayload(entryExitSet.mergedEnter, payload.target);
           var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(mergedEnter.uids, actualPoint.uids, [function (v) {
             return v[0];
@@ -21040,8 +21052,8 @@ var strategies = {
               apply: false
             }, [layer]);
           }
-        });
-      }
+        }
+      });
     }
   },
   highlight: function highlight(set, context, payload, excludeSetIds) {
@@ -26383,21 +26395,6 @@ function () {
       }
 
       return [[fieldName], [data.rawVal]];
-    }
-  }, {
-    key: "getValueFromId",
-    value: function getValueFromId(id) {
-      var fields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-      var data = this.data();
-
-      if (fields.length) {
-        id = Number(id);
-        return [data.find(function (d) {
-          return id === d.id;
-        }).rawVal];
-      }
-
-      return [];
     }
   }, {
     key: "getRangeFromIdentifiers",
@@ -46474,11 +46471,12 @@ __webpack_require__.r(__webpack_exports__);
 /*!*************************************************!*\
   !*** ./packages/muze-utils/src/common-utils.js ***!
   \*************************************************/
-/*! exports provided: arraysEqual, componentRegistry, mix, partition, getArrayIndexMap, getValueParser, require, intersect, difference, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColor, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, transformToHex, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, unique, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, getReadableTicks, dmMultipleSelection, pointWithinCircle */
+/*! exports provided: getIndexMap, arraysEqual, componentRegistry, mix, partition, getArrayIndexMap, getValueParser, require, intersect, difference, Scales, Symbols, pathInterpolators, stack, nestCollection, getArrayDiff, getSymbol, transformColor, transformColors, detectColor, hexToHsv, hslToRgb, rgbToHsv, transformToHex, hsvToRgb, hslaToRgb, concatModels, toArray, angleToRadian, escapeHTML, generateGetterSetters, getArraySum, interpolator, piecewiseInterpolator, getDataModelFromIdentifiers, getDataModelFromRange, colorInterpolator, numberInterpolator, ERROR_MSG, reqAnimFrame, nextAnimFrame, transposeArray, cancelAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, symbolFns, easeFns, unique, clone, isEqual, interpolateArray, getMinPoint, defaultValue, getMaxPoint, getClosestIndexOf, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isSimpleObject, nextFrame, registerListeners, replaceCSSPrefix, getObjProp, extendsClass, assembleModelFromIdentifiers, isValidValue, hslInterpolator, getSmallestDiff, getNearestValue, retrieveNearestGroupByReducers, nearestSortingDetails, createSelection, formatTemporal, temporalFields, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, getReadableTicks, dmMultipleSelection, pointWithinCircle */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getIndexMap", function() { return getIndexMap; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "arraysEqual", function() { return arraysEqual; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "componentRegistry", function() { return componentRegistry; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mix", function() { return mix; });
@@ -48615,6 +48613,14 @@ var dmMultipleSelection = function dmMultipleSelection(targetData, dm) {
   return filterFn;
 };
 
+var getIndexMap = function getIndexMap(arr, prop) {
+  return arr.reduce(function (acc, v, i) {
+    var key = prop ? v[prop] : v;
+    acc[key] = i;
+    return acc;
+  }, {});
+};
+
 
 
 /***/ }),
@@ -48770,7 +48776,7 @@ var OFFSET_WIGGLE = 'wiggle';
 /*!******************************************!*\
   !*** ./packages/muze-utils/src/index.js ***!
   \******************************************/
-/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColor, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, difference, getArrayIndexMap, arraysEqual, getReadableTicks, unique, dmMultipleSelection, pointWithinCircle, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS, RTree */
+/*! exports provided: InvalidAwareTypes, DataModel, ReservedFields, CommonProps, COORD_TYPES, STATE_NAMESPACES, scales, colorSchemes, getNearestValue, getValueParser, transformColor, transformColors, detectColor, hslToRgb, rgbToHsv, hexToHsv, hsvToRgb, hslaToRgb, escapeHTML, angleToRadian, generateGetterSetters, getArraySum, ERROR_MSG, interpolator, colorInterpolator, numberInterpolator, piecewiseInterpolator, reqAnimFrame, cancelAnimFrame, nextAnimFrame, getMax, getMin, getDomainFromData, getUniqueId, mergeRecursive, unionDomain, replaceCSSPrefix, symbolFns, defaultValue, easeFns, clone, interpolateArray, getMinPoint, getMaxPoint, getClosestIndexOf, registerListeners, Voronoi, checkExistence, sanitizeIP, getMinDiff, capitalizeFirst, getWindow, getQualifiedClassName, getDependencyOrder, objectIterator, intSanitizer, enableChainedTransaction, isHTMLElem, isEqual, isSimpleObject, nextFrame, getObjProp, getDataModelFromIdentifiers, getDataModelFromRange, transposeArray, toArray, extendsClass, concatModels, assembleModelFromIdentifiers, isValidValue, nestCollection, stack, getSymbol, Scales, Symbols, pathInterpolators, hslInterpolator, getSmallestDiff, require, formatTemporal, nearestSortingDetails, createSelection, temporalFields, retrieveNearestGroupByReducers, retrieveFieldDisplayName, sanitizeDomainWhenEqual, sortCategoricalField, intersect, partition, mix, componentRegistry, getArrayDiff, difference, getArrayIndexMap, arraysEqual, getReadableTicks, unique, dmMultipleSelection, pointWithinCircle, getIndexMap, selectElement, makeElement, applyStyle, addClass, removeClass, appendElement, setAttrs, setStyles, createElement, createElements, clipElement, getElementsByClassName, getMousePos, getEvent, getD3Drag, getSmartComputedStyle, getClientPoint, hasTouch, Store, transactor, timeMillisecond, timeSecond, timeMinute, timeHour, timeDay, timeWeek, timeMonth, timeYear, Smartlabel, dataSelect, LifeCycleManager, DimensionSubtype, FieldType, MeasureSubtype, DateTimeFormatter, DM_DERIVATIVES, GROUP_BY_FUNCTIONS, RTree */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48977,6 +48983,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "dmMultipleSelection", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["dmMultipleSelection"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "pointWithinCircle", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["pointWithinCircle"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getIndexMap", function() { return _common_utils__WEBPACK_IMPORTED_MODULE_6__["getIndexMap"]; });
 
 /* harmony import */ var _renderer_utils__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./renderer-utils */ "./packages/muze-utils/src/renderer-utils.js");
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "selectElement", function() { return _renderer_utils__WEBPACK_IMPORTED_MODULE_7__["selectElement"]; });
@@ -54910,8 +54918,11 @@ var prepareSelectionSetData = function prepareSelectionSetData(group, dataModel)
   dataModel.getData({
     withUid: true
   }).data.forEach(function (row) {
-    var dimKey = row[row.length - 1];
-    groupDataMap[dimKey] = row;
+    var uid = row[row.length - 1];
+    uid.values().reduce(function (acc, id) {
+      acc[id] = row;
+      return acc;
+    }, groupDataMap);
   });
   valueMatrix.each(function (cell) {
     var unit = cell.source();
@@ -54923,7 +54934,11 @@ var prepareSelectionSetData = function prepareSelectionSetData(group, dataModel)
         uidsArr = _dm$getData.uids;
 
     var uids = [];
-    uidsArr.forEach(function (id) {
+    uidsArr.forEach(function (uid) {
+      var values = uid.values();
+      var id = values.find(function (idValue) {
+        return groupDataMap[idValue];
+      });
       var linkedRow = groupDataMap[id];
 
       if (linkedRow) {
@@ -55096,45 +55111,19 @@ function (_Firebolt) {
       }
 
       if (enabled) {
+        var _ref = valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {},
+            _ref$instance = _ref.instance,
+            unit = _ref$instance === void 0 ? units[0][0] : _ref$instance;
+
         var propagationInf = {
           propagate: false,
           data: propagationData,
           propPayload: propPayload,
           sourceIdentifiers: sourceIdentifiers,
           sourceId: config.propagationSourceId,
-          isMutableAction: config.isMutableAction
+          isMutableAction: config.isMutableAction,
+          unit: unit
         };
-        var behaviourEffectMap = this._behaviourEffectMap;
-        var sideEffects = Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, behaviourEffectMap);
-        var sideEffectInstances = this.sideEffects();
-
-        var _ref = valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {},
-            _ref$instance = _ref.instance,
-            unit = _ref$instance === void 0 ? units[0][0] : _ref$instance;
-
-        sideEffects.forEach(function (_ref2) {
-          var effects = _ref2.effects;
-          effects.forEach(function (effect) {
-            var name = effect.name;
-            var inst = sideEffectInstances[name];
-
-            if (inst) {
-              inst.sourceInfo(function () {
-                return unit.getSourceInfo();
-              });
-              inst.layers(function () {
-                return unit.layers();
-              });
-              inst.plotPointsFromIdentifiers(function () {
-                return unit.getPlotPointsFromIdentifiers.apply(unit, arguments);
-              });
-              inst instanceof _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["SpawnableSideEffect"] && inst.drawingContext(function () {
-                return unit.getDrawingContext();
-              });
-              inst.valueParser(unit.valueParser());
-            }
-          });
-        });
         this.dispatchBehaviour(action, payload, propagationInf);
       }
 
@@ -55258,9 +55247,9 @@ function (_Firebolt) {
     }
   }, {
     key: "getRangeFromIdentifiers",
-    value: function getRangeFromIdentifiers(_ref3) {
-      var criteria = _ref3.criteria,
-          fields = _ref3.fields;
+    value: function getRangeFromIdentifiers(_ref2) {
+      var criteria = _ref2.criteria,
+          fields = _ref2.fields;
       return fields.reduce(function (acc, v) {
         acc[v] = criteria[v];
         return acc;
@@ -55320,6 +55309,43 @@ function (_Firebolt) {
       });
       return sideEffects;
     }
+  }, {
+    key: "dispatchBehaviour",
+    value: function dispatchBehaviour(action, payload) {
+      var propagationInf = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var group = this.context.composition().visualGroup;
+      var units = group.resolver().units();
+      var _propagationInf$unit = propagationInf.unit,
+          unit = _propagationInf$unit === void 0 ? units[0][0] : _propagationInf$unit;
+      var behaviourEffectMap = this._behaviourEffectMap;
+      var sideEffects = Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, behaviourEffectMap);
+      var sideEffectInstances = this.sideEffects();
+      sideEffects.forEach(function (_ref3) {
+        var effects = _ref3.effects;
+        effects.forEach(function (effect) {
+          var name = effect.name;
+          var inst = sideEffectInstances[name];
+
+          if (inst) {
+            inst.sourceInfo(function () {
+              return unit.getSourceInfo();
+            });
+            inst.layers(function () {
+              return unit.layers();
+            });
+            inst.plotPointsFromIdentifiers(function () {
+              return unit.getPlotPointsFromIdentifiers.apply(unit, arguments);
+            });
+            inst instanceof _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["SpawnableSideEffect"] && inst.drawingContext(function () {
+              return unit.getDrawingContext();
+            });
+            inst.valueParser(unit.valueParser());
+          }
+        });
+      });
+
+      _get(_getPrototypeOf(GroupFireBolt.prototype), "dispatchBehaviour", this).call(this, action, payload, propagationInf);
+    }
   }], [{
     key: "defaultInteractionPolicy",
     value: function defaultInteractionPolicy() {
@@ -55358,7 +55384,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/muze-firebolt */ "./packages/muze-firebolt/src/index.js");
 /* harmony import */ var _chartshq_visual_unit_src_enums_behaviours__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @chartshq/visual-unit/src/enums/behaviours */ "./packages/visual-unit/src/enums/behaviours.js");
-/* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../constants */ "./packages/muze/src/constants.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -55368,7 +55393,6 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 
 
 
@@ -55523,36 +55547,11 @@ var dispatchBehaviours = function dispatchBehaviours(firebolt, _ref) {
     payload.criteria = addFacetDataAndMeasureNames(payload.criteria, unit.facetFieldsMap(), unit.layers().map(function (layer) {
       return Object.keys(layer.data().getFieldspace().getMeasure());
     }));
-    var behaviourEffectMap = firebolt._behaviourEffectMap;
-    var sideEffects = Object(_chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["getSideEffects"])(action, behaviourEffectMap);
-    var sideEffectInstances = firebolt.sideEffects();
-    sideEffects.forEach(function (_ref2) {
-      var effects = _ref2.effects;
-      effects.forEach(function (effect) {
-        var name = effect.name;
-        var inst = sideEffectInstances[name];
-
-        if (inst) {
-          inst.sourceInfo(function () {
-            return unit.getSourceInfo();
-          });
-          inst.layers(function () {
-            return unit.layers();
-          });
-          inst.plotPointsFromIdentifiers(function () {
-            return unit.getPlotPointsFromIdentifiers.apply(unit, arguments);
-          });
-          inst.drawingContext(function () {
-            return unit.getDrawingContext();
-          });
-          inst.valueParser(unit.valueParser());
-        }
-      });
-    });
     addSelectedMeasuresInPayload(firebolt, unit, payload);
     payload.sourceCanvas = firebolt.sourceCanvas();
     firebolt.dispatchBehaviour(action, payload, {
-      propagate: false
+      propagate: false,
+      unit: unit
     });
     var identifiers = actions[action].propagationIdentifiers();
     firebolt.propagate(action, payload, identifiers, {
@@ -55563,10 +55562,10 @@ var dispatchBehaviours = function dispatchBehaviours(firebolt, _ref) {
     });
   });
 };
-var resetSelectAction = function resetSelectAction(firebolt, _ref3) {
-  var unit = _ref3.unit,
-      payload = _ref3.payload,
-      behaviours = _ref3.behaviours;
+var resetSelectAction = function resetSelectAction(firebolt, _ref2) {
+  var unit = _ref2.unit,
+      payload = _ref2.payload,
+      behaviours = _ref2.behaviours;
 
   if (behaviours[0] === _chartshq_muze_firebolt__WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].BRUSH && payload.dragging && payload.dragDiff < 5) {
     dispatchBehaviours(firebolt, {
@@ -67384,42 +67383,49 @@ var BaseLayerMixin = function BaseLayerMixin(superclass) {
         value: function getUidsFromPayload(_ref, targetData) {
           var model = _ref.model,
               uids = _ref.uids;
-          var targetFields = targetData[0];
-          var targetVals = targetData.slice(1, targetData.length);
-          var payloadMap = targetVals.reduce(function (acc, v) {
-            acc[v] = v;
-            return acc;
-          }, {});
-          var measures = Object.keys(this.data().getFieldspace().getMeasure());
-          var dm = model.select(function (fields) {
-            var row = "".concat(targetFields.map(function (field) {
-              var val;
+          var uidsArr = uids;
+          var dm = model;
 
-              if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES) {
-                val = measures;
-              } else if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID) {
-                val = fields[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID];
-              } else {
-                var currentField = fields[field];
-                var isFieldInvalid = currentField instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"];
-                val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
-              }
+          if (targetData) {
+            var targetFields = targetData[0];
+            var targetVals = targetData.slice(1, targetData.length);
+            var payloadMap = targetVals.reduce(function (acc, v) {
+              acc[v] = v;
+              return acc;
+            }, {});
+            var measures = Object.keys(this.data().getFieldspace().getMeasure());
+            dm = model.select(function (fields) {
+              var row = "".concat(targetFields.map(function (field) {
+                var val;
 
-              return val;
-            }));
-            return row in payloadMap;
-          }, {
-            saveChild: false
-          });
-          var uidArr = dm.getUids();
-          return {
-            model: dm,
-            uids: uids.filter(function (d) {
-              return uidArr.find(function (id) {
+                if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES) {
+                  val = measures;
+                } else if (field === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID) {
+                  val = fields[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID];
+                } else {
+                  var currentField = fields[field];
+                  var isFieldInvalid = currentField instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["InvalidAwareTypes"];
+                  val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+                }
+
+                return val;
+              }));
+              return row in payloadMap;
+            }, {
+              saveChild: false
+            });
+            var dmUids = dm.getUids();
+            uidsArr = uids.filter(function (d) {
+              return dmUids.find(function (id) {
                 return "".concat(id) === "".concat(d[0]);
               });
-            }),
-            length: uidArr.length
+            });
+          }
+
+          return {
+            model: dm,
+            uids: uidsArr,
+            length: uidsArr.length
           };
         }
         /**
@@ -69181,8 +69187,8 @@ var getBoundBoxes = function getBoundBoxes(points) {
     };
   });
 };
-var getDataFromEvent = function getDataFromEvent(context, event) {
-  var dataPoint = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(event.target).data()[0];
+var getDataFromEvent = function getDataFromEvent(context, event, data) {
+  var dataPoint = data || Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["selectElement"])(event.target).data()[0];
 
   if (Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["isSimpleObject"])(dataPoint) && Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getObjProp"])(dataPoint, 'meta', 'layerId') === context.id()) {
     var values = dataPoint && dataPoint.source;
@@ -71090,6 +71096,7 @@ var BarLayerMixin = function BarLayerMixin(superclass) {
         };
         _this._pointMap = {};
         _this._overlayPath = {};
+        _this._rtree = null;
         return _this;
       }
 
@@ -71207,6 +71214,13 @@ var BarLayerMixin = function BarLayerMixin(superclass) {
               });
             }
           });
+          var elements = this.getBoundBoxes().flat().filter(function (d) {
+            return d !== null;
+          });
+          this._rtree = new muze_utils__WEBPACK_IMPORTED_MODULE_0__["RTree"]();
+
+          this._rtree.load(elements);
+
           return this;
         }
       }, {
@@ -71258,19 +71272,28 @@ var BarLayerMixin = function BarLayerMixin(superclass) {
 
       }, {
         key: "getNearestPoint",
-        value: function getNearestPoint(x, y, _ref) {
-          var event = _ref.event;
-
+        value: function getNearestPoint(x, y) {
           if (!this.data()) {
             return null;
           }
 
-          return this.getDataFromEvent(event);
+          var data = this._rtree.search({
+            minX: Math.max(x - 1, 0),
+            minY: Math.max(y - 1, 0),
+            maxX: x + 1,
+            maxY: y + 1
+          });
+
+          if (data.length) {
+            return this.getDataFromEvent(null, data[0].point);
+          }
+
+          return null;
         }
       }, {
         key: "getDataFromEvent",
-        value: function getDataFromEvent(event) {
-          return Object(_helpers__WEBPACK_IMPORTED_MODULE_4__["getDataFromEvent"])(this, event);
+        value: function getDataFromEvent(event, data) {
+          return Object(_helpers__WEBPACK_IMPORTED_MODULE_4__["getDataFromEvent"])(this, event, data);
         }
       }, {
         key: "getPlotSpan",
@@ -71361,7 +71384,8 @@ var BarLayerMixin = function BarLayerMixin(superclass) {
               maxX: x + width,
               minY: y,
               maxY: y + height,
-              data: data
+              data: data,
+              point: point
             };
           });
         }
@@ -75334,7 +75358,7 @@ var getUniqueKeys = function getUniqueKeys(data, _ref2) {
         uid: uids[i]
       };
       dimensionsMap[key] = Object(muze_utils__WEBPACK_IMPORTED_MODULE_1__["defaultValue"])(dimensionsMap[key], []);
-      dimensionsMap[key].push(measureNames);
+      measureNames.length && dimensionsMap[key].push(measureNames);
     });
   });
   return {
@@ -75384,63 +75408,7 @@ var prepareSelectionSetData = function prepareSelectionSetData(dataModel, unit) 
     dimensions: dimensions,
     dimensionsMap: dimensionsMap
   };
-}; // export const sanitizePayloadCriteria = (data, { dm, dimensionsMap, dimsMapGetter }) => {
-//     const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
-//         [ReservedFields.ROW_ID]: {
-//             index: Object.keys(dm.getFieldsConfig()).length,
-//             def: {
-//                 name: ReservedFields.ROW_ID,
-//                 type: FieldType.DIMENSION
-//             }
-//         }
-//     });
-//     if (data === null) {
-//         return null;
-//     }
-//     const criteriaFields = data[0];
-//     const fields = criteriaFields.length ? criteriaFields.map((d, i) => ({
-//         name: d,
-//         index: i
-//     })) : [];
-//     const fieldIndexMap = fields.reduce((acc, v, i) => {
-//         acc[v.name] = i;
-//         return acc;
-//     }, {});
-//     const propFields = fields.map(d => d.name);
-//     const uids = [];
-//     const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
-//     const propDims = fields.filter(d => d.name in fieldsConfig).map(d => d.name);
-//     const dimsMap = dimsMapGetter(propDims, fieldsConfig);
-//     for (let i = 1, len = data.length; i < len; i++) {
-//         const row = data[i];
-//         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
-//         const origRow = dimsMap[dimKey];
-//         if (origRow) {
-//             origRow.forEach((rowVal) => {
-//                 const newRowVal = [];
-//                 const rowId = rowVal[rowVal.length - 1];
-//                 propFields.forEach((field) => {
-//                     const idx = getObjProp(fieldsConfig[field], 'index');
-//                     if (field === ReservedFields.MEASURE_NAMES) {
-//                         newRowVal.push(row[fieldIndexMap[field]]);
-//                     } else {
-//                         idx !== undefined && newRowVal.push(rowId);
-//                     }
-//                 });
-//                 if (!measureNameField) {
-//                     const measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
-//                     measuresArr.forEach((measures) => {
-//                         uids.push([...[rowId], ...measures]);
-//                     });
-//                 } else {
-//                     uids.push([newRowVal]);
-//                 }
-//             });
-//         }
-//     }
-//     return uids;
-// };
-
+};
 var dispatchSecondaryActions = function dispatchSecondaryActions(firebolt, _ref4) {
   var action = _ref4.action,
       propagationData = _ref4.propagationData,
@@ -75658,7 +75626,7 @@ function (_Firebolt) {
 
         var payloadFn = _this3.getPayloadGeneratorFor(action);
 
-        var payload = payloadFn(_this3, propagationData, config, context.facetByFields());
+        var payload = payloadFn(_this3, propagationData, config, context.facetFieldsMap());
         var behaviourPolicies = _this3._behaviourPolicies;
         var filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
         var enabled = filterFns.every(function (fn) {
@@ -75788,17 +75756,41 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 
+
+var getIdentifierMeasureMap = function getIdentifierMeasureMap(identifiers, fields, facetsMap) {
+  var identifierIdxMap = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["getIndexMap"])(identifiers[0]);
+  var identifierValues = identifiers.slice(1, identifiers.length);
+  return identifierValues.reduce(function (acc, row) {
+    var facetPresent = true;
+
+    for (var field in facetsMap) {
+      var facetVal = row[identifierIdxMap[field]];
+      facetPresent = facetPresent && facetVal === facetsMap[field];
+    }
+
+    if (facetPresent) {
+      var key = fields.map(function (field) {
+        var fieldIndex = identifierIdxMap[field];
+        return row[fieldIndex];
+      });
+      var measureNamesIdx = identifierIdxMap[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES];
+
+      if (measureNamesIdx !== undefined) {
+        var measureArr = row[measureNamesIdx];
+        !acc[key] && (acc[key] = []);
+
+        if (measureArr && measureArr.length) {
+          acc[key].push([measureArr]);
+        }
+      }
+    }
+
+    return acc;
+  }, {});
+};
 
 var getRangeFromData = function getRangeFromData(instance, selectionDataModel, propConfig) {
   var dataObj = selectionDataModel.getData();
@@ -75854,108 +75846,59 @@ var payloadGenerator = {
 
     return payload;
   },
-  __default: function __default(instance, selectionDataModel, propConfig) {
-    var facetByFields = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-    var selectionSetFields = [];
+  __default: function __default(instance, propagationDataModel, propConfig) {
+    var facetByFields = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+    var propagationDataDims = [];
+    var criteria = null;
     var propPayload = propConfig.payload,
         sourceIdentifiers = propConfig.sourceIdentifiers,
         excludeSelectedMeasures = propConfig.excludeSelectedMeasures;
-    var dataObj = selectionDataModel.getData({
+
+    var _propagationDataModel = propagationDataModel.getData({
       withUid: true
-    });
+    }),
+        data = _propagationDataModel.data;
+
     var payload = Object.assign({}, propPayload);
-    var data = dataObj.data;
-    var fieldsConfig = Object.assign({}, selectionDataModel.getFieldsConfig(), _defineProperty({}, muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID, {
-      index: Object.keys(selectionDataModel.getFieldsConfig()).length,
-      def: {
-        type: muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION
-      }
+    var fieldsConfig = Object.assign({}, propagationDataModel.getFieldsConfig(), _defineProperty({}, muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID, {
+      index: Object.keys(propagationDataModel.getFieldsConfig()).length
     }));
-    selectionSetFields = Object.keys(selectionDataModel.getFieldspace().getDimension());
-    !selectionSetFields.length && (selectionSetFields = [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID]);
+    propagationDataDims = Object.keys(propagationDataModel.getFieldspace().getDimension());
+    !propagationDataDims.length && (propagationDataDims = [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID]);
 
     if (sourceIdentifiers) {
       (function () {
-        var _facetByFields = _slicedToArray(facetByFields, 2),
-            _facetByFields$ = _facetByFields[0],
-            facetFields = _facetByFields$ === void 0 ? [] : _facetByFields$,
-            _facetByFields$2 = _facetByFields[1],
-            facetValues = _facetByFields$2 === void 0 ? [] : _facetByFields$2;
-
-        var facetIndices = facetFields.reduce(function (acc, v, i) {
-          acc[v] = i;
-          return acc;
-        }, {});
-        var identifierIdxMap = sourceIdentifiers.fields.reduce(function (acc, v, i) {
-          acc[v.name] = i;
-          return acc;
-        }, {});
-        var identifiers = sourceIdentifiers.identifiers.slice(1, sourceIdentifiers.identifiers.length);
-        var sourceIdentifierFields = sourceIdentifiers.fields.filter(function (d) {
-          return d.name in fieldsConfig || d.name in facetIndices || d.name === muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].ROW_ID;
-        });
-        var identifierMap = identifiers.reduce(function (acc, v) {
-          var key = sourceIdentifierFields.map(function (d) {
-            return v[identifierIdxMap[d.name]];
-          });
-          var measureNamesIdx = identifierIdxMap[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES];
-
-          if (measureNamesIdx) {
-            !acc[key] && (acc[key] = []);
-            acc[key].push([v[measureNamesIdx]]);
-          }
-
-          return acc;
-        }, {});
+        var identifierMap = getIdentifierMeasureMap(sourceIdentifiers.identifiers, propagationDataDims, facetByFields);
         var dataArr = [];
 
         var _loop = function _loop(i, len) {
           var row = data[i];
           var dims = [];
-          selectionSetFields.forEach(function (field) {
-            if (fieldsConfig[field] && fieldsConfig[field].def.type === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].DIMENSION) {
-              var idx = fieldsConfig[field].index;
-              dims.push(row[idx]);
-            }
+          propagationDataDims.forEach(function (field) {
+            var idx = fieldsConfig[field].index;
+            dims.push(row[idx]);
           });
           var uid = row[row.length - 1];
-          var vals = "".concat(sourceIdentifierFields.map(function (d) {
-            if (d.name in fieldsConfig) {
-              return row[fieldsConfig[d.name].index];
-            } else if (d.name in facetIndices) {
-              return facetValues[facetIndices[d.name]];
-            }
+          var dimKey = "".concat(dims);
 
-            return null;
-          }).filter(function (d) {
-            return d !== null;
-          }));
-
-          if (vals in identifierMap) {
-            var measures = identifierMap[vals];
+          if (dimKey in identifierMap) {
+            var measures = identifierMap[dimKey];
             var allMeasures = instance._metaData.dimensionsMap[uid];
 
             if (excludeSelectedMeasures) {
-              var fn = function fn(v) {
-                return "".concat(v);
-              };
-
-              var diffMeasures = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"])(allMeasures, measures, [fn, fn]);
+              var diffMeasures = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"])(allMeasures, measures);
               diffMeasures.forEach(function (measureArr) {
                 dataArr.push([].concat(dims, [measureArr]));
               });
-            } else {
+            } else if (measures && measures.length) {
               measures.forEach(function (measureArr) {
                 dataArr.push([].concat(dims, [measureArr]));
               });
+            } else {
+              dataArr.push([].concat(dims, [[]]));
             }
           } else {
-            var _measures = instance._metaData.dimensionsMap[uid];
-            _measures = _measures && _measures.length ? _measures : [[]];
-
-            _measures.forEach(function (measureArr) {
-              dataArr.push([].concat(dims, [measureArr]));
-            });
+            dataArr.push([].concat(dims, [[]]));
           }
         };
 
@@ -75963,12 +75906,11 @@ var payloadGenerator = {
           _loop(i, len);
         }
 
-        payload.criteria = [[].concat(_toConsumableArray(selectionSetFields), [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES])].concat(dataArr);
+        criteria = [[].concat(_toConsumableArray(propagationDataDims), [muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES])].concat(dataArr);
       })();
-    } else {
-      payload.criteria = null;
     }
 
+    payload.criteria = criteria;
     payload.sourceFields = sourceIdentifiers ? sourceIdentifiers.fields.map(function (d) {
       return d.name;
     }) : [];
@@ -76265,7 +76207,7 @@ var renderGridLineLayers = function renderGridLineLayers(context, container) {
 /*!**************************************************!*\
   !*** ./packages/visual-unit/src/helper/index.js ***!
   \**************************************************/
-/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup, createRenderPromise, getRadiusRange, setAxisRange, isXandYMeasures, getValuesMap, getSelectionRejectionModel, createRTree */
+/*! exports provided: getDimensionMeasureMap, transformDataModels, getLayerFromDef, resolveEncodingTransform, sanitizeLayerDef, attachDataToLayers, attachAxisToLayers, getLayerAxisIndex, unionDomainFromLayers, renderLayers, getNearestDimensionalValue, getLayersBy, removeLayersBy, createSideEffectGroup, createRenderPromise, getRadiusRange, setAxisRange, createRTree */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -76287,21 +76229,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createRenderPromise", function() { return createRenderPromise; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRadiusRange", function() { return getRadiusRange; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "setAxisRange", function() { return setAxisRange; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isXandYMeasures", function() { return isXandYMeasures; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getValuesMap", function() { return getValuesMap; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSelectionRejectionModel", function() { return getSelectionRejectionModel; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createRTree", function() { return createRTree; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 /* harmony import */ var _chartshq_visual_layer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @chartshq/visual-layer */ "./packages/visual-layer/src/index.js");
 var _this = undefined;
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
-
-function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -76659,107 +76590,6 @@ var setAxisRange = function setAxisRange(context) {
     });
   }
 };
-var isXandYMeasures = function isXandYMeasures(context) {
-  var _context$fields = context.fields(),
-      xFields = _context$fields.x,
-      yFields = _context$fields.y;
-
-  var _map = [xFields, yFields].map(function (fields) {
-    return fields.every(function (field) {
-      return field.type() === muze_utils__WEBPACK_IMPORTED_MODULE_0__["FieldType"].MEASURE;
-    });
-  }),
-      _map2 = _slicedToArray(_map, 2),
-      xMeasures = _map2[0],
-      yMeasures = _map2[1];
-
-  return xMeasures && yMeasures;
-};
-
-var getKey = function getKey(arr, row) {
-  var key = row[arr[0]];
-
-  for (var i = 1, len = arr.length; i < len; i++) {
-    key = "".concat(key, ",").concat(row[arr[i]]);
-  }
-
-  return key;
-};
-
-var getValuesMap = function getValuesMap(model, context) {
-  var idValuesMap = {};
-  var valuesIdMap = {};
-
-  var _model$getData = model.getData(),
-      dataArr = _model$getData.data,
-      schema = _model$getData.schema,
-      uids = _model$getData.uids;
-
-  var fieldsConfig = model.getFieldsConfig();
-  var fieldIndices = isXandYMeasures(context) ? schema.map(function (d, i) {
-    return i;
-  }) : Object.keys(model.getFieldspace().getDimension()).map(function (d) {
-    return fieldsConfig[d].index;
-  });
-  dataArr.forEach(function (row, i) {
-    var key = getKey(fieldIndices, row);
-    valuesIdMap[key] = uids[i];
-    idValuesMap[uids[i]] = row;
-  });
-  return {
-    valuesIdMap: valuesIdMap,
-    idValuesMap: idValuesMap,
-    fieldsConfig: fieldsConfig
-  };
-};
-var getSelectionRejectionModel = function getSelectionRejectionModel(model, propModel, measures, propValuesMap) {
-  var rejectionModel;
-
-  var _propModel$getData = propModel.getData(),
-      data = _propModel$getData.data,
-      schema = _propModel$getData.schema;
-
-  var entryRowIds = [];
-  var exitRowIds = [];
-
-  if (schema.length) {
-    var fieldMap = model.getFieldsConfig();
-    var valuesIdMap = propValuesMap.valuesIdMap;
-    var rowIdsObj = {};
-    var filteredSchema = measures ? schema.map(function (d, idx) {
-      return idx;
-    }) : Object.keys(model.getFieldspace().getDimension()).map(function (d) {
-      return fieldMap[d].index;
-    });
-    data.forEach(function (row) {
-      var key = getKey(filteredSchema, row);
-      var id = valuesIdMap[key];
-
-      if (key in valuesIdMap) {
-        entryRowIds.push(id);
-        rowIdsObj[id] = 1;
-      }
-    });
-    rejectionModel = model.select(function (fields, i) {
-      if (!rowIdsObj[i]) {
-        exitRowIds.push(i);
-        return true;
-      }
-
-      return false;
-    }, {
-      saveChild: false
-    });
-  } else {
-    rejectionModel = propModel;
-  }
-
-  return {
-    model: [propModel, rejectionModel],
-    entryRowIds: entryRowIds,
-    exitRowIds: exitRowIds
-  };
-};
 var createRTree = function createRTree(context) {
   var _ref;
 
@@ -77112,18 +76942,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
       return d instanceof muze_utils__WEBPACK_IMPORTED_MODULE_0__["DataModel"];
     },
     preset: function preset(data, context) {
-      context._cachedValuesMap = function (model) {
-        var valuesMap = null;
-        return function () {
-          if (valuesMap) {
-            return valuesMap;
-          }
-
-          valuesMap = Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getValuesMap"])(model, context);
-          return valuesMap;
-        };
-      }(data);
-
       if (context._cache) {
         var cachedData = context.cachedData();
         context.cachedData([].concat(_toConsumableArray(cachedData), [data]));
@@ -78053,18 +77871,6 @@ function () {
     value: function calculateDomainFromData() {
       var domain = Object(_helper__WEBPACK_IMPORTED_MODULE_5__["unionDomainFromLayers"])(this.layers(), this.fields(), this._layerAxisIndex, this.data().getFieldsConfig());
       return domain;
-    }
-  }, {
-    key: "getValueFromId",
-    value: function getValueFromId(id, fields, fieldsConfig) {
-      var _this$_cachedValuesMa = this._cachedValuesMap(),
-          idValuesMap = _this$_cachedValuesMa.idValuesMap;
-
-      var row = idValuesMap[id];
-      var filteredRow = fields.map(function (d) {
-        return d === muze_utils__WEBPACK_IMPORTED_MODULE_1__["ReservedFields"].ROW_ID ? id : row[fieldsConfig[d].index];
-      });
-      return filteredRow;
     }
   }, {
     key: "getRangeFromIdentifiers",

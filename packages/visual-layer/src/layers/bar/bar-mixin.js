@@ -7,7 +7,8 @@ import {
     Scales,
     getObjProp,
     makeElement,
-    appendElement
+    appendElement,
+    RTree
 } from 'muze-utils';
 import { BaseLayer } from '../../base-layer';
 import { drawRects } from './renderer';
@@ -35,6 +36,7 @@ export const BarLayerMixin = superclass => class extends superclass {
         };
         this._pointMap = {};
         this._overlayPath = {};
+        this._rtree = null;
     }
 
     elemType () {
@@ -145,7 +147,9 @@ export const BarLayerMixin = superclass => class extends superclass {
                 });
             }
         });
-
+        const elements = this.getBoundBoxes().flat().filter(d => d !== null);
+        this._rtree = new RTree();
+        this._rtree.load(elements);
         return this;
     }
 
@@ -186,15 +190,25 @@ export const BarLayerMixin = superclass => class extends superclass {
      * @param {number} y y position
      * @return {Object} Nearest point.
      */
-    getNearestPoint (x, y, { event }) {
+    getNearestPoint (x, y) {
         if (!this.data()) {
             return null;
         }
-        return this.getDataFromEvent(event);
+        const data = this._rtree.search({
+            minX: Math.max(x - 1, 0),
+            minY: Math.max(y - 1, 0),
+            maxX: x + 1,
+            maxY: y + 1
+        });
+
+        if (data.length) {
+            return this.getDataFromEvent(null, data[0].point);
+        }
+        return null;
     }
 
-    getDataFromEvent (event) {
-        return getDataFromEvent(this, event);
+    getDataFromEvent (event, data) {
+        return getDataFromEvent(this, event, data);
     }
 
     getPlotSpan () {
@@ -267,7 +281,8 @@ export const BarLayerMixin = superclass => class extends superclass {
                 maxX: x + width,
                 minY: y,
                 maxY: y + height,
-                data
+                data,
+                point
             };
         });
     }

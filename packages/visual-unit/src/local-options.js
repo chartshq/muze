@@ -1,7 +1,7 @@
 import { mergeRecursive, DataModel } from 'muze-utils';
 import { defaultConfig } from './default-config';
 import { CONFIG, LAYERDEFS, TRANSFORM, DATA, LAYERS, TRANSFORMEDDATA } from './enums/reactive-props';
-import { sanitizeLayerDef, getValuesMap } from './helper';
+import { sanitizeLayerDef } from './helper';
 
 export default {
     [CONFIG]: {
@@ -29,16 +29,6 @@ export default {
         meta: {
             typeCheck: d => d instanceof DataModel,
             preset: (data, context) => {
-                context._cachedValuesMap = ((model) => {
-                    let valuesMap = null;
-                    return () => {
-                        if (valuesMap) {
-                            return valuesMap;
-                        }
-                        valuesMap = getValuesMap(model, context);
-                        return valuesMap;
-                    };
-                })(data);
                 if (context._cache) {
                     const cachedData = context.cachedData();
                     context.cachedData([...cachedData, data]);

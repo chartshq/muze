@@ -65,8 +65,11 @@ const prepareSelectionSetData = (group, dataModel) => {
     const groupDataMap = {};
 
     dataModel.getData({ withUid: true }).data.forEach((row) => {
-        const dimKey = row[row.length - 1];
-        groupDataMap[dimKey] = row;
+        const uid = row[row.length - 1];
+        uid.values().reduce((acc, id) => {
+            acc[id] = row;
+            return acc;
+        }, groupDataMap);
     });
 
     valueMatrix.each((cell) => {
@@ -77,7 +80,9 @@ const prepareSelectionSetData = (group, dataModel) => {
         const { uids: uidsArr } = dm.getData();
         const uids = [];
 
-        uidsArr.forEach((id) => {
+        uidsArr.forEach((uid) => {
+            const values = uid.values();
+            const id = values.find(idValue => groupDataMap[idValue]);
             const linkedRow = groupDataMap[id];
 
             if (linkedRow) {
@@ -222,36 +227,17 @@ export default class GroupFireBolt extends Firebolt {
         }
 
         if (enabled) {
+            const { instance: unit = units[0][0] } =
+                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
             const propagationInf = {
                 propagate: false,
                 data: propagationData,
                 propPayload,
                 sourceIdentifiers,
                 sourceId: config.propagationSourceId,
-                isMutableAction: config.isMutableAction
+                isMutableAction: config.isMutableAction,
+                unit
             };
-
-            const behaviourEffectMap = this._behaviourEffectMap;
-            const sideEffects = getSideEffects(action, behaviourEffectMap);
-            const sideEffectInstances = this.sideEffects();
-            const { instance: unit = units[0][0] } =
-                valueMatrix.findPlaceHolderById(propPayload.sourceUnit) || {};
-
-            sideEffects.forEach(({ effects }) => {
-                effects.forEach((effect) => {
-                    const name = effect.name;
-                    const inst = sideEffectInstances[name];
-
-                    if (inst) {
-                        inst.sourceInfo(() => unit.getSourceInfo());
-                        inst.layers(() => unit.layers());
-                        inst.plotPointsFromIdentifiers((...params) =>
-                            unit.getPlotPointsFromIdentifiers(...params));
-                        inst instanceof SpawnableSideEffect && inst.drawingContext(() => unit.getDrawingContext());
-                        inst.valueParser(unit.valueParser());
-                    }
-                });
-            });
 
             this.dispatchBehaviour(action, payload, propagationInf);
         }
@@ -397,5 +383,32 @@ export default class GroupFireBolt extends Firebolt {
             d.effects = mappedEffects;
         });
         return sideEffects;
+    }
+
+    dispatchBehaviour (action, payload, propagationInf = {}) {
+        const group = this.context.composition().visualGroup;
+        const units = group.resolver().units();
+        const { unit = units[0][0] } = propagationInf;
+        const behaviourEffectMap = this._behaviourEffectMap;
+        const sideEffects = getSideEffects(action, behaviourEffectMap);
+        const sideEffectInstances = this.sideEffects();
+
+        sideEffects.forEach(({ effects }) => {
+            effects.forEach((effect) => {
+                const name = effect.name;
+                const inst = sideEffectInstances[name];
+
+                if (inst) {
+                    inst.sourceInfo(() => unit.getSourceInfo());
+                    inst.layers(() => unit.layers());
+                    inst.plotPointsFromIdentifiers((...params) =>
+                        unit.getPlotPointsFromIdentifiers(...params));
+                    inst instanceof SpawnableSideEffect &&
+                        inst.drawingContext(() => unit.getDrawingContext());
+                    inst.valueParser(unit.valueParser());
+                }
+            });
+        });
+        super.dispatchBehaviour(action, payload, propagationInf);
     }
 }

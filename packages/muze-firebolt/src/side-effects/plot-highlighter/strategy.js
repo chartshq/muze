@@ -102,22 +102,22 @@ export const strategies = {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
             context.applyInteractionStyle(entrySet, { interactionType: 'focusStroke', apply: true });
 
-            const payload = firebolt.getPayload(BEHAVIOURS.HIGHLIGHT);
+            const payload = firebolt.getPayload(BEHAVIOURS.HIGHLIGHT) || {};
             const entryExitSet = firebolt.getEntryExitSet(BEHAVIOURS.HIGHLIGHT);
             const layers = firebolt.context.layers();
 
-            if (payload.target && entryExitSet) {
-                layers.forEach((layer) => {
-                    const layerName = layer.constructor.formalName();
+            layers.forEach((layer) => {
+                const layerName = layer.constructor.formalName();
 
-                    if (layerName === 'area') {
-                        context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: false }, [layer]);
-                        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: true }, [layer]);
-                    } else {
-                        context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true }, [layer]);
-                        context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false }, [layer]);
-                    }
+                if (layerName === 'area') {
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: false }, [layer]);
+                    context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: true }, [layer]);
+                } else {
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'focus', apply: true }, [layer]);
+                    context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false }, [layer]);
+                }
 
+                if (payload.target !== null && entryExitSet) {
                     // get uids of only the currently highlighted point
                     const actualPoint = layer.getUidsFromPayload(entryExitSet.mergedEnter, payload.target);
 
@@ -135,8 +135,8 @@ export const strategies = {
                             [layer]
                         );
                     }
-                });
-            }
+                }
+            });
         }
     },
     highlight: (set, context, payload, excludeSetIds) => {

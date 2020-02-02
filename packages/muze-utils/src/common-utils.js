@@ -1591,7 +1591,14 @@ const dmMultipleSelection = (targetData, dm) => {
     return filterFn;
 };
 
+const getIndexMap = (arr, prop) => arr.reduce((acc, v, i) => {
+    const key = prop ? v[prop] : v;
+    acc[key] = i;
+    return acc;
+}, {});
+
 export {
+    getIndexMap,
     arraysEqual,
     componentRegistry,
     mix,
