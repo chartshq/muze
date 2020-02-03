@@ -291,48 +291,46 @@ export const BaseLayerMixin = superclass => class extends superclass {
     }
 
     getUidsFromPayload ({ model, uids }, targetData) {
-        const targetFields = targetData[0];
-        const targetVals = targetData.slice(1, targetData.length);
-        const payloadMap = targetVals.reduce((acc, v) => {
-            acc[v] = v;
-            return acc;
-        }, {});
-        const measures = Object.keys(this.data().getFieldspace().getMeasure());
+        let uidsArr = uids;
+        let dm = model;
 
-        const filterFn = (fields, i) => {
-            const row = `${targetFields.map((field) => {
-                let val;
-                if (field === ReservedFields.MEASURE_NAMES) {
-                    val = measures;
-                } else if (field === ReservedFields.ROW_ID) {
-                    val = i;
-                } else {
-                    const currentField = fields[field];
-                    const isFieldInvalid = currentField instanceof InvalidAwareTypes;
+        if (targetData) {
+            const targetFields = targetData[0];
+            const targetVals = targetData.slice(1, targetData.length);
+            const payloadMap = targetVals.reduce((acc, v) => {
+                acc[v] = v;
+                return acc;
+            }, {});
+            const measures = Object.keys(this.data().getFieldspace().getMeasure());
 
-                    val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
-                }
-                return val;
-            })}`;
-            return row in payloadMap;
-        };
+            dm = model.select((fields) => {
+                const row = `${targetFields.map((field) => {
+                    let val;
+                    if (field === ReservedFields.MEASURE_NAMES) {
+                        val = measures;
+                    } else if (field === ReservedFields.ROW_ID) {
+                        val = fields[ReservedFields.ROW_ID];
+                    } else {
+                        const currentField = fields[field];
+                        const isFieldInvalid = currentField instanceof InvalidAwareTypes;
 
-        const dm = model.select(filterFn, {});
+                        val = isFieldInvalid ? currentField.value() : (currentField || {}).internalValue;
+                    }
+                    return val;
+                })}`;
+                return row in payloadMap;
+            }, {
+                saveChild: false
+            });
 
-        // Need to find a better way to do this instead of iterating the full data
-        const currentSetIds = this.data().select(filterFn, {
-            saveChild: false
-        }).getUids();
-
-        const uidMap = currentSetIds.reduce((acc, v) => {
-            acc[v] = true;
-            return acc;
-        }, {});
+            const dmUids = dm.getUids();
+            uidsArr = uids.filter(d => dmUids.find(id => `${id}` === `${d[0]}`));
+        }
 
         return {
             model: dm,
-            uids: uids.filter(d => uidMap[d[0]]),
-            length: currentSetIds.length
+            uids: uidsArr,
+            length: uidsArr.length
         };
     }
 
@@ -471,16 +469,14 @@ export const BaseLayerMixin = superclass => class extends superclass {
         });
 
         const measures = schema.filter(d => d.type === FieldType.MEASURE).map(d => d.name);
-        if (measures.length) {
-            identifiers[0].push(ReservedFields.MEASURE_NAMES);
-            identifiers[1].push(measures.join());
-        }
-
         if (allMeasures) {
             identifiers[0].push(...[ReservedFields.ROW_ID]);
             identifiers[1].push(...[rowId]);
         }
-
+        if (measures.length) {
+            identifiers[0].push(ReservedFields.MEASURE_NAMES);
+            identifiers[1].push(measures.join());
+        }
         return identifiers;
     }
 

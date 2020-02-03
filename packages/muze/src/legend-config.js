@@ -6,6 +6,9 @@
  *
  * @param {boolean} show Whether to show or hide the legend.
  * @param {string} borderColor Border color of legend box.
+ * @param {Object} marker Legend marker configuration
+ * @param {Object} marker.text Legend marker text configuration.
+ * @param {string} marker.text.formatter Returns formatted marker text value.
  * @param {Object} item Legend item configuration
  * @param {Object} item.text Legend item text configuration.
  * @param {number} item.text.width Item text width.

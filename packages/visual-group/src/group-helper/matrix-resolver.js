@@ -3,7 +3,8 @@ import {
      initializeCacheMaps,
      headerCreator,
      extractUnitConfig,
-     setFacetsAndProjections
+     setFacetsAndProjections,
+     sanitizeCheck
 } from './group-utils';
 import {
      ROW, COL, LEFT, RIGHT, COLOR, SIZE, SHAPE, DETAIL, CELL, X_AXES, Y_AXES, ENTRY_CELLS, EXIT_CELLS, INITIALIZED,
@@ -415,13 +416,14 @@ export default class MatrixResolver {
         const rowHeaders = fieldNames.rows;
         const blankCellCreator = cell => new BlankCell().config({ show: cell.config().show });
 
+        const sanitizeCheckBorder = sanitizeCheck(config.facetsUserConfig);
         // Headers and footers are created based on the rows. Thereafter, using the column information
         // they are tabularized into the current structure
         const headers = {
             left: headerCreator(leftRows, rowHeaders[0], showHeaders ? TextCell : BlankCell,
-                { classPrefix, labelManager }),
+                { classPrefix, labelManager, sanitizeCheckBorder }),
             right: headerCreator(rightRows, rowHeaders[1], showHeaders ? TextCell : BlankCell,
-                { classPrefix, labelManager })
+                { classPrefix, labelManager, sanitizeCheckBorder })
         };
         const footers = {
             left: leftRows.length > 0 ? leftRows[0].map(blankCellCreator) : [],

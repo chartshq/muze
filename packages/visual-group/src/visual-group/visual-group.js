@@ -72,6 +72,8 @@ class VisualGroup extends SimpleGroup {
         this._composition = {};
         // store reference to data
         this._data = [];
+        this._prevData = null;
+        this._groupedDataModel = [];
         // store reference to mountpoint
         this._mount = null;
         // selection object that takes care of updating of components
@@ -327,6 +329,23 @@ class VisualGroup extends SimpleGroup {
 
     createMatrixResolver () {
         this.resolver(new MatrixResolver(this._dependencies));
+
+        return this;
+    }
+
+    groupedData (...params) {
+        if (params.length) {
+            this._groupedDataModel = params[0];
+            return this;
+        }
+        return this.getGroupByData();
+    }
+
+    resetData () {
+        const oriData = this._originalGroupedData;
+        if (oriData) {
+            this._groupedDataModel = oriData;
+        }
 
         return this;
     }

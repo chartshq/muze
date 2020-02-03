@@ -413,7 +413,6 @@ export const prepareSelectionSetData = (data, fieldName, dm) => {
                 acc[d.rawVal] = {
                     uid: d.id,
                     dims: [d.rawVal]
-
                 };
                 return acc;
             }, {}),

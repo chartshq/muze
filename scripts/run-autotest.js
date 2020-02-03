@@ -220,8 +220,13 @@ const printAutotestSummery = async (tag) => {
             });
         }
         out('\n');
+        if (failedTestcases.length) {
+            out(`   ${chalk.red('Test Cases Failed')}\n`);
+            throw new Error();
+        }
     } catch (err) {
-        log(err.message);
+        out(err.message);
+        process.exit(1);
     }
 };
 

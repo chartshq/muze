@@ -6,14 +6,14 @@ import {
 } from 'muze-utils';
 
 const area = Symbols.area;
+
 /**
  * Draws a line from the points
  * Generates a svg path string
  * @param {Object} params Contains container, points and interpolate attribute.
  */
 const /* istanbul ignore next */ drawArea = (params) => {
-    const { layer, container, points, style, transition, className, interpolate, connectNullData } = params;
-
+    const { layer, container, style, points, transition, className, interpolate, connectNullData } = params;
     const graphicElems = layer._graphicElems;
     const { effect: easeEffect, duration } = transition;
     const mount = selectElement(container);
@@ -23,13 +23,13 @@ const /* istanbul ignore next */ drawArea = (params) => {
                     .x(d => d[e].x)
                     .y1(d => d[e].y)
                     .y0(d => d[e].y0)
-                    .defined(d => d[e].y !== undefined));
+                    .defined(d => d[e].y !== null));
 
     mount.attr('class', className);
 
     let filteredPoints = points;
     if (connectNullData) {
-        filteredPoints = filteredPoints.filter(d => d.update.y !== undefined);
+        filteredPoints = filteredPoints.filter(d => d.update.y !== null);
     }
     const selectionEnter = selection
         .enter()
@@ -37,7 +37,7 @@ const /* istanbul ignore next */ drawArea = (params) => {
         .attr('d', enterAreaPath(filteredPoints))
         .each((d) => {
             d.forEach((dd) => {
-                if (dd.rowId) {
+                if (dd.rowId !== null) {
                     graphicElems[dd.rowId] = mount.select('path');
                 }
             });

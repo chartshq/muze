@@ -6,7 +6,7 @@ export default class FilterEffect extends SurrogateSideEffect {
     }
 
     static target () {
-        return 'visual-unit';
+        return 'all';
     }
 
     static mutates () {
@@ -14,12 +14,13 @@ export default class FilterEffect extends SurrogateSideEffect {
     }
 
     apply (selectionSet, payload) {
-        const context = this.firebolt.context;
+        const firebolt = this.firebolt;
         const entryModel = selectionSet.mergedEnter.model;
+
         if (payload.criteria === null) {
-            context.clearCaching().resetData();
+            firebolt.resetData();
         } else {
-            context.enableCaching().data(entryModel);
+            firebolt.data(entryModel);
         }
         return this;
     }

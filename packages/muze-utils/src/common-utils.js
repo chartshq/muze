@@ -1381,7 +1381,7 @@ const nearestSortingDetails = (dataModel) => {
 };
 
 const sortingOrder = (a, b) => {
-    const sortOrder = !(a instanceof InvalidAwareTypes || a instanceof InvalidAwareTypes)
+    const sortOrder = !(a instanceof InvalidAwareTypes || b instanceof InvalidAwareTypes)
     ? a.localeCompare(b)
     : 1;
     return sortOrder;
@@ -1591,7 +1591,14 @@ const dmMultipleSelection = (targetData, dm) => {
     return filterFn;
 };
 
+const getIndexMap = (arr, prop) => arr.reduce((acc, v, i) => {
+    const key = prop ? v[prop] : v;
+    acc[key] = i;
+    return acc;
+}, {});
+
 export {
+    getIndexMap,
     arraysEqual,
     componentRegistry,
     mix,

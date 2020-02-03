@@ -13,7 +13,7 @@ export default class PersistentBehaviour extends GenericBehaviour {
                 || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
             if (propagationInf.sourceId) {
                 selectionSet.updateExit();
-                const { entrySet } = selectionSet.getSets({ keepDims: true });
+                const { entrySet } = selectionSet.getSets({ keys: true });
                 selectionSet.reset(getMergedSet(entrySet));
                 selectionSet.add(addSet);
                 selectionSet.update(existingAddSet);

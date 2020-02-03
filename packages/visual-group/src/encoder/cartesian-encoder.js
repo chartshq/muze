@@ -19,7 +19,7 @@ import {
 } from './encoder-helper';
 import { retriveDomainFromData } from '../group-helper';
 
-import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y } from '../enums/constants';
+import { ROW, COLUMN, COL, LEFT, TOP, MEASURE, BOTH, X, Y, TEMPORAL } from '../enums/constants';
 import VisualEncoder from './visual-encoder';
 
 const CARTESIAN = COORD_TYPES.CARTESIAN;
@@ -283,7 +283,14 @@ export default class CartesianEncoder extends VisualEncoder {
                 const encodingObj = encoding[key];
                 const field = encodingObj.field;
                 if (!encodingObj.domain && field) {
-                    const domain = retriveDomainFromData(groupedModel, field);
+                    let domain = retriveDomainFromData(groupedModel, field);
+                    const fieldInstance = groupedModel.getFieldspace().fieldsObj()[field];
+                    const isTemporalField = fieldInstance.schema().subtype === TEMPORAL;
+
+                    if (isTemporalField) {
+                        domain = fieldInstance.data();
+                    }
+
                     domains[field] = domain;
                 }
             }
