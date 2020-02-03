@@ -1,6 +1,6 @@
 {
     "groups": {
-		"groupNames": ["update"],
-		"subGroups": ["legend"]
+		"groupNames": ["canvas"],
+		"subGroups": ["sort-config"]
 	}
 }
