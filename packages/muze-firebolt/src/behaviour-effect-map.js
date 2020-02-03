@@ -60,7 +60,7 @@ export const behaviourEffectMap = {
                 if (selectEntrySet || brushEntrySet) {
                     let uids = [];
                     let returnEntrySet = null;
-                    if (getObjProp(brushEntrySet, 'mergedEnter', 'uids', 'length')) {
+                    if (getObjProp(selectEntrySet, 'mergedEnter', 'uids', 'length')) {
                         uids = selectEntrySet.mergedEnter.uids;
                         returnEntrySet = selectEntrySet;
                     } else if (getObjProp(brushEntrySet, 'mergedEnter', 'uids', 'length')) {

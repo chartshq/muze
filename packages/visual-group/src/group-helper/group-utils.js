@@ -161,7 +161,7 @@ export const headerCreator = (fields, fieldHeaders, TextCell, { classPrefix, lab
  * @param {*} facetConfig
  *
  */
-export const sanitizeCheck = (facetConfig) => {
+export const sanitizeCheck = (facetConfig = {}) => {
     const { isBorderPresent } = facetConfig;
     const updateBorderMap = ['color', 'showRowBorders', 'showColBorders', 'showValueBorders'];
     return (!isBorderPresent || updateBorderMap.every(d => !isBorderPresent[d]));
