@@ -56,7 +56,7 @@ const getUniqueKeys = (data, { layers, uids, keys = {}, dimensionsMap = {}, dime
                 uid: uids[i]
             };
             dimensionsMap[key] = defaultValue(dimensionsMap[key], []);
-            dimensionsMap[key].push(measureNames);
+            measureNames.length && dimensionsMap[key].push(measureNames);
         });
     });
 
@@ -94,70 +94,6 @@ export const prepareSelectionSetData = (dataModel, unit) => {
         dimensionsMap
     };
 };
-
-// export const sanitizePayloadCriteria = (data, { dm, dimensionsMap, dimsMapGetter }) => {
-//     const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
-//         [ReservedFields.ROW_ID]: {
-//             index: Object.keys(dm.getFieldsConfig()).length,
-//             def: {
-//                 name: ReservedFields.ROW_ID,
-//                 type: FieldType.DIMENSION
-//             }
-//         }
-//     });
-
-//     if (data === null) {
-//         return null;
-//     }
-
-//     const criteriaFields = data[0];
-//     const fields = criteriaFields.length ? criteriaFields.map((d, i) => ({
-//         name: d,
-//         index: i
-//     })) : [];
-
-//     const fieldIndexMap = fields.reduce((acc, v, i) => {
-//         acc[v.name] = i;
-//         return acc;
-//     }, {});
-
-//     const propFields = fields.map(d => d.name);
-//     const uids = [];
-//     const measureNameField = criteriaFields.find(field => field === ReservedFields.MEASURE_NAMES);
-//     const propDims = fields.filter(d => d.name in fieldsConfig).map(d => d.name);
-
-//     const dimsMap = dimsMapGetter(propDims, fieldsConfig);
-//     for (let i = 1, len = data.length; i < len; i++) {
-//         const row = data[i];
-//         const dimKey = propDims.map(field => row[fieldIndexMap[field]]);
-//         const origRow = dimsMap[dimKey];
-//         if (origRow) {
-//             origRow.forEach((rowVal) => {
-//                 const newRowVal = [];
-//                 const rowId = rowVal[rowVal.length - 1];
-//                 propFields.forEach((field) => {
-//                     const idx = getObjProp(fieldsConfig[field], 'index');
-//                     if (field === ReservedFields.MEASURE_NAMES) {
-//                         newRowVal.push(row[fieldIndexMap[field]]);
-//                     } else {
-//                         idx !== undefined && newRowVal.push(rowId);
-//                     }
-//                 });
-
-//                 if (!measureNameField) {
-//                     const measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
-//                     measuresArr.forEach((measures) => {
-//                         uids.push([...[rowId], ...measures]);
-//                     });
-//                 } else {
-//                     uids.push([newRowVal]);
-//                 }
-//             });
-//         }
-//     }
-
-//     return uids;
-// };
 
 export const dispatchSecondaryActions = (firebolt, { action, propagationData, config, propagationInf }) => {
     const context = firebolt.context;

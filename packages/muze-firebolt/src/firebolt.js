@@ -15,12 +15,11 @@ import {
     initializeSideEffects,
     changeSideEffectAvailability,
     initializePhysicalActions,
-    unionSets,
     getSideEffects,
     setSideEffectConfig
 } from './helper';
 
-export const sanitizePayloadCriteria = (data, { dm, dimensionsMap, dimsMapGetter, addMeasures = true }) => {
+export const getUidsFromCriteria = (data, { dm, dimensionsMap, dimsMapGetter, addMeasures = true }) => {
     const fieldsConfig = Object.assign({}, dm.getFieldsConfig(), {
         [ReservedFields.ROW_ID]: {
             index: Object.keys(dm.getFieldsConfig()).length,
@@ -61,10 +60,23 @@ export const sanitizePayloadCriteria = (data, { dm, dimensionsMap, dimsMapGetter
                 if (!measureNameField) {
                     const measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
                     measuresArr.forEach((measures) => {
-                        uids.push([...rowId, ...(addMeasures ? measures : [])]);
+                        uids.push([rowId, ...(addMeasures ? measures : [])]);
                     });
                 } else {
-                    uids.push([rowId, row[fieldIndexMap[measureNameField]]]);
+                    let measuresArr = row[fieldIndexMap[measureNameField]];
+
+                    if (!measuresArr.length) {
+                        measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [];
+                        if (measuresArr.length) {
+                            measuresArr.forEach((measures) => {
+                                uids.push([rowId, measures]);
+                            });
+                        } else {
+                            uids.push([rowId]);
+                        }
+                    } else {
+                        uids.push(measuresArr.length ? [rowId, measuresArr] : [rowId]);
+                    }
                 }
             });
         }
@@ -100,14 +112,18 @@ const getKeysFromCriteria = (criteria, firebolt) => {
             const dm = getDataModelFromRange(data, criteria);
             dm.getData({ withUid: true }).data.forEach((row) => {
                 const id = row[row.length - 1];
-                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [[]];
-                measures.forEach((measureArr) => {
-                    values.push(`${[id, ...measureArr]}`);
-                });
+                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [];
+                if (measures.length) {
+                    measures.forEach((measureArr) => {
+                        values.push(`${[id, ...measureArr]}`);
+                    });
+                } else {
+                    values.push([id]);
+                }
             });
         } else {
             const dimsMapGetter = firebolt._dimsMapGetter;
-            values = sanitizePayloadCriteria(criteria, {
+            values = getUidsFromCriteria(criteria, {
                 dm: firebolt.data(),
                 dimensionsMap,
                 dimsMapGetter
@@ -227,7 +243,6 @@ export default class Firebolt {
         sideEffects.forEach((sideEffect) => {
             const effects = sideEffect.effects;
             const behaviours = sideEffect.behaviours;
-            let combinedSet = this.mergeSelectionSets(behaviours);
             effects.forEach((effect) => {
                 let options = {};
                 let name;
@@ -237,20 +252,16 @@ export default class Firebolt {
                 } else {
                     name = effect;
                 }
-                const set = options.set;
-                if (set) {
-                    combinedSet = this.mergeSelectionSets(set);
-                }
                 const sideEffectInstance = sideEffectStore[name];
                 if (sideEffectInstance && sideEffectInstance.isEnabled()) {
                     if (!sideEffectInstance.constructor.mutates() &&
                         Object.values(actionHistory).some(d => d.isMutableAction)) {
                         queuedSideEffects[`${name}-${behaviours.join()}`] = {
                             name,
-                            params: [combinedSet, payload, options]
+                            params: [selectionSet, payload, options]
                         };
                     } else {
-                        this.dispatchSideEffect(name, combinedSet, payload, options);
+                        this.dispatchSideEffect(name, selectionSet, payload, options);
                     }
                 }
             });
@@ -549,8 +560,8 @@ export default class Firebolt {
         };
     }
 
-    getSelectionSets (action) {
-        return [this.selectionSet()[action]];
+    getSelectionSet (action) {
+        return this.selectionSet()[action];
     }
 
     getFullData () {
@@ -572,10 +583,6 @@ export default class Firebolt {
      */
     getEntryExitSet (behaviour) {
         return this._entryExitSet[behaviour];
-    }
-
-    mergeSelectionSets (behaviours) {
-        return unionSets(this, behaviours);
     }
 
     data () {

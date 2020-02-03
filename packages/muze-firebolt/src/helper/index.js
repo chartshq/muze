@@ -1,5 +1,3 @@
-import { clone, unique } from 'muze-utils';
-
 export const initializeSideEffects = (context, sideEffects) => {
     const sideEffectsMap = context._sideEffects;
     sideEffects = sideEffects instanceof Array ? sideEffects : Object.values(sideEffects);
@@ -90,47 +88,3 @@ export const getSideEffects = (behaviour, behaviourEffectMap) => {
     return sideEffects;
 };
 
-export const unionSets = (firebolt, behaviours) => {
-    let combinedSet = null;
-    const models = {
-        mergedEnter: null,
-        mergedExit: null
-    };
-    const uidSet = {
-        mergedEnter: [],
-        mergedExit: []
-    };
-
-    behaviours.forEach((behaviour) => {
-        const entryExitSet = firebolt._entryExitSet[behaviour];
-        if (entryExitSet) {
-            combinedSet = Object.assign(combinedSet || {}, clone(entryExitSet));
-            ['mergedEnter', 'mergedExit'].forEach((type) => {
-                const { model, uids } = entryExitSet[type];
-                let existingModel = models[type];
-
-                if (!existingModel) {
-                    existingModel = models[type] = model;
-                    uidSet[type] = uids;
-                } else if (`${model.getSchema().map(d => d.name).sort()}` ===
-                    `${existingModel.getSchema().map(d => d.name).sort()}`) {
-                    uidSet[type] = unique([...uidSet[type], ...uids]);
-                    if (!existingModel.isEmpty() && !model.isEmpty()) {
-                        models[type] = existingModel.union(model);
-                    } else if (existingModel.isEmpty()) {
-                        models[type] = model;
-                    } else {
-                        models[type] = existingModel;
-                    }
-                } else {
-                    existingModel = model;
-                    uidSet[type] = uids;
-                }
-                combinedSet[type].uids = uidSet[type];
-                combinedSet[type].model = models[type];
-            });
-        }
-    });
-
-    return combinedSet;
-};

@@ -2,10 +2,10 @@ import {
     isSimpleObject,
     DimensionSubtype,
     partition,
-    ReservedFields,
-    retrieveNearestGroupByReducers
+    ReservedFields
 } from 'muze-utils';
 import { getSourceFields } from '../../helper';
+import { EntryExitSet } from '../../entry-exit-set';
 
 /**
  * This is the base class has all the common functionalities needed for all behavioural actions. Any other behavioural
@@ -34,7 +34,7 @@ export default class GenericBehaviour {
         const criteria = payload.criteria;
         const firebolt = this.firebolt;
         const formalName = this.constructor.formalName();
-        const selectionSets = firebolt.getSelectionSets(formalName);
+        const selectionSet = firebolt.getSelectionSet(formalName);
         const propInf = this.firebolt.getPropagationInf();
         const {
             model: filteredDataModel,
@@ -42,16 +42,14 @@ export default class GenericBehaviour {
         } = this.getAddSetFromCriteria(criteria, this.firebolt.getPropagationInf());
         this._payload = payload;
 
-        selectionSets.forEach((selectionSet) => {
-            this.setSelectionSet(uids, selectionSet, {
-                filteredDataModel,
-                payload
-            });
-            if (!propInf.sourceId) {
-                this.propagationIdentifiers(selectionSet, payload);
-            }
-            this.entryExitSet(selectionSet, filteredDataModel, payload);
+        this.setSelectionSet(uids, selectionSet, {
+            filteredDataModel,
+            payload
         });
+        if (!propInf.sourceId) {
+            this.propagationIdentifiers(selectionSet, payload);
+        }
+        this.entryExitSet(selectionSet, filteredDataModel, payload);
     }
 
     getAddSetFromCriteria (...params) {
@@ -103,31 +101,28 @@ export default class GenericBehaviour {
     getSetInfo (type, set, filteredDataModel) {
         const { sourceId } = this.firebolt.getPropagationInf();
         const data = this.firebolt.data();
-        let model = null;
 
-        if (type === 'mergedEnter') {
-            if (sourceId) {
-                model = filteredDataModel || null;
-            } else {
-                const uidMap = set.reduce((acc, v) => {
-                    acc[v[0]] = 1;
-                    return acc;
-                }, {});
-                model = data.select(fields => fields[ReservedFields.ROW_ID] in uidMap, {
-                    saveChild: false
-                });
-            }
-        } else if (type === 'mergedExit') {
-            model = null;
-        }
-        const aggFns = retrieveNearestGroupByReducers(model);
-
-        return {
+        return new EntryExitSet({
             uids: set,
-            length: set.length,
-            model,
-            aggFns
-        };
+            filteredModel: (fullData) => {
+                let model = null;
+                if (type === 'complete') {
+                    return fullData;
+                } else if (type === 'mergedEnter' && sourceId) {
+                    model = filteredDataModel;
+                } else {
+                    const uidMap = set.reduce((acc, v) => {
+                        acc[v[0]] = 1;
+                        return acc;
+                    }, {});
+                    model = fullData.select(fields => fields[ReservedFields.ROW_ID] in uidMap, {
+                        saveChild: false
+                    });
+                }
+                return model;
+            },
+            data
+        });
     }
 
     propagationIdentifiers (...params) {
@@ -147,14 +142,14 @@ export default class GenericBehaviour {
                         DimensionSubtype.CATEGORICAL : d === ReservedFields.MEASURE_NAMES)));
                 const allFields = fields.filter(d => d === ReservedFields.ROW_ID ||
                     fieldsConfig[d] && fieldsConfig[d].def.subtype === DimensionSubtype.CATEGORICAL);
-                const { mergedEnter } = selectionSet.getSets();
+                const { mergedEnter } = selectionSet.getSets({ keepDims: true, fields: allFields });
                 propData = {
                     fields: fields.map(d => (fieldsConfig[d] ? fieldsConfig[d].def : {
                         name: d
                     })),
                     range: this.firebolt.getRangeFromIdentifiers({
                         criteria,
-                        entrySet: mergedEnter,
+                        entrySet: selectionSet.getSets().mergedEnter,
                         fields: otherFields
                     }),
                     identifiers: [[...allFields, ReservedFields.MEASURE_NAMES], ...mergedEnter]

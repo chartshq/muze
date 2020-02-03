@@ -590,8 +590,8 @@ export const getBoundBoxes = points => points.map((point) => {
     };
 });
 
-export const getDataFromEvent = (context, event) => {
-    const dataPoint = selectElement(event.target).data()[0];
+export const getDataFromEvent = (context, event, data) => {
+    const dataPoint = data || selectElement(event.target).data()[0];
     if (isSimpleObject(dataPoint) && getObjProp(dataPoint, 'meta', 'layerId') === context.id()) {
         const values = dataPoint && dataPoint.source;
         let identifiers = null;
