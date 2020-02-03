@@ -14,6 +14,7 @@ const dragCriteriaRetriever = {
         const dimensions = {};
         dimensions.x = [startPos.x, endPos.x];
         dimensions.y = [startPos.y, endPos.y];
+
         return {
             criteria: ranges,
             dimensions

@@ -18,7 +18,7 @@ export default class SelectBehaviour extends PersistentBehaviour {
                 || selectionSet._set[d] === SELECTION.SELECTION_OLD_ENTRY);
             if (propagationInf.sourceId) {
                 selectionSet.updateExit();
-                const { entrySet } = selectionSet.getSets({ keepDims: true });
+                const { entrySet } = selectionSet.getSets();
                 selectionSet.reset(getMergedSet(entrySet));
                 selectionSet.add(addSet);
                 selectionSet.update(existingAddSet);
@@ -31,7 +31,7 @@ export default class SelectBehaviour extends PersistentBehaviour {
                     selectionSet.updateEntry();
                     selectionSet.add(addSet);
                 }
-                const { exitSet } = selectionSet.getSets({ keepDims: true });
+                const { exitSet } = selectionSet.getSets({ keys: true });
                 const mergedExitSet = getMergedSet(exitSet);
                 const completeSetCount = selectionSet.getCompleteSet().length;
                 if (mergedExitSet.length === completeSetCount) {

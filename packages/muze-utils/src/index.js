@@ -115,7 +115,8 @@ export {
     getReadableTicks,
     unique,
     dmMultipleSelection,
-    pointWithinCircle
+    pointWithinCircle,
+    getIndexMap
 } from './common-utils';
 
 export {

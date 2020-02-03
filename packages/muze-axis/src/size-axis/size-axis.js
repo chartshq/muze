@@ -109,7 +109,7 @@ export default class SizeAxis {
         const scale = this.scale();
         const domain = this.domain() || [1, 1];
 
-        if (!scale || domain[0] === domain[1]) {
+        if (!scale || domain[0] === domain[1] || domain.length === 1) {
             sizeVal = value;
         } else {
             return this._sizeStrategy.range(domainVal, scale, this.domain(), this.uniqueValues());

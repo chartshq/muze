@@ -15,8 +15,8 @@
  */
 
 import { intSanitizer, mergeRecursive, DataModel } from 'muze-utils';
-import { fixScrollBarConfig, fixFacetConfig } from './canvas/helper';
-import { DEFAULT_CONFIG } from './defaults';
+import { fixScrollBarConfig, fixFacetConfig, excludeKeys } from './canvas/helper';
+import { DEFAULT_CONFIG, EXCLUDE_CONFIG_KEYS } from './defaults';
 
 export default {
     data: {
@@ -70,6 +70,7 @@ export default {
 
                 if (!reset) {
                     oldConf = mergeRecursive({}, config === null ? {} : oldConfig);
+                    oldConf = Object.assign(oldConf, excludeKeys(config, EXCLUDE_CONFIG_KEYS));
                 }
 
                 const defConfig = mergeRecursive(oldConf, DEFAULT_CONFIG);

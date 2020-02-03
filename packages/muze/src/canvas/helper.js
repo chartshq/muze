@@ -25,18 +25,14 @@ export const initCanvas = (context) => {
 
 export const fixFacetConfig = (config) => {
     if (config) {
-        let isBorderPresent = false;
         const isGridLinePresent = {};
-
-        if (config.border && config.border.width) {
-            isBorderPresent = true;
-        }
-        if (config.gridLines) {
-            isGridLinePresent.x = !!config.gridLines.x;
-            isGridLinePresent.y = !!config.gridLines.y;
+        const { border, gridLines } = config;
+        if (gridLines) {
+            isGridLinePresent.x = !!gridLines.x;
+            isGridLinePresent.y = !!gridLines.y;
         }
         const facetsUserConfig = {
-            isBorderPresent,
+            isBorderPresent: border || {},
             isGridLinePresent
         };
         return {
@@ -50,6 +46,16 @@ export const fixFacetConfig = (config) => {
 export const fixScrollBarConfig = (config) => {
     config.scrollBar.thickness = Math.min(50, Math.max(10, config.scrollBar.thickness));
     return config;
+};
+
+export const excludeKeys = (config, keys) => {
+    const emptyValueKeyObject = {};
+    keys.forEach((key) => {
+        if (config && config[key] && Object.keys(config[key]).length) {
+            emptyValueKeyObject[key] = {};
+        }
+    });
+    return emptyValueKeyObject;
 };
 
 export const setLayoutInfForUnits = (context) => {

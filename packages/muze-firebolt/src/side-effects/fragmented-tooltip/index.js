@@ -1,4 +1,4 @@
-import { FieldType } from 'muze-utils';
+import { FieldType, ReservedFields } from 'muze-utils';
 import { spaceOutBoxes } from '../helper';
 import { FRAGMENTED_TOOLTIP } from '../../enums/side-effects';
 import Tooltip from '../tooltip';
@@ -30,9 +30,10 @@ export default class FragmentedTooltip extends Tooltip {
         const boxes = [];
         const uids = dataModel.getUids();
 
-        dataModels.push(...uids.map(d => dataModel.select((fieldsArr, i) => i === d, {
-            saveChild: false
-        })));
+        dataModels.push(...uids.map(uid => dataModel.select(fieldsArr =>
+            fieldsArr[ReservedFields.ROW_ID].value === uid, {
+                saveChild: false
+            })));
 
         const enter = {};
         for (let i = 0, len = dataModels.length; i < len; i++) {

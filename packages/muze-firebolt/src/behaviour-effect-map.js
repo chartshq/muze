@@ -1,7 +1,6 @@
-import { intersect } from 'muze-utils';
+import { intersect, getObjProp } from 'muze-utils';
 import * as BEHAVIOURS from './enums/behaviours';
 import * as SIDE_EFFECTS from './enums/side-effects';
-import { unionSets } from './helper';
 
 const nullDataTooltipMap = {
     area: true,
@@ -59,12 +58,20 @@ export const behaviourEffectMap = {
                 const selectEntrySet = sideEffect.firebolt.getEntryExitSet(BEHAVIOURS.SELECT);
                 const brushEntrySet = sideEffect.firebolt.getEntryExitSet(BEHAVIOURS.BRUSH);
                 if (selectEntrySet || brushEntrySet) {
-                    const unionedSet = unionSets(sideEffect.firebolt, [BEHAVIOURS.SELECT, BEHAVIOURS.BRUSH]);
-                    const { uids } = unionedSet.mergedEnter;
+                    let uids = [];
+                    let returnEntrySet = null;
+                    if (getObjProp(selectEntrySet, 'mergedEnter', 'uids', 'length')) {
+                        uids = selectEntrySet.mergedEnter.uids;
+                        returnEntrySet = selectEntrySet;
+                    } else if (getObjProp(brushEntrySet, 'mergedEnter', 'uids', 'length')) {
+                        uids = brushEntrySet.mergedEnter.uids;
+                        returnEntrySet = brushEntrySet;
+                    }
+
                     const { uids: highlightUids } = selectionSet.mergedEnter;
 
                     if (intersect(uids, highlightUids, [id => id[0], id => id[0]]).length) {
-                        return unionedSet;
+                        return returnEntrySet;
                     }
                 }
 

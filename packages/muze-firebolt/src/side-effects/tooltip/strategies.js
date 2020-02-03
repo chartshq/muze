@@ -348,11 +348,11 @@ export const buildTooltipData = (dataModel, config = {}, context) => {
  * @param {EntrySet} entrySet Entry set
  */
 const getAggregatedValues = (dm, entrySet) => {
-    const fields = entrySet.fields;
+    // const fields = entrySet.fields;
     const aggFns = entrySet.aggFns;
     // Create a map of all the dimensions and the measures
     const dimsMap = entrySet.uids.reduce((acc, v) => {
-        const dims = v[2];
+        const dims = v[0];
 
         !acc[dims] && (acc[dims] = []);
         acc[dims].push(v[1]);
@@ -362,10 +362,9 @@ const getAggregatedValues = (dm, entrySet) => {
     const aggregatedValues = {};
     aggMeasures.forEach((measure) => {
         // Filter all the rows which has this measure and dimensions and apply aggregation.
-        const groupedDm = dm.select((dmFields, id) => {
-            const row = `${fields.map(field => (field === ReservedFields.ROW_ID ? id :
-                dmFields[field].internalValue))}`;
-            const measures = dimsMap[row];
+        const groupedDm = dm.select((dmFields) => {
+            const id = dmFields[ReservedFields.ROW_ID];
+            const measures = dimsMap[id];
             if (measures) {
                 return measures.find(arr => arr.indexOf(measure) !== -1);
             }
