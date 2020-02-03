@@ -1,4 +1,4 @@
-import { intersect } from 'muze-utils';
+import { intersect, getObjProp } from 'muze-utils';
 import * as BEHAVIOURS from './enums/behaviours';
 import * as SIDE_EFFECTS from './enums/side-effects';
 
@@ -60,10 +60,10 @@ export const behaviourEffectMap = {
                 if (selectEntrySet || brushEntrySet) {
                     let uids = [];
                     let returnEntrySet = null;
-                    if (selectEntrySet.mergedEnter.uids.length) {
+                    if (getObjProp(brushEntrySet, 'mergedEnter', 'uids', 'length')) {
                         uids = selectEntrySet.mergedEnter.uids;
                         returnEntrySet = selectEntrySet;
-                    } else if (brushEntrySet.mergedEnter.uids.length) {
+                    } else if (getObjProp(brushEntrySet, 'mergedEnter', 'uids', 'length')) {
                         uids = brushEntrySet.mergedEnter.uids;
                         returnEntrySet = brushEntrySet;
                     }
