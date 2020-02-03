@@ -127,13 +127,13 @@ canvas
   .mount("#chart"); // Specify an element to mount on using a CSS selector
 ```
 
-See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
+See [muzejs.org/docs](https://muzejs.org/docs/v1.3.1) for more documentation!
 
 You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
 
 ## Documentation
 
-You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs).
+You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs/v1.3.1).
 
 ## Support
 
