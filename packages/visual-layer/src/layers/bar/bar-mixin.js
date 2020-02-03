@@ -36,7 +36,7 @@ export const BarLayerMixin = superclass => class extends superclass {
         };
         this._pointMap = {};
         this._overlayPath = {};
-        this._rtree = null;
+        this._rtree = new RTree();
     }
 
     elemType () {

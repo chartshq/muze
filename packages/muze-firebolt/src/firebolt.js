@@ -64,11 +64,19 @@ export const getUidsFromCriteria = (data, { dm, dimensionsMap, dimsMapGetter, ad
                     });
                 } else {
                     let measuresArr = row[fieldIndexMap[measureNameField]];
+
                     if (!measuresArr.length) {
                         measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [];
+                        if (measuresArr.length) {
+                            measuresArr.forEach((measures) => {
+                                uids.push([rowId, measures]);
+                            });
+                        } else {
+                            uids.push([rowId]);
+                        }
+                    } else {
+                        uids.push(measuresArr.length ? [rowId, measuresArr] : [rowId]);
                     }
-                    const uidArr = measuresArr.length ? [rowId, measuresArr] : [rowId];
-                    uids.push(uidArr);
                 }
             });
         }
