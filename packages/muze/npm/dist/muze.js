@@ -17802,17 +17802,24 @@ var getUidsFromCriteria = function getUidsFromCriteria(data, _ref) {
         if (!measureNameField) {
           var measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
           measuresArr.forEach(function (measures) {
-            uids.push([].concat(_toConsumableArray(rowId), _toConsumableArray(addMeasures ? measures : [])));
+            uids.push([rowId].concat(_toConsumableArray(addMeasures ? measures : [])));
           });
         } else {
           var _measuresArr = row[fieldIndexMap[measureNameField]];
 
           if (!_measuresArr.length) {
             _measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [];
-          }
 
-          var uidArr = _measuresArr.length ? [rowId, _measuresArr] : [rowId];
-          uids.push(uidArr);
+            if (_measuresArr.length) {
+              _measuresArr.forEach(function (measures) {
+                uids.push([rowId, measures]);
+              });
+            } else {
+              uids.push([rowId]);
+            }
+          } else {
+            uids.push(_measuresArr.length ? [rowId, _measuresArr] : [rowId]);
+          }
         }
       });
     }
@@ -17855,10 +17862,15 @@ var getKeysFromCriteria = function getKeysFromCriteria(criteria, firebolt) {
         withUid: true
       }).data.forEach(function (row) {
         var id = row[row.length - 1];
-        var measures = criteria[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] || dimensionsMap[id] || [[]];
-        measures.forEach(function (measureArr) {
-          values.push("".concat([id].concat(_toConsumableArray(measureArr))));
-        });
+        var measures = criteria[muze_utils__WEBPACK_IMPORTED_MODULE_0__["ReservedFields"].MEASURE_NAMES] || dimensionsMap[id] || [];
+
+        if (measures.length) {
+          measures.forEach(function (measureArr) {
+            values.push("".concat([id].concat(_toConsumableArray(measureArr))));
+          });
+        } else {
+          values.push([id]);
+        }
       });
     } else {
       var dimsMapGetter = firebolt._dimsMapGetter;
@@ -18049,6 +18061,11 @@ function () {
       return this;
     }
   }, {
+    key: "shouldApplyHighlightEffect",
+    value: function shouldApplyHighlightEffect() {
+      return true;
+    }
+  }, {
     key: "dispatchBehaviour",
     value: function dispatchBehaviour(behaviour, payload) {
       var propagationInfo = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
@@ -18065,16 +18082,19 @@ function () {
         action.dispatch(payload);
         this._entryExitSet[behaviour] = action.entryExitSet();
         var shouldApplySideEffects = this.shouldApplySideEffects(propagationInfo);
+        var shouldApplyHighlightEffect = this.shouldApplyHighlightEffect(behaviour);
 
-        if (propagate) {
-          this.propagate(behaviour, payload, action.propagationIdentifiers(), {
-            sideEffects: sideEffects
-          });
-        }
+        if (shouldApplyHighlightEffect) {
+          if (propagate) {
+            this.propagate(behaviour, payload, action.propagationIdentifiers(), {
+              sideEffects: sideEffects
+            });
+          }
 
-        if (shouldApplySideEffects) {
-          var applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
-          this.applySideEffects(applicableSideEffects, this.getEntryExitSet(behaviour), payload);
+          if (shouldApplySideEffects) {
+            var applicableSideEffects = this.getApplicableSideEffects(sideEffects, payload, propagationInfo);
+            this.applySideEffects(applicableSideEffects, this.getEntryExitSet(behaviour), payload);
+          }
         }
       }
 
@@ -18524,7 +18544,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMergedSet", function() { return getMergedSet; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSourceFields", function() { return getSourceFields; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getSideEffects", function() { return getSideEffects; });
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -18532,7 +18551,6 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 
 var initializeSideEffects = function initializeSideEffects(context, sideEffects) {
   var sideEffectsMap = context._sideEffects;
@@ -21072,7 +21090,7 @@ var strategies = {
     } else {
       var layers = context.firebolt.context.layers();
       layers.forEach(function (layer) {
-        if (payload.target) {
+        if (payload.target !== null) {
           // get uids of only the currently highlighted point
           var actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target); // get uids of only the currently highlighted point excluding the excludeSet ids
 
@@ -23227,6 +23245,39 @@ function (_Firebolt) {
   }, {
     key: "shouldApplySideEffects",
     value: function shouldApplySideEffects() {
+      return true;
+    }
+    /**
+     * Finds out if a deselected legend item is hovered
+     * @param {string} behaviour type of interaction
+     * @return {bool} true if highlight should work on the legend item, false otherwise
+     */
+
+  }, {
+    key: "shouldApplyHighlightEffect",
+    value: function shouldApplyHighlightEffect(behaviour) {
+      var highlightedSet = this.getEntryExitSet(_enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"]);
+      var selectionSet = this.getEntryExitSet(_enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["SELECT"]);
+
+      if (highlightedSet && selectionSet) {
+        var currentHighlightedSet = highlightedSet.mergedEnter.uids;
+        var deselectedLegendItemsSet = selectionSet.mergedExit.uids; // Find out if the currently highlighted item is also the deselected item
+
+        if (behaviour === _enums_behaviours__WEBPACK_IMPORTED_MODULE_3__["HIGHLIGHT"]) {
+          var _ref2;
+
+          var disabledLegendItems = (_ref2 = []).concat.apply(_ref2, _toConsumableArray(currentHighlightedSet)).filter(function (id) {
+            var _ref3;
+
+            return (_ref3 = []).concat.apply(_ref3, _toConsumableArray(deselectedLegendItemsSet)).includes(id);
+          });
+
+          if (disabledLegendItems.length) {
+            return false;
+          }
+        }
+      }
+
       return true;
     }
   }]);
@@ -71096,7 +71147,7 @@ var BarLayerMixin = function BarLayerMixin(superclass) {
         };
         _this._pointMap = {};
         _this._overlayPath = {};
-        _this._rtree = null;
+        _this._rtree = new muze_utils__WEBPACK_IMPORTED_MODULE_0__["RTree"]();
         return _this;
       }
 
