@@ -111,7 +111,7 @@ export default class UnitFireBolt extends Firebolt {
             } = config;
 
             const payloadFn = this.getPayloadGeneratorFor(action);
-            const payload = payloadFn(this, propagationData, config, context.facetByFields());
+            const payload = payloadFn(this, propagationData, config, context.facetFieldsMap());
             const behaviourPolicies = this._behaviourPolicies;
             const filterFns = Object.values(behaviourPolicies[action] || behaviourPolicies['*'] || {});
             let enabled = filterFns.every(fn => fn(propPayload || {}, this, {

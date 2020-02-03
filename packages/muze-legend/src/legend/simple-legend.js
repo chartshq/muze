@@ -346,16 +346,6 @@ export default class SimpleLegend {
         return [[fieldName], [data.rawVal]];
     }
 
-    getValueFromId (id, fields = []) {
-        const data = this.data();
-        if (fields.length) {
-            id = Number(id);
-            return [data.find(d => id === d.id).rawVal];
-        }
-
-        return [];
-    }
-
     getRangeFromIdentifiers ({ fields, entrySet }) {
         const data = this.data();
         const idRangeMap = data.reduce((acc, v) => {
