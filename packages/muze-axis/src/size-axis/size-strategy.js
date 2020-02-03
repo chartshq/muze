@@ -35,13 +35,6 @@ const normalDomain = (domain) => {
  */
 const steppedDomain = (domain, intervals) => {
     let newIntervals = [];
-    if (domain[0] === domain[1]) {
-        if (domain[0] < 0) {
-            domain[1] = 0;
-        } else {
-            domain[0] = 0;
-        }
-    }
     if (intervals instanceof Array) {
         newIntervals = intervals.slice().sort();
     } else {
