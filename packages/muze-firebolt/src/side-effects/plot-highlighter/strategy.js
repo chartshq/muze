@@ -152,7 +152,7 @@ export const strategies = {
             const layers = context.firebolt.context.layers();
 
             layers.forEach((layer) => {
-                if (payload.target) {
+                if (payload.target !== null) {
                     // get uids of only the currently highlighted point
                     const actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target);
                     // get uids of only the currently highlighted point excluding the excludeSet ids

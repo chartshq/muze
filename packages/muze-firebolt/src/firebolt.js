@@ -60,7 +60,7 @@ export const getUidsFromCriteria = (data, { dm, dimensionsMap, dimsMapGetter, ad
                 if (!measureNameField) {
                     const measuresArr = dimensionsMap[rowId].length ? dimensionsMap[rowId] : [[]];
                     measuresArr.forEach((measures) => {
-                        uids.push([...rowId, ...(addMeasures ? measures : [])]);
+                        uids.push([rowId, ...(addMeasures ? measures : [])]);
                     });
                 } else {
                     let measuresArr = row[fieldIndexMap[measureNameField]];
@@ -112,10 +112,14 @@ const getKeysFromCriteria = (criteria, firebolt) => {
             const dm = getDataModelFromRange(data, criteria);
             dm.getData({ withUid: true }).data.forEach((row) => {
                 const id = row[row.length - 1];
-                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [[]];
-                measures.forEach((measureArr) => {
-                    values.push(`${[id, ...measureArr]}`);
-                });
+                const measures = criteria[ReservedFields.MEASURE_NAMES] || dimensionsMap[id] || [];
+                if (measures.length) {
+                    measures.forEach((measureArr) => {
+                        values.push(`${[id, ...measureArr]}`);
+                    });
+                } else {
+                    values.push([id]);
+                }
             });
         } else {
             const dimsMapGetter = firebolt._dimsMapGetter;
