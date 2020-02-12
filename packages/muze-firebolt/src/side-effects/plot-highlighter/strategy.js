@@ -1,15 +1,13 @@
 import { intersect, difference } from 'muze-utils';
-import { getFormattedSet } from './helper';
 import { BEHAVIOURS } from '../..';
 
 const fadeFn = (set, context) => {
-    const { formattedSet } = set;
     const {
         mergedEnter,
         mergedExit,
         exitSet,
         completeSet
-    } = formattedSet;
+    } = set;
 
     if (!mergedEnter.length && !mergedExit.length) {
         context.applyInteractionStyle(completeSet, { interactionType: 'fade', apply: false });
@@ -32,13 +30,12 @@ const fadeFn = (set, context) => {
 };
 
 const fadeOnBrushFn = (set, context, payload) => {
-    const { formattedSet } = set;
     const {
         exitSet,
         mergedEnter,
         mergedExit,
         completeSet
-    } = formattedSet;
+    } = set;
 
     const { dragEnd } = payload;
     let interactionType = 'brushStroke';
@@ -85,13 +82,11 @@ export const strategies = {
     fade: fadeFn,
     fadeOnBrush: fadeOnBrushFn,
     focus: (set, context) => {
-        const { formattedSet } = set;
         const {
-            entrySet,
             mergedEnter,
             mergedExit,
             completeSet
-        } = formattedSet;
+        } = set;
         const { firebolt } = context;
 
         if (!mergedEnter.length && !mergedExit.length) {
@@ -100,7 +95,7 @@ export const strategies = {
             context.applyInteractionStyle(completeSet, { interactionType: 'commonDoubleStroke', apply: false });
         } else {
             context.applyInteractionStyle(mergedExit, { interactionType: 'focusStroke', apply: false });
-            context.applyInteractionStyle(entrySet, { interactionType: 'focusStroke', apply: true });
+            context.applyInteractionStyle(mergedEnter, { interactionType: 'focusStroke', apply: true });
 
             const payload = firebolt.getPayload(BEHAVIOURS.HIGHLIGHT) || {};
             const entryExitSet = firebolt.getEntryExitSet(BEHAVIOURS.HIGHLIGHT);
@@ -139,9 +134,7 @@ export const strategies = {
             });
         }
     },
-    highlight: (set, context, payload, excludeSetIds) => {
-        const { selectionSet } = set;
-
+    highlight: (selectionSet, context, payload) => {
         if (!selectionSet.mergedEnter.length && !selectionSet.mergedExit.length) {
             // Remove focusStroke on selected but currently non-highlighted set
             context.applyInteractionStyle(selectionSet.completeSet, { interactionType: 'highlight', apply: false });
@@ -154,9 +147,7 @@ export const strategies = {
             layers.forEach((layer) => {
                 if (payload.target !== null) {
                     // get uids of only the currently highlighted point
-                    const actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target);
-                    // get uids of only the currently highlighted point excluding the excludeSet ids
-                    const currentHighlightedSet = getFormattedSet(actualPoint, excludeSetIds);
+                    const currentHighlightedSet = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target);
 
                     // Apply highlight on the currently hovered point
                     context.applyInteractionStyle(currentHighlightedSet,
@@ -171,9 +162,9 @@ export const strategies = {
 
                     const selectEntrySet = context.firebolt.getEntryExitSet('select');
                     if (selectEntrySet) {
-                        const commonSet = intersect(selectEntrySet.mergedEnter.uids, actualPoint.uids,
+                        const commonSet = intersect(selectEntrySet.mergedEnter.uids, currentHighlightedSet.uids,
                             [v => v[0], v => v[0]]);
-                        const diffSet = difference(selectEntrySet.mergedEnter.uids, actualPoint.uids,
+                        const diffSet = difference(selectEntrySet.mergedEnter.uids, currentHighlightedSet.uids,
                             [v => v[0], v => v[0]]);
 
                         if (commonSet.length) {
@@ -192,10 +183,9 @@ export const strategies = {
         }
     },
     pseudoFocus: (set, context) => {
-        const { formattedSet } = set;
         const {
             mergedEnter
-        } = formattedSet;
+        } = set;
 
         context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: false });
     }

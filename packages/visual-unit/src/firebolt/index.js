@@ -10,8 +10,8 @@ import {
 const sideEffectPolicy = (propPayload, firebolt, propagationInf) => {
     const { sourceIdentifiers, propagationData } = propagationInf;
     const fields = sourceIdentifiers.fields;
-    const sourceIdentifierFields = Object.keys(fields).filter(field =>
-        field.type !== FieldType.MEASURE);
+    const sourceIdentifierFields = fields.filter(field =>
+        field.type !== FieldType.MEASURE).map(field => field.name);
     const propFields = Object.keys(propagationData.getFieldsConfig());
     const hasCommonCanvas = propPayload.sourceCanvas === firebolt.sourceCanvas();
     return intersect(sourceIdentifierFields, propFields).length || hasCommonCanvas;

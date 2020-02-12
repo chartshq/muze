@@ -193,8 +193,7 @@ export const LineLayerMixin = superclass => class extends superclass {
 
         this._points = [];
         this._pointMap = {};
-        containerSelection.classed(qualifiedClassName.join(' '), true);
-        containerSelection.classed(className, true);
+        containerSelection.attr('class', `${qualifiedClassName.join(' ')} ${className}`);
 
         const colorValFn = encoding.color.value;
         const translatedPoints = this.getTranslatedData(normalizedData, colorValFn, colorFieldIndex, axes);
