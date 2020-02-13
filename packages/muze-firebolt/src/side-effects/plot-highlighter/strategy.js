@@ -5,7 +5,6 @@ const fadeFn = (set, context) => {
     const {
         mergedEnter,
         mergedExit,
-        exitSet,
         completeSet
     } = set;
 
@@ -20,9 +19,9 @@ const fadeFn = (set, context) => {
             // Apply style only on the hovered layer
             if (layerName === 'area') {
                 context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: true }, [layer]);
-                context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+                context.applyInteractionStyle(mergedExit, { interactionType: 'fade', apply: false }, [layer]);
             } else {
-                context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: true }, [layer]);
+                context.applyInteractionStyle(mergedExit, { interactionType: 'fade', apply: true }, [layer]);
                 context.applyInteractionStyle(mergedEnter, { interactionType: 'fade', apply: false }, [layer]);
             }
         });
@@ -31,7 +30,6 @@ const fadeFn = (set, context) => {
 
 const fadeOnBrushFn = (set, context, payload) => {
     const {
-        exitSet,
         mergedEnter,
         mergedExit,
         completeSet
@@ -57,7 +55,7 @@ const fadeOnBrushFn = (set, context, payload) => {
             // Apply style only on the hovered layer
             if (layerName === 'area') {
                 if (dragEnd) {
-                    context.applyInteractionStyle(exitSet, { interactionType: 'fade', apply: false }, [layer]);
+                    context.applyInteractionStyle(mergedExit, { interactionType: 'fade', apply: false }, [layer]);
                     mergedEnter.length &&
                         context.applyInteractionStyle(mergedEnter, { interactionType: 'focus', apply: true }, [layer]);
                 }

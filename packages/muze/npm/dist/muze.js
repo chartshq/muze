@@ -20684,45 +20684,6 @@ function (_AnchorEffect) {
 
 /***/ }),
 
-/***/ "./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js":
-/*!****************************************************************************!*\
-  !*** ./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js ***!
-  \****************************************************************************/
-/*! exports provided: getFormattedSet */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getFormattedSet", function() { return getFormattedSet; });
-/* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
-/**
- * @private
- * @param {Object} set Points set
- * @param {Array.<number>} selectedPointsId array of id of selected points
- * @return {Object} Returns the set with the selected points removed
- */
-
-var getFormattedSet = function getFormattedSet(set, selectedPointsId) {
-  var intersection = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-  var fn = intersection ? muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"] : muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"];
-  var formattedSet = fn(set.uids, selectedPointsId, [function (d) {
-    return d[0];
-  }, function (d) {
-    return d[0];
-  }]);
-  return _objectSpread({}, set, {
-    uids: formattedSet,
-    length: formattedSet.length
-  });
-};
-
-/***/ }),
-
 /***/ "./packages/muze-firebolt/src/side-effects/plot-highlighter/index.js":
 /*!***************************************************************************!*\
   !*** ./packages/muze-firebolt/src/side-effects/plot-highlighter/index.js ***!
@@ -20736,12 +20697,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _surrogate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../surrogate */ "./packages/muze-firebolt/src/side-effects/surrogate.js");
 /* harmony import */ var _strategy__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./strategy */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/strategy.js");
 /* harmony import */ var _enums_side_effects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../enums/side-effects */ "./packages/muze-firebolt/src/enums/side-effects.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js");
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -20766,7 +20722,6 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
 
 
 
@@ -20819,21 +20774,7 @@ function (_SurrogateSideEffect) {
     value: function apply(selectionSet, payload) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var currentStrategy = this._strategies[options.strategy || this._strategy];
-      var excludeSetIds = this.getExcludeSetIds(options.excludeSet); // Get all sets except the excludeSet points
-
-      var formattedSet = _objectSpread({}, selectionSet, {
-        completeSet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.completeSet, excludeSetIds),
-        entrySet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.entrySet[1], excludeSetIds),
-        exitSet: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.exitSet[1], excludeSetIds),
-        mergedEnter: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.mergedEnter, excludeSetIds),
-        mergedExit: Object(_helper__WEBPACK_IMPORTED_MODULE_3__["getFormattedSet"])(selectionSet.mergedExit, excludeSetIds)
-      });
-
-      var totalSet = {
-        selectionSet: selectionSet,
-        formattedSet: formattedSet
-      };
-      currentStrategy(totalSet, this, payload, excludeSetIds);
+      currentStrategy(selectionSet, this, payload);
       return this;
     }
   }], [{
@@ -20866,18 +20807,14 @@ function (_SurrogateSideEffect) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "strategies", function() { return strategies; });
 /* harmony import */ var muze_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! muze-utils */ "./packages/muze-utils/src/index.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helper */ "./packages/muze-firebolt/src/side-effects/plot-highlighter/helper.js");
-/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../.. */ "./packages/muze-firebolt/src/index.js");
-
+/* harmony import */ var ___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../.. */ "./packages/muze-firebolt/src/index.js");
 
 
 
 var fadeFn = function fadeFn(set, context) {
-  var formattedSet = set.formattedSet;
-  var mergedEnter = formattedSet.mergedEnter,
-      mergedExit = formattedSet.mergedExit,
-      exitSet = formattedSet.exitSet,
-      completeSet = formattedSet.completeSet;
+  var mergedEnter = set.mergedEnter,
+      mergedExit = set.mergedExit,
+      completeSet = set.completeSet;
 
   if (!mergedEnter.length && !mergedExit.length) {
     context.applyInteractionStyle(completeSet, {
@@ -20894,12 +20831,12 @@ var fadeFn = function fadeFn(set, context) {
           interactionType: 'fade',
           apply: true
         }, [layer]);
-        context.applyInteractionStyle(exitSet, {
+        context.applyInteractionStyle(mergedExit, {
           interactionType: 'fade',
           apply: false
         }, [layer]);
       } else {
-        context.applyInteractionStyle(exitSet, {
+        context.applyInteractionStyle(mergedExit, {
           interactionType: 'fade',
           apply: true
         }, [layer]);
@@ -20913,11 +20850,9 @@ var fadeFn = function fadeFn(set, context) {
 };
 
 var fadeOnBrushFn = function fadeOnBrushFn(set, context, payload) {
-  var formattedSet = set.formattedSet;
-  var exitSet = formattedSet.exitSet,
-      mergedEnter = formattedSet.mergedEnter,
-      mergedExit = formattedSet.mergedExit,
-      completeSet = formattedSet.completeSet;
+  var mergedEnter = set.mergedEnter,
+      mergedExit = set.mergedExit,
+      completeSet = set.completeSet;
   var dragEnd = payload.dragEnd;
   var interactionType = 'brushStroke';
 
@@ -20946,7 +20881,7 @@ var fadeOnBrushFn = function fadeOnBrushFn(set, context, payload) {
 
       if (layerName === 'area') {
         if (dragEnd) {
-          context.applyInteractionStyle(exitSet, {
+          context.applyInteractionStyle(mergedExit, {
             interactionType: 'fade',
             apply: false
           }, [layer]);
@@ -20991,11 +20926,9 @@ var strategies = {
   fade: fadeFn,
   fadeOnBrush: fadeOnBrushFn,
   focus: function focus(set, context) {
-    var formattedSet = set.formattedSet;
-    var entrySet = formattedSet.entrySet,
-        mergedEnter = formattedSet.mergedEnter,
-        mergedExit = formattedSet.mergedExit,
-        completeSet = formattedSet.completeSet;
+    var mergedEnter = set.mergedEnter,
+        mergedExit = set.mergedExit,
+        completeSet = set.completeSet;
     var firebolt = context.firebolt;
 
     if (!mergedEnter.length && !mergedExit.length) {
@@ -21016,12 +20949,12 @@ var strategies = {
         interactionType: 'focusStroke',
         apply: false
       });
-      context.applyInteractionStyle(entrySet, {
+      context.applyInteractionStyle(mergedEnter, {
         interactionType: 'focusStroke',
         apply: true
       });
-      var payload = firebolt.getPayload(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT) || {};
-      var entryExitSet = firebolt.getEntryExitSet(___WEBPACK_IMPORTED_MODULE_2__["BEHAVIOURS"].HIGHLIGHT);
+      var payload = firebolt.getPayload(___WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].HIGHLIGHT) || {};
+      var entryExitSet = firebolt.getEntryExitSet(___WEBPACK_IMPORTED_MODULE_1__["BEHAVIOURS"].HIGHLIGHT);
       var layers = firebolt.context.layers();
       layers.forEach(function (layer) {
         var layerName = layer.constructor.formalName();
@@ -21074,9 +21007,7 @@ var strategies = {
       });
     }
   },
-  highlight: function highlight(set, context, payload, excludeSetIds) {
-    var selectionSet = set.selectionSet;
-
+  highlight: function highlight(selectionSet, context, payload) {
     if (!selectionSet.mergedEnter.length && !selectionSet.mergedExit.length) {
       // Remove focusStroke on selected but currently non-highlighted set
       context.applyInteractionStyle(selectionSet.completeSet, {
@@ -21092,9 +21023,7 @@ var strategies = {
       layers.forEach(function (layer) {
         if (payload.target !== null) {
           // get uids of only the currently highlighted point
-          var actualPoint = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target); // get uids of only the currently highlighted point excluding the excludeSet ids
-
-          var currentHighlightedSet = Object(_helper__WEBPACK_IMPORTED_MODULE_1__["getFormattedSet"])(actualPoint, excludeSetIds); // Apply highlight on the currently hovered point
+          var currentHighlightedSet = layer.getUidsFromPayload(selectionSet.mergedEnter, payload.target); // Apply highlight on the currently hovered point
 
           context.applyInteractionStyle(currentHighlightedSet, {
             interactionType: 'highlight',
@@ -21107,12 +21036,12 @@ var strategies = {
           var selectEntrySet = context.firebolt.getEntryExitSet('select');
 
           if (selectEntrySet) {
-            var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(selectEntrySet.mergedEnter.uids, actualPoint.uids, [function (v) {
+            var commonSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["intersect"])(selectEntrySet.mergedEnter.uids, currentHighlightedSet.uids, [function (v) {
               return v[0];
             }, function (v) {
               return v[0];
             }]);
-            var diffSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"])(selectEntrySet.mergedEnter.uids, actualPoint.uids, [function (v) {
+            var diffSet = Object(muze_utils__WEBPACK_IMPORTED_MODULE_0__["difference"])(selectEntrySet.mergedEnter.uids, currentHighlightedSet.uids, [function (v) {
               return v[0];
             }, function (v) {
               return v[0];
@@ -21139,8 +21068,7 @@ var strategies = {
     }
   },
   pseudoFocus: function pseudoFocus(set, context) {
-    var formattedSet = set.formattedSet;
-    var mergedEnter = formattedSet.mergedEnter;
+    var mergedEnter = set.mergedEnter;
     context.applyInteractionStyle(mergedEnter, {
       interactionType: 'focus',
       apply: false
