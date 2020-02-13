@@ -1,7 +1,6 @@
 import SurrogateSideEffect from '../surrogate';
 import { strategies } from './strategy';
 import { HIGHLIGHTER } from '../../enums/side-effects';
-import { getFormattedSet } from './helper';
 
 export default class PlotHighlighter extends SurrogateSideEffect {
     constructor (...params) {
@@ -34,21 +33,8 @@ export default class PlotHighlighter extends SurrogateSideEffect {
 
     apply (selectionSet, payload, options = {}) {
         const currentStrategy = this._strategies[options.strategy || this._strategy];
-        const excludeSetIds = this.getExcludeSetIds(options.excludeSet);
 
-        // Get all sets except the excludeSet points
-        const formattedSet = {
-            ...selectionSet,
-            completeSet: getFormattedSet(selectionSet.completeSet, excludeSetIds),
-            entrySet: getFormattedSet(selectionSet.entrySet[1], excludeSetIds),
-            exitSet: getFormattedSet(selectionSet.exitSet[1], excludeSetIds),
-            mergedEnter: getFormattedSet(selectionSet.mergedEnter, excludeSetIds),
-            mergedExit: getFormattedSet(selectionSet.mergedExit, excludeSetIds)
-        };
-
-        const totalSet = { selectionSet, formattedSet };
-
-        currentStrategy(totalSet, this, payload, excludeSetIds);
+        currentStrategy(selectionSet, this, payload);
 
         return this;
     }
