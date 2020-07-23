@@ -1,7 +1,0 @@
----
-  title: "Lifecycle Events"
-  description: "Documented Methods"
-  sections: 
-    - 
-      type: "markdown-section"
-      content: "\n\nLife cycle events trigger throughout the lifecycle of every component of canvas. These events can be tapped into\nand be used for doing any work before and after these events occur.\n\nThe events which are registered in canvas are:-\n- `canvas.initialized`: Fired when the canvas is initialized first time.\n- `canvas.updated`: Fired when the canvas gets updated with new data or new configuration.\n- `canvas.beforedraw`: Fired before the canvas has started drawing.\n- `canvas.drawn`: Fired when the canvas has finished drawing.\n- `unit.initialized`: Fired when all the visual units of the canvas gets initialized.\n- `unit.updated`: Fired when all the visual units of the canvas gets updated.\n- `unit.beforedraw`: Fired before the units are being drawn.\n- `unit.drawn`: Fired when all of the units has been rendered.\n- `layer.initialized`: Fired when all the layers of a visual unit gets created.\n- `layer.beforedraw`: Fired before the layers are being drawn.\n- `layer.drawn`: Fired after the layers has been drawn."
