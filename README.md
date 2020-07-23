@@ -15,3 +15,5 @@
 [![License](https://img.shields.io/github/license/chartshq/muze.svg)](https://github.com/chartshq/muze/blob/master/LICENSE)
 
 # MIGRATION IN PROGRESS 
+
+Visit old version  https://github.com/chartshq/muze-deprecated
