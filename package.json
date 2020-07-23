@@ -1,101 +1,75 @@
 {
-  "name": "muze-monorepo",
-  "private": true,
-  "scripts": {
-    "test": "npm run lint && npm run ut",
-    "ut": "./scripts/test-runner.sh '*'",
-    "ut:layout": "./scripts/test-runner.sh layout",
-    "ut:muze": "./scripts/test-runner.sh muze",
-    "ut:axis": "./scripts/test-runner.sh muze-axis",
-    "ut:firebolt": "./scripts/test-runner.sh muze-firebolt",
-    "ut:legend": "./scripts/test-runner.sh muze-legend",
-    "ut:tooltip": "./scripts/test-runner.sh muze-tooltip",
-    "ut:utils": "./scripts/test-runner.sh muze-utils",
-    "ut:transform": "./scripts/test-runner.sh transform",
-    "ut:cell": "./scripts/test-runner.sh visual-cell",
-    "ut:group": "./scripts/test-runner.sh visual-group",
-    "ut:layer": "./scripts/test-runner.sh visual-layer",
-    "ut:unit": "./scripts/test-runner.sh visual-unit",
-    "clean": "rimraf ./dist",
-    "build:prod": "npm run clean && webpack --mode production",
-    "build:dev": "npm run clean && webpack --mode development",
-    "build": "npm run build:prod",
-    "start:prod": "webpack-dev-server --host 0.0.0.0 --open --mode production --config webpack.config.js",
-    "start:dev": "webpack-dev-server --host 0.0.0.0 --mode development --config webpack.config.dev.js",
-    "start": "npm run start:dev",
-    "lint": "eslint ./packages",
-    "lint-errors": "eslint --quiet ./packages",
-    "docs": "rm -rf yaml && mkdir yaml && jsdoc -c jsdoc.conf.json",
-    "autotest:prod": "node scripts/run-autotest.js --mode production",
-    "autotest:dev": "node scripts/run-autotest.js --mode development",
-    "autotest": "npm run autotest:dev",
-    "upload": "node scripts/upload-build.js",
-    "postinstall": "lerna bootstrap"
+  "name": "@chartshq/muze",
+  "version": "2.0.0",
+  "description": "Composable visualisation library for web with a data-first approach",
+  "homepage": "https://muzejs.org",
+  "author": "Charts.com <eng@chars.com> (https://charts.com/)",
+  "main": "dist/muze.js",
+  "types": "./index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json",
+    "index.d.ts"
+  ],
+  "contributors": [
+    {
+      "name": "Akash Ghoswami",
+      "email": "akashgoswami90s@gmail.com"
+    },
+    {
+      "name": "Ranajit Banerjee",
+      "email": "ranajit.113124@gmail.com",
+      "url": "https://github.com/ranajitbanerjee"
+    },
+    {
+      "name": "Mridul Meharia",
+      "email": "mehariamridul@gmail.com",
+      "url": "https://github.com/mridulmeh"
+    },
+    {
+      "name": "Subhash Haldar"
+    },
+    {
+      "name": "Sandeep Acharya"
+    },
+    {
+      "name": "Rousan Ali",
+      "email": "hello@rousan.io",
+      "url": "https://rousan.io"
+    },
+    {
+      "name": "Ujjal Kumar Dutta",
+      "email": "duttaujjal143@gmail.com",
+      "url": "https://github.com/UD-UD"
+    },
+    {
+      "name": "Nakshatra Mukhopadhyay"
+    },
+    {
+      "name": "Adarsh Lilha",
+      "email": "adarsh@charts.com"
+    },
+    {
+      "name": "Swati Mukherjee"
+    }
+  ],
+  "keywords": [
+    "muze",
+    "svg",
+    "vector",
+    "graphics",
+    "data-visualization",
+    "visualization",
+    "renderer",
+    "relational",
+    "algebra",
+    "relation",
+    "webassembly"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chartshq/muze"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
-    "autoprefixer": "^9.1.1",
-    "axios": "^0.18.0",
-    "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.4",
-    "chai": "3.5.0",
-    "chalk": "^2.4.2",
-    "commander": "^2.19.0",
-    "cross-env": "^5.0.5",
-    "css-loader": "^0.28.11",
-    "dotenv": "^7.0.0",
-    "ejs": "^2.6.1",
-    "es6-promisify": "^6.0.1",
-    "eslint": "3.19.0",
-    "eslint-config-airbnb": "15.1.0",
-    "eslint-plugin-import": "2.7.0",
-    "eslint-plugin-jsx-a11y": "5.1.1",
-    "eslint-plugin-react": "7.3.0",
-    "extract-text-webpack-plugin": "^4.0.0-beta.0",
-    "form-data": "^2.3.3",
-    "fs-extra": "^7.0.1",
-    "http-status-codes": "^1.3.2",
-    "istanbul-instrumenter-loader": "^3.0.0",
-    "jsdoc": "^3.5.5",
-    "json2yaml": "^1.1.0",
-    "karma": "1.7.1",
-    "karma-chai": "0.1.0",
-    "karma-chrome-launcher": "2.1.1",
-    "karma-coverage-istanbul-reporter": "^1.3.0",
-    "karma-mocha": "1.3.0",
-    "karma-sourcemap-loader": "^0.3.7",
-    "karma-spec-reporter": "0.0.31",
-    "karma-webpack": "^3.0.4",
-    "lerna": "^3.0.4",
-    "mini-css-extract-plugin": "^0.4.1",
-    "mocha": "3.4.2",
-    "mocha-webpack": "0.7.0",
-    "node-sass": "^4.9.0",
-    "optimize-css-assets-webpack-plugin": "^5.0.0",
-    "ora": "^3.2.0",
-    "postcss-loader": "^3.0.0",
-    "prompt": "^1.0.0",
-    "prompts": "^2.2.1",
-    "rimraf": "^2.6.2",
-    "sass-loader": "^7.0.1",
-    "semver": "^5.6.0",
-    "shelljs": "^0.8.3",
-    "style-loader": "^0.21.0",
-    "transform-runtime": "0.0.0",
-    "uglifyjs-webpack-plugin": "^1.2.7",
-    "uuid": "^3.3.2",
-    "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-dev-server": "^3.1.14",
-    "yamljs": "^0.3.0",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.1"
-  },
-  "browserslist": [
-    "last 10 major versions",
-    "not dead",
-    "Firefox ESR",
-    "ie >= 11"
-  ]
+  "dependencies": {}
 }

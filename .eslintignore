@@ -1,5 +1,0 @@
-packages/muze/npm/*
-packages/*/node_modules/*
-packages/*/example/*
-packages/*/test/*
-dist/*
