@@ -1,94 +1,65 @@
-<h3 align="center">
-  <br />
-  <br />
-  <a href="https://github.com/chartshq/muze">
-    <img src="https://github.com/chartshq/muze/raw/master/logo.png" alt="muzejs" title="muzejs" />
-  </a>
-</h3>
-<br />
-<br />
-<br />
-
 [![Free](https://img.shields.io/badge/cost-Free-brightgreen)](http://muzejs.org/muze-wa/eula)
 [![License](https://img.shields.io/badge/license-Custom-brightgreen)](http://muzejs.org/muze-wa/eula)
-[![NPM version](https://img.shields.io/npm/v/@chartshq/muze.svg)](https://www.npmjs.com/package/@chartshq/muze)
-[![Contributors](https://img.shields.io/github/contributors/chartshq/muze.svg)](https://github.com/chartshq/muze/graphs/contributors)
+[![NPM version](https://img.shields.io/npm/v/@chartshq/datamodel.svg)](https://www.npmjs.com/package/@chartshq/datamodel)
+[![Contributors](https://img.shields.io/github/contributors/chartshq/datamodel.svg)](https://github.com/chartshq/datamodel/graphs/contributors)
 
-## What is Muze?
+## What is DataModel?
 
-Muze is a free **data visualization library for creating exploratory data visualizations (like Tableau)** in browser, using WebAssembly. It uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It is ideal for use in visual analytics dashboards & applications to create highly performant, interactive, multi-dimensional, and composable visualizations.
+DataModel is an in-browser representation of tabular data. It uses WebAssembly for high performance and works seamlessly with any JavaScript library. It supports [Relational Algebra](https://en.wikipedia.org/wiki/Relational_algebra) operators which enable you to run `select`, `group`, `sort` (and many more) operations on the data.
 
-It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart.
+The current version performs all the data operations like `filtering`, `aggregation`, etc. on **[WebAssembly](https://webassembly.org/)** which gives a **10x performance** boost compared to the [old JavaScript version](https://github.com/chartshq/datamodel-deprecated).
 
-Muze uses an in-browser **[DataModel](https://github.com/chartshq/datamodel)** to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
+It is written in [Rust Language](https://www.rust-lang.org/) to handle computation intensive data operations, which is then compiled to **[WebAssembly](https://webassembly.org/)**, thereby providing a native-like performance for data operations.
+
+DataModel can be used if you need an in-browser tabular data store for data analysis, visualization or just general use of data. 
 
 ## Features
 
-* 🍗  Build complex and interactive visualizations by using **composable** layer constructs.
+ * 🎉  Supports [**Relational Algebra**](https://en.wikipedia.org/wiki/Relational_algebra) operators e.g. `selection`, `projection`, `group`, `calculateVariable`, `sort` etc out-of-the-box.
 
-* 🔨  Use rich **data operators** to transform, visualize and interact with data.
+* 💎  Every operation creates **Immutable** DataModel instance and builds a Directed Acyclic Graph (DAG) which establishes auto interactivity.
 
-* 👯  Define custom interactions by configuring **physical behavioural model** and **side effect**.
+* 🚀  Uses **[WebAssembly](https://webassembly.org/)** for handling huge datasets and for **better performance**.
 
-* ✂️  Use **css** to change look and feel of the charts.
-
-* ☀️  Have a **single source of truth** for all your visualization and interaction controlled from data.
-
-* 🔩  Integrate easily with your existing application by **dispatching actions** on demand.
-
-* 🚀  Uses **WebAssembly** for handling huge datasets and for **better performance**.
+* ⛺  Also supports **Nodejs**.
 
 ## Installation
 
 ### CDN
 
-Insert the muze build and the required CSS into the `<head>`: 
+Insert the DataModel build into the `<head>`:
 
 ```html
-<link href="https://cdn.jsdelivr.net/npm/@chartshq/muze@2.0.0/dist/muze.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@chartshq/muze@2.0.0/dist/muze.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/@chartshq/datamodel@3.0.0/dist/browser/datamodel.js" type="text/javascript"></script>
 ```
 
 ### NPM
 
-Install muze from NPM:
+Install DataModel from NPM:
 
 ```bash
-$ npm install @chartshq/muze
+$ npm install --save @chartshq/datamodel
 ```
 
-Also import the required stylesheet in entry file:
+As we're using [Worker](https://developer.mozilla.org/en-US/docs/Web/API/Worker) internally, so the [worker-loader](https://www.npmjs.com/package/worker-loader) needs to be added in your `webpack.config.js` file as follows:
 
 ```js
-import "@chartshq/muze/dist/muze.css"
-```
-
-Then you need to add a webpack plugin [copy-webpack-plugin](https://webpack.js.org/plugins/copy-webpack-plugin/) to copy some required muze files to your output `dist` or `build` folder.
-
-```bash
-npm install copy-webpack-plugin@5.1.1 --save-dev
-```
-
-And add this to your `webpack.config.file` :
-
-```js
-const path = require("path");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-
-module.exports = {
-	plugins: [
-		new CopyWebpackPlugin([
+module: {
+    rules: [
       {
-        // Provide your node_modules path where @chartshq/muze
-				// package is installed.
-        from: path.resolve("<your_node_modules_path>", "@chartshq/muze/dist"),
-        to: '.',
-        ignore: ['*.DS_Store'],
+        test: /\.worker/,
+        include: /datamodel/,
+        loader: 'worker-loader',
+        options: {
+          inline: false, // If you want to make it inline, set to true.
+          fallback: true
+        },
       },
-    ]),
-	]
-}
+    ],
+  },
 ```
+
+Please visit the [worker-loader](https://www.npmjs.com/package/worker-loader) for more info about the loader.
 
 ## Getting Started
 
@@ -141,139 +112,162 @@ const data = [
 ]
 ```
 
-2. Import muze as follows:
+2. Import DataModel as follows:
 
 ```js
 // If you are using the npm package,
-// import the package and its CSS file.
-import muze from '@chartshq/muze';
-import "@chartshq/muze/dist/muze.css";
+// import the package as below:
+import DataModel from '@chartshq/datamodel';
 
-// If you are using CDN, import it as follows:
-const muze = window.muze;
+// If you are using CDN, then use it as follows:
+const DataModel = window.DataModel;
 ```
 
-3. Create a DataModel and a basic chart:
+2. Load the DataModel engine and pass the data and schema to `DataModel` constructor and create a new `DataModel` instance:
 
 ```js
-// As the muze and DataModel are asynchronous, so we need to
+import Engine from '@chartshq/datamodel';
+
+// As the DataModel are asynchronous, so we need to
 // use async-await syntax.
 (async () => {
-	// Load the DataModel module.
-  const DataModel = await muze.DataModel.onReady();
-  
+  // Load the DataModel module.
+  const DataModel = await Engine.onReady();
+
   // Converts the raw data into a format
 	// which DataModel can consume.
   const formattedData = await DataModel.loadData(data, schema);
 
   // Create a new DataModel instance with
   // the formatted data.
-  let dm = new DataModel(formattedData);
+  const dm = new DataModel(formattedData);
 
-	// Create a global environment to share common configs across charts.
-  const env = await muze();
- 
-  // Create a new canvas instance from the global
-  // environment to render chart on.
-  const canvas = env.canvas();
+  console.log(dm.getData().data);
+  // Output:
+  //  [
+  //     ["chevrolet chevelle malibu", "chevrolet", 130, "USA"],
+  //     ["buick skylark 320", "buick", 165, "USA"],
+  //     ["datsun pl510", "datsun", 88, "Japan"]
+  //  ]
 
-  canvas
-  .data(dm) // Set data to the chart.
-  .rows(["Horsepower"]) // Fields drawn on Y axis.
-  .columns(["Origin"]) // Fields drawn on X axis.
-  .mount("#chart"); // Specify an element to mount on using a CSS selector.
+  // Perform the selection operation
+  const selectDm = dm.select({ field: ‘Origin’, value: ‘USA’, operator: ‘eq’ });
+  console.log(selectDm.getData().data);
+  // Output:
+  //  [
+  //     ["chevrolet chevelle malibu", "chevrolet", 130, "USA],
+  //     ["buick skylark 320", "buick", 165, "USA]
+  //  ]
+
+  // Perform the projection operation
+  const projectDm = dm.project(["Origin", "Maker"]);
+  console.log(projectDm.getData().data);
+  // Output:
+  //  [
+  //     ["USA", "chevrolet"],
+  //     ["USA", "buick"],
+  //     ["Japan", "datsun"]
+  //  ]
+  console.log(projectDm.getData().schema);
+  // Output:
+  //  [
+  //     {"name": "Origin","type": "dimension"},
+  //     {"name": "Maker","type": "dimension"}
+  //  ]
 })()
 .catch(console.error.bind(console));
 ```
 
-See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
-
-You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** quickly through a boilerplate app.
-
-**Note:** do we need to change the Yeoman Generator generator-muze app too? 
-
 ## Documentation
 
-You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs).
+Find detailed documentation and API reference from [here](https://muzejs.org/docs/concepts/datamodel/introducing-datamodel).
 
 ## What has changed?
 
-Muze 2.0.0 is now powered by WebAssembly bringing in huge performance improvement over the previous versions. The JavaScript version has been deprecated and no active development will take place in that version - but we'll fix critical bugs as and when raised in GitHub.
+DataModel 3.0.0 now has the core written in [Rust langauge](https://www.rust-lang.org/)  and has been ported to **[WebAssembly](https://webassembly.org/)** bringing in a huge performance difference w.r.t to [previous version](https://github.com/chartshq/datamodel-deprecated), in terms of both data size and computing speed. While the JavaScript version is deprecated and no active development will take place there but critical bugs if raised would be taken and released in GitHub only.
 
-This version of Muze brings in power of WebAssembly for handling large datasets with ease, along with frictionless interaction and rendering. In addition, the data loading part in WebAssembly version is asynchronous, as opposed to being synchronous in the JavaScript version. Further, the WebAssembly version is free but only available as a compiled binary, whereas the JavaScript version is free and open-source (MIT).
+You can visit the JavaScript (deprecated) version here [https://github.com/chartshq/datamodel-deprecated](https://github.com/chartshq/datamodel-deprecated)
 
-You can visit the deprecated JavaScript version here [https://github.com/chartshq/muze-deprecated](https://github.com/chartshq/muze-deprecated)
+## Migrating from previous versions of DataModel
 
-## Migrating from previous versions of Muze
+Now the DataModel became asynchronous as opposed to being synchronous in the previous JavaScript version.
 
-Now the Muze became asynchronous as opposed to being synchronous in the previous JavaScript version.
+```js
+import Engine from '@chartshq/datamodel';
 
-### Changed APIs
+(async () => {
+  // Load the DataModel module.
+  const DataModel = await Engine.onReady();
 
-- **Creating Env**
+  // Converts the raw data into a format
+	// which DataModel can consume.
+  const formattedData = await DataModel.loadData(data, schema);
 
-    Muze deprecated version:
+  // Create a new DataModel instance with
+  // the formatted data.
+  const dm = new DataModel(formattedData);
+})();
+```
+
+### **Changed APIs**
+
+- **select**
+
+    DataModel deprecated version:
 
     ```js
-    const env = muze();
-    const canvas = env.canvas();
+    dm.select((fields) => { 
+    		return fields.Origin.value === 'USA';
+    });
     ```
 
     Latest version:
 
     ```js
-    (async function () {
-    		const env = await muze();
-    		const canvas = env.canvas();
-    })();
+    dm.select({
+    		field: 'Origin',
+    		operator: DataModel.ComparisonOperators.EQUAL,
+    		value: 'USA'
+    });
     ```
 
-- **dispatchBehaviour**
+- **groupBy**
 
-    Muze deprecated version:
+    DataModel deprecated version:
 
     ```js
-    canvas.firebolt().dispatchBehaviour('highlight', {
-    			criteria: {
-    					Maker: ['ford']
-    			}
+    dm.groupBy(['Origin'], {
+    		Acceleration: 'avg'
     });
     ```
 
-    Latest version :
-
-    In the current version, the identifiers needs to be passed in dimensions object or range object if it is measure or temporal field.
+    Latest version:
 
     ```js
-    // Dispatch highlight behaviour on data plots having maker as ford
-    canvas.firebolt().dispatchBehaviour('highlight', {
-    			criteria: {
-    					dimensions: {
-    							Maker: ['ford']
-    					}
-    			}
-    });
-
-    // Dispatch highlight behaviour on data plots having Acceleration
-    // between 20 and 50.
-    canvas.firebolt().dispatchBehaviour('highlight', {
-    			criteria: {
-    					range: {
-    							Acceleration: [20, 50]
-    					}
-    			}
-    });
+    dm.groupBy(['Origin'], [{
+    		aggn: Datamodel.AggregationFunctions.AVG,
+    		field: 'Acceleration'
+    }]);
     ```
 
-## Support
+Supported data operations:
 
-Please raise a Github issue [here](https://github.com/chartshq/muze/issues/new).
+- select
+- project
+- calculateVariable
+- sort
+- groupBy
 
-## Roadmap
+Upcoming data operations:
 
-Change link to our Github projects page here.
+- join
+- bin
+- compose
+- union
+- difference
+- ... many more ...
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://github.com/orgs/chartshq/projects/1)
+For more details on API's visit our [docs](http://www.muzejs.org/docs)
 
 ## License
 
