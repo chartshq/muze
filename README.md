@@ -9,35 +9,44 @@
 <br />
 <br />
 
-[![NPM version](https://img.shields.io/npm/v/muze.svg)](https://www.npmjs.com/package/muze)
-[![NPM total downloads](https://img.shields.io/npm/dt/muze.svg)](https://www.npmjs.com/package/muze)
+[![Free](https://img.shields.io/badge/cost-Free-brightgreen)](http://muzejs.org/muze-wa/eula)
+[![License](https://img.shields.io/badge/license-Custom-brightgreen)](http://muzejs.org/muze-wa/eula)
+[![NPM version](https://img.shields.io/npm/v/@chartshq/muze.svg)](https://www.npmjs.com/package/@chartshq/muze)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/muze.svg)](https://github.com/chartshq/muze/graphs/contributors)
-[![License](https://img.shields.io/github/license/chartshq/muze.svg)](https://github.com/chartshq/muze/blob/master/LICENSE)
 
 ## What is Muze?
 
-Muze is a data visualization library which uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart. 
+Muze is a free **data visualization library for creating exploratory data visualizations (like Tableau)** in browser, using WebAssembly. It uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It is ideal for use in visual analytics dashboards & applications to create highly performant, interactive, multi-dimensional, and composable visualizations.
 
-Muze uses an in-browser [DataModel](https://github.com/chartshq/datamodel) to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
+It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart.
+
+Muze uses an in-browser **[DataModel](https://github.com/chartshq/datamodel)** to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
 
 ## Features
 
-* 🚀 Build complex and interactive visualizations by using **composable** layer constructs.
-* 🔨 Use rich **data operators** to transform, visualize and interact with data.
-* 👯 Define custom interactions by configuring **physical behavioural model** and **side effect**.
-* ✂️ Use **css** to change look and feel of the charts.
-* ☀️ Have a **single source of truth** for all your visualization and interaction controlled from data.
-* 🔩 Integrate easily with your existing application by **dispatching actions** on demand.
+* 🍗  Build complex and interactive visualizations by using **composable** layer constructs.
+
+* 🔨  Use rich **data operators** to transform, visualize and interact with data.
+
+* 👯  Define custom interactions by configuring **physical behavioural model** and **side effect**.
+
+* ✂️  Use **css** to change look and feel of the charts.
+
+* ☀️  Have a **single source of truth** for all your visualization and interaction controlled from data.
+
+* 🔩  Integrate easily with your existing application by **dispatching actions** on demand.
+
+* 🚀  Uses **WebAssembly** for handling huge datasets and for **better performance**.
 
 ## Installation
 
 ### CDN
 
-Insert the muze build and the required CSS into the `<head>`:
+Insert the muze build and the required CSS into the `<head>`: 
 
 ```html
-<link href="https://cdn.muzejs.org/lib/muze/core/latest/themes/muze.css" rel="stylesheet">
-<script src="https://cdn.muzejs.org/lib/muze/core/latest/muze.js" type="text/javascript"></script>
+<link href="https://cdn.jsdelivr.net/npm/@chartshq/muze@2.0.0/dist/muze.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@chartshq/muze@2.0.0/dist/muze.js" type="text/javascript"></script>
 ```
 
 ### NPM
@@ -45,21 +54,50 @@ Insert the muze build and the required CSS into the `<head>`:
 Install muze from NPM:
 
 ```bash
-$ npm install --save muze
+$ npm install @chartshq/muze
 ```
 
-Also import the required stylesheet:
+Also import the required stylesheet in entry file:
 
-```javascript
-import 'muze/dist/muze.css';
+```js
+import "@chartshq/muze/dist/muze.css"
 ```
 
-## Getting started
+Then you need to add a webpack plugin [copy-webpack-plugin](https://webpack.js.org/plugins/copy-webpack-plugin/) to copy some required muze files to your output `dist` or `build` folder.
 
-1. Prepare the data and the corresponding schema using [DataModel](https://github.com/chartshq/datamodel):
+```bash
+npm install copy-webpack-plugin@5.1.1 --save-dev
+```
 
-```javascript
-// Prepare the schema for data
+And add this to your `webpack.config.file` :
+
+```js
+const path = require("path");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+module.exports = {
+	plugins: [
+		new CopyWebpackPlugin([
+      {
+        // Provide your node_modules path where @chartshq/muze
+				// package is installed.
+        from: path.resolve("<your_node_modules_path>", "@chartshq/muze/dist"),
+        to: '.',
+        ignore: ['*.DS_Store'],
+      },
+    ]),
+	]
+}
+```
+
+## Getting Started
+
+Once the installation is done, please follow the steps below:
+
+1. Prepare the data and the corresponding schema:
+
+```js
+// Prepare the schema for data.
 const schema = [
   {
     name: 'Name',
@@ -80,7 +118,7 @@ const schema = [
   }
 ]
 
-// Prepare the data
+// Prepare the data.
 const data = [
    {
     "Name": "chevrolet chevelle malibu",
@@ -103,37 +141,129 @@ const data = [
 ]
 ```
 
-2. Pass the data and schema to `DataModel` and create a new `DataModel` instance:
+2. Import muze as follows:
 
-```javascript
-const DataModel = muze.DataModel;
-const dm = new DataModel(data, schema);
+```js
+// If you are using the npm package,
+// import the package and its CSS file.
+import muze from '@chartshq/muze';
+import "@chartshq/muze/dist/muze.css";
+
+// If you are using CDN, import it as follows:
+const muze = window.muze;
 ```
 
-3. Pass the `DataModel` instance to `muze` and create your first chart:
+3. Create a DataModel and a basic chart:
 
-```javascript
-import muze from 'muze';
-import 'muze/dist/muze.css';
+```js
+// As the muze and DataModel are asynchronous, so we need to
+// use async-await syntax.
+(async () => {
+	// Load the DataModel module.
+  const DataModel = await muze.DataModel.onReady();
+  
+  // Converts the raw data into a format
+	// which DataModel can consume.
+  const formattedData = await DataModel.loadData(data, schema);
 
-// Create a global environment to share common configs across charts
-const env = muze();
-// Create a new canvas instance from the global environment
-const canvas = env.canvas();
-canvas
-  .data(dm) 
-  .rows(["Horsepower"]) // Fields drawn on Y axis
-  .columns(["Origin"]) // Fields drawn on X axis
-  .mount("#chart"); // Specify an element to mount on using a CSS selector
+  // Create a new DataModel instance with
+  // the formatted data.
+  let dm = new DataModel(formattedData);
+
+	// Create a global environment to share common configs across charts.
+  const env = await muze();
+ 
+  // Create a new canvas instance from the global
+  // environment to render chart on.
+  const canvas = env.canvas();
+
+  canvas
+  .data(dm) // Set data to the chart.
+  .rows(["Horsepower"]) // Fields drawn on Y axis.
+  .columns(["Origin"]) // Fields drawn on X axis.
+  .mount("#chart"); // Specify an element to mount on using a CSS selector.
+})()
+.catch(console.error.bind(console));
 ```
 
 See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
 
-You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** through a boilerplate app.
+You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** quickly through a boilerplate app.
+
+**Note:** do we need to change the Yeoman Generator generator-muze app too? 
 
 ## Documentation
 
 You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs).
+
+## What has changed?
+
+Muze 2.0.0 is now powered by WebAssembly bringing in huge performance improvement over the previous versions. The JavaScript version has been deprecated and no active development will take place in that version - but we'll fix critical bugs as and when raised in GitHub.
+
+This version of Muze brings in power of WebAssembly for handling large datasets with ease, along with frictionless interaction and rendering. In addition, the data loading part in WebAssembly version is asynchronous, as opposed to being synchronous in the JavaScript version. Further, the WebAssembly version is free but only available as a compiled binary, whereas the JavaScript version is free and open-source (MIT).
+
+You can visit the deprecated JavaScript version here [https://github.com/chartshq/muze-deprecated](https://github.com/chartshq/muze-deprecated)
+
+## Migrating from previous versions of Muze
+
+Now the Muze became asynchronous as opposed to being synchronous in the previous JavaScript version.
+
+### Changed APIs
+
+- **Creating Env**
+
+    Muze deprecated version:
+
+    ```js
+    const env = muze();
+    const canvas = env.canvas();
+    ```
+
+    Latest version:
+
+    ```js
+    (async function () {
+    		const env = await muze();
+    		const canvas = env.canvas();
+    })();
+    ```
+
+- **dispatchBehaviour**
+
+    Muze deprecated version:
+
+    ```js
+    canvas.firebolt().dispatchBehaviour('highlight', {
+    			criteria: {
+    					Maker: ['ford']
+    			}
+    });
+    ```
+
+    Latest version :
+
+    In the current version, the identifiers needs to be passed in dimensions object or range object if it is measure or temporal field.
+
+    ```js
+    // Dispatch highlight behaviour on data plots having maker as ford
+    canvas.firebolt().dispatchBehaviour('highlight', {
+    			criteria: {
+    					dimensions: {
+    							Maker: ['ford']
+    					}
+    			}
+    });
+
+    // Dispatch highlight behaviour on data plots having Acceleration
+    // between 20 and 50.
+    canvas.firebolt().dispatchBehaviour('highlight', {
+    			criteria: {
+    					range: {
+    							Acceleration: [20, 50]
+    					}
+    			}
+    });
+    ```
 
 ## Support
 
@@ -141,12 +271,10 @@ Please raise a Github issue [here](https://github.com/chartshq/muze/issues/new).
 
 ## Roadmap
 
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://feedback.muzejs.org)
+Change link to our Github projects page here.
 
-## Contributing
-
-Your PRs and stars are always welcome :). Checkout the [Contributing](https://github.com/chartshq/muze/blob/master/CONTRIBUTING.md) guides.
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://github.com/orgs/chartshq/projects/1)
 
 ## License
 
-MIT
+[Custom License](http://muzejs.org/muze-wa/eula) (Free to use)
