@@ -76,17 +76,17 @@ const path = require("path");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-	plugins: [
-		new CopyWebpackPlugin([
+  plugins: [
+    new CopyWebpackPlugin([
       {
         // Provide your node_modules path where @chartshq/muze
-				// package is installed.
+        // package is installed.
         from: path.resolve("<your_node_modules_path>", "@chartshq/muze/dist"),
         to: '.',
         ignore: ['*.DS_Store'],
       },
     ]),
-	]
+  ]
 }
 ```
 
