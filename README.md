@@ -163,14 +163,14 @@ const muze = window.muze;
   const DataModel = await muze.DataModel.onReady();
   
   // Converts the raw data into a format
-	// which DataModel can consume.
+  // which DataModel can consume.
   const formattedData = await DataModel.loadData(data, schema);
 
   // Create a new DataModel instance with
   // the formatted data.
   let dm = new DataModel(formattedData);
-
-	// Create a global environment to share common configs across charts.
+  
+  // Create a global environment to share common configs across charts.
   const env = await muze();
  
   // Create a new canvas instance from the global
