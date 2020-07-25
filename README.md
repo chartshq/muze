@@ -152,8 +152,8 @@ const muze = window.muze;
 ```js
 // As the muze and DataModel are asynchronous, so we need to
 // use async-await syntax.
-(async () => {
-  // Load the DataModel module.
+async function myAsyncFn() {
+    // Load the DataModel module.
   const DataModel = await muze.DataModel.onReady();
   
   // Converts the raw data into a format
@@ -176,8 +176,10 @@ const muze = window.muze;
   .rows(["Horsepower"]) // Fields drawn on Y axis.
   .columns(["Origin"]) // Fields drawn on X axis.
   .mount("#chart"); // Specify an element to mount on using a CSS selector.
-})()
-.catch(console.error.bind(console));
+}
+
+myAsyncFn()
+  .catch(console.error.bind(console));
 ```
 
 See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
