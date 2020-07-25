@@ -57,19 +57,13 @@ Install muze from NPM:
 $ npm install @chartshq/muze
 ```
 
-Also import the required stylesheet in entry file:
-
-```js
-import "@chartshq/muze/dist/muze.css"
-```
-
 Then you need to add a webpack plugin [copy-webpack-plugin](https://webpack.js.org/plugins/copy-webpack-plugin/) to copy some required muze files to your output `dist` or `build` folder.
 
 ```bash
 npm install copy-webpack-plugin@5.1.1 --save-dev
 ```
 
-And add this to your `webpack.config.file` :
+And then within your webpack configuration object, you'll need to add the `copy-webpack-plugin` to the list of plugins, like so:
 
 ```js
 const path = require("path");
