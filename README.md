@@ -83,6 +83,7 @@ module.exports = {
   ]
 }
 ```
+
 You also can checkout our [muze-app-template](https://github.com/chartshq/muze-app-template) to try out the `Muze` quickly through a boilerplate app.
 
 ## Getting Started
