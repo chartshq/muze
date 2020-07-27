@@ -262,9 +262,7 @@ Please raise a Github issue [here](https://github.com/chartshq/muze/issues/new).
 
 ## Roadmap
 
-Change link to our Github projects page here.
-
-Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://github.com/orgs/chartshq/projects/1)
+Please contribute to our public wishlist or upvote an existing feature at [Muze Public Wishlist & Roadmap](https://github.com/orgs/chartshq/projects/1).
 
 ## License
 
