@@ -83,6 +83,7 @@ module.exports = {
   ]
 }
 ```
+You also can checkout our [muze-app-template](https://github.com/chartshq/muze-app-template) to try out the `Muze` quickly through a boilerplate app.
 
 ## Getting Started
 
@@ -181,10 +182,6 @@ async function myAsyncFn() {
 myAsyncFn()
   .catch(console.error.bind(console));
 ```
-
-See [muzejs.org/docs](https://muzejs.org/docs) for more documentation!
-
-You also can checkout our Yeoman Generator [generator-muze](https://github.com/chartshq/generator-muze) to try out the **muze** quickly through a boilerplate app.
 
 ## Documentation
 
