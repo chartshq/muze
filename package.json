@@ -72,5 +72,8 @@
     "type": "git",
     "url": "https://github.com/chartshq/muze"
   },
+  "bugs": {
+    "url": "https://github.com/chartshq/muze/issues"
+  },
   "dependencies": {}
 }
