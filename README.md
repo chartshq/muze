@@ -14,8 +14,6 @@
 [![NPM version](https://img.shields.io/npm/v/@chartshq/muze.svg)](https://www.npmjs.com/package/@chartshq/muze)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/muze.svg)](https://github.com/chartshq/muze/graphs/contributors)
 
-# MIGRATION IN PROGRESS
-
 Muze is a free **data visualization library for creating exploratory data visualizations (like Tableau)** in browser, using WebAssembly. It uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It is ideal for use in visual analytics dashboards & applications to create highly performant, interactive, multi-dimensional, and composable visualizations.
 
 It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart.
