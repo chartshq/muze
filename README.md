@@ -76,8 +76,7 @@ module.exports = {
         // Provide your node_modules path where @chartshq/muze
         // package is installed.
         from: path.resolve("<your_node_modules_path>", "@chartshq/muze/dist"),
-        to: '.',
-        ignore: ['*.DS_Store'],
+        to: '.'
       },
     ]),
   ]
@@ -186,7 +185,7 @@ myAsyncFn()
 
 ## Documentation
 
-You can find detailed tutorials, concepts and API references at [muzejs.org/docs](https://muzejs.org/docs).
+You can find detailed tutorials, concepts and API references at our [Documentation](https://muzejs.org/docs/wa/latest/installation/getting-started).
 
 ## What has changed?
 
