@@ -155,7 +155,7 @@ const muze = window.muze;
 // As the muze and DataModel are asynchronous, so we need to
 // use async-await syntax.
 async function myAsyncFn() {
-    // Load the DataModel module.
+  // Load the DataModel module.
   const DataModel = await muze.DataModel.onReady();
   
   // Converts the raw data into a format
