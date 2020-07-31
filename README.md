@@ -14,6 +14,8 @@
 [![NPM version](https://img.shields.io/npm/v/@chartshq/muze.svg)](https://www.npmjs.com/package/@chartshq/muze)
 [![Contributors](https://img.shields.io/github/contributors/chartshq/muze.svg)](https://github.com/chartshq/muze/graphs/contributors)
 
+## What is Muze?
+
 Muze is a free **data visualization library for creating exploratory data visualizations (like Tableau)** in browser, using WebAssembly. It uses a layered Grammar of Graphics (GoG) to create composable and interactive data visualization for web. It is ideal for use in visual analytics dashboards & applications to create highly performant, interactive, multi-dimensional, and composable visualizations.
 
 It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart.
@@ -40,7 +42,7 @@ Muze uses an in-browser **[DataModel](https://github.com/chartshq/datamodel)** t
 
 ### CDN
 
-Insert the muze build and the required CSS into the `<head>`:
+Insert the muze build and the required CSS into the `<head>`: 
 
 ```html
 <link href="https://cdn.jsdelivr.net/npm/@chartshq/muze@2.0.0/dist/muze.css" rel="stylesheet">
@@ -155,7 +157,7 @@ const muze = window.muze;
 async function myAsyncFn() {
   // Load the DataModel module.
   const DataModel = await muze.DataModel.onReady();
-
+  
   // Converts the raw data into a format
   // which DataModel can consume.
   const formattedData = await DataModel.loadData(data, schema);
@@ -163,10 +165,10 @@ async function myAsyncFn() {
   // Create a new DataModel instance with
   // the formatted data.
   let dm = new DataModel(formattedData);
-
+  
   // Create a global environment to share common configs across charts.
   const env = await muze();
-
+ 
   // Create a new canvas instance from the global
   // environment to render chart on.
   const canvas = env.canvas();
