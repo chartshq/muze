@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Composable visualisation library for web with a data-first approach",
   "homepage": "https://muzejs.org",
-  "author": "Charts.com <eng@chars.com> (https://charts.com/)",
+  "author": "Charts.com <eng@charts.com> (https://charts.com/)",
   "main": "dist/muze.js",
   "types": "./index.d.ts",
   "files": [

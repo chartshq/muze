@@ -20,7 +20,7 @@ Muze is a free **data visualization library for creating exploratory data visual
 
 It uses a data-first approach to define the constructs and layers of the chart, automatically generates cross-chart interactivity, and allows you to over-ride any behavior or interaction on the chart.
 
-Muze uses an in-browser **[DataModel](https://github.com/chartshq/datamodel)** to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
+Muze uses an in-browser **[DataModel](https://github.com/chartshq/datamodel)** to store and transform data, and control the behaviour of every component in the visualization, thereby enabling creating of complex and cross-connected charts.
 
 ## Features
 
@@ -138,13 +138,14 @@ const data = [
 
 2. Import muze as follows:
 
+If you are using the npm package, import the package and its CSS file.
 ```js
-// If you are using the npm package,
-// import the package and its CSS file.
 import muze from '@chartshq/muze';
 import "@chartshq/muze/dist/muze.css";
+```
 
-// If you are using CDN, import it as follows:
+If you are using CDN, use it as follows:
+```js
 const muze = window.muze;
 ```
 
